@@ -5,28 +5,22 @@
 //  Created by Даниил Виноградов on 06.07.2022.
 //
 
-#include "Application.hpp"
-#include "UIBlurView.hpp"
-#include "UILabel.hpp"
-#include "Label.hpp"
-#include "UIStackView.hpp"
+#include "NXKit.hpp"
 
 #ifdef __SWITCH__
 #include <switch.h>
 #endif
 
-class RootView: public UIView {
-public:
-    RootView() {
+class TestVC: public UIViewController {
+    void loadView() override {
         UIStackView *root = new UIStackView(Axis::VERTICAL);
         root->backgroundColor = UIColor(235, 235, 235);
-        stackView = root;
     //    root->backgroundColor = RED;
     //    root->cornerRadius = 40;
 
         UIStackView *header = new UIStackView(Axis::HORIZONTAL);
 //        header->backgroundColor = UIColor(255, 0, 0);
-        header->setSize(Size(AUTO, 88));
+        header->setSize(Size(UIView::AUTO, 88));
         header->setBorderBottom(1);
         header->setPaddingLeft(35);
         header->setPaddingRight(35);
@@ -53,7 +47,7 @@ public:
 
         UIStackView *footer = new UIStackView(Axis::HORIZONTAL);
 //        footer->backgroundColor = UIColor(255, 255, 0);
-        footer->setSize(Size(AUTO, 73));
+        footer->setSize(Size(UIView::AUTO, 73));
         footer->setBorderTop(1);
         footer->setPaddingLeft(35);
         footer->setPaddingRight(35);
@@ -64,23 +58,16 @@ public:
         root->addSubview(body);
         root->addSubview(footer);
 
-        addSubview(root);
+        setView(root);
     }
-
-    void layoutSubviews() override {
-        UIView::layoutSubviews();
-        stackView->setSize(frame.size);
-    }
-
-private:
-    UIStackView* stackView = nullptr;
 };
 
 int main(int argc, const char * argv[]) {
     Application* application = new Application();
 
-    RootView* root = new RootView();
-    application->setRootView(root);
+//    RootView* root = new RootView();
+    TestVC* vc = new TestVC();
+    application->setRootView(vc->getView());
 
     while (application->mainLoop());
 

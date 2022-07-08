@@ -67,6 +67,7 @@
 		7C53FE512878EA220091DEF9 /* UIEvent.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIEvent.hpp; sourceTree = "<group>"; };
 		7C53FE542878ED350091DEF9 /* UIViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIViewController.cpp; sourceTree = "<group>"; };
 		7C53FE552878ED350091DEF9 /* UIViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIViewController.hpp; sourceTree = "<group>"; };
+		7C53FE572878F13D0091DEF9 /* NXKit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NXKit.hpp; sourceTree = "<group>"; };
 		7C78EBCD2873748B0082D3AC /* UIBlurView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIBlurView.hpp; sourceTree = "<group>"; };
 		7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIBlurView.cpp; sourceTree = "<group>"; };
 		7C78EBD02873748B0082D3AC /* UIColor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIColor.hpp; sourceTree = "<group>"; };
@@ -312,6 +313,7 @@
 			children = (
 				7CA9607A2871F8DA009E0953 /* extern */,
 				7CA960742871F841009E0953 /* Core */,
+				7C53FE572878F13D0091DEF9 /* NXKit.hpp */,
 			);
 			path = lib;
 			sourceTree = "<group>";
