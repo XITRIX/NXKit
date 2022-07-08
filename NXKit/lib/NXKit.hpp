@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Application.hpp"
+#include "UIWindow.hpp"
 #include "UIViewController.hpp"
 #include "UIBlurView.hpp"
 #include "UILabel.hpp"

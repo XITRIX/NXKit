@@ -23,7 +23,7 @@ static void shrinkImage(unsigned char** in, int w, int h, int scale) {
 static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float w, float h, float r) {
     unsigned char* image;
 
-    Size rootSize = Application::shared()->getRootView()->frame.size;
+    Size rootSize = Application::shared()->getKeyWindow()->frame.size;
 
     float scaleFactor = Application::shared()->getVideoContext()->getScaleFactor();
     int winHeight = static_cast<int>(rootSize.height * scaleFactor);

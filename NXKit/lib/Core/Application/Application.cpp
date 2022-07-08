@@ -9,6 +9,7 @@
 
 #include "Application.hpp"
 #include "UIView.hpp"
+#include "UIWindow.hpp"
 
 #ifdef __SWITCH__
 #include <switch.h>
@@ -27,9 +28,9 @@ Application::Application() {
     this->videoContext = new GLFWVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
 }
 
-void Application::setRootView(UIView *view) {
-    rootView = view;
-    rootView->setSize(Size(windowWidth, windowHeight));
+void Application::setKeyWindow(UIWindow *window) {
+    keyWindow = window;
+    keyWindow->setSize(Size(windowWidth, windowHeight));
 }
 
 void Application::onWindowResized(unsigned width, unsigned height, float scale) {
@@ -38,8 +39,8 @@ void Application::onWindowResized(unsigned width, unsigned height, float scale) 
 
     // Rescale UI
     windowScale = scale;
-    if (rootView)
-        rootView->setSize(Size(width, height));
+    if (keyWindow)
+        keyWindow->setSize(Size(width, height));
 }
 
 bool Application::mainLoopIteration() {
@@ -72,7 +73,7 @@ bool Application::mainLoop() {
 
     nvgBeginFrame(videoContext->getNVGContext(), windowWidth, windowHeight, windowScale);
     
-    rootView->internalDraw(videoContext->getNVGContext());
+    keyWindow->internalDraw(videoContext->getNVGContext());
 
     nvgResetTransform(videoContext->getNVGContext()); // scale
     nvgEndFrame(videoContext->getNVGContext());

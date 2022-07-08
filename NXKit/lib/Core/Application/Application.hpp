@@ -9,8 +9,10 @@
 
 #include "glfw_video.hpp"
 #include "UIView.hpp"
+#include "UIWindow.hpp"
 
 class UIView;
+class UIWindow;
 
 class Application {
 public:
@@ -18,8 +20,8 @@ public:
 
     Application();
 
-    UIView* getRootView() { return rootView; }
-    void setRootView(UIView* view);
+    UIWindow* getKeyWindow() { return keyWindow; }
+    void setKeyWindow(UIWindow* window);
     
     bool mainLoop();
     void flushContext();
@@ -28,7 +30,7 @@ public:
 private:
     inline static Application* _shared;
 
-    UIView* rootView;
+    UIWindow* keyWindow;
     unsigned windowWidth, windowHeight;
     float windowScale;
 

@@ -66,8 +66,10 @@ int main(int argc, const char * argv[]) {
     Application* application = new Application();
 
 //    RootView* root = new RootView();
+    UIWindow* window = new UIWindow();
     TestVC* vc = new TestVC();
-    application->setRootView(vc->getView());
+    window->setRootViewController(vc);
+    window->makeKeyAndVisible();
 
     while (application->mainLoop());
 

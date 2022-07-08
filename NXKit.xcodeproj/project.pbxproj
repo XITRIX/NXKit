@@ -15,6 +15,7 @@
 		7C53FE4E28788D8E0091DEF9 /* UIGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4C28788D8E0091DEF9 /* UIGestureRecognizer.cpp */; };
 		7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE502878EA220091DEF9 /* UIEvent.cpp */; };
 		7C53FE562878ED350091DEF9 /* UIViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE542878ED350091DEF9 /* UIViewController.cpp */; };
+		7C53FE5B2878F4E60091DEF9 /* UIWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE592878F4E60091DEF9 /* UIWindow.cpp */; };
 		7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */; };
 		7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD12873748B0082D3AC /* UIColor.cpp */; };
 		7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD32873748B0082D3AC /* UIView.cpp */; };
@@ -68,6 +69,8 @@
 		7C53FE542878ED350091DEF9 /* UIViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIViewController.cpp; sourceTree = "<group>"; };
 		7C53FE552878ED350091DEF9 /* UIViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIViewController.hpp; sourceTree = "<group>"; };
 		7C53FE572878F13D0091DEF9 /* NXKit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NXKit.hpp; sourceTree = "<group>"; };
+		7C53FE592878F4E60091DEF9 /* UIWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIWindow.cpp; sourceTree = "<group>"; };
+		7C53FE5A2878F4E60091DEF9 /* UIWindow.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIWindow.hpp; sourceTree = "<group>"; };
 		7C78EBCD2873748B0082D3AC /* UIBlurView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIBlurView.hpp; sourceTree = "<group>"; };
 		7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIBlurView.cpp; sourceTree = "<group>"; };
 		7C78EBD02873748B0082D3AC /* UIColor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIColor.hpp; sourceTree = "<group>"; };
@@ -200,6 +203,15 @@
 			path = UIViewController;
 			sourceTree = "<group>";
 		};
+		7C53FE582878F4DB0091DEF9 /* UIWindow */ = {
+			isa = PBXGroup;
+			children = (
+				7C53FE5A2878F4E60091DEF9 /* UIWindow.hpp */,
+				7C53FE592878F4E60091DEF9 /* UIWindow.cpp */,
+			);
+			path = UIWindow;
+			sourceTree = "<group>";
+		};
 		7C78EBCB2873743C0082D3AC /* Driver */ = {
 			isa = PBXGroup;
 			children = (
@@ -321,20 +333,21 @@
 		7CA960742871F841009E0953 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				7C53FE532878ED270091DEF9 /* UIViewController */,
-				7C53FE4F2878EA180091DEF9 /* UIEvent */,
-				7C53FE4B28788D820091DEF9 /* UIGestureRecognizer */,
-				7C53FE4728788A930091DEF9 /* UITouch */,
-				7C44163928777D8D0076663D /* UIResponder */,
-				7C78EBDA2873748B0082D3AC /* Utils */,
+				7C53FE582878F4DB0091DEF9 /* UIWindow */,
+				7CA960BE2871FABA009E0953 /* Application */,
 				7C78EBCB2873743C0082D3AC /* Driver */,
 				7C78EBD52873748B0082D3AC /* Geometry */,
-				7C78EBCF2873748B0082D3AC /* UIColor */,
-				7CA960BE2871FABA009E0953 /* Application */,
 				7C78EBCC2873748B0082D3AC /* UIBlurView */,
+				7C78EBCF2873748B0082D3AC /* UIColor */,
+				7C53FE4F2878EA180091DEF9 /* UIEvent */,
+				7C53FE4B28788D820091DEF9 /* UIGestureRecognizer */,
 				7C78EBD72873748B0082D3AC /* UILabel */,
-				7C78EBD22873748B0082D3AC /* UIView */,
+				7C44163928777D8D0076663D /* UIResponder */,
 				7CE9B5E5287495E400659D24 /* UIStackView */,
+				7C53FE4728788A930091DEF9 /* UITouch */,
+				7C78EBD22873748B0082D3AC /* UIView */,
+				7C53FE532878ED270091DEF9 /* UIViewController */,
+				7C78EBDA2873748B0082D3AC /* Utils */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -576,6 +589,7 @@
 				7CE9B5E22874917F00659D24 /* YGConfig.cpp in Sources */,
 				7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */,
 				7C78EBE12873748B0082D3AC /* UILabel.cpp in Sources */,
+				7C53FE5B2878F4E60091DEF9 /* UIWindow.cpp in Sources */,
 				7C53FE4A28788AA20091DEF9 /* UITouch.cpp in Sources */,
 				7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */,
 				7C53FE562878ED350091DEF9 /* UIViewController.cpp in Sources */,
