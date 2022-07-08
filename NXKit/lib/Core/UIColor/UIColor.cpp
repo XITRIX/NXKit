@@ -11,20 +11,20 @@ UIColor::UIColor(short r, short g, short b, short a) {
     value = (a & 0xff) << 24 | (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
 }
 
-short UIColor::r() {
-    return (value >> 16) & 0xff;
+unsigned char UIColor::r() {
+    return static_cast<unsigned char>((value >> 16) & 0xff);
 }
 
-short UIColor::g() {
-    return (value >> 8) & 0xff;
+unsigned char UIColor::g() {
+    return static_cast<unsigned char>((value >> 8) & 0xff);
 }
 
-short UIColor::b() {
-    return value & 0xff;
+unsigned char UIColor::b() {
+    return static_cast<unsigned char>(value & 0xff);
 }
 
-short UIColor::a() {
-    return (value >> 24) & 0xff;
+unsigned char UIColor::a() {
+    return static_cast<unsigned char>((value >> 24) & 0xff);
 }
 
 NVGcolor UIColor::raw() {

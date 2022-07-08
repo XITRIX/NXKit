@@ -20,18 +20,18 @@ static void shrinkImage(unsigned char** in, int w, int h, int scale) {
     }
 }
 
-static int getContextBluredImage(NVGcontext* vgContext, int x, int y, int w, int h, float r) {
+static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float w, float h, float r) {
     unsigned char* image;
 
-    Size rootSize = Application::shared()->rootView->frame.size;
+    Size rootSize = Application::shared()->getRootView()->frame.size;
 
     float scaleFactor = Application::shared()->getVideoContext()->getScaleFactor();
-    int winHeight = rootSize.height * scaleFactor;
+    int winHeight = static_cast<int>(rootSize.height * scaleFactor);
 
-    int lx = x * scaleFactor;
-    int ly = winHeight - y * scaleFactor;
-    int lw = w * scaleFactor;
-    int lh = h * scaleFactor;
+    int lx = static_cast<int>(x * scaleFactor);
+    int ly = static_cast<int>(winHeight - y * scaleFactor);
+    int lw = static_cast<int>(w * scaleFactor);
+    int lh = static_cast<int>(h * scaleFactor);
     float lr = r * scaleFactor;
 
     Application::shared()->getVideoContext()->getContextPixels(lx, ly, lw, lh, &image);
@@ -43,7 +43,7 @@ static int getContextBluredImage(NVGcontext* vgContext, int x, int y, int w, int
     if (minim != 0) {
         shrinkImage(&image, lw, lh, minim);
 
-        unsigned char* blured = (unsigned char*)malloc(lw*lh*4/minim);
+        unsigned char* blured = (unsigned char*)malloc(static_cast<size_t>(lw * lh * 4 / minim));
         fast_gaussian_blur_rgb(image, blured, lw/minim, lh/minim, 4, lr/minim);
         int img = nvgCreateImageRGBA(vgContext, lw/minim, lh/minim, 0, blured);
 
@@ -61,11 +61,6 @@ static int getContextBluredImage(NVGcontext* vgContext, int x, int y, int w, int
 UIBlurView::UIBlurView(Rect frame): UIView(frame) { }
 
 void UIBlurView::draw(NVGcontext *vgContext) {
-//    nvgBeginPath(vgContext);
-//    nvgRoundedRect(vgContext, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height, cornerRadius);
-//    nvgFillColor(vgContext, nvgRGBA(155, 155, 155, 155));
-//    nvgFill(vgContext);
-
     int img = getContextBluredImage(vgContext, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height, blurRadius);
     NVGpaint imgPaint = nvgImagePattern(vgContext, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height, 0, img, 1);
     nvgBeginPath(vgContext);

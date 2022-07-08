@@ -51,18 +51,21 @@ INCLUDES := $(INCLUDES) \
 			NXKit/lib/Core/Driver/Video \
 			NXKit/lib/Core/Application \
 			NXKit/lib/Core/Geometry \
+			NXKit/lib/Core/UIStackView \
 			NXKit/lib/Core/UIBlurView \
 			NXKit/lib/Core/UIColor \
 			NXKit/lib/Core/UILabel \
 			NXKit/lib/Core/UIView \
 			NXKit/lib/Core/Utils/GaussianBlur \
 			NXKit/lib/extern/include/nanovg-gl/ \
-			NXKit/lib/extern/include
+			NXKit/lib/extern/include \
+			NXKit/lib/extern/lib/yoga/src
 
 SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/Driver/Video \
 			NXKit/lib/Core/Application \
 			NXKit/lib/Core/Geometry \
+			NXKit/lib/Core/UIStackView \
 			NXKit/lib/Core/UIBlurView \
 			NXKit/lib/Core/UIColor \
 			NXKit/lib/Core/UILabel \
@@ -72,9 +75,14 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/extern/lib/glad \
 			NXKit/lib/extern/lib/libretro-common/compat \
 			NXKit/lib/extern/lib/libretro-common/encodings \
-			NXKit/lib/extern/lib/libretro-common/features
+			NXKit/lib/extern/lib/libretro-common/features \
+			NXKit/lib/extern/lib/yoga/src/yoga \
+			NXKit/lib/extern/lib/yoga/src/yoga/event \
+			NXKit/lib/extern/lib/yoga/src/yoga/internal
 
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
+
+DEFINES	:=	-DYG_ENABLE_EVENTS
 
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES)

@@ -12,7 +12,8 @@
 class UIBlurView: public UIView {
 public:
     UIBlurView(Rect frame);
-    UIBlurView(): UIView(Rect()) {}
+    UIBlurView(float x, float y, float width, float height): UIBlurView(Rect(x, y, width, height)) {}
+    UIBlurView(): UIBlurView(Rect(0, 0, UIView::AUTO, UIView::AUTO)) {}
 
     float blurRadius = 24;
 

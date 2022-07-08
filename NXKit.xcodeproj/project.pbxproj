@@ -7,17 +7,33 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7C0638F32876215100621093 /* FontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F12876215100621093 /* FontManager.cpp */; };
+		7C0638F42876233200621093 /* main2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E92874EA4000659D24 /* main2.cpp */; };
+		7C0638FB2876C01900621093 /* Label.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F92876C01900621093 /* Label.cpp */; };
+		7C44163C28777D9B0076663D /* UIResponder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C44163A28777D9B0076663D /* UIResponder.cpp */; };
 		7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */; };
 		7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD12873748B0082D3AC /* UIColor.cpp */; };
 		7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD32873748B0082D3AC /* UIView.cpp */; };
 		7C78EBE12873748B0082D3AC /* UILabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD82873748B0082D3AC /* UILabel.cpp */; };
 		7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBDD2873748B0082D3AC /* GaussianBlur.cpp */; };
 		7C78EBE8287386070082D3AC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C78EBE7287386070082D3AC /* OpenGL.framework */; };
-		7CA9606D2871F7A2009E0953 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9606C2871F7A2009E0953 /* main.cpp */; };
 		7CA960792871F8BF009E0953 /* glfw_video.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960762871F8BF009E0953 /* glfw_video.cpp */; };
 		7CA960B12871F993009E0953 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960882871F993009E0953 /* nanovg.c */; };
 		7CA960B22871F993009E0953 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9608A2871F993009E0953 /* glad.c */; };
 		7CA960C12871FAC6009E0953 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960BF2871FAC6009E0953 /* Application.cpp */; };
+		7CE9B5D92874917F00659D24 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D42874917F00659D24 /* log.cpp */; };
+		7CE9B5DA2874917F00659D24 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D52874917F00659D24 /* Utils.cpp */; };
+		7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D82874917F00659D24 /* YGLayout.cpp */; };
+		7CE9B5DC2874917F00659D24 /* Yoga.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DB2874917F00659D24 /* Yoga.cpp */; };
+		7CE9B5DD2874917F00659D24 /* YGStyle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DC2874917F00659D24 /* YGStyle.cpp */; };
+		7CE9B5DE2874917F00659D24 /* experiments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DF2874917F00659D24 /* experiments.cpp */; };
+		7CE9B5DF2874917F00659D24 /* YGNodePrint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E22874917F00659D24 /* YGNodePrint.cpp */; };
+		7CE9B5E02874917F00659D24 /* YGEnums.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E42874917F00659D24 /* YGEnums.cpp */; };
+		7CE9B5E12874917F00659D24 /* YGValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E62874917F00659D24 /* YGValue.cpp */; };
+		7CE9B5E22874917F00659D24 /* YGConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E92874917F00659D24 /* YGConfig.cpp */; };
+		7CE9B5E32874917F00659D24 /* YGNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4EA2874917F00659D24 /* YGNode.cpp */; };
+		7CE9B5E42874917F00659D24 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4EE2874917F00659D24 /* event.cpp */; };
+		7CE9B5E8287495F900659D24 /* UIStackView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E6287495F900659D24 /* UIStackView.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,6 +49,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7C0638F12876215100621093 /* FontManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FontManager.cpp; sourceTree = "<group>"; };
+		7C0638F22876215100621093 /* FontManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FontManager.hpp; sourceTree = "<group>"; };
+		7C0638F92876C01900621093 /* Label.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Label.cpp; sourceTree = "<group>"; };
+		7C0638FA2876C01900621093 /* Label.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Label.hpp; sourceTree = "<group>"; };
+		7C44163A28777D9B0076663D /* UIResponder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIResponder.cpp; sourceTree = "<group>"; };
+		7C44163B28777D9B0076663D /* UIResponder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIResponder.hpp; sourceTree = "<group>"; };
 		7C78EBCD2873748B0082D3AC /* UIBlurView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIBlurView.hpp; sourceTree = "<group>"; };
 		7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIBlurView.cpp; sourceTree = "<group>"; };
 		7C78EBD02873748B0082D3AC /* UIColor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIColor.hpp; sourceTree = "<group>"; };
@@ -64,6 +86,39 @@
 		7CA960BF2871FAC6009E0953 /* Application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
 		7CA960C02871FAC6009E0953 /* Application.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Application.hpp; sourceTree = "<group>"; };
 		7CA960C22871FCC2009E0953 /* NXKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NXKit.entitlements; sourceTree = "<group>"; };
+		7CE9B4CF2874917F00659D24 /* YGFloatOptional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGFloatOptional.h; sourceTree = "<group>"; };
+		7CE9B4D02874917F00659D24 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
+		7CE9B4D12874917F00659D24 /* CompactValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompactValue.h; sourceTree = "<group>"; };
+		7CE9B4D22874917F00659D24 /* Yoga-internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Yoga-internal.h"; sourceTree = "<group>"; };
+		7CE9B4D32874917F00659D24 /* YGLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGLayout.h; sourceTree = "<group>"; };
+		7CE9B4D42874917F00659D24 /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log.cpp; sourceTree = "<group>"; };
+		7CE9B4D52874917F00659D24 /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
+		7CE9B4D62874917F00659D24 /* YGNodePrint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGNodePrint.h; sourceTree = "<group>"; };
+		7CE9B4D72874917F00659D24 /* YGEnums.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGEnums.h; sourceTree = "<group>"; };
+		7CE9B4D82874917F00659D24 /* YGLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = YGLayout.cpp; sourceTree = "<group>"; };
+		7CE9B4D92874917F00659D24 /* YGNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGNode.h; sourceTree = "<group>"; };
+		7CE9B4DA2874917F00659D24 /* YGMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGMacros.h; sourceTree = "<group>"; };
+		7CE9B4DB2874917F00659D24 /* Yoga.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Yoga.cpp; sourceTree = "<group>"; };
+		7CE9B4DC2874917F00659D24 /* YGStyle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = YGStyle.cpp; sourceTree = "<group>"; };
+		7CE9B4DD2874917F00659D24 /* Yoga.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Yoga.h; sourceTree = "<group>"; };
+		7CE9B4DF2874917F00659D24 /* experiments.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = experiments.cpp; sourceTree = "<group>"; };
+		7CE9B4E02874917F00659D24 /* experiments-inl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "experiments-inl.h"; sourceTree = "<group>"; };
+		7CE9B4E12874917F00659D24 /* experiments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = experiments.h; sourceTree = "<group>"; };
+		7CE9B4E22874917F00659D24 /* YGNodePrint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = YGNodePrint.cpp; sourceTree = "<group>"; };
+		7CE9B4E32874917F00659D24 /* YGStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGStyle.h; sourceTree = "<group>"; };
+		7CE9B4E42874917F00659D24 /* YGEnums.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = YGEnums.cpp; sourceTree = "<group>"; };
+		7CE9B4E52874917F00659D24 /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = log.h; sourceTree = "<group>"; };
+		7CE9B4E62874917F00659D24 /* YGValue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = YGValue.cpp; sourceTree = "<group>"; };
+		7CE9B4E72874917F00659D24 /* BitUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BitUtils.h; sourceTree = "<group>"; };
+		7CE9B4E82874917F00659D24 /* YGConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGConfig.h; sourceTree = "<group>"; };
+		7CE9B4E92874917F00659D24 /* YGConfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = YGConfig.cpp; sourceTree = "<group>"; };
+		7CE9B4EA2874917F00659D24 /* YGNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = YGNode.cpp; sourceTree = "<group>"; };
+		7CE9B4EB2874917F00659D24 /* YGValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGValue.h; sourceTree = "<group>"; };
+		7CE9B4ED2874917F00659D24 /* event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = event.h; sourceTree = "<group>"; };
+		7CE9B4EE2874917F00659D24 /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = event.cpp; sourceTree = "<group>"; };
+		7CE9B5E6287495F900659D24 /* UIStackView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIStackView.cpp; sourceTree = "<group>"; };
+		7CE9B5E7287495F900659D24 /* UIStackView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIStackView.hpp; sourceTree = "<group>"; };
+		7CE9B5E92874EA4000659D24 /* main2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main2.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +133,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7C0638F02876214000621093 /* FontManager */ = {
+			isa = PBXGroup;
+			children = (
+				7C0638F22876215100621093 /* FontManager.hpp */,
+				7C0638F12876215100621093 /* FontManager.cpp */,
+			);
+			path = FontManager;
+			sourceTree = "<group>";
+		};
+		7C44163928777D8D0076663D /* UIResponder */ = {
+			isa = PBXGroup;
+			children = (
+				7C44163B28777D9B0076663D /* UIResponder.hpp */,
+				7C44163A28777D9B0076663D /* UIResponder.cpp */,
+			);
+			path = UIResponder;
+			sourceTree = "<group>";
+		};
 		7C78EBCB2873743C0082D3AC /* Driver */ = {
 			isa = PBXGroup;
 			children = (
@@ -126,6 +199,8 @@
 			children = (
 				7C78EBD92873748B0082D3AC /* UILabel.hpp */,
 				7C78EBD82873748B0082D3AC /* UILabel.cpp */,
+				7C0638FA2876C01900621093 /* Label.hpp */,
+				7C0638F92876C01900621093 /* Label.cpp */,
 			);
 			path = UILabel;
 			sourceTree = "<group>";
@@ -133,6 +208,7 @@
 		7C78EBDA2873748B0082D3AC /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				7C0638F02876214000621093 /* FontManager */,
 				7C78EBDB2873748B0082D3AC /* GaussianBlur */,
 			);
 			path = Utils;
@@ -177,6 +253,7 @@
 			children = (
 				7CA960C22871FCC2009E0953 /* NXKit.entitlements */,
 				7CA9606C2871F7A2009E0953 /* main.cpp */,
+				7CE9B5E92874EA4000659D24 /* main2.cpp */,
 				7CA960732871F839009E0953 /* lib */,
 			);
 			path = NXKit;
@@ -194,6 +271,7 @@
 		7CA960742871F841009E0953 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				7C44163928777D8D0076663D /* UIResponder */,
 				7C78EBDA2873748B0082D3AC /* Utils */,
 				7C78EBCB2873743C0082D3AC /* Driver */,
 				7C78EBD52873748B0082D3AC /* Geometry */,
@@ -202,6 +280,7 @@
 				7C78EBCC2873748B0082D3AC /* UIBlurView */,
 				7C78EBD72873748B0082D3AC /* UILabel */,
 				7C78EBD22873748B0082D3AC /* UIView */,
+				7CE9B5E5287495E400659D24 /* UIStackView */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -228,6 +307,7 @@
 		7CA960852871F993009E0953 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				7CE9B17F2874917E00659D24 /* yoga */,
 				7CA960862871F993009E0953 /* nanovg-gl */,
 				7CA960892871F993009E0953 /* glad */,
 			);
@@ -291,6 +371,84 @@
 			path = Application;
 			sourceTree = "<group>";
 		};
+		7CE9B17F2874917E00659D24 /* yoga */ = {
+			isa = PBXGroup;
+			children = (
+				7CE9B4CD2874917F00659D24 /* src */,
+			);
+			path = yoga;
+			sourceTree = "<group>";
+		};
+		7CE9B4CD2874917F00659D24 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				7CE9B4CE2874917F00659D24 /* yoga */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		7CE9B4CE2874917F00659D24 /* yoga */ = {
+			isa = PBXGroup;
+			children = (
+				7CE9B4D42874917F00659D24 /* log.cpp */,
+				7CE9B4D52874917F00659D24 /* Utils.cpp */,
+				7CE9B4E92874917F00659D24 /* YGConfig.cpp */,
+				7CE9B4E42874917F00659D24 /* YGEnums.cpp */,
+				7CE9B4D82874917F00659D24 /* YGLayout.cpp */,
+				7CE9B4EA2874917F00659D24 /* YGNode.cpp */,
+				7CE9B4E22874917F00659D24 /* YGNodePrint.cpp */,
+				7CE9B4DC2874917F00659D24 /* YGStyle.cpp */,
+				7CE9B4E62874917F00659D24 /* YGValue.cpp */,
+				7CE9B4DB2874917F00659D24 /* Yoga.cpp */,
+				7CE9B4E72874917F00659D24 /* BitUtils.h */,
+				7CE9B4D12874917F00659D24 /* CompactValue.h */,
+				7CE9B4E52874917F00659D24 /* log.h */,
+				7CE9B4D02874917F00659D24 /* Utils.h */,
+				7CE9B4E82874917F00659D24 /* YGConfig.h */,
+				7CE9B4D72874917F00659D24 /* YGEnums.h */,
+				7CE9B4CF2874917F00659D24 /* YGFloatOptional.h */,
+				7CE9B4D32874917F00659D24 /* YGLayout.h */,
+				7CE9B4DA2874917F00659D24 /* YGMacros.h */,
+				7CE9B4D92874917F00659D24 /* YGNode.h */,
+				7CE9B4D62874917F00659D24 /* YGNodePrint.h */,
+				7CE9B4E32874917F00659D24 /* YGStyle.h */,
+				7CE9B4EB2874917F00659D24 /* YGValue.h */,
+				7CE9B4D22874917F00659D24 /* Yoga-internal.h */,
+				7CE9B4DD2874917F00659D24 /* Yoga.h */,
+				7CE9B4EC2874917F00659D24 /* event */,
+				7CE9B4DE2874917F00659D24 /* internal */,
+			);
+			path = yoga;
+			sourceTree = "<group>";
+		};
+		7CE9B4DE2874917F00659D24 /* internal */ = {
+			isa = PBXGroup;
+			children = (
+				7CE9B4DF2874917F00659D24 /* experiments.cpp */,
+				7CE9B4E02874917F00659D24 /* experiments-inl.h */,
+				7CE9B4E12874917F00659D24 /* experiments.h */,
+			);
+			path = internal;
+			sourceTree = "<group>";
+		};
+		7CE9B4EC2874917F00659D24 /* event */ = {
+			isa = PBXGroup;
+			children = (
+				7CE9B4ED2874917F00659D24 /* event.h */,
+				7CE9B4EE2874917F00659D24 /* event.cpp */,
+			);
+			path = event;
+			sourceTree = "<group>";
+		};
+		7CE9B5E5287495E400659D24 /* UIStackView */ = {
+			isa = PBXGroup;
+			children = (
+				7CE9B5E7287495F900659D24 /* UIStackView.hpp */,
+				7CE9B5E6287495F900659D24 /* UIStackView.cpp */,
+			);
+			path = UIStackView;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -348,16 +506,32 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7CA9606D2871F7A2009E0953 /* main.cpp in Sources */,
+				7CE9B5E32874917F00659D24 /* YGNode.cpp in Sources */,
+				7CE9B5E02874917F00659D24 /* YGEnums.cpp in Sources */,
+				7C0638F32876215100621093 /* FontManager.cpp in Sources */,
+				7CE9B5D92874917F00659D24 /* log.cpp in Sources */,
 				7CA960792871F8BF009E0953 /* glfw_video.cpp in Sources */,
 				7CA960C12871FAC6009E0953 /* Application.cpp in Sources */,
+				7C0638FB2876C01900621093 /* Label.cpp in Sources */,
+				7CE9B5DE2874917F00659D24 /* experiments.cpp in Sources */,
 				7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */,
 				7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */,
+				7C0638F42876233200621093 /* main2.cpp in Sources */,
+				7CE9B5E42874917F00659D24 /* event.cpp in Sources */,
+				7CE9B5E22874917F00659D24 /* YGConfig.cpp in Sources */,
 				7C78EBE12873748B0082D3AC /* UILabel.cpp in Sources */,
 				7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */,
+				7CE9B5E8287495F900659D24 /* UIStackView.cpp in Sources */,
+				7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */,
+				7CE9B5DF2874917F00659D24 /* YGNodePrint.cpp in Sources */,
+				7CE9B5DD2874917F00659D24 /* YGStyle.cpp in Sources */,
 				7CA960B12871F993009E0953 /* nanovg.c in Sources */,
 				7CA960B22871F993009E0953 /* glad.c in Sources */,
 				7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */,
+				7C44163C28777D9B0076663D /* UIResponder.cpp in Sources */,
+				7CE9B5DC2874917F00659D24 /* Yoga.cpp in Sources */,
+				7CE9B5DA2874917F00659D24 /* Utils.cpp in Sources */,
+				7CE9B5E12874917F00659D24 /* YGValue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -404,10 +578,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = YG_ENABLE_EVENTS;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -418,6 +589,7 @@
 					/opt/homebrew/include,
 					NXKit/lib/extern/include,
 					"NXKit/lib/extern/include/nanovg-gl",
+					NXKit/lib/extern/lib/yoga/src,
 				);
 				LIBRARY_SEARCH_PATHS = /opt/homebrew/lib;
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
@@ -467,6 +639,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = YG_ENABLE_EVENTS;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -477,6 +650,7 @@
 					/opt/homebrew/include,
 					NXKit/lib/extern/include,
 					"NXKit/lib/extern/include/nanovg-gl",
+					NXKit/lib/extern/lib/yoga/src,
 				);
 				LIBRARY_SEARCH_PATHS = /opt/homebrew/lib;
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
@@ -494,6 +668,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = D59DHVRS87;
 				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -505,6 +680,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = D59DHVRS87;
 				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

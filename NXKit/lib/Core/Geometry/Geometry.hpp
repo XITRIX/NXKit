@@ -8,17 +8,17 @@
 #pragma once
 
 struct Point {
-    double x, y;
+    float x, y;
 
     Point(): x(0), y(0) { }
-    Point(double x, double y): x(x), y(y) { }
+    Point(float x, float y): x(x), y(y) { }
 };
 
 struct Size {
-    double width, height;
+    float width, height;
 
     Size(): width(0), height(0) { }
-    Size(double width, double height): width(width), height(height) { }
+    Size(float width, float height): width(width), height(height) { }
 };
 
 struct Rect {
@@ -27,5 +27,5 @@ struct Rect {
 
     Rect(): origin(), size() { }
     Rect(Point origin, Size size): origin(origin), size(size) { }
-    Rect(double x, double y, double width, double height): origin(x, y), size(width, height) { }
+    Rect(float x, float y, float width, float height): origin(x, y), size(width, height) { }
 };

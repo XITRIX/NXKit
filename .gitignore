@@ -3,3 +3,5 @@ build
 *.nacp
 *.nro
 NXKit.xcodeproj/xcuserdata
+.idea
+NXKit.xcodeproj/project.xcworkspace/xcuserdata

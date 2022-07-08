@@ -53,7 +53,7 @@ static void glfwWindowFramebufferSizeCallback(GLFWwindow* window, int width, int
     glfwGetWindowSize(window, &wWidth, &wHeight);
     glfwGetFramebufferSize(window, &fWidth, &fHeight);
 
-    Application::shared()->onWindowResized(wWidth, wHeight, fWidth / wWidth);
+    Application::shared()->onWindowResized(static_cast<unsigned>(wWidth), static_cast<unsigned>(wHeight), (float)fWidth / (float)wWidth);
 }
 
 GLFWVideoContext::GLFWVideoContext(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight)
@@ -197,7 +197,7 @@ void GLFWVideoContext::getContextPixels(int x, int y, int w, int h, unsigned cha
 {
     Application::shared()->flushContext();
 
-    *pixels = (unsigned char*)malloc(w*h*4);
+    *pixels = (unsigned char*) malloc(static_cast<size_t>(w * h * 4));
 
     glReadPixels(x, y - h, w, h, GL_RGBA, GL_UNSIGNED_BYTE, *pixels);
     flipHorizontal(*pixels, w, h, w*4);

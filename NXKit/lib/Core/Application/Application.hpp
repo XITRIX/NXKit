@@ -16,16 +16,19 @@ class Application {
 public:
     static Application* shared();
 
-    UIView* rootView;
-
     Application();
+
+    UIView* getRootView() { return rootView; }
+    void setRootView(UIView* view);
     
     bool mainLoop();
     void flushContext();
-    void onWindowResized(int width, int height, float scale);
+    void onWindowResized(unsigned width, unsigned height, float scale);
     GLFWVideoContext* getVideoContext();
 private:
     inline static Application* _shared;
+
+    UIView* rootView;
     unsigned windowWidth, windowHeight;
     float windowScale;
 

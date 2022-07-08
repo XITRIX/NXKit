@@ -27,12 +27,19 @@ Application::Application() {
     this->videoContext = new GLFWVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
 }
 
-void Application::onWindowResized(int width, int height, float scale) {
-    Application::windowWidth  = width;
-    Application::windowHeight = height;
+void Application::setRootView(UIView *view) {
+    rootView = view;
+    rootView->setSize(Size(windowWidth, windowHeight));
+}
+
+void Application::onWindowResized(unsigned width, unsigned height, float scale) {
+    windowWidth  = width;
+    windowHeight = height;
 
     // Rescale UI
-    Application::windowScale = scale;
+    windowScale = scale;
+    if (rootView)
+        rootView->setSize(Size(width, height));
 }
 
 bool Application::mainLoopIteration() {
@@ -64,9 +71,7 @@ bool Application::mainLoop() {
     videoContext->clear(nvgRGB(100, 0, 0));
 
     nvgBeginFrame(videoContext->getNVGContext(), windowWidth, windowHeight, windowScale);
-//    nvgScale(videoContext->getNVGContext(), windowScale, windowScale);
-
-    rootView->frame.size = Size(windowWidth, windowHeight);
+    
     rootView->internalDraw(videoContext->getNVGContext());
 
     nvgResetTransform(videoContext->getNVGContext()); // scale
