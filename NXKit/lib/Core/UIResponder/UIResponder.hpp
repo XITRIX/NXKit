@@ -7,6 +7,17 @@
 
 #pragma once
 
-class UIResponder {
+#include <vector>
 
+#include "UITouch.hpp"
+#include "UIEvent.hpp"
+
+class UIResponder {
+public:
+    UIResponder* next = nullptr;
+
+    void touchesBegan(std::vector<UITouch*> touches, UIEvent* withEvent);
+    void touchesMoved(std::vector<UITouch*> touches, UIEvent* withEvent);
+    void touchesEnded(std::vector<UITouch*> touches, UIEvent* withEvent);
+    void touchesCancelled(std::vector<UITouch*> touches, UIEvent* withEvent);
 };

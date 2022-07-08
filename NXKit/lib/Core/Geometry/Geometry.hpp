@@ -12,6 +12,26 @@ struct Point {
 
     Point(): x(0), y(0) { }
     Point(float x, float y): x(x), y(y) { }
+
+    Point operator+(const Point& first) const {
+        return Point(x + first.x, y + first.y);
+    }
+
+    Point operator-(const Point& first) const {
+        return Point(x - first.x, y - first.y);
+    }
+
+    Point& operator+=(const Point& rhs) {
+        this->x += rhs.x;
+        this->y += rhs.y;
+        return *this;
+    }
+
+    Point& operator-=(const Point& rhs) {
+        this->x -= rhs.x;
+        this->y -= rhs.y;
+        return *this;
+    }
 };
 
 struct Size {
@@ -19,6 +39,26 @@ struct Size {
 
     Size(): width(0), height(0) { }
     Size(float width, float height): width(width), height(height) { }
+
+    Size operator+(const Size& first) const {
+        return Size(width + first.width, height + first.height);
+    }
+
+    Size operator-(const Size& first) const {
+        return Size(width - first.width, height - first.height);
+    }
+
+    Size& operator+=(const Size& rhs) {
+        this->width += rhs.width;
+        this->height += rhs.height;
+        return *this;
+    }
+
+    Size& operator-=(const Size& rhs) {
+        this->width -= rhs.width;
+        this->height -= rhs.height;
+        return *this;
+    }
 };
 
 struct Rect {

@@ -52,6 +52,12 @@ Rect UIView::getFrame() {
     return Rect( YGNodeLayoutGetLeft(this->ygNode), YGNodeLayoutGetTop(this->ygNode), YGNodeLayoutGetWidth(this->ygNode), YGNodeLayoutGetHeight(this->ygNode) );
 }
 
+Rect UIView::getBounds() {
+    Rect frame = getFrame();
+    frame.origin = Point();
+    return frame;
+}
+
 void UIView::internalDraw(NVGcontext* vgContext) {
     layoutIfNeeded();
 
@@ -185,6 +191,29 @@ void UIView::addSubview(UIView *view) {
 
 std::vector<UIView*> UIView::getSubviews() {
     return subviews;
+}
+
+Point UIView::convert(Point point, UIView* toView) {
+    Point selfAbsoluteOrigin;
+    Point otherAbsoluteOrigin;
+
+    UIView* current = this;
+    while (current) {
+        selfAbsoluteOrigin += current->frame.origin;
+        if (current == toView) {
+            return point + selfAbsoluteOrigin;
+        }
+        current = current->superview;
+    }
+
+    current = toView;
+    while (current) {
+        otherAbsoluteOrigin += current->frame.origin;
+        current = current->superview;
+    }
+
+    Point originDifference = otherAbsoluteOrigin - selfAbsoluteOrigin;
+    return point - originDifference;
 }
 
 UIView* UIView::getSuperview() {

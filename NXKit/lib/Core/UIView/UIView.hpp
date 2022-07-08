@@ -9,12 +9,13 @@
 
 #include "Geometry.hpp"
 #include "UIColor.hpp"
+#include "UIResponder.hpp"
 
 #include <yoga/YGNode.h>
 
 #include <vector>
 
-class UIView {
+class UIView: public UIResponder {
 public:
     static constexpr float AUTO = NAN;
 
@@ -28,14 +29,21 @@ public:
     UIView(float x, float y, float width, float height): UIView(Rect(x, y, width, height)) {}
     UIView(): UIView(Rect(0, 0, UIView::AUTO, UIView::AUTO)) {}
 
-    Rect getFrame();
     virtual void draw(NVGcontext* vgContext) {}
+
     virtual void addSubview(UIView* view);
     std::vector<UIView*> getSubviews();
+
+    Point convert(Point point, UIView* toView);
+
     UIView* getSuperview();
 
+    // Yoga node
     YGNode* getYGNode() { return this->ygNode; }
 
+    // Sizes
+    Rect getFrame();
+    Rect getBounds();
     void setPosition(Point position);
     void setSize(Size size);
     void setGrow(float grow);
@@ -73,6 +81,7 @@ private:
     std::vector<UIView*> subviews;
     UIView* superview = nullptr;
     bool needsLayout = true;
+    Rect bounds;
 
     void internalDraw(NVGcontext* vgContext);
 };
