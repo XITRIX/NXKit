@@ -177,10 +177,10 @@ UILabel::UILabel(std::string text) : UIView(),
 }
 
 void UILabel::draw(NVGcontext *vg) {
-    int x = frame.origin.x;
-    int y = frame.origin.y;
-    int width = frame.size.width;
-    int height = frame.size.height;
+    int x = frame.origin().x;
+    int y = frame.origin().y;
+    int width = frame.size().width;
+    int height = frame.size().height;
 
 
     if (width == 0)
@@ -222,7 +222,7 @@ void UILabel::draw(NVGcontext *vg) {
 void UILabel::layoutSubviews() {
     UIView::layoutSubviews();
 
-    float width = frame.size.width;
+    float width = frame.size().width;
 
     if (width == 0)
     {

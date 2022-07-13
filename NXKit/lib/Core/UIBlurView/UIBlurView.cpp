@@ -23,7 +23,7 @@ static void shrinkImage(unsigned char** in, int w, int h, int scale) {
 static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float w, float h, float r) {
     unsigned char* image;
 
-    Size rootSize = Application::shared()->getKeyWindow()->frame.size;
+    Size rootSize = Application::shared()->getKeyWindow()->frame.size();
 
     float scaleFactor = Application::shared()->getVideoContext()->getScaleFactor();
     int winHeight = static_cast<int>(rootSize.height * scaleFactor);
@@ -61,10 +61,10 @@ static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float 
 UIBlurView::UIBlurView(Rect frame): UIView(frame) { }
 
 void UIBlurView::draw(NVGcontext *vgContext) {
-    int img = getContextBluredImage(vgContext, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height, blurRadius);
-    NVGpaint imgPaint = nvgImagePattern(vgContext, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height, 0, img, 1);
+    int img = getContextBluredImage(vgContext, frame.origin().x, frame.origin().y, frame.size().width, frame.size().height, blurRadius);
+    NVGpaint imgPaint = nvgImagePattern(vgContext, frame.origin().x, frame.origin().y, frame.size().width, frame.size().height, 0, img, 1);
     nvgBeginPath(vgContext);
-    nvgRoundedRect(vgContext, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height, cornerRadius);
+    nvgRoundedRect(vgContext, frame.origin().x, frame.origin().y, frame.size().width, frame.size().height, cornerRadius);
     nvgFillPaint(vgContext, imgPaint);
     nvgFill(vgContext);
 

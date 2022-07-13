@@ -35,6 +35,7 @@ private:
     float windowScale;
 
     bool mainLoopIteration();
+    void render();
     GLFWVideoContext* videoContext = nullptr;
 
 };

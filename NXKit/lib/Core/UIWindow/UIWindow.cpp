@@ -14,8 +14,6 @@ UIViewController* UIWindow::getRootViewController() {
 
 void UIWindow::setRootViewController(UIViewController *viewController) {
     rootViewController = viewController;
-    if (rootViewController)
-        rootViewController->next = this;
 }
 
 void UIWindow::makeKeyAndVisible() {
@@ -23,14 +21,30 @@ void UIWindow::makeKeyAndVisible() {
 
     if (rootViewController) {
         rootViewController->loadViewIfNeeded();
-        rootViewController->next = this;
         rootViewController->viewWillAppear(false);
         addSubview(rootViewController->getView());
+        rootViewController->getView()->layoutSubviews();
         rootViewController->viewDidAppear(false);
+    }
+}
+
+void UIWindow::sendEvent(UIEvent* event) {
+    auto allTouches = event->allTouches;
+    if (allTouches.size() < 1) { return; }
+    auto currentTouch = allTouches[0];
+
+    UIView* hitView = nullptr;
+    if (currentTouch->view) hitView = currentTouch->view;
+    else hitView = hitTest(currentTouch->locationIn(nullptr), nullptr);
+    if (hitView == nullptr) return;
+
+    switch (currentTouch->phase) {
+        default:
+            break;
     }
 }
 
 void UIWindow::layoutSubviews() {
     UIView::layoutSubviews();
-    rootViewController->getView()->setSize(this->frame.size);
+    rootViewController->getView()->setSize(((Rect) this->frame).size);
 }

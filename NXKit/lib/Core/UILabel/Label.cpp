@@ -378,10 +378,10 @@ enum NVGalign Label::getNVGHorizontalAlign()
 
 void Label::draw(NVGcontext* vg)
 {
-    int x = frame.origin.x;
-    int y = frame.origin.y;
-    int width = frame.size.width;
-    int height = frame.size.height;
+    int x = frame.origin().x;
+    int y = frame.origin().y;
+    int width = frame.size().width;
+    int height = frame.size().height;
 
     if (width == 0)
         return;
@@ -504,7 +504,7 @@ void Label::resetScrollingAnimation()
     // Restart it if it needs to be
     if (this->animated)
     {
-        float width = this->frame.size.width;
+        float width = this->frame.size().width;
 
         if (width < this->requiredWidth)
             this->startScrollTimer();
@@ -513,7 +513,7 @@ void Label::resetScrollingAnimation()
 
 void Label::layoutSubviews()
 {
-    float width = this->frame.size.width;
+    float width = this->frame.size().width;
 
     if (width == 0)
     {

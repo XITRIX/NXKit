@@ -10,6 +10,8 @@
 #include "Application.hpp"
 #include "UIView.hpp"
 #include "UIWindow.hpp"
+#include "Time.hpp"
+#include "CGFloat.hpp"
 
 #ifdef __SWITCH__
 #include <switch.h>
@@ -64,22 +66,29 @@ bool Application::mainLoopIteration() {
 }
 
 bool Application::mainLoop() {
-
     // Main loop callback
     if (!mainLoopIteration()) return false;
 
-    videoContext->beginFrame();
-    videoContext->clear(nvgRGB(100, 0, 0));
+    // Animations
+    updateHighlightAnimation();
+    Ticking::updateTickings();
 
-    nvgBeginFrame(videoContext->getNVGContext(), windowWidth, windowHeight, windowScale);
-    
-    keyWindow->internalDraw(videoContext->getNVGContext());
-
-    nvgResetTransform(videoContext->getNVGContext()); // scale
-    nvgEndFrame(videoContext->getNVGContext());
-    videoContext->endFrame();
+    // Render
+    render();
 
     return true;
+}
+
+void Application::render() {
+    videoContext->beginFrame();
+    videoContext->clear(nvgRGB(0, 0, 0));
+
+    nvgBeginFrame(videoContext->getNVGContext(), windowWidth, windowHeight, windowScale);
+    keyWindow->internalDraw(videoContext->getNVGContext());
+//    nvgResetTransform(videoContext->getNVGContext()); // scale
+
+    nvgEndFrame(videoContext->getNVGContext());
+    videoContext->endFrame();
 }
 
 void Application::flushContext() {

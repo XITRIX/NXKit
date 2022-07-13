@@ -6,6 +6,9 @@
 //
 
 #include "UIViewController.hpp"
+#include "UIWindow.hpp"
+
+#include <typeinfo>
 
 UIView* UIViewController::getView() {
     loadViewIfNeeded();
@@ -14,7 +17,7 @@ UIView* UIViewController::getView() {
 
 void UIViewController::setView(UIView* view) {
     this->view = view;
-    view->next = this;
+    this->view->controller = this;
     viewDidLoad();
 }
 
@@ -26,4 +29,11 @@ void UIViewController::loadViewIfNeeded() {
     if (view == nullptr) {
         loadView();
     }
+}
+
+UIResponder* UIViewController::getNext() {
+    if (typeid(view->getSuperview()) == typeid(UIWindow)) {
+        return view->getSuperview();
+    }
+    return nullptr;
 }

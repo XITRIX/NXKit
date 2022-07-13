@@ -6,6 +6,7 @@
 //
 
 #include "UIView.hpp"
+#include "UIViewController.hpp"
 
 UIView::UIView(Rect frame):
     backgroundColor(0, 0, 0, 0)
@@ -59,18 +60,23 @@ Rect UIView::getBounds() {
 }
 
 void UIView::internalDraw(NVGcontext* vgContext) {
+    nvgSave(vgContext);
     layoutIfNeeded();
+
+    nvgTranslate(vgContext, transformOrigin.x() , transformOrigin.y());
+//    nvgTranslate(vgContext, frame.origin().x , frame.origin().y);
+    nvgScale(vgContext, transformSize.width(), transformSize.height());
 
     // Background color
     nvgBeginPath(vgContext);
-    nvgRoundedRect(vgContext, frame.origin.x, frame.origin.y, frame.size.width, frame.size.height, cornerRadius);
+    nvgRoundedRect(vgContext, frame.origin().x, frame.origin().y, frame.size().width, frame.size().height, cornerRadius);
     nvgFillColor(vgContext, backgroundColor.raw());
     nvgFill(vgContext);
 
     draw(vgContext);
 
     nvgSave(vgContext);
-    nvgTranslate(vgContext, frame.origin.x, frame.origin.y);
+    nvgTranslate(vgContext, frame.origin().x, frame.origin().y);
     for (auto view: subviews) {
         view->internalDraw(vgContext);
     }
@@ -79,7 +85,7 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     // Borders
     if (borderThickness > 0) {
         float offset = borderThickness / 2;
-        Rect borderRect = Rect(frame.origin.x + offset, frame.origin.y + offset, frame.size.width - offset * 2, frame.size.height - offset * 2);
+        Rect borderRect = Rect(frame.origin().x + offset, frame.origin().y + offset, frame.size().width - offset * 2, frame.size().height - offset * 2);
 
         nvgBeginPath(vgContext);
         nvgStrokeColor(vgContext, borderColor.raw());
@@ -90,31 +96,33 @@ void UIView::internalDraw(NVGcontext* vgContext) {
 
     if (getBorderTop() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, frame.origin.x, frame.origin.y, frame.size.width, getBorderTop());
+        nvgRect(vgContext, frame.origin().x, frame.origin().y, frame.size().width, getBorderTop());
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
 
     if (getBorderLeft() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, frame.origin.x, frame.origin.y, getBorderLeft(), frame.size.height);
+        nvgRect(vgContext, frame.origin().x, frame.origin().y, getBorderLeft(), frame.size().height);
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
 
     if (getBorderRight() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, (frame.origin.x + frame.size.width - getBorderRight()), frame.origin.y, getBorderRight(), frame.size.height);
+        nvgRect(vgContext, (frame.origin().x + frame.size().width - getBorderRight()), frame.origin().y, getBorderRight(), frame.size().height);
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
 
     if (getBorderBottom() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, frame.origin.x, (frame.origin.y + frame.size.height - getBorderBottom()), frame.size.width, getBorderBottom());
+        nvgRect(vgContext, frame.origin().x, (frame.origin().y + frame.size().height - getBorderBottom()), frame.size().width, getBorderBottom());
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
+
+    nvgRestore(vgContext);
 }
 
 void UIView::setNeedsLayout() {
@@ -183,10 +191,18 @@ void UIView::layoutSubviews() {
 //    nodeHolder->layoutSubviews();
 }
 
+
+
 void UIView::addSubview(UIView *view) {
-    view->superview = this;
+    view->setSuperview(this);
     subviews.push_back(view);
-    layoutSubviews();
+    setNeedsLayout();
+}
+
+UIResponder* UIView::getNext() {
+    if (controller) return controller;
+    if (superview) return superview;
+    return nullptr;
 }
 
 std::vector<UIView*> UIView::getSubviews() {
@@ -199,7 +215,7 @@ Point UIView::convert(Point point, UIView* toView) {
 
     UIView* current = this;
     while (current) {
-        selfAbsoluteOrigin += current->frame.origin;
+        selfAbsoluteOrigin += current->frame.origin();
         if (current == toView) {
             return point + selfAbsoluteOrigin;
         }
@@ -208,7 +224,7 @@ Point UIView::convert(Point point, UIView* toView) {
 
     current = toView;
     while (current) {
-        otherAbsoluteOrigin += current->frame.origin;
+        otherAbsoluteOrigin += current->frame.origin();
         current = current->superview;
     }
 
@@ -216,8 +232,28 @@ Point UIView::convert(Point point, UIView* toView) {
     return point - originDifference;
 }
 
+UIView* UIView::hitTest(Point point, UIEvent* withEvent) {
+    if (!this->point(point, withEvent)) return nullptr;
+
+    auto subviews = getSubviews();
+    for (int i = (int) subviews.size(); i >= 0; i--) {
+        UIView* test = subviews[i]->hitTest(subviews[i]->convert(point, this), withEvent);
+        if (test) return test;
+    }
+
+    return this;
+}
+
+bool UIView::point(Point insidePoint, UIEvent *withEvent) {
+    return bounds.contains(insidePoint);
+}
+
 UIView* UIView::getSuperview() {
     return superview;
+}
+
+void UIView::setSuperview(UIView* view) {
+    superview = view;
 }
 
 void UIView::setGrow(float grow) {

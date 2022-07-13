@@ -12,6 +12,7 @@
 #endif
 
 class TestVC: public UIViewController {
+    UIView* test;
     void loadView() override {
         UIStackView *root = new UIStackView(Axis::VERTICAL);
         root->backgroundColor = UIColor(235, 235, 235);
@@ -58,7 +59,25 @@ class TestVC: public UIViewController {
         root->addSubview(body);
         root->addSubview(footer);
 
+        test = body;
         setView(root);
+    }
+
+    void viewDidLoad() override {
+//        getView()->layoutSubviews();
+//        test->animate(10, [this]() {
+//            test->setSize(Size(10, UIView::AUTO));
+//        });
+    }
+
+    void viewWillAppear(bool animated) override {
+        getView()->layoutSubviews();
+
+//        test->transformOrigin.reset();
+//        test->transformOrigin.addStep({100, 100}, 1200);
+//        test->transformOrigin.start();
+
+        test->transformSize = Size(0.8f, 0.8f);
     }
 };
 

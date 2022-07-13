@@ -26,6 +26,8 @@ public:
 
     virtual void viewWillLayoutSubviews() {}
     virtual void viewDidLayoutSubviews() {}
+
+    UIResponder* getNext() override;
 private:
     UIView* view = nullptr;
 };

@@ -15,6 +15,7 @@ public:
     void setRootViewController(UIViewController* viewController);
 
     void makeKeyAndVisible();
+    void sendEvent(UIEvent* event);
 
     void layoutSubviews() override;
 private:

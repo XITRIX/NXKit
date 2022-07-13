@@ -14,7 +14,7 @@
 
 class UIResponder {
 public:
-    UIResponder* next = nullptr;
+    virtual UIResponder* getNext() { return nullptr; }
 
     void touchesBegan(std::vector<UITouch*> touches, UIEvent* withEvent);
     void touchesMoved(std::vector<UITouch*> touches, UIEvent* withEvent);
