@@ -30,6 +30,11 @@ void UIView::setSize(Size size) {
         YGNodeStyleSetWidthAuto(this->ygNode);
         YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
     }
+    else if (0 < size.width && size.width < 1.0f)
+    {
+        YGNodeStyleSetMinWidthPercent(this->ygNode, size.width);
+        YGNodeStyleSetWidthPercent(this->ygNode, size.width);
+    }
     else
     {
         YGNodeStyleSetWidth(this->ygNode, size.width);
@@ -41,11 +46,56 @@ void UIView::setSize(Size size) {
         YGNodeStyleSetHeightAuto(this->ygNode);
         YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
     }
+    else if (0 < size.height && size.height < 1.0f)
+    {
+        YGNodeStyleSetMinHeightPercent(this->ygNode, size.height);
+        YGNodeStyleSetHeightPercent(this->ygNode, size.height);
+    }
     else
     {
         YGNodeStyleSetHeight(this->ygNode, size.height);
         YGNodeStyleSetMinHeight(this->ygNode, size.height);
     }
+    setNeedsLayout();
+}
+
+void UIView::setWidth(float width) {
+    if (width == UIView::AUTO)
+    {
+        YGNodeStyleSetWidthAuto(this->ygNode);
+        YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
+    }
+    else
+    {
+        YGNodeStyleSetWidth(this->ygNode, width);
+        YGNodeStyleSetMinWidth(this->ygNode, width);
+    }
+    setNeedsLayout();
+}
+
+void UIView::setHeight(float height) {
+    if (height == UIView::AUTO)
+    {
+        YGNodeStyleSetHeightAuto(this->ygNode);
+        YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
+    }
+    else
+    {
+        YGNodeStyleSetHeight(this->ygNode, height);
+        YGNodeStyleSetMinHeight(this->ygNode, height);
+    }
+    setNeedsLayout();
+}
+
+void UIView::setPercentWidth(float width) {
+    YGNodeStyleSetMinWidthPercent(this->ygNode, width);
+    YGNodeStyleSetWidthPercent(this->ygNode, width);
+    setNeedsLayout();
+}
+
+void UIView::setPercentHeight(float height) {
+    YGNodeStyleSetMinHeightPercent(this->ygNode, height);
+    YGNodeStyleSetHeightPercent(this->ygNode, height);
     setNeedsLayout();
 }
 
@@ -60,23 +110,37 @@ Rect UIView::getBounds() {
 }
 
 void UIView::internalDraw(NVGcontext* vgContext) {
+    if (isHidden()) return;
+
     nvgSave(vgContext);
     layoutIfNeeded();
 
+    // Frame position
+    nvgTranslate(vgContext, frame.origin().x , frame.origin().y);
+
+    // Position transform
     nvgTranslate(vgContext, transformOrigin.x() , transformOrigin.y());
-//    nvgTranslate(vgContext, frame.origin().x , frame.origin().y);
+
+    // Scale transform
+    float scaleTransformX = (frame.size().width / 2.0f) - (frame.size().width / 2.0f) * transformSize.width();
+    float scaleTransformY = (frame.size().height / 2.0f) - (frame.size().height / 2.0f) * transformSize.height();
+    nvgTranslate(vgContext, scaleTransformX, scaleTransformY);
     nvgScale(vgContext, transformSize.width(), transformSize.height());
+
+    // ClipToBounds
+    if (clipToBounds)
+        nvgIntersectScissor(vgContext, 0, 0, frame.size().width, frame.size().height);
 
     // Background color
     nvgBeginPath(vgContext);
-    nvgRoundedRect(vgContext, frame.origin().x, frame.origin().y, frame.size().width, frame.size().height, cornerRadius);
+    nvgRoundedRect(vgContext, 0, 0, frame.size().width, frame.size().height, cornerRadius);
     nvgFillColor(vgContext, backgroundColor.raw());
     nvgFill(vgContext);
 
     draw(vgContext);
 
     nvgSave(vgContext);
-    nvgTranslate(vgContext, frame.origin().x, frame.origin().y);
+//    nvgTranslate(vgContext, frame.origin().x, frame.origin().y);
     for (auto view: subviews) {
         view->internalDraw(vgContext);
     }
@@ -85,7 +149,7 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     // Borders
     if (borderThickness > 0) {
         float offset = borderThickness / 2;
-        Rect borderRect = Rect(frame.origin().x + offset, frame.origin().y + offset, frame.size().width - offset * 2, frame.size().height - offset * 2);
+        Rect borderRect = Rect(offset, offset, frame.size().width - offset * 2, frame.size().height - offset * 2);
 
         nvgBeginPath(vgContext);
         nvgStrokeColor(vgContext, borderColor.raw());
@@ -96,28 +160,28 @@ void UIView::internalDraw(NVGcontext* vgContext) {
 
     if (getBorderTop() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, frame.origin().x, frame.origin().y, frame.size().width, getBorderTop());
+        nvgRect(vgContext, 0, 0, frame.size().width, getBorderTop());
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
 
     if (getBorderLeft() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, frame.origin().x, frame.origin().y, getBorderLeft(), frame.size().height);
+        nvgRect(vgContext, 0, 0, getBorderLeft(), frame.size().height);
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
 
     if (getBorderRight() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, (frame.origin().x + frame.size().width - getBorderRight()), frame.origin().y, getBorderRight(), frame.size().height);
+        nvgRect(vgContext, (0 + frame.size().width - getBorderRight()), 0, getBorderRight(), frame.size().height);
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
 
     if (getBorderBottom() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, frame.origin().x, (frame.origin().y + frame.size().height - getBorderBottom()), frame.size().width, getBorderBottom());
+        nvgRect(vgContext, 0, (frame.size().height - getBorderBottom()), frame.size().width, getBorderBottom());
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
@@ -161,6 +225,8 @@ void UIView::layoutIfNeeded() {
 }
 
 void UIView::layoutSubviews() {
+    if (controller) controller->viewWillLayoutSubviews();
+
     needsLayout = false;
 
     if (YGNodeHasMeasureFunc(this->ygNode))
@@ -176,22 +242,23 @@ void UIView::layoutSubviews() {
 
     frame = getFrame();
 
-//    YGNode* parentNode = YGNodeGetParent(this->ygNode);
-//    if (!parentNode) {
-//        YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
-//        return;
-//    }
-//
-//    UIView* nodeHolder = (UIView*) YGNodeGetParent(this->ygNode)->getContext();
-//    if (!nodeHolder) {
-//        YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
-//        return;
-//    }
-//
-//    nodeHolder->layoutSubviews();
+    if (controller) controller->viewDidLayoutSubviews();
 }
 
+UIView* UIView::getDefaultFocus() {
+    if (isFocusable) return this;
 
+    for (auto view: subviews) {
+        UIView* focus = view->getDefaultFocus();
+        if (focus) return focus;
+    }
+
+    return nullptr;
+}
+
+UIView* UIView::getNextFocus(NavigationDirection direction) {
+    return nullptr;
+}
 
 void UIView::addSubview(UIView *view) {
     view->setSuperview(this);
@@ -203,6 +270,19 @@ UIResponder* UIView::getNext() {
     if (controller) return controller;
     if (superview) return superview;
     return nullptr;
+}
+
+
+void UIView::setHidden(bool hidden) {
+    if (hidden)
+        YGNodeStyleSetDisplay(this->ygNode, YGDisplayNone);
+    else
+        YGNodeStyleSetDisplay(this->ygNode, YGDisplayFlex);
+    setNeedsLayout();
+}
+
+bool UIView::isHidden() {
+    return YGNodeStyleGetDisplay(this->ygNode) == YGDisplayNone;
 }
 
 std::vector<UIView*> UIView::getSubviews() {
@@ -262,6 +342,14 @@ void UIView::setGrow(float grow) {
 
 float UIView::getGrow() {
     return YGNodeStyleGetFlexGrow(this->ygNode);
+}
+
+void UIView::setShrink(float grow) {
+    YGNodeStyleSetFlexShrink(this->ygNode, grow);
+}
+
+float UIView::getShrink() {
+    return YGNodeStyleGetFlexShrink(this->ygNode);
 }
 
 void UIView::setMargins(float top, float right, float bottom, float left) {

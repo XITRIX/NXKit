@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7C0638F32876215100621093 /* FontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F12876215100621093 /* FontManager.cpp */; };
-		7C0638F42876233200621093 /* main2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E92874EA4000659D24 /* main2.cpp */; };
+		7C0638F42876233200621093 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E92874EA4000659D24 /* main.cpp */; };
 		7C0638FB2876C01900621093 /* Label.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F92876C01900621093 /* Label.cpp */; };
 		7C239612287E13C100973CC0 /* Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239610287E13C100973CC0 /* Time.cpp */; };
 		7C23962E287E143700973CC0 /* encoding_utf.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C239628287E143600973CC0 /* encoding_utf.c */; };
@@ -30,10 +30,58 @@
 		7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBDD2873748B0082D3AC /* GaussianBlur.cpp */; };
 		7C78EBE8287386070082D3AC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C78EBE7287386070082D3AC /* OpenGL.framework */; };
 		7C888E37287F7726009A6B95 /* CGSize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E35287F7726009A6B95 /* CGSize.cpp */; };
+		7C888E4328816547009A6B95 /* UINavigationController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4128816547009A6B95 /* UINavigationController.cpp */; };
+		7C888E47288165E9009A6B95 /* ViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E45288165E9009A6B95 /* ViewController.cpp */; };
+		7C888E4B28818212009A6B95 /* UITabBarController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4928818212009A6B95 /* UITabBarController.cpp */; };
 		7CA960792871F8BF009E0953 /* glfw_video.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960762871F8BF009E0953 /* glfw_video.cpp */; };
 		7CA960B12871F993009E0953 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960882871F993009E0953 /* nanovg.c */; };
 		7CA960B22871F993009E0953 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9608A2871F993009E0953 /* glad.c */; };
 		7CA960C12871FAC6009E0953 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960BF2871FAC6009E0953 /* Application.cpp */; };
+		7CA9C46B2882ADD600E47DB3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C46A2882ADD600E47DB3 /* AppDelegate.m */; };
+		7CA9C46E2882ADD600E47DB3 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C46D2882ADD600E47DB3 /* SceneDelegate.m */; };
+		7CA9C4712882ADD600E47DB3 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C4702882ADD600E47DB3 /* ViewController.m */; };
+		7CA9C4742882ADD600E47DB3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7CA9C4722882ADD600E47DB3 /* Main.storyboard */; };
+		7CA9C4762882ADD700E47DB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7CA9C4752882ADD700E47DB3 /* Assets.xcassets */; };
+		7CA9C4792882ADD700E47DB3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7CA9C4772882ADD700E47DB3 /* LaunchScreen.storyboard */; };
+		7CA9C47C2882ADD700E47DB3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C47B2882ADD700E47DB3 /* main.m */; };
+		7CA9C4822882C3F700E47DB3 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960BF2871FAC6009E0953 /* Application.cpp */; };
+		7CA9C4842882C40500E47DB3 /* UIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD32873748B0082D3AC /* UIView.cpp */; };
+		7CA9C4852882C41000E47DB3 /* UIBlurView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */; };
+		7CA9C4862882C43100E47DB3 /* FontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F12876215100621093 /* FontManager.cpp */; };
+		7CA9C4872882C43100E47DB3 /* UILabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD82873748B0082D3AC /* UILabel.cpp */; };
+		7CA9C4882882C43100E47DB3 /* UIViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE542878ED350091DEF9 /* UIViewController.cpp */; };
+		7CA9C4892882C43100E47DB3 /* UITabBarController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4928818212009A6B95 /* UITabBarController.cpp */; };
+		7CA9C48A2882C43100E47DB3 /* UIStackView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E6287495F900659D24 /* UIStackView.cpp */; };
+		7CA9C48B2882C43100E47DB3 /* UIGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4C28788D8E0091DEF9 /* UIGestureRecognizer.cpp */; };
+		7CA9C48C2882C43100E47DB3 /* UIResponder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C44163A28777D9B0076663D /* UIResponder.cpp */; };
+		7CA9C48D2882C43100E47DB3 /* UITouch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4828788AA20091DEF9 /* UITouch.cpp */; };
+		7CA9C48E2882C43100E47DB3 /* Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239610287E13C100973CC0 /* Time.cpp */; };
+		7CA9C48F2882C43100E47DB3 /* GaussianBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBDD2873748B0082D3AC /* GaussianBlur.cpp */; };
+		7CA9C4902882C43100E47DB3 /* UIEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE502878EA220091DEF9 /* UIEvent.cpp */; };
+		7CA9C4912882C43100E47DB3 /* CGFloat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239631287E148700973CC0 /* CGFloat.cpp */; };
+		7CA9C4922882C43100E47DB3 /* CGPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239637287E177900973CC0 /* CGPoint.cpp */; };
+		7CA9C4932882C43100E47DB3 /* CGSize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E35287F7726009A6B95 /* CGSize.cpp */; };
+		7CA9C4942882C43100E47DB3 /* UIColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD12873748B0082D3AC /* UIColor.cpp */; };
+		7CA9C4952882C43100E47DB3 /* UINavigationController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4128816547009A6B95 /* UINavigationController.cpp */; };
+		7CA9C4962882C43100E47DB3 /* CGRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C23963B287E2BCC00973CC0 /* CGRect.cpp */; };
+		7CA9C4982882C83800E47DB3 /* compat_strl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962A287E143600973CC0 /* compat_strl.c */; };
+		7CA9C4992882C83800E47DB3 /* encoding_utf.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C239628287E143600973CC0 /* encoding_utf.c */; };
+		7CA9C49A2882C83800E47DB3 /* features_cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962C287E143600973CC0 /* features_cpu.c */; };
+		7CA9C49B2882C83F00E47DB3 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D52874917F00659D24 /* Utils.cpp */; };
+		7CA9C49C2882C83F00E47DB3 /* YGConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E92874917F00659D24 /* YGConfig.cpp */; };
+		7CA9C49D2882C83F00E47DB3 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D82874917F00659D24 /* YGLayout.cpp */; };
+		7CA9C49E2882C83F00E47DB3 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D42874917F00659D24 /* log.cpp */; };
+		7CA9C49F2882C83F00E47DB3 /* YGStyle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DC2874917F00659D24 /* YGStyle.cpp */; };
+		7CA9C4A02882C83F00E47DB3 /* YGValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E62874917F00659D24 /* YGValue.cpp */; };
+		7CA9C4A12882C83F00E47DB3 /* YGNodePrint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E22874917F00659D24 /* YGNodePrint.cpp */; };
+		7CA9C4A22882C83F00E47DB3 /* YGEnums.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E42874917F00659D24 /* YGEnums.cpp */; };
+		7CA9C4A32882C83F00E47DB3 /* YGNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4EA2874917F00659D24 /* YGNode.cpp */; };
+		7CA9C4A42882C83F00E47DB3 /* Yoga.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DB2874917F00659D24 /* Yoga.cpp */; };
+		7CA9C4A52882C84400E47DB3 /* experiments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DF2874917F00659D24 /* experiments.cpp */; };
+		7CA9C4A62882C84400E47DB3 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4EE2874917F00659D24 /* event.cpp */; };
+		7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960882871F993009E0953 /* nanovg.c */; };
+		7CA9C4A82882C84E00E47DB3 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9608A2871F993009E0953 /* glad.c */; };
+		7CA9C4B02882CF1100E47DB3 /* ios_video_layer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C4AD2882CE7500E47DB3 /* ios_video_layer.mm */; };
 		7CE9B5D92874917F00659D24 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D42874917F00659D24 /* log.cpp */; };
 		7CE9B5DA2874917F00659D24 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D52874917F00659D24 /* Utils.cpp */; };
 		7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D82874917F00659D24 /* YGLayout.cpp */; };
@@ -131,10 +179,15 @@
 		7C78EBE7287386070082D3AC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		7C888E35287F7726009A6B95 /* CGSize.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CGSize.cpp; sourceTree = "<group>"; };
 		7C888E36287F7726009A6B95 /* CGSize.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CGSize.hpp; sourceTree = "<group>"; };
+		7C888E4128816547009A6B95 /* UINavigationController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UINavigationController.cpp; sourceTree = "<group>"; };
+		7C888E4228816547009A6B95 /* UINavigationController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UINavigationController.hpp; sourceTree = "<group>"; };
+		7C888E45288165E9009A6B95 /* ViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ViewController.cpp; sourceTree = "<group>"; };
+		7C888E46288165E9009A6B95 /* ViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ViewController.hpp; sourceTree = "<group>"; };
+		7C888E4928818212009A6B95 /* UITabBarController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITabBarController.cpp; sourceTree = "<group>"; };
+		7C888E4A28818212009A6B95 /* UITabBarController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITabBarController.hpp; sourceTree = "<group>"; };
 		7CA960692871F7A2009E0953 /* NXKit */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NXKit; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CA9606C2871F7A2009E0953 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		7CA960762871F8BF009E0953 /* glfw_video.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glfw_video.cpp; sourceTree = "<group>"; };
-		7CA960772871F8BF009E0953 /* glfw_video.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = glfw_video.hpp; sourceTree = "<group>"; };
 		7CA960782871F8BF009E0953 /* video.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = video.hpp; sourceTree = "<group>"; };
 		7CA960872871F993009E0953 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		7CA960882871F993009E0953 /* nanovg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nanovg.c; sourceTree = "<group>"; };
@@ -150,6 +203,23 @@
 		7CA960BF2871FAC6009E0953 /* Application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
 		7CA960C02871FAC6009E0953 /* Application.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Application.hpp; sourceTree = "<group>"; };
 		7CA960C22871FCC2009E0953 /* NXKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NXKit.entitlements; sourceTree = "<group>"; };
+		7CA9C4672882ADD600E47DB3 /* NXKit-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NXKit-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7CA9C4692882ADD600E47DB3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		7CA9C46A2882ADD600E47DB3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		7CA9C46C2882ADD600E47DB3 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		7CA9C46D2882ADD600E47DB3 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
+		7CA9C46F2882ADD600E47DB3 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		7CA9C4702882ADD600E47DB3 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		7CA9C4732882ADD600E47DB3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		7CA9C4752882ADD700E47DB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7CA9C4782882ADD700E47DB3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		7CA9C47A2882ADD700E47DB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7CA9C47B2882ADD700E47DB3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		7CA9C4972882C5EB00E47DB3 /* glfw_video.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = glfw_video.hpp; sourceTree = "<group>"; };
+		7CA9C4A92882CA4800E47DB3 /* ios_video.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ios_video.mm; sourceTree = "<group>"; };
+		7CA9C4AC2882CA6500E47DB3 /* ios_video.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ios_video.hpp; sourceTree = "<group>"; };
+		7CA9C4AD2882CE7500E47DB3 /* ios_video_layer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ios_video_layer.mm; sourceTree = "<group>"; };
+		7CA9C4AF2882CE8700E47DB3 /* ios_video_layer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ios_video_layer.h; sourceTree = "<group>"; };
 		7CE9B4CF2874917F00659D24 /* YGFloatOptional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGFloatOptional.h; sourceTree = "<group>"; };
 		7CE9B4D02874917F00659D24 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		7CE9B4D12874917F00659D24 /* CompactValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompactValue.h; sourceTree = "<group>"; };
@@ -182,7 +252,7 @@
 		7CE9B4EE2874917F00659D24 /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = event.cpp; sourceTree = "<group>"; };
 		7CE9B5E6287495F900659D24 /* UIStackView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIStackView.cpp; sourceTree = "<group>"; };
 		7CE9B5E7287495F900659D24 /* UIStackView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIStackView.hpp; sourceTree = "<group>"; };
-		7CE9B5E92874EA4000659D24 /* main2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main2.cpp; sourceTree = "<group>"; };
+		7CE9B5E92874EA4000659D24 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -191,6 +261,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C78EBE8287386070082D3AC /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7CA9C4642882ADD600E47DB3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -513,6 +590,60 @@
 			path = CGSize;
 			sourceTree = "<group>";
 		};
+		7C888E3F28816531009A6B95 /* TestControllers */ = {
+			isa = PBXGroup;
+			children = (
+				7C888E44288165DB009A6B95 /* ViewController */,
+			);
+			path = TestControllers;
+			sourceTree = "<group>";
+		};
+		7C888E4028816537009A6B95 /* UINavigationController */ = {
+			isa = PBXGroup;
+			children = (
+				7C888E4228816547009A6B95 /* UINavigationController.hpp */,
+				7C888E4128816547009A6B95 /* UINavigationController.cpp */,
+			);
+			path = UINavigationController;
+			sourceTree = "<group>";
+		};
+		7C888E44288165DB009A6B95 /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				7C888E46288165E9009A6B95 /* ViewController.hpp */,
+				7C888E45288165E9009A6B95 /* ViewController.cpp */,
+			);
+			path = ViewController;
+			sourceTree = "<group>";
+		};
+		7C888E48288181F8009A6B95 /* UITabBarController */ = {
+			isa = PBXGroup;
+			children = (
+				7C888E4A28818212009A6B95 /* UITabBarController.hpp */,
+				7C888E4928818212009A6B95 /* UITabBarController.cpp */,
+			);
+			path = UITabBarController;
+			sourceTree = "<group>";
+		};
+		7C888E6E28819F34009A6B95 /* Platforms */ = {
+			isa = PBXGroup;
+			children = (
+				7CA9C4682882ADD600E47DB3 /* iOS */,
+				7C888E6F28819F3F009A6B95 /* Universal */,
+			);
+			path = Platforms;
+			sourceTree = "<group>";
+		};
+		7C888E6F28819F3F009A6B95 /* Universal */ = {
+			isa = PBXGroup;
+			children = (
+				7CE9B5E92874EA4000659D24 /* main.cpp */,
+				7CA9C4972882C5EB00E47DB3 /* glfw_video.hpp */,
+				7CA960762871F8BF009E0953 /* glfw_video.cpp */,
+			);
+			path = Universal;
+			sourceTree = "<group>";
+		};
 		7CA960602871F7A2009E0953 = {
 			isa = PBXGroup;
 			children = (
@@ -526,6 +657,7 @@
 			isa = PBXGroup;
 			children = (
 				7CA960692871F7A2009E0953 /* NXKit */,
+				7CA9C4672882ADD600E47DB3 /* NXKit-iOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -533,9 +665,9 @@
 		7CA9606B2871F7A2009E0953 /* NXKit */ = {
 			isa = PBXGroup;
 			children = (
+				7C888E3F28816531009A6B95 /* TestControllers */,
 				7CA960C22871FCC2009E0953 /* NXKit.entitlements */,
 				7CA9606C2871F7A2009E0953 /* main.cpp */,
-				7CE9B5E92874EA4000659D24 /* main2.cpp */,
 				7CA960732871F839009E0953 /* lib */,
 			);
 			path = NXKit;
@@ -544,6 +676,7 @@
 		7CA960732871F839009E0953 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				7C888E6E28819F34009A6B95 /* Platforms */,
 				7CA9607A2871F8DA009E0953 /* extern */,
 				7CA960742871F841009E0953 /* Core */,
 				7C53FE572878F13D0091DEF9 /* NXKit.hpp */,
@@ -568,6 +701,8 @@
 				7C53FE4728788A930091DEF9 /* UITouch */,
 				7C78EBD22873748B0082D3AC /* UIView */,
 				7C53FE532878ED270091DEF9 /* UIViewController */,
+				7C888E4028816537009A6B95 /* UINavigationController */,
+				7C888E48288181F8009A6B95 /* UITabBarController */,
 				7C78EBDA2873748B0082D3AC /* Utils */,
 			);
 			path = Core;
@@ -577,8 +712,6 @@
 			isa = PBXGroup;
 			children = (
 				7CA960782871F8BF009E0953 /* video.hpp */,
-				7CA960772871F8BF009E0953 /* glfw_video.hpp */,
-				7CA960762871F8BF009E0953 /* glfw_video.cpp */,
 			);
 			path = Video;
 			sourceTree = "<group>";
@@ -660,6 +793,28 @@
 				7CA960BF2871FAC6009E0953 /* Application.cpp */,
 			);
 			path = Application;
+			sourceTree = "<group>";
+		};
+		7CA9C4682882ADD600E47DB3 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				7CA9C4AF2882CE8700E47DB3 /* ios_video_layer.h */,
+				7CA9C4AD2882CE7500E47DB3 /* ios_video_layer.mm */,
+				7CA9C4AC2882CA6500E47DB3 /* ios_video.hpp */,
+				7CA9C4A92882CA4800E47DB3 /* ios_video.mm */,
+				7CA9C4692882ADD600E47DB3 /* AppDelegate.h */,
+				7CA9C46A2882ADD600E47DB3 /* AppDelegate.m */,
+				7CA9C46C2882ADD600E47DB3 /* SceneDelegate.h */,
+				7CA9C46D2882ADD600E47DB3 /* SceneDelegate.m */,
+				7CA9C46F2882ADD600E47DB3 /* ViewController.h */,
+				7CA9C4702882ADD600E47DB3 /* ViewController.m */,
+				7CA9C4722882ADD600E47DB3 /* Main.storyboard */,
+				7CA9C4752882ADD700E47DB3 /* Assets.xcassets */,
+				7CA9C4772882ADD700E47DB3 /* LaunchScreen.storyboard */,
+				7CA9C47A2882ADD700E47DB3 /* Info.plist */,
+				7CA9C47B2882ADD700E47DB3 /* main.m */,
+			);
+			path = iOS;
 			sourceTree = "<group>";
 		};
 		7CE9B17F2874917E00659D24 /* yoga */ = {
@@ -760,6 +915,23 @@
 			productReference = 7CA960692871F7A2009E0953 /* NXKit */;
 			productType = "com.apple.product-type.tool";
 		};
+		7CA9C4662882ADD600E47DB3 /* NXKit-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7CA9C47F2882ADD700E47DB3 /* Build configuration list for PBXNativeTarget "NXKit-iOS" */;
+			buildPhases = (
+				7CA9C4632882ADD600E47DB3 /* Sources */,
+				7CA9C4642882ADD600E47DB3 /* Frameworks */,
+				7CA9C4652882ADD600E47DB3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "NXKit-iOS";
+			productName = "NXKit-iOS";
+			productReference = 7CA9C4672882ADD600E47DB3 /* NXKit-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -770,6 +942,9 @@
 				LastUpgradeCheck = 1400;
 				TargetAttributes = {
 					7CA960682871F7A2009E0953 = {
+						CreatedOnToolsVersion = 14.0;
+					};
+					7CA9C4662882ADD600E47DB3 = {
 						CreatedOnToolsVersion = 14.0;
 					};
 				};
@@ -788,9 +963,23 @@
 			projectRoot = "";
 			targets = (
 				7CA960682871F7A2009E0953 /* NXKit */,
+				7CA9C4662882ADD600E47DB3 /* NXKit-iOS */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7CA9C4652882ADD600E47DB3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7CA9C4792882ADD700E47DB3 /* LaunchScreen.storyboard in Resources */,
+				7CA9C4762882ADD700E47DB3 /* Assets.xcassets in Resources */,
+				7CA9C4742882ADD600E47DB3 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		7CA960652871F7A2009E0953 /* Sources */ = {
@@ -812,17 +1001,19 @@
 				7C239639287E177900973CC0 /* CGPoint.cpp in Sources */,
 				7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */,
 				7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */,
-				7C0638F42876233200621093 /* main2.cpp in Sources */,
+				7C0638F42876233200621093 /* main.cpp in Sources */,
 				7CE9B5E42874917F00659D24 /* event.cpp in Sources */,
 				7CE9B5E22874917F00659D24 /* YGConfig.cpp in Sources */,
 				7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */,
 				7C23962E287E143700973CC0 /* encoding_utf.c in Sources */,
 				7C78EBE12873748B0082D3AC /* UILabel.cpp in Sources */,
 				7C23962F287E143700973CC0 /* compat_strl.c in Sources */,
+				7C888E47288165E9009A6B95 /* ViewController.cpp in Sources */,
 				7C23963D287E2BCC00973CC0 /* CGRect.cpp in Sources */,
 				7C239630287E143700973CC0 /* features_cpu.c in Sources */,
 				7C53FE5B2878F4E60091DEF9 /* UIWindow.cpp in Sources */,
 				7C53FE4A28788AA20091DEF9 /* UITouch.cpp in Sources */,
+				7C888E4B28818212009A6B95 /* UITabBarController.cpp in Sources */,
 				7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */,
 				7C53FE562878ED350091DEF9 /* UIViewController.cpp in Sources */,
 				7CE9B5E8287495F900659D24 /* UIStackView.cpp in Sources */,
@@ -834,12 +1025,81 @@
 				7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */,
 				7C44163C28777D9B0076663D /* UIResponder.cpp in Sources */,
 				7CE9B5DC2874917F00659D24 /* Yoga.cpp in Sources */,
+				7C888E4328816547009A6B95 /* UINavigationController.cpp in Sources */,
 				7CE9B5DA2874917F00659D24 /* Utils.cpp in Sources */,
 				7CE9B5E12874917F00659D24 /* YGValue.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7CA9C4632882ADD600E47DB3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7CA9C4712882ADD600E47DB3 /* ViewController.m in Sources */,
+				7CA9C4B02882CF1100E47DB3 /* ios_video_layer.mm in Sources */,
+				7CA9C4A12882C83F00E47DB3 /* YGNodePrint.cpp in Sources */,
+				7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */,
+				7CA9C48F2882C43100E47DB3 /* GaussianBlur.cpp in Sources */,
+				7CA9C46B2882ADD600E47DB3 /* AppDelegate.m in Sources */,
+				7CA9C4912882C43100E47DB3 /* CGFloat.cpp in Sources */,
+				7CA9C48D2882C43100E47DB3 /* UITouch.cpp in Sources */,
+				7CA9C4902882C43100E47DB3 /* UIEvent.cpp in Sources */,
+				7CA9C4A62882C84400E47DB3 /* event.cpp in Sources */,
+				7CA9C4862882C43100E47DB3 /* FontManager.cpp in Sources */,
+				7CA9C4852882C41000E47DB3 /* UIBlurView.cpp in Sources */,
+				7CA9C48B2882C43100E47DB3 /* UIGestureRecognizer.cpp in Sources */,
+				7CA9C4822882C3F700E47DB3 /* Application.cpp in Sources */,
+				7CA9C48C2882C43100E47DB3 /* UIResponder.cpp in Sources */,
+				7CA9C4952882C43100E47DB3 /* UINavigationController.cpp in Sources */,
+				7CA9C4992882C83800E47DB3 /* encoding_utf.c in Sources */,
+				7CA9C49F2882C83F00E47DB3 /* YGStyle.cpp in Sources */,
+				7CA9C4A22882C83F00E47DB3 /* YGEnums.cpp in Sources */,
+				7CA9C48E2882C43100E47DB3 /* Time.cpp in Sources */,
+				7CA9C4A82882C84E00E47DB3 /* glad.c in Sources */,
+				7CA9C4872882C43100E47DB3 /* UILabel.cpp in Sources */,
+				7CA9C47C2882ADD700E47DB3 /* main.m in Sources */,
+				7CA9C4A02882C83F00E47DB3 /* YGValue.cpp in Sources */,
+				7CA9C4892882C43100E47DB3 /* UITabBarController.cpp in Sources */,
+				7CA9C4842882C40500E47DB3 /* UIView.cpp in Sources */,
+				7CA9C4A52882C84400E47DB3 /* experiments.cpp in Sources */,
+				7CA9C4A42882C83F00E47DB3 /* Yoga.cpp in Sources */,
+				7CA9C4922882C43100E47DB3 /* CGPoint.cpp in Sources */,
+				7CA9C49C2882C83F00E47DB3 /* YGConfig.cpp in Sources */,
+				7CA9C4982882C83800E47DB3 /* compat_strl.c in Sources */,
+				7CA9C4A32882C83F00E47DB3 /* YGNode.cpp in Sources */,
+				7CA9C49D2882C83F00E47DB3 /* YGLayout.cpp in Sources */,
+				7CA9C4942882C43100E47DB3 /* UIColor.cpp in Sources */,
+				7CA9C49A2882C83800E47DB3 /* features_cpu.c in Sources */,
+				7CA9C4962882C43100E47DB3 /* CGRect.cpp in Sources */,
+				7CA9C49B2882C83F00E47DB3 /* Utils.cpp in Sources */,
+				7CA9C4882882C43100E47DB3 /* UIViewController.cpp in Sources */,
+				7CA9C4932882C43100E47DB3 /* CGSize.cpp in Sources */,
+				7CA9C46E2882ADD600E47DB3 /* SceneDelegate.m in Sources */,
+				7CA9C48A2882C43100E47DB3 /* UIStackView.cpp in Sources */,
+				7CA9C49E2882C83F00E47DB3 /* log.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		7CA9C4722882ADD600E47DB3 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7CA9C4732882ADD600E47DB3 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		7CA9C4772882ADD700E47DB3 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7CA9C4782882ADD700E47DB3 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		7CA9606E2871F7A2009E0953 /* Debug */ = {
@@ -890,17 +1150,14 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					/opt/homebrew/include,
 					NXKit/lib/extern/include,
 					"NXKit/lib/extern/include/nanovg-gl",
 					NXKit/lib/extern/lib/yoga/src,
 				);
-				LIBRARY_SEARCH_PATHS = /opt/homebrew/lib;
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-lglfw";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -951,16 +1208,13 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					/opt/homebrew/include,
 					NXKit/lib/extern/include,
 					"NXKit/lib/extern/include/nanovg-gl",
 					NXKit/lib/extern/lib/yoga/src,
 				);
-				LIBRARY_SEARCH_PATHS = /opt/homebrew/lib;
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = "-lglfw";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -972,7 +1226,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = D59DHVRS87;
 				ENABLE_HARDENED_RUNTIME = YES;
+				HEADER_SEARCH_PATHS = (
+					NXKit/lib/extern/include,
+					"NXKit/lib/extern/include/nanovg-gl",
+					NXKit/lib/extern/lib/yoga/src,
+					/opt/homebrew/include,
+				);
+				LIBRARY_SEARCH_PATHS = /opt/homebrew/lib;
 				MACOSX_DEPLOYMENT_TARGET = 12.3;
+				OTHER_LDFLAGS = "-lglfw";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -984,8 +1246,85 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = D59DHVRS87;
 				ENABLE_HARDENED_RUNTIME = YES;
+				HEADER_SEARCH_PATHS = (
+					NXKit/lib/extern/include,
+					"NXKit/lib/extern/include/nanovg-gl",
+					NXKit/lib/extern/lib/yoga/src,
+					/opt/homebrew/include,
+				);
+				LIBRARY_SEARCH_PATHS = /opt/homebrew/lib;
 				MACOSX_DEPLOYMENT_TARGET = 12.3;
+				OTHER_LDFLAGS = "-lglfw";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		7CA9C47D2882ADD700E47DB3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D59DHVRS87;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "ru.xitrix.NXKit-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7CA9C47E2882ADD700E47DB3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D59DHVRS87;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "ru.xitrix.NXKit-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -1006,6 +1345,15 @@
 			buildConfigurations = (
 				7CA960712871F7A2009E0953 /* Debug */,
 				7CA960722871F7A2009E0953 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7CA9C47F2882ADD700E47DB3 /* Build configuration list for PBXNativeTarget "NXKit-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7CA9C47D2882ADD700E47DB3 /* Debug */,
+				7CA9C47E2882ADD700E47DB3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

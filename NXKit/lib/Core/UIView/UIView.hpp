@@ -22,6 +22,13 @@
 class UIViewController;
 class UIWindow;
 
+enum NavigationDirection {
+    UP,
+    RIGHT,
+    DOWN,
+    LEFT
+};
+
 class UIView: public UIResponder {
 public:
     static constexpr float AUTO = NAN;
@@ -33,6 +40,8 @@ public:
     float borderThickness = 0;
     CGPoint transformOrigin;
     CGSize transformSize = Size(1, 1);
+    bool clipToBounds = false;
+    bool isFocusable = false;
 
     UIView(Rect frame);
     UIView(float x, float y, float width, float height): UIView(Rect(x, y, width, height)) {}
@@ -51,17 +60,27 @@ public:
 
     UIView* getSuperview();
 
-    void animate(float duration, std::function<void()> animations, std::function<void()> completion = [](){});
+    UIView* getDefaultFocus();
+    UIView* getNextFocus(NavigationDirection direction);
 
     // Yoga node
     YGNode* getYGNode() { return this->ygNode; }
 
+    void setHidden(bool hidden);
+    bool isHidden();
+
     // Sizes
     Rect getBounds();
     void setPosition(Point position);
-    void setSize(Size size);
     void setGrow(float grow);
     float getGrow();
+    void setShrink(float grow);
+    float getShrink();
+    void setSize(Size size);
+    void setWidth(float width);
+    void setHeight(float height);
+    void setPercentWidth(float width);
+    void setPercentHeight(float height);
 
     // Margins
     void setMargins(float top, float right, float bottom, float left);
@@ -94,7 +113,7 @@ private:
     friend class Application;
     friend class UIViewController;
 
-    UIViewController* controller;
+    UIViewController* controller = nullptr;
     std::vector<UIView*> subviews;
     UIView* superview = nullptr;
     bool needsLayout = true;

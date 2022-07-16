@@ -36,7 +36,7 @@ static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float 
 
     Application::shared()->getVideoContext()->getContextPixels(lx, ly, lw, lh, &image);
 
-    if (image == NULL)
+    if (image == NULL || lw <= 0 || lh <= 0)
         return 0;
 
     int minim = 2;
@@ -62,9 +62,9 @@ UIBlurView::UIBlurView(Rect frame): UIView(frame) { }
 
 void UIBlurView::draw(NVGcontext *vgContext) {
     int img = getContextBluredImage(vgContext, frame.origin().x, frame.origin().y, frame.size().width, frame.size().height, blurRadius);
-    NVGpaint imgPaint = nvgImagePattern(vgContext, frame.origin().x, frame.origin().y, frame.size().width, frame.size().height, 0, img, 1);
+    NVGpaint imgPaint = nvgImagePattern(vgContext, 0, 0, frame.size().width, frame.size().height, 0, img, 1);
     nvgBeginPath(vgContext);
-    nvgRoundedRect(vgContext, frame.origin().x, frame.origin().y, frame.size().width, frame.size().height, cornerRadius);
+    nvgRoundedRect(vgContext, 0, 0, frame.size().width, frame.size().height, cornerRadius);
     nvgFillPaint(vgContext, imgPaint);
     nvgFill(vgContext);
 

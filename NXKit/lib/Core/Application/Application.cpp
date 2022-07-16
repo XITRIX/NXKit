@@ -12,13 +12,11 @@
 #include "UIWindow.hpp"
 #include "Time.hpp"
 #include "CGFloat.hpp"
+#include "video.hpp"
 
 #ifdef __SWITCH__
 #include <switch.h>
 #endif
-
-constexpr uint32_t ORIGINAL_WINDOW_WIDTH  = 1280;
-constexpr uint32_t ORIGINAL_WINDOW_HEIGHT = 720;
 
 //Application* Application::_shared = nullptr;
 Application* Application::shared() {
@@ -27,7 +25,6 @@ Application* Application::shared() {
 
 Application::Application() {
     Application::_shared = this;
-    this->videoContext = new GLFWVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
 }
 
 void Application::setKeyWindow(UIWindow *window) {
@@ -46,23 +43,7 @@ void Application::onWindowResized(unsigned width, unsigned height, float scale) 
 }
 
 bool Application::mainLoopIteration() {
-    bool isActive;
-    do {
-        isActive = !glfwGetWindowAttrib(this->videoContext->getGLFWWindow(), GLFW_ICONIFIED);
-
-        if (isActive)
-            glfwPollEvents();
-        else
-            glfwWaitEvents();
-    } while (!isActive);
-
-    bool platform = true;
-
-#ifdef __SWITCH__
-    platform = appletMainLoop();
-#endif
-
-    return !glfwWindowShouldClose(this->videoContext->getGLFWWindow()) || !platform;
+    return videoContext->mainLoopInteraction();
 }
 
 bool Application::mainLoop() {
@@ -98,6 +79,10 @@ void Application::flushContext() {
 //    nvgScale(videoContext->getNVGContext(), windowScale, windowScale);
 }
 
-GLFWVideoContext* Application::getVideoContext() {
+void Application::setVideoContext(VideoContext* videoContext) {
+    this->videoContext = videoContext;
+}
+
+VideoContext* Application::getVideoContext() {
     return videoContext;
 }

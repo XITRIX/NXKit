@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "glfw_video.hpp"
+#include "video.hpp"
 #include "UIView.hpp"
 #include "UIWindow.hpp"
 
@@ -26,7 +26,8 @@ public:
     bool mainLoop();
     void flushContext();
     void onWindowResized(unsigned width, unsigned height, float scale);
-    GLFWVideoContext* getVideoContext();
+    void setVideoContext(VideoContext*);
+    VideoContext* getVideoContext();
 private:
     inline static Application* _shared;
 
@@ -36,6 +37,6 @@ private:
 
     bool mainLoopIteration();
     void render();
-    GLFWVideoContext* videoContext = nullptr;
+    VideoContext* videoContext = nullptr;
 
 };

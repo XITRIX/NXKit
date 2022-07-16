@@ -23,7 +23,7 @@ void UIWindow::makeKeyAndVisible() {
         rootViewController->loadViewIfNeeded();
         rootViewController->viewWillAppear(false);
         addSubview(rootViewController->getView());
-        rootViewController->getView()->layoutSubviews();
+        layoutSubviews();
         rootViewController->viewDidAppear(false);
     }
 }

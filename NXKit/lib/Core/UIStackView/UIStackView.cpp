@@ -89,6 +89,14 @@ void UIStackView::setAlignItems(AlignItems alignment)
     this->setNeedsLayout();
 }
 
+void UIStackView::setPadding(float top, float right, float bottom, float left) {
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeTop, top);
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeRight, right);
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeBottom, bottom);
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeLeft, left);
+    this->setNeedsLayout();
+}
+
 void UIStackView::setPaddingTop(float top) {
     YGNodeStyleSetPadding(this->ygNode, YGEdgeTop, top);
     this->setNeedsLayout();

@@ -39,6 +39,7 @@ class GLFWVideoContext : public VideoContext
     void disableScreenDimming(bool disable) override;
     void getContextPixels(int x, int y, int w, int h, unsigned char** pixels) override;
     float getScaleFactor() override;
+    bool mainLoopInteraction() override;
 
     GLFWwindow* getGLFWWindow();
 

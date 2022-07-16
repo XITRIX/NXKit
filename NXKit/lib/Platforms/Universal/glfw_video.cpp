@@ -171,6 +171,26 @@ void GLFWVideoContext::resetState()
     glDisable(GL_STENCIL_TEST);
 }
 
+bool GLFWVideoContext::mainLoopInteraction() {
+    bool isActive;
+    do {
+        isActive = !glfwGetWindowAttrib(getGLFWWindow(), GLFW_ICONIFIED);
+
+        if (isActive)
+            glfwPollEvents();
+        else
+            glfwWaitEvents();
+    } while (!isActive);
+
+    bool platform = true;
+
+#ifdef __SWITCH__
+    platform = appletMainLoop();
+#endif
+
+    return !glfwWindowShouldClose(getGLFWWindow()) || !platform;
+}
+
 void GLFWVideoContext::disableScreenDimming(bool disable)
 {
 #ifdef __SWITCH__

@@ -49,6 +49,8 @@ class VideoContext
 
     virtual float getScaleFactor() = 0;
 
+    virtual bool mainLoopInteraction() = 0;
+
     /**
      * Can be called by the application to reset the graphics
      * state, in case there is a need to use the graphics API

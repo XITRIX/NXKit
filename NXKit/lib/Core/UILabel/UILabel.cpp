@@ -117,7 +117,8 @@ YGSize UILabel::labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widt
             }
             else
             {
-                computeLabelHeight(label, width, widthMode, height, heightMode, &size, bounds);
+                size.height = height;
+//                computeLabelHeight(label, width, widthMode, height, heightMode, &size, bounds);
             }
         }
         // Exactly mode, see if we have enough space
@@ -177,8 +178,8 @@ UILabel::UILabel(std::string text) : UIView(),
 }
 
 void UILabel::draw(NVGcontext *vg) {
-    int x = frame.origin().x;
-    int y = frame.origin().y;
+    int x = 0;
+    int y = 0;
     int width = frame.size().width;
     int height = frame.size().height;
 

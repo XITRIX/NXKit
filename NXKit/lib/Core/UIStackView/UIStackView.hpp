@@ -49,6 +49,7 @@ public:
     void setJustifyContent(JustifyContent justify);
     void setAlignItems(AlignItems alignment);
 
+    void setPadding(float top, float right, float bottom, float left);
     void setPaddingTop(float top);
     void setPaddingLeft(float left);
     void setPaddingRight(float right);

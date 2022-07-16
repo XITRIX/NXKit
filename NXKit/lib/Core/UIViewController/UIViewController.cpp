@@ -26,14 +26,14 @@ void UIViewController::loadView() {
 }
 
 void UIViewController::loadViewIfNeeded() {
-    if (view == nullptr) {
+    if (!view) {
         loadView();
     }
 }
 
 UIResponder* UIViewController::getNext() {
-    if (typeid(view->getSuperview()) == typeid(UIWindow)) {
-        return view->getSuperview();
-    }
+//    if (typeid(view->getSuperview()) == typeid(UIWindow)) {
+//        return view->getSuperview();
+//    }
     return nullptr;
 }
