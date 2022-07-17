@@ -26,14 +26,18 @@ public:
     bool mainLoop();
     void flushContext();
     void onWindowResized(unsigned width, unsigned height, float scale);
-    void setVideoContext(VideoContext*);
     VideoContext* getVideoContext();
+    std::string getResourcesPath() { return resourcesPath; }
+
+    void setResourcesPath(std::string resourcesPath) { this->resourcesPath = resourcesPath; }
+    void setVideoContext(VideoContext*);
 private:
     inline static Application* _shared;
 
     UIWindow* keyWindow;
     unsigned windowWidth, windowHeight;
     float windowScale;
+    std::string resourcesPath;
 
     bool mainLoopIteration();
     void render();

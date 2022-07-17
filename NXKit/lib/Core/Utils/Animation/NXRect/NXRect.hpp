@@ -17,7 +17,7 @@
 #pragma once
 
 #include "Geometry.hpp"
-#include "tweeny.h"
+#include <tweeny/tweeny.h>
 
 #include "Time.hpp"
 
@@ -35,13 +35,13 @@ using EasingFunction = tweeny::easing::enumerated;
 //
 // An animatable has overloads for float conversion, comparison (==) and assignment operator (=) to allow
 // basic usage as a simple float. Assignment operator is a shortcut to the reset() method.
-class CGRect : public FiniteTicking
+class NXRect : public FiniteTicking
 {
   public:
     /**
      * Creates an animatable with the given initial value.
      */
-    CGRect(Rect value = Rect());
+    NXRect(Rect value = Rect());
 
     /**
      * Returns the current animatable value.

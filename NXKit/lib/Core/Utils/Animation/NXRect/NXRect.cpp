@@ -14,86 +14,79 @@
     limitations under the License.
 */
 
-#include "CGSize.hpp"
+#include "NXRect.hpp"
 #include <vector>
 
-CGSize::CGSize(Size value)
+NXRect::NXRect(Rect value)
     : currentValue(value)
 {
 }
 
-void CGSize::onReset()
+void NXRect::onReset()
 {
-    this->tween = tweeny::tween<float, float>::from(this->currentValue.width, this->currentValue.height);
+    this->tween = tweeny::tween<float, float, float, float>::from(this->currentValue.origin.x, this->currentValue.origin.y, this->currentValue.size.width, this->currentValue.size.height);
 }
 
-void CGSize::reset(Size initialValue)
+void NXRect::reset(Rect initialValue)
 {
     this->currentValue = initialValue;
     FiniteTicking::reset();
 }
 
-void CGSize::reset()
+void NXRect::reset()
 {
     FiniteTicking::reset();
 }
 
-void CGSize::onRewind()
+void NXRect::onRewind()
 {
     auto seek = this->tween.seek(0);
-    this->currentValue = Size(seek[0], seek[1]);
+    this->currentValue = Rect(seek[0], seek[1], seek[2], seek[3]);
 }
 
-void CGSize::addStep(Size targetValue, int32_t duration, EasingFunction easing)
+void NXRect::addStep(Rect targetValue, int32_t duration, EasingFunction easing)
 {
-    this->tween.to(targetValue.width, targetValue.height).during(duration).via(easing);
+    this->tween.to(targetValue.origin.x, targetValue.origin.y, targetValue.size.width, targetValue.size.height).during(duration).via(easing);
 }
 
-float CGSize::getProgress()
+float NXRect::getProgress()
 {
     return this->tween.progress();
 }
 
-bool CGSize::onUpdate(retro_time_t delta)
+bool NXRect::onUpdate(retro_time_t delta)
 {
     // int32_t for stepping works as long as the app goes faster than 0.00001396983 FPS
     // (in which case the delta for a frame wraps in an int32_t)
     auto step = this->tween.step((int32_t)delta);
-    this->currentValue = Size(step[0], step[1]);
+    this->currentValue = Rect(step[0], step[1], step[2], step[3]);
     return this->tween.progress() < 1.0f;
 }
 
-Size CGSize::getValue()
+Rect NXRect::getValue()
 {
     return this->currentValue;
 }
 
-float CGSize::width()
-{
-    return this->currentValue.width;
-}
+Point NXRect::origin() { return currentValue.origin; }
+Size NXRect::size() { return currentValue.size; }
 
-float CGSize::height()
-{
-    return this->currentValue.height;
-}
-
-CGSize::operator Size() const
+NXRect::operator Rect() const
 {
     return this->currentValue;
 }
 
-CGSize::operator Size()
+NXRect::operator Rect()
 {
     return this->currentValue;
 }
 
-void CGSize::operator=(const Size value)
+void NXRect::operator=(const Rect value)
 {
     this->reset(value);
 }
 
-bool CGSize::operator==(const Size value)
+bool NXRect::operator==(const Rect value)
 {
     return this->currentValue == value;
 }

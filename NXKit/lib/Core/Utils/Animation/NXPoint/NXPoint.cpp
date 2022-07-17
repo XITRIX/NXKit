@@ -14,47 +14,47 @@
     limitations under the License.
 */
 
-#include "CGPoint.hpp"
+#include "NXPoint.hpp"
 #include <vector>
 
-CGPoint::CGPoint(Point value)
+NXPoint::NXPoint(Point value)
     : currentValue(value)
 {
 }
 
-void CGPoint::onReset()
+void NXPoint::onReset()
 {
     this->tween = tweeny::tween<float, float>::from(this->currentValue.x, this->currentValue.y);
 }
 
-void CGPoint::reset(Point initialValue)
+void NXPoint::reset(Point initialValue)
 {
     this->currentValue = initialValue;
     FiniteTicking::reset();
 }
 
-void CGPoint::reset()
+void NXPoint::reset()
 {
     FiniteTicking::reset();
 }
 
-void CGPoint::onRewind()
+void NXPoint::onRewind()
 {
     auto seek = this->tween.seek(0);
     this->currentValue = Point(seek[0], seek[1]);
 }
 
-void CGPoint::addStep(Point targetValue, int32_t duration, EasingFunction easing)
+void NXPoint::addStep(Point targetValue, int32_t duration, EasingFunction easing)
 {
     this->tween.to(targetValue.x, targetValue.y).during(duration).via(easing);
 }
 
-float CGPoint::getProgress()
+float NXPoint::getProgress()
 {
     return this->tween.progress();
 }
 
-bool CGPoint::onUpdate(retro_time_t delta)
+bool NXPoint::onUpdate(retro_time_t delta)
 {
     // int32_t for stepping works as long as the app goes faster than 0.00001396983 FPS
     // (in which case the delta for a frame wraps in an int32_t)
@@ -63,37 +63,37 @@ bool CGPoint::onUpdate(retro_time_t delta)
     return this->tween.progress() < 1.0f;
 }
 
-Point CGPoint::getValue()
+Point NXPoint::getValue()
 {
     return this->currentValue;
 }
 
-float CGPoint::x()
+float NXPoint::x()
 {
     return this->currentValue.x;
 }
 
-float CGPoint::y()
+float NXPoint::y()
 {
     return this->currentValue.y;
 }
 
-CGPoint::operator Point() const
+NXPoint::operator Point() const
 {
     return this->currentValue;
 }
 
-CGPoint::operator Point()
+NXPoint::operator Point()
 {
     return this->currentValue;
 }
 
-void CGPoint::operator=(const Point value)
+void NXPoint::operator=(const Point value)
 {
     this->reset(value);
 }
 
-bool CGPoint::operator==(const Point value)
+bool NXPoint::operator==(const Point value)
 {
     return this->currentValue == value;
 }

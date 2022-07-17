@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <UIKit/UIKit.h>
 #include "video.hpp"
 
 #import <OpenGLES/ES2/glext.h>
@@ -31,6 +30,10 @@ class IOSVideoContext : public VideoContext
     void getContextPixels(int x, int y, int w, int h, unsigned char** pixels) override;
     float getScaleFactor() override;
     bool mainLoopInteraction() override;
+
+    void setScale(double width, double height, double scale);
+    void applicationLoop();
   private:
+    double scaleFactor = 1;
     NVGcontext* nvgContext = nullptr;
 };

@@ -20,7 +20,7 @@
 
 #define GLM_FORCE_PURE
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glad/glad.h>
+//#include <glad/glad.h>
 
 //#include <glm/gtc/matrix_transform.hpp>
 //#include <glm/gtc/type_ptr.hpp>
@@ -33,7 +33,7 @@
 #define NANOVG_GLES2_IMPLEMENTATION
 #import <OpenGLES/ES2/glext.h>
 
-//#include "Application.hpp"
+#include "Application.hpp"
 
 //static void glfwWindowFramebufferSizeCallback(GLFWwindow* window, int width, int height)
 //{
@@ -49,15 +49,29 @@
 //    glfwGetWindowSize(window, &wWidth, &wHeight);
 //    glfwGetFramebufferSize(window, &fWidth, &fHeight);
 //
-//    Application::shared()->onWindowResized(static_cast<unsigned>(wWidth), static_cast<unsigned>(wHeight), (float)fWidth / (float)wWidth);
+////    Application::shared()->onWindowResized(static_cast<unsigned>(wWidth), static_cast<unsigned>(wHeight), (float)fWidth / (float)wWidth);
 //}
+
+void IOSVideoContext::setScale(double width, double height, double scale) {
+    
+    static double swidth = -1;
+    static double sheight = -1;
+
+    if (swidth != width || sheight != height || scaleFactor != scale) {
+        scaleFactor = scale;
+        swidth = width;
+        sheight = height;
+
+        Application::shared()->onWindowResized(static_cast<unsigned>(width), static_cast<unsigned>(height), (float) scale);
+    }
+}
 
 IOSVideoContext::IOSVideoContext(NVGcontext* nvgContext):
     nvgContext(nvgContext)
 { }
 
 float IOSVideoContext::getScaleFactor() {
-    return 2;
+    return scaleFactor;
 }
 
 void IOSVideoContext::beginFrame()
@@ -105,6 +119,10 @@ bool IOSVideoContext::mainLoopInteraction() {
 
 void IOSVideoContext::disableScreenDimming(bool disable)
 {
+}
+
+void IOSVideoContext::applicationLoop() {
+    Application::shared()->mainLoop();
 }
 
 static void flipHorizontal(unsigned char* image, int w, int h, int stride) {

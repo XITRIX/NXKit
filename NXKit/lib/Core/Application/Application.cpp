@@ -11,7 +11,7 @@
 #include "UIView.hpp"
 #include "UIWindow.hpp"
 #include "Time.hpp"
-#include "CGFloat.hpp"
+#include "NXFloat.hpp"
 #include "video.hpp"
 
 #ifdef __SWITCH__

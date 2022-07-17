@@ -8,9 +8,9 @@
 #pragma once
 
 #include "Geometry.hpp"
-#include "CGPoint.hpp"
-#include "CGSize.hpp"
-#include "CGRect.hpp"
+#include "NXPoint.hpp"
+#include "NXSize.hpp"
+#include "NXRect.hpp"
 #include "UIColor.hpp"
 #include "UIResponder.hpp"
 #include "tweeny/tweeny.h"
@@ -33,13 +33,13 @@ class UIView: public UIResponder {
 public:
     static constexpr float AUTO = NAN;
 
-    CGRect frame;
+    NXRect frame;
     UIColor backgroundColor;
     UIColor borderColor = UIColor(0, 0, 0);
     float cornerRadius = 0;
     float borderThickness = 0;
-    CGPoint transformOrigin;
-    CGSize transformSize = Size(1, 1);
+    NXPoint transformOrigin;
+    NXSize transformSize = Size(1, 1);
     bool clipToBounds = false;
     bool isFocusable = false;
 

@@ -16,8 +16,7 @@
 
 #pragma once
 
-#include "Geometry.hpp"
-#include "tweeny.h"
+#include <tweeny/tweeny.h>
 
 #include "Time.hpp"
 
@@ -35,20 +34,18 @@ using EasingFunction = tweeny::easing::enumerated;
 //
 // An animatable has overloads for float conversion, comparison (==) and assignment operator (=) to allow
 // basic usage as a simple float. Assignment operator is a shortcut to the reset() method.
-class CGSize : public FiniteTicking
+class NXFloat : public FiniteTicking
 {
   public:
     /**
      * Creates an animatable with the given initial value.
      */
-    CGSize(Size value = Size());
+    NXFloat(float value = 0.0f);
 
     /**
      * Returns the current animatable value.
      */
-    Size getValue();
-    float width();
-    float height();
+    float getValue();
 
     /**
      * Stops and resets the animation, going back to the given initial value.
@@ -56,7 +53,7 @@ class CGSize : public FiniteTicking
      * If an animation was already ongoing for that animatable, its end callback
      * will be called.
      */
-    void reset(Size initialValue);
+    void reset(float initialValue);
 
     /**
      * Stops and resets the animation. The value will stay where it's at.
@@ -75,17 +72,17 @@ class CGSize : public FiniteTicking
      * Duration is int32_t due to internal limitations, so a step cannot last for longer than 2 147 483 647ms.
      * The sum of the duration of all steps cannot exceed 71582min.
      */
-    void addStep(Size targetValue, int32_t duration, EasingFunction easing = EasingFunction::linear);
+    void addStep(float targetValue, int32_t duration, EasingFunction easing = EasingFunction::linear);
 
     /**
      * Returns the progress of the animation between 0.0f and 1.0f.
      */
     float getProgress();
 
-    operator Size() const;
-    operator Size();
-    void operator=(const Size value);
-    bool operator==(const Size value);
+    operator float() const;
+    operator float();
+    void operator=(const float value);
+    bool operator==(const float value);
 
   protected:
     bool onUpdate(Time delta) override;
@@ -94,6 +91,9 @@ class CGSize : public FiniteTicking
     void onRewind() override;
 
   private:
-    Size currentValue = Size();
-    tweeny::tween<float, float> tween;
+    float currentValue = 0.0f;
+    tweeny::tween<float> tween;
 };
+
+void updateHighlightAnimation();
+void getHighlightAnimation(float* gradient_x, float* gradient_y, float* color);

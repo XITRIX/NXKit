@@ -14,46 +14,46 @@
     limitations under the License.
 */
 
-#include "CGFloat.hpp"
+#include "NXFloat.hpp"
 #include <vector>
 
-CGFloat::CGFloat(float value)
+NXFloat::NXFloat(float value)
     : currentValue(value)
 {
 }
 
-void CGFloat::onReset()
+void NXFloat::onReset()
 {
     this->tween = tweeny::tween<float>::from(this->currentValue);
 }
 
-void CGFloat::reset(float initialValue)
+void NXFloat::reset(float initialValue)
 {
     this->currentValue = initialValue;
     FiniteTicking::reset();
 }
 
-void CGFloat::reset()
+void NXFloat::reset()
 {
     FiniteTicking::reset();
 }
 
-void CGFloat::onRewind()
+void NXFloat::onRewind()
 {
     this->currentValue = this->tween.seek(0);
 }
 
-void CGFloat::addStep(float targetValue, int32_t duration, EasingFunction easing)
+void NXFloat::addStep(float targetValue, int32_t duration, EasingFunction easing)
 {
     this->tween.to(targetValue).during(duration).via(easing);
 }
 
-float CGFloat::getProgress()
+float NXFloat::getProgress()
 {
     return this->tween.progress();
 }
 
-bool CGFloat::onUpdate(retro_time_t delta)
+bool NXFloat::onUpdate(retro_time_t delta)
 {
     // int32_t for stepping works as long as the app goes faster than 0.00001396983 FPS
     // (in which case the delta for a frame wraps in an int32_t)
@@ -61,27 +61,27 @@ bool CGFloat::onUpdate(retro_time_t delta)
     return this->tween.progress() < 1.0f;
 }
 
-float CGFloat::getValue()
+float NXFloat::getValue()
 {
     return this->currentValue;
 }
 
-CGFloat::operator float() const
+NXFloat::operator float() const
 {
     return this->currentValue;
 }
 
-CGFloat::operator float()
+NXFloat::operator float()
 {
     return this->currentValue;
 }
 
-void CGFloat::operator=(const float value)
+void NXFloat::operator=(const float value)
 {
     this->reset(value);
 }
 
-bool CGFloat::operator==(const float value)
+bool NXFloat::operator==(const float value)
 {
     return this->currentValue == value;
 }

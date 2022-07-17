@@ -18,5 +18,6 @@ FontManager* FontManager::shared() {
 }
 
 FontManager::FontManager() {
-    primaryFont = nvgCreateFont(Application::shared()->getVideoContext()->getNVGContext(), "Switch", "Fonts/switch_font.ttf");
+    auto path = Application::shared()->getResourcesPath() + "Fonts/switch_font.ttf";
+    primaryFont = nvgCreateFont(Application::shared()->getVideoContext()->getNVGContext(), "Switch", path.c_str());
 }
