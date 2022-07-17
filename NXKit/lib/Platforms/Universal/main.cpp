@@ -22,14 +22,7 @@ int main(int argc, const char * argv[]) {
     Application* application = new Application();
     auto videoContext = new GLFWVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
     application->setVideoContext(videoContext);
-
-//    RootView* root = new RootView();
-    UIWindow* window = new UIWindow();
-//    ViewController* rootVC = new ViewController();
-    UITabBarController* tabsVC = new UITabBarController();
-    UINavigationController* vc = new UINavigationController(tabsVC);
-    window->setRootViewController(vc);
-    window->makeKeyAndVisible();
+    application->getDelegate()->applicationDidFinishLaunching();
 
     while (application->mainLoop());
 

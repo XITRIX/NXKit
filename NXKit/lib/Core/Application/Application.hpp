@@ -10,6 +10,7 @@
 #include "video.hpp"
 #include "UIView.hpp"
 #include "UIWindow.hpp"
+#include "UIAppDelegate.hpp"
 
 class UIView;
 class UIWindow;
@@ -31,6 +32,8 @@ public:
 
     void setResourcesPath(std::string resourcesPath) { this->resourcesPath = resourcesPath; }
     void setVideoContext(VideoContext*);
+
+    UIAppDelegate* getDelegate() { return delegate; }
 private:
     inline static Application* _shared;
 
@@ -38,6 +41,7 @@ private:
     unsigned windowWidth, windowHeight;
     float windowScale;
     std::string resourcesPath;
+    UIAppDelegate* delegate = nullptr;
 
     bool mainLoopIteration();
     void render();

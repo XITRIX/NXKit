@@ -24,6 +24,7 @@ Application* Application::shared() {
 }
 
 Application::Application() {
+    delegate = new UIAppDelegate();
     Application::_shared = this;
 }
 

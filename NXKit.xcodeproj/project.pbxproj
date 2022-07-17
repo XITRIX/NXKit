@@ -18,6 +18,8 @@
 		7C239639287E177900973CC0 /* NXPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239637287E177900973CC0 /* NXPoint.cpp */; };
 		7C23963D287E2BCC00973CC0 /* NXRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C23963B287E2BCC00973CC0 /* NXRect.cpp */; };
 		7C44163C28777D9B0076663D /* UIResponder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C44163A28777D9B0076663D /* UIResponder.cpp */; };
+		7C4630552884325800DF15F3 /* UIAppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4630532884325800DF15F3 /* UIAppDelegate.cpp */; };
+		7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4630532884325800DF15F3 /* UIAppDelegate.cpp */; };
 		7C53FE4A28788AA20091DEF9 /* UITouch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4828788AA20091DEF9 /* UITouch.cpp */; };
 		7C53FE4E28788D8E0091DEF9 /* UIGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4C28788D8E0091DEF9 /* UIGestureRecognizer.cpp */; };
 		7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE502878EA220091DEF9 /* UIEvent.cpp */; };
@@ -158,6 +160,8 @@
 		7C35D1C4287CD0E8005C0A7F /* tweeny.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tweeny.h; sourceTree = "<group>"; };
 		7C44163A28777D9B0076663D /* UIResponder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIResponder.cpp; sourceTree = "<group>"; };
 		7C44163B28777D9B0076663D /* UIResponder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIResponder.hpp; sourceTree = "<group>"; };
+		7C4630532884325800DF15F3 /* UIAppDelegate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIAppDelegate.cpp; sourceTree = "<group>"; };
+		7C4630542884325800DF15F3 /* UIAppDelegate.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIAppDelegate.hpp; sourceTree = "<group>"; };
 		7C53FE4828788AA20091DEF9 /* UITouch.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITouch.cpp; sourceTree = "<group>"; };
 		7C53FE4928788AA20091DEF9 /* UITouch.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITouch.hpp; sourceTree = "<group>"; };
 		7C53FE4C28788D8E0091DEF9 /* UIGestureRecognizer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIGestureRecognizer.cpp; sourceTree = "<group>"; };
@@ -191,9 +195,8 @@
 		7C888E4A28818212009A6B95 /* UITabBarController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITabBarController.hpp; sourceTree = "<group>"; };
 		7CA3897328835AA1005C7A91 /* nx_application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nx_application.h; sourceTree = "<group>"; };
 		7CA3897428835AB8005C7A91 /* nx_application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = nx_application.cpp; sourceTree = "<group>"; };
-		7CA3898528836343005C7A91 /* Fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Fonts; path = resources/Fonts; sourceTree = SOURCE_ROOT; };
+		7CA3898528836343005C7A91 /* Fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; name = Fonts; path = resources/Fonts; sourceTree = SOURCE_ROOT; };
 		7CA960692871F7A2009E0953 /* NXKit */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NXKit; sourceTree = BUILT_PRODUCTS_DIR; };
-		7CA9606C2871F7A2009E0953 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		7CA960762871F8BF009E0953 /* glfw_video.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glfw_video.cpp; sourceTree = "<group>"; };
 		7CA960782871F8BF009E0953 /* video.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = video.hpp; sourceTree = "<group>"; };
 		7CA960872871F993009E0953 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
@@ -461,6 +464,14 @@
 			path = UIResponder;
 			sourceTree = "<group>";
 		};
+		7C4630562884330500DF15F3 /* UIAppDelegate */ = {
+			isa = PBXGroup;
+			children = (
+				7C4630542884325800DF15F3 /* UIAppDelegate.hpp */,
+			);
+			path = UIAppDelegate;
+			sourceTree = "<group>";
+		};
 		7C53FE4728788A930091DEF9 /* UITouch */ = {
 			isa = PBXGroup;
 			children = (
@@ -680,9 +691,9 @@
 		7CA9606B2871F7A2009E0953 /* NXKit */ = {
 			isa = PBXGroup;
 			children = (
+				7C4630532884325800DF15F3 /* UIAppDelegate.cpp */,
 				7C888E3F28816531009A6B95 /* TestControllers */,
 				7CA960C22871FCC2009E0953 /* NXKit.entitlements */,
-				7CA9606C2871F7A2009E0953 /* main.cpp */,
 				7CA960732871F839009E0953 /* lib */,
 			);
 			path = NXKit;
@@ -704,6 +715,7 @@
 			children = (
 				7C53FE582878F4DB0091DEF9 /* UIWindow */,
 				7CA960BE2871FABA009E0953 /* Application */,
+				7C4630562884330500DF15F3 /* UIAppDelegate */,
 				7C78EBCB2873743C0082D3AC /* Driver */,
 				7C78EBD52873748B0082D3AC /* Geometry */,
 				7C78EBCC2873748B0082D3AC /* UIBlurView */,
@@ -1041,6 +1053,7 @@
 				7CE9B5DD2874917F00659D24 /* YGStyle.cpp in Sources */,
 				7CA960B12871F993009E0953 /* nanovg.c in Sources */,
 				7CA960B22871F993009E0953 /* glad.c in Sources */,
+				7C4630552884325800DF15F3 /* UIAppDelegate.cpp in Sources */,
 				7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */,
 				7C44163C28777D9B0076663D /* UIResponder.cpp in Sources */,
 				7CE9B5DC2874917F00659D24 /* Yoga.cpp in Sources */,
@@ -1056,6 +1069,7 @@
 			files = (
 				7CA9C4712882ADD600E47DB3 /* GLViewController.m in Sources */,
 				7CA9C4A12882C83F00E47DB3 /* YGNodePrint.cpp in Sources */,
+				7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */,
 				7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */,
 				7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */,
 				7CA9C48F2882C43100E47DB3 /* GaussianBlur.cpp in Sources */,

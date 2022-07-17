@@ -17,13 +17,7 @@ void makeApplication(VideoContext* context, const char* path) {
     auto application = new Application();
     application->setVideoContext(context);
     application->setResourcesPath(std::string(path) + "/");
-
-    UIWindow* window = new UIWindow();
-//    ViewController* rootVC = new ViewController();
-    UITabBarController* tabsVC = new UITabBarController();
-    UINavigationController* vc = new UINavigationController(tabsVC);
-    window->setRootViewController(vc);
-    window->makeKeyAndVisible();
+    application->getDelegate()->applicationDidFinishLaunching();
 }
 
 void applicationLoop() {
