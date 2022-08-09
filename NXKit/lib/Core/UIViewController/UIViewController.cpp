@@ -10,6 +10,8 @@
 
 #include <typeinfo>
 
+namespace NXKit {
+
 UIView* UIViewController::getView() {
     loadViewIfNeeded();
     return view;
@@ -32,8 +34,10 @@ void UIViewController::loadViewIfNeeded() {
 }
 
 UIResponder* UIViewController::getNext() {
-//    if (typeid(view->getSuperview()) == typeid(UIWindow)) {
-//        return view->getSuperview();
-//    }
+    //    if (typeid(view->getSuperview()) == typeid(UIWindow)) {
+    //        return view->getSuperview();
+    //    }
     return nullptr;
+}
+
 }

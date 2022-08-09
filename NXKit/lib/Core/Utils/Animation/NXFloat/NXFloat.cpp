@@ -17,8 +17,10 @@
 #include "NXFloat.hpp"
 #include <vector>
 
+namespace NXKit {
+
 NXFloat::NXFloat(float value)
-    : currentValue(value)
+: currentValue(value)
 {
 }
 
@@ -112,4 +114,6 @@ void getHighlightAnimation(float* gradientX, float* gradientY, float* color)
 
     if (color)
         *color = (float)highlightColor;
+}
+
 }

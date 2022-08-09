@@ -13,6 +13,8 @@
 
 #import "video.hpp"
 
+using namespace NXKit;
+
 void makeApplication(VideoContext* context, const char* path) {
     auto application = new Application();
     application->setVideoContext(context);

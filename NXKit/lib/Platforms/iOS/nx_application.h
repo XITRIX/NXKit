@@ -9,6 +9,6 @@
 
 #import "video.hpp"
 
-void makeApplication(VideoContext* context, const char* path);
+void makeApplication(NXKit::VideoContext* context, const char* path);
 
 void applicationLoop();

@@ -7,6 +7,10 @@
 
 #include "UIEvent.hpp"
 
+namespace NXKit {
+
 UIEvent::UIEvent(UITouch* touch) {
     allTouches.push_back(touch);
+}
+
 }

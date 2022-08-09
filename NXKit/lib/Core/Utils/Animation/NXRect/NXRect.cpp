@@ -17,8 +17,10 @@
 #include "NXRect.hpp"
 #include <vector>
 
+namespace NXKit {
+
 NXRect::NXRect(Rect value)
-    : currentValue(value)
+: currentValue(value)
 {
 }
 
@@ -89,4 +91,6 @@ void NXRect::operator=(const Rect value)
 bool NXRect::operator==(const Rect value)
 {
     return this->currentValue == value;
+}
+
 }

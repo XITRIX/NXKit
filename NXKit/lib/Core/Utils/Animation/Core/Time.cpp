@@ -16,6 +16,8 @@
 
 #include "Time.hpp"
 
+namespace NXKit {
+
 void Ticking::updateTickings()
 {
     // Update time
@@ -109,4 +111,6 @@ void FiniteTicking::reset()
 {
     this->stop();
     this->onReset();
+}
+
 }

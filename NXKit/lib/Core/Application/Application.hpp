@@ -12,6 +12,8 @@
 #include "UIWindow.hpp"
 #include "UIAppDelegate.hpp"
 
+namespace NXKit {
+
 class UIView;
 class UIWindow;
 
@@ -33,18 +35,25 @@ public:
     void setResourcesPath(std::string resourcesPath) { this->resourcesPath = resourcesPath; }
     void setVideoContext(VideoContext*);
 
+    UIView* getFocus();
+    void setFocus(UIView* view);
+
     UIAppDelegate* getDelegate() { return delegate; }
 private:
     inline static Application* _shared;
 
-    UIWindow* keyWindow;
+    VideoContext* videoContext = nullptr;
+    UIAppDelegate* delegate = nullptr;
+    UIWindow* keyWindow = nullptr;
+    UIView* focus = nullptr;
+
     unsigned windowWidth, windowHeight;
     float windowScale;
     std::string resourcesPath;
-    UIAppDelegate* delegate = nullptr;
 
     bool mainLoopIteration();
     void render();
-    VideoContext* videoContext = nullptr;
 
 };
+
+}

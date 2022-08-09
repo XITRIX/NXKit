@@ -7,9 +7,11 @@
 
 #include "UIStackView.hpp"
 
+namespace NXKit {
+
 UIStackView::UIStackView(Axis axis): UIView() {
     setAxis(axis);
-//    YGNodeStyleSetJustifyContent(this->ygNode, YGJustify::YGJustifyCenter);
+    //    YGNodeStyleSetJustifyContent(this->ygNode, YGJustify::YGJustifyCenter);
 }
 
 void UIStackView::addSubview(UIView* view) {
@@ -52,7 +54,7 @@ void UIStackView::setJustifyContent(JustifyContent justify)
             YGNodeStyleSetJustifyContent(this->ygNode, YGJustifySpaceEvenly);
             break;
     }
-
+    
     this->setNeedsLayout();
 }
 
@@ -85,7 +87,7 @@ void UIStackView::setAlignItems(AlignItems alignment)
             YGNodeStyleSetAlignItems(this->ygNode, YGAlignSpaceAround);
             break;
     }
-
+    
     this->setNeedsLayout();
 }
 
@@ -115,4 +117,6 @@ void UIStackView::setPaddingRight(float right) {
 void UIStackView::setPaddingBottom(float bottom) {
     YGNodeStyleSetPadding(this->ygNode, YGEdgeBottom, bottom);
     this->setNeedsLayout();
+}
+
 }

@@ -7,7 +7,11 @@
 
 #pragma once
 
+namespace NXKit {
+
 class UIAppDelegate {
 public:
     void applicationDidFinishLaunching();
 };
+
+}

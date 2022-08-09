@@ -16,6 +16,11 @@
 
 #import "nx_application.h"
 
+
+#include "IOSInputManager.hpp"
+
+using namespace NXKit;
+
 @interface IOSVideoLayer () {
     NVGcontext* vg;
 }
@@ -52,6 +57,12 @@
 
 - (void)applicationLoop {
     _nxcontext->applicationLoop();
+}
+
+- (void)setKey:(int)key state:(bool)state
+{
+    IOSInputManager* manager = (IOSInputManager*) InputManager::shared();
+    manager->setKey((BrlsKeyboardScancode) key, state);
 }
 
 @end

@@ -9,6 +9,8 @@
 
 #include "UIView.hpp"
 
+namespace NXKit {
+
 enum class Axis {
     HORIZONTAL,
     VERTICAL,
@@ -57,3 +59,5 @@ public:
 private:
     Axis axis = Axis::VERTICAL;
 };
+
+}

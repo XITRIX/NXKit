@@ -21,6 +21,8 @@
 
 #include "Time.hpp"
 
+namespace NXKit {
+
 using EasingFunction = tweeny::easing::enumerated;
 
 // An animatable is a float which value can be animated from an initial value to a target value,
@@ -37,7 +39,7 @@ using EasingFunction = tweeny::easing::enumerated;
 // basic usage as a simple float. Assignment operator is a shortcut to the reset() method.
 class NXRect : public FiniteTicking
 {
-  public:
+public:
     /**
      * Creates an animatable with the given initial value.
      */
@@ -87,13 +89,15 @@ class NXRect : public FiniteTicking
     void operator=(const Rect value);
     bool operator==(const Rect value);
 
-  protected:
+protected:
     bool onUpdate(Time delta) override;
 
     void onReset() override;
     void onRewind() override;
 
-  private:
+private:
     Rect currentValue = Rect();
     tweeny::tween<float, float, float, float> tween;
 };
+
+}

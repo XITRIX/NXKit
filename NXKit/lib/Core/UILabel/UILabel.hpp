@@ -10,6 +10,8 @@
 #include "UIView.hpp"
 #include <string>
 
+namespace NXKit {
+
 enum class HorizontalAlign {
     LEFT,
     CENTER,
@@ -69,3 +71,5 @@ private:
     static void computeLabelHeight(UILabel* label, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode, YGSize* size, float* originalBounds);
     static YGSize labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode);
 };
+
+}

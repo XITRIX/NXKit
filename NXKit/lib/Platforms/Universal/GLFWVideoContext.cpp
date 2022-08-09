@@ -16,18 +16,11 @@
 
 //#include <borealis/core/application.hpp>
 //#include <borealis/core/logger.hpp>
-#include "glfw_video.hpp"
+#include "GLFWVideoContext.hpp"
 
 #define GLM_FORCE_PURE
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glad/glad.h>
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/rotate_vector.hpp>
-#include <glm/mat4x4.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
 
 // nanovg implementation
 #define NANOVG_GL3_IMPLEMENTATION
@@ -38,6 +31,8 @@
 #endif
 
 #include "Application.hpp"
+
+namespace NXKit {
 
 static void glfwWindowFramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -60,7 +55,7 @@ GLFWVideoContext::GLFWVideoContext(std::string windowTitle, uint32_t windowWidth
 {
     if (!glfwInit())
     {
-//        Logger::error("glfw: failed to initialize");
+        //        Logger::error("glfw: failed to initialize");
         return;
     }
     
@@ -72,7 +67,7 @@ GLFWVideoContext::GLFWVideoContext(std::string windowTitle, uint32_t windowWidth
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     // Force scaling off to keep desired framebuffer size
-//        glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+    //        glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #else
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -83,7 +78,7 @@ GLFWVideoContext::GLFWVideoContext(std::string windowTitle, uint32_t windowWidth
 
     if (!this->window)
     {
-//        Logger::error("glfw: failed to create window");
+        //        Logger::error("glfw: failed to create window");
         glfwTerminate();
         return;
     }
@@ -97,15 +92,15 @@ GLFWVideoContext::GLFWVideoContext(std::string windowTitle, uint32_t windowWidth
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
-//    Logger::info("glfw: GL Vendor: {}", glGetString(GL_VENDOR));
-//    Logger::info("glfw: GL Renderer: {}", glGetString(GL_RENDERER));
-//    Logger::info("glfw: GL Version: {}", glGetString(GL_VERSION));
+    //    Logger::info("glfw: GL Vendor: {}", glGetString(GL_VENDOR));
+    //    Logger::info("glfw: GL Renderer: {}", glGetString(GL_RENDERER));
+    //    Logger::info("glfw: GL Version: {}", glGetString(GL_VERSION));
 
     // Initialize nanovg
     this->nvgContext = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_ANTIALIAS);
     if (!this->nvgContext)
     {
-//        Logger::error("glfw: unable to init nanovg");
+        //        Logger::error("glfw: unable to init nanovg");
         glfwTerminate();
         return;
     }
@@ -240,4 +235,6 @@ NVGcontext* GLFWVideoContext::getNVGContext()
 GLFWwindow* GLFWVideoContext::getGLFWWindow()
 {
     return this->window;
+}
+
 }

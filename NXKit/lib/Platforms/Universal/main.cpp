@@ -9,7 +9,7 @@
 #include "UINavigationController.hpp"
 #include "UITabBarController.hpp"
 #include "ViewController.hpp"
-#include "glfw_video.hpp"
+#include "GLFWVideoContext.hpp"
 
 constexpr uint32_t ORIGINAL_WINDOW_WIDTH  = 1280;
 constexpr uint32_t ORIGINAL_WINDOW_HEIGHT = 720;

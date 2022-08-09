@@ -9,6 +9,8 @@
 
 #include "UIViewController.hpp"
 
+namespace NXKit {
+
 class UINavigationController: public UIViewController {
 public:
     UINavigationController(UIViewController* rootController);
@@ -19,3 +21,5 @@ private:
     UIView* rootView;
     UIViewController* rootController;
 };
+
+}

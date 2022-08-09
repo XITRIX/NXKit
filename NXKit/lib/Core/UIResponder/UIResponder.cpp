@@ -7,6 +7,8 @@
 
 #include "UIResponder.hpp"
 
+namespace NXKit {
+
 void UIResponder::touchesBegan(std::vector<UITouch*> touches, UIEvent* withEvent) {
     if (!getNext()) return;
     getNext()->touchesBegan(touches, withEvent);
@@ -25,4 +27,6 @@ void UIResponder::touchesEnded(std::vector<UITouch*> touches, UIEvent* withEvent
 void UIResponder::touchesCancelled(std::vector<UITouch*> touches, UIEvent* withEvent) {
     if (!getNext()) return;
     getNext()->touchesCancelled(touches, withEvent);
+}
+
 }

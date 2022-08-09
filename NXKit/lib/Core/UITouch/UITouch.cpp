@@ -8,11 +8,13 @@
 #include "UITouch.hpp"
 #include "UIView.hpp"
 
+namespace NXKit {
+
 UITouch::UITouch(int touchId, Point atPoint, std::time_t timestamp):
-    touchId(touchId),
-    absoluteLocation(atPoint),
-    previousAbsoluteLocation(atPoint),
-    timestamp(timestamp)
+touchId(touchId),
+absoluteLocation(atPoint),
+previousAbsoluteLocation(atPoint),
+timestamp(timestamp)
 { }
 
 void UITouch::updateAbsoluteLocation(Point newLocation) {
@@ -30,6 +32,9 @@ Point UITouch::previousLocationIn(UIView* view) {
 
 void UITouch::runTouchActionOnRecognizerHierachy(std::function<void(UIGestureRecognizer*)> action) {
     for (auto recognizer: gestureRecognizers) {
+        if (!recognizer->isEnabled()) continue;
         action(recognizer);
     }
+}
+
 }

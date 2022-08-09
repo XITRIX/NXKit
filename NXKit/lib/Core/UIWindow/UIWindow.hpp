@@ -9,6 +9,8 @@
 
 #include "UIViewController.hpp"
 
+namespace NXKit {
+
 class UIWindow: public UIView {
 public:
     UIViewController* getRootViewController();
@@ -21,3 +23,5 @@ public:
 private:
     UIViewController* rootViewController = nullptr;
 };
+
+}

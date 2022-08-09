@@ -14,6 +14,8 @@
 #include <vector>
 #include <functional>
 
+namespace NXKit {
+
 enum class UITouchPhase {
     BEGIN,
     MOVED,
@@ -51,4 +53,6 @@ public:
 
 constexpr bool operator==(const UITouch& lhs, const UITouch& rhs) {
     return lhs.touchId == rhs.touchId;
+}
+
 }

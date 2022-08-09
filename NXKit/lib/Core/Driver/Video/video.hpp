@@ -18,6 +18,8 @@
 
 #include <nanovg.h>
 
+namespace NXKit {
+
 // A VideoContext is responsible for providing a nanovg context for the app
 // (so by extension it manages all the graphics state as well as the window / context).
 // The VideoContext implementation must also provide the nanovg implementation. As such, there
@@ -25,38 +27,40 @@
 // Context creation and teardown can be done in the constructor and destructor.
 class VideoContext
 {
-  public:
+public:
     virtual ~VideoContext() {};
-
+    
     /**
      * Called at the beginning of every frame to clear the window
      */
     virtual void clear(NVGcolor color) = 0;
-
+    
     /**
      * Called at the beginning of every frame to begin it.
      */
     virtual void beginFrame() = 0;
-
+    
     /**
      * Called at the end of every frame to end it (swap buffers...).
      */
     virtual void endFrame() = 0;
-
+    
     virtual void disableScreenDimming(bool disable) = 0;
-
+    
     virtual void getContextPixels(int x, int y, int w, int h, unsigned char** pixels) = 0;
-
+    
     virtual float getScaleFactor() = 0;
-
+    
     virtual bool mainLoopInteraction() = 0;
-
+    
     /**
      * Can be called by the application to reset the graphics
      * state, in case there is a need to use the graphics API
      * directly (for instance direct OpenGL calls).
      */
     virtual void resetState() = 0;
-
+    
     virtual NVGcontext* getNVGContext() = 0;
 };
+
+}

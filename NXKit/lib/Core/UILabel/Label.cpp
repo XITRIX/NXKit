@@ -21,6 +21,8 @@
 #include "Application.hpp"
 #include "Label.hpp"
 
+namespace NXKit {
+
 #define ELLIPSIS "\u2026"
 
 static void computeLabelHeight(Label* label, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode, YGSize* size, float* originalBounds)
@@ -42,7 +44,7 @@ static void computeLabelHeight(Label* label, float width, YGMeasureMode widthMod
     }
     else
     {
-//        fatal("Unsupported Label height measure mode: " + std::to_string(heightMode));
+        //        fatal("Unsupported Label height measure mode: " + std::to_string(heightMode));
     }
 }
 
@@ -102,7 +104,7 @@ static YGSize labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widthM
     }
     else
     {
-//        fatal("Unsupported Label width measure mode: " + std::to_string(widthMode));
+        //        fatal("Unsupported Label width measure mode: " + std::to_string(widthMode));
     }
 
     // Height
@@ -150,7 +152,7 @@ static YGSize labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widthM
         }
         else
         {
-//            fatal("Unsupported Label height measure mode: " + std::to_string(heightMode));
+            //            fatal("Unsupported Label height measure mode: " + std::to_string(heightMode));
         }
     }
     // No wrapping necessary or allowed, return the normal height
@@ -164,16 +166,16 @@ static YGSize labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widthM
 
 Label::Label()
 {
-//    Style style = Application::getStyle();
-//    Theme theme = Application::getTheme();
+    //    Style style = Application::getStyle();
+    //    Theme theme = Application::getTheme();
 
     // Default attributes
     this->font       = FontManager::shared()->getPrimaryFont(); //Application::getFont(FONT_REGULAR);
-//    this->fontSize   = style["brls/label/default_font_size"];
-//    this->lineHeight = style["brls/label/default_line_height"];
-//    this->textColor  = theme["brls/text"];
+    //    this->fontSize   = style["brls/label/default_font_size"];
+    //    this->lineHeight = style["brls/label/default_line_height"];
+    //    this->textColor  = theme["brls/text"];
 
-//    this->setHighlightPadding(style["brls/label/highlight_padding"]);
+    //    this->setHighlightPadding(style["brls/label/highlight_padding"]);
 
     // Setup the custom measure function
     YGNodeSetMeasureFunc(this->ygNode, labelMeasureFunc);
@@ -184,50 +186,50 @@ Label::Label()
     YGNodeStyleSetMaxHeightPercent(this->ygNode, 100);
 
     // Register XML attributes
-//    this->registerStringXMLAttribute("text", [this](std::string value) {
-//        this->setText(value);
-//    });
-//
-//    this->registerFloatXMLAttribute("fontSize", [this](float value) {
-//        this->setFontSize(value);
-//    });
-//
-//    this->registerColorXMLAttribute("textColor", [this](NVGcolor color) {
-//        this->setTextColor(color);
-//    });
-//
-//    this->registerFloatXMLAttribute("lineHeight", [this](float value) {
-//        this->setLineHeight(value);
-//    });
-//
-//    this->registerBoolXMLAttribute("animated", [this](bool value) {
-//        this->setAnimated(value);
-//    });
-//
-//    this->registerBoolXMLAttribute("autoAnimate", [this](bool value) {
-//        this->setAutoAnimate(value);
-//    });
-//
-//    this->registerBoolXMLAttribute("singleLine", [this](bool value) {
-//        this->setSingleLine(value);
-//    });
-//
-//    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
-//        "horizontalAlign", HorizontalAlign, this->setHorizontalAlign,
-//        {
-//            { "left", HorizontalAlign::LEFT },
-//            { "center", HorizontalAlign::CENTER },
-//            { "right", HorizontalAlign::RIGHT },
-//        });
-//
-//    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
-//        "verticalAlign", VerticalAlign, this->setVerticalAlign,
-//        {
-//            { "baseline", VerticalAlign::BASELINE },
-//            { "top", VerticalAlign::TOP },
-//            { "center", VerticalAlign::CENTER },
-//            { "bottom", VerticalAlign::BOTTOM },
-//        });
+    //    this->registerStringXMLAttribute("text", [this](std::string value) {
+    //        this->setText(value);
+    //    });
+    //
+    //    this->registerFloatXMLAttribute("fontSize", [this](float value) {
+    //        this->setFontSize(value);
+    //    });
+    //
+    //    this->registerColorXMLAttribute("textColor", [this](NVGcolor color) {
+    //        this->setTextColor(color);
+    //    });
+    //
+    //    this->registerFloatXMLAttribute("lineHeight", [this](float value) {
+    //        this->setLineHeight(value);
+    //    });
+    //
+    //    this->registerBoolXMLAttribute("animated", [this](bool value) {
+    //        this->setAnimated(value);
+    //    });
+    //
+    //    this->registerBoolXMLAttribute("autoAnimate", [this](bool value) {
+    //        this->setAutoAnimate(value);
+    //    });
+    //
+    //    this->registerBoolXMLAttribute("singleLine", [this](bool value) {
+    //        this->setSingleLine(value);
+    //    });
+    //
+    //    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    //        "horizontalAlign", HorizontalAlign, this->setHorizontalAlign,
+    //        {
+    //            { "left", HorizontalAlign::LEFT },
+    //            { "center", HorizontalAlign::CENTER },
+    //            { "right", HorizontalAlign::RIGHT },
+    //        });
+    //
+    //    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    //        "verticalAlign", VerticalAlign, this->setVerticalAlign,
+    //        {
+    //            { "baseline", VerticalAlign::BASELINE },
+    //            { "top", VerticalAlign::TOP },
+    //            { "center", VerticalAlign::CENTER },
+    //            { "bottom", VerticalAlign::BOTTOM },
+    //        });
 }
 
 void Label::setAnimated(bool animated)
@@ -394,7 +396,7 @@ void Label::draw(NVGcontext* vg)
     nvgFontFaceId(vg, this->font);
     nvgTextLineHeight(vg, this->lineHeight);
     nvgFillColor(vg, this->textColor);
-//    nvgFillColor(vg, a(this->textColor));
+    //    nvgFillColor(vg, a(this->textColor));
 
     // Animated text
     if (this->animating)
@@ -402,13 +404,13 @@ void Label::draw(NVGcontext* vg)
         nvgSave(vg);
         nvgIntersectScissor(vg, x, y, width, height);
 
-//        float baseX   = x - this->scrollingAnimation;
-//        float spacing = style["brls/label/scrolling_animation_spacing"];
-//
-//        nvgText(vg, baseX, y + height / 2.0f, this->fullText.c_str(), nullptr);
-//
-//        if (this->scrollingAnimation > 0)
-//            nvgText(vg, baseX + this->requiredWidth + spacing, y + height / 2.0f, this->fullText.c_str(), nullptr);
+        //        float baseX   = x - this->scrollingAnimation;
+        //        float spacing = style["brls/label/scrolling_animation_spacing"];
+        //
+        //        nvgText(vg, baseX, y + height / 2.0f, this->fullText.c_str(), nullptr);
+        //
+        //        if (this->scrollingAnimation > 0)
+        //            nvgText(vg, baseX + this->requiredWidth + spacing, y + height / 2.0f, this->fullText.c_str(), nullptr);
 
         nvgRestore(vg);
     }
@@ -445,53 +447,53 @@ void Label::stopScrollingAnimation()
     if (!this->animating)
         return;
 
-//    this->scrollingTimer.stop();
-//    this->scrollingTimer.reset();
-//
-//    this->scrollingAnimation = 0.0f;
+    //    this->scrollingTimer.stop();
+    //    this->scrollingTimer.reset();
+    //
+    //    this->scrollingAnimation = 0.0f;
 
     this->animating = false;
 }
 
 void Label::onScrollTimerFinished()
 {
-//    Style style = Application::getStyle();
-//
-//    // Step 2: actual scrolling animation
-//    float target   = this->requiredWidth + style["brls/label/scrolling_animation_spacing"];
-//    float duration = target / style["brls/animations/label_scrolling_speed"];
-//
-//    this->scrollingAnimation.reset();
-//
-//    this->scrollingAnimation.addStep(target, duration, EasingFunction::linear);
-//
-//    this->scrollingAnimation.setEndCallback([this](bool finished) {
-//        // Start over if the scrolling animation ended naturally
-//        if (finished)
-//            this->startScrollTimer();
-//    });
-//
-//    this->scrollingAnimation.start();
+    //    Style style = Application::getStyle();
+    //
+    //    // Step 2: actual scrolling animation
+    //    float target   = this->requiredWidth + style["brls/label/scrolling_animation_spacing"];
+    //    float duration = target / style["brls/animations/label_scrolling_speed"];
+    //
+    //    this->scrollingAnimation.reset();
+    //
+    //    this->scrollingAnimation.addStep(target, duration, EasingFunction::linear);
+    //
+    //    this->scrollingAnimation.setEndCallback([this](bool finished) {
+    //        // Start over if the scrolling animation ended naturally
+    //        if (finished)
+    //            this->startScrollTimer();
+    //    });
+    //
+    //    this->scrollingAnimation.start();
 
     this->animating = true;
 }
 
 void Label::startScrollTimer()
 {
-//    Style style = Application::getStyle();
-//
-//    // Step 1: timer before starting to scroll
-//    this->scrollingAnimation = 0.0f;
-//
-//    this->scrollingTimer.reset();
-//
-//    this->scrollingTimer.setDuration(style["brls/animations/label_scrolling_timer"]);
-//
-//    this->scrollingTimer.setEndCallback([this](bool finished) {
-//        this->onScrollTimerFinished();
-//    });
-//
-//    this->scrollingTimer.start();
+    //    Style style = Application::getStyle();
+    //
+    //    // Step 1: timer before starting to scroll
+    //    this->scrollingAnimation = 0.0f;
+    //
+    //    this->scrollingTimer.reset();
+    //
+    //    this->scrollingTimer.setDuration(style["brls/animations/label_scrolling_timer"]);
+    //
+    //    this->scrollingTimer.setEndCallback([this](bool finished) {
+    //        this->onScrollTimerFinished();
+    //    });
+    //
+    //    this->scrollingTimer.start();
 
     this->animating = true;
 }
@@ -580,3 +582,5 @@ Label::~Label()
 //{
 //    return new Label();
 //}
+
+}

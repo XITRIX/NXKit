@@ -12,6 +12,8 @@
 #include <cstring>
 #include <chrono>
 
+namespace NXKit {
+
 typedef unsigned char uchar;
 
 //!
@@ -87,3 +89,5 @@ void box_blur_rgb(uchar *& in, uchar *& out, int w, int h, int c, int r);
 //! \param[in] sigma        gaussian std dev
 //!
 void fast_gaussian_blur_rgb(uchar *& in, uchar *& out, int w, int h, int c, float sigma);
+
+}

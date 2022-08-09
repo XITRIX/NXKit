@@ -7,6 +7,8 @@
 
 #pragma once
 
+namespace NXKit {
+
 struct Point {
     float x, y;
 
@@ -90,13 +92,15 @@ struct Rect {
 
     bool contains(Point point) {
         return
-            (point.x >= minX()) && (point.x < maxX()) &&
-            (point.y >= minY()) && (point.y < maxY());
+        (point.x >= minX()) && (point.x < maxX()) &&
+        (point.y >= minY()) && (point.y < maxY());
     }
 
     bool operator==(const Rect& rhs) {
         return
-            this->origin.x == rhs.origin.x && this->origin.y == rhs.origin.y &&
-            this->size.width == rhs.size.width && this->size.height == rhs.size.height;
+        this->origin.x == rhs.origin.x && this->origin.y == rhs.origin.y &&
+        this->size.width == rhs.size.width && this->size.height == rhs.size.height;
     }
 };
+
+}

@@ -23,10 +23,12 @@
 
 #include <string>
 
+namespace NXKit {
+
 // GLFW Video Context
 class GLFWVideoContext : public VideoContext
 {
-  public:
+public:
     GLFWVideoContext(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight);
     ~GLFWVideoContext();
 
@@ -43,7 +45,7 @@ class GLFWVideoContext : public VideoContext
 
     GLFWwindow* getGLFWWindow();
 
-  private:
+private:
     GLFWwindow* window     = nullptr;
     NVGcontext* nvgContext = nullptr;
     
@@ -52,3 +54,5 @@ class GLFWVideoContext : public VideoContext
     int oldWidth, oldHeight;
 #endif
 };
+
+}

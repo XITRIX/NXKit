@@ -9,7 +9,16 @@
 
 #include "NXKit.hpp"
 
-class ViewController: public UIViewController {
+class MyViewController: public UIViewController {
+public:
     void loadView() override;
     void viewDidLoad() override;
+    void viewDidLayoutSubviews() override;
+    
+    void touchesBegan(std::vector<UITouch*> touches, UIEvent* withEvent) override;
+    void touchesMoved(std::vector<UITouch*> touches, UIEvent* withEvent) override;
+    void touchesEnded(std::vector<UITouch*> touches, UIEvent* withEvent) override;
+    
+private:
+//    UILabel* body = nullptr;
 };

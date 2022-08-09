@@ -9,6 +9,8 @@
 #include "Application.hpp"
 #include "FontManager.hpp"
 
+namespace NXKit {
+
 #define ELLIPSIS "\u2026"
 
 void UILabel::computeLabelHeight(UILabel* label, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode, YGSize* size, float* originalBounds) {
@@ -29,7 +31,7 @@ void UILabel::computeLabelHeight(UILabel* label, float width, YGMeasureMode widt
     }
     else
     {
-//        fatal("Unsupported Label height measure mode: " + std::to_string(heightMode));
+        //        fatal("Unsupported Label height measure mode: " + std::to_string(heightMode));
     }
 }
 
@@ -87,7 +89,7 @@ YGSize UILabel::labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widt
     }
     else
     {
-//        fatal("Unsupported Label width measure mode: " + std::to_string(widthMode));
+        //        fatal("Unsupported Label width measure mode: " + std::to_string(widthMode));
     }
 
     // Height
@@ -118,7 +120,7 @@ YGSize UILabel::labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widt
             else
             {
                 size.height = height;
-//                computeLabelHeight(label, width, widthMode, height, heightMode, &size, bounds);
+                //                computeLabelHeight(label, width, widthMode, height, heightMode, &size, bounds);
             }
         }
         // Exactly mode, see if we have enough space
@@ -136,7 +138,7 @@ YGSize UILabel::labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widt
         }
         else
         {
-//            fatal("Unsupported Label height measure mode: " + std::to_string(heightMode));
+            //            fatal("Unsupported Label height measure mode: " + std::to_string(heightMode));
         }
     }
     // No wrapping necessary or allowed, return the normal height
@@ -164,9 +166,9 @@ static std::string trim(const std::string& str)
 }
 
 UILabel::UILabel(std::string text) : UIView(),
-    text(text),
-    textColor(0, 0, 0),
-    shadowColor(0, 0, 0)
+text(text),
+textColor(0, 0, 0),
+shadowColor(0, 0, 0)
 {
     font = UIFont {
         .fontId = FontManager::shared()->getPrimaryFont(),
@@ -227,7 +229,7 @@ void UILabel::layoutSubviews() {
 
     if (width == 0)
     {
-//        this->resetScrollingAnimation();
+        //        this->resetScrollingAnimation();
         return;
     }
 
@@ -302,4 +304,6 @@ enum NVGalign UILabel::getNVGVerticalAlign()
         case VerticalAlign::BOTTOM:
             return NVG_ALIGN_BOTTOM;
     }
+}
+
 }

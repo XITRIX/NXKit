@@ -9,6 +9,8 @@
 #include "UIStackView.hpp"
 #include "UILabel.hpp"
 
+namespace NXKit {
+
 UITabBarItem::UITabBarItem() {
     setAxis(Axis::HORIZONTAL);
     setHeight(70);
@@ -28,6 +30,7 @@ UITabBarItem::UITabBarItem() {
     addSubview(label);
 
     setSelected(false);
+    canBecomeFocused = true;
 }
 
 void UITabBarItem::setTitle(std::string text) {
@@ -36,6 +39,14 @@ void UITabBarItem::setTitle(std::string text) {
 
 bool UITabBarItem::isSelected() {
     return selected;
+}
+
+void UITabBarItem::becomeFocused() {
+    setSelected(true);
+}
+
+void UITabBarItem::resignFocused() {
+    setSelected(false);
 }
 
 void UITabBarItem::setSelected(bool selected) {
@@ -49,6 +60,8 @@ void UITabBarItem::setSelected(bool selected) {
     }
 }
 
+UITabBarController::UITabBarController(UIViewController* content): content(content) { }
+
 void UITabBarController::loadView() {
     UIStackView* view = new UIStackView(Axis::HORIZONTAL);
 
@@ -57,12 +70,17 @@ void UITabBarController::loadView() {
     tabs->backgroundColor = UIColor(240, 240, 240);
     tabs->setPadding(32, 40, 47, 80);
 
-    UIView* content = new UIView();
-    content->setGrow(1);
-//    content->backgroundColor = UIColor(0, 255, 0);
+    contentView = new UIView();
+    contentView->setGrow(1);
+    //    contentView->clipToBounds = true;
+    //    contentView->backgroundColor = UIColor(255, 0, 0);
+    contentView->addSubview(this->content->getView());
+    //    contentView->setPaddingRight(140);
+    //    contentView->setMarginRight(140);
+    //    contentView->backgroundColor = UIColor(0, 255, 0);
 
     view->addSubview(tabs);
-    view->addSubview(content);
+    view->addSubview(contentView);
 
     setView(view);
 }
@@ -71,7 +89,18 @@ void UITabBarController::viewDidLoad() {
     for (int i = 0; i < 5; i++) {
         UITabBarItem* item = new UITabBarItem();
         item->setTitle("Hello world #" + std::to_string(i));
-        if (i == 2) item->setSelected(true);
+//        if (i == 2) item->setSelected(true);
+        item->tag = "Num" + std::to_string(i);
         tabs->addSubview(item);
     }
+    tabs->clipToBounds = true;
+//    tabs->setBounds({ {0, 80}, tabs->frame.size() });
+}
+
+
+void UITabBarController::viewDidLayoutSubviews() {
+    UIViewController::viewDidLayoutSubviews();
+    content->getView()->setSize(contentView->frame.size());
+}
+
 }

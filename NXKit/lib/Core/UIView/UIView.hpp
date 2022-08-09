@@ -13,11 +13,14 @@
 #include "NXRect.hpp"
 #include "UIColor.hpp"
 #include "UIResponder.hpp"
+#include "UIGestureRecognizer.hpp"
 #include "tweeny/tweeny.h"
 
 #include <yoga/YGNode.h>
 
 #include <vector>
+
+namespace NXKit {
 
 class UIViewController;
 class UIWindow;
@@ -33,6 +36,7 @@ class UIView: public UIResponder {
 public:
     static constexpr float AUTO = NAN;
 
+    std::string tag;
     NXRect frame;
     UIColor backgroundColor;
     UIColor borderColor = UIColor(0, 0, 0);
@@ -41,7 +45,7 @@ public:
     NXPoint transformOrigin;
     NXSize transformSize = Size(1, 1);
     bool clipToBounds = false;
-    bool isFocusable = false;
+    bool canBecomeFocused = false;
 
     UIView(Rect frame);
     UIView(float x, float y, float width, float height): UIView(Rect(x, y, width, height)) {}
@@ -58,10 +62,19 @@ public:
     UIView* hitTest(Point point, UIEvent* withEvent);
     bool point(Point insidePoint, UIEvent* withEvent);
 
+
     UIView* getSuperview();
 
     UIView* getDefaultFocus();
     UIView* getNextFocus(NavigationDirection direction);
+
+    bool isFocused();
+    virtual void becomeFocused() {}
+    virtual void resignFocused() {}
+    virtual void subviewFocusDidChange(UIView* focusedView, UIView* notifiedView);
+
+    void addGestureRecognizer(UIGestureRecognizer* gestureRecognizer);
+    std::vector<UIGestureRecognizer*> getGestureRecognizers();
 
     // Yoga node
     YGNode* getYGNode() { return this->ygNode; }
@@ -71,6 +84,7 @@ public:
 
     // Sizes
     Rect getBounds();
+    void setBounds(Rect bounds);
     void setPosition(Point position);
     void setGrow(float grow);
     float getGrow();
@@ -113,6 +127,7 @@ private:
     friend class Application;
     friend class UIViewController;
 
+    std::vector<UIGestureRecognizer*> gestureRecognizers;
     UIViewController* controller = nullptr;
     std::vector<UIView*> subviews;
     UIView* superview = nullptr;
@@ -124,3 +139,5 @@ private:
     void internalDraw(NVGcontext* vgContext);
     void setSuperview(UIView* view);
 };
+
+}

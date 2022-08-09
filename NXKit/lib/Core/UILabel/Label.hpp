@@ -23,6 +23,8 @@
 #include "UILabel.hpp"
 #include <string>
 
+namespace NXKit {
+
 //enum class HorizontalAlign
 //{
 //    LEFT,
@@ -47,17 +49,17 @@
 // Warning: to wrap, the label width MUST be constrained
 class Label : public UIView
 {
-  public:
+public:
     Label();
     ~Label();
 
     void draw(NVGcontext *vgContext) override;
     void layoutSubviews() override;
-//    void onLayout() override;
-//    void onFocusGained() override;
-//    void onFocusLost() override;
-//    void onParentFocusGained(View* focusedView) override;
-//    void onParentFocusLost(View* focusedView) override;
+    //    void onLayout() override;
+    //    void onFocusGained() override;
+    //    void onFocusLost() override;
+    //    void onParentFocusGained(View* focusedView) override;
+    //    void onParentFocusLost(View* focusedView) override;
 
     /**
      * Sets the text of the label.
@@ -94,7 +96,7 @@ class Label : public UIView
 
     std::string getFullText();
 
-//    static UIView* create();
+    //    static UIView* create();
 
     void setRequiredWidth(float requiredWidth);
     void setEllipsisWidth(float ellipsisWidth);
@@ -130,7 +132,7 @@ class Label : public UIView
      */
     void setIsWrapping(bool isWrapping);
 
-  private:
+private:
     std::string truncatedText = "";
     std::string fullText      = "";
 
@@ -150,8 +152,8 @@ class Label : public UIView
     bool animated    = false; // should it animate?
     bool animating   = false; // currently animating?
 
-//    Timer scrollingTimer;
-//    Animatable scrollingAnimation;
+    //    Timer scrollingTimer;
+    //    Animatable scrollingAnimation;
 
     void stopScrollingAnimation();
     void resetScrollingAnimation();
@@ -165,3 +167,5 @@ class Label : public UIView
     enum NVGalign getNVGHorizontalAlign();
     enum NVGalign getNVGVerticalAlign();
 };
+
+}

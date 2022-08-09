@@ -9,6 +9,8 @@
 #include "UIBlurView.hpp"
 #include "GaussianBlur.hpp"
 
+namespace NXKit {
+
 static void shrinkImage(unsigned char** in, int w, int h, int scale) {
     for (int j = 0; j < h/scale; j++) {
         for (int i = 0; i < w/scale; i++) {
@@ -71,4 +73,6 @@ void UIBlurView::draw(NVGcontext *vgContext) {
     Application::shared()->flushContext();
 
     nvgDeleteImage(vgContext, img);
+}
+
 }

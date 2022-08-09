@@ -10,6 +10,8 @@
 #include "UIResponder.hpp"
 #include "UIView.hpp"
 
+namespace NXKit {
+
 class UIViewController: public UIResponder {
 public:
     UIView* getView();
@@ -31,3 +33,5 @@ public:
 private:
     UIView* view = nullptr;
 };
+
+}

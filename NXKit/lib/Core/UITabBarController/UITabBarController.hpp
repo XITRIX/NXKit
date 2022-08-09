@@ -11,6 +11,8 @@
 #include "UIStackView.hpp"
 #include "UILabel.hpp"
 
+namespace NXKit {
+
 class UITabBarItem: public UIStackView {
 public:
     UITabBarItem();
@@ -19,6 +21,9 @@ public:
 
     bool isSelected();
     void setSelected(bool selected);
+
+    void becomeFocused() override;
+    void resignFocused() override;
 private:
     UILabel* label = nullptr;
     UIView* selectionBar = nullptr;
@@ -29,9 +34,14 @@ private:
 
 class UITabBarController: public UIViewController {
 public:
-//    UITabBarController();
+    UITabBarController(UIViewController* content);
     void loadView() override;
     void viewDidLoad() override;
+    void viewDidLayoutSubviews() override;
 private:
-    UIStackView* tabs;
+    UIStackView* tabs = nullptr;
+    UIView* contentView = nullptr;
+    UIViewController* content = nullptr;
 };
+
+}

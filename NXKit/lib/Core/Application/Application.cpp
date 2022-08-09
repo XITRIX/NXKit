@@ -8,6 +8,7 @@
 #include <math.h>
 
 #include "Application.hpp"
+#include <Platforms/InputManager.hpp>
 #include "UIView.hpp"
 #include "UIWindow.hpp"
 #include "Time.hpp"
@@ -18,7 +19,8 @@
 #include <switch.h>
 #endif
 
-//Application* Application::_shared = nullptr;
+namespace NXKit {
+
 Application* Application::shared() {
     return Application::_shared;
 }
@@ -51,6 +53,13 @@ bool Application::mainLoop() {
     // Main loop callback
     if (!mainLoopIteration()) return false;
 
+    // Input
+    InputManager::shared()->update();
+    UIEvent* event = new UIEvent();
+    event->allTouches = InputManager::shared()->getTouches();
+    keyWindow->sendEvent(event);
+    delete event;
+
     // Animations
     updateHighlightAnimation();
     Ticking::updateTickings();
@@ -61,13 +70,28 @@ bool Application::mainLoop() {
     return true;
 }
 
+UIView* Application::getFocus() {
+    return this->focus;
+}
+
+void Application::setFocus(UIView* view) {
+    if (this->focus) {
+        this->focus->resignFocused();
+    }
+    this->focus = view;
+    this->focus->becomeFocused();
+    
+    if (this->focus->superview)
+        this->focus->superview->subviewFocusDidChange(this->focus, this->focus);
+}
+
 void Application::render() {
     videoContext->beginFrame();
     videoContext->clear(nvgRGB(0, 0, 0));
 
     nvgBeginFrame(videoContext->getNVGContext(), windowWidth, windowHeight, windowScale);
     keyWindow->internalDraw(videoContext->getNVGContext());
-//    nvgResetTransform(videoContext->getNVGContext()); // scale
+    //    nvgResetTransform(videoContext->getNVGContext()); // scale
 
     nvgEndFrame(videoContext->getNVGContext());
     videoContext->endFrame();
@@ -77,7 +101,7 @@ void Application::flushContext() {
     nvgEndFrame(this->videoContext->getNVGContext());
 
     nvgBeginFrame(videoContext->getNVGContext(), windowWidth, windowHeight, windowScale);
-//    nvgScale(videoContext->getNVGContext(), windowScale, windowScale);
+    //    nvgScale(videoContext->getNVGContext(), windowScale, windowScale);
 }
 
 void Application::setVideoContext(VideoContext* videoContext) {
@@ -86,4 +110,6 @@ void Application::setVideoContext(VideoContext* videoContext) {
 
 VideoContext* Application::getVideoContext() {
     return videoContext;
+}
+
 }

@@ -7,6 +7,8 @@
 
 #pragma once
 
+namespace NXKit {
+
 class FontManager {
 public:
     static FontManager* shared();
@@ -19,3 +21,5 @@ private:
 
     int primaryFont = -1;
 };
+
+}

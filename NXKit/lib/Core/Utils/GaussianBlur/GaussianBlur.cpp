@@ -7,6 +7,8 @@
 
 #include "GaussianBlur.hpp"
 
+namespace NXKit {
+
 void std_to_box(int boxes[], float sigma, int n)
 {
     // ideal filter width
@@ -25,7 +27,7 @@ void std_to_box(int boxes[], float sigma, int n)
 void horizontal_blur_rgb(uchar * in, uchar * out, int w, int h, int c, int r)
 {
     float iarr = 1.f / (r+r+1);
-    #pragma omp parallel for
+#pragma omp parallel for
     for(int i=0; i<h; i++)
     {
         int ti = i*w;
@@ -79,7 +81,7 @@ void total_blur_rgb(uchar * in, uchar * out, int w, int h, int c, int r)
 {
     // radius range on either side of a pixel + the pixel itself
     float iarr = 1.f / (r+r+1);
-    #pragma omp parallel for
+#pragma omp parallel for
     for(int i=0; i<w; i++)
     {
         int ti = i;
@@ -146,4 +148,6 @@ void fast_gaussian_blur_rgb(uchar *& in, uchar *& out, int w, int h, int c, floa
     box_blur_rgb(in, out, w, h, c, boxes[0]);
     box_blur_rgb(out, in, w, h, c, boxes[1]);
     box_blur_rgb(in, out, w, h, c, boxes[2]);
+}
+
 }

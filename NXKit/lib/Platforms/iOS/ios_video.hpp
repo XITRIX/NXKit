@@ -14,7 +14,7 @@
 #include <string>
 
 // GLFW Video Context
-class IOSVideoContext : public VideoContext
+class IOSVideoContext : public NXKit::VideoContext
 {
   public:
     IOSVideoContext(NVGcontext* nvgContext);

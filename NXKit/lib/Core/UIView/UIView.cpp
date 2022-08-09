@@ -7,15 +7,24 @@
 
 #include "UIView.hpp"
 #include "UIViewController.hpp"
+#include "Application.hpp"
+#include "InputManager.hpp"
+
+namespace NXKit {
 
 UIView::UIView(Rect frame):
-    backgroundColor(0, 0, 0, 0)
+backgroundColor(0, 0, 0, 0)
 {
     this->ygNode = YGNodeNew();
     YGNodeSetContext(this->ygNode, this);
 
     setPosition(frame.origin);
     setSize(frame.size);
+
+    auto inputManager = InputManager::shared();
+    inputManager->getInputUpdated()->subscribe([inputManager](){
+        //        inputManager->
+    });
 }
 
 void UIView::setPosition(Point position) {
@@ -105,8 +114,12 @@ Rect UIView::getFrame() {
 
 Rect UIView::getBounds() {
     Rect frame = getFrame();
-    frame.origin = Point();
+    frame.origin = bounds.origin;
     return frame;
+}
+
+void UIView::setBounds(Rect bounds) {
+    this->bounds = bounds;
 }
 
 void UIView::internalDraw(NVGcontext* vgContext) {
@@ -137,13 +150,16 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     nvgFillColor(vgContext, backgroundColor.raw());
     nvgFill(vgContext);
 
+    nvgSave(vgContext);
+    nvgTranslate(vgContext, -bounds.minX(), -bounds.minY());
     draw(vgContext);
 
     nvgSave(vgContext);
-//    nvgTranslate(vgContext, frame.origin().x, frame.origin().y);
+    //    nvgTranslate(vgContext, frame.origin().x, frame.origin().y);
     for (auto view: subviews) {
         view->internalDraw(vgContext);
     }
+    nvgRestore(vgContext);
     nvgRestore(vgContext);
 
     // Borders
@@ -241,12 +257,17 @@ void UIView::layoutSubviews() {
     }
 
     frame = getFrame();
+    bounds = getBounds();
 
     if (controller) controller->viewDidLayoutSubviews();
 }
 
+bool UIView::isFocused() {
+    return Application::shared()->getFocus() == this;
+}
+
 UIView* UIView::getDefaultFocus() {
-    if (isFocusable) return this;
+    if (canBecomeFocused) return this;
 
     for (auto view: subviews) {
         UIView* focus = view->getDefaultFocus();
@@ -256,8 +277,22 @@ UIView* UIView::getDefaultFocus() {
     return nullptr;
 }
 
+void UIView::subviewFocusDidChange(UIView* focusedView, UIView* notifiedView) {
+    if (superview)
+        superview->subviewFocusDidChange(focusedView, this);
+}
+
 UIView* UIView::getNextFocus(NavigationDirection direction) {
-    return nullptr;
+    if (!superview) return nullptr;
+    return superview->getNextFocus(direction);
+}
+
+void UIView::addGestureRecognizer(UIGestureRecognizer* gestureRecognizer) {
+    gestureRecognizers.push_back(gestureRecognizer);
+}
+
+std::vector<UIGestureRecognizer*> UIView::getGestureRecognizers() {
+    return gestureRecognizers;
 }
 
 void UIView::addSubview(UIView *view) {
@@ -295,16 +330,18 @@ Point UIView::convert(Point point, UIView* toView) {
 
     UIView* current = this;
     while (current) {
-        selfAbsoluteOrigin += current->frame.origin();
         if (current == toView) {
-            return point + selfAbsoluteOrigin;
+            return point - selfAbsoluteOrigin;
         }
+        selfAbsoluteOrigin += current->frame.origin();
+        selfAbsoluteOrigin -= current->bounds.origin;
         current = current->superview;
     }
 
     current = toView;
     while (current) {
         otherAbsoluteOrigin += current->frame.origin();
+        otherAbsoluteOrigin -= current->bounds.origin;
         current = current->superview;
     }
 
@@ -316,8 +353,9 @@ UIView* UIView::hitTest(Point point, UIEvent* withEvent) {
     if (!this->point(point, withEvent)) return nullptr;
 
     auto subviews = getSubviews();
-    for (int i = (int) subviews.size(); i >= 0; i--) {
-        UIView* test = subviews[i]->hitTest(subviews[i]->convert(point, this), withEvent);
+    for (int i = (int) subviews.size()-1; i >= 0; i--) {
+        Point convertedPoint = subviews[i]->convert(point, this);
+        UIView* test = subviews[i]->hitTest(convertedPoint, withEvent);
         if (test) return test;
     }
 
@@ -429,4 +467,6 @@ float UIView::getBorderRight() {
 
 float UIView::getBorderBottom() {
     return YGNodeLayoutGetBorder(this->ygNode, YGEdgeBottom);
+}
+
 }

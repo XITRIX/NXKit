@@ -17,8 +17,10 @@
 #include "NXPoint.hpp"
 #include <vector>
 
+namespace NXKit {
+
 NXPoint::NXPoint(Point value)
-    : currentValue(value)
+: currentValue(value)
 {
 }
 
@@ -96,4 +98,6 @@ void NXPoint::operator=(const Point value)
 bool NXPoint::operator==(const Point value)
 {
     return this->currentValue == value;
+}
+
 }

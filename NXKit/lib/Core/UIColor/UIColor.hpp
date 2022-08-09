@@ -9,6 +9,8 @@
 
 #include "nanovg.h"
 
+namespace NXKit {
+
 struct UIColor {
 public:
     UIColor(short r, short g, short b, short a);
@@ -20,6 +22,15 @@ public:
     unsigned char a();
 
     NVGcolor raw();
+
+    static UIColor clear;
+    static UIColor red;
+    static UIColor green;
+    static UIColor blue;
+    static UIColor white;
+    static UIColor black;
 private:
     int value;
 };
+
+}

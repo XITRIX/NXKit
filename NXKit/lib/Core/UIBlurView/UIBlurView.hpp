@@ -9,6 +9,8 @@
 
 #include "UIView.hpp"
 
+namespace NXKit {
+
 class UIBlurView: public UIView {
 public:
     UIBlurView(Rect frame);
@@ -19,3 +21,5 @@ public:
 
     void draw(NVGcontext *vgContext) override;
 };
+
+}

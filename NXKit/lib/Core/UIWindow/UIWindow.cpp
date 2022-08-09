@@ -8,6 +8,8 @@
 #include "UIWindow.hpp"
 #include "Application.hpp"
 
+namespace NXKit {
+
 UIViewController* UIWindow::getRootViewController() {
     return rootViewController;
 }
@@ -30,21 +32,40 @@ void UIWindow::makeKeyAndVisible() {
 
 void UIWindow::sendEvent(UIEvent* event) {
     auto allTouches = event->allTouches;
-    if (allTouches.size() < 1) { return; }
-    auto currentTouch = allTouches[0];
 
-    UIView* hitView = nullptr;
-    if (currentTouch->view) hitView = currentTouch->view;
-    else hitView = hitTest(currentTouch->locationIn(nullptr), nullptr);
-    if (hitView == nullptr) return;
+    for (auto touch: allTouches) {
+        switch (touch->phase) {
+            case UITouchPhase::BEGIN:
+                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->touchesBegan({ touch }, event); });
 
-    switch (currentTouch->phase) {
-        default:
-            break;
+                if (!touch->hasBeenCancelledByAGestureRecognizer) {
+                    touch->view->touchesBegan({ touch }, event);
+                }
+                break;
+            case UITouchPhase::MOVED:
+                if (touch->previousAbsoluteLocation == touch->absoluteLocation) break;
+                
+                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->touchesMoved({ touch }, event); });
+
+                if (!touch->hasBeenCancelledByAGestureRecognizer) {
+                    touch->view->touchesMoved({ touch }, event);
+                }
+                break;
+            case UITouchPhase::ENDED:
+                bool hasBeenCancelledByAGestureRecognizer = touch->hasBeenCancelledByAGestureRecognizer;
+                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->touchesEnded({ touch }, event); });
+
+                if (!hasBeenCancelledByAGestureRecognizer) {
+                    touch->view->touchesEnded({ touch }, event);
+                }
+                break;
+        }
     }
 }
 
 void UIWindow::layoutSubviews() {
     UIView::layoutSubviews();
     rootViewController->getView()->setSize(((Rect) this->frame).size);
+}
+
 }

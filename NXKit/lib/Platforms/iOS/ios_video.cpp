@@ -35,6 +35,8 @@
 
 #include "Application.hpp"
 
+using namespace NXKit;
+
 //static void glfwWindowFramebufferSizeCallback(GLFWwindow* window, int width, int height)
 //{
 //    if (!width || !height)

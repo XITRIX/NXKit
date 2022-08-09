@@ -19,4 +19,6 @@
 
 - (void)applicationLoop;
 
+- (void)setKey:(int)key state:(bool)state;
+
 @end

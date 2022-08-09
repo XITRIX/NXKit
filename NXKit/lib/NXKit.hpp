@@ -16,3 +16,6 @@
 #include "UILabel.hpp"
 #include "Label.hpp"
 #include "UIStackView.hpp"
+#include "InputManager.hpp"
+
+using namespace NXKit;

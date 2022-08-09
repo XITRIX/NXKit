@@ -17,8 +17,10 @@
 #include "NXSize.hpp"
 #include <vector>
 
+namespace NXKit {
+
 NXSize::NXSize(Size value)
-    : currentValue(value)
+: currentValue(value)
 {
 }
 
@@ -96,4 +98,6 @@ void NXSize::operator=(const Size value)
 bool NXSize::operator==(const Size value)
 {
     return this->currentValue == value;
+}
+
 }

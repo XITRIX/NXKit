@@ -10,6 +10,8 @@
 #include <vector>
 #include <chrono>
 
+namespace NXKit {
+
 class UITouch;
 
 class UIEvent {
@@ -22,3 +24,5 @@ public:
 private:
     static std::vector<UIEvent*> activeEvents;
 };
+
+}

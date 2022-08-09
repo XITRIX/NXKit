@@ -22,6 +22,8 @@
 #include <functional>
 #include <vector>
 
+namespace NXKit {
+
 typedef retro_time_t Time;
 
 /**
@@ -43,7 +45,7 @@ typedef TickingGenericCallback TickingTickCallback;
 // lifetime by returning true or false in onUpdate.
 class Ticking
 {
-  public:
+public:
     virtual ~Ticking();
 
     /**
@@ -88,7 +90,7 @@ class Ticking
 
     inline static std::vector<Ticking*> runningTickings;
 
-  protected:
+protected:
     /**
      * Executed every frame while the ticking lives.
      * Delta is the time difference in ms between the last frame
@@ -110,7 +112,7 @@ class Ticking
      */
     virtual void onStop() {};
 
-  private:
+private:
     void stop(bool finished);
 
     bool running = false;
@@ -123,7 +125,7 @@ class Ticking
 // and can be seek / reset / rewound.
 class FiniteTicking : public Ticking
 {
-  public:
+public:
     /**
      * Rewinds the ticking to go back to the beginning
      * without losing its state (as opposed to reset() that clears
@@ -139,7 +141,7 @@ class FiniteTicking : public Ticking
      */
     void reset();
 
-  protected:
+protected:
     /**
      * Called when the ticking gets rewound.
      */
@@ -150,3 +152,5 @@ class FiniteTicking : public Ticking
      */
     virtual void onReset() {};
 };
+
+}
