@@ -10,27 +10,44 @@
 
 #include <Core/Application/Application.hpp>
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
 namespace NXKit {
 
-//void GLFWInputManager::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+#define GLFW_GAMEPAD_BUTTON_MAX 15
+#define GLFW_GAMEPAD_AXIS_MAX 4
+
+//static short controllersCount = 0;
+
+//static void glfwJoystickCallback(int jid, int event)
 //{
-//    GLFWInputManager* self = (GLFWInputManager*)Application::getPlatform()->getInputManager();
-//    KeyState state;
-//    state.key = (BrlsKeyboardScancode)key;
-//    state.mods = mods;
-//    state.pressed = action != GLFW_RELEASE;
-//    const char* key_name = glfwGetKeyName(key, scancode);
-////    if (key_name != NULL)
-////        Logger::debug("Key: {} / Code: {}", key_name, key);
-////    else
-////        Logger::debug("Key: NULL / Code: {}", key);
-//    self->getKeyboardKeyStateChanged()->fire(state);
+//    if (event == GLFW_CONNECTED) { controllersCount++; }
+//    else if (event == GLFW_DISCONNECTED) { controllersCount--; }
 //}
+
+// LT and RT do not exist here because they are axes
+static const size_t GLFW_BUTTONS_MAPPING[GLFW_GAMEPAD_BUTTON_MAX] = {
+    BUTTON_A, // GLFW_GAMEPAD_BUTTON_A
+    BUTTON_B, // GLFW_GAMEPAD_BUTTON_B
+    BUTTON_X, // GLFW_GAMEPAD_BUTTON_X
+    BUTTON_Y, // GLFW_GAMEPAD_BUTTON_Y
+    BUTTON_LB, // GLFW_GAMEPAD_BUTTON_LEFT_BUMPER
+    BUTTON_RB, // GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER
+    BUTTON_BACK, // GLFW_GAMEPAD_BUTTON_BACK
+    BUTTON_START, // GLFW_GAMEPAD_BUTTON_START
+    BUTTON_GUIDE, // GLFW_GAMEPAD_BUTTON_GUIDE
+    BUTTON_LSB, // GLFW_GAMEPAD_BUTTON_LEFT_THUMB
+    BUTTON_RSB, // GLFW_GAMEPAD_BUTTON_RIGHT_THUMB
+    BUTTON_UP, // GLFW_GAMEPAD_BUTTON_DPAD_UP
+    BUTTON_RIGHT, // GLFW_GAMEPAD_BUTTON_DPAD_RIGHT
+    BUTTON_DOWN, // GLFW_GAMEPAD_BUTTON_DPAD_DOWN
+    BUTTON_LEFT, // GLFW_GAMEPAD_BUTTON_DPAD_LEFT
+};
 
 GLFWInputManager::GLFWInputManager() {
     window = ((GLFWVideoContext*) Application::shared()->getVideoContext())->getGLFWWindow();
-    //    glfwSetCursorPosCallback(window, cursorCallback);
-    //    glfwSetKeyCallback(window, keyboardCallback);
+//    glfwSetJoystickCallback(glfwJoystickCallback);
 }
 
 InputManager* InputManager::shared() {
@@ -66,6 +83,26 @@ bool GLFWInputManager::getKeyDown(BrlsKeyboardScancode key) {
     return keysDown[key];
 }
 
+short GLFWInputManager::getGamepadsCount() {
+    return controllersCount;
+}
+
+bool GLFWInputManager::getButton(short controller, ControllerButton key) {
+    return buttons[controller][key];
+}
+
+bool GLFWInputManager::getButtonUp(short controller, ControllerButton key) {
+    return buttonsUp[controller][key];
+}
+
+bool GLFWInputManager::getButtonDown(short controller, ControllerButton key) {
+    return buttonsDown[controller][key];
+}
+
+float GLFWInputManager::getAxis(short controller, ControllerAxis axis) {
+    return this->axis[controller][axis];
+}
+
 int GLFWInputManager::touchCount() {
     return (int) touches.size();
 }
@@ -79,7 +116,7 @@ std::vector<UITouch*> GLFWInputManager::getTouches() {
 }
 
 void GLFWInputManager::updateKeyboard() {
-    for (int i = 0; i < BRLS_KBD_KEY_LAST; i++) {
+    for (int i = 0; i < _BRLS_KBD_KEY_LAST; i++) {
         bool key = glfwGetKey(this->window, i);
         if (keys[i] != key) {
             if (key) {
@@ -103,7 +140,7 @@ void GLFWInputManager::updateMouse() {
     glfwGetCursorPos(this->window, &x, &y);
     coursorPosition = Point(x, y);
 
-    for (int i = 0; i < BRLS_MOUSE_LAST; i++) {
+    for (int i = 0; i < _BRLS_MOUSE_LAST; i++) {
         bool button = glfwGetMouseButton(this->window, i);
         if (mouseButtons[i] != button) {
             if (button) {
@@ -168,8 +205,55 @@ void GLFWInputManager::updateTouch() {
     }
 }
 
+void GLFWInputManager::updateButton(short controller, ControllerButton button, bool newValue) {
+    if (buttons[controller][button] != newValue) {
+        if (newValue) {
+            buttonsDown[controller][button] = true;
+            buttonsUp[controller][button] = false;
+        }
+        else {
+            buttonsDown[controller][button] = false;
+            buttonsUp[controller][button] = true;
+        }
+        buttons[controller][button] = newValue;
+    } else {
+        buttonsDown[controller][button] = false;
+        buttonsUp[controller][button] = false;
+    }
+}
+
+void GLFWInputManager::updateGamepads() {
+    controllersCount = 0;
+    for (short i = 0; i < GLFW_JOYSTICK_LAST; i++) {
+        controllersCount += glfwJoystickPresent(i);
+    }
+
+    for (short controller = 0; controller < controllersCount; controller++) {
+        GLFWgamepadstate glfwState = {};
+        glfwGetGamepadState(controller, &glfwState);
+
+        for (size_t i = 0; i < GLFW_GAMEPAD_BUTTON_MAX; i++) {
+            size_t button          = GLFW_BUTTONS_MAPPING[i];
+            updateButton(controller, (ControllerButton) button, (bool)glfwState.buttons[i]);
+        }
+
+        updateButton(controller, BUTTON_LT, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] > 0.1f);
+        updateButton(controller, BUTTON_RT, glfwState.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] > 0.1f);
+
+        updateButton(controller, BUTTON_NAV_UP, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] < -0.5f || buttons[controller][BUTTON_UP] || keys[BRLS_KBD_KEY_UP]);
+        updateButton(controller, BUTTON_NAV_RIGHT, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_X] > 0.5f || buttons[controller][BUTTON_RIGHT] || keys[BRLS_KBD_KEY_RIGHT]);
+        updateButton(controller, BUTTON_NAV_DOWN, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] > 0.5f || buttons[controller][BUTTON_DOWN] || keys[BRLS_KBD_KEY_DOWN]);
+        updateButton(controller, BUTTON_NAV_LEFT, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_X] < -0.5f || buttons[controller][BUTTON_LEFT] || keys[BRLS_KBD_KEY_LEFT]);
+
+        for (size_t i = 0; i < GLFW_GAMEPAD_AXIS_MAX; i++) {
+            axis[controller][i] = glfwState.axes[i];
+        }
+    }
+}
+
 void GLFWInputManager::update() {
     updateKeyboard();
+    updateGamepads();
     updateMouse();
     updateTouch();
 

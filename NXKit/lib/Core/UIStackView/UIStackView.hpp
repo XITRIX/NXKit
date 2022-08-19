@@ -41,9 +41,11 @@ enum class AlignItems
 class UIStackView: public UIView {
 public:
     UIStackView(Axis axis);
+    UIStackView(Rect frame);
     UIStackView(): UIStackView(Axis::VERTICAL) {}
 
     void addSubview(UIView* view) override;
+    UIView* getNextFocus(NavigationDirection direction) override;
 
     void setAxis(Axis axis);
     Axis getAxis() { return axis; }
@@ -58,6 +60,7 @@ public:
     void setPaddingBottom(float bottom);
 private:
     Axis axis = Axis::VERTICAL;
+    int currentFocus = 0;
 };
 
 }

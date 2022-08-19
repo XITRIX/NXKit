@@ -52,6 +52,7 @@ private:
     std::string resourcesPath;
 
     bool mainLoopIteration();
+    void navigation();
     void render();
 
 };

@@ -90,7 +90,7 @@ void IOSVideoContext::clear(NVGcolor color)
                  color.b,
                  1.0f);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void IOSVideoContext::resetState()

@@ -56,12 +56,12 @@
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
 
-    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
+//    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
+//    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+//    glEnable(GL_BLEND);
+//    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    glEnable(GL_CULL_FACE);
+//    glDisable(GL_DEPTH_TEST);
 
     int winWidth = self.view.frame.size.width;
     int winHeight = self.view.frame.size.height;

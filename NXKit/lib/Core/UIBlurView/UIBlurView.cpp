@@ -41,7 +41,7 @@ static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float 
     if (image == NULL || lw <= 0 || lh <= 0)
         return 0;
 
-    int minim = 2;
+    int minim = 4;
     if (minim != 0) {
         shrinkImage(&image, lw, lh, minim);
 
@@ -60,7 +60,7 @@ static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float 
     }
 }
 
-UIBlurView::UIBlurView(Rect frame): UIView(frame) { }
+UIBlurView::UIBlurView(Rect frame): UIStackView() { }
 
 void UIBlurView::draw(NVGcontext *vgContext) {
     int img = getContextBluredImage(vgContext, frame.origin().x, frame.origin().y, frame.size().width, frame.size().height, blurRadius);

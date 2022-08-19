@@ -55,6 +55,8 @@ bool Application::mainLoop() {
 
     // Input
     InputManager::shared()->update();
+    navigation();
+
     UIEvent* event = new UIEvent();
     event->allTouches = InputManager::shared()->getTouches();
     keyWindow->sendEvent(event);
@@ -68,6 +70,29 @@ bool Application::mainLoop() {
     render();
 
     return true;
+}
+
+void Application::navigation() {
+    auto manager = InputManager::shared();
+    if (manager->getGamepadsCount() == 0 || focus == nullptr) return;
+
+    auto newFocus = focus;
+    if (manager->getButtonDown(0, BUTTON_NAV_UP)) {
+        newFocus = focus->getNextFocus(NavigationDirection::UP);
+    }
+    if (manager->getButtonDown(0, BUTTON_NAV_DOWN)) {
+        newFocus = focus->getNextFocus(NavigationDirection::DOWN);
+    }
+    if (manager->getButtonDown(0, BUTTON_NAV_LEFT)) {
+        newFocus = focus->getNextFocus(NavigationDirection::LEFT);
+    }
+    if (manager->getButtonDown(0, BUTTON_NAV_RIGHT)) {
+        newFocus = focus->getNextFocus(NavigationDirection::RIGHT);
+    }
+
+    if (newFocus && newFocus != focus) {
+        setFocus(newFocus);
+    }
 }
 
 UIView* Application::getFocus() {
@@ -98,9 +123,10 @@ void Application::render() {
 }
 
 void Application::flushContext() {
+//    nvgSave(this->videoContext->getNVGContext());
     nvgEndFrame(this->videoContext->getNVGContext());
 
-    nvgBeginFrame(videoContext->getNVGContext(), windowWidth, windowHeight, windowScale);
+//    nvgBeginFrame(videoContext->getNVGContext(), windowWidth, windowHeight, windowScale);
     //    nvgScale(videoContext->getNVGContext(), windowScale, windowScale);
 }
 

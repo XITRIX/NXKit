@@ -13,6 +13,7 @@
 #include "NXRect.hpp"
 #include "UIColor.hpp"
 #include "UIResponder.hpp"
+#include "UIEdgeInsets.hpp"
 #include "UIGestureRecognizer.hpp"
 #include "tweeny/tweeny.h"
 
@@ -25,7 +26,7 @@ namespace NXKit {
 class UIViewController;
 class UIWindow;
 
-enum NavigationDirection {
+enum class NavigationDirection {
     UP,
     RIGHT,
     DOWN,
@@ -62,11 +63,11 @@ public:
     UIView* hitTest(Point point, UIEvent* withEvent);
     bool point(Point insidePoint, UIEvent* withEvent);
 
-
+    UIWindow* getWindow();
     UIView* getSuperview();
 
-    UIView* getDefaultFocus();
-    UIView* getNextFocus(NavigationDirection direction);
+    virtual UIView* getDefaultFocus();
+    virtual UIView* getNextFocus(NavigationDirection direction);
 
     bool isFocused();
     virtual void becomeFocused() {}
@@ -120,6 +121,8 @@ public:
     void setNeedsLayout();
     void layoutIfNeeded();
     virtual void layoutSubviews();
+
+    virtual UIEdgeInsets safeAreaInsets();
 protected:
     YGNode* ygNode;
 

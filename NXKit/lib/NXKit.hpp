@@ -12,6 +12,7 @@
 #include "UIViewController.hpp"
 #include "UINavigationController.hpp"
 #include "UITabBarController.hpp"
+#include "UIScrollView.hpp"
 #include "UIBlurView.hpp"
 #include "UILabel.hpp"
 #include "Label.hpp"

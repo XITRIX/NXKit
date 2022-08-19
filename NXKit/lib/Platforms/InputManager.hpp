@@ -15,6 +15,54 @@
 
 namespace NXKit {
 
+typedef enum
+{
+    BUTTON_LT = 0,
+    BUTTON_LB,
+
+    BUTTON_LSB,
+
+    BUTTON_UP,
+    BUTTON_RIGHT,
+    BUTTON_DOWN,
+    BUTTON_LEFT,
+
+    BUTTON_BACK,
+    BUTTON_GUIDE,
+    BUTTON_START,
+
+    BUTTON_RSB,
+
+    BUTTON_Y,
+    BUTTON_B,
+    BUTTON_A,
+    BUTTON_X,
+
+    BUTTON_RB,
+    BUTTON_RT,
+
+    BUTTON_NAV_UP,
+    BUTTON_NAV_RIGHT,
+    BUTTON_NAV_DOWN,
+    BUTTON_NAV_LEFT,
+
+    _BUTTON_MAX,
+} ControllerButton;
+
+// Abstract axis enum - names correspond to a generic Xbox controller
+typedef enum
+{
+    LEFT_X,
+    LEFT_Y,
+
+    // No Z axis, LT and RT are in the buttons enum for the sake of simplicity
+
+    RIGHT_X, // also called 5th axis
+    RIGHT_Y, // also called 4th axis
+
+    _AXES_MAX,
+} ControllerAxis;
+
 /// HidKeyboardScancode
 /// Uses the same key codes as GLFW
 typedef enum {
@@ -145,32 +193,37 @@ typedef enum {
     BRLS_KBD_KEY_RIGHT_SUPER        = 347,
     BRLS_KBD_KEY_MENU               = 348,
 
-    BRLS_KBD_KEY_LAST
+    _BRLS_KBD_KEY_LAST
 } BrlsKeyboardScancode;
 
 typedef enum {
     BRLS_MOUSE_LKB = 0,
     BRLS_MOUSE_RKB = 1,
     BRLS_MOUSE_MKB = 2,
-    BRLS_MOUSE_LAST
+    _BRLS_MOUSE_LAST
 } BrlsMouseButton;
-
-struct Touch {
-    int id;
-    
-};
 
 class InputManager {
 public:
     static InputManager* shared();
 
     virtual Point getCoursorPosition() = 0;
+
     virtual bool getMouseButton(BrlsMouseButton button) = 0;
     virtual bool getMouseButtonUp(BrlsMouseButton button) = 0;
     virtual bool getMouseButtonDown(BrlsMouseButton button) = 0;
+
     virtual bool getKey(BrlsKeyboardScancode key) = 0;
     virtual bool getKeyUp(BrlsKeyboardScancode key) = 0;
     virtual bool getKeyDown(BrlsKeyboardScancode key) = 0;
+
+    virtual short getGamepadsCount() = 0;
+
+    virtual bool getButton(short controller, ControllerButton button) = 0;
+    virtual bool getButtonUp(short controller, ControllerButton button) = 0;
+    virtual bool getButtonDown(short controller, ControllerButton button) = 0;
+    
+    virtual float getAxis(short controller, ControllerAxis axis) = 0;
 
     virtual int touchCount() = 0;
     virtual UITouch* getTouch(int id) = 0;

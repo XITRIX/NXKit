@@ -7,6 +7,7 @@
 
 #include "UITabBarController.hpp"
 #include "UIStackView.hpp"
+#include <Core/UIScrollView/UIScrollView.hpp>
 #include "UILabel.hpp"
 
 namespace NXKit {
@@ -60,26 +61,35 @@ void UITabBarItem::setSelected(bool selected) {
     }
 }
 
-UITabBarController::UITabBarController(UIViewController* content): content(content) { }
+UITabBarController::UITabBarController(UIViewController* content): content(content) {
+}
 
 void UITabBarController::loadView() {
     UIStackView* view = new UIStackView(Axis::HORIZONTAL);
 
     tabs = new UIStackView(Axis::VERTICAL);
-    tabs->setPercentWidth(32);
-    tabs->backgroundColor = UIColor(240, 240, 240);
     tabs->setPadding(32, 40, 47, 80);
 
     contentView = new UIView();
     contentView->setGrow(1);
     //    contentView->clipToBounds = true;
     //    contentView->backgroundColor = UIColor(255, 0, 0);
+
+    addChild(content);
     contentView->addSubview(this->content->getView());
+    content->didMoveToParent(this);
+    
     //    contentView->setPaddingRight(140);
     //    contentView->setMarginRight(140);
     //    contentView->backgroundColor = UIColor(0, 255, 0);
 
-    view->addSubview(tabs);
+    UIScrollView* scrollView = new UIScrollView();
+    scrollView->setFixWidth(true);
+    scrollView->setPercentWidth(32);
+    scrollView->backgroundColor = UIColor(240, 240, 240);
+    scrollView->addSubview(tabs);
+
+    view->addSubview(scrollView);
     view->addSubview(contentView);
 
     setView(view);

@@ -7,23 +7,31 @@
 
 #include "UINavigationController.hpp"
 #include "UIStackView.hpp"
+#include "UIBlurView.hpp"
 #include "UILabel.hpp"
 
 namespace NXKit {
 
 UINavigationController::UINavigationController(UIViewController* rootController):
-rootController(rootController)
+    rootController(rootController)
 { }
 
 void UINavigationController::loadView() {
-    UIStackView *root = new UIStackView(Axis::VERTICAL);
+    UIView* root = new UIView();
     root->backgroundColor = UIColor(235, 235, 235);
+
+    overlay = new UIStackView(Axis::VERTICAL);
+    overlay->setJustifyContent(JustifyContent::SPACE_BETWEEN);
     //    root->backgroundColor = RED;
     //    root->cornerRadius = 40;
 
-    UIStackView *header = new UIStackView(Axis::HORIZONTAL);
-    //        header->backgroundColor = UIColor(255, 0, 0);
-    header->setSize(Size(UIView::AUTO, 88));
+    float headerHeight = 88;
+    float footerHeight = 73;
+    setAdditionalSafeAreaInsets(UIEdgeInsets(headerHeight, 0, 0, 0));
+
+    UIBlurView *header = new UIBlurView();
+    header->setAxis(Axis::HORIZONTAL);
+    header->setSize(Size(UIView::AUTO, headerHeight));
     header->setBorderBottom(1);
     header->setPaddingLeft(35);
     header->setPaddingRight(35);
@@ -40,9 +48,10 @@ void UINavigationController::loadView() {
     //
     header->addSubview(headerLabel);
 
-    UIStackView *footer = new UIStackView(Axis::HORIZONTAL);
+    UIBlurView *footer = new UIBlurView();
+    footer->setAxis(Axis::HORIZONTAL);
     //        footer->backgroundColor = UIColor(255, 255, 0);
-    footer->setSize(Size(UIView::AUTO, 73));
+    footer->setSize(Size(UIView::AUTO, footerHeight));
     footer->setBorderTop(1);
     footer->setPaddingLeft(35);
     footer->setPaddingRight(35);
@@ -50,15 +59,20 @@ void UINavigationController::loadView() {
     footer->setMarginRight(30);
     footer->setShrink(0);
 
-    root->addSubview(header);
+    overlay->addSubview(header);
+    
+    addChild(rootController);
     root->addSubview(rootController->getView());
+    rootController->didMoveToParent(this);
+
     rootController->getView()->setGrow(1);
     rootController->getView()->setShrink(1);
-    root->addSubview(footer);
+    overlay->addSubview(footer);
 
     //    UIView* view = new UIView();
     //    view->addSubview(root);
 
+    root->addSubview(overlay);
     setView(root);
 }
 
@@ -74,6 +88,9 @@ void UINavigationController::viewDidLoad() {
 
 void UINavigationController::viewDidLayoutSubviews() {
     UIViewController::viewDidLayoutSubviews();
+    overlay->setSize(getView()->frame.size());
+    printf("Width: %f, Height: %f", getView()->frame.size().width, getView()->frame.size().height);
+    rootController->getView()->setSize(getView()->frame.size());
     //    getView()->setSize(getView()->frame.size());
 }
 

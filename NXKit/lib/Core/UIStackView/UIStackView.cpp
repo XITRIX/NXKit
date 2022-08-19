@@ -14,6 +14,11 @@ UIStackView::UIStackView(Axis axis): UIView() {
     //    YGNodeStyleSetJustifyContent(this->ygNode, YGJustify::YGJustifyCenter);
 }
 
+UIStackView::UIStackView(Rect frame): UIView(frame) {
+    setAxis(Axis::VERTICAL);
+    //    YGNodeStyleSetJustifyContent(this->ygNode, YGJustify::YGJustifyCenter);
+}
+
 void UIStackView::addSubview(UIView* view) {
     YGNodeInsertChild(this->ygNode, view->getYGNode(), (int) getSubviews().size());
     UIView::addSubview(view);
@@ -29,6 +34,25 @@ void UIStackView::setAxis(Axis axis) {
             break;
     }
     setNeedsLayout();
+}
+
+UIView* UIStackView::getNextFocus(NavigationDirection direction) {
+    if (currentFocus >= getSubviews().size()) currentFocus = (int) getSubviews().size() - 1;
+
+    if (direction == NavigationDirection::UP || direction == NavigationDirection::LEFT) {
+        if (currentFocus <= 0) return UIView::getNextFocus(direction);
+        currentFocus--;
+    }
+
+    if (direction == NavigationDirection::DOWN || direction == NavigationDirection::RIGHT) {
+        if (currentFocus >= getSubviews().size() - 1) return UIView::getNextFocus(direction);
+        currentFocus++;
+    }
+
+    auto newFocus = getSubviews()[currentFocus]->getDefaultFocus();
+    if (newFocus) return newFocus;
+
+    return UIView::getNextFocus(direction);
 }
 
 void UIStackView::setJustifyContent(JustifyContent justify)

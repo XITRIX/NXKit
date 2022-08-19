@@ -13,8 +13,18 @@ namespace NXKit {
 
 class UIScrollView: public UIView {
 public:
-    NXPoint getContentOffset();
-    void setContentOffset(NXPoint offset);
+    UIScrollView();
+    Point getContentOffset();
+    void setContentOffset(Point offset);
+
+    void layoutSubviews() override;
+
+    void setFixWidth(bool fix);
+    void setFixHeight(bool fix);
+    
+private:
+    UIEdgeInsets lastSafeAreaInset;
+    bool fixWidth = false, fixHeight = false;
 };
 
 }

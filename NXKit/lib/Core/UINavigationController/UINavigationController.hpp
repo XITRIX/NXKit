@@ -8,6 +8,7 @@
 #pragma once
 
 #include "UIViewController.hpp"
+#include "UIStackView.hpp"
 
 namespace NXKit {
 
@@ -19,6 +20,7 @@ public:
     void viewDidLayoutSubviews() override;
 private:
     UIView* rootView;
+    UIStackView* overlay;
     UIViewController* rootController;
 };
 

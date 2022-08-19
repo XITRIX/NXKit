@@ -28,7 +28,6 @@ private:
     UILabel* label = nullptr;
     UIView* selectionBar = nullptr;
 
-
     bool selected = false;
 };
 

@@ -29,8 +29,22 @@ public:
     virtual void viewWillLayoutSubviews() {}
     virtual void viewDidLayoutSubviews() {}
 
+    std::vector<UIViewController*> getChildren() { return children; }
+    UIViewController* getParent() { return parent; }
+
+    void addChild(UIViewController* child);
+    void willMoveToParent(UIViewController* parent);
+    void didMoveToParent(UIViewController* parent);
+    void removeFromParent();
+
+    UIEdgeInsets getAdditionalSafeAreaInsets() { return additionalSafeAreaInsets; }
+    void setAdditionalSafeAreaInsets(UIEdgeInsets insets);
+
     UIResponder* getNext() override;
 private:
+    UIEdgeInsets additionalSafeAreaInsets;
+    std::vector<UIViewController*> children;
+    UIViewController* parent = nullptr;
     UIView* view = nullptr;
 };
 

@@ -32,6 +32,10 @@
 		7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE502878EA220091DEF9 /* UIEvent.cpp */; };
 		7C53FE562878ED350091DEF9 /* UIViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE542878ED350091DEF9 /* UIViewController.cpp */; };
 		7C53FE5B2878F4E60091DEF9 /* UIWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE592878F4E60091DEF9 /* UIWindow.cpp */; };
+		7C58C65428AF85A80039F0E5 /* NXTransform3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C65228AF85A80039F0E5 /* NXTransform3D.cpp */; };
+		7C58C65528AF85AD0039F0E5 /* NXTransform3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C65228AF85A80039F0E5 /* NXTransform3D.cpp */; };
+		7C58C65B28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C65928AFBAD50039F0E5 /* UIEdgeInsets.cpp */; };
+		7C58C65C28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C65928AFBAD50039F0E5 /* UIEdgeInsets.cpp */; };
 		7C65882528A29CD40036AAD5 /* ViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E45288165E9009A6B95 /* ViewController.cpp */; };
 		7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */; };
 		7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD12873748B0082D3AC /* UIColor.cpp */; };
@@ -192,6 +196,10 @@
 		7C53FE572878F13D0091DEF9 /* NXKit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NXKit.hpp; sourceTree = "<group>"; };
 		7C53FE592878F4E60091DEF9 /* UIWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIWindow.cpp; sourceTree = "<group>"; };
 		7C53FE5A2878F4E60091DEF9 /* UIWindow.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIWindow.hpp; sourceTree = "<group>"; };
+		7C58C65228AF85A80039F0E5 /* NXTransform3D.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NXTransform3D.cpp; sourceTree = "<group>"; };
+		7C58C65328AF85A80039F0E5 /* NXTransform3D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NXTransform3D.hpp; sourceTree = "<group>"; };
+		7C58C65928AFBAD50039F0E5 /* UIEdgeInsets.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIEdgeInsets.cpp; sourceTree = "<group>"; };
+		7C58C65A28AFBAD50039F0E5 /* UIEdgeInsets.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIEdgeInsets.hpp; sourceTree = "<group>"; };
 		7C78EBCD2873748B0082D3AC /* UIBlurView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIBlurView.hpp; sourceTree = "<group>"; };
 		7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIBlurView.cpp; sourceTree = "<group>"; };
 		7C78EBD02873748B0082D3AC /* UIColor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIColor.hpp; sourceTree = "<group>"; };
@@ -573,6 +581,24 @@
 			path = UIWindow;
 			sourceTree = "<group>";
 		};
+		7C58C65128AF859A0039F0E5 /* NXTransform3D */ = {
+			isa = PBXGroup;
+			children = (
+				7C58C65328AF85A80039F0E5 /* NXTransform3D.hpp */,
+				7C58C65228AF85A80039F0E5 /* NXTransform3D.cpp */,
+			);
+			path = NXTransform3D;
+			sourceTree = "<group>";
+		};
+		7C58C65828AFBAC00039F0E5 /* UIEdgeInsets */ = {
+			isa = PBXGroup;
+			children = (
+				7C58C65A28AFBAD50039F0E5 /* UIEdgeInsets.hpp */,
+				7C58C65928AFBAD50039F0E5 /* UIEdgeInsets.cpp */,
+			);
+			path = UIEdgeInsets;
+			sourceTree = "<group>";
+		};
 		7C78EBCB2873743C0082D3AC /* Driver */ = {
 			isa = PBXGroup;
 			children = (
@@ -774,6 +800,8 @@
 		7CA960742871F841009E0953 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				7C58C65828AFBAC00039F0E5 /* UIEdgeInsets */,
+				7C58C65128AF859A0039F0E5 /* NXTransform3D */,
 				7C47495E2886062500C5A988 /* NXAffineTransform */,
 				7C47494F2884603F00C5A988 /* UIScrollView */,
 				7C53FE582878F4DB0091DEF9 /* UIWindow */,
@@ -1096,6 +1124,7 @@
 				7CE9B5DE2874917F00659D24 /* experiments.cpp in Sources */,
 				7C239639287E177900973CC0 /* NXPoint.cpp in Sources */,
 				7C4749522884604B00C5A988 /* UIScrollView.cpp in Sources */,
+				7C58C65B28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */,
 				7C47495628854E2900C5A988 /* GLFWInputManager.cpp in Sources */,
 				7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */,
 				7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */,
@@ -1124,6 +1153,7 @@
 				7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */,
 				7C44163C28777D9B0076663D /* UIResponder.cpp in Sources */,
 				7C4749612886063B00C5A988 /* NXAffineTransform.cpp in Sources */,
+				7C58C65428AF85A80039F0E5 /* NXTransform3D.cpp in Sources */,
 				7CE9B5DC2874917F00659D24 /* Yoga.cpp in Sources */,
 				7C888E4328816547009A6B95 /* UINavigationController.cpp in Sources */,
 				7CE9B5DA2874917F00659D24 /* Utils.cpp in Sources */,
@@ -1160,6 +1190,7 @@
 				7CA9C48E2882C43100E47DB3 /* Time.cpp in Sources */,
 				7CA9C4A82882C84E00E47DB3 /* glad.c in Sources */,
 				7CA9C4872882C43100E47DB3 /* UILabel.cpp in Sources */,
+				7C58C65528AF85AD0039F0E5 /* NXTransform3D.cpp in Sources */,
 				7CA9C47C2882ADD700E47DB3 /* main.m in Sources */,
 				7CA9C4A02882C83F00E47DB3 /* YGValue.cpp in Sources */,
 				7CA9C4892882C43100E47DB3 /* UITabBarController.cpp in Sources */,
@@ -1184,6 +1215,7 @@
 				7CA389722882F8C6005C7A91 /* ios_main.mm in Sources */,
 				7CA9C4B62882D31900E47DB3 /* ios_video.cpp in Sources */,
 				7CA9C48A2882C43100E47DB3 /* UIStackView.cpp in Sources */,
+				7C58C65C28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */,
 				7CA9C49E2882C83F00E47DB3 /* log.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

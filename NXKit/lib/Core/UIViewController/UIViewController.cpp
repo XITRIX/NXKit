@@ -34,10 +34,33 @@ void UIViewController::loadViewIfNeeded() {
 }
 
 UIResponder* UIViewController::getNext() {
-    //    if (typeid(view->getSuperview()) == typeid(UIWindow)) {
-    //        return view->getSuperview();
-    //    }
+    auto window = dynamic_cast<UIWindow*>(view->getSuperview());
+    if (window) return window;
+    if (parent) return parent;
     return nullptr;
+}
+
+void UIViewController::addChild(UIViewController* child) {
+    children.push_back(child);
+    child->willMoveToParent(this);
+    child->viewWillAppear(true);
+}
+
+void UIViewController::willMoveToParent(UIViewController* parent) {
+    this->parent = parent;
+}
+
+void UIViewController::didMoveToParent(UIViewController* parent) {
+    viewDidAppear(true);
+}
+
+void UIViewController::removeFromParent() {
+    std::remove(parent->children.begin(), parent->children.end(), this);
+    viewDidDisappear(true);
+}
+
+void UIViewController::setAdditionalSafeAreaInsets(UIEdgeInsets insets) {
+    additionalSafeAreaInsets = insets;
 }
 
 }

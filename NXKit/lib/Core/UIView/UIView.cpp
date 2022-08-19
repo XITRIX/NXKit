@@ -6,6 +6,7 @@
 //
 
 #include "UIView.hpp"
+#include "UIWindow.hpp"
 #include "UIViewController.hpp"
 #include "Application.hpp"
 #include "InputManager.hpp"
@@ -162,6 +163,7 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     nvgRestore(vgContext);
     nvgRestore(vgContext);
 
+//    nvgTranslate(vgContext, frame.origin().x , frame.origin().y);
     // Borders
     if (borderThickness > 0) {
         float offset = borderThickness / 2;
@@ -364,6 +366,50 @@ UIView* UIView::hitTest(Point point, UIEvent* withEvent) {
 
 bool UIView::point(Point insidePoint, UIEvent *withEvent) {
     return bounds.contains(insidePoint);
+}
+
+UIEdgeInsets UIView::safeAreaInsets() {
+    auto insets = UIEdgeInsets::zero;
+    if (controller && controller->getParent()) {
+        insets += controller->getParent()->getAdditionalSafeAreaInsets();
+    }
+    if (superview) {
+        insets += superview->safeAreaInsets();
+
+        if (frame.origin().y > 0 && insets.top > 0) {
+            insets.top -= frame.origin().y;
+            if (insets.top < 0) insets.top = 0;
+        }
+
+        if (frame.origin().x > 0 || insets.left > 0) {
+            insets.left -= frame.origin().x;
+            if (insets.left < 0) insets.left = 0;
+        }
+
+        auto right = superview->frame.size().width - frame.origin().x - frame.size().width;
+        if (right > 0 || insets.right > 0) {
+            insets.right -= right;
+            if (insets.right < 0) insets.right = 0;
+        }
+
+        auto bottom = superview->frame.size().height - frame.origin().y - frame.size().height;
+        if (bottom > 0 || insets.bottom > 0) {
+            insets.bottom -= bottom;
+            if (insets.bottom < 0) insets.bottom = 0;
+        }
+    }
+
+    return insets;
+}
+
+UIWindow* UIView::getWindow() {
+    auto superview = this;
+    while (superview) {
+        auto cast = dynamic_cast<UIWindow*>(superview);
+        if (cast) return cast;
+        superview = superview->getSuperview();
+    }
+    return nullptr;
 }
 
 UIView* UIView::getSuperview() {

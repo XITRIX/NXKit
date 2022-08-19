@@ -20,5 +20,6 @@ public:
     void touchesEnded(std::vector<UITouch*> touches, UIEvent* withEvent) override;
     
 private:
-//    UILabel* body = nullptr;
+    UIScrollView* scroll = nullptr;
+    UILabel* text = nullptr;
 };
