@@ -8,11 +8,22 @@
 #pragma once
 
 #include <Core/UIView/UIView.hpp>
+#include <Core/UIPanGestureRecognizer/UIPanGestureRecognizer.hpp>
 
 namespace NXKit {
 
+class UIScrollView;
+class UIScrollViewDelegate {
+public:
+    virtual void scrollViewWillBeginDragging(UIScrollView* scrollView) {}
+    virtual void scrollViewDidScroll(UIScrollView* scrollView) {}
+    virtual void scrollViewDidEndDragging(UIScrollView* scrollView) {}
+};
+
 class UIScrollView: public UIView {
 public:
+    UIScrollViewDelegate* delegate = nullptr;
+
     UIScrollView();
     Point getContentOffset();
     void setContentOffset(Point offset);
@@ -21,10 +32,14 @@ public:
 
     void setFixWidth(bool fix);
     void setFixHeight(bool fix);
-    
+
 private:
+    UIPanGestureRecognizer* panGestureRecognizer = new UIPanGestureRecognizer();
     UIEdgeInsets lastSafeAreaInset;
     bool fixWidth = false, fixHeight = false;
+    bool dragging = false;
+
+    void onPan();
 };
 
 }

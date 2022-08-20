@@ -36,7 +36,7 @@ void UIWindow::sendEvent(UIEvent* event) {
     for (auto touch: allTouches) {
         switch (touch->phase) {
             case UITouchPhase::BEGIN:
-                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->touchesBegan({ touch }, event); });
+                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->_touchesBegan({ touch }, event); });
 
                 if (!touch->hasBeenCancelledByAGestureRecognizer) {
                     touch->view->touchesBegan({ touch }, event);
@@ -45,7 +45,7 @@ void UIWindow::sendEvent(UIEvent* event) {
             case UITouchPhase::MOVED:
                 if (touch->previousAbsoluteLocation == touch->absoluteLocation) break;
                 
-                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->touchesMoved({ touch }, event); });
+                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->_touchesMoved({ touch }, event); });
 
                 if (!touch->hasBeenCancelledByAGestureRecognizer) {
                     touch->view->touchesMoved({ touch }, event);
@@ -53,7 +53,7 @@ void UIWindow::sendEvent(UIEvent* event) {
                 break;
             case UITouchPhase::ENDED:
                 bool hasBeenCancelledByAGestureRecognizer = touch->hasBeenCancelledByAGestureRecognizer;
-                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->touchesEnded({ touch }, event); });
+                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->_touchesEnded({ touch }, event); });
 
                 if (!hasBeenCancelledByAGestureRecognizer) {
                     touch->view->touchesEnded({ touch }, event);

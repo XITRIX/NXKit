@@ -23,6 +23,8 @@ public:
 
     NVGcolor raw();
 
+    bool operator==(const UIColor& rhs);
+
     static UIColor clear;
     static UIColor red;
     static UIColor green;

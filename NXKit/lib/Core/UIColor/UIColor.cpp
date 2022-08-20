@@ -40,4 +40,8 @@ NVGcolor UIColor::raw() {
     return nvgRGBA(r(), g(), b(), a());
 }
 
+bool UIColor::operator==(const UIColor& rhs) {
+    return value == rhs.value;
+}
+
 }

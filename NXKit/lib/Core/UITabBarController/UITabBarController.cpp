@@ -7,7 +7,9 @@
 
 #include "UITabBarController.hpp"
 #include "UIStackView.hpp"
+#include <Core/Application/Application.hpp>
 #include <Core/UIScrollView/UIScrollView.hpp>
+#include <Core/UITapGestureRecognizer/UITapGestureRecognizer.hpp>
 #include "UILabel.hpp"
 
 namespace NXKit {
@@ -32,6 +34,18 @@ UITabBarItem::UITabBarItem() {
 
     setSelected(false);
     canBecomeFocused = true;
+
+    auto tap = new UITapGestureRecognizer();
+    tap->onStateChanged = [this](UIGestureRecognizerState state) {
+        switch (state) {
+            case UIGestureRecognizerState::ENDED:
+                Application::shared()->setFocus(this);
+                break;
+
+            default: break;
+        }
+    };
+    addGestureRecognizer(tap);
 }
 
 void UITabBarItem::setTitle(std::string text) {

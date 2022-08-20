@@ -10,6 +10,21 @@
 namespace NXKit {
 
 UIScrollView::UIScrollView() {
+    panGestureRecognizer->onStateChanged = [this](UIGestureRecognizerState state) {
+        switch (state) {
+            case UIGestureRecognizerState::CHANGED:
+                if (!dragging) {
+                    dragging = true;
+                    if (delegate) delegate->scrollViewWillBeginDragging(this);
+                }
+                onPan();
+                break;
+            case UIGestureRecognizerState::ENDED:
+                dragging = false;
+            default: break;
+        }
+    };
+    addGestureRecognizer(panGestureRecognizer);
 }
 
 Point UIScrollView::getContentOffset() {
@@ -50,6 +65,15 @@ void UIScrollView::layoutSubviews() {
         setContentOffset(offset);
         lastSafeAreaInset = safeAreaInset;
     }
+}
+
+void UIScrollView::onPan() {
+    Point translation = panGestureRecognizer->translationInView(this);
+    panGestureRecognizer->setTranslation(Point(), this);
+
+    Point newOffset = getContentOffset() - translation;
+    printf("newOffset X: %f, Y:%f", newOffset.x, newOffset.y);
+    setContentOffset(newOffset);
 }
 
 }

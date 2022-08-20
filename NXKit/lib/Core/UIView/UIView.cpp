@@ -10,6 +10,7 @@
 #include "UIViewController.hpp"
 #include "Application.hpp"
 #include "InputManager.hpp"
+#include "UIStackView.hpp"
 
 namespace NXKit {
 
@@ -290,6 +291,7 @@ UIView* UIView::getNextFocus(NavigationDirection direction) {
 }
 
 void UIView::addGestureRecognizer(UIGestureRecognizer* gestureRecognizer) {
+    gestureRecognizer->view = this;
     gestureRecognizers.push_back(gestureRecognizer);
 }
 
@@ -360,6 +362,9 @@ UIView* UIView::hitTest(Point point, UIEvent* withEvent) {
         UIView* test = subviews[i]->hitTest(convertedPoint, withEvent);
         if (test) return test;
     }
+
+    if (dynamic_cast<UIStackView*>(this) && !this->canBecomeFocused)
+        return nullptr;
 
     return this;
 }
