@@ -7,15 +7,15 @@
 
 #pragma once
 
-#include "Geometry.hpp"
-#include "NXPoint.hpp"
-#include "NXSize.hpp"
-#include "NXRect.hpp"
-#include "UIColor.hpp"
-#include "UIResponder.hpp"
-#include "UIEdgeInsets.hpp"
-#include "UIGestureRecognizer.hpp"
-#include "tweeny/tweeny.h"
+#include <Core/Geometry/Geometry.hpp>
+#include <Core/Utils/Animation/NXPoint/NXPoint.hpp>
+#include <Core/Utils/Animation/NXSize/NXSize.hpp>
+#include <Core/Utils/Animation/NXRect/NXRect.hpp>
+#include <Core/UIColor/UIColor.hpp>
+#include <Core/UIResponder/UIResponder.hpp>
+#include <Core/UIEdgeInsets/UIEdgeInsets.hpp>
+#include <Core/UIGestureRecognizer/UIGestureRecognizer.hpp>
+#include <tweeny/tweeny.h>
 
 #include <yoga/YGNode.h>
 

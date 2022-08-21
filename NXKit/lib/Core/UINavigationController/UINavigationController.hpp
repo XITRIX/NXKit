@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "UIViewController.hpp"
-#include "UIStackView.hpp"
+#include <Core/UIViewController/UIViewController.hpp>
+#include <Core/UIStackView/UIStackView.hpp>
 
 namespace NXKit {
 

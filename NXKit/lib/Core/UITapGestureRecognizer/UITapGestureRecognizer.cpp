@@ -5,7 +5,7 @@
 //  Created by Даниил Виноградов on 20.08.2022.
 //
 
-#include "UITapGestureRecognizer.hpp"
+#include <Core/UITapGestureRecognizer/UITapGestureRecognizer.hpp>
 
 namespace NXKit {
 

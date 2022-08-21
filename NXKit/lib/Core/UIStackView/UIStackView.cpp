@@ -5,7 +5,7 @@
 //  Created by Даниил Виноградов on 05.07.2022.
 //
 
-#include "UIStackView.hpp"
+#include <Core/UIStackView/UIStackView.hpp>
 
 namespace NXKit {
 

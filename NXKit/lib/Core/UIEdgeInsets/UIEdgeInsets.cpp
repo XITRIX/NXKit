@@ -5,7 +5,7 @@
 //  Created by Даниил Виноградов on 19.08.2022.
 //
 
-#include "UIEdgeInsets.hpp"
+#include <Core/UIEdgeInsets/UIEdgeInsets.hpp>
 
 namespace NXKit {
 

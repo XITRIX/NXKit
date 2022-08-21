@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "nanovg.h"
+#include <nanovg.h>
 
 namespace NXKit {
 

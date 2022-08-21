@@ -16,7 +16,7 @@
 
 //#include <borealis/core/application.hpp>
 //#include <borealis/core/logger.hpp>
-#include "GLFWVideoContext.hpp"
+#include <Platforms/Universal/GLFWVideoContext.hpp>
 
 #define GLM_FORCE_PURE
 #define GLM_ENABLE_EXPERIMENTAL
@@ -30,7 +30,7 @@
 #include <switch.h>
 #endif
 
-#include "Application.hpp"
+#include <Core/Application/Application.hpp>
 
 namespace NXKit {
 

@@ -5,7 +5,7 @@
 //  Created by Даниил Виноградов on 08.07.2022.
 //
 
-#include "UIGestureRecognizer.hpp"
+#include <Core/UIGestureRecognizer/UIGestureRecognizer.hpp>
 #include <Core/UITouch/UITouch.hpp>
 
 namespace NXKit {

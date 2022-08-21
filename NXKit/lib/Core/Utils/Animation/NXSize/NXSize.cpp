@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include "NXSize.hpp"
+#include <Core/Utils/Animation/NXSize/NXSize.hpp>
 #include <vector>
 
 namespace NXKit {

@@ -5,8 +5,8 @@
 //  Created by Даниил Виноградов on 09.07.2022.
 //
 
-#include "UIViewController.hpp"
-#include "UIWindow.hpp"
+#include <Core/UIViewController/UIViewController.hpp>
+#include <Core/UIWindow/UIWindow.hpp>
 
 #include <typeinfo>
 

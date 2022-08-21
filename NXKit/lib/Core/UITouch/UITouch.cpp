@@ -5,8 +5,8 @@
 //  Created by Даниил Виноградов on 08.07.2022.
 //
 
-#include "UITouch.hpp"
-#include "UIView.hpp"
+#include <Core/UITouch/UITouch.hpp>
+#include <Core/UIView/UIView.hpp>
 
 namespace NXKit {
 

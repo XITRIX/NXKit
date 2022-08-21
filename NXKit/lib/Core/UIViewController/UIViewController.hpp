@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "UIResponder.hpp"
-#include "UIView.hpp"
+#include <Core/UIResponder/UIResponder.hpp>
+#include <Core/UIView/UIView.hpp>
 
 namespace NXKit {
 

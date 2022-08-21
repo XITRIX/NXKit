@@ -5,11 +5,8 @@
 //  Created by Даниил Виноградов on 06.07.2022.
 //
 
-#include "NXKit.hpp"
-#include "UINavigationController.hpp"
-#include "UITabBarController.hpp"
-#include "ViewController.hpp"
-#include "GLFWVideoContext.hpp"
+#include <NXKit.hpp>
+#include <Platforms/Universal/GLFWVideoContext.hpp>
 
 constexpr uint32_t ORIGINAL_WINDOW_WIDTH  = 1280;
 constexpr uint32_t ORIGINAL_WINDOW_HEIGHT = 720;

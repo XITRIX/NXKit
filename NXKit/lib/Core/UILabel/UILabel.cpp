@@ -5,9 +5,9 @@
 //  Created by Даниил Виноградов on 09.06.2022.
 //
 
-#include "UILabel.hpp"
-#include "Application.hpp"
-#include "FontManager.hpp"
+#include <Core/UILabel/UILabel.hpp>
+#include <Core/Application/Application.hpp>
+#include <Core/Utils/FontManager/FontManager.hpp>
 
 namespace NXKit {
 

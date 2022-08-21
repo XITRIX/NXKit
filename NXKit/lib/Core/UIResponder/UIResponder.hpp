@@ -9,8 +9,8 @@
 
 #include <vector>
 
-#include "UITouch.hpp"
-#include "UIEvent.hpp"
+#include <Core/UITouch/UITouch.hpp>
+#include <Core/UIEvent/UIEvent.hpp>
 
 namespace NXKit {
 

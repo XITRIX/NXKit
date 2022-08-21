@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include "NXRect.hpp"
+#include <Core/Utils/Animation/NXRect/NXRect.hpp>
 #include <vector>
 
 namespace NXKit {

@@ -5,12 +5,12 @@
 //  Created by Даниил Виноградов on 15.07.2022.
 //
 
-#include "UITabBarController.hpp"
-#include "UIStackView.hpp"
+#include <Core/UITabBarController/UITabBarController.hpp>
+#include <Core/UIStackView/UIStackView.hpp>
 #include <Core/Application/Application.hpp>
 #include <Core/UIScrollView/UIScrollView.hpp>
 #include <Core/UITapGestureRecognizer/UITapGestureRecognizer.hpp>
-#include "UILabel.hpp"
+#include <Core/UILabel/UILabel.hpp>
 
 namespace NXKit {
 

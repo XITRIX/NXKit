@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include "NXFloat.hpp"
+#include <Core/Utils/Animation/NXFloat/NXFloat.hpp>
 #include <vector>
 
 namespace NXKit {

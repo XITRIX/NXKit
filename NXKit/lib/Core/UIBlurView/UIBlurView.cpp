@@ -5,9 +5,9 @@
 //  Created by Даниил Виноградов on 09.06.2022.
 //
 
-#include "Application.hpp"
-#include "UIBlurView.hpp"
-#include "GaussianBlur.hpp"
+#include <Core/Application/Application.hpp>
+#include <Core/UIBlurView/UIBlurView.hpp>
+#include <Core/Utils/GaussianBlur/GaussianBlur.hpp>
 
 namespace NXKit {
 

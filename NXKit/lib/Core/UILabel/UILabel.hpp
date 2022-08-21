@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "UIView.hpp"
+#include <Core/UIView/UIView.hpp>
 #include <string>
 
 namespace NXKit {

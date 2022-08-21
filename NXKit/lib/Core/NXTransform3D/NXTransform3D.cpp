@@ -5,7 +5,7 @@
 //  Created by Даниил Виноградов on 19.08.2022.
 //
 
-#include "NXTransform3D.hpp"
+#include <Core/NXTransform3D/NXTransform3D.hpp>
 
 namespace NXKit {
 

@@ -7,13 +7,13 @@
 
 #include <math.h>
 
-#include "Application.hpp"
+#include <Core/Application/Application.hpp>
 #include <Platforms/InputManager.hpp>
-#include "UIView.hpp"
-#include "UIWindow.hpp"
-#include "Time.hpp"
-#include "NXFloat.hpp"
-#include "video.hpp"
+#include <Core/UIView/UIView.hpp>
+#include <Core/UIWindow/UIWindow.hpp>
+#include <Core/Utils/Animation/Core/Time.hpp>
+#include <Core/Utils/Animation/NXFloat/NXFloat.hpp>
+#include <Core/Driver/Video/video.hpp>
 
 #ifdef __SWITCH__
 #include <switch.h>

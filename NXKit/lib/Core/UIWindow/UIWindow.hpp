@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "UIViewController.hpp"
+#include <Core/UIViewController/UIViewController.hpp>
 
 namespace NXKit {
 

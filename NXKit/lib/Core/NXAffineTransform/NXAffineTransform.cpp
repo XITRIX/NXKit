@@ -5,7 +5,7 @@
 //  Created by Даниил Виноградов on 19.07.2022.
 //
 
-#include "NXAffineTransform.hpp"
+#include <Core/NXAffineTransform/NXAffineTransform.hpp>
 
 namespace NXKit {
 

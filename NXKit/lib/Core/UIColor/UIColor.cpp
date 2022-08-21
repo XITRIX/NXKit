@@ -5,7 +5,7 @@
 //  Created by Даниил Виноградов on 09.06.2022.
 //
 
-#include "UIColor.hpp"
+#include <Core/UIColor/UIColor.hpp>
 
 namespace NXKit {
 

@@ -5,8 +5,8 @@
 //  Created by Даниил Виноградов on 06.07.2022.
 //
 
-#include "FontManager.hpp"
-#include "Application.hpp"
+#include <Core/Utils/FontManager/FontManager.hpp>
+#include <Core/Application/Application.hpp>
 
 #include <nanovg.h>
 

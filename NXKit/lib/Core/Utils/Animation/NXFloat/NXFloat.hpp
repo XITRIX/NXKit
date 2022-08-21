@@ -18,7 +18,7 @@
 
 #include <tweeny/tweeny.h>
 
-#include "Time.hpp"
+#include <Core/Utils/Animation/Core/Time.hpp>
 
 namespace NXKit {
 

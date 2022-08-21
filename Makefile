@@ -59,36 +59,6 @@ SOURCES  := $(SOURCES) \
 INCLUDES := $(INCLUDES) \
 			NXKit/lib \
 			NXKit/lib/Platforms/Universal \
-			NXKit/lib/Core/Application \
-			NXKit/lib/Core/Driver/Video \
-			NXKit/lib/Core/Geometry \
-			NXKit/lib/Core/NXAffineTransform \
-			NXKit/lib/Core/NXTransform3D \
-			NXKit/lib/Core/UIAppDelegate \
-			NXKit/lib/Core/UIBlurView \
-			NXKit/lib/Core/UIColor \
-			NXKit/lib/Core/UIEdgeInsets \
-			NXKit/lib/Core/UIEvent \
-			NXKit/lib/Core/UIGestureRecognizer \
-			NXKit/lib/Core/UILabel \
-			NXKit/lib/Core/UINavigationController \
-			NXKit/lib/Core/UIPanGestureRecognizer \
-			NXKit/lib/Core/UIResponder \
-			NXKit/lib/Core/UIScrollView \
-			NXKit/lib/Core/UIStackView \
-			NXKit/lib/Core/UITabBarController \
-			NXKit/lib/Core/UITapGestureRecognizer \
-			NXKit/lib/Core/UITouch \
-			NXKit/lib/Core/UIView \
-			NXKit/lib/Core/UIViewController \
-			NXKit/lib/Core/UIWindow \
-			NXKit/lib/Core/Utils/GaussianBlur \
-			NXKit/lib/Core/Utils/Animation/Core \
-			NXKit/lib/Core/Utils/Animation/NXFloat \
-			NXKit/lib/Core/Utils/Animation/NXPoint \
-			NXKit/lib/Core/Utils/Animation/NXRect \
-			NXKit/lib/Core/Utils/Animation/NXSize \
-			NXKit/lib/Core/Utils/FontManager \
 			NXKit/lib/extern/include/nanovg-gl/ \
 			NXKit/lib/extern/include \
 			NXKit/lib/extern/lib/yoga/src

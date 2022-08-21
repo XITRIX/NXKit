@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "video.hpp"
+#include <Core/Driver/Video/video.hpp>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>

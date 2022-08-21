@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "Geometry.hpp"
-#include "UIGestureRecognizer.hpp"
+#include <Core/Geometry/Geometry.hpp>
+#include <Core/UIGestureRecognizer/UIGestureRecognizer.hpp>
 
 #include <ctime>
 #include <vector>

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include "NXPoint.hpp"
+#include <Core/Utils/Animation/NXPoint/NXPoint.hpp>
 #include <vector>
 
 namespace NXKit {

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		7C0638F32876215100621093 /* FontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F12876215100621093 /* FontManager.cpp */; };
 		7C0638F42876233200621093 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E92874EA4000659D24 /* main.cpp */; };
-		7C0638FB2876C01900621093 /* Label.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F92876C01900621093 /* Label.cpp */; };
 		7C239612287E13C100973CC0 /* Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239610287E13C100973CC0 /* Time.cpp */; };
 		7C23962E287E143700973CC0 /* encoding_utf.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C239628287E143600973CC0 /* encoding_utf.c */; };
 		7C23962F287E143700973CC0 /* compat_strl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962A287E143600973CC0 /* compat_strl.c */; };
@@ -134,8 +133,6 @@
 /* Begin PBXFileReference section */
 		7C0638F12876215100621093 /* FontManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FontManager.cpp; sourceTree = "<group>"; };
 		7C0638F22876215100621093 /* FontManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FontManager.hpp; sourceTree = "<group>"; };
-		7C0638F92876C01900621093 /* Label.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Label.cpp; sourceTree = "<group>"; };
-		7C0638FA2876C01900621093 /* Label.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Label.hpp; sourceTree = "<group>"; };
 		7C23960E287E138500973CC0 /* CGGeometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CGGeometry.hpp; sourceTree = "<group>"; };
 		7C239610287E13C100973CC0 /* Time.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Time.cpp; sourceTree = "<group>"; };
 		7C239611287E13C100973CC0 /* Time.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Time.hpp; sourceTree = "<group>"; };
@@ -674,8 +671,6 @@
 			children = (
 				7C78EBD92873748B0082D3AC /* UILabel.hpp */,
 				7C78EBD82873748B0082D3AC /* UILabel.cpp */,
-				7C0638FA2876C01900621093 /* Label.hpp */,
-				7C0638F92876C01900621093 /* Label.cpp */,
 			);
 			path = UILabel;
 			sourceTree = "<group>";
@@ -1148,7 +1143,6 @@
 				7CA960792871F8BF009E0953 /* GLFWVideoContext.cpp in Sources */,
 				7C53FE4E28788D8E0091DEF9 /* UIGestureRecognizer.cpp in Sources */,
 				7CA960C12871FAC6009E0953 /* Application.cpp in Sources */,
-				7C0638FB2876C01900621093 /* Label.cpp in Sources */,
 				7C239612287E13C100973CC0 /* Time.cpp in Sources */,
 				7CE9B5DE2874917F00659D24 /* experiments.cpp in Sources */,
 				7C239639287E177900973CC0 /* NXPoint.cpp in Sources */,

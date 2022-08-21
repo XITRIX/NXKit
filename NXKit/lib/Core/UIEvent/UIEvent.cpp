@@ -5,7 +5,7 @@
 //  Created by Даниил Виноградов on 09.07.2022.
 //
 
-#include "UIEvent.hpp"
+#include <Core/UIEvent/UIEvent.hpp>
 
 namespace NXKit {
 

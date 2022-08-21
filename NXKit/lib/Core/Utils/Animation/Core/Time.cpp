@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include "Time.hpp"
+#include <Core/Utils/Animation/Core/Time.hpp>
 
 namespace NXKit {
 

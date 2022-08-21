@@ -5,7 +5,7 @@
 //  Created by Даниил Виноградов on 17.07.2022.
 //
 
-#include "UIScrollView.hpp"
+#include <Core/UIScrollView/UIScrollView.hpp>
 
 namespace NXKit {
 

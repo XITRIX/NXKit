@@ -5,8 +5,8 @@
 //  Created by Даниил Виноградов on 09.07.2022.
 //
 
-#include "UIWindow.hpp"
-#include "Application.hpp"
+#include <Core/UIWindow/UIWindow.hpp>
+#include <Core/Application/Application.hpp>
 
 namespace NXKit {
 

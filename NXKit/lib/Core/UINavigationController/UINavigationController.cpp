@@ -5,10 +5,10 @@
 //  Created by Даниил Виноградов on 15.07.2022.
 //
 
-#include "UINavigationController.hpp"
-#include "UIStackView.hpp"
-#include "UIBlurView.hpp"
-#include "UILabel.hpp"
+#include <Core/UINavigationController/UINavigationController.hpp>
+#include <Core/UIStackView/UIStackView.hpp>
+#include <Core/UIBlurView/UIBlurView.hpp>
+#include <Core/UILabel/UILabel.hpp>
 
 namespace NXKit {
 

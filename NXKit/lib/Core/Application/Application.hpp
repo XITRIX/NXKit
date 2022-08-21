@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include "video.hpp"
-#include "UIView.hpp"
-#include "UIWindow.hpp"
-#include "UIAppDelegate.hpp"
+#include <Core/Driver/Video/video.hpp>
+#include <Core/UIView/UIView.hpp>
+#include <Core/UIWindow/UIWindow.hpp>
+#include <Core/UIAppDelegate/UIAppDelegate.hpp>
 
 namespace NXKit {
 

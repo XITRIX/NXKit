@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "UIEvent.hpp"
+#include <Core/UIEvent/UIEvent.hpp>
 #include <functional>
 
 namespace NXKit {

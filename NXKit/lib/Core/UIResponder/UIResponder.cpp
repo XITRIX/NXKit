@@ -5,7 +5,7 @@
 //  Created by Даниил Виноградов on 07.07.2022.
 //
 
-#include "UIResponder.hpp"
+#include <Core/UIResponder/UIResponder.hpp>
 
 namespace NXKit {
 
