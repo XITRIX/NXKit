@@ -205,6 +205,7 @@
 		7C58C66128B055CD0039F0E5 /* UITapGestureRecognizer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITapGestureRecognizer.hpp; sourceTree = "<group>"; };
 		7C58C66528B0DA510039F0E5 /* UIPanGestureRecognizer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIPanGestureRecognizer.cpp; sourceTree = "<group>"; };
 		7C58C66628B0DA510039F0E5 /* UIPanGestureRecognizer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIPanGestureRecognizer.hpp; sourceTree = "<group>"; };
+		7C58C66A28B250600039F0E5 /* switch_wrapper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = switch_wrapper.c; sourceTree = "<group>"; };
 		7C78EBCD2873748B0082D3AC /* UIBlurView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIBlurView.hpp; sourceTree = "<group>"; };
 		7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIBlurView.cpp; sourceTree = "<group>"; };
 		7C78EBD02873748B0082D3AC /* UIColor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIColor.hpp; sourceTree = "<group>"; };
@@ -622,6 +623,14 @@
 			path = UIPanGestureRecognizer;
 			sourceTree = "<group>";
 		};
+		7C58C66928B2504C0039F0E5 /* Switch */ = {
+			isa = PBXGroup;
+			children = (
+				7C58C66A28B250600039F0E5 /* switch_wrapper.c */,
+			);
+			path = Switch;
+			sourceTree = "<group>";
+		};
 		7C78EBCB2873743C0082D3AC /* Driver */ = {
 			isa = PBXGroup;
 			children = (
@@ -753,6 +762,7 @@
 			children = (
 				7C47495528854E2900C5A988 /* InputManager.hpp */,
 				7CA9C4682882ADD600E47DB3 /* iOS */,
+				7C58C66928B2504C0039F0E5 /* Switch */,
 				7C888E6F28819F3F009A6B95 /* Universal */,
 			);
 			path = Platforms;

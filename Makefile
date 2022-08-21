@@ -65,6 +65,7 @@ INCLUDES := $(INCLUDES) \
 
 SOURCES  := $(SOURCES) \
 			NXKit/lib/Platforms/Universal \
+			NXKit/lib/Platforms/Switch \
 			NXKit/lib/Core/Driver/Video \
 			NXKit/lib/Core/Application \
 			NXKit/lib/Core/Geometry \
