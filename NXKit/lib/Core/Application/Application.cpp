@@ -104,10 +104,13 @@ void Application::setFocus(UIView* view) {
         this->focus->resignFocused();
     }
     this->focus = view;
-    this->focus->becomeFocused();
-    
-    if (this->focus->superview)
-        this->focus->superview->subviewFocusDidChange(this->focus, this->focus);
+
+    if (this->focus) {
+        this->focus->becomeFocused();
+        
+        if (this->focus->superview)
+            this->focus->superview->subviewFocusDidChange(this->focus, this->focus);
+    }
 }
 
 void Application::render() {

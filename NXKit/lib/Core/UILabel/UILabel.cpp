@@ -182,8 +182,8 @@ shadowColor(0, 0, 0)
 void UILabel::draw(NVGcontext *vg) {
     int x = 0;
     int y = 0;
-    int width = frame.size().width;
-    int height = frame.size().height;
+    int width = getFrame().size.width;
+    int height = getFrame().size.height;
 
 
     if (width == 0)
@@ -225,7 +225,7 @@ void UILabel::draw(NVGcontext *vg) {
 void UILabel::layoutSubviews() {
     UIView::layoutSubviews();
 
-    float width = frame.size().width;
+    float width = getFrame().size.width;
 
     if (width == 0)
     {

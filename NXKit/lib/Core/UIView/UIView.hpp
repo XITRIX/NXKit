@@ -38,14 +38,13 @@ public:
     static constexpr float AUTO = NAN;
 
     std::string tag;
-    NXRect frame;
     UIColor backgroundColor;
     UIColor borderColor = UIColor(0, 0, 0);
     float cornerRadius = 0;
     float borderThickness = 0;
     NXPoint transformOrigin;
     NXSize transformSize = Size(1, 1);
-    bool clipToBounds = false;
+    bool clipToBounds = true;
     bool canBecomeFocused = false;
 
     UIView(Rect frame);
@@ -55,6 +54,7 @@ public:
     virtual void draw(NVGcontext* vgContext) {}
     virtual void addSubview(UIView* view);
     std::vector<UIView*> getSubviews();
+    void removeFromSuperview();
 
     UIResponder* getNext() override;
 
@@ -84,6 +84,7 @@ public:
     bool isHidden();
 
     // Sizes
+    Rect getFrame();
     Rect getBounds();
     void setBounds(Rect bounds);
     void setPosition(Point position);
@@ -136,8 +137,6 @@ private:
     UIView* superview = nullptr;
     bool needsLayout = true;
     Rect bounds;
-
-    Rect getFrame();
 
     void internalDraw(NVGcontext* vgContext);
     void setSuperview(UIView* view);

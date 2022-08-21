@@ -9,7 +9,15 @@
 
 #include <NXKit.hpp>
 
+class TargetView: public UIView {
+    void layoutSubviews() override;
+};
+
 class TouchTestViewController: public UIViewController {
+public:
+    TouchTestViewController();
+    
     void loadView() override;
     void viewDidLoad() override;
+    void viewWillLayoutSubviews() override;
 };

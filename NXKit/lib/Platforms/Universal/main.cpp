@@ -22,6 +22,11 @@ int main(int argc, const char * argv[]) {
     Application* application = new Application();
     auto videoContext = new GLFWVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
     application->setVideoContext(videoContext);
+
+#ifdef __SWITCH__
+    application->setResourcesPath("romfs:/");
+#endif
+
     application->getDelegate()->applicationDidFinishLaunching();
 
     while (application->mainLoop());

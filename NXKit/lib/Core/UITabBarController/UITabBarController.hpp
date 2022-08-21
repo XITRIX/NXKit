@@ -13,9 +13,10 @@
 
 namespace NXKit {
 
-class UITabBarItem: public UIStackView {
+class UITabBarController;
+class UITabBarItemView: public UIStackView {
 public:
-    UITabBarItem();
+    UITabBarItemView(UITabBarController* parent, UIViewController* controller);
 
     void setTitle(std::string text);
 
@@ -23,24 +24,43 @@ public:
     void setSelected(bool selected);
 
     void becomeFocused() override;
-    void resignFocused() override;
 private:
+    friend class UITabBarController;
     UILabel* label = nullptr;
     UIView* selectionBar = nullptr;
+    UITabBarController* parent = nullptr;
+    UIViewController* controller = nullptr;
 
     bool selected = false;
 };
 
 class UITabBarController: public UIViewController {
 public:
-    UITabBarController(UIViewController* content);
+    UITabBarController();
+    UITabBarController(std::vector<UIViewController*> controllers);
+
     void loadView() override;
     void viewDidLoad() override;
     void viewDidLayoutSubviews() override;
+
+    std::vector<UIViewController*> getViewControllers() { return viewControllers; }
+    void setViewControllers(std::vector<UIViewController*> controllers);
+
+    int getSelectedIndex() { return selectedIndex; }
+    void setSelectedIndex(int index);
 private:
+    friend class UITabBarItemView;
+
+    std::vector<UIViewController*> viewControllers;
+    int selectedIndex = -1;
+
     UIStackView* tabs = nullptr;
     UIView* contentView = nullptr;
     UIViewController* content = nullptr;
+    std::vector<UITabBarItemView*> tabViews;
+
+    void setSelected(UITabBarItemView* item);
+    void reloadViewForViewControllers();
 };
 
 }

@@ -265,7 +265,7 @@
 		7CA9C4AC2882CA6500E47DB3 /* ios_video.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ios_video.hpp; sourceTree = "<group>"; };
 		7CA9C4AD2882CE7500E47DB3 /* ios_main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ios_main.mm; sourceTree = "<group>"; };
 		7CA9C4AF2882CE8700E47DB3 /* ios_main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ios_main.h; sourceTree = "<group>"; };
-		7CD926CC28951DFC005AD85D /* Event.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Event.hpp; sourceTree = "<group>"; };
+		7CD926CC28951DFC005AD85D /* NotificationEvent.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NotificationEvent.hpp; sourceTree = "<group>"; };
 		7CE9B4CF2874917F00659D24 /* YGFloatOptional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGFloatOptional.h; sourceTree = "<group>"; };
 		7CE9B4D02874917F00659D24 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		7CE9B4D12874917F00659D24 /* CompactValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompactValue.h; sourceTree = "<group>"; };
@@ -686,7 +686,7 @@
 				7C23960F287E139B00973CC0 /* Animation */,
 				7C0638F02876214000621093 /* FontManager */,
 				7C78EBDB2873748B0082D3AC /* GaussianBlur */,
-				7CD926CC28951DFC005AD85D /* Event.hpp */,
+				7CD926CC28951DFC005AD85D /* NotificationEvent.hpp */,
 			);
 			path = Utils;
 			sourceTree = "<group>";

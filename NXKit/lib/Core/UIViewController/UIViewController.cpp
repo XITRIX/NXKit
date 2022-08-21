@@ -33,11 +33,19 @@ void UIViewController::loadViewIfNeeded() {
     }
 }
 
+bool UIViewController::isViewLoaded() {
+    return view != nullptr;
+}
+
 UIResponder* UIViewController::getNext() {
     auto window = dynamic_cast<UIWindow*>(view->getSuperview());
     if (window) return window;
     if (parent) return parent;
     return nullptr;
+}
+
+void UIViewController::setTitle(std::string title) {
+    this->title = title;
 }
 
 void UIViewController::addChild(UIViewController* child) {
@@ -47,7 +55,8 @@ void UIViewController::addChild(UIViewController* child) {
 }
 
 void UIViewController::willMoveToParent(UIViewController* parent) {
-    this->parent = parent;
+    if (parent)
+        this->parent = parent;
 }
 
 void UIViewController::didMoveToParent(UIViewController* parent) {

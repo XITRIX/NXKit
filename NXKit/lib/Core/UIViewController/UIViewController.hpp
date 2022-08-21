@@ -19,6 +19,7 @@ public:
 
     virtual void loadView();
     void loadViewIfNeeded();
+    bool isViewLoaded();
 
     virtual void viewDidLoad() {}
     virtual void viewWillAppear(bool animated) {}
@@ -32,6 +33,9 @@ public:
     std::vector<UIViewController*> getChildren() { return children; }
     UIViewController* getParent() { return parent; }
 
+    std::string getTitle() { return title; }
+    void setTitle(std::string title);
+
     void addChild(UIViewController* child);
     void willMoveToParent(UIViewController* parent);
     void didMoveToParent(UIViewController* parent);
@@ -42,6 +46,7 @@ public:
 
     UIResponder* getNext() override;
 private:
+    std::string title;
     UIEdgeInsets additionalSafeAreaInsets;
     std::vector<UIViewController*> children;
     UIViewController* parent = nullptr;

@@ -21,6 +21,9 @@ public:
     unsigned char b();
     unsigned char a();
 
+    UIColor withAlphaComponent(float alpha);
+    UIColor withAlphaComponent(short alpha);
+
     NVGcolor raw();
 
     bool operator==(const UIColor& rhs);

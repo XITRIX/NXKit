@@ -5,8 +5,8 @@
 //  Created by Даниил Виноградов on 18.07.2022.
 //
 
-#include "GLFWInputManager.hpp"
-#include "GLFWVideoContext.hpp"
+#include <Platforms/Universal/GLFWInputManager.hpp>
+#include <Platforms/Universal/GLFWVideoContext.hpp>
 
 #include <Core/Application/Application.hpp>
 

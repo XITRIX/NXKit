@@ -6,7 +6,10 @@
 //
 
 #include "ViewController.hpp"
-#include "InputManager.hpp"
+
+MyViewController::MyViewController() {
+    setTitle("Text scrolling View");
+}
 
 void MyViewController::loadView() {
     UIStackView* view = new UIStackView();

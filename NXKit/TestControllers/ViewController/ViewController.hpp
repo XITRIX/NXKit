@@ -11,6 +11,8 @@
 
 class MyViewController: public UIViewController {
 public:
+    MyViewController();
+    
     void loadView() override;
     void viewDidLoad() override;
     void viewDidLayoutSubviews() override;

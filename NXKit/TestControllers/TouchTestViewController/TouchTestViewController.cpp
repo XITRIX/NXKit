@@ -9,6 +9,18 @@
 
 UIView* target;
 
+TouchTestViewController::TouchTestViewController() {
+    setTitle("Touch test");
+}
+
+void TargetView::layoutSubviews() {
+    UIView::layoutSubviews();
+}
+
+void TouchTestViewController::viewWillLayoutSubviews() {
+    UIViewController::viewWillLayoutSubviews();
+}
+
 void TouchTestViewController::loadView() {
     auto view = new UIStackView(Axis::HORIZONTAL);
 
@@ -24,7 +36,7 @@ void TouchTestViewController::loadView() {
     green->setJustifyContent(JustifyContent::CENTER);
     green->setAlignItems(AlignItems::CENTER);
 
-    target = new UIView();
+    target = new TargetView();
     target->tag = "TARGET";
     target->backgroundColor = UIColor::blue;
     target->setSize(Size(50, 50));

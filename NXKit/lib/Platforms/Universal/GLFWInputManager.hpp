@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "InputManager.hpp"
+#include <Platforms/InputManager.hpp>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>

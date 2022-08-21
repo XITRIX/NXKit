@@ -32,7 +32,7 @@ namespace NXKit {
 //    it wil return true if at least one subscriber exists
 //    for that event
 template <typename... Ts>
-class Event
+class NotificationEvent
 {
 public:
     typedef std::function<void(Ts...)> Callback;
@@ -48,21 +48,21 @@ private:
 };
 
 template <typename... Ts>
-typename Event<Ts...>::Subscription Event<Ts...>::subscribe(Event<Ts...>::Callback cb)
+typename NotificationEvent<Ts...>::Subscription NotificationEvent<Ts...>::subscribe(NotificationEvent<Ts...>::Callback cb)
 {
     this->callbacks.push_back(cb);
     return --this->callbacks.end();
 }
 
 template <typename... Ts>
-void Event<Ts...>::unsubscribe(Event<Ts...>::Subscription subscription)
+void NotificationEvent<Ts...>::unsubscribe(NotificationEvent<Ts...>::Subscription subscription)
 {
     if (this->callbacks.size() > 0)
         this->callbacks.erase(subscription);
 }
 
 template <typename... Ts>
-bool Event<Ts...>::fire(Ts... args)
+bool NotificationEvent<Ts...>::fire(Ts... args)
 {
     for (Callback cb : this->callbacks)
         cb(args...);

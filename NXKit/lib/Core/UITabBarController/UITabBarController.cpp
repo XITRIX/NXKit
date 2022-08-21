@@ -14,7 +14,9 @@
 
 namespace NXKit {
 
-UITabBarItem::UITabBarItem() {
+UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController* controller):
+    parent(parent), controller(controller)
+{
     setAxis(Axis::HORIZONTAL);
     setHeight(70);
 
@@ -48,23 +50,19 @@ UITabBarItem::UITabBarItem() {
     addGestureRecognizer(tap);
 }
 
-void UITabBarItem::setTitle(std::string text) {
+void UITabBarItemView::setTitle(std::string text) {
     label->setText(text);
 }
 
-bool UITabBarItem::isSelected() {
+bool UITabBarItemView::isSelected() {
     return selected;
 }
 
-void UITabBarItem::becomeFocused() {
-    setSelected(true);
+void UITabBarItemView::becomeFocused() {
+    parent->setSelected(this);
 }
 
-void UITabBarItem::resignFocused() {
-    setSelected(false);
-}
-
-void UITabBarItem::setSelected(bool selected) {
+void UITabBarItemView::setSelected(bool selected) {
     this->selected = selected;
     if (selected) {
         label->textColor = UIColor(49, 79, 235);
@@ -75,8 +73,10 @@ void UITabBarItem::setSelected(bool selected) {
     }
 }
 
-UITabBarController::UITabBarController(UIViewController* content): content(content) {
-}
+UITabBarController::UITabBarController() {}
+UITabBarController::UITabBarController(std::vector<UIViewController*> controllers):
+    viewControllers(controllers)
+{}
 
 void UITabBarController::loadView() {
     UIStackView* view = new UIStackView(Axis::HORIZONTAL);
@@ -86,16 +86,6 @@ void UITabBarController::loadView() {
 
     contentView = new UIView();
     contentView->setGrow(1);
-    //    contentView->clipToBounds = true;
-    //    contentView->backgroundColor = UIColor(255, 0, 0);
-
-    addChild(content);
-    contentView->addSubview(this->content->getView());
-    content->didMoveToParent(this);
-    
-    //    contentView->setPaddingRight(140);
-    //    contentView->setMarginRight(140);
-    //    contentView->backgroundColor = UIColor(0, 255, 0);
 
     UIScrollView* scrollView = new UIScrollView();
     scrollView->setFixWidth(true);
@@ -110,21 +100,56 @@ void UITabBarController::loadView() {
 }
 
 void UITabBarController::viewDidLoad() {
-    for (int i = 0; i < 5; i++) {
-        UITabBarItem* item = new UITabBarItem();
-        item->setTitle("Hello world #" + std::to_string(i));
-//        if (i == 2) item->setSelected(true);
-        item->tag = "Num" + std::to_string(i);
-        tabs->addSubview(item);
-    }
+    reloadViewForViewControllers();
     tabs->clipToBounds = true;
-//    tabs->setBounds({ {0, 80}, tabs->frame.size() });
 }
 
+void UITabBarController::setSelected(UITabBarItemView* item) {
+    size_t newIndex = std::find(tabViews.begin(), tabViews.end(), item) - tabViews.begin();
+    if (selectedIndex == newIndex) return;
+
+    if (selectedIndex >= 0 && selectedIndex < tabViews.size()) {
+        tabViews[selectedIndex]->setSelected(false);
+
+        tabViews[selectedIndex]->controller->willMoveToParent(nullptr);
+        tabViews[selectedIndex]->controller->getView()->removeFromSuperview();
+        tabViews[selectedIndex]->controller->removeFromParent();
+    }
+
+    item->setSelected(true);
+    selectedIndex = (int) newIndex;
+
+    addChild(item->controller);
+    contentView->addSubview(item->controller->getView());
+    item->controller->didMoveToParent(this);
+
+    content = item->controller;
+}
 
 void UITabBarController::viewDidLayoutSubviews() {
     UIViewController::viewDidLayoutSubviews();
-    content->getView()->setSize(contentView->frame.size());
+    content->getView()->setSize(contentView->getFrame().size);
+}
+
+void UITabBarController::setViewControllers(std::vector<UIViewController*> controllers) {
+    viewControllers = controllers;
+    if (isViewLoaded()) reloadViewForViewControllers();
+}
+
+void UITabBarController::reloadViewForViewControllers() {
+    tabViews.clear();
+    for (UIView* tab: tabs->getSubviews()) { tab->removeFromSuperview(); }
+    selectedIndex = -1;
+
+    for (int i = 0; i < viewControllers.size(); i++) {
+        auto controller = viewControllers[i];
+        UITabBarItemView* item = new UITabBarItemView(this, viewControllers[i]);
+        item->setTitle(controller->getTitle());
+        item->tag = "Num" + std::to_string(i);
+        item->setSelected(i == selectedIndex);
+        tabViews.push_back(item);
+        tabs->addSubview(item);
+    }
 }
 
 }

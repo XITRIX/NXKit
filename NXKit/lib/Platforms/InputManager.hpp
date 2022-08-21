@@ -8,7 +8,7 @@
 #pragma once
 
 #include <Core/Geometry/Geometry.hpp>
-#include <Core/Utils/Event.hpp>
+#include <Core/Utils/NotificationEvent.hpp>
 #include <Core/UITouch/UITouch.hpp>
 
 #include <vector>
@@ -229,7 +229,7 @@ public:
     virtual UITouch* getTouch(int id) = 0;
     virtual std::vector<UITouch*> getTouches() = 0;
 
-    inline Event<> *getInputUpdated() {
+    inline NotificationEvent<> *getInputUpdated() {
         return &inputUpdated;
     }
     
@@ -239,7 +239,7 @@ protected:
 private:
     friend class Application;
     inline static InputManager* _shared = nullptr;
-    Event<> inputUpdated;
+    NotificationEvent<> inputUpdated;
 };
 
 }

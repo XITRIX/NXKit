@@ -36,6 +36,14 @@ unsigned char UIColor::a() {
     return static_cast<unsigned char>((value >> 24) & 0xff);
 }
 
+UIColor UIColor::withAlphaComponent(float alpha) {
+    return this->withAlphaComponent((short)(alpha * 255));
+}
+
+UIColor UIColor::withAlphaComponent(short alpha) {
+    return UIColor(r(), g(), b(), alpha);
+}
+
 NVGcolor UIColor::raw() {
     return nvgRGBA(r(), g(), b(), a());
 }

@@ -5,12 +5,12 @@
 //  Created by Даниил Виноградов on 09.06.2022.
 //
 
-#include "UIView.hpp"
-#include "UIWindow.hpp"
-#include "UIViewController.hpp"
-#include "Application.hpp"
-#include "InputManager.hpp"
-#include "UIStackView.hpp"
+#include <Core/UIView/UIView.hpp>
+#include <Core/UIWindow/UIWindow.hpp>
+#include <Core/UIViewController/UIViewController.hpp>
+#include <Core/Application/Application.hpp>
+#include <Core/UIStackView/UIStackView.hpp>
+#include <Platforms/InputManager.hpp>
 
 namespace NXKit {
 
@@ -36,15 +36,11 @@ void UIView::setPosition(Point position) {
 }
 
 void UIView::setSize(Size size) {
+    bounds.size = size;
     if (size.width == UIView::AUTO)
     {
         YGNodeStyleSetWidthAuto(this->ygNode);
         YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
-    }
-    else if (0 < size.width && size.width < 1.0f)
-    {
-        YGNodeStyleSetMinWidthPercent(this->ygNode, size.width);
-        YGNodeStyleSetWidthPercent(this->ygNode, size.width);
     }
     else
     {
@@ -57,11 +53,6 @@ void UIView::setSize(Size size) {
         YGNodeStyleSetHeightAuto(this->ygNode);
         YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
     }
-    else if (0 < size.height && size.height < 1.0f)
-    {
-        YGNodeStyleSetMinHeightPercent(this->ygNode, size.height);
-        YGNodeStyleSetHeightPercent(this->ygNode, size.height);
-    }
     else
     {
         YGNodeStyleSetHeight(this->ygNode, size.height);
@@ -71,6 +62,7 @@ void UIView::setSize(Size size) {
 }
 
 void UIView::setWidth(float width) {
+    bounds.size.width = width;
     if (width == UIView::AUTO)
     {
         YGNodeStyleSetWidthAuto(this->ygNode);
@@ -85,6 +77,7 @@ void UIView::setWidth(float width) {
 }
 
 void UIView::setHeight(float height) {
+    bounds.size.height = height;
     if (height == UIView::AUTO)
     {
         YGNodeStyleSetHeightAuto(this->ygNode);
@@ -115,9 +108,14 @@ Rect UIView::getFrame() {
 }
 
 Rect UIView::getBounds() {
-    Rect frame = getFrame();
-    frame.origin = bounds.origin;
-    return frame;
+    Rect bounds;
+    bounds.origin = this->bounds.origin;
+    bounds.size = Size(YGNodeLayoutGetWidth(this->ygNode), YGNodeLayoutGetHeight(this->ygNode));
+
+//    bounds.size = Size(this->bounds.width() == AUTO ? YGNodeLayoutGetWidth(this->ygNode) : this->bounds.width(),
+//                       this->bounds.height() == AUTO ? YGNodeLayoutGetHeight(this->ygNode) : this->bounds.height());
+
+    return bounds;
 }
 
 void UIView::setBounds(Rect bounds) {
@@ -131,24 +129,24 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     layoutIfNeeded();
 
     // Frame position
-    nvgTranslate(vgContext, frame.origin().x , frame.origin().y);
+    nvgTranslate(vgContext, getFrame().origin.x , getFrame().origin.y);
 
     // Position transform
     nvgTranslate(vgContext, transformOrigin.x() , transformOrigin.y());
 
     // Scale transform
-    float scaleTransformX = (frame.size().width / 2.0f) - (frame.size().width / 2.0f) * transformSize.width();
-    float scaleTransformY = (frame.size().height / 2.0f) - (frame.size().height / 2.0f) * transformSize.height();
+    float scaleTransformX = (getFrame().size.width / 2.0f) - (getFrame().size.width / 2.0f) * transformSize.width();
+    float scaleTransformY = (getFrame().size.height / 2.0f) - (getFrame().size.height / 2.0f) * transformSize.height();
     nvgTranslate(vgContext, scaleTransformX, scaleTransformY);
     nvgScale(vgContext, transformSize.width(), transformSize.height());
 
     // ClipToBounds
     if (clipToBounds)
-        nvgIntersectScissor(vgContext, 0, 0, frame.size().width, frame.size().height);
+        nvgIntersectScissor(vgContext, 0, 0, getFrame().size.width, getFrame().size.height);
 
     // Background color
     nvgBeginPath(vgContext);
-    nvgRoundedRect(vgContext, 0, 0, frame.size().width, frame.size().height, cornerRadius);
+    nvgRoundedRect(vgContext, 0, 0, getFrame().size.width, getFrame().size.height, cornerRadius);
     nvgFillColor(vgContext, backgroundColor.raw());
     nvgFill(vgContext);
 
@@ -157,18 +155,18 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     draw(vgContext);
 
     nvgSave(vgContext);
-    //    nvgTranslate(vgContext, frame.origin().x, frame.origin().y);
+    //    nvgTranslate(vgContext, getFrame().origin.x, getFrame().origin.y);
     for (auto view: subviews) {
         view->internalDraw(vgContext);
     }
     nvgRestore(vgContext);
     nvgRestore(vgContext);
 
-//    nvgTranslate(vgContext, frame.origin().x , frame.origin().y);
+//    nvgTranslate(vgContext, getFrame().origin.x , getFrame().origin.y);
     // Borders
     if (borderThickness > 0) {
         float offset = borderThickness / 2;
-        Rect borderRect = Rect(offset, offset, frame.size().width - offset * 2, frame.size().height - offset * 2);
+        Rect borderRect = Rect(offset, offset, getFrame().size.width - offset * 2, getFrame().size.height - offset * 2);
 
         nvgBeginPath(vgContext);
         nvgStrokeColor(vgContext, borderColor.raw());
@@ -179,28 +177,28 @@ void UIView::internalDraw(NVGcontext* vgContext) {
 
     if (getBorderTop() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, 0, 0, frame.size().width, getBorderTop());
+        nvgRect(vgContext, 0, 0, getFrame().size.width, getBorderTop());
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
 
     if (getBorderLeft() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, 0, 0, getBorderLeft(), frame.size().height);
+        nvgRect(vgContext, 0, 0, getBorderLeft(), getFrame().size.height);
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
 
     if (getBorderRight() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, (0 + frame.size().width - getBorderRight()), 0, getBorderRight(), frame.size().height);
+        nvgRect(vgContext, (0 + getFrame().size.width - getBorderRight()), 0, getBorderRight(), getFrame().size.height);
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
 
     if (getBorderBottom() > 0) {
         nvgBeginPath(vgContext);
-        nvgRect(vgContext, 0, (frame.size().height - getBorderBottom()), frame.size().width, getBorderBottom());
+        nvgRect(vgContext, 0, (getFrame().size.height - getBorderBottom()), getFrame().size.width, getBorderBottom());
         nvgFillColor(vgContext, borderColor.raw());
         nvgFill(vgContext);
     }
@@ -256,10 +254,11 @@ void UIView::layoutSubviews() {
     }
 
     for (auto view: getSubviews()) {
+        auto viewParentNode = YGNodeGetParent(view->ygNode);
+        if (!viewParentNode || viewParentNode != this->ygNode) continue;
         view->layoutSubviews();
     }
 
-    frame = getFrame();
     bounds = getBounds();
 
     if (controller) controller->viewDidLayoutSubviews();
@@ -328,6 +327,14 @@ std::vector<UIView*> UIView::getSubviews() {
     return subviews;
 }
 
+void UIView::removeFromSuperview() {
+    if (superview)
+        superview->subviews.erase(std::remove(superview->subviews.begin(), superview->subviews.end(), this));
+
+    YGNodeRemoveChild(superview->ygNode, ygNode);
+    superview = nullptr;
+}
+
 Point UIView::convert(Point point, UIView* toView) {
     Point selfAbsoluteOrigin;
     Point otherAbsoluteOrigin;
@@ -337,14 +344,14 @@ Point UIView::convert(Point point, UIView* toView) {
         if (current == toView) {
             return point - selfAbsoluteOrigin;
         }
-        selfAbsoluteOrigin += current->frame.origin();
+        selfAbsoluteOrigin += current->getFrame().origin;
         selfAbsoluteOrigin -= current->bounds.origin;
         current = current->superview;
     }
 
     current = toView;
     while (current) {
-        otherAbsoluteOrigin += current->frame.origin();
+        otherAbsoluteOrigin += current->getFrame().origin;
         otherAbsoluteOrigin -= current->bounds.origin;
         current = current->superview;
     }
@@ -381,23 +388,23 @@ UIEdgeInsets UIView::safeAreaInsets() {
     if (superview) {
         insets += superview->safeAreaInsets();
 
-        if (frame.origin().y > 0 && insets.top > 0) {
-            insets.top -= frame.origin().y;
+        if (getFrame().origin.y > 0 && insets.top > 0) {
+            insets.top -= getFrame().origin.y;
             if (insets.top < 0) insets.top = 0;
         }
 
-        if (frame.origin().x > 0 || insets.left > 0) {
-            insets.left -= frame.origin().x;
+        if (getFrame().origin.x > 0 || insets.left > 0) {
+            insets.left -= getFrame().origin.x;
             if (insets.left < 0) insets.left = 0;
         }
 
-        auto right = superview->frame.size().width - frame.origin().x - frame.size().width;
+        auto right = superview->getBounds().size.width - getFrame().origin.x - getBounds().size.width;
         if (right > 0 || insets.right > 0) {
             insets.right -= right;
             if (insets.right < 0) insets.right = 0;
         }
 
-        auto bottom = superview->frame.size().height - frame.origin().y - frame.size().height;
+        auto bottom = superview->getBounds().size.height - getFrame().origin.y - getBounds().size.height;
         if (bottom > 0 || insets.bottom > 0) {
             insets.bottom -= bottom;
             if (insets.bottom < 0) insets.bottom = 0;

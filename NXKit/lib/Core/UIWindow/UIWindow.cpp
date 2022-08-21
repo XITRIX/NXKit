@@ -65,7 +65,7 @@ void UIWindow::sendEvent(UIEvent* event) {
 
 void UIWindow::layoutSubviews() {
     UIView::layoutSubviews();
-    rootViewController->getView()->setSize(((Rect) this->frame).size);
+    rootViewController->getView()->setSize(getBounds().size);
 }
 
 }

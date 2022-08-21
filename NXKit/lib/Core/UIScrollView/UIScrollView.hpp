@@ -33,11 +33,15 @@ public:
     void setFixWidth(bool fix);
     void setFixHeight(bool fix);
 
+    Size getContentSize();
+
 private:
     UIPanGestureRecognizer* panGestureRecognizer = new UIPanGestureRecognizer();
     UIEdgeInsets lastSafeAreaInset;
     bool fixWidth = false, fixHeight = false;
     bool dragging = false;
+
+    Point getContentOffsetInBounds(Point offset);
 
     void onPan();
 };
