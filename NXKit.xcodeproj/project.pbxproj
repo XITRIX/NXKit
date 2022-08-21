@@ -206,6 +206,10 @@
 		7C58C66528B0DA510039F0E5 /* UIPanGestureRecognizer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIPanGestureRecognizer.cpp; sourceTree = "<group>"; };
 		7C58C66628B0DA510039F0E5 /* UIPanGestureRecognizer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIPanGestureRecognizer.hpp; sourceTree = "<group>"; };
 		7C58C66A28B250600039F0E5 /* switch_wrapper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = switch_wrapper.c; sourceTree = "<group>"; };
+		7C58C66C28B2530E0039F0E5 /* SwitchVideoContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SwitchVideoContext.cpp; sourceTree = "<group>"; };
+		7C58C66D28B2530E0039F0E5 /* SwitchVideoContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SwitchVideoContext.hpp; sourceTree = "<group>"; };
+		7C58C67028B253790039F0E5 /* SwitchInputManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SwitchInputManager.cpp; sourceTree = "<group>"; };
+		7C58C67128B253790039F0E5 /* SwitchInputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SwitchInputManager.hpp; sourceTree = "<group>"; };
 		7C78EBCD2873748B0082D3AC /* UIBlurView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIBlurView.hpp; sourceTree = "<group>"; };
 		7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIBlurView.cpp; sourceTree = "<group>"; };
 		7C78EBD02873748B0082D3AC /* UIColor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIColor.hpp; sourceTree = "<group>"; };
@@ -627,6 +631,10 @@
 			isa = PBXGroup;
 			children = (
 				7C58C66A28B250600039F0E5 /* switch_wrapper.c */,
+				7C58C66D28B2530E0039F0E5 /* SwitchVideoContext.hpp */,
+				7C58C66C28B2530E0039F0E5 /* SwitchVideoContext.cpp */,
+				7C58C67128B253790039F0E5 /* SwitchInputManager.hpp */,
+				7C58C67028B253790039F0E5 /* SwitchInputManager.cpp */,
 			);
 			path = Switch;
 			sourceTree = "<group>";

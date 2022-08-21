@@ -58,14 +58,14 @@ SOURCES  := $(SOURCES) \
 
 INCLUDES := $(INCLUDES) \
 			NXKit/lib \
-			NXKit/lib/Platforms/Universal \
 			NXKit/lib/extern/include/nanovg-gl/ \
 			NXKit/lib/extern/include \
 			NXKit/lib/extern/lib/yoga/src
 
 SOURCES  := $(SOURCES) \
-			NXKit/lib/Platforms/Universal \
 			NXKit/lib/Platforms/Switch \
+			NXKit/lib/Platforms/Switch/Input \
+			NXKit/lib/Platforms/Universal \
 			NXKit/lib/Core/Driver/Video \
 			NXKit/lib/Core/Application \
 			NXKit/lib/Core/Geometry \

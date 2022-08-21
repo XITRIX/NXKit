@@ -50,11 +50,6 @@ GLFWInputManager::GLFWInputManager() {
 //    glfwSetJoystickCallback(glfwJoystickCallback);
 }
 
-InputManager* InputManager::shared() {
-    if (!_shared) _shared = new GLFWInputManager();
-    return _shared;
-}
-
 Point GLFWInputManager::getCoursorPosition() {
     return coursorPosition;
 }
@@ -159,7 +154,7 @@ void GLFWInputManager::updateMouse() {
     }
 }
 
-std::vector<UIGestureRecognizer*> getRecognizerHierachyFrom(UIView* view) {
+std::vector<UIGestureRecognizer*> GLFWInputManager::getRecognizerHierachyFrom(UIView* view) {
     std::vector<UIGestureRecognizer*> recognizers;
     while (view) {
         for (auto recognizer : view->getGestureRecognizers())

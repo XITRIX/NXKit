@@ -205,7 +205,8 @@ typedef enum {
 
 class InputManager {
 public:
-    static InputManager* shared();
+    static InputManager* shared() { return _shared; }
+    static void initWith(InputManager* shared) { _shared = shared; }
 
     virtual Point getCoursorPosition() = 0;
 

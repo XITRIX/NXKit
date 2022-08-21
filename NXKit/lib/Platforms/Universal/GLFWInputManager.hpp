@@ -42,7 +42,7 @@ public:
 
     void update() override;
 
-private:
+protected:
     GLFWwindow* window = nullptr;
 
     short controllersCount = 0;
@@ -64,12 +64,14 @@ private:
 
     std::vector<UITouch*> touches;
 
-    void updateKeyboard();
-    void updateMouse();
-    void updateTouch();
-    void updateGamepads();
-    void updateButton(short controller, ControllerButton button, bool newValue);
+    virtual void updateKeyboard();
+    virtual void updateMouse();
+    virtual void updateTouch();
+    virtual void updateGamepads();
+    virtual void updateButton(short controller, ControllerButton button, bool newValue);
     static void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+    std::vector<UIGestureRecognizer*> getRecognizerHierachyFrom(UIView* view);
 };
 
 }

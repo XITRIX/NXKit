@@ -7,6 +7,11 @@
 
 #include <NXKit.hpp>
 #include <Platforms/Universal/GLFWVideoContext.hpp>
+#include <Platforms/Universal/GLFWInputManager.hpp>
+
+#ifdef __SWITCH__
+#include <Platforms/Switch/SwitchInputManager.hpp>
+#endif
 
 constexpr uint32_t ORIGINAL_WINDOW_WIDTH  = 1280;
 constexpr uint32_t ORIGINAL_WINDOW_HEIGHT = 720;
@@ -21,7 +26,10 @@ int main(int argc, const char * argv[]) {
     application->setVideoContext(videoContext);
 
 #ifdef __SWITCH__
+    InputManager::initWith(new SwitchInputManager());
     application->setResourcesPath("romfs:/");
+#else
+    InputManager::initWith(new GLFWInputManager());
 #endif
 
     application->getDelegate()->applicationDidFinishLaunching();

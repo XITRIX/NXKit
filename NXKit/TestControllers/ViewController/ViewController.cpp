@@ -57,7 +57,7 @@ void MyViewController::viewDidLoad() {
         }
 
         if (manager->getGamepadsCount() > 0) {
-            printf("X axis: %f\n", manager->getAxis(0, LEFT_X));
+//            printf("X axis: %f\n", manager->getAxis(0, LEFT_X));
         }
     });
 }
@@ -71,15 +71,15 @@ void MyViewController::viewDidLayoutSubviews() {
 
 void MyViewController::touchesBegan(std::vector<UITouch*> touches, UIEvent* withEvent) {
     UIViewController::touchesBegan(touches, withEvent);
-    printf("Touch started\n");
+//    printf("Touch started\n");
 }
 
 void MyViewController::touchesMoved(std::vector<UITouch*> touches, UIEvent* withEvent) {
     UIViewController::touchesMoved(touches, withEvent);
-    printf("Touch moved\n");
+//    printf("Touch moved\n");
 }
 
 void MyViewController::touchesEnded(std::vector<UITouch*> touches, UIEvent* withEvent) {
     UIViewController::touchesEnded(touches, withEvent);
-    printf("Touch ended\n");
+//    printf("Touch ended\n");
 }
