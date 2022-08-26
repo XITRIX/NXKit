@@ -35,7 +35,6 @@ UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController*
     addSubview(label);
 
     setSelected(false);
-    canBecomeFocused = true;
 
     auto tap = new UITapGestureRecognizer();
     tap->onStateChanged = [this](UIGestureRecognizerState state) {
@@ -48,6 +47,14 @@ UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController*
         }
     };
     addGestureRecognizer(tap);
+}
+
+UITabBarItemView::~UITabBarItemView() {
+//    delete controller;
+}
+
+bool UITabBarItemView::canBecomeFocused() {
+    return true;
 }
 
 void UITabBarItemView::setTitle(std::string text) {
@@ -77,6 +84,13 @@ UITabBarController::UITabBarController() {}
 UITabBarController::UITabBarController(std::vector<UIViewController*> controllers):
     viewControllers(controllers)
 {}
+
+UITabBarController::~UITabBarController() {
+    for (auto vc: viewControllers) {
+        if (vc->getParent() != this)
+            delete vc;
+    }
+}
 
 void UITabBarController::loadView() {
     UIStackView* view = new UIStackView(Axis::HORIZONTAL);
@@ -137,6 +151,7 @@ void UITabBarController::setViewControllers(std::vector<UIViewController*> contr
 }
 
 void UITabBarController::reloadViewForViewControllers() {
+    for (auto tab: tabViews) delete tab;
     tabViews.clear();
     for (UIView* tab: tabs->getSubviews()) { tab->removeFromSuperview(); }
     selectedIndex = -1;

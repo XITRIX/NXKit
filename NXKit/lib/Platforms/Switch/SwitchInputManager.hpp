@@ -14,6 +14,7 @@ namespace NXKit {
 
 class SwitchInputManager: public GLFWInputManager {
 public:
+    virtual ~SwitchInputManager();
     void updateTouch() override;
 };
     

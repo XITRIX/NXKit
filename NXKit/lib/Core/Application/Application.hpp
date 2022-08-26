@@ -22,6 +22,7 @@ public:
     static Application* shared();
 
     Application();
+    virtual ~Application();
 
     UIWindow* getKeyWindow() { return keyWindow; }
     void setKeyWindow(UIWindow* window);

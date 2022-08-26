@@ -7,12 +7,13 @@
 
 #include <math.h>
 
-#include <Core/Application/Application.hpp>
 #include <Platforms/InputManager.hpp>
+#include <Core/Application/Application.hpp>
 #include <Core/UIView/UIView.hpp>
 #include <Core/UIWindow/UIWindow.hpp>
 #include <Core/Utils/Animation/Core/Time.hpp>
 #include <Core/Utils/Animation/NXFloat/NXFloat.hpp>
+#include <Core/Utils/FontManager/FontManager.hpp>
 #include <Core/Driver/Video/video.hpp>
 
 #ifdef __SWITCH__
@@ -28,6 +29,14 @@ Application* Application::shared() {
 Application::Application() {
     delegate = new UIAppDelegate();
     Application::_shared = this;
+}
+
+Application::~Application() {
+    delete delegate;
+    delete videoContext;
+    delete keyWindow;
+    delete FontManager::shared();
+    delete InputManager::shared();
 }
 
 void Application::setKeyWindow(UIWindow *window) {

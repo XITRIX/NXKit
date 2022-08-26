@@ -33,32 +33,33 @@ void MyViewController::loadView() {
 void MyViewController::viewDidLoad() {
     InputManager* manager = InputManager::shared();
     manager->getInputUpdated()->subscribe([this, manager]() {
+//        tweeny::from({0, 1});//.to({1, 2}).during(10);
         static float speed = 50;
-        if (manager->getKey(BRLS_KBD_KEY_DOWN)) {
-            auto offset = scroll->getContentOffset();
-            offset.y += speed;
-            scroll->setContentOffset(offset);
-        }
-        if (manager->getKey(BRLS_KBD_KEY_UP)) {
-            auto offset = scroll->getContentOffset();
-            offset.y -= speed;
-            scroll->setContentOffset(offset);
-        }
-        if (manager->getMouseButtonDown(BRLS_MOUSE_LKB)) {
-            auto pos = manager->getCoursorPosition();
-            auto view = Application::shared()->getKeyWindow()->hitTest(pos, nullptr);
-            printf("TEST\n");
-        }
+//        if (manager->getKey(BRLS_KBD_KEY_DOWN)) {
+//            auto offset = scroll->getContentOffset();
+//            offset.y += speed;
+//            scroll->setContentOffset(offset);
+//        }
+//        if (manager->getKey(BRLS_KBD_KEY_UP)) {
+//            auto offset = scroll->getContentOffset();
+//            offset.y -= speed;
+//            scroll->setContentOffset(offset);
+//        }
+//        if (manager->getMouseButtonDown(BRLS_MOUSE_LKB)) {
+//            auto pos = manager->getCoursorPosition();
+//            auto view = Application::shared()->getKeyWindow()->hitTest(pos, nullptr);
+//            printf("TEST\n");
+//        }
 
-        if (manager->getKeyDown(BRLS_KBD_KEY_SPACE)) {
-            speed = speed == 50 ? 5 : 50;
-            printf("Space pressed!\n ");
-            printf("Controllers count: %i\n", manager->getGamepadsCount());
-        }
+//        if (manager->getKeyDown(BRLS_KBD_KEY_SPACE)) {
+//            speed = speed == 50 ? 5 : 50;
+//            printf("Space pressed!\n ");
+//            printf("Controllers count: %i\n", manager->getGamepadsCount());
+//        }
 
-        if (manager->getGamepadsCount() > 0) {
+//        if (manager->getGamepadsCount() > 0) {
 //            printf("X axis: %f\n", manager->getAxis(0, LEFT_X));
-        }
+//        }
     });
 }
 

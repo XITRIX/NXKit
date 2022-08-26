@@ -10,6 +10,10 @@
 
 namespace NXKit {
 
+UIWindow::~UIWindow() {
+    delete rootViewController;
+}
+
 UIViewController* UIWindow::getRootViewController() {
     return rootViewController;
 }

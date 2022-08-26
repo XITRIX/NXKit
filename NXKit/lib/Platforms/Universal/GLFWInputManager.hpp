@@ -17,6 +17,7 @@ namespace NXKit {
 class GLFWInputManager: public InputManager {
 public:
     GLFWInputManager();
+    virtual ~GLFWInputManager();
 
     Point getCoursorPosition() override;
 

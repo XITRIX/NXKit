@@ -12,6 +12,17 @@
 
 namespace NXKit {
 
+UIViewController::~UIViewController() {
+    for (auto child: children) {
+        delete child;
+    }
+
+    if (view) {
+        view->removeFromSuperview();
+        delete view;
+    }
+}
+
 UIView* UIViewController::getView() {
     loadViewIfNeeded();
     return view;

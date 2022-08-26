@@ -16,10 +16,7 @@ IOSInputManager::IOSInputManager() {
     //    glfwSetCursorPosCallback(window, cursorCallback);
 }
 
-InputManager* InputManager::shared() {
-    if (!_shared) _shared = new IOSInputManager();
-    return _shared;
-}
+IOSInputManager::~IOSInputManager() { }
 
 Point IOSInputManager::getCoursorPosition() {
     return Point();

@@ -13,6 +13,8 @@ namespace NXKit {
 
 class UIWindow: public UIView {
 public:
+    ~UIWindow();
+
     UIViewController* getRootViewController();
     void setRootViewController(UIViewController* viewController);
 

@@ -23,10 +23,23 @@ backgroundColor(0, 0, 0, 0)
     setPosition(frame.origin);
     setSize(frame.size);
 
-    auto inputManager = InputManager::shared();
-    inputManager->getInputUpdated()->subscribe([inputManager](){
+//    auto inputManager = InputManager::shared();
+//    inputManager->getInputUpdated()->subscribe([inputManager](){
         //        inputManager->
-    });
+//    });
+}
+
+UIView::~UIView() {
+    for (auto recognizer: gestureRecognizers) {
+        delete recognizer;
+    }
+
+    for (auto view: subviews) {
+        if (!view->controller)
+            delete view;
+    }
+
+    YGNodeFree(ygNode);
 }
 
 void UIView::setPosition(Point position) {
@@ -155,14 +168,12 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     draw(vgContext);
 
     nvgSave(vgContext);
-    //    nvgTranslate(vgContext, getFrame().origin.x, getFrame().origin.y);
     for (auto view: subviews) {
         view->internalDraw(vgContext);
     }
     nvgRestore(vgContext);
     nvgRestore(vgContext);
 
-//    nvgTranslate(vgContext, getFrame().origin.x , getFrame().origin.y);
     // Borders
     if (borderThickness > 0) {
         float offset = borderThickness / 2;
@@ -269,7 +280,7 @@ bool UIView::isFocused() {
 }
 
 UIView* UIView::getDefaultFocus() {
-    if (canBecomeFocused) return this;
+    if (canBecomeFocused()) return this;
 
     for (auto view: subviews) {
         UIView* focus = view->getDefaultFocus();
@@ -328,9 +339,9 @@ std::vector<UIView*> UIView::getSubviews() {
 }
 
 void UIView::removeFromSuperview() {
-    if (superview)
-        superview->subviews.erase(std::remove(superview->subviews.begin(), superview->subviews.end(), this));
-
+    if (!superview) return;
+    
+    superview->subviews.erase(std::remove(superview->subviews.begin(), superview->subviews.end(), this));
     YGNodeRemoveChild(superview->ygNode, ygNode);
     superview = nullptr;
 }
@@ -369,9 +380,6 @@ UIView* UIView::hitTest(Point point, UIEvent* withEvent) {
         UIView* test = subviews[i]->hitTest(convertedPoint, withEvent);
         if (test) return test;
     }
-
-    if (dynamic_cast<UIStackView*>(this) && !this->canBecomeFocused)
-        return nullptr;
 
     return this;
 }

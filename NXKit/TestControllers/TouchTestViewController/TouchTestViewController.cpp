@@ -56,12 +56,12 @@ void TouchTestViewController::viewDidLoad() {
             auto pos = manager->getCoursorPosition();
 //            printf("X: %f, Y: %f\n", pos.x, pos.y);
             auto view = Application::shared()->getKeyWindow()->hitTest(pos, nullptr);
-            printf("TEST");
+            printf("View touched: %s\n", view->tag.c_str());
         }
 
         if (manager->getKeyDown(BRLS_KBD_KEY_SPACE)) {
-            auto res = target->convert(Point(), nullptr);
-            printf("Space pressed!");
+//            auto res = target->convert(Point(), nullptr);
+            printf("Space pressed!\n");
         }
     });
 }

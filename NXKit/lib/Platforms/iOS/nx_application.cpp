@@ -7,6 +7,7 @@
 
 #import "nx_application.h"
 #include "Application.hpp"
+#include "IOSInputManager.hpp"
 
 #include "UINavigationController.hpp"
 #include "UITabBarController.hpp"
@@ -19,6 +20,9 @@ void makeApplication(VideoContext* context, const char* path) {
     auto application = new Application();
     application->setVideoContext(context);
     application->setResourcesPath(std::string(path) + "/");
+
+    InputManager::initWith(new IOSInputManager());
+
     application->getDelegate()->applicationDidFinishLaunching();
 }
 

@@ -14,6 +14,8 @@ namespace NXKit {
 
 class UIViewController: public UIResponder {
 public:
+    virtual ~UIViewController();
+
     UIView* getView();
     void setView(UIView* view);
 

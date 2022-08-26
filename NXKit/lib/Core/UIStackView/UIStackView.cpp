@@ -39,6 +39,12 @@ void UIStackView::setAxis(Axis axis) {
 UIView* UIStackView::getNextFocus(NavigationDirection direction) {
     if (currentFocus >= getSubviews().size()) currentFocus = (int) getSubviews().size() - 1;
 
+    if ((direction == NavigationDirection::UP || direction == NavigationDirection::DOWN) && axis == Axis::HORIZONTAL)
+        return nullptr;
+
+    if ((direction == NavigationDirection::LEFT || direction == NavigationDirection::RIGHT) && axis == Axis::VERTICAL)
+        return nullptr;
+
     if (direction == NavigationDirection::UP || direction == NavigationDirection::LEFT) {
         if (currentFocus <= 0) return UIView::getNextFocus(direction);
         currentFocus--;
@@ -53,6 +59,19 @@ UIView* UIStackView::getNextFocus(NavigationDirection direction) {
     if (newFocus) return newFocus;
 
     return UIView::getNextFocus(direction);
+}
+
+UIView* UIStackView::hitTest(Point point, UIEvent *withEvent) {
+    auto super = UIView::hitTest(point, withEvent);
+    if (super == this && !canBecomeFocused() && backgroundColor == UIColor::clear)
+        return nullptr;
+    return super;
+}
+
+void UIStackView::subviewFocusDidChange(UIView *focusedView, UIView *notifiedView) {
+    auto find = std::find(getSubviews().begin(), getSubviews().end(), notifiedView);
+    if (find != getSubviews().end())
+        currentFocus = (int) (getSubviews().begin() - find);
 }
 
 void UIStackView::setJustifyContent(JustifyContent justify)

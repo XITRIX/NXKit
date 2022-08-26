@@ -50,6 +50,10 @@ GLFWInputManager::GLFWInputManager() {
 //    glfwSetJoystickCallback(glfwJoystickCallback);
 }
 
+GLFWInputManager::~GLFWInputManager() {
+
+}
+
 Point GLFWInputManager::getCoursorPosition() {
     return coursorPosition;
 }

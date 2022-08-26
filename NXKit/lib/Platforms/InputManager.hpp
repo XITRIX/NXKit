@@ -205,6 +205,8 @@ typedef enum {
 
 class InputManager {
 public:
+    virtual ~InputManager() {}
+
     static InputManager* shared() { return _shared; }
     static void initWith(InputManager* shared) { _shared = shared; }
 

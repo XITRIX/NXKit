@@ -13,6 +13,10 @@
 
 namespace NXKit {
 
+SwitchInputManager::~SwitchInputManager() {
+
+}
+
 void SwitchInputManager::updateTouch() {
     HidTouchScreenState hidState;
     

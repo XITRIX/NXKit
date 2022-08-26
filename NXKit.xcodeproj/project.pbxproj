@@ -39,6 +39,7 @@
 		7C58C66328B055CD0039F0E5 /* UITapGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C66028B055CD0039F0E5 /* UITapGestureRecognizer.cpp */; };
 		7C58C66728B0DA510039F0E5 /* UIPanGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C66528B0DA510039F0E5 /* UIPanGestureRecognizer.cpp */; };
 		7C58C66828B0DA510039F0E5 /* UIPanGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C66528B0DA510039F0E5 /* UIPanGestureRecognizer.cpp */; };
+		7C58C67428B382F90039F0E5 /* NXAffineTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495F2886063B00C5A988 /* NXAffineTransform.cpp */; };
 		7C65882528A29CD40036AAD5 /* ViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E45288165E9009A6B95 /* ViewController.cpp */; };
 		7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */; };
 		7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD12873748B0082D3AC /* UIColor.cpp */; };
@@ -1234,6 +1235,7 @@
 				7CA9C4A82882C84E00E47DB3 /* glad.c in Sources */,
 				7CA9C4872882C43100E47DB3 /* UILabel.cpp in Sources */,
 				7C58C65528AF85AD0039F0E5 /* NXTransform3D.cpp in Sources */,
+				7C58C67428B382F90039F0E5 /* NXAffineTransform.cpp in Sources */,
 				7CA9C47C2882ADD700E47DB3 /* main.m in Sources */,
 				7CA9C4A02882C83F00E47DB3 /* YGValue.cpp in Sources */,
 				7CA9C4892882C43100E47DB3 /* UITabBarController.cpp in Sources */,

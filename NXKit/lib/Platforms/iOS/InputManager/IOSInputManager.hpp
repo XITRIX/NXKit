@@ -14,6 +14,7 @@ namespace NXKit {
 class IOSInputManager: public InputManager {
 public:
     IOSInputManager();
+    virtual ~IOSInputManager();
 
     Point getCoursorPosition() override;
 

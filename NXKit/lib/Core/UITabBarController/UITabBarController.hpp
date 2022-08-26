@@ -17,6 +17,7 @@ class UITabBarController;
 class UITabBarItemView: public UIStackView {
 public:
     UITabBarItemView(UITabBarController* parent, UIViewController* controller);
+    virtual ~UITabBarItemView();
 
     void setTitle(std::string text);
 
@@ -24,6 +25,7 @@ public:
     void setSelected(bool selected);
 
     void becomeFocused() override;
+    bool canBecomeFocused() override;
 private:
     friend class UITabBarController;
     UILabel* label = nullptr;
@@ -38,6 +40,7 @@ class UITabBarController: public UIViewController {
 public:
     UITabBarController();
     UITabBarController(std::vector<UIViewController*> controllers);
+    ~UITabBarController();
 
     void loadView() override;
     void viewDidLoad() override;

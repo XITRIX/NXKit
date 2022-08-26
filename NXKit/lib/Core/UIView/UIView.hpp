@@ -45,11 +45,11 @@ public:
     NXPoint transformOrigin;
     NXSize transformSize = Size(1, 1);
     bool clipToBounds = true;
-    bool canBecomeFocused = false;
 
     UIView(Rect frame);
     UIView(float x, float y, float width, float height): UIView(Rect(x, y, width, height)) {}
     UIView(): UIView(Rect(0, 0, UIView::AUTO, UIView::AUTO)) {}
+    virtual ~UIView();
 
     virtual void draw(NVGcontext* vgContext) {}
     virtual void addSubview(UIView* view);
@@ -60,8 +60,8 @@ public:
 
     Point convert(Point point, UIView* toView);
 
-    UIView* hitTest(Point point, UIEvent* withEvent);
-    bool point(Point insidePoint, UIEvent* withEvent);
+    virtual UIView* hitTest(Point point, UIEvent* withEvent);
+    virtual bool point(Point insidePoint, UIEvent* withEvent);
 
     UIWindow* getWindow();
     UIView* getSuperview();
@@ -73,6 +73,7 @@ public:
     virtual void becomeFocused() {}
     virtual void resignFocused() {}
     virtual void subviewFocusDidChange(UIView* focusedView, UIView* notifiedView);
+    virtual bool canBecomeFocused() { return false; }
 
     void addGestureRecognizer(UIGestureRecognizer* gestureRecognizer);
     std::vector<UIGestureRecognizer*> getGestureRecognizers();
