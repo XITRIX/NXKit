@@ -31,7 +31,7 @@ void SwitchInputManager::updateTouch() {
         {
             auto find = oldTouches.find(hidState.touches[i].finger_id);
             if (find == oldTouches.end()) {
-                auto touch = new UITouch(hidState.touches[i].finger_id, Point(hidState.touches[i].x, hidState.touches[i].y), std::time(nullptr));
+                auto touch = new UITouch(hidState.touches[i].finger_id, Point(hidState.touches[i].x, hidState.touches[i].y), getCPUTimeUsec());
                 touch->window = Application::shared()->getKeyWindow();
                 touch->view = touch->window->hitTest(touch->absoluteLocation, nullptr);
                 touch->gestureRecognizers = getRecognizerHierachyFrom(touch->view);
@@ -40,7 +40,7 @@ void SwitchInputManager::updateTouch() {
                 // printf("Touch begin at: X - %d, Y - %d\n", hidState.touches[i].x, hidState.touches[i].y);
             } else {
                 auto touch = find->second;
-                touch->timestamp = std::time(nullptr);
+                touch->timestamp = getCPUTimeUsec();
                 touch->phase = UITouchPhase::MOVED;
                 touch->updateAbsoluteLocation(Point(hidState.touches[i].x, hidState.touches[i].y));
                 oldTouches.erase(find);
@@ -51,6 +51,7 @@ void SwitchInputManager::updateTouch() {
         for (auto touchIter: oldTouches) {
             UITouch* touch = touchIter.second;
             if (touch->phase == UITouchPhase::MOVED) {
+                touch->timestamp = getCPUTimeUsec();
                 touch->phase = UITouchPhase::ENDED;
                 // printf("Touch ended\n");
             } else if (touch->phase == UITouchPhase::ENDED) {

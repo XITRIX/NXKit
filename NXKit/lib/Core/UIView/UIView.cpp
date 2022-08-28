@@ -318,12 +318,6 @@ std::vector<float> UIView::createAnimationContext() {
     return context;
 }
 
-float pop(std::vector<float>* context) {
-    float val = context->back();
-    context->pop_back();
-    return val;
-}
-
 void UIView::applyAnimationContext(std::vector<float>* context) {
     transformOrigin.y = pop(context);
     transformOrigin.x = pop(context);

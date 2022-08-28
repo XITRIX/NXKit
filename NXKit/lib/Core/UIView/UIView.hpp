@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Core/Geometry/Geometry.hpp>
+#include <Core/Utils/Vector/Vector.hpp>
 #include <Core/Utils/Animation/AnimationContext/AnimationContext.hpp>
 #include <Core/Utils/Animation/NXFloat/NXFloat.hpp>
 #include <Core/Utils/Animation/NXPoint/NXPoint.hpp>

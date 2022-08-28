@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <Core/Utils/Animation/Core/Time.hpp>
 #include <vector>
 #include <chrono>
 
@@ -17,7 +18,7 @@ class UITouch;
 class UIEvent {
 public:
     std::vector<UITouch*> allTouches;
-    std::time_t timestamp = time(nullptr);
+    std::time_t timestamp = getCPUTimeUsec();
 
     UIEvent() {}
     UIEvent(UITouch* touch);

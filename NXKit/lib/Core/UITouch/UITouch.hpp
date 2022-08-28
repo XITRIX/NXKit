@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <Core/Utils/Animation/Core/Time.hpp>
 #include <Core/Geometry/Geometry.hpp>
 #include <Core/UIGestureRecognizer/UIGestureRecognizer.hpp>
 
@@ -26,8 +27,8 @@ class UIView;
 
 class UITouch {
 public:
-    UITouch(int touchId, Point atPoint, std::time_t timestamp);
-    UITouch(): UITouch(0, Point(), std::time(nullptr)) {}
+    UITouch(int touchId, Point atPoint, Time timestamp);
+    UITouch(): UITouch(0, Point(), getCPUTimeUsec()) {}
 
     int touchId;
 

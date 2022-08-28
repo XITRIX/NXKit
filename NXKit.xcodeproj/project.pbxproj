@@ -243,6 +243,7 @@
 		7C8D980928BAC24000BDD667 /* AnimationContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AnimationContext.hpp; sourceTree = "<group>"; };
 		7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AnimationTestViewController.cpp; sourceTree = "<group>"; };
 		7C8D980E28BB5A0A00BDD667 /* AnimationTestViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AnimationTestViewController.hpp; sourceTree = "<group>"; };
+		7C8D981328BB72FC00BDD667 /* Vector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vector.hpp; sourceTree = "<group>"; };
 		7CA3897328835AA1005C7A91 /* nx_application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nx_application.h; sourceTree = "<group>"; };
 		7CA3897428835AB8005C7A91 /* nx_application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = nx_application.cpp; sourceTree = "<group>"; };
 		7CA3898528836343005C7A91 /* Fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; name = Fonts; path = resources/Fonts; sourceTree = SOURCE_ROOT; };
@@ -709,6 +710,7 @@
 		7C78EBDA2873748B0082D3AC /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				7C8D981128BB72E700BDD667 /* Vector */,
 				7C23960F287E139B00973CC0 /* Animation */,
 				7C0638F02876214000621093 /* FontManager */,
 				7C78EBDB2873748B0082D3AC /* GaussianBlur */,
@@ -829,6 +831,14 @@
 				7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */,
 			);
 			path = AnimationTestViewController;
+			sourceTree = "<group>";
+		};
+		7C8D981128BB72E700BDD667 /* Vector */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D981328BB72FC00BDD667 /* Vector.hpp */,
+			);
+			path = Vector;
 			sourceTree = "<group>";
 		};
 		7CA38982288362FE005C7A91 /* Resources */ = {

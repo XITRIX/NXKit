@@ -40,6 +40,20 @@ struct Point {
         return *this;
     }
 
+    Point operator/(const float& rhs) {
+        auto res = *this;
+        res.x /= rhs;
+        res.y /= rhs;
+        return res;
+    }
+
+    Point operator*(const float& rhs) {
+        auto res = *this;
+        res.x *= rhs;
+        res.y *= rhs;
+        return res;
+    }
+
     bool valid() {
         return !isnan(this->x) && !isnan(this->y);
     }

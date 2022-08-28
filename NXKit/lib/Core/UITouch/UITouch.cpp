@@ -10,7 +10,7 @@
 
 namespace NXKit {
 
-UITouch::UITouch(int touchId, Point atPoint, std::time_t timestamp):
+UITouch::UITouch(int touchId, Point atPoint, Time timestamp):
 touchId(touchId),
 absoluteLocation(atPoint),
 previousAbsoluteLocation(atPoint),

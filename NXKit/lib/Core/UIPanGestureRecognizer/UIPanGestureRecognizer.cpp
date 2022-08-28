@@ -28,11 +28,28 @@ void UIPanGestureRecognizer::setTranslation(Point translation, UIView* inView) {
     initialTouchPoint = positionInTargetView - translation;
 }
 
+Point UIPanGestureRecognizer::velocityIn(UIView* view, float timeDiffSeconds) {
+    if (!trackingTouch || timeDiffSeconds == 0) return Point();
+
+    Point curPos = trackingTouch->locationIn(view);
+    Point prevPos = trackingTouch->previousLocationIn(view);
+
+    return (curPos - prevPos) / (float)timeDiffSeconds;
+}
+
+Point UIPanGestureRecognizer::velocityIn(UIView* view) {
+    float timeDiffSeconds = touchesMovedTimestamp - previousTouchesMovedTimestamp;
+    timeDiffSeconds /= 100000.0f;
+    return velocityIn(view, timeDiffSeconds);
+}
+
 void UIPanGestureRecognizer::touchesBegan(std::vector<UITouch*> touches, UIEvent* event) {
     UIGestureRecognizer::touchesBegan(touches, event);
     if (!trackingTouch) {
         trackingTouch = touches[0];
         initialTouchPoint = trackingTouch->locationIn(nullptr);
+        touchesMovedTimestamp = trackingTouch->timestamp;
+        previousTouchesMovedTimestamp = trackingTouch->timestamp;
     }
 }
 
@@ -42,9 +59,13 @@ void UIPanGestureRecognizer::touchesMoved(std::vector<UITouch*> touches, UIEvent
         if (getState() == UIGestureRecognizerState::POSSIBLE) {
             Point diff = initialTouchPoint - trackingTouch->locationIn(nullptr);
             if (abs(diff.x) >= THRESHOLD || abs(diff.y) >= THRESHOLD) {
+                previousTouchesMovedTimestamp = touchesMovedTimestamp;
+                touchesMovedTimestamp = trackingTouch->timestamp;
                 setState(UIGestureRecognizerState::CHANGED);
             }
         } else if (getState() == UIGestureRecognizerState::CHANGED) {
+            previousTouchesMovedTimestamp = touchesMovedTimestamp;
+            touchesMovedTimestamp = trackingTouch->timestamp;
             onStateChanged(UIGestureRecognizerState::CHANGED);
         }
     }
@@ -53,6 +74,8 @@ void UIPanGestureRecognizer::touchesMoved(std::vector<UITouch*> touches, UIEvent
 void UIPanGestureRecognizer::touchesEnded(std::vector<UITouch*> touches, UIEvent* event) {
     UIGestureRecognizer::touchesEnded(touches, event);
     if (trackingTouch == touches[0]) {
+        previousTouchesMovedTimestamp = touchesMovedTimestamp;
+        touchesMovedTimestamp = trackingTouch->timestamp;
         setState(UIGestureRecognizerState::ENDED);
         trackingTouch = nullptr;
     }

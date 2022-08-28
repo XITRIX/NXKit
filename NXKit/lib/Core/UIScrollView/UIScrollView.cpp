@@ -9,9 +9,15 @@
 
 namespace NXKit {
 
+#define PAN_SCROLL_ACCELERATION -50
+
 UIScrollView::UIScrollView() {
 //    clipToBounds = true;
     panGestureRecognizer->onStateChanged = [this](UIGestureRecognizerState state) {
+        Point velocity;
+        Point time;
+        Point distance;
+
         switch (state) {
             case UIGestureRecognizerState::CHANGED:
                 if (!dragging) {
@@ -22,6 +28,18 @@ UIScrollView::UIScrollView() {
                 break;
             case UIGestureRecognizerState::ENDED:
                 dragging = false;
+                velocity = panGestureRecognizer->velocityIn(this);
+                time = Point(-fabs(velocity.x), -fabs(velocity.y)) / PAN_SCROLL_ACCELERATION;
+                distance = Point(velocity.x * time.x / 2, velocity.y * time.y / 2);
+
+
+                animate(time.y * 100, [this, distance](){
+                    auto offset = getContentOffsetInBounds(getContentOffset() - distance);
+                    setBounds({offset , getBounds().size });
+                }, EasingFunction::cubicOut);
+
+                printf("Velocity: X-%f, Y-%f\n", velocity.x, velocity.y);
+                break;
             default: break;
         }
     };

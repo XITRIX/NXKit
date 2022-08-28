@@ -183,7 +183,7 @@ std::vector<UIGestureRecognizer*> GLFWInputManager::getRecognizerHierachyFrom(UI
 
 void GLFWInputManager::updateTouch() {
     if (getMouseButtonDown(BrlsMouseButton::BRLS_MOUSE_LKB)) {
-        auto touch = new UITouch(0, getCoursorPosition(), std::time(nullptr));
+        auto touch = new UITouch(0, getCoursorPosition(), getCPUTimeUsec());
         touch->window = Application::shared()->getKeyWindow();
         touch->view = touch->window->hitTest(touch->absoluteLocation, nullptr);
         touch->gestureRecognizers = getRecognizerHierachyFrom(touch->view);
@@ -193,6 +193,7 @@ void GLFWInputManager::updateTouch() {
         for (int i = 0; i < touchCount(); i++) {
             auto touch = touches[i];
             if (touch->touchId == 0) {
+                touch->timestamp = getCPUTimeUsec();
                 touch->phase = UITouchPhase::ENDED;
             }
         }
@@ -200,7 +201,7 @@ void GLFWInputManager::updateTouch() {
         for (int i = 0; i < touchCount(); i++) {
             auto touch = touches[i];
             if (touch->touchId == 0) {
-                touch->timestamp = std::time(nullptr);
+                touch->timestamp = getCPUTimeUsec();
                 touch->phase = UITouchPhase::MOVED;
                 touch->updateAbsoluteLocation(getCoursorPosition());
             }

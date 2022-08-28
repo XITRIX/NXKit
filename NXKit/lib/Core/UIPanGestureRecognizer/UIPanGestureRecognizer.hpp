@@ -22,9 +22,15 @@ public:
     Point translationInView(UIView* view);
     void setTranslation(Point translation, UIView* inView);
 
+    Point velocityIn(UIView* view);
+
 private:
     UITouch* trackingTouch = nullptr;
     Point initialTouchPoint;
+    time_t touchesMovedTimestamp;
+    time_t previousTouchesMovedTimestamp;
+
+    Point velocityIn(UIView* view, float timeDiffSeconds);
 };
 
 }
