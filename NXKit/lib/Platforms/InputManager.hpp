@@ -225,6 +225,10 @@ public:
     virtual bool getButton(short controller, ControllerButton button) = 0;
     virtual bool getButtonUp(short controller, ControllerButton button) = 0;
     virtual bool getButtonDown(short controller, ControllerButton button) = 0;
+
+    virtual bool getButton(ControllerButton button) = 0;
+    virtual bool getButtonUp(ControllerButton button) = 0;
+    virtual bool getButtonDown(ControllerButton button) = 0;
     
     virtual float getAxis(short controller, ControllerAxis axis) = 0;
 

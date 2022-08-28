@@ -8,6 +8,8 @@
 #pragma once
 
 #include <Core/Geometry/Geometry.hpp>
+#include <Core/Utils/Animation/AnimationContext/AnimationContext.hpp>
+#include <Core/Utils/Animation/NXFloat/NXFloat.hpp>
 #include <Core/Utils/Animation/NXPoint/NXPoint.hpp>
 #include <Core/Utils/Animation/NXSize/NXSize.hpp>
 #include <Core/Utils/Animation/NXRect/NXRect.hpp>
@@ -42,8 +44,8 @@ public:
     UIColor borderColor = UIColor(0, 0, 0);
     float cornerRadius = 0;
     float borderThickness = 0;
-    NXPoint transformOrigin;
-    NXSize transformSize = Size(1, 1);
+    Point transformOrigin;
+    Size transformSize = Size(1, 1);
     bool clipToBounds = true;
 
     UIView(Rect frame);
@@ -74,6 +76,10 @@ public:
     virtual void resignFocused() {}
     virtual void subviewFocusDidChange(UIView* focusedView, UIView* notifiedView);
     virtual bool canBecomeFocused() { return false; }
+
+    std::vector<float> createAnimationContext();
+    void applyAnimationContext(std::vector<float>* context);
+    void animate(float duration, std::function<void()> animations, EasingFunction easing = EasingFunction::linear, std::function<void(bool)> completion = [](bool res){});
 
     void addGestureRecognizer(UIGestureRecognizer* gestureRecognizer);
     std::vector<UIGestureRecognizer*> getGestureRecognizers();
@@ -141,6 +147,9 @@ private:
 
     void internalDraw(NVGcontext* vgContext);
     void setSuperview(UIView* view);
+    void drawHighlight(NVGcontext* vg, bool background);
+
+    AnimationContext animationContext;
 };
 
 }

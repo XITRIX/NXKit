@@ -49,10 +49,14 @@ ROMFS		:=	resources
 #---------------------------------------------------------------------------------
 INCLUDES := $(INCLUDES) \
 			NXKit/TestControllers/ViewController \
+			NXKit/TestControllers/ListViewController \
+			NXKit/TestControllers/AnimationTestViewController \
 			NXKit/TestControllers/TouchTestViewController
 
 SOURCES  := $(SOURCES) \
 			NXKit/TestControllers/ViewController \
+			NXKit/TestControllers/ListViewController \
+			NXKit/TestControllers/AnimationTestViewController \
 			NXKit/TestControllers/TouchTestViewController
 
 
@@ -91,6 +95,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UIWindow \
 			NXKit/lib/Core/Utils/GaussianBlur \
 			NXKit/lib/Core/Utils/Animation/Core \
+			NXKit/lib/Core/Utils/Animation/AnimationContext \
 			NXKit/lib/Core/Utils/Animation/NXFloat \
 			NXKit/lib/Core/Utils/Animation/NXPoint \
 			NXKit/lib/Core/Utils/Animation/NXRect \

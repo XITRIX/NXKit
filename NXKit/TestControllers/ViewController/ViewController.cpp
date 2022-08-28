@@ -31,10 +31,20 @@ void MyViewController::loadView() {
 }
 
 void MyViewController::viewDidLoad() {
+    char a[] = {'h','e','l','l','o'};
+    char b[] = {'w','o','r','l','d'};
+    auto t = tweeny::from(a).to(b).during(10);
+    for (int i = 0; i < 10; i++) {
+
+        printf("%s", t.step(1));
+//        for (auto c: t.step(1)) { printf("%s", t.step(1)); }
+        printf("\n");
+    }
+
+
     InputManager* manager = InputManager::shared();
     manager->getInputUpdated()->subscribe([this, manager]() {
-//        tweeny::from({0, 1});//.to({1, 2}).during(10);
-        static float speed = 50;
+//        static float speed = 50;
 //        if (manager->getKey(BRLS_KBD_KEY_DOWN)) {
 //            auto offset = scroll->getContentOffset();
 //            offset.y += speed;

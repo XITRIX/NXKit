@@ -20,6 +20,9 @@ public:
     float blurRadius = 6;
 
     void draw(NVGcontext *vgContext) override;
+
+private:
+    bool reduceTransparency = true;
 };
 
 }

@@ -98,6 +98,18 @@ bool GLFWInputManager::getButtonDown(short controller, ControllerButton key) {
     return buttonsDown[controller][key];
 }
 
+bool GLFWInputManager::getButton(ControllerButton button) {
+    return univButtons[button];
+}
+
+bool GLFWInputManager::getButtonUp(ControllerButton button) {
+    return univButtonsUp[button];
+}
+
+bool GLFWInputManager::getButtonDown(ControllerButton button) {
+    return univButtonsDown[button];
+}
+
 float GLFWInputManager::getAxis(short controller, ControllerAxis axis) {
     return this->axis[controller][axis];
 }
@@ -239,10 +251,10 @@ void GLFWInputManager::updateGamepads() {
         updateButton(controller, BUTTON_LT, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] > 0.1f);
         updateButton(controller, BUTTON_RT, glfwState.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] > 0.1f);
 
-        updateButton(controller, BUTTON_NAV_UP, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] < -0.5f || buttons[controller][BUTTON_UP] || keys[BRLS_KBD_KEY_UP]);
-        updateButton(controller, BUTTON_NAV_RIGHT, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_X] > 0.5f || buttons[controller][BUTTON_RIGHT] || keys[BRLS_KBD_KEY_RIGHT]);
-        updateButton(controller, BUTTON_NAV_DOWN, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] > 0.5f || buttons[controller][BUTTON_DOWN] || keys[BRLS_KBD_KEY_DOWN]);
-        updateButton(controller, BUTTON_NAV_LEFT, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_X] < -0.5f || buttons[controller][BUTTON_LEFT] || keys[BRLS_KBD_KEY_LEFT]);
+        updateButton(controller, BUTTON_NAV_UP, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] < -0.5f || buttons[controller][BUTTON_UP]);
+        updateButton(controller, BUTTON_NAV_RIGHT, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_X] > 0.5f || buttons[controller][BUTTON_RIGHT]);
+        updateButton(controller, BUTTON_NAV_DOWN, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] > 0.5f || buttons[controller][BUTTON_DOWN]);
+        updateButton(controller, BUTTON_NAV_LEFT, glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_X] < -0.5f || buttons[controller][BUTTON_LEFT]);
 
         for (size_t i = 0; i < GLFW_GAMEPAD_AXIS_MAX; i++) {
             axis[controller][i] = glfwState.axes[i];
@@ -250,9 +262,43 @@ void GLFWInputManager::updateGamepads() {
     }
 }
 
+void GLFWInputManager::updateUniversalGamepad() {
+    bool _univButtons[_BUTTON_MAX];
+    for (int button = 0; button < _BUTTON_MAX; button++) { _univButtons[button] = false; }
+
+    for (short controller = 0; controller < controllersCount; controller++) {
+        for (int button = 0; button < _BUTTON_MAX; button++) {
+            _univButtons[button] |= this->buttons[controller][button];
+        }
+    }
+
+    _univButtons[BUTTON_NAV_UP] |= keys[BRLS_KBD_KEY_UP];
+    _univButtons[BUTTON_NAV_DOWN] |= keys[BRLS_KBD_KEY_DOWN];
+    _univButtons[BUTTON_NAV_RIGHT] |= keys[BRLS_KBD_KEY_RIGHT];
+    _univButtons[BUTTON_NAV_LEFT] |= keys[BRLS_KBD_KEY_LEFT];
+
+    for (int button = 0; button < _BUTTON_MAX; button++) {
+        if (univButtons[button] != _univButtons[button]) {
+            if (_univButtons[button]) {
+                univButtonsUp[button] = false;
+                univButtonsDown[button] = true;
+            } else {
+                univButtonsUp[button] = true;
+                univButtonsDown[button] = false;
+            }
+        } else {
+            univButtonsUp[button] = false;
+            univButtonsDown[button] = false;
+        }
+
+        univButtons[button] = _univButtons[button];
+    }
+}
+
 void GLFWInputManager::update() {
     updateKeyboard();
     updateGamepads();
+    updateUniversalGamepad();
     updateMouse();
     updateTouch();
 

@@ -25,6 +25,7 @@ void UIStackView::addSubview(UIView* view) {
 }
 
 void UIStackView::setAxis(Axis axis) {
+    this->axis = axis;
     switch (axis) {
         case Axis::VERTICAL:
             YGNodeStyleSetFlexDirection(this->ygNode, YGFlexDirectionColumn);
@@ -40,10 +41,10 @@ UIView* UIStackView::getNextFocus(NavigationDirection direction) {
     if (currentFocus >= getSubviews().size()) currentFocus = (int) getSubviews().size() - 1;
 
     if ((direction == NavigationDirection::UP || direction == NavigationDirection::DOWN) && axis == Axis::HORIZONTAL)
-        return nullptr;
+        return UIView::getNextFocus(direction);
 
     if ((direction == NavigationDirection::LEFT || direction == NavigationDirection::RIGHT) && axis == Axis::VERTICAL)
-        return nullptr;
+        return UIView::getNextFocus(direction);
 
     if (direction == NavigationDirection::UP || direction == NavigationDirection::LEFT) {
         if (currentFocus <= 0) return UIView::getNextFocus(direction);
@@ -61,6 +62,17 @@ UIView* UIStackView::getNextFocus(NavigationDirection direction) {
     return UIView::getNextFocus(direction);
 }
 
+UIView* UIStackView::getDefaultFocus() {
+    if (canBecomeFocused()) return this;
+
+    auto subviews = getSubviews();
+
+    if (subviews.size() > currentFocus)
+        return getSubviews()[currentFocus]->getDefaultFocus();
+
+    return nullptr;
+}
+
 UIView* UIStackView::hitTest(Point point, UIEvent *withEvent) {
     auto super = UIView::hitTest(point, withEvent);
     if (super == this && !canBecomeFocused() && backgroundColor == UIColor::clear)
@@ -69,9 +81,11 @@ UIView* UIStackView::hitTest(Point point, UIEvent *withEvent) {
 }
 
 void UIStackView::subviewFocusDidChange(UIView *focusedView, UIView *notifiedView) {
-    auto find = std::find(getSubviews().begin(), getSubviews().end(), notifiedView);
-    if (find != getSubviews().end())
-        currentFocus = (int) (getSubviews().begin() - find);
+    auto subviews = getSubviews();
+    auto find = std::find(subviews.begin(), subviews.end(), notifiedView);
+    if (find != subviews.end())
+        currentFocus = (int) (find - subviews.begin());
+    UIView::subviewFocusDidChange(focusedView, notifiedView);
 }
 
 void UIStackView::setJustifyContent(JustifyContent justify)

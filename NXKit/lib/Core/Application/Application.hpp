@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <Platforms/InputManager.hpp>
 #include <Core/Driver/Video/video.hpp>
 #include <Core/UIView/UIView.hpp>
 #include <Core/UIWindow/UIWindow.hpp>
@@ -53,7 +54,8 @@ private:
     std::string resourcesPath;
 
     bool mainLoopIteration();
-    void navigation();
+    void onControllerButtonPressed(ControllerButton button, bool repeating);
+    void input();
     void render();
 
 };

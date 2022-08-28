@@ -35,6 +35,7 @@ struct UIFont {
 class UILabel: public UIView {
 public:
     UILabel(std::string text);
+    UILabel(): UILabel("") {}
 
     UIColor textColor;
 

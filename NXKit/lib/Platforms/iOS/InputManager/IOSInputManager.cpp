@@ -63,6 +63,18 @@ bool IOSInputManager::getButtonDown(short controller, ControllerButton button) {
     return false;
 }
 
+bool IOSInputManager::getButton(ControllerButton button) {
+    return false;
+}
+
+bool IOSInputManager::getButtonUp(ControllerButton button) {
+    return false;
+}
+
+bool IOSInputManager::getButtonDown(ControllerButton button) {
+    return false;
+}
+
 float IOSInputManager::getAxis(short controller, ControllerAxis axis) {
     return 0;
 }

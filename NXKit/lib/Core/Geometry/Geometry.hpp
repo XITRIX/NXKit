@@ -6,6 +6,7 @@
 //
 
 #pragma once
+#include <math.h>
 
 namespace NXKit {
 
@@ -38,6 +39,10 @@ struct Point {
         this->y -= rhs.y;
         return *this;
     }
+
+    bool valid() {
+        return !isnan(this->x) && !isnan(this->y);
+    }
 };
 
 struct Size {
@@ -68,6 +73,10 @@ struct Size {
         this->width -= rhs.width;
         this->height -= rhs.height;
         return *this;
+    }
+
+    bool valid() {
+        return !isnan(this->width) && !isnan(this->height);
     }
 };
 
@@ -100,6 +109,10 @@ struct Rect {
         return
         this->origin.x == rhs.origin.x && this->origin.y == rhs.origin.y &&
         this->size.width == rhs.size.width && this->size.height == rhs.size.height;
+    }
+
+    bool valid() {
+        return this->origin.valid() && this->size.valid();
     }
 };
 

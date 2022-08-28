@@ -124,10 +124,6 @@ Rect UIView::getBounds() {
     Rect bounds;
     bounds.origin = this->bounds.origin;
     bounds.size = Size(YGNodeLayoutGetWidth(this->ygNode), YGNodeLayoutGetHeight(this->ygNode));
-
-//    bounds.size = Size(this->bounds.width() == AUTO ? YGNodeLayoutGetWidth(this->ygNode) : this->bounds.width(),
-//                       this->bounds.height() == AUTO ? YGNodeLayoutGetHeight(this->ygNode) : this->bounds.height());
-
     return bounds;
 }
 
@@ -145,13 +141,13 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     nvgTranslate(vgContext, getFrame().origin.x , getFrame().origin.y);
 
     // Position transform
-    nvgTranslate(vgContext, transformOrigin.x() , transformOrigin.y());
+    nvgTranslate(vgContext, transformOrigin.x , transformOrigin.y);
 
     // Scale transform
-    float scaleTransformX = (getFrame().size.width / 2.0f) - (getFrame().size.width / 2.0f) * transformSize.width();
-    float scaleTransformY = (getFrame().size.height / 2.0f) - (getFrame().size.height / 2.0f) * transformSize.height();
+    float scaleTransformX = (getFrame().size.width / 2.0f) - (getFrame().size.width / 2.0f) * transformSize.width;
+    float scaleTransformY = (getFrame().size.height / 2.0f) - (getFrame().size.height / 2.0f) * transformSize.height;
     nvgTranslate(vgContext, scaleTransformX, scaleTransformY);
-    nvgScale(vgContext, transformSize.width(), transformSize.height());
+    nvgScale(vgContext, transformSize.width, transformSize.height);
 
     // ClipToBounds
     if (clipToBounds)
@@ -162,6 +158,8 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     nvgRoundedRect(vgContext, 0, 0, getFrame().size.width, getFrame().size.height, cornerRadius);
     nvgFillColor(vgContext, backgroundColor.raw());
     nvgFill(vgContext);
+    
+    drawHighlight(vgContext, true);
 
     nvgSave(vgContext);
     nvgTranslate(vgContext, -bounds.minX(), -bounds.minY());
@@ -214,7 +212,142 @@ void UIView::internalDraw(NVGcontext* vgContext) {
         nvgFill(vgContext);
     }
 
+    drawHighlight(vgContext, false);
+
     nvgRestore(vgContext);
+}
+
+void UIView::drawHighlight(NVGcontext* vg, bool background) {
+    if (!isFocused()) return;
+
+    nvgSave(vg);
+    nvgResetScissor(vg);
+
+    float padding = 0;
+    float cornerRadius = 0.5f;
+    float strokeWidth  = 5;
+
+    auto frame = getFrame();
+
+    float x      = padding - strokeWidth / 2;
+    float y      = padding - strokeWidth / 2;
+    float width  = frame.width() + padding * 2 + strokeWidth;
+    float height = frame.height() + padding * 2 + strokeWidth;
+
+    // Draw
+    if (background)
+    {
+        // Background
+        UIColor highlightBackgroundColor = UIColor(252, 255, 248);
+        nvgFillColor(vg, highlightBackgroundColor.raw());
+        nvgBeginPath(vg);
+        nvgRoundedRect(vg, x, y, width, height, cornerRadius);
+        nvgFill(vg);
+    }
+    else
+    {
+        float shadowOffset = 10;
+
+        // Shadow
+        NVGpaint shadowPaint = nvgBoxGradient(vg,
+            x, y + 2,
+            width, height,
+            cornerRadius * 2, 10,
+            UIColor(0, 0, 0, 128).raw(), UIColor::clear.raw());
+
+        nvgBeginPath(vg);
+        nvgRect(vg, x - shadowOffset, y - shadowOffset,
+            width + shadowOffset * 2, height + shadowOffset * 3);
+        nvgRoundedRect(vg, x, y, width, height, cornerRadius);
+        nvgPathWinding(vg, NVG_HOLE);
+        nvgFillPaint(vg, shadowPaint);
+        nvgFill(vg);
+
+        // Border
+        float gradientX, gradientY, color;
+        getHighlightAnimation(&gradientX, &gradientY, &color);
+
+        UIColor highlightColor1 = UIColor(13, 182, 213);
+
+        UIColor pulsationColor = UIColor((color * highlightColor1.r()) + (1 - color) * highlightColor1.r(),
+            (color * highlightColor1.g()) + (1 - color) * highlightColor1.g(),
+            (color * highlightColor1.b()) + (1 - color) * highlightColor1.b());
+
+        UIColor borderColor = UIColor(80, 239, 217, 150);
+
+        float strokeWidth = 5;
+
+        NVGpaint border1Paint = nvgRadialGradient(vg,
+            x + gradientX * width, y + gradientY * height,
+            strokeWidth * 10, strokeWidth * 40,
+            borderColor.raw(), UIColor::clear.raw());
+
+        NVGpaint border2Paint = nvgRadialGradient(vg,
+            x + (1 - gradientX) * width, y + (1 - gradientY) * height,
+            strokeWidth * 10, strokeWidth * 40,
+            borderColor.raw(), UIColor::clear.raw());
+
+        nvgBeginPath(vg);
+        nvgStrokeColor(vg, pulsationColor.raw());
+        nvgStrokeWidth(vg, strokeWidth);
+        nvgRoundedRect(vg, x, y, width, height, cornerRadius);
+        nvgStroke(vg);
+
+        nvgBeginPath(vg);
+        nvgStrokePaint(vg, border1Paint);
+        nvgStrokeWidth(vg, strokeWidth);
+        nvgRoundedRect(vg, x, y, width, height, cornerRadius);
+        nvgStroke(vg);
+
+        nvgBeginPath(vg);
+        nvgStrokePaint(vg, border2Paint);
+        nvgStrokeWidth(vg, strokeWidth);
+        nvgRoundedRect(vg, x, y, width, height, cornerRadius);
+        nvgStroke(vg);
+    }
+
+    nvgRestore(vg);
+}
+
+std::vector<float> UIView::createAnimationContext() {
+    std::vector<float> context;
+    context.push_back(bounds.origin.x);
+    context.push_back(bounds.origin.y);
+    context.push_back(transformOrigin.x);
+    context.push_back(transformOrigin.y);
+    return context;
+}
+
+float pop(std::vector<float>* context) {
+    float val = context->back();
+    context->pop_back();
+    return val;
+}
+
+void UIView::applyAnimationContext(std::vector<float>* context) {
+    transformOrigin.y = pop(context);
+    transformOrigin.x = pop(context);
+    bounds.origin.y = pop(context);
+    bounds.origin.x = pop(context);
+}
+
+void UIView::animate(float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {
+    if (duration <= 0) {
+        animations();
+        return;
+    }
+    
+    auto oldContext = createAnimationContext();
+    animationContext.reset(oldContext);
+    animations();
+    animationContext.addStep(createAnimationContext(), duration, easing);
+    animationContext.setTickCallback([this]() {
+        auto values = animationContext.getValue();
+        applyAnimationContext(&values);
+    });
+    animationContext.setEndCallback(completion);
+    applyAnimationContext(&oldContext);
+    animationContext.start();
 }
 
 void UIView::setNeedsLayout() {

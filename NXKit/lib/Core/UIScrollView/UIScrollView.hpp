@@ -12,6 +12,12 @@
 
 namespace NXKit {
 
+enum class UIScrollViewScrollingMode {
+    centered,
+    scrollingEdge,
+    continous
+};
+
 class UIScrollView;
 class UIScrollViewDelegate {
 public:
@@ -23,12 +29,15 @@ public:
 class UIScrollView: public UIView {
 public:
     UIScrollViewDelegate* delegate = nullptr;
+    UIScrollViewScrollingMode scrollingMode = UIScrollViewScrollingMode::centered;
 
     UIScrollView();
     Point getContentOffset();
-    void setContentOffset(Point offset);
+    void setContentOffset(Point offset, bool animated = true);
 
+    void subviewFocusDidChange(UIView *focusedView, UIView *notifiedView) override;
     void layoutSubviews() override;
+    UIView* getNextFocus(NavigationDirection direction) override;
 
     void setFixWidth(bool fix);
     void setFixHeight(bool fix);
@@ -41,7 +50,10 @@ private:
     bool fixWidth = false, fixHeight = false;
     bool dragging = false;
 
+    Rect getContentOffsetBounds();
+    Rect getVisibleBounds();
     Point getContentOffsetInBounds(Point offset);
+    Rect visibleBounds();
 
     void onPan();
 };

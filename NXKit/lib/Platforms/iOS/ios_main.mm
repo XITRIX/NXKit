@@ -52,7 +52,7 @@ using namespace NXKit;
 }
 
 - (void)setScale:(float)width height:(float)height scale:(float)scale {
-    _nxcontext->setScale(width, height, scale * 2);
+    _nxcontext->setScale(width, height, scale);
 }
 
 - (void)applicationLoop {

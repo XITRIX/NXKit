@@ -32,10 +32,12 @@ Point UIScrollView::getContentOffset() {
     return getBounds().origin;
 }
 
-void UIScrollView::setContentOffset(Point offset) {
+void UIScrollView::setContentOffset(Point offset, bool animated) {
     if (getBounds().origin == offset) return;
-    
-    setBounds({ offset, getBounds().size });
+
+    animate(animated ? 80 : 0, [this, offset]() {
+        setBounds({ offset, getBounds().size });
+    });
 }
 
 void UIScrollView::setFixWidth(bool fix) {
@@ -53,6 +55,49 @@ Size UIScrollView::getContentSize() {
     return getSubviews()[0]->getFrame().size;
 }
 
+void UIScrollView::subviewFocusDidChange(UIView *focusedView, UIView *notifiedView) {
+    if (!getFrame().valid()) return UIView::subviewFocusDidChange(focusedView, notifiedView);
+
+    if (scrollingMode == UIScrollViewScrollingMode::centered) {
+        Rect focusedViewFrame = focusedView->getFrame();
+        Point origin = focusedView->getSuperview()->convert(focusedViewFrame.origin, this);
+        origin.y -= getFrame().height() / 2 - focusedViewFrame.height() / 2;
+        Point newOffset = getContentOffsetInBounds(origin);
+        setContentOffset(newOffset);
+    }
+
+    if (scrollingMode == UIScrollViewScrollingMode::scrollingEdge) {
+        Rect bounds = visibleBounds();
+        Point newOffset = bounds.origin;
+        Rect focusedViewFrame = focusedView->getFrame();
+        focusedViewFrame.origin = focusedView->getSuperview()->convert(focusedViewFrame.origin, this);
+
+        float padding = 20;
+
+        if (focusedViewFrame.minY() < bounds.minY()) newOffset.y = focusedViewFrame.minY() - safeAreaInsets().top - padding;
+        if (focusedViewFrame.maxY() > bounds.maxY()) newOffset.y = focusedViewFrame.maxY() - safeAreaInsets().top + padding - bounds.height();
+
+        if (focusedViewFrame.minX() < bounds.minX()) newOffset.x = focusedViewFrame.minX() - safeAreaInsets().left - padding;
+        if (focusedViewFrame.maxX() > bounds.maxX()) newOffset.x = focusedViewFrame.maxX() - safeAreaInsets().left + padding - bounds.width();
+
+        if (newOffset == bounds.origin) return UIView::subviewFocusDidChange(focusedView, notifiedView);
+
+        newOffset = getContentOffsetInBounds(newOffset);
+        setContentOffset(newOffset);
+    }
+
+    UIView::subviewFocusDidChange(focusedView, notifiedView);
+}
+
+Rect UIScrollView::visibleBounds() {
+    auto bounds = getBounds();
+    bounds.origin.y += safeAreaInsets().top;
+    bounds.origin.x += safeAreaInsets().left;
+    bounds.size.height -= safeAreaInsets().top + safeAreaInsets().bottom;
+    bounds.size.width -= safeAreaInsets().left + safeAreaInsets().right;
+    return bounds;
+}
+
 void UIScrollView::layoutSubviews() {
     UIView::layoutSubviews();
 
@@ -68,9 +113,32 @@ void UIScrollView::layoutSubviews() {
         Point latestSafeAreaOffset = Point(lastSafeAreaInset.left, lastSafeAreaInset.top);
         Point safeAreaOffset = Point(safeAreaInset.left, safeAreaInset.top);
         offset += latestSafeAreaOffset - safeAreaOffset;
-        setContentOffset(offset);
+        setContentOffset(offset, false);
         lastSafeAreaInset = safeAreaInset;
     }
+}
+
+UIView* UIScrollView::getNextFocus(NavigationDirection direction) {
+    Rect offsetBounds = getContentOffsetBounds();
+
+    if (direction == NavigationDirection::UP && getContentOffset().y > offsetBounds.minY()) {
+        setContentOffset(Point(getContentOffset().x, offsetBounds.minY()));
+        return nullptr;
+    }
+    if (direction == NavigationDirection::LEFT && getContentOffset().x > offsetBounds.minX()) {
+        setContentOffset(Point(offsetBounds.minX(), getContentOffset().y));
+        return nullptr;
+    }
+    if (direction == NavigationDirection::DOWN && getContentOffset().y < offsetBounds.maxY()) {
+        setContentOffset(Point(getContentOffset().x, offsetBounds.maxY()));
+        return nullptr;
+    }
+    if (direction == NavigationDirection::LEFT && getContentOffset().x > offsetBounds.maxX()) {
+        setContentOffset(Point(offsetBounds.maxX(), getContentOffset().y));
+        return nullptr;
+    }
+
+    return UIView::getNextFocus(direction);
 }
 
 void UIScrollView::onPan() {
@@ -79,29 +147,33 @@ void UIScrollView::onPan() {
 
     Point newOffset = getContentOffset() - translation;
     newOffset = getContentOffsetInBounds(newOffset);
-    setContentOffset(newOffset);
+    setContentOffset(newOffset, false);
+}
+
+Rect UIScrollView::getContentOffsetBounds() {
+    Point origin = Point(-lastSafeAreaInset.left, -lastSafeAreaInset.top);
+    Size size = getContentSize();
+    size.width += lastSafeAreaInset.left + lastSafeAreaInset.right - getFrame().size.width;
+    size.height += lastSafeAreaInset.top + lastSafeAreaInset.bottom - getFrame().size.height;
+    return Rect(origin, size);
+}
+
+Rect UIScrollView::getVisibleBounds() {
+    Point origin = Point(lastSafeAreaInset.left, lastSafeAreaInset.top);
+    Size size = getBounds().size;
+    size.width -= lastSafeAreaInset.left + lastSafeAreaInset.right;
+    size.height -= lastSafeAreaInset.top + lastSafeAreaInset.bottom;
+    return Rect(origin, size);
 }
 
 Point UIScrollView::getContentOffsetInBounds(Point offset) {
-    Size contenSize = getContentSize();
+    Rect offsetBounds = getContentOffsetBounds();
+    Rect visibleBounds = getVisibleBounds();
 
-    if (contenSize.width <= getFrame().size.width - lastSafeAreaInset.left - lastSafeAreaInset.right) {
-        offset.x = -lastSafeAreaInset.left;
-    } else {
-        if (offset.x < -lastSafeAreaInset.left)
-            offset.x = -lastSafeAreaInset.left;
-        if (offset.x > getFrame().size.width - contenSize.width - lastSafeAreaInset.right)
-            offset.x = getFrame().size.width - contenSize.width - lastSafeAreaInset.right;
-    }
-
-    if (contenSize.height <= getFrame().size.height - lastSafeAreaInset.top - lastSafeAreaInset.bottom) {
-        offset.y = -lastSafeAreaInset.top;
-    } else {
-        if (offset.y < -lastSafeAreaInset.top)
-            offset.y = -lastSafeAreaInset.top;
-        if (offset.y > contenSize.height - getFrame().size.height + lastSafeAreaInset.bottom)
-            offset.y = contenSize.height - getFrame().size.height + lastSafeAreaInset.bottom;
-    }
+    if (offset.x < offsetBounds.minX() || getContentSize().width < visibleBounds.width()) offset.x = offsetBounds.minX();
+    else if (offset.x > offsetBounds.maxX()) offset.x = offsetBounds.maxX();
+    if (offset.y < offsetBounds.minY() || getContentSize().height < visibleBounds.height()) offset.y = offsetBounds.minY();
+    else if (offset.y > offsetBounds.maxY()) offset.y = offsetBounds.maxY();
 
     return offset;
 }

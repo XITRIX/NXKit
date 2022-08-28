@@ -20,6 +20,10 @@ UIColor::UIColor(short r, short g, short b, short a) {
     value = (a & 0xff) << 24 | (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
 }
 
+UIColor UIColor::f(float r, float g, float b, float a) {
+    return UIColor(r * 255, g * 255, b * 255, a * 255);
+}
+
 unsigned char UIColor::r() {
     return static_cast<unsigned char>((value >> 16) & 0xff);
 }

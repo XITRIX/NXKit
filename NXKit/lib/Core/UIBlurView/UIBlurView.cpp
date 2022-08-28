@@ -41,7 +41,7 @@ static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float 
     if (image == NULL || lw <= 0 || lh <= 0)
         return 0;
 
-    int minim = 4;
+    int minim = 8;
     if (minim != 0) {
         shrinkImage(&image, lw, lh, minim);
 
@@ -61,11 +61,14 @@ static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float 
 }
 
 UIBlurView::UIBlurView(Rect frame): UIStackView() {
-    backgroundColor = UIColor(235, 235, 235).withAlphaComponent(0.6f);
-//    backgroundColor = UIColor::white.withAlphaComponent(0.6f);
+    if (reduceTransparency)
+        backgroundColor = UIColor(235, 235, 235);
+    else
+        backgroundColor = UIColor(235, 235, 235).withAlphaComponent(0.6f);
 }
 
 void UIBlurView::draw(NVGcontext *vgContext) {
+    if (reduceTransparency) return;
     int img = getContextBluredImage(vgContext, getFrame().origin.x, getFrame().origin.y, getFrame().size.width, getFrame().size.height, blurRadius);
     NVGpaint imgPaint = nvgImagePattern(vgContext, 0, 0, getFrame().size.width, getFrame().size.height, 0, img, 1);
     nvgBeginPath(vgContext);

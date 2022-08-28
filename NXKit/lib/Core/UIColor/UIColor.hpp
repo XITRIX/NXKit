@@ -16,6 +16,8 @@ public:
     UIColor(short r, short g, short b, short a);
     UIColor(short r, short g, short b): UIColor(r, g, b, 255) {}
 
+    static UIColor f(float r, float g, float b, float a = 1);
+
     unsigned char r();
     unsigned char g();
     unsigned char b();

@@ -35,6 +35,10 @@ public:
     bool getButtonUp(short controller, ControllerButton button) override;
     bool getButtonDown(short controller, ControllerButton button) override;
 
+    bool getButton(ControllerButton button) override;
+    bool getButtonUp(ControllerButton button) override;
+    bool getButtonDown(ControllerButton button) override;
+
     float getAxis(short controller, ControllerAxis axis) override;
 
     int touchCount() override;
@@ -61,6 +65,10 @@ protected:
     bool buttonsUp[GLFW_JOYSTICK_LAST][_BUTTON_MAX];
     bool buttonsDown[GLFW_JOYSTICK_LAST][_BUTTON_MAX];
 
+    bool univButtons[_BUTTON_MAX];
+    bool univButtonsUp[_BUTTON_MAX];
+    bool univButtonsDown[_BUTTON_MAX];
+
     float axis[GLFW_JOYSTICK_LAST][_AXES_MAX];
 
     std::vector<UITouch*> touches;
@@ -69,6 +77,7 @@ protected:
     virtual void updateMouse();
     virtual void updateTouch();
     virtual void updateGamepads();
+    virtual void updateUniversalGamepad();
     virtual void updateButton(short controller, ControllerButton button, bool newValue);
     static void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 

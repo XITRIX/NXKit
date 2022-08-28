@@ -32,6 +32,10 @@ public:
     bool getButtonUp(short controller, ControllerButton button) override;
     bool getButtonDown(short controller, ControllerButton button) override;
 
+    bool getButton(ControllerButton button) override;
+    bool getButtonUp(ControllerButton button) override;
+    bool getButtonDown(ControllerButton button) override;
+
     float getAxis(short controller, ControllerAxis axis) override;
 
     int touchCount() override;

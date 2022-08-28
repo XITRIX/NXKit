@@ -22,6 +22,9 @@
 
 namespace NXKit {
 
+#define BUTTON_REPEAT_DELAY 15
+#define BUTTON_REPEAT_CADENCY 5
+
 Application* Application::shared() {
     return Application::_shared;
 }
@@ -64,7 +67,7 @@ bool Application::mainLoop() {
 
     // Input
     InputManager::shared()->update();
-    navigation();
+    input();
 
     UIEvent* event = new UIEvent();
     event->allTouches = InputManager::shared()->getTouches();
@@ -81,21 +84,53 @@ bool Application::mainLoop() {
     return true;
 }
 
-void Application::navigation() {
+void Application::input() {
     auto manager = InputManager::shared();
-    if (manager->getGamepadsCount() == 0 || focus == nullptr) return;
+//    if (manager->getGamepadsCount() == 0 || focus == nullptr) return;
 
+    bool anyButtonPressed           = false;
+    bool repeating                  = false;
+    static Time buttonPressTime     = 0;
+    static int repeatingButtonTimer = 0;
+
+//    controllerState.buttons[BUTTON_A]  |= inputManager->getKeyboardKeyState(BRLS_KBD_KEY_ENTER);
+//    controllerState.buttons[BUTTON_B]  |= inputManager->getKeyboardKeyState(BRLS_KBD_KEY_ESCAPE);
+
+    for (int i = 0; i < _BUTTON_MAX; i++)
+    {
+        if (manager->getButton((ControllerButton)i))
+        {
+            anyButtonPressed = true;
+            repeating        = (repeatingButtonTimer > BUTTON_REPEAT_DELAY && repeatingButtonTimer % BUTTON_REPEAT_CADENCY == 0);
+
+            if (manager->getButtonDown((ControllerButton) i) || repeating) {
+                onControllerButtonPressed((ControllerButton) i, repeating);
+            }
+        }
+
+        if (manager->getButtonDown((ControllerButton)i) || manager->getButtonUp((ControllerButton)i))
+            buttonPressTime = repeatingButtonTimer = 0;
+    }
+
+    if (anyButtonPressed && getCPUTimeUsec() - buttonPressTime > 1000)
+    {
+        buttonPressTime = getCPUTimeUsec();
+        repeatingButtonTimer++; // Increased once every ~1ms
+    }
+}
+
+void Application::onControllerButtonPressed(ControllerButton button, bool repeating) {
     auto newFocus = focus;
-    if (manager->getButtonDown(0, BUTTON_NAV_UP)) {
+    if (button == BUTTON_NAV_UP) {
         newFocus = focus->getNextFocus(NavigationDirection::UP);
     }
-    if (manager->getButtonDown(0, BUTTON_NAV_DOWN)) {
+    if (button == BUTTON_NAV_DOWN) {
         newFocus = focus->getNextFocus(NavigationDirection::DOWN);
     }
-    if (manager->getButtonDown(0, BUTTON_NAV_LEFT)) {
+    if (button == BUTTON_NAV_LEFT) {
         newFocus = focus->getNextFocus(NavigationDirection::LEFT);
     }
-    if (manager->getButtonDown(0, BUTTON_NAV_RIGHT)) {
+    if (button == BUTTON_NAV_RIGHT) {
         newFocus = focus->getNextFocus(NavigationDirection::RIGHT);
     }
 
@@ -109,6 +144,8 @@ UIView* Application::getFocus() {
 }
 
 void Application::setFocus(UIView* view) {
+    if (this->focus == view) return;
+
     if (this->focus) {
         this->focus->resignFocused();
     }

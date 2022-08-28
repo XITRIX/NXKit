@@ -94,14 +94,17 @@ UITabBarController::~UITabBarController() {
 
 void UITabBarController::loadView() {
     UIStackView* view = new UIStackView(Axis::HORIZONTAL);
+    view->tag = "TabBar stack 2";
 
     tabs = new UIStackView(Axis::VERTICAL);
+    tabs->tag = "TabBarItems stack";
     tabs->setPadding(32, 40, 47, 80);
 
     contentView = new UIView();
     contentView->setGrow(1);
 
     UIScrollView* scrollView = new UIScrollView();
+    scrollView->tag = "TabBar scroll";
     scrollView->setFixWidth(true);
     scrollView->setPercentWidth(32);
     scrollView->backgroundColor = UIColor(240, 240, 240);

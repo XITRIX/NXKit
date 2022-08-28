@@ -46,6 +46,7 @@ public:
 
     void addSubview(UIView* view) override;
     UIView* getNextFocus(NavigationDirection direction) override;
+    UIView* getDefaultFocus() override;
 
     UIView* hitTest(Point point, UIEvent *withEvent) override;
 

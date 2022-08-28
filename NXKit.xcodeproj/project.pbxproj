@@ -51,6 +51,12 @@
 		7C888E4328816547009A6B95 /* UINavigationController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4128816547009A6B95 /* UINavigationController.cpp */; };
 		7C888E47288165E9009A6B95 /* ViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E45288165E9009A6B95 /* ViewController.cpp */; };
 		7C888E4B28818212009A6B95 /* UITabBarController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4928818212009A6B95 /* UITabBarController.cpp */; };
+		7C8D980528BA219A00BDD667 /* ListViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980328BA219A00BDD667 /* ListViewController.cpp */; };
+		7C8D980628BA219A00BDD667 /* ListViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980328BA219A00BDD667 /* ListViewController.cpp */; };
+		7C8D980A28BAC24000BDD667 /* AnimationContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980828BAC24000BDD667 /* AnimationContext.cpp */; };
+		7C8D980B28BAC24000BDD667 /* AnimationContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980828BAC24000BDD667 /* AnimationContext.cpp */; };
+		7C8D980F28BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */; };
+		7C8D981028BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */; };
 		7CA389722882F8C6005C7A91 /* ios_main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C4AD2882CE7500E47DB3 /* ios_main.mm */; };
 		7CA3897728835B5F005C7A91 /* nx_application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA3897428835AB8005C7A91 /* nx_application.cpp */; };
 		7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE592878F4E60091DEF9 /* UIWindow.cpp */; };
@@ -231,6 +237,12 @@
 		7C888E46288165E9009A6B95 /* ViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ViewController.hpp; sourceTree = "<group>"; };
 		7C888E4928818212009A6B95 /* UITabBarController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITabBarController.cpp; sourceTree = "<group>"; };
 		7C888E4A28818212009A6B95 /* UITabBarController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITabBarController.hpp; sourceTree = "<group>"; };
+		7C8D980328BA219A00BDD667 /* ListViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ListViewController.cpp; sourceTree = "<group>"; };
+		7C8D980428BA219A00BDD667 /* ListViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ListViewController.hpp; sourceTree = "<group>"; };
+		7C8D980828BAC24000BDD667 /* AnimationContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AnimationContext.cpp; sourceTree = "<group>"; };
+		7C8D980928BAC24000BDD667 /* AnimationContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AnimationContext.hpp; sourceTree = "<group>"; };
+		7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AnimationTestViewController.cpp; sourceTree = "<group>"; };
+		7C8D980E28BB5A0A00BDD667 /* AnimationTestViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AnimationTestViewController.hpp; sourceTree = "<group>"; };
 		7CA3897328835AA1005C7A91 /* nx_application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nx_application.h; sourceTree = "<group>"; };
 		7CA3897428835AB8005C7A91 /* nx_application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = nx_application.cpp; sourceTree = "<group>"; };
 		7CA3898528836343005C7A91 /* Fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; name = Fonts; path = resources/Fonts; sourceTree = SOURCE_ROOT; };
@@ -336,6 +348,7 @@
 			isa = PBXGroup;
 			children = (
 				7C239634287E175100973CC0 /* Core */,
+				7C8D980728BAC22D00BDD667 /* AnimationContext */,
 				7C239635287E175900973CC0 /* NXFloat */,
 				7C239636287E176A00973CC0 /* NXPoint */,
 				7C888E34287F770D009A6B95 /* NXSize */,
@@ -733,6 +746,8 @@
 		7C888E3F28816531009A6B95 /* TestControllers */ = {
 			isa = PBXGroup;
 			children = (
+				7C8D980C28BB59F300BDD667 /* AnimationTestViewController */,
+				7C8D980228BA218700BDD667 /* ListViewController */,
 				7C49617628A8213700E30B4B /* TouchTestViewController */,
 				7C888E44288165DB009A6B95 /* ViewController */,
 			);
@@ -787,6 +802,33 @@
 				7C47495428854E2900C5A988 /* GLFWInputManager.cpp */,
 			);
 			path = Universal;
+			sourceTree = "<group>";
+		};
+		7C8D980228BA218700BDD667 /* ListViewController */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D980428BA219A00BDD667 /* ListViewController.hpp */,
+				7C8D980328BA219A00BDD667 /* ListViewController.cpp */,
+			);
+			path = ListViewController;
+			sourceTree = "<group>";
+		};
+		7C8D980728BAC22D00BDD667 /* AnimationContext */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D980928BAC24000BDD667 /* AnimationContext.hpp */,
+				7C8D980828BAC24000BDD667 /* AnimationContext.cpp */,
+			);
+			path = AnimationContext;
+			sourceTree = "<group>";
+		};
+		7C8D980C28BB59F300BDD667 /* AnimationTestViewController */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D980E28BB5A0A00BDD667 /* AnimationTestViewController.hpp */,
+				7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */,
+			);
+			path = AnimationTestViewController;
 			sourceTree = "<group>";
 		};
 		7CA38982288362FE005C7A91 /* Resources */ = {
@@ -1167,7 +1209,9 @@
 				7C239639287E177900973CC0 /* NXPoint.cpp in Sources */,
 				7C58C66728B0DA510039F0E5 /* UIPanGestureRecognizer.cpp in Sources */,
 				7C4749522884604B00C5A988 /* UIScrollView.cpp in Sources */,
+				7C8D980528BA219A00BDD667 /* ListViewController.cpp in Sources */,
 				7C58C65B28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */,
+				7C8D980F28BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
 				7C47495628854E2900C5A988 /* GLFWInputManager.cpp in Sources */,
 				7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */,
 				7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */,
@@ -1188,6 +1232,7 @@
 				7C53FE562878ED350091DEF9 /* UIViewController.cpp in Sources */,
 				7CE9B5E8287495F900659D24 /* UIStackView.cpp in Sources */,
 				7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */,
+				7C8D980A28BAC24000BDD667 /* AnimationContext.cpp in Sources */,
 				7CE9B5DF2874917F00659D24 /* YGNodePrint.cpp in Sources */,
 				7CE9B5DD2874917F00659D24 /* YGStyle.cpp in Sources */,
 				7CA960B12871F993009E0953 /* nanovg.c in Sources */,
@@ -1210,14 +1255,17 @@
 			files = (
 				7CA9C4712882ADD600E47DB3 /* GLViewController.m in Sources */,
 				7CA9C4A12882C83F00E47DB3 /* YGNodePrint.cpp in Sources */,
+				7C8D980628BA219A00BDD667 /* ListViewController.cpp in Sources */,
 				7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */,
 				7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */,
+				7C8D981028BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
 				7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */,
 				7CA9C48F2882C43100E47DB3 /* GaussianBlur.cpp in Sources */,
 				7CA9C46B2882ADD600E47DB3 /* AppDelegate.m in Sources */,
 				7CA9C4912882C43100E47DB3 /* NXFloat.cpp in Sources */,
 				7CA9C48D2882C43100E47DB3 /* UITouch.cpp in Sources */,
 				7CA9C4902882C43100E47DB3 /* UIEvent.cpp in Sources */,
+				7C8D980B28BAC24000BDD667 /* AnimationContext.cpp in Sources */,
 				7CA9C4A62882C84400E47DB3 /* event.cpp in Sources */,
 				7CA9C4862882C43100E47DB3 /* FontManager.cpp in Sources */,
 				7CA9C4852882C41000E47DB3 /* UIBlurView.cpp in Sources */,
