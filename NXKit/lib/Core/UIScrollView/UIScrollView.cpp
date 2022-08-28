@@ -57,7 +57,7 @@ void UIScrollView::startDeceleting() {
     float time = -fabs(velocity.magnitude()) / PAN_SCROLL_ACCELERATION;
     Point distance = Point(velocity.x * time / 2, velocity.y * time / 2);
 
-    animate(time * 100, [this, distance]() {
+    animate(time / 10, [this, distance]() {
         auto offset = getContentOffset() - distance;
         setBounds({offset , getBounds().size });
     }, EasingFunction::quadraticOut, [this](bool res) {
@@ -82,7 +82,7 @@ void UIScrollView::setContentOffset(Point offset, bool animated) {
     if (getBounds().origin == offset) return;
 
     if (animated) {
-        animate(80, [this, offset]() {
+        animate(0.1f, [this, offset]() {
             setContentOffset(offset, false);
 //            setBounds({ offset, getBounds().size });
         });

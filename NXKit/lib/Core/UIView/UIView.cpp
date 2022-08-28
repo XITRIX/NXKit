@@ -350,7 +350,7 @@ void UIView::animate(float duration, std::function<void()> animations, EasingFun
     auto oldContext = createAnimationContext();
     animationContext.reset(oldContext);
     animations();
-    animationContext.addStep(createAnimationContext(), duration, easing);
+    animationContext.addStep(createAnimationContext(), duration * 1000, easing);
     animationContext.setTickCallback([this]() {
         auto values = animationContext.getValue();
         applyAnimationContext(&values);

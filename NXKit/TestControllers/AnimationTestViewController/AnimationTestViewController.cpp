@@ -32,7 +32,7 @@ void AnimationTestViewController::viewDidLoad() {
 }
 
 void AnimationTestViewController::animate(bool revers) {
-    ball->animate(1000, [this, revers]() {
+    ball->animate(1, [this, revers]() {
         ball->transformOrigin = Point(revers ? 120 : -120, 0);
     }, EasingFunction::elasticInOut, [this](bool res) {
         if (!res) return;
