@@ -10,6 +10,7 @@
 #include <tweeny/tweeny.h>
 #include <Core/Utils/Animation/Core/Time.hpp>
 #include <Core/Utils/Animation/NXFloat/NXFloat.hpp>
+#include <deque>
 
 namespace NXKit {
 
@@ -25,7 +26,7 @@ public:
     /**
      * Returns the current animatable value.
      */
-    std::vector<float> getValue();
+    std::deque<float> getValue();
 
     /**
      * Stops and resets the animation, going back to the given initial value.
@@ -33,7 +34,7 @@ public:
      * If an animation was already ongoing for that animatable, its end callback
      * will be called.
      */
-    void reset(std::vector<float> initialValue);
+    void reset(std::deque<float> initialValue);
 
     /**
      * Stops and resets the animation. The value will stay where it's at.
@@ -52,7 +53,7 @@ public:
      * Duration is int32_t due to internal limitations, so a step cannot last for longer than 2 147 483 647ms.
      * The sum of the duration of all steps cannot exceed 71582min.
      */
-    void addStep(std::vector<float> targetValue, int32_t duration, EasingFunction easing = EasingFunction::linear);
+    void addStep(std::deque<float> targetValue, int32_t duration, EasingFunction easing = EasingFunction::linear);
 
     /**
      * Returns the progress of the animation between 0.0f and 1.0f.
@@ -71,7 +72,7 @@ protected:
     void onRewind() override;
 
 private:
-    std::vector<float> currentValues;
+    std::deque<float> currentValues;
     std::vector<tweeny::tween<float>> tweens;
 };
 

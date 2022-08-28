@@ -309,8 +309,8 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
     nvgRestore(vg);
 }
 
-std::vector<float> UIView::createAnimationContext() {
-    std::vector<float> context;
+std::deque<float> UIView::createAnimationContext() {
+    std::deque<float> context;
     context.push_back(bounds.origin.x);
     context.push_back(bounds.origin.y);
     context.push_back(transformOrigin.x);
@@ -318,16 +318,18 @@ std::vector<float> UIView::createAnimationContext() {
     return context;
 }
 
-void UIView::applyAnimationContext(std::vector<float>* context) {
-    transformOrigin.y = pop(context);
-    transformOrigin.x = pop(context);
-    bounds.origin.y = pop(context);
+void UIView::applyAnimationContext(std::deque<float>* context) {
     bounds.origin.x = pop(context);
+    bounds.origin.y = pop(context);
+    transformOrigin.x = pop(context);
+    transformOrigin.y = pop(context);
 }
 
 void UIView::animate(float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {
     if (duration <= 0) {
         animations();
+        animationContext.reset(createAnimationContext());
+        completion(true);
         return;
     }
     
@@ -439,6 +441,12 @@ std::vector<UIGestureRecognizer*> UIView::getGestureRecognizers() {
 void UIView::addSubview(UIView *view) {
     view->setSuperview(this);
     subviews.push_back(view);
+    setNeedsLayout();
+}
+
+void UIView::insertSubview(UIView* view, int position) {
+    view->setSuperview(this);
+    subviews.insert(subviews.begin() + position, view);
     setNeedsLayout();
 }
 

@@ -10,15 +10,20 @@
 namespace NXKit {
 
 #define PAN_SCROLL_ACCELERATION -50
+#define SCROLLING_INDICATOR_WIDTH 4
 
 UIScrollView::UIScrollView() {
-//    clipToBounds = true;
-    panGestureRecognizer->onStateChanged = [this](UIGestureRecognizerState state) {
-        Point velocity;
-        Point time;
-        Point distance;
+    scrollingIndicatorV = new UIView();
+    scrollingIndicatorV->setWidth(SCROLLING_INDICATOR_WIDTH);
+    scrollingIndicatorV->cornerRadius = SCROLLING_INDICATOR_WIDTH / 2;
+    scrollingIndicatorV->backgroundColor = UIColor::gray;
+    insertSubview(scrollingIndicatorV, 0);
 
+    panGestureRecognizer->onStateChanged = [this](UIGestureRecognizerState state) {
         switch (state) {
+            case UIGestureRecognizerState::POSSIBLE:
+                cancelDeceleting();
+                break;
             case UIGestureRecognizerState::CHANGED:
                 if (!dragging) {
                     dragging = true;
@@ -28,22 +33,45 @@ UIScrollView::UIScrollView() {
                 break;
             case UIGestureRecognizerState::ENDED:
                 dragging = false;
-                velocity = panGestureRecognizer->velocityIn(this);
-                time = Point(-fabs(velocity.x), -fabs(velocity.y)) / PAN_SCROLL_ACCELERATION;
-                distance = Point(velocity.x * time.x / 2, velocity.y * time.y / 2);
-
-
-                animate(time.y * 100, [this, distance](){
-                    auto offset = getContentOffsetInBounds(getContentOffset() - distance);
-                    setBounds({offset , getBounds().size });
-                }, EasingFunction::cubicOut);
-
-                printf("Velocity: X-%f, Y-%f\n", velocity.x, velocity.y);
+                startDeceleting();
                 break;
             default: break;
         }
     };
     addGestureRecognizer(panGestureRecognizer);
+}
+
+void UIScrollView::addSubview(UIView *view) {
+    if (contentView != nullptr) return;
+
+    contentView = view;
+    insertSubview(view, 0);
+}
+
+void UIScrollView::startDeceleting() {
+    Point velocity = panGestureRecognizer->velocityIn(this);
+    if (velocity.magnitude() <= 0) return;
+
+    decelerating = true;
+
+    float time = -fabs(velocity.magnitude()) / PAN_SCROLL_ACCELERATION;
+    Point distance = Point(velocity.x * time / 2, velocity.y * time / 2);
+
+    animate(time * 100, [this, distance]() {
+        auto offset = getContentOffset() - distance;
+        setBounds({offset , getBounds().size });
+    }, EasingFunction::quadraticOut, [this](bool res) {
+        decelerating = false;
+    });
+
+    printf("Velocity: X-%f, Y-%f\n", velocity.x, velocity.y);
+}
+
+void UIScrollView::cancelDeceleting() {
+    if (!decelerating) return;
+    animate(0, [](){}, EasingFunction::linear, [this](bool res){
+        decelerating = false;
+    });
 }
 
 Point UIScrollView::getContentOffset() {
@@ -53,9 +81,48 @@ Point UIScrollView::getContentOffset() {
 void UIScrollView::setContentOffset(Point offset, bool animated) {
     if (getBounds().origin == offset) return;
 
-    animate(animated ? 80 : 0, [this, offset]() {
+    if (animated) {
+        animate(80, [this, offset]() {
+            setContentOffset(offset, false);
+//            setBounds({ offset, getBounds().size });
+        });
+    } else {
         setBounds({ offset, getBounds().size });
-    });
+    }
+    updateScrollingIndicatior();
+}
+
+void UIScrollView::updateScrollingIndicatior() {
+    Rect visible = getVisibleBounds();
+    scrollingIndicatorV->setHidden(visible.height() > getContentSize().height);
+    float height = visible.height() * (visible.height() / getContentSize().height);
+    scrollingIndicatorV->setHeight(height);
+
+    float pos = (getContentOffset().y + visible.minY()) * (visible.height() / getContentSize().height) + visible.minY();
+    scrollingIndicatorV->setPosition(Point(getFrame().width() - 16, pos + getContentOffset().y));
+}
+
+void UIScrollView::setBounds(Rect bounds) {
+    UIView::setBounds(bounds);
+}
+
+std::deque<float> UIScrollView::createAnimationContext() {
+    std::deque<float> context = UIView::createAnimationContext();
+
+    context.push_back(getContentOffset().x);
+    context.push_back(getContentOffset().y);
+
+    return context;
+}
+
+void UIScrollView::applyAnimationContext(std::deque<float>* context) {
+    UIView::applyAnimationContext(context);
+
+    auto newOffset = Point(pop(context), pop(context));
+    newOffset = getContentOffsetInBounds(newOffset);
+    setContentOffset(newOffset, false);
+
+    updateScrollingIndicatior();
 }
 
 void UIScrollView::setFixWidth(bool fix) {
@@ -69,8 +136,8 @@ void UIScrollView::setFixHeight(bool fix) {
 }
 
 Size UIScrollView::getContentSize() {
-    if (getSubviews().size() == 0) return Size();
-    return getSubviews()[0]->getFrame().size;
+    if (!contentView) return Size();
+    return contentView->getFrame().size;
 }
 
 void UIScrollView::subviewFocusDidChange(UIView *focusedView, UIView *notifiedView) {
@@ -85,7 +152,7 @@ void UIScrollView::subviewFocusDidChange(UIView *focusedView, UIView *notifiedVi
     }
 
     if (scrollingMode == UIScrollViewScrollingMode::scrollingEdge) {
-        Rect bounds = visibleBounds();
+        Rect bounds = getVisibleOffsetBounds();
         Point newOffset = bounds.origin;
         Rect focusedViewFrame = focusedView->getFrame();
         focusedViewFrame.origin = focusedView->getSuperview()->convert(focusedViewFrame.origin, this);
@@ -107,22 +174,13 @@ void UIScrollView::subviewFocusDidChange(UIView *focusedView, UIView *notifiedVi
     UIView::subviewFocusDidChange(focusedView, notifiedView);
 }
 
-Rect UIScrollView::visibleBounds() {
-    auto bounds = getBounds();
-    bounds.origin.y += safeAreaInsets().top;
-    bounds.origin.x += safeAreaInsets().left;
-    bounds.size.height -= safeAreaInsets().top + safeAreaInsets().bottom;
-    bounds.size.width -= safeAreaInsets().left + safeAreaInsets().right;
-    return bounds;
-}
-
 void UIScrollView::layoutSubviews() {
     UIView::layoutSubviews();
 
-    if (getSubviews().size() > 0) {
+    if (contentView) {
         Size frameSize = getBounds().size;
         Size size = Size(fixWidth ? frameSize.width : UIView::AUTO, fixHeight ? frameSize.height : UIView::AUTO);
-        getSubviews()[0]->setSize(size);
+        contentView->setSize(size);
     }
 
     auto safeAreaInset = safeAreaInsets();
@@ -134,6 +192,8 @@ void UIScrollView::layoutSubviews() {
         setContentOffset(offset, false);
         lastSafeAreaInset = safeAreaInset;
     }
+
+    updateScrollingIndicatior();
 }
 
 UIView* UIScrollView::getNextFocus(NavigationDirection direction) {
@@ -169,10 +229,11 @@ void UIScrollView::onPan() {
 }
 
 Rect UIScrollView::getContentOffsetBounds() {
-    Point origin = Point(-lastSafeAreaInset.left, -lastSafeAreaInset.top);
+    UIEdgeInsets safeArea = safeAreaInsets();
+    Point origin = Point(-safeArea.left, -safeArea.top);
     Size size = getContentSize();
-    size.width += lastSafeAreaInset.left + lastSafeAreaInset.right - getFrame().size.width;
-    size.height += lastSafeAreaInset.top + lastSafeAreaInset.bottom - getFrame().size.height;
+    size.width += safeArea.left + safeArea.right - getFrame().size.width;
+    size.height += safeArea.top + safeArea.bottom - getFrame().size.height;
     return Rect(origin, size);
 }
 
@@ -182,6 +243,15 @@ Rect UIScrollView::getVisibleBounds() {
     size.width -= lastSafeAreaInset.left + lastSafeAreaInset.right;
     size.height -= lastSafeAreaInset.top + lastSafeAreaInset.bottom;
     return Rect(origin, size);
+}
+
+Rect UIScrollView::getVisibleOffsetBounds() {
+    auto bounds = getBounds();
+    bounds.origin.y += safeAreaInsets().top;
+    bounds.origin.x += safeAreaInsets().left;
+    bounds.size.height -= safeAreaInsets().top + safeAreaInsets().bottom;
+    bounds.size.width -= safeAreaInsets().left + safeAreaInsets().right;
+    return bounds;
 }
 
 Point UIScrollView::getContentOffsetInBounds(Point offset) {

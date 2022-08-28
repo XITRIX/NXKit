@@ -35,6 +35,11 @@ public:
     Point getContentOffset();
     void setContentOffset(Point offset, bool animated = true);
 
+    void setBounds(Rect bounds) override;
+    void addSubview(UIView *view) override;
+    std::deque<float> createAnimationContext() override;
+    void applyAnimationContext(std::deque<float>* context) override;
+
     void subviewFocusDidChange(UIView *focusedView, UIView *notifiedView) override;
     void layoutSubviews() override;
     UIView* getNextFocus(NavigationDirection direction) override;
@@ -49,11 +54,20 @@ private:
     UIEdgeInsets lastSafeAreaInset;
     bool fixWidth = false, fixHeight = false;
     bool dragging = false;
+    bool decelerating = false;
+
+    UIView *contentView = nullptr;
+
+    UIView* scrollingIndicatorV = nullptr;
 
     Rect getContentOffsetBounds();
     Rect getVisibleBounds();
     Point getContentOffsetInBounds(Point offset);
-    Rect visibleBounds();
+    Rect getVisibleOffsetBounds();
+
+    void startDeceleting();
+    void cancelDeceleting();
+    void updateScrollingIndicatior();
 
     void onPan();
 };

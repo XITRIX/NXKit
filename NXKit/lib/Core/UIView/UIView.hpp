@@ -56,6 +56,7 @@ public:
 
     virtual void draw(NVGcontext* vgContext) {}
     virtual void addSubview(UIView* view);
+    virtual void insertSubview(UIView* view, int position);
     std::vector<UIView*> getSubviews();
     void removeFromSuperview();
 
@@ -78,8 +79,8 @@ public:
     virtual void subviewFocusDidChange(UIView* focusedView, UIView* notifiedView);
     virtual bool canBecomeFocused() { return false; }
 
-    std::vector<float> createAnimationContext();
-    void applyAnimationContext(std::vector<float>* context);
+    virtual std::deque<float> createAnimationContext();
+    virtual void applyAnimationContext(std::deque<float>* context);
     void animate(float duration, std::function<void()> animations, EasingFunction easing = EasingFunction::linear, std::function<void(bool)> completion = [](bool res){});
 
     void addGestureRecognizer(UIGestureRecognizer* gestureRecognizer);
@@ -94,7 +95,7 @@ public:
     // Sizes
     Rect getFrame();
     Rect getBounds();
-    void setBounds(Rect bounds);
+    virtual void setBounds(Rect bounds);
     void setPosition(Point position);
     void setGrow(float grow);
     float getGrow();

@@ -21,7 +21,7 @@ void AnimationContext::onReset()
         this->tweens.push_back(tweeny::tween<float>::from(this->currentValues[i]));
 }
 
-void AnimationContext::reset(std::vector<float> initialValue)
+void AnimationContext::reset(std::deque<float> initialValue)
 {
     this->currentValues = initialValue;
     FiniteTicking::reset();
@@ -39,7 +39,7 @@ void AnimationContext::onRewind()
     }
 }
 
-void AnimationContext::addStep(std::vector<float> targetValue, int32_t duration, EasingFunction easing)
+void AnimationContext::addStep(std::deque<float> targetValue, int32_t duration, EasingFunction easing)
 {
     if (currentValues.size() != targetValue.size()) {
         printf("FATAL ERROR!\n");
@@ -67,7 +67,7 @@ bool AnimationContext::onUpdate(retro_time_t delta)
     return res;
 }
 
-std::vector<float> AnimationContext::getValue()
+std::deque<float> AnimationContext::getValue()
 {
     return this->currentValues;
 }

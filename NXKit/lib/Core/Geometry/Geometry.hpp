@@ -57,6 +57,10 @@ struct Point {
     bool valid() {
         return !isnan(this->x) && !isnan(this->y);
     }
+
+    float magnitude() {
+        return sqrt(x * x + y * y);
+    }
 };
 
 struct Size {

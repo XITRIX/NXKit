@@ -36,6 +36,7 @@ public:
     static UIColor blue;
     static UIColor white;
     static UIColor black;
+    static UIColor gray;
 private:
     int value;
 };

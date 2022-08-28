@@ -50,6 +50,7 @@ void UIPanGestureRecognizer::touchesBegan(std::vector<UITouch*> touches, UIEvent
         initialTouchPoint = trackingTouch->locationIn(nullptr);
         touchesMovedTimestamp = trackingTouch->timestamp;
         previousTouchesMovedTimestamp = trackingTouch->timestamp;
+        onStateChanged(UIGestureRecognizerState::POSSIBLE);
     }
 }
 
