@@ -14,6 +14,18 @@
 
 namespace NXKit {
 
+UITabBarSeparatorView::UITabBarSeparatorView() {
+    setHeight(30);
+    setAlignItems(AlignItems::STRETCH);
+    setJustifyContent(JustifyContent::CENTER);
+
+    auto line = new UIView();
+    line->setHeight(1);
+    line->backgroundColor = UIColor(208, 208, 208);
+
+    addSubview(line);
+}
+
 UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController* controller):
     parent(parent), controller(controller)
 {
@@ -87,7 +99,7 @@ UITabBarController::UITabBarController(std::vector<UIViewController*> controller
 
 UITabBarController::~UITabBarController() {
     for (auto vc: viewControllers) {
-        if (vc->getParent() != this)
+        if (vc && vc->getParent() != this)
             delete vc;
     }
 }
@@ -161,12 +173,16 @@ void UITabBarController::reloadViewForViewControllers() {
 
     for (int i = 0; i < viewControllers.size(); i++) {
         auto controller = viewControllers[i];
-        UITabBarItemView* item = new UITabBarItemView(this, viewControllers[i]);
-        item->setTitle(controller->getTitle());
-        item->tag = "Num" + std::to_string(i);
-        item->setSelected(i == selectedIndex);
-        tabViews.push_back(item);
-        tabs->addSubview(item);
+        if (controller) {
+            UITabBarItemView* item = new UITabBarItemView(this, viewControllers[i]);
+            item->setTitle(controller->getTitle());
+            item->tag = "Num" + std::to_string(i);
+            item->setSelected(i == selectedIndex);
+            tabViews.push_back(item);
+            tabs->addSubview(item);
+        } else {
+            tabs->addSubview(new UITabBarSeparatorView());
+        }
     }
 }
 

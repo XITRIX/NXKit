@@ -166,59 +166,69 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     draw(vgContext);
 
     nvgSave(vgContext);
+
+    UIView* focused = nullptr;
     for (auto view: subviews) {
+        if (view->isFocused())
+            focused = view;
+
         view->internalDraw(vgContext);
+    }
+    if (focused) {
+        focused->drawHighlight(vgContext, false);
     }
     nvgRestore(vgContext);
     nvgRestore(vgContext);
 
     // Borders
-    if (borderThickness > 0) {
-        float offset = borderThickness / 2;
-        Rect borderRect = Rect(offset, offset, getFrame().size.width - offset * 2, getFrame().size.height - offset * 2);
-
-        nvgBeginPath(vgContext);
-        nvgStrokeColor(vgContext, borderColor.raw());
-        nvgStrokeWidth(vgContext, this->borderThickness);
-        nvgRoundedRect(vgContext, borderRect.origin.x, borderRect.origin.y, borderRect.size.width, borderRect.size.height, this->cornerRadius);
-        nvgStroke(vgContext);
+    if (!isFocused() || !highlightOnFocus) {
+        if (borderThickness > 0) {
+            float offset = borderThickness / 2;
+            Rect borderRect = Rect(offset, offset, getFrame().size.width - offset * 2, getFrame().size.height - offset * 2);
+            
+            nvgBeginPath(vgContext);
+            nvgStrokeColor(vgContext, borderColor.raw());
+            nvgStrokeWidth(vgContext, this->borderThickness);
+            nvgRoundedRect(vgContext, borderRect.origin.x, borderRect.origin.y, borderRect.size.width, borderRect.size.height, this->cornerRadius);
+            nvgStroke(vgContext);
+        }
+        
+        if (getBorderTop() > 0) {
+            nvgBeginPath(vgContext);
+            nvgRect(vgContext, 0, 0, getFrame().size.width, getBorderTop());
+            nvgFillColor(vgContext, borderColor.raw());
+            nvgFill(vgContext);
+        }
+        
+        if (getBorderLeft() > 0) {
+            nvgBeginPath(vgContext);
+            nvgRect(vgContext, 0, 0, getBorderLeft(), getFrame().size.height);
+            nvgFillColor(vgContext, borderColor.raw());
+            nvgFill(vgContext);
+        }
+        
+        if (getBorderRight() > 0) {
+            nvgBeginPath(vgContext);
+            nvgRect(vgContext, (getFrame().size.width - getBorderRight()), 0, getBorderRight(), getFrame().size.height);
+            nvgFillColor(vgContext, borderColor.raw());
+            nvgFill(vgContext);
+        }
+        
+        if (getBorderBottom() > 0) {
+            nvgBeginPath(vgContext);
+            nvgRect(vgContext, 0, (getFrame().size.height - getBorderBottom()), getFrame().size.width, getBorderBottom());
+            nvgFillColor(vgContext, borderColor.raw());
+            nvgFill(vgContext);
+        }
     }
 
-    if (getBorderTop() > 0) {
-        nvgBeginPath(vgContext);
-        nvgRect(vgContext, 0, 0, getFrame().size.width, getBorderTop());
-        nvgFillColor(vgContext, borderColor.raw());
-        nvgFill(vgContext);
-    }
-
-    if (getBorderLeft() > 0) {
-        nvgBeginPath(vgContext);
-        nvgRect(vgContext, 0, 0, getBorderLeft(), getFrame().size.height);
-        nvgFillColor(vgContext, borderColor.raw());
-        nvgFill(vgContext);
-    }
-
-    if (getBorderRight() > 0) {
-        nvgBeginPath(vgContext);
-        nvgRect(vgContext, (0 + getFrame().size.width - getBorderRight()), 0, getBorderRight(), getFrame().size.height);
-        nvgFillColor(vgContext, borderColor.raw());
-        nvgFill(vgContext);
-    }
-
-    if (getBorderBottom() > 0) {
-        nvgBeginPath(vgContext);
-        nvgRect(vgContext, 0, (getFrame().size.height - getBorderBottom()), getFrame().size.width, getBorderBottom());
-        nvgFillColor(vgContext, borderColor.raw());
-        nvgFill(vgContext);
-    }
-
-    drawHighlight(vgContext, false);
+//    drawHighlight(vgContext, false);
 
     nvgRestore(vgContext);
 }
 
 void UIView::drawHighlight(NVGcontext* vg, bool background) {
-    if (!isFocused()) return;
+    if (!isFocused() || !highlightOnFocus) return;
 
     nvgSave(vg);
     nvgResetScissor(vg);
@@ -229,14 +239,15 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
 
     auto frame = getFrame();
 
-    float x      = padding - strokeWidth / 2;
-    float y      = padding - strokeWidth / 2;
     float width  = frame.width() + padding * 2 + strokeWidth;
     float height = frame.height() + padding * 2 + strokeWidth;
 
     // Draw
     if (background)
     {
+        float x = padding - strokeWidth / 2;
+        float y = padding - strokeWidth / 2;
+
         // Background
         UIColor highlightBackgroundColor = UIColor(252, 255, 248);
         nvgFillColor(vg, highlightBackgroundColor.raw());
@@ -246,6 +257,9 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
     }
     else
     {
+        float x = frame.minX() - padding - strokeWidth / 2;
+        float y = frame.minY() - padding - strokeWidth / 2;
+
         float shadowOffset = 10;
 
         // Shadow

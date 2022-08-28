@@ -47,17 +47,36 @@ UIView* UIStackView::getNextFocus(NavigationDirection direction) {
         return UIView::getNextFocus(direction);
 
     if (direction == NavigationDirection::UP || direction == NavigationDirection::LEFT) {
-        if (currentFocus <= 0) return UIView::getNextFocus(direction);
-        currentFocus--;
+        float newFocus = currentFocus;
+        UIView* newFocusView = nullptr;
+
+        do {
+            newFocus--;
+            if (newFocus < 0) return UIView::getNextFocus(direction);
+            newFocusView = getSubviews()[newFocus]->getDefaultFocus();
+        } while (!newFocusView || !newFocusView->canBecomeFocused());
+
+        if (newFocusView && newFocusView->canBecomeFocused()) {
+            currentFocus = newFocus;
+            return newFocusView;
+        }
     }
 
     if (direction == NavigationDirection::DOWN || direction == NavigationDirection::RIGHT) {
-        if (currentFocus >= getSubviews().size() - 1) return UIView::getNextFocus(direction);
-        currentFocus++;
-    }
+        float newFocus = currentFocus;
+        UIView* newFocusView = nullptr;
 
-    auto newFocus = getSubviews()[currentFocus]->getDefaultFocus();
-    if (newFocus) return newFocus;
+        do {
+            newFocus++;
+            if (newFocus >= getSubviews().size()) return UIView::getNextFocus(direction);
+            newFocusView = getSubviews()[newFocus]->getDefaultFocus();
+        } while (!newFocusView || !newFocusView->canBecomeFocused());
+
+        if (newFocusView && newFocusView->canBecomeFocused()) {
+            currentFocus = newFocus;
+            return newFocusView;
+        }
+    }
 
     return UIView::getNextFocus(direction);
 }

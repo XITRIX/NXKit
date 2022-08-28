@@ -21,15 +21,10 @@ void UIAppDelegate::applicationDidFinishLaunching() {
     printf("Launching app...\n");
 
     UIWindow* window = new UIWindow();
-    UITabBarController* tabsVC = new UITabBarController({listVC, animVC, rootVC, touchVC});
+    UITabBarController* tabsVC = new UITabBarController({listVC, animVC, nullptr, rootVC, touchVC});
     UINavigationController* vc = new UINavigationController(tabsVC);
     window->setRootViewController(vc);
     window->makeKeyAndVisible();
-
-//    UIWindow* window = new UIWindow();
-//    TouchTestViewController* rootVC = new TouchTestViewController();
-//    window->setRootViewController(rootVC);
-//    window->makeKeyAndVisible();
 
     // Focus test
     auto focus = window->getDefaultFocus();

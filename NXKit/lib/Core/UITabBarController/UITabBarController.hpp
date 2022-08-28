@@ -14,6 +14,12 @@
 namespace NXKit {
 
 class UITabBarController;
+
+class UITabBarSeparatorView: public UIStackView {
+public:
+    UITabBarSeparatorView();
+};
+
 class UITabBarItemView: public UIStackView {
 public:
     UITabBarItemView(UITabBarController* parent, UIViewController* controller);

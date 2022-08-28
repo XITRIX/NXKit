@@ -48,6 +48,7 @@ public:
     Point transformOrigin;
     Size transformSize = Size(1, 1);
     bool clipToBounds = true;
+    bool highlightOnFocus = true;
 
     UIView(Rect frame);
     UIView(float x, float y, float width, float height): UIView(Rect(x, y, width, height)) {}

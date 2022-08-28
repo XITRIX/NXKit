@@ -55,6 +55,9 @@ void ListViewController::viewDidLoad() {
     for (int i = 0; i < 20; i++) {
         auto item = new ListItemView();
         item->setText("Test text #" + std::to_string(i + 1));
+        item->setBorderBottom(1);
+        if (i == 0) item->setBorderTop(1);
+        item->borderColor = UIColor(208, 208, 208);
         stackView->addSubview(item);
     }
 }
