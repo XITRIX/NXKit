@@ -65,7 +65,7 @@ void ListViewController::viewDidLoad() {
     for (int i = 0; i < 200; i++) {
         auto item = new ListItemView();
         item->setText("РПО #" + std::to_string(i + 1));
-        item->setImage(new UIImage("Images/test/" + std::to_string(i%10) + ".svg"_res, 2));
+        item->setImage(new UIImage(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(i%10) + ".svg", 2));
         item->setBorderBottom(1);
         if (i == 0) item->setBorderTop(1);
         item->borderColor = UIColor(208, 208, 208);

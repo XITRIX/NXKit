@@ -28,51 +28,24 @@ UIImage::UIImage(std::string path, float upscale): upscale(upscale) {
     if (svgFile) {
         int svgMultiplier = Application::shared()->getVideoContext()->getScaleFactor() * upscale;
         size = Size(svgFile->width() * svgMultiplier, svgFile->height() * svgMultiplier);
+        auto bitmap = svgFile->renderToBitmap(size.width, size.height);
+        bitmap.convertToRGBA();
+
+        pngTexture = nvgCreateImageRGBA(context, bitmap.width(), bitmap.height(), 0, bitmap.data());
         imageType = UIImageType::SVG;
         return;
     }
-
-//    svgTexture = nsvgParseFromFile(path.c_str(), "px", 96.0f);
-//    if (svgTexture) {
-//        rast = nsvgCreateRasterizer();
-//        size = Size(svgTexture->width, svgTexture->height);
-//        imageType = UIImageType::SVG;
-//        return;
-//    }
 }
 
 UIImage::~UIImage() {
     auto context = Application::shared()->getVideoContext()->getNVGContext();
     if (pngTexture != 0)
         nvgDeleteImage(context, pngTexture);
-
-//    if (rast) nsvgDeleteRasterizer(rast);
-//
-//    if (svgTexture) delete svgTexture;
 }
 
 NVGpaint UIImage::getPaint() {
-    auto context = Application::shared()->getVideoContext()->getNVGContext();
-
-    int img = 0;
-    Size size = getSize();
-    
-    switch (imageType) {
-        case UIImageType::PNG:
-            img = this->pngTexture;
-            break;
-
-        case UIImageType::SVG:
-            auto bitmap = svgFile->renderToBitmap(size.width, size.height);
-            bitmap.convertToRGBA();
-
-            img = nvgCreateImageRGBA(context, bitmap.width(), bitmap.height(), 0, bitmap.data());
-            break;
-    }
-
-    NVGpaint paint = nvgImagePattern(context, 0, 0, size.width, size.height, 0, img, 1.0f);
-//    nvgDeleteImage(context, img);
-    return paint;
+    auto context = Application::shared()->getContext();
+    return nvgImagePattern(context, 0, 0, size.width, size.height, 0, this->pngTexture, 1.0f);
 }
 
 }

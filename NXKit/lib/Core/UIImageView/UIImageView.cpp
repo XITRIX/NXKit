@@ -194,10 +194,6 @@ void UIImageView::invalidateImageBounds()
             printf("Unimplemented Image scaling type");
     }
 
-    if (this->paint.image != -1) {
-        nvgDeleteImage(Application::shared()->getContext(), this->paint.image);
-    }
-
     this->paint = image->getPaint();
 
     this->paint.xform[4] = imageX;
