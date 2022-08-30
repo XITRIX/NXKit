@@ -16,6 +16,7 @@
 #include <Core/UIBlurView/UIBlurView.hpp>
 #include <Core/UILabel/UILabel.hpp>
 #include <Core/UIStackView/UIStackView.hpp>
+#include <Core/UIImageView/UIImageView.hpp>
 #include <Platforms/InputManager.hpp>
 
 using namespace NXKit;

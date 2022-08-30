@@ -17,17 +17,27 @@ ListItemView::ListItemView() {
     setAxis(Axis::HORIZONTAL);
     setAlignItems(AlignItems::CENTER);
 
+    imageView = new UIImageView();
+    imageView->setSize({ 44, 44 });
+    imageView->setMarginRight(20);
+
 //    backgroundColor = UIColor::red;
 
     label = new UILabel("Test text");
     label->verticalAlign = VerticalAlign::CENTER;
 //    label->backgroundColor = UIColor::blue;
     label->getFont()->fontSize = 22;
+
+    addSubview(imageView);
     addSubview(label);
 }
 
 void ListItemView::setText(std::string text) {
     label->setText(text);
+}
+
+void ListItemView::setImage(UIImage* image) {
+    imageView->setImage(image);
 }
 
 bool ListItemView::canBecomeFocused() {
@@ -52,9 +62,10 @@ void ListViewController::loadView() {
 }
 
 void ListViewController::viewDidLoad() {
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 200; i++) {
         auto item = new ListItemView();
-        item->setText("Test text #" + std::to_string(i + 1));
+        item->setText("РПО #" + std::to_string(i + 1));
+        item->setImage(new UIImage("Images/test/" + std::to_string(i%10) + ".svg"_res, 2));
         item->setBorderBottom(1);
         if (i == 0) item->setBorderTop(1);
         item->borderColor = UIColor(208, 208, 208);

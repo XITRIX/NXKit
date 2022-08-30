@@ -62,8 +62,11 @@ SOURCES  := $(SOURCES) \
 
 INCLUDES := $(INCLUDES) \
 			NXKit/lib \
-			NXKit/lib/extern/include/nanovg-gl/ \
 			NXKit/lib/extern/include \
+			NXKit/lib/extern/include/lunasvg \
+			NXKit/lib/extern/lib/lunasvg/3rdparty/plutovg \
+			NXKit/lib/extern/lib/lunasvg/3rdparty/software \
+			NXKit/lib/extern/include/nanovg-gl/ \
 			NXKit/lib/extern/lib/yoga/src
 
 SOURCES  := $(SOURCES) \
@@ -81,6 +84,8 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UIEdgeInsets \
 			NXKit/lib/Core/UIEvent \
 			NXKit/lib/Core/UIGestureRecognizer \
+			NXKit/lib/Core/UIImage \
+			NXKit/lib/Core/UIImageView \
 			NXKit/lib/Core/UILabel \
 			NXKit/lib/Core/UINavigationController \
 			NXKit/lib/Core/UIPanGestureRecognizer \
@@ -93,6 +98,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UIView \
 			NXKit/lib/Core/UIViewController \
 			NXKit/lib/Core/UIWindow \
+			NXKit/lib/Core/Utils/Tools \
 			NXKit/lib/Core/Utils/GaussianBlur \
 			NXKit/lib/Core/Utils/Animation/Core \
 			NXKit/lib/Core/Utils/Animation/AnimationContext \
@@ -101,8 +107,12 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/Utils/Animation/NXRect \
 			NXKit/lib/Core/Utils/Animation/NXSize \
 			NXKit/lib/Core/Utils/FontManager \
+			NXKit/lib/Core/Utils/Literals \
 			NXKit/lib/extern/lib/nanovg-gl/ \
 			NXKit/lib/extern/lib/glad \
+			NXKit/lib/extern/lib/lunasvg \
+			NXKit/lib/extern/lib/lunasvg/3rdparty/plutovg \
+			NXKit/lib/extern/lib/lunasvg/3rdparty/software \
 			NXKit/lib/extern/lib/libretro-common/compat \
 			NXKit/lib/extern/lib/libretro-common/encodings \
 			NXKit/lib/extern/lib/libretro-common/features \

@@ -14,10 +14,12 @@ public:
     ListItemView();
 
     void setText(std::string text);
+    void setImage(UIImage* image);
 
     bool canBecomeFocused() override;
 private:
     UILabel* label;
+    UIImageView* imageView;
 };
 
 class ListViewController: public UIViewController {

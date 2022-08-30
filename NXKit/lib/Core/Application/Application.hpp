@@ -31,6 +31,7 @@ public:
     bool mainLoop();
     void flushContext();
     void onWindowResized(unsigned width, unsigned height, float scale);
+    NVGcontext* getContext();
     VideoContext* getVideoContext();
     std::string getResourcesPath() { return resourcesPath; }
 

@@ -57,6 +57,76 @@
 		7C8D980B28BAC24000BDD667 /* AnimationContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980828BAC24000BDD667 /* AnimationContext.cpp */; };
 		7C8D980F28BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */; };
 		7C8D981028BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */; };
+		7C8D981D28BC113700BDD667 /* UIImageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D981B28BC113700BDD667 /* UIImageView.cpp */; };
+		7C8D981E28BC113700BDD667 /* UIImageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D981B28BC113700BDD667 /* UIImageView.cpp */; };
+		7C8D982128BC118200BDD667 /* UIImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D981F28BC118200BDD667 /* UIImage.cpp */; };
+		7C8D982228BC118200BDD667 /* UIImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D981F28BC118200BDD667 /* UIImage.cpp */; };
+		7C8D982628BC172D00BDD667 /* Literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D982428BC172D00BDD667 /* Literals.cpp */; };
+		7C8D982728BC172D00BDD667 /* Literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D982428BC172D00BDD667 /* Literals.cpp */; };
+		7C8D982A28BCC64600BDD667 /* Tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D982928BCC64600BDD667 /* Tools.cpp */; };
+		7C8D982B28BCC64600BDD667 /* Tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D982928BCC64600BDD667 /* Tools.cpp */; };
+		7C8D985B28BD657500BDD667 /* layoutcontext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983328BD657200BDD667 /* layoutcontext.cpp */; };
+		7C8D985C28BD657500BDD667 /* layoutcontext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983328BD657200BDD667 /* layoutcontext.cpp */; };
+		7C8D985D28BD657500BDD667 /* defselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983428BD657200BDD667 /* defselement.cpp */; };
+		7C8D985E28BD657500BDD667 /* defselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983428BD657200BDD667 /* defselement.cpp */; };
+		7C8D985F28BD657500BDD667 /* stopelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983528BD657200BDD667 /* stopelement.cpp */; };
+		7C8D986028BD657500BDD667 /* stopelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983528BD657200BDD667 /* stopelement.cpp */; };
+		7C8D986128BD657500BDD667 /* symbolelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983728BD657200BDD667 /* symbolelement.cpp */; };
+		7C8D986228BD657500BDD667 /* symbolelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983728BD657200BDD667 /* symbolelement.cpp */; };
+		7C8D986328BD657500BDD667 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7C8D983828BD657200BDD667 /* CMakeLists.txt */; };
+		7C8D986428BD657500BDD667 /* lunasvg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983A28BD657200BDD667 /* lunasvg.cpp */; };
+		7C8D986528BD657500BDD667 /* lunasvg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983A28BD657200BDD667 /* lunasvg.cpp */; };
+		7C8D986628BD657500BDD667 /* graphicselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983B28BD657200BDD667 /* graphicselement.cpp */; };
+		7C8D986728BD657500BDD667 /* graphicselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983B28BD657200BDD667 /* graphicselement.cpp */; };
+		7C8D986828BD657500BDD667 /* maskelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983D28BD657200BDD667 /* maskelement.cpp */; };
+		7C8D986928BD657500BDD667 /* maskelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983D28BD657200BDD667 /* maskelement.cpp */; };
+		7C8D986A28BD657500BDD667 /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984128BD657300BDD667 /* parser.cpp */; };
+		7C8D986B28BD657500BDD667 /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984128BD657300BDD667 /* parser.cpp */; };
+		7C8D986C28BD657500BDD667 /* canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984428BD657300BDD667 /* canvas.cpp */; };
+		7C8D986D28BD657500BDD667 /* canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984428BD657300BDD667 /* canvas.cpp */; };
+		7C8D986E28BD657500BDD667 /* styleelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984728BD657300BDD667 /* styleelement.cpp */; };
+		7C8D986F28BD657500BDD667 /* styleelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984728BD657300BDD667 /* styleelement.cpp */; };
+		7C8D987028BD657500BDD667 /* clippathelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984D28BD657400BDD667 /* clippathelement.cpp */; };
+		7C8D987128BD657500BDD667 /* clippathelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984D28BD657400BDD667 /* clippathelement.cpp */; };
+		7C8D987228BD657500BDD667 /* markerelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984E28BD657400BDD667 /* markerelement.cpp */; };
+		7C8D987328BD657500BDD667 /* markerelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984E28BD657400BDD667 /* markerelement.cpp */; };
+		7C8D987428BD657500BDD667 /* element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984F28BD657400BDD667 /* element.cpp */; };
+		7C8D987528BD657500BDD667 /* element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984F28BD657400BDD667 /* element.cpp */; };
+		7C8D987628BD657500BDD667 /* styledelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985028BD657400BDD667 /* styledelement.cpp */; };
+		7C8D987728BD657500BDD667 /* styledelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985028BD657400BDD667 /* styledelement.cpp */; };
+		7C8D987828BD657500BDD667 /* gelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985128BD657400BDD667 /* gelement.cpp */; };
+		7C8D987928BD657500BDD667 /* gelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985128BD657400BDD667 /* gelement.cpp */; };
+		7C8D987A28BD657500BDD667 /* geometryelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985228BD657400BDD667 /* geometryelement.cpp */; };
+		7C8D987B28BD657500BDD667 /* geometryelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985228BD657400BDD667 /* geometryelement.cpp */; };
+		7C8D987C28BD657500BDD667 /* property.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985328BD657400BDD667 /* property.cpp */; };
+		7C8D987D28BD657500BDD667 /* property.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985328BD657400BDD667 /* property.cpp */; };
+		7C8D987E28BD657500BDD667 /* paintelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985528BD657400BDD667 /* paintelement.cpp */; };
+		7C8D987F28BD657500BDD667 /* paintelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985528BD657400BDD667 /* paintelement.cpp */; };
+		7C8D988028BD657500BDD667 /* svgelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985728BD657400BDD667 /* svgelement.cpp */; };
+		7C8D988128BD657500BDD667 /* svgelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985728BD657400BDD667 /* svgelement.cpp */; };
+		7C8D988228BD657500BDD667 /* useelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985828BD657400BDD667 /* useelement.cpp */; };
+		7C8D988328BD657500BDD667 /* useelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985828BD657400BDD667 /* useelement.cpp */; };
+		7C8D989928BD658400BDD667 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7C8D988628BD658300BDD667 /* CMakeLists.txt */; };
+		7C8D989A28BD658400BDD667 /* sw_ft_stroker.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988728BD658300BDD667 /* sw_ft_stroker.c */; };
+		7C8D989B28BD658400BDD667 /* sw_ft_stroker.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988728BD658300BDD667 /* sw_ft_stroker.c */; };
+		7C8D989C28BD658400BDD667 /* sw_ft_raster.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988A28BD658300BDD667 /* sw_ft_raster.c */; };
+		7C8D989D28BD658400BDD667 /* sw_ft_raster.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988A28BD658300BDD667 /* sw_ft_raster.c */; };
+		7C8D989E28BD658400BDD667 /* FTL.TXT in Resources */ = {isa = PBXBuildFile; fileRef = 7C8D988B28BD658300BDD667 /* FTL.TXT */; };
+		7C8D989F28BD658400BDD667 /* sw_ft_math.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988E28BD658300BDD667 /* sw_ft_math.c */; };
+		7C8D98A028BD658400BDD667 /* sw_ft_math.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988E28BD658300BDD667 /* sw_ft_math.c */; };
+		7C8D98A128BD658400BDD667 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7C8D989028BD658300BDD667 /* CMakeLists.txt */; };
+		7C8D98A228BD658400BDD667 /* plutovg-dash.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989228BD658300BDD667 /* plutovg-dash.c */; };
+		7C8D98A328BD658400BDD667 /* plutovg-dash.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989228BD658300BDD667 /* plutovg-dash.c */; };
+		7C8D98A428BD658400BDD667 /* plutovg-paint.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989328BD658300BDD667 /* plutovg-paint.c */; };
+		7C8D98A528BD658400BDD667 /* plutovg-paint.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989328BD658300BDD667 /* plutovg-paint.c */; };
+		7C8D98A628BD658400BDD667 /* plutovg-geometry.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989428BD658300BDD667 /* plutovg-geometry.c */; };
+		7C8D98A728BD658400BDD667 /* plutovg-geometry.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989428BD658300BDD667 /* plutovg-geometry.c */; };
+		7C8D98A828BD658400BDD667 /* plutovg-blend.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989528BD658300BDD667 /* plutovg-blend.c */; };
+		7C8D98A928BD658400BDD667 /* plutovg-blend.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989528BD658300BDD667 /* plutovg-blend.c */; };
+		7C8D98AA28BD658400BDD667 /* plutovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989628BD658300BDD667 /* plutovg.c */; };
+		7C8D98AB28BD658400BDD667 /* plutovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989628BD658300BDD667 /* plutovg.c */; };
+		7C8D98AC28BD658400BDD667 /* plutovg-rle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989828BD658300BDD667 /* plutovg-rle.c */; };
+		7C8D98AD28BD658400BDD667 /* plutovg-rle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989828BD658300BDD667 /* plutovg-rle.c */; };
 		7CA389722882F8C6005C7A91 /* ios_main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C4AD2882CE7500E47DB3 /* ios_main.mm */; };
 		7CA3897728835B5F005C7A91 /* nx_application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA3897428835AB8005C7A91 /* nx_application.cpp */; };
 		7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE592878F4E60091DEF9 /* UIWindow.cpp */; };
@@ -243,7 +313,74 @@
 		7C8D980928BAC24000BDD667 /* AnimationContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AnimationContext.hpp; sourceTree = "<group>"; };
 		7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AnimationTestViewController.cpp; sourceTree = "<group>"; };
 		7C8D980E28BB5A0A00BDD667 /* AnimationTestViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AnimationTestViewController.hpp; sourceTree = "<group>"; };
-		7C8D981328BB72FC00BDD667 /* Vector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vector.hpp; sourceTree = "<group>"; };
+		7C8D981328BB72FC00BDD667 /* Tools.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Tools.hpp; sourceTree = "<group>"; };
+		7C8D981B28BC113700BDD667 /* UIImageView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIImageView.cpp; sourceTree = "<group>"; };
+		7C8D981C28BC113700BDD667 /* UIImageView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIImageView.hpp; sourceTree = "<group>"; };
+		7C8D981F28BC118200BDD667 /* UIImage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIImage.cpp; sourceTree = "<group>"; };
+		7C8D982028BC118200BDD667 /* UIImage.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIImage.hpp; sourceTree = "<group>"; };
+		7C8D982428BC172D00BDD667 /* Literals.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Literals.cpp; sourceTree = "<group>"; };
+		7C8D982528BC172D00BDD667 /* Literals.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Literals.hpp; sourceTree = "<group>"; };
+		7C8D982928BCC64600BDD667 /* Tools.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Tools.cpp; sourceTree = "<group>"; };
+		7C8D983028BD654A00BDD667 /* lunasvg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lunasvg.h; sourceTree = "<group>"; };
+		7C8D983228BD657100BDD667 /* useelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = useelement.h; sourceTree = "<group>"; };
+		7C8D983328BD657200BDD667 /* layoutcontext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = layoutcontext.cpp; sourceTree = "<group>"; };
+		7C8D983428BD657200BDD667 /* defselement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = defselement.cpp; sourceTree = "<group>"; };
+		7C8D983528BD657200BDD667 /* stopelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stopelement.cpp; sourceTree = "<group>"; };
+		7C8D983628BD657200BDD667 /* markerelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = markerelement.h; sourceTree = "<group>"; };
+		7C8D983728BD657200BDD667 /* symbolelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = symbolelement.cpp; sourceTree = "<group>"; };
+		7C8D983828BD657200BDD667 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		7C8D983928BD657200BDD667 /* maskelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maskelement.h; sourceTree = "<group>"; };
+		7C8D983A28BD657200BDD667 /* lunasvg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lunasvg.cpp; sourceTree = "<group>"; };
+		7C8D983B28BD657200BDD667 /* graphicselement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = graphicselement.cpp; sourceTree = "<group>"; };
+		7C8D983C28BD657200BDD667 /* svgelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = svgelement.h; sourceTree = "<group>"; };
+		7C8D983D28BD657200BDD667 /* maskelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = maskelement.cpp; sourceTree = "<group>"; };
+		7C8D983E28BD657200BDD667 /* styleelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = styleelement.h; sourceTree = "<group>"; };
+		7C8D983F28BD657300BDD667 /* defselement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = defselement.h; sourceTree = "<group>"; };
+		7C8D984028BD657300BDD667 /* paintelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = paintelement.h; sourceTree = "<group>"; };
+		7C8D984128BD657300BDD667 /* parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parser.cpp; sourceTree = "<group>"; };
+		7C8D984228BD657300BDD667 /* clippathelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clippathelement.h; sourceTree = "<group>"; };
+		7C8D984328BD657300BDD667 /* element.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = element.h; sourceTree = "<group>"; };
+		7C8D984428BD657300BDD667 /* canvas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = canvas.cpp; sourceTree = "<group>"; };
+		7C8D984528BD657300BDD667 /* gelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gelement.h; sourceTree = "<group>"; };
+		7C8D984628BD657300BDD667 /* property.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = property.h; sourceTree = "<group>"; };
+		7C8D984728BD657300BDD667 /* styleelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = styleelement.cpp; sourceTree = "<group>"; };
+		7C8D984828BD657300BDD667 /* layoutcontext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = layoutcontext.h; sourceTree = "<group>"; };
+		7C8D984928BD657300BDD667 /* graphicselement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = graphicselement.h; sourceTree = "<group>"; };
+		7C8D984A28BD657300BDD667 /* parserutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parserutils.h; sourceTree = "<group>"; };
+		7C8D984B28BD657300BDD667 /* stopelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stopelement.h; sourceTree = "<group>"; };
+		7C8D984C28BD657300BDD667 /* canvas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = canvas.h; sourceTree = "<group>"; };
+		7C8D984D28BD657400BDD667 /* clippathelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clippathelement.cpp; sourceTree = "<group>"; };
+		7C8D984E28BD657400BDD667 /* markerelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = markerelement.cpp; sourceTree = "<group>"; };
+		7C8D984F28BD657400BDD667 /* element.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = element.cpp; sourceTree = "<group>"; };
+		7C8D985028BD657400BDD667 /* styledelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = styledelement.cpp; sourceTree = "<group>"; };
+		7C8D985128BD657400BDD667 /* gelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gelement.cpp; sourceTree = "<group>"; };
+		7C8D985228BD657400BDD667 /* geometryelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geometryelement.cpp; sourceTree = "<group>"; };
+		7C8D985328BD657400BDD667 /* property.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = property.cpp; sourceTree = "<group>"; };
+		7C8D985428BD657400BDD667 /* geometryelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geometryelement.h; sourceTree = "<group>"; };
+		7C8D985528BD657400BDD667 /* paintelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = paintelement.cpp; sourceTree = "<group>"; };
+		7C8D985628BD657400BDD667 /* styledelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = styledelement.h; sourceTree = "<group>"; };
+		7C8D985728BD657400BDD667 /* svgelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = svgelement.cpp; sourceTree = "<group>"; };
+		7C8D985828BD657400BDD667 /* useelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = useelement.cpp; sourceTree = "<group>"; };
+		7C8D985928BD657400BDD667 /* symbolelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = symbolelement.h; sourceTree = "<group>"; };
+		7C8D985A28BD657500BDD667 /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
+		7C8D988628BD658300BDD667 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		7C8D988728BD658300BDD667 /* sw_ft_stroker.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sw_ft_stroker.c; sourceTree = "<group>"; };
+		7C8D988828BD658300BDD667 /* sw_ft_math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sw_ft_math.h; sourceTree = "<group>"; };
+		7C8D988928BD658300BDD667 /* sw_ft_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sw_ft_types.h; sourceTree = "<group>"; };
+		7C8D988A28BD658300BDD667 /* sw_ft_raster.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sw_ft_raster.c; sourceTree = "<group>"; };
+		7C8D988B28BD658300BDD667 /* FTL.TXT */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = FTL.TXT; sourceTree = "<group>"; };
+		7C8D988C28BD658300BDD667 /* sw_ft_stroker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sw_ft_stroker.h; sourceTree = "<group>"; };
+		7C8D988D28BD658300BDD667 /* sw_ft_raster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sw_ft_raster.h; sourceTree = "<group>"; };
+		7C8D988E28BD658300BDD667 /* sw_ft_math.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sw_ft_math.c; sourceTree = "<group>"; };
+		7C8D989028BD658300BDD667 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		7C8D989128BD658300BDD667 /* plutovg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = plutovg.h; sourceTree = "<group>"; };
+		7C8D989228BD658300BDD667 /* plutovg-dash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "plutovg-dash.c"; sourceTree = "<group>"; };
+		7C8D989328BD658300BDD667 /* plutovg-paint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "plutovg-paint.c"; sourceTree = "<group>"; };
+		7C8D989428BD658300BDD667 /* plutovg-geometry.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "plutovg-geometry.c"; sourceTree = "<group>"; };
+		7C8D989528BD658300BDD667 /* plutovg-blend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "plutovg-blend.c"; sourceTree = "<group>"; };
+		7C8D989628BD658300BDD667 /* plutovg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = plutovg.c; sourceTree = "<group>"; };
+		7C8D989728BD658300BDD667 /* plutovg-private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "plutovg-private.h"; sourceTree = "<group>"; };
+		7C8D989828BD658300BDD667 /* plutovg-rle.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "plutovg-rle.c"; sourceTree = "<group>"; };
 		7CA3897328835AA1005C7A91 /* nx_application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nx_application.h; sourceTree = "<group>"; };
 		7CA3897428835AB8005C7A91 /* nx_application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = nx_application.cpp; sourceTree = "<group>"; };
 		7CA3898528836343005C7A91 /* Fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; name = Fonts; path = resources/Fonts; sourceTree = SOURCE_ROOT; };
@@ -315,6 +452,7 @@
 		7CE9B5E6287495F900659D24 /* UIStackView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIStackView.cpp; sourceTree = "<group>"; };
 		7CE9B5E7287495F900659D24 /* UIStackView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIStackView.hpp; sourceTree = "<group>"; };
 		7CE9B5E92874EA4000659D24 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		7CEC275628BE4FC1005E6A9D /* stb_image_write.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image_write.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -710,7 +848,8 @@
 		7C78EBDA2873748B0082D3AC /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				7C8D981128BB72E700BDD667 /* Vector */,
+				7CEC275828BEA8CC005E6A9D /* Tools */,
+				7C8D982328BC172000BDD667 /* Literals */,
 				7C23960F287E139B00973CC0 /* Animation */,
 				7C0638F02876214000621093 /* FontManager */,
 				7C78EBDB2873748B0082D3AC /* GaussianBlur */,
@@ -833,12 +972,129 @@
 			path = AnimationTestViewController;
 			sourceTree = "<group>";
 		};
-		7C8D981128BB72E700BDD667 /* Vector */ = {
+		7C8D981928BC111200BDD667 /* UIImageView */ = {
 			isa = PBXGroup;
 			children = (
-				7C8D981328BB72FC00BDD667 /* Vector.hpp */,
+				7C8D981C28BC113700BDD667 /* UIImageView.hpp */,
+				7C8D981B28BC113700BDD667 /* UIImageView.cpp */,
 			);
-			path = Vector;
+			path = UIImageView;
+			sourceTree = "<group>";
+		};
+		7C8D981A28BC112100BDD667 /* UIImage */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D982028BC118200BDD667 /* UIImage.hpp */,
+				7C8D981F28BC118200BDD667 /* UIImage.cpp */,
+			);
+			path = UIImage;
+			sourceTree = "<group>";
+		};
+		7C8D982328BC172000BDD667 /* Literals */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D982528BC172D00BDD667 /* Literals.hpp */,
+				7C8D982428BC172D00BDD667 /* Literals.cpp */,
+			);
+			path = Literals;
+			sourceTree = "<group>";
+		};
+		7C8D982F28BD653A00BDD667 /* lunasvg */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D983028BD654A00BDD667 /* lunasvg.h */,
+			);
+			path = lunasvg;
+			sourceTree = "<group>";
+		};
+		7C8D983128BD656600BDD667 /* lunasvg */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D988428BD658300BDD667 /* 3rdparty */,
+				7C8D984428BD657300BDD667 /* canvas.cpp */,
+				7C8D984C28BD657300BDD667 /* canvas.h */,
+				7C8D984D28BD657400BDD667 /* clippathelement.cpp */,
+				7C8D984228BD657300BDD667 /* clippathelement.h */,
+				7C8D983828BD657200BDD667 /* CMakeLists.txt */,
+				7C8D983428BD657200BDD667 /* defselement.cpp */,
+				7C8D983F28BD657300BDD667 /* defselement.h */,
+				7C8D984F28BD657400BDD667 /* element.cpp */,
+				7C8D984328BD657300BDD667 /* element.h */,
+				7C8D985128BD657400BDD667 /* gelement.cpp */,
+				7C8D984528BD657300BDD667 /* gelement.h */,
+				7C8D985228BD657400BDD667 /* geometryelement.cpp */,
+				7C8D985428BD657400BDD667 /* geometryelement.h */,
+				7C8D983B28BD657200BDD667 /* graphicselement.cpp */,
+				7C8D984928BD657300BDD667 /* graphicselement.h */,
+				7C8D983328BD657200BDD667 /* layoutcontext.cpp */,
+				7C8D984828BD657300BDD667 /* layoutcontext.h */,
+				7C8D983A28BD657200BDD667 /* lunasvg.cpp */,
+				7C8D984E28BD657400BDD667 /* markerelement.cpp */,
+				7C8D983628BD657200BDD667 /* markerelement.h */,
+				7C8D983D28BD657200BDD667 /* maskelement.cpp */,
+				7C8D983928BD657200BDD667 /* maskelement.h */,
+				7C8D985528BD657400BDD667 /* paintelement.cpp */,
+				7C8D984028BD657300BDD667 /* paintelement.h */,
+				7C8D984128BD657300BDD667 /* parser.cpp */,
+				7C8D985A28BD657500BDD667 /* parser.h */,
+				7C8D984A28BD657300BDD667 /* parserutils.h */,
+				7C8D985328BD657400BDD667 /* property.cpp */,
+				7C8D984628BD657300BDD667 /* property.h */,
+				7C8D983528BD657200BDD667 /* stopelement.cpp */,
+				7C8D984B28BD657300BDD667 /* stopelement.h */,
+				7C8D985028BD657400BDD667 /* styledelement.cpp */,
+				7C8D985628BD657400BDD667 /* styledelement.h */,
+				7C8D984728BD657300BDD667 /* styleelement.cpp */,
+				7C8D983E28BD657200BDD667 /* styleelement.h */,
+				7C8D985728BD657400BDD667 /* svgelement.cpp */,
+				7C8D983C28BD657200BDD667 /* svgelement.h */,
+				7C8D983728BD657200BDD667 /* symbolelement.cpp */,
+				7C8D985928BD657400BDD667 /* symbolelement.h */,
+				7C8D985828BD657400BDD667 /* useelement.cpp */,
+				7C8D983228BD657100BDD667 /* useelement.h */,
+			);
+			path = lunasvg;
+			sourceTree = "<group>";
+		};
+		7C8D988428BD658300BDD667 /* 3rdparty */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D988528BD658300BDD667 /* software */,
+				7C8D988F28BD658300BDD667 /* plutovg */,
+			);
+			path = 3rdparty;
+			sourceTree = "<group>";
+		};
+		7C8D988528BD658300BDD667 /* software */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D988628BD658300BDD667 /* CMakeLists.txt */,
+				7C8D988728BD658300BDD667 /* sw_ft_stroker.c */,
+				7C8D988828BD658300BDD667 /* sw_ft_math.h */,
+				7C8D988928BD658300BDD667 /* sw_ft_types.h */,
+				7C8D988A28BD658300BDD667 /* sw_ft_raster.c */,
+				7C8D988B28BD658300BDD667 /* FTL.TXT */,
+				7C8D988C28BD658300BDD667 /* sw_ft_stroker.h */,
+				7C8D988D28BD658300BDD667 /* sw_ft_raster.h */,
+				7C8D988E28BD658300BDD667 /* sw_ft_math.c */,
+			);
+			path = software;
+			sourceTree = "<group>";
+		};
+		7C8D988F28BD658300BDD667 /* plutovg */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D989028BD658300BDD667 /* CMakeLists.txt */,
+				7C8D989128BD658300BDD667 /* plutovg.h */,
+				7C8D989228BD658300BDD667 /* plutovg-dash.c */,
+				7C8D989328BD658300BDD667 /* plutovg-paint.c */,
+				7C8D989428BD658300BDD667 /* plutovg-geometry.c */,
+				7C8D989528BD658300BDD667 /* plutovg-blend.c */,
+				7C8D989628BD658300BDD667 /* plutovg.c */,
+				7C8D989728BD658300BDD667 /* plutovg-private.h */,
+				7C8D989828BD658300BDD667 /* plutovg-rle.c */,
+			);
+			path = plutovg;
 			sourceTree = "<group>";
 		};
 		7CA38982288362FE005C7A91 /* Resources */ = {
@@ -903,6 +1159,8 @@
 				7C58C65828AFBAC00039F0E5 /* UIEdgeInsets */,
 				7C53FE4F2878EA180091DEF9 /* UIEvent */,
 				7C53FE4B28788D820091DEF9 /* UIGestureRecognizer */,
+				7C8D981A28BC112100BDD667 /* UIImage */,
+				7C8D981928BC111200BDD667 /* UIImageView */,
 				7C78EBD72873748B0082D3AC /* UILabel */,
 				7C888E4028816537009A6B95 /* UINavigationController */,
 				7C58C66428B0DA3F0039F0E5 /* UIPanGestureRecognizer */,
@@ -940,6 +1198,7 @@
 		7CA960852871F993009E0953 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				7C8D983128BD656600BDD667 /* lunasvg */,
 				7C239626287E143600973CC0 /* libretro-common */,
 				7CE9B17F2874917E00659D24 /* yoga */,
 				7CA960862871F993009E0953 /* nanovg-gl */,
@@ -968,10 +1227,12 @@
 		7CA960932871F993009E0953 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				7C8D982F28BD653A00BDD667 /* lunasvg */,
 				7C239613287E142F00973CC0 /* libretro-common */,
 				7C35D1B8287CD0E8005C0A7F /* tweeny */,
 				7CA960B62871FA53009E0953 /* nanovg-gl */,
 				7CA960942871F993009E0953 /* glad */,
+				7CEC275628BE4FC1005E6A9D /* stb_image_write.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -1111,6 +1372,15 @@
 			path = UIStackView;
 			sourceTree = "<group>";
 		};
+		7CEC275828BEA8CC005E6A9D /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				7C8D981328BB72FC00BDD667 /* Tools.hpp */,
+				7C8D982928BCC64600BDD667 /* Tools.cpp */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1189,10 +1459,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7C8D989E28BD658400BDD667 /* FTL.TXT in Resources */,
 				7CA9C4792882ADD700E47DB3 /* LaunchScreen.storyboard in Resources */,
 				7CA9C4762882ADD700E47DB3 /* Assets.xcassets in Resources */,
+				7C8D989928BD658400BDD667 /* CMakeLists.txt in Resources */,
+				7C8D98A128BD658400BDD667 /* CMakeLists.txt in Resources */,
 				7CA9C4742882ADD600E47DB3 /* Main.storyboard in Resources */,
 				7CA3898628836343005C7A91 /* Fonts in Resources */,
+				7C8D986328BD657500BDD667 /* CMakeLists.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1205,7 +1479,9 @@
 			files = (
 				7C888E37287F7726009A6B95 /* NXSize.cpp in Sources */,
 				7CE9B5E32874917F00659D24 /* YGNode.cpp in Sources */,
+				7C8D981D28BC113700BDD667 /* UIImageView.cpp in Sources */,
 				7C49617928A8215000E30B4B /* TouchTestViewController.cpp in Sources */,
+				7C8D98A628BD658400BDD667 /* plutovg-geometry.c in Sources */,
 				7C239633287E148700973CC0 /* NXFloat.cpp in Sources */,
 				7CE9B5E02874917F00659D24 /* YGEnums.cpp in Sources */,
 				7C0638F32876215100621093 /* FontManager.cpp in Sources */,
@@ -1213,42 +1489,72 @@
 				7C58C66228B055CD0039F0E5 /* UITapGestureRecognizer.cpp in Sources */,
 				7CA960792871F8BF009E0953 /* GLFWVideoContext.cpp in Sources */,
 				7C53FE4E28788D8E0091DEF9 /* UIGestureRecognizer.cpp in Sources */,
+				7C8D987A28BD657500BDD667 /* geometryelement.cpp in Sources */,
+				7C8D987E28BD657500BDD667 /* paintelement.cpp in Sources */,
+				7C8D987C28BD657500BDD667 /* property.cpp in Sources */,
 				7CA960C12871FAC6009E0953 /* Application.cpp in Sources */,
 				7C239612287E13C100973CC0 /* Time.cpp in Sources */,
 				7CE9B5DE2874917F00659D24 /* experiments.cpp in Sources */,
+				7C8D986E28BD657500BDD667 /* styleelement.cpp in Sources */,
+				7C8D989A28BD658400BDD667 /* sw_ft_stroker.c in Sources */,
+				7C8D986428BD657500BDD667 /* lunasvg.cpp in Sources */,
 				7C239639287E177900973CC0 /* NXPoint.cpp in Sources */,
 				7C58C66728B0DA510039F0E5 /* UIPanGestureRecognizer.cpp in Sources */,
 				7C4749522884604B00C5A988 /* UIScrollView.cpp in Sources */,
 				7C8D980528BA219A00BDD667 /* ListViewController.cpp in Sources */,
+				7C8D982128BC118200BDD667 /* UIImage.cpp in Sources */,
+				7C8D989C28BD658400BDD667 /* sw_ft_raster.c in Sources */,
+				7C8D98AC28BD658400BDD667 /* plutovg-rle.c in Sources */,
 				7C58C65B28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */,
+				7C8D987428BD657500BDD667 /* element.cpp in Sources */,
 				7C8D980F28BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
+				7C8D986828BD657500BDD667 /* maskelement.cpp in Sources */,
+				7C8D982628BC172D00BDD667 /* Literals.cpp in Sources */,
+				7C8D98A228BD658400BDD667 /* plutovg-dash.c in Sources */,
+				7C8D98A428BD658400BDD667 /* plutovg-paint.c in Sources */,
 				7C47495628854E2900C5A988 /* GLFWInputManager.cpp in Sources */,
+				7C8D986A28BD657500BDD667 /* parser.cpp in Sources */,
 				7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */,
 				7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */,
+				7C8D987828BD657500BDD667 /* gelement.cpp in Sources */,
 				7C0638F42876233200621093 /* main.cpp in Sources */,
+				7C8D987628BD657500BDD667 /* styledelement.cpp in Sources */,
 				7CE9B5E42874917F00659D24 /* event.cpp in Sources */,
+				7C8D986128BD657500BDD667 /* symbolelement.cpp in Sources */,
+				7C8D985B28BD657500BDD667 /* layoutcontext.cpp in Sources */,
+				7C8D989F28BD658400BDD667 /* sw_ft_math.c in Sources */,
 				7CE9B5E22874917F00659D24 /* YGConfig.cpp in Sources */,
 				7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */,
 				7C23962E287E143700973CC0 /* encoding_utf.c in Sources */,
 				7C78EBE12873748B0082D3AC /* UILabel.cpp in Sources */,
 				7C23962F287E143700973CC0 /* compat_strl.c in Sources */,
 				7C888E47288165E9009A6B95 /* ViewController.cpp in Sources */,
+				7C8D987028BD657500BDD667 /* clippathelement.cpp in Sources */,
 				7C23963D287E2BCC00973CC0 /* NXRect.cpp in Sources */,
 				7C239630287E143700973CC0 /* features_cpu.c in Sources */,
 				7C53FE5B2878F4E60091DEF9 /* UIWindow.cpp in Sources */,
 				7C53FE4A28788AA20091DEF9 /* UITouch.cpp in Sources */,
+				7C8D98AA28BD658400BDD667 /* plutovg.c in Sources */,
 				7C888E4B28818212009A6B95 /* UITabBarController.cpp in Sources */,
 				7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */,
 				7C53FE562878ED350091DEF9 /* UIViewController.cpp in Sources */,
+				7C8D988028BD657500BDD667 /* svgelement.cpp in Sources */,
 				7CE9B5E8287495F900659D24 /* UIStackView.cpp in Sources */,
 				7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */,
 				7C8D980A28BAC24000BDD667 /* AnimationContext.cpp in Sources */,
 				7CE9B5DF2874917F00659D24 /* YGNodePrint.cpp in Sources */,
+				7C8D986C28BD657500BDD667 /* canvas.cpp in Sources */,
 				7CE9B5DD2874917F00659D24 /* YGStyle.cpp in Sources */,
+				7C8D986628BD657500BDD667 /* graphicselement.cpp in Sources */,
 				7CA960B12871F993009E0953 /* nanovg.c in Sources */,
+				7C8D982A28BCC64600BDD667 /* Tools.cpp in Sources */,
 				7CA960B22871F993009E0953 /* glad.c in Sources */,
 				7C4630552884325800DF15F3 /* UIAppDelegate.cpp in Sources */,
+				7C8D985D28BD657500BDD667 /* defselement.cpp in Sources */,
+				7C8D988228BD657500BDD667 /* useelement.cpp in Sources */,
 				7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */,
+				7C8D987228BD657500BDD667 /* markerelement.cpp in Sources */,
+				7C8D985F28BD657500BDD667 /* stopelement.cpp in Sources */,
 				7C44163C28777D9B0076663D /* UIResponder.cpp in Sources */,
 				7C4749612886063B00C5A988 /* NXAffineTransform.cpp in Sources */,
 				7C58C65428AF85A80039F0E5 /* NXTransform3D.cpp in Sources */,
@@ -1256,6 +1562,7 @@
 				7C888E4328816547009A6B95 /* UINavigationController.cpp in Sources */,
 				7CE9B5DA2874917F00659D24 /* Utils.cpp in Sources */,
 				7CE9B5E12874917F00659D24 /* YGValue.cpp in Sources */,
+				7C8D98A828BD658400BDD667 /* plutovg-blend.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1263,24 +1570,33 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7C8D986B28BD657500BDD667 /* parser.cpp in Sources */,
 				7CA9C4712882ADD600E47DB3 /* GLViewController.m in Sources */,
+				7C8D982B28BCC64600BDD667 /* Tools.cpp in Sources */,
 				7CA9C4A12882C83F00E47DB3 /* YGNodePrint.cpp in Sources */,
 				7C8D980628BA219A00BDD667 /* ListViewController.cpp in Sources */,
 				7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */,
 				7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */,
+				7C8D987F28BD657500BDD667 /* paintelement.cpp in Sources */,
+				7C8D986D28BD657500BDD667 /* canvas.cpp in Sources */,
 				7C8D981028BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
 				7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */,
+				7C8D987928BD657500BDD667 /* gelement.cpp in Sources */,
 				7CA9C48F2882C43100E47DB3 /* GaussianBlur.cpp in Sources */,
 				7CA9C46B2882ADD600E47DB3 /* AppDelegate.m in Sources */,
+				7C8D987D28BD657500BDD667 /* property.cpp in Sources */,
 				7CA9C4912882C43100E47DB3 /* NXFloat.cpp in Sources */,
 				7CA9C48D2882C43100E47DB3 /* UITouch.cpp in Sources */,
+				7C8D985E28BD657500BDD667 /* defselement.cpp in Sources */,
 				7CA9C4902882C43100E47DB3 /* UIEvent.cpp in Sources */,
 				7C8D980B28BAC24000BDD667 /* AnimationContext.cpp in Sources */,
 				7CA9C4A62882C84400E47DB3 /* event.cpp in Sources */,
 				7CA9C4862882C43100E47DB3 /* FontManager.cpp in Sources */,
 				7CA9C4852882C41000E47DB3 /* UIBlurView.cpp in Sources */,
 				7CA9C48B2882C43100E47DB3 /* UIGestureRecognizer.cpp in Sources */,
+				7C8D989B28BD658400BDD667 /* sw_ft_stroker.c in Sources */,
 				7C65882528A29CD40036AAD5 /* ViewController.cpp in Sources */,
+				7C8D98A028BD658400BDD667 /* sw_ft_math.c in Sources */,
 				7CA9C4822882C3F700E47DB3 /* Application.cpp in Sources */,
 				7CA9C48C2882C43100E47DB3 /* UIResponder.cpp in Sources */,
 				7CA9C4952882C43100E47DB3 /* UINavigationController.cpp in Sources */,
@@ -1295,31 +1611,55 @@
 				7C58C65528AF85AD0039F0E5 /* NXTransform3D.cpp in Sources */,
 				7C58C67428B382F90039F0E5 /* NXAffineTransform.cpp in Sources */,
 				7CA9C47C2882ADD700E47DB3 /* main.m in Sources */,
+				7C8D98AB28BD658400BDD667 /* plutovg.c in Sources */,
 				7CA9C4A02882C83F00E47DB3 /* YGValue.cpp in Sources */,
+				7C8D987728BD657500BDD667 /* styledelement.cpp in Sources */,
+				7C8D989D28BD658400BDD667 /* sw_ft_raster.c in Sources */,
+				7C8D987528BD657500BDD667 /* element.cpp in Sources */,
+				7C8D986528BD657500BDD667 /* lunasvg.cpp in Sources */,
+				7C8D982228BC118200BDD667 /* UIImage.cpp in Sources */,
+				7C8D98A328BD658400BDD667 /* plutovg-dash.c in Sources */,
 				7CA9C4892882C43100E47DB3 /* UITabBarController.cpp in Sources */,
+				7C8D986028BD657500BDD667 /* stopelement.cpp in Sources */,
+				7C8D987128BD657500BDD667 /* clippathelement.cpp in Sources */,
 				7CA9C4842882C40500E47DB3 /* UIView.cpp in Sources */,
 				7CA9C4A52882C84400E47DB3 /* experiments.cpp in Sources */,
 				7CA9C4A42882C83F00E47DB3 /* Yoga.cpp in Sources */,
+				7C8D98AD28BD658400BDD667 /* plutovg-rle.c in Sources */,
 				7CA9C4922882C43100E47DB3 /* NXPoint.cpp in Sources */,
 				7CA9C49C2882C83F00E47DB3 /* YGConfig.cpp in Sources */,
 				7CA9C4982882C83800E47DB3 /* compat_strl.c in Sources */,
+				7C8D981E28BC113700BDD667 /* UIImageView.cpp in Sources */,
 				7CA9C4A32882C83F00E47DB3 /* YGNode.cpp in Sources */,
 				7CA9C49D2882C83F00E47DB3 /* YGLayout.cpp in Sources */,
+				7C8D98A928BD658400BDD667 /* plutovg-blend.c in Sources */,
+				7C8D985C28BD657500BDD667 /* layoutcontext.cpp in Sources */,
+				7C8D986228BD657500BDD667 /* symbolelement.cpp in Sources */,
+				7C8D986928BD657500BDD667 /* maskelement.cpp in Sources */,
 				7C49617A28A8215000E30B4B /* TouchTestViewController.cpp in Sources */,
 				7CA9C4942882C43100E47DB3 /* UIColor.cpp in Sources */,
+				7C8D982728BC172D00BDD667 /* Literals.cpp in Sources */,
 				7CA9C49A2882C83800E47DB3 /* features_cpu.c in Sources */,
 				7CA9C4962882C43100E47DB3 /* NXRect.cpp in Sources */,
+				7C8D987B28BD657500BDD667 /* geometryelement.cpp in Sources */,
+				7C8D98A728BD658400BDD667 /* plutovg-geometry.c in Sources */,
 				7CA9C49B2882C83F00E47DB3 /* Utils.cpp in Sources */,
 				7CA9C4882882C43100E47DB3 /* UIViewController.cpp in Sources */,
 				7C4749532884608700C5A988 /* UIScrollView.cpp in Sources */,
+				7C8D988328BD657500BDD667 /* useelement.cpp in Sources */,
+				7C8D987328BD657500BDD667 /* markerelement.cpp in Sources */,
 				7CA9C4932882C43100E47DB3 /* NXSize.cpp in Sources */,
 				7C47495D2885EDCB00C5A988 /* IOSInputManager.cpp in Sources */,
 				7CA9C46E2882ADD600E47DB3 /* SceneDelegate.m in Sources */,
 				7CA389722882F8C6005C7A91 /* ios_main.mm in Sources */,
+				7C8D988128BD657500BDD667 /* svgelement.cpp in Sources */,
 				7CA9C4B62882D31900E47DB3 /* ios_video.cpp in Sources */,
+				7C8D986728BD657500BDD667 /* graphicselement.cpp in Sources */,
 				7CA9C48A2882C43100E47DB3 /* UIStackView.cpp in Sources */,
+				7C8D986F28BD657500BDD667 /* styleelement.cpp in Sources */,
 				7C58C66828B0DA510039F0E5 /* UIPanGestureRecognizer.cpp in Sources */,
 				7C58C65C28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */,
+				7C8D98A528BD658400BDD667 /* plutovg-paint.c in Sources */,
 				7CA9C49E2882C83F00E47DB3 /* log.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

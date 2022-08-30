@@ -9,6 +9,7 @@
 #include <Core/UIStackView/UIStackView.hpp>
 #include <Core/UIBlurView/UIBlurView.hpp>
 #include <Core/UILabel/UILabel.hpp>
+#include <Core/UIImageView/UIImageView.hpp>
 
 namespace NXKit {
 
@@ -42,10 +43,17 @@ void UINavigationController::loadView() {
     header->setAlignItems(AlignItems::CENTER);
 
     UILabel *headerLabel = new UILabel("Demo app");
+    UIImageView* imageView = new UIImageView();
+    imageView->setSize(Size(48, 48));
+    imageView->setMarginRight(18);
+    imageView->setImage(new UIImage("Images/logo.png"_res, 2));
+//    imageView->setScalingType(ImageScalingType::CENTER);
+
     headerLabel->getFont()->fontSize = 28;
     headerLabel->setMarginTop(7);
-    headerLabel->backgroundColor = UIColor(255, 0, 0);
+//    headerLabel->backgroundColor = UIColor(255, 0, 0);
 
+    header->addSubview(imageView);
     header->addSubview(headerLabel);
     blurHeader->addSubview(header);
 

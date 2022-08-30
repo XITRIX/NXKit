@@ -138,6 +138,9 @@ void Application::onControllerButtonPressed(ControllerButton button, bool repeat
         setFocus(newFocus);
     }
 }
+NVGcontext* Application::getContext() {
+    return videoContext->getNVGContext();
+}
 
 UIView* Application::getFocus() {
     return this->focus;
