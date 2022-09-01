@@ -13,6 +13,10 @@ UIEdgeInsets::UIEdgeInsets():
     top(0), left(0), bottom(0), right(0)
 {}
 
+UIEdgeInsets::UIEdgeInsets(float insets):
+    top(insets), left(insets), bottom(insets), right(insets)
+{}
+
 UIEdgeInsets::UIEdgeInsets(float top, float left, float bottom, float right):
     top(top), left(left), bottom(bottom), right(right)
 {}

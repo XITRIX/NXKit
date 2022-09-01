@@ -161,6 +161,13 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     
     drawHighlight(vgContext, true);
 
+    if (clickAlpha > 0) {
+        nvgFillColor(vgContext, UIColor(13, 182, 213, 38).withAlphaComponent(clickAlpha).raw());
+        nvgBeginPath(vgContext);
+        nvgRoundedRect(vgContext, 0, 0, getBounds().width(), getBounds().height(), this->cornerRadius);
+        nvgFill(vgContext);
+    }
+
     nvgSave(vgContext);
     nvgTranslate(vgContext, -bounds.minX(), -bounds.minY());
     draw(vgContext);
@@ -329,6 +336,7 @@ std::deque<float> UIView::createAnimationContext() {
     context.push_back(bounds.origin.y);
     context.push_back(transformOrigin.x);
     context.push_back(transformOrigin.y);
+    context.push_back(clickAlpha);
     return context;
 }
 
@@ -337,6 +345,7 @@ void UIView::applyAnimationContext(std::deque<float>* context) {
     bounds.origin.y = pop(context);
     transformOrigin.x = pop(context);
     transformOrigin.y = pop(context);
+    clickAlpha = pop(context);
 }
 
 void UIView::animate(float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {

@@ -21,7 +21,7 @@ UITabBarSeparatorView::UITabBarSeparatorView() {
 
     auto line = new UIView();
     line->setHeight(1);
-    line->backgroundColor = UIColor(208, 208, 208);
+    line->backgroundColor = UIColor::separator;
 
     addSubview(line);
 }
@@ -48,17 +48,22 @@ UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController*
 
     setSelected(false);
 
-    auto tap = new UITapGestureRecognizer();
-    tap->onStateChanged = [this](UIGestureRecognizerState state) {
-        switch (state) {
-            case UIGestureRecognizerState::ENDED:
-                Application::shared()->setFocus(this);
-                break;
-
-            default: break;
+    onEvent = [this](UIControlTouchEvent event) {
+        if (event == UIControlTouchEvent::touchUpInside) {
+            Application::shared()->setFocus(this);
         }
     };
-    addGestureRecognizer(tap);
+//    auto tap = new UITapGestureRecognizer();
+//    tap->onStateChanged = [this](UIGestureRecognizerState state) {
+//        switch (state) {
+//            case UIGestureRecognizerState::ENDED:
+//                Application::shared()->setFocus(this);
+//                break;
+//
+//            default: break;
+//        }
+//    };
+//    addGestureRecognizer(tap);
 }
 
 UITabBarItemView::~UITabBarItemView() {

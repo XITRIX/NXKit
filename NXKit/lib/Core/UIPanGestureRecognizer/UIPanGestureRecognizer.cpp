@@ -62,6 +62,7 @@ void UIPanGestureRecognizer::touchesMoved(std::vector<UITouch*> touches, UIEvent
             if (abs(diff.x) >= THRESHOLD || abs(diff.y) >= THRESHOLD) {
                 previousTouchesMovedTimestamp = touchesMovedTimestamp;
                 touchesMovedTimestamp = trackingTouch->timestamp;
+                setState(UIGestureRecognizerState::BEGAN);
                 setState(UIGestureRecognizerState::CHANGED);
             }
         } else if (getState() == UIGestureRecognizerState::CHANGED) {

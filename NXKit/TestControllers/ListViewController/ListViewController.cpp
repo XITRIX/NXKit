@@ -30,6 +30,16 @@ ListItemView::ListItemView() {
 
     addSubview(imageView);
     addSubview(label);
+
+    onEvent = [this](UIControlTouchEvent event) {
+        if (event == NXKit::UIControlTouchEvent::touchUpInside) {
+            getActions()[BUTTON_A].action();
+        }
+    };
+
+    addAction(BUTTON_A, UIAction([this](){
+        Application::shared()->setFocus(this);
+    }));
 }
 
 void ListItemView::setText(std::string text) {
@@ -64,11 +74,11 @@ void ListViewController::loadView() {
 void ListViewController::viewDidLoad() {
     for (int i = 0; i < 200; i++) {
         auto item = new ListItemView();
-        item->setText("РПО #" + std::to_string(i + 1));
+        item->setText("Test text #" + std::to_string(i + 1));
         item->setImage(new UIImage(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(i%10) + ".svg", 2));
         item->setBorderBottom(1);
         if (i == 0) item->setBorderTop(1);
-        item->borderColor = UIColor(208, 208, 208);
+        item->borderColor = UIColor::separator;
         stackView->addSubview(item);
     }
 }

@@ -13,6 +13,7 @@ namespace NXKit {
 
 struct UIColor {
 public:
+    UIColor(): UIColor(0, 0, 0, 0) {}
     UIColor(short r, short g, short b, short a);
     UIColor(short r, short g, short b): UIColor(r, g, b, 255) {}
 
@@ -37,6 +38,7 @@ public:
     static UIColor white;
     static UIColor black;
     static UIColor gray;
+    static UIColor separator;
 private:
     int value;
 };

@@ -50,6 +50,7 @@ public:
     Size transformSize = Size(1, 1);
     bool clipToBounds = true;
     bool highlightOnFocus = true;
+    float clickAlpha = 0;
 
     UIView(Rect frame);
     UIView(float x, float y, float width, float height): UIView(Rect(x, y, width, height)) {}

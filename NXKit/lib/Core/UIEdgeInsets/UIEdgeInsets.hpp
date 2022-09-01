@@ -13,6 +13,7 @@ struct UIEdgeInsets {
     float top, left, bottom, right;
 
     UIEdgeInsets();
+    UIEdgeInsets(float insets);
     UIEdgeInsets(float top, float left, float bottom, float right);
     bool operator==(const UIEdgeInsets& rhs);
     bool operator!=(const UIEdgeInsets& rhs);

@@ -16,6 +16,7 @@ UIColor UIColor::blue = UIColor(0, 0, 255);
 UIColor UIColor::white = UIColor(255, 255, 255);
 UIColor UIColor::black = UIColor(0, 0, 0);
 UIColor UIColor::gray = UIColor(155, 155, 155);
+UIColor UIColor::separator = UIColor(208, 208, 208);
 
 UIColor::UIColor(short r, short g, short b, short a) {
     value = (a & 0xff) << 24 | (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
@@ -42,11 +43,11 @@ unsigned char UIColor::a() {
 }
 
 UIColor UIColor::withAlphaComponent(float alpha) {
-    return this->withAlphaComponent((short)(alpha * 255));
+    return UIColor(r(), g(), b(), a() * alpha);
 }
 
 UIColor UIColor::withAlphaComponent(short alpha) {
-    return UIColor(r(), g(), b(), alpha);
+    return UIColor(r(), g(), b(), a() * (alpha / 255));
 }
 
 NVGcolor UIColor::raw() {

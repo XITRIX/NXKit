@@ -41,6 +41,16 @@
 		7C58C66828B0DA510039F0E5 /* UIPanGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C66528B0DA510039F0E5 /* UIPanGestureRecognizer.cpp */; };
 		7C58C67428B382F90039F0E5 /* NXAffineTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495F2886063B00C5A988 /* NXAffineTransform.cpp */; };
 		7C65882528A29CD40036AAD5 /* ViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E45288165E9009A6B95 /* ViewController.cpp */; };
+		7C709C9F28C08CCE000A474F /* UIControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709C9D28C08CCE000A474F /* UIControl.cpp */; };
+		7C709CA028C08CD1000A474F /* UIControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709C9D28C08CCE000A474F /* UIControl.cpp */; };
+		7C709CA228C08F77000A474F /* Geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA128C08F77000A474F /* Geometry.cpp */; };
+		7C709CA328C08F77000A474F /* Geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA128C08F77000A474F /* Geometry.cpp */; };
+		7C709CA628C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA428C0ABED000A474F /* UIControl+GestureRecognizer.cpp */; };
+		7C709CA728C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA428C0ABED000A474F /* UIControl+GestureRecognizer.cpp */; };
+		7C709CAB28C0B3F9000A474F /* UIAction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA928C0B3F9000A474F /* UIAction.cpp */; };
+		7C709CAC28C0B3F9000A474F /* UIAction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA928C0B3F9000A474F /* UIAction.cpp */; };
+		7C709CB028C0BD15000A474F /* ControlTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CAE28C0BD15000A474F /* ControlTestViewController.cpp */; };
+		7C709CB128C0BD15000A474F /* ControlTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CAE28C0BD15000A474F /* ControlTestViewController.cpp */; };
 		7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */; };
 		7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD12873748B0082D3AC /* UIColor.cpp */; };
 		7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD32873748B0082D3AC /* UIView.cpp */; };
@@ -210,7 +220,6 @@
 /* Begin PBXFileReference section */
 		7C0638F12876215100621093 /* FontManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FontManager.cpp; sourceTree = "<group>"; };
 		7C0638F22876215100621093 /* FontManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FontManager.hpp; sourceTree = "<group>"; };
-		7C23960E287E138500973CC0 /* CGGeometry.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CGGeometry.hpp; sourceTree = "<group>"; };
 		7C239610287E13C100973CC0 /* Time.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Time.cpp; sourceTree = "<group>"; };
 		7C239611287E13C100973CC0 /* Time.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Time.hpp; sourceTree = "<group>"; };
 		7C239615287E142F00973CC0 /* utf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utf.h; sourceTree = "<group>"; };
@@ -287,6 +296,14 @@
 		7C58C66D28B2530E0039F0E5 /* SwitchVideoContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SwitchVideoContext.hpp; sourceTree = "<group>"; };
 		7C58C67028B253790039F0E5 /* SwitchInputManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SwitchInputManager.cpp; sourceTree = "<group>"; };
 		7C58C67128B253790039F0E5 /* SwitchInputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SwitchInputManager.hpp; sourceTree = "<group>"; };
+		7C709C9D28C08CCE000A474F /* UIControl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIControl.cpp; sourceTree = "<group>"; };
+		7C709C9E28C08CCE000A474F /* UIControl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIControl.hpp; sourceTree = "<group>"; };
+		7C709CA128C08F77000A474F /* Geometry.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Geometry.cpp; sourceTree = "<group>"; };
+		7C709CA428C0ABED000A474F /* UIControl+GestureRecognizer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "UIControl+GestureRecognizer.cpp"; sourceTree = "<group>"; };
+		7C709CA928C0B3F9000A474F /* UIAction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIAction.cpp; sourceTree = "<group>"; };
+		7C709CAA28C0B3F9000A474F /* UIAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIAction.hpp; sourceTree = "<group>"; };
+		7C709CAE28C0BD15000A474F /* ControlTestViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ControlTestViewController.cpp; sourceTree = "<group>"; };
+		7C709CAF28C0BD15000A474F /* ControlTestViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ControlTestViewController.hpp; sourceTree = "<group>"; };
 		7C78EBCD2873748B0082D3AC /* UIBlurView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIBlurView.hpp; sourceTree = "<group>"; };
 		7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIBlurView.cpp; sourceTree = "<group>"; };
 		7C78EBD02873748B0082D3AC /* UIColor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIColor.hpp; sourceTree = "<group>"; };
@@ -792,6 +809,34 @@
 			path = Switch;
 			sourceTree = "<group>";
 		};
+		7C709C9C28C08CC1000A474F /* UIControl */ = {
+			isa = PBXGroup;
+			children = (
+				7C709C9E28C08CCE000A474F /* UIControl.hpp */,
+				7C709C9D28C08CCE000A474F /* UIControl.cpp */,
+				7C709CA428C0ABED000A474F /* UIControl+GestureRecognizer.cpp */,
+			);
+			path = UIControl;
+			sourceTree = "<group>";
+		};
+		7C709CA828C0B3EE000A474F /* UIAction */ = {
+			isa = PBXGroup;
+			children = (
+				7C709CAA28C0B3F9000A474F /* UIAction.hpp */,
+				7C709CA928C0B3F9000A474F /* UIAction.cpp */,
+			);
+			path = UIAction;
+			sourceTree = "<group>";
+		};
+		7C709CAD28C0BCFC000A474F /* ControlTestViewController */ = {
+			isa = PBXGroup;
+			children = (
+				7C709CAF28C0BD15000A474F /* ControlTestViewController.hpp */,
+				7C709CAE28C0BD15000A474F /* ControlTestViewController.cpp */,
+			);
+			path = ControlTestViewController;
+			sourceTree = "<group>";
+		};
 		7C78EBCB2873743C0082D3AC /* Driver */ = {
 			isa = PBXGroup;
 			children = (
@@ -831,7 +876,7 @@
 			isa = PBXGroup;
 			children = (
 				7C78EBD62873748B0082D3AC /* Geometry.hpp */,
-				7C23960E287E138500973CC0 /* CGGeometry.hpp */,
+				7C709CA128C08F77000A474F /* Geometry.cpp */,
 			);
 			path = Geometry;
 			sourceTree = "<group>";
@@ -887,6 +932,7 @@
 		7C888E3F28816531009A6B95 /* TestControllers */ = {
 			isa = PBXGroup;
 			children = (
+				7C709CAD28C0BCFC000A474F /* ControlTestViewController */,
 				7C8D980C28BB59F300BDD667 /* AnimationTestViewController */,
 				7C8D980228BA218700BDD667 /* ListViewController */,
 				7C49617628A8213700E30B4B /* TouchTestViewController */,
@@ -1148,6 +1194,8 @@
 		7CA960742871F841009E0953 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				7C709CA828C0B3EE000A474F /* UIAction */,
+				7C709C9C28C08CC1000A474F /* UIControl */,
 				7CA960BE2871FABA009E0953 /* Application */,
 				7C78EBCB2873743C0082D3AC /* Driver */,
 				7C78EBD52873748B0082D3AC /* Geometry */,
@@ -1492,6 +1540,7 @@
 				7C8D987A28BD657500BDD667 /* geometryelement.cpp in Sources */,
 				7C8D987E28BD657500BDD667 /* paintelement.cpp in Sources */,
 				7C8D987C28BD657500BDD667 /* property.cpp in Sources */,
+				7C709CAB28C0B3F9000A474F /* UIAction.cpp in Sources */,
 				7CA960C12871FAC6009E0953 /* Application.cpp in Sources */,
 				7C239612287E13C100973CC0 /* Time.cpp in Sources */,
 				7CE9B5DE2874917F00659D24 /* experiments.cpp in Sources */,
@@ -1510,6 +1559,7 @@
 				7C8D980F28BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
 				7C8D986828BD657500BDD667 /* maskelement.cpp in Sources */,
 				7C8D982628BC172D00BDD667 /* Literals.cpp in Sources */,
+				7C709CB028C0BD15000A474F /* ControlTestViewController.cpp in Sources */,
 				7C8D98A228BD658400BDD667 /* plutovg-dash.c in Sources */,
 				7C8D98A428BD658400BDD667 /* plutovg-paint.c in Sources */,
 				7C47495628854E2900C5A988 /* GLFWInputManager.cpp in Sources */,
@@ -1525,7 +1575,9 @@
 				7C8D989F28BD658400BDD667 /* sw_ft_math.c in Sources */,
 				7CE9B5E22874917F00659D24 /* YGConfig.cpp in Sources */,
 				7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */,
+				7C709CA628C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */,
 				7C23962E287E143700973CC0 /* encoding_utf.c in Sources */,
+				7C709CA228C08F77000A474F /* Geometry.cpp in Sources */,
 				7C78EBE12873748B0082D3AC /* UILabel.cpp in Sources */,
 				7C23962F287E143700973CC0 /* compat_strl.c in Sources */,
 				7C888E47288165E9009A6B95 /* ViewController.cpp in Sources */,
@@ -1550,6 +1602,7 @@
 				7C8D982A28BCC64600BDD667 /* Tools.cpp in Sources */,
 				7CA960B22871F993009E0953 /* glad.c in Sources */,
 				7C4630552884325800DF15F3 /* UIAppDelegate.cpp in Sources */,
+				7C709C9F28C08CCE000A474F /* UIControl.cpp in Sources */,
 				7C8D985D28BD657500BDD667 /* defselement.cpp in Sources */,
 				7C8D988228BD657500BDD667 /* useelement.cpp in Sources */,
 				7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */,
@@ -1577,12 +1630,14 @@
 				7C8D980628BA219A00BDD667 /* ListViewController.cpp in Sources */,
 				7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */,
 				7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */,
+				7C709CA728C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */,
 				7C8D987F28BD657500BDD667 /* paintelement.cpp in Sources */,
 				7C8D986D28BD657500BDD667 /* canvas.cpp in Sources */,
 				7C8D981028BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
 				7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */,
 				7C8D987928BD657500BDD667 /* gelement.cpp in Sources */,
 				7CA9C48F2882C43100E47DB3 /* GaussianBlur.cpp in Sources */,
+				7C709CB128C0BD15000A474F /* ControlTestViewController.cpp in Sources */,
 				7CA9C46B2882ADD600E47DB3 /* AppDelegate.m in Sources */,
 				7C8D987D28BD657500BDD667 /* property.cpp in Sources */,
 				7CA9C4912882C43100E47DB3 /* NXFloat.cpp in Sources */,
@@ -1611,6 +1666,7 @@
 				7C58C65528AF85AD0039F0E5 /* NXTransform3D.cpp in Sources */,
 				7C58C67428B382F90039F0E5 /* NXAffineTransform.cpp in Sources */,
 				7CA9C47C2882ADD700E47DB3 /* main.m in Sources */,
+				7C709CA028C08CD1000A474F /* UIControl.cpp in Sources */,
 				7C8D98AB28BD658400BDD667 /* plutovg.c in Sources */,
 				7CA9C4A02882C83F00E47DB3 /* YGValue.cpp in Sources */,
 				7C8D987728BD657500BDD667 /* styledelement.cpp in Sources */,
@@ -1643,6 +1699,7 @@
 				7CA9C4962882C43100E47DB3 /* NXRect.cpp in Sources */,
 				7C8D987B28BD657500BDD667 /* geometryelement.cpp in Sources */,
 				7C8D98A728BD658400BDD667 /* plutovg-geometry.c in Sources */,
+				7C709CAC28C0B3F9000A474F /* UIAction.cpp in Sources */,
 				7CA9C49B2882C83F00E47DB3 /* Utils.cpp in Sources */,
 				7CA9C4882882C43100E47DB3 /* UIViewController.cpp in Sources */,
 				7C4749532884608700C5A988 /* UIScrollView.cpp in Sources */,
@@ -1657,6 +1714,7 @@
 				7C8D986728BD657500BDD667 /* graphicselement.cpp in Sources */,
 				7CA9C48A2882C43100E47DB3 /* UIStackView.cpp in Sources */,
 				7C8D986F28BD657500BDD667 /* styleelement.cpp in Sources */,
+				7C709CA328C08F77000A474F /* Geometry.cpp in Sources */,
 				7C58C66828B0DA510039F0E5 /* UIPanGestureRecognizer.cpp in Sources */,
 				7C58C65C28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */,
 				7C8D98A528BD658400BDD667 /* plutovg-paint.c in Sources */,

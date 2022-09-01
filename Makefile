@@ -51,12 +51,14 @@ INCLUDES := $(INCLUDES) \
 			NXKit/TestControllers/ViewController \
 			NXKit/TestControllers/ListViewController \
 			NXKit/TestControllers/AnimationTestViewController \
+			NXKit/TestControllers/ControlTestViewController \
 			NXKit/TestControllers/TouchTestViewController
 
 SOURCES  := $(SOURCES) \
 			NXKit/TestControllers/ViewController \
 			NXKit/TestControllers/ListViewController \
 			NXKit/TestControllers/AnimationTestViewController \
+			NXKit/TestControllers/ControlTestViewController \
 			NXKit/TestControllers/TouchTestViewController
 
 
@@ -81,6 +83,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UIAppDelegate \
 			NXKit/lib/Core/UIBlurView \
 			NXKit/lib/Core/UIColor \
+			NXKit/lib/Core/UIControl \
 			NXKit/lib/Core/UIEdgeInsets \
 			NXKit/lib/Core/UIEvent \
 			NXKit/lib/Core/UIGestureRecognizer \

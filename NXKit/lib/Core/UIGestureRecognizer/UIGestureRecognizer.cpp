@@ -66,16 +66,18 @@ void UIGestureRecognizer::_touchesEnded(std::vector<UITouch*> touches, UIEvent* 
     for (auto touch : touches)
         removeTouch(touch);
 
-    if (!condition) return;
+    if (condition)
+        touchesEnded(touches, event);
 
-    touchesEnded(touches, event);
+    if (allTouches.size() == 0)
+        setState(UIGestureRecognizerState::POSSIBLE);
 }
 
 void UIGestureRecognizer::_touchesCancelled(std::vector<UITouch*> touches, UIEvent* event) {
     for (auto touch : touches)
         removeTouch(touch);
 
-    if (!recognitionCondition()) return;
+//    if (!recognitionCondition()) return;
     
     touchesCancelled(touches, event);
 }

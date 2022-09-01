@@ -9,6 +9,7 @@
 
 #include <Core/UIViewController/UIViewController.hpp>
 #include <Core/UIStackView/UIStackView.hpp>
+#include <Core/UIControl/UIControl.hpp>
 #include <Core/UILabel/UILabel.hpp>
 
 namespace NXKit {
@@ -20,7 +21,7 @@ public:
     UITabBarSeparatorView();
 };
 
-class UITabBarItemView: public UIStackView {
+class UITabBarItemView: public UIControl {
 public:
     UITabBarItemView(UITabBarController* parent, UIViewController* controller);
     virtual ~UITabBarItemView();

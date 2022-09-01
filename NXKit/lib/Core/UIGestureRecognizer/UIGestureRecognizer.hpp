@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Core/UIEvent/UIEvent.hpp>
+#include <Core/Utils/NotificationEvent.hpp>
 #include <functional>
 
 namespace NXKit {
