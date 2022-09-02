@@ -52,18 +52,21 @@ struct Rect {
     Rect(Point origin, Size size);
     Rect(float x, float y, float width, float height);
 
-    float width();
-    float height();
+    float width() const;
+    float height() const;
 
-    float minX();
-    float midX();
-    float maxX();
+    float minX() const;
+    float midX() const;
+    float maxX() const;
 
-    float minY();
-    float midY();
-    float maxY();
+    float minY() const;
+    float midY() const;
+    float maxY() const;
 
     bool contains(Point point);
+    bool intersects(const Rect& other) const;
+    Rect& offsetBy(const Point& offet);
+    Rect& offsetBy(const float& offetX, const float& offetY);
     Rect& insetBy(const UIEdgeInsets& insets);
 
     bool operator==(const Rect& rhs);

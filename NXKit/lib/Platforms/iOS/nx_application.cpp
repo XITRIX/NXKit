@@ -19,7 +19,7 @@ using namespace NXKit;
 void makeApplication(VideoContext* context, const char* path) {
     auto application = new Application();
     application->setVideoContext(context);
-    application->setResourcesPath(std::string(path) + "/");
+    application->setResourcesPath(std::string(path) + "/resource/");
 
     InputManager::initWith(new IOSInputManager());
 

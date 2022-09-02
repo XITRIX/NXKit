@@ -54,10 +54,12 @@ private:
     float windowScale;
     std::string resourcesPath;
 
+    int getFps();
     bool mainLoopIteration();
     void onControllerButtonPressed(ControllerButton button, bool repeating);
     void input();
     void render();
+    void renderFps();
 
 };
 

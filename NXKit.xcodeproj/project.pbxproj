@@ -51,6 +51,7 @@
 		7C709CAC28C0B3F9000A474F /* UIAction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA928C0B3F9000A474F /* UIAction.cpp */; };
 		7C709CB028C0BD15000A474F /* ControlTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CAE28C0BD15000A474F /* ControlTestViewController.cpp */; };
 		7C709CB128C0BD15000A474F /* ControlTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CAE28C0BD15000A474F /* ControlTestViewController.cpp */; };
+		7C709CB428C1DC23000A474F /* resource in Resources */ = {isa = PBXBuildFile; fileRef = 7C709CB328C1DC0C000A474F /* resource */; };
 		7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */; };
 		7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD12873748B0082D3AC /* UIColor.cpp */; };
 		7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD32873748B0082D3AC /* UIView.cpp */; };
@@ -83,7 +84,6 @@
 		7C8D986028BD657500BDD667 /* stopelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983528BD657200BDD667 /* stopelement.cpp */; };
 		7C8D986128BD657500BDD667 /* symbolelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983728BD657200BDD667 /* symbolelement.cpp */; };
 		7C8D986228BD657500BDD667 /* symbolelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983728BD657200BDD667 /* symbolelement.cpp */; };
-		7C8D986328BD657500BDD667 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7C8D983828BD657200BDD667 /* CMakeLists.txt */; };
 		7C8D986428BD657500BDD667 /* lunasvg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983A28BD657200BDD667 /* lunasvg.cpp */; };
 		7C8D986528BD657500BDD667 /* lunasvg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983A28BD657200BDD667 /* lunasvg.cpp */; };
 		7C8D986628BD657500BDD667 /* graphicselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983B28BD657200BDD667 /* graphicselement.cpp */; };
@@ -116,15 +116,12 @@
 		7C8D988128BD657500BDD667 /* svgelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985728BD657400BDD667 /* svgelement.cpp */; };
 		7C8D988228BD657500BDD667 /* useelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985828BD657400BDD667 /* useelement.cpp */; };
 		7C8D988328BD657500BDD667 /* useelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985828BD657400BDD667 /* useelement.cpp */; };
-		7C8D989928BD658400BDD667 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7C8D988628BD658300BDD667 /* CMakeLists.txt */; };
 		7C8D989A28BD658400BDD667 /* sw_ft_stroker.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988728BD658300BDD667 /* sw_ft_stroker.c */; };
 		7C8D989B28BD658400BDD667 /* sw_ft_stroker.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988728BD658300BDD667 /* sw_ft_stroker.c */; };
 		7C8D989C28BD658400BDD667 /* sw_ft_raster.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988A28BD658300BDD667 /* sw_ft_raster.c */; };
 		7C8D989D28BD658400BDD667 /* sw_ft_raster.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988A28BD658300BDD667 /* sw_ft_raster.c */; };
-		7C8D989E28BD658400BDD667 /* FTL.TXT in Resources */ = {isa = PBXBuildFile; fileRef = 7C8D988B28BD658300BDD667 /* FTL.TXT */; };
 		7C8D989F28BD658400BDD667 /* sw_ft_math.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988E28BD658300BDD667 /* sw_ft_math.c */; };
 		7C8D98A028BD658400BDD667 /* sw_ft_math.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988E28BD658300BDD667 /* sw_ft_math.c */; };
-		7C8D98A128BD658400BDD667 /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7C8D989028BD658300BDD667 /* CMakeLists.txt */; };
 		7C8D98A228BD658400BDD667 /* plutovg-dash.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989228BD658300BDD667 /* plutovg-dash.c */; };
 		7C8D98A328BD658400BDD667 /* plutovg-dash.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989228BD658300BDD667 /* plutovg-dash.c */; };
 		7C8D98A428BD658400BDD667 /* plutovg-paint.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989328BD658300BDD667 /* plutovg-paint.c */; };
@@ -140,7 +137,6 @@
 		7CA389722882F8C6005C7A91 /* ios_main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C4AD2882CE7500E47DB3 /* ios_main.mm */; };
 		7CA3897728835B5F005C7A91 /* nx_application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA3897428835AB8005C7A91 /* nx_application.cpp */; };
 		7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE592878F4E60091DEF9 /* UIWindow.cpp */; };
-		7CA3898628836343005C7A91 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 7CA3898528836343005C7A91 /* Fonts */; };
 		7CA960792871F8BF009E0953 /* GLFWVideoContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960762871F8BF009E0953 /* GLFWVideoContext.cpp */; };
 		7CA960B12871F993009E0953 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960882871F993009E0953 /* nanovg.c */; };
 		7CA960B22871F993009E0953 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9608A2871F993009E0953 /* glad.c */; };
@@ -304,6 +300,7 @@
 		7C709CAA28C0B3F9000A474F /* UIAction.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIAction.hpp; sourceTree = "<group>"; };
 		7C709CAE28C0BD15000A474F /* ControlTestViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ControlTestViewController.cpp; sourceTree = "<group>"; };
 		7C709CAF28C0BD15000A474F /* ControlTestViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ControlTestViewController.hpp; sourceTree = "<group>"; };
+		7C709CB328C1DC0C000A474F /* resource */ = {isa = PBXFileReference; lastKnownFileType = folder; path = resource; sourceTree = "<group>"; };
 		7C78EBCD2873748B0082D3AC /* UIBlurView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIBlurView.hpp; sourceTree = "<group>"; };
 		7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIBlurView.cpp; sourceTree = "<group>"; };
 		7C78EBD02873748B0082D3AC /* UIColor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UIColor.hpp; sourceTree = "<group>"; };
@@ -1154,6 +1151,7 @@
 		7CA960602871F7A2009E0953 = {
 			isa = PBXGroup;
 			children = (
+				7C709CB328C1DC0C000A474F /* resource */,
 				7CA9606B2871F7A2009E0953 /* NXKit */,
 				7CA9606A2871F7A2009E0953 /* Products */,
 				7C78EBE6287386070082D3AC /* Frameworks */,
@@ -1507,14 +1505,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7C8D989E28BD658400BDD667 /* FTL.TXT in Resources */,
+				7C709CB428C1DC23000A474F /* resource in Resources */,
 				7CA9C4792882ADD700E47DB3 /* LaunchScreen.storyboard in Resources */,
 				7CA9C4762882ADD700E47DB3 /* Assets.xcassets in Resources */,
-				7C8D989928BD658400BDD667 /* CMakeLists.txt in Resources */,
-				7C8D98A128BD658400BDD667 /* CMakeLists.txt in Resources */,
 				7CA9C4742882ADD600E47DB3 /* Main.storyboard in Resources */,
-				7CA3898628836343005C7A91 /* Fonts in Resources */,
-				7C8D986328BD657500BDD667 /* CMakeLists.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

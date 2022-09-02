@@ -42,7 +42,7 @@ BUILD		:=	build
 SOURCES		:=	NXKit
 DATA		:=	data
 INCLUDES	:=	NXKit
-ROMFS		:=	resources
+ROMFS		:=	resource
 
 #---------------------------------------------------------------------------------
 # options for code generation

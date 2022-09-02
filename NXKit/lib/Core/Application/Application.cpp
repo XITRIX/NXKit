@@ -162,24 +162,49 @@ void Application::setFocus(UIView* view) {
     }
 }
 
+int Application::getFps() {
+    static double counter = 0;
+    static double res = 0;
+    static double prevres = 0;
+    static double prevt = getCPUTimeUsec();
+    double t = getCPUTimeUsec();
+    double dt = t - prevt;
+    prevt = t;
+
+    res += dt;
+    counter++;
+
+    if (counter >= 60) {
+        prevres = res;
+        res = 0;
+        counter = 0;
+    }
+
+    int fps = 1 / (prevres / 1000000.0 / 60.0);
+    return fps;
+}
+
 void Application::render() {
     videoContext->beginFrame();
     videoContext->clear(nvgRGB(0, 0, 0));
 
-    nvgBeginFrame(videoContext->getNVGContext(), windowWidth, windowHeight, windowScale);
-    keyWindow->internalDraw(videoContext->getNVGContext());
-    //    nvgResetTransform(videoContext->getNVGContext()); // scale
+    nvgBeginFrame(getContext(), windowWidth, windowHeight, windowScale);
+    keyWindow->internalDraw(getContext());
 
-    nvgEndFrame(videoContext->getNVGContext());
+    renderFps();
+
+    nvgEndFrame(getContext());
     videoContext->endFrame();
 }
 
-void Application::flushContext() {
-//    nvgSave(this->videoContext->getNVGContext());
-    nvgEndFrame(this->videoContext->getNVGContext());
+void Application::renderFps() {
+    nvgFontSize(getContext(), 21);
+    nvgFillColor(getContext(), UIColor::black.raw());
+    nvgText(getContext(), 20, 20, ("FPS: " + std::to_string(getFps())).c_str(), nullptr);
+}
 
-//    nvgBeginFrame(videoContext->getNVGContext(), windowWidth, windowHeight, windowScale);
-    //    nvgScale(videoContext->getNVGContext(), windowScale, windowScale);
+void Application::flushContext() {
+    nvgEndFrame(getContext());
 }
 
 void Application::setVideoContext(VideoContext* videoContext) {

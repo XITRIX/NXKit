@@ -79,12 +79,13 @@ Point UIScrollView::getContentOffset() {
 }
 
 void UIScrollView::setContentOffset(Point offset, bool animated) {
+    if (!offset.valid()) return;
+
     if (getBounds().origin == offset) return;
 
     if (animated) {
         animate(0.1f, [this, offset]() {
             setContentOffset(offset, false);
-//            setBounds({ offset, getBounds().size });
         });
     } else {
         setBounds({ offset, getBounds().size });
@@ -103,6 +104,7 @@ void UIScrollView::updateScrollingIndicatior() {
 }
 
 void UIScrollView::setBounds(Rect bounds) {
+    if (!bounds.origin.valid()) return;
     UIView::setBounds(bounds);
 }
 

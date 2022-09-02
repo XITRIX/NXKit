@@ -340,12 +340,19 @@ std::deque<float> UIView::createAnimationContext() {
     return context;
 }
 
+#define IFNNULL(prop, val)  \
+{                           \
+    float v = val;          \
+    if (!isnan(v))          \
+        prop = v;           \
+}
+
 void UIView::applyAnimationContext(std::deque<float>* context) {
-    bounds.origin.x = pop(context);
-    bounds.origin.y = pop(context);
-    transformOrigin.x = pop(context);
-    transformOrigin.y = pop(context);
-    clickAlpha = pop(context);
+    IFNNULL(bounds.origin.x, pop(context))
+    IFNNULL(bounds.origin.y, pop(context))
+    IFNNULL(transformOrigin.x, pop(context))
+    IFNNULL(transformOrigin.y, pop(context))
+    IFNNULL(clickAlpha, pop(context))
 }
 
 void UIView::animate(float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {
