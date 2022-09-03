@@ -100,6 +100,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UITabBarController \
 			NXKit/lib/Core/UITableView \
 			NXKit/lib/Core/UITableViewCell \
+			NXKit/lib/Core/UITableViewDefaultCell \
 			NXKit/lib/Core/UITapGestureRecognizer \
 			NXKit/lib/Core/UITouch \
 			NXKit/lib/Core/UIView \

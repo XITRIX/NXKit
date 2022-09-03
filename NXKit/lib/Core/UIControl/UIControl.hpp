@@ -26,7 +26,9 @@ public:
     std::function<void(UIControlTouchEvent)> onEvent = [](auto){};
 
     UIControl();
+    ~UIControl();
     bool canBecomeFocused() override;
+    bool press(ControllerButton button) override;
 
     virtual bool isEnabled();
     bool isSelected();
@@ -38,11 +40,12 @@ protected:
     void setHighlighted(bool highlighted);
 
 private:
-    bool enabled = false;
+    bool enabled = true;
     bool selected = false;
     bool highlighted = false;
 
     UIColor backgroundStorage;
+    NotificationEvent<>::Subscription actionSub;
 
     // MARK: - Gesture recognizer
     class GestureRecognizer: public UIGestureRecognizer {

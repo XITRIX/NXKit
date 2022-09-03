@@ -71,6 +71,7 @@ bool Application::mainLoop() {
 
     UIEvent* event = new UIEvent();
     event->allTouches = InputManager::shared()->getTouches();
+    if (event->allTouches.size() > 0) setInputType(ApplicationInputType::TOUCH);
     keyWindow->sendEvent(event);
     delete event;
 
@@ -101,6 +102,11 @@ void Application::input() {
             anyButtonPressed = true;
             repeating        = (repeatingButtonTimer > BUTTON_REPEAT_DELAY && repeatingButtonTimer % BUTTON_REPEAT_CADENCY == 0 && !repeatingLocked);
 
+            if (inputType != ApplicationInputType::GAMEPAD) {
+                setInputType(ApplicationInputType::GAMEPAD);
+                return;
+            }
+
             if (manager->getButtonDown((ControllerButton) i) || repeating) {
                 repeatingLocked = !onControllerButtonPressed((ControllerButton) i, repeating);
             }
@@ -120,7 +126,16 @@ void Application::input() {
     }
 }
 
+void Application::setInputType(ApplicationInputType inputType) {
+    this->inputType = inputType;
+//    printf("Input type changed %d\n", inputType);
+}
+
 bool Application::onControllerButtonPressed(ControllerButton button, bool repeating) {
+    if (focus->press(button)) {
+        return false;
+    }
+
     auto newFocus = focus;
     NavigationDirection direction = NavigationDirection::UP;
     if (button == BUTTON_NAV_UP) {
@@ -145,9 +160,10 @@ bool Application::onControllerButtonPressed(ControllerButton button, bool repeat
         return true;
     } else if (!newFocus && focus) {
         focus->shakeHighlight(direction);
+        return false;
     }
 
-    return false;
+    return true;
 }
 NVGcontext* Application::getContext() {
     return videoContext->getNVGContext();

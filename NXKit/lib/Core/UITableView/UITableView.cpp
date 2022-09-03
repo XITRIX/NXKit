@@ -7,12 +7,21 @@
 
 //#include <Core/Utils/Tools/Tools.hpp>
 #include <Core/UITableView/UITableView.hpp>
+#include <Core/Application/Application.hpp>
 
 namespace NXKit {
 
 UITableView::UITableView() {
     UIScrollView::delegate = delegate;
     setPaddings(32, 40, 47, 80);
+}
+
+UITableView::~UITableView() {
+    for (auto it = cellsInQueue.begin(); it != cellsInQueue.end(); it++) {
+        for (auto cell: it->second) {
+            delete cell;
+        }
+    }
 }
 
 void UITableView::setPaddings(float top, float left, float bottom, float right) {
@@ -76,6 +85,14 @@ UIView* UITableView::getNextFocus(NavigationDirection direction) {
     return UIScrollView::getNextFocus(direction);
 }
 
+void UITableView::subviewFocusDidChange(UIView* focusedView, UIView* notifiedView) {
+    UIScrollView::subviewFocusDidChange(focusedView, notifiedView);
+    auto cell = dynamic_cast<UITableViewCell*>(notifiedView);
+    if (cell && cell->tableView == this) {
+        selectedIndexPath = cell->indexPath;
+    }
+}
+
 void UITableView::addSubview(UIView *view) { }
 
 Size UITableView::getContentSize() {
@@ -98,22 +115,25 @@ void UITableView::registerView(std::string reuseId, std::function<UITableViewCel
 }
 
 UITableViewCell* UITableView::dequeueReusableCell(std::string reuseId, IndexPath indexPath) {
+    // Dequeue existing Cell
     if (cellsInQueue[reuseId].size() > 0) {
         auto cell = pop(&cellsInQueue[reuseId]);
         cell->indexPath = indexPath;
-        cell->onEvent = [this, cell](UIControlTouchEvent event) {
-            if (event == UIControlTouchEvent::touchUpInside) {
-                if (this->delegate)
-                    this->delegate->tableViewDidSelectRowAtIndexPath(this, cell->indexPath);
-            }
-        };
         return cell;
     }
 
+    // Instantiate new Cell
     auto cell = allocationMap[reuseId]();
     cell->reuseIdentifier = reuseId;
     cell->indexPath = indexPath;
     cell->tableView = this;
+    cell->onEvent = [this, cell](UIControlTouchEvent event) {
+        if (event == UIControlTouchEvent::touchUpInside) {
+            if (this->delegate)
+                this->delegate->tableViewDidSelectRowAtIndexPath(this, cell->indexPath);
+            Application::shared()->setFocus(cell);
+        }
+    };
     return cell;
 }
 

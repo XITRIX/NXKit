@@ -277,6 +277,8 @@ void GLFWInputManager::updateUniversalGamepad() {
     _univButtons[BUTTON_NAV_DOWN] |= keys[BRLS_KBD_KEY_DOWN];
     _univButtons[BUTTON_NAV_RIGHT] |= keys[BRLS_KBD_KEY_RIGHT];
     _univButtons[BUTTON_NAV_LEFT] |= keys[BRLS_KBD_KEY_LEFT];
+    _univButtons[BUTTON_A] |= keys[BRLS_KBD_KEY_ENTER];
+    _univButtons[BUTTON_B] |= keys[BRLS_KBD_KEY_ESCAPE];
 
     for (int button = 0; button < _BUTTON_MAX; button++) {
         if (univButtons[button] != _univButtons[button]) {

@@ -18,6 +18,11 @@ namespace NXKit {
 class UIView;
 class UIWindow;
 
+enum class ApplicationInputType {
+    GAMEPAD,
+    TOUCH
+};
+
 class Application {
 public:
     static Application* shared();
@@ -41,6 +46,7 @@ public:
     UIView* getFocus();
     void setFocus(UIView* view);
 
+    ApplicationInputType getInputType() { return inputType; }
     UIAppDelegate* getDelegate() { return delegate; }
 private:
     inline static Application* _shared;
@@ -49,6 +55,9 @@ private:
     UIAppDelegate* delegate = nullptr;
     UIWindow* keyWindow = nullptr;
     UIView* focus = nullptr;
+
+    void setInputType(ApplicationInputType inputType);
+    ApplicationInputType inputType = ApplicationInputType::GAMEPAD;
 
     unsigned windowWidth, windowHeight;
     float windowScale;

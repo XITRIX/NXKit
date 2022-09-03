@@ -27,6 +27,8 @@ public:
     virtual void touchesEnded(std::vector<UITouch*> touches, UIEvent* withEvent);
     virtual void touchesCancelled(std::vector<UITouch*> touches, UIEvent* withEvent);
 
+    virtual bool press(ControllerButton button);
+
     std::map<ControllerButton, UIAction> getActions();
     void addAction(ControllerButton button, UIAction action);
     void removeAction(ControllerButton button);

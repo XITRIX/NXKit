@@ -70,16 +70,12 @@ UITabBarItemView::~UITabBarItemView() {
 //    delete controller;
 }
 
-bool UITabBarItemView::canBecomeFocused() {
-    return true;
+bool UITabBarItemView::isEnabled() {
+    return !isSelected();
 }
 
 void UITabBarItemView::setTitle(std::string text) {
     label->setText(text);
-}
-
-bool UITabBarItemView::isSelected() {
-    return selected;
 }
 
 void UITabBarItemView::becomeFocused() {
@@ -87,7 +83,7 @@ void UITabBarItemView::becomeFocused() {
 }
 
 void UITabBarItemView::setSelected(bool selected) {
-    this->selected = selected;
+    UIControl::setSelected(selected);
     if (selected) {
         label->textColor = UIColor(49, 79, 235);
         selectionBar->backgroundColor = UIColor(49, 79, 235);
@@ -97,10 +93,17 @@ void UITabBarItemView::setSelected(bool selected) {
     }
 }
 
-UITabBarController::UITabBarController() {}
+UITabBarController::UITabBarController() {
+    addAction(BUTTON_B, UIAction([this]() {
+        Application::shared()->setFocus(tabs->getDefaultFocus());
+    }));
+}
+
 UITabBarController::UITabBarController(std::vector<UIViewController*> controllers):
-    viewControllers(controllers)
-{}
+    UITabBarController()
+{
+    viewControllers = controllers;
+}
 
 UITabBarController::~UITabBarController() {
     for (auto vc: viewControllers) {
@@ -183,6 +186,9 @@ void UITabBarController::reloadViewForViewControllers() {
             item->setTitle(controller->getTitle());
             item->tag = "Num" + std::to_string(i);
             item->setSelected(i == selectedIndex);
+            item->addAction(BUTTON_A, UIAction([this]() {
+                Application::shared()->setFocus(getView()->getNextFocus(NavigationDirection::RIGHT));
+            }));
             tabViews.push_back(item);
             tabs->addSubview(item);
         } else {

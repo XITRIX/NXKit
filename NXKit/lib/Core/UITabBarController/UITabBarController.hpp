@@ -27,12 +27,10 @@ public:
     virtual ~UITabBarItemView();
 
     void setTitle(std::string text);
-
-    bool isSelected();
     void setSelected(bool selected);
 
     void becomeFocused() override;
-    bool canBecomeFocused() override;
+    bool isEnabled() override;
 private:
     friend class UITabBarController;
     UILabel* label = nullptr;
@@ -40,7 +38,7 @@ private:
     UITabBarController* parent = nullptr;
     UIViewController* controller = nullptr;
 
-    bool selected = false;
+//    bool selected = false;
 };
 
 class UITabBarController: public UIViewController {

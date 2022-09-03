@@ -188,7 +188,7 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     nvgRestore(vgContext);
 
     // Borders
-    if (!isFocused() || !highlightOnFocus) {
+    if (!shouldDrawHighlight()) {
         if (borderThickness > 0) {
             float offset = borderThickness / 2;
             Rect borderRect = Rect(offset, offset, getFrame().size.width - offset * 2, getFrame().size.height - offset * 2);
@@ -229,8 +229,6 @@ void UIView::internalDraw(NVGcontext* vgContext) {
         }
     }
 
-//    drawHighlight(vgContext, false);
-
     nvgRestore(vgContext);
 }
 
@@ -249,8 +247,12 @@ void UIView::shakeHighlight(NavigationDirection direction) {
     this->highlightShakeAmplitude = std::rand() % 15 + 10;
 }
 
+bool UIView::shouldDrawHighlight() {
+    return !(!isFocused() || !highlightOnFocus || Application::shared()->getInputType() == ApplicationInputType::TOUCH);
+}
+
 void UIView::drawHighlight(NVGcontext* vg, bool background) {
-    if (!isFocused() || !highlightOnFocus) return;
+    if (!shouldDrawHighlight()) return;
 
     nvgSave(vg);
     nvgResetScissor(vg);

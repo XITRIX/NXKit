@@ -164,6 +164,7 @@ private:
     void drawHighlight(NVGcontext* vg, bool background);
 
     void shakeHighlight(NavigationDirection direction);
+    bool shouldDrawHighlight();
 
     AnimationContext animationContext;
 };

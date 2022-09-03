@@ -29,6 +29,17 @@ void UIResponder::touchesCancelled(std::vector<UITouch*> touches, UIEvent* withE
     getNext()->touchesCancelled(touches, withEvent);
 }
 
+bool UIResponder::press(ControllerButton button) {
+    if (getActions().count(button)) {
+        getActions()[button].action();
+        return true;
+    } else if (getNext()) {
+        return getNext()->press(button);
+    } else {
+        return false;
+    }
+}
+
 std::map<ControllerButton, UIAction> UIResponder::getActions() {
     return actions;
 }

@@ -37,9 +37,11 @@ public:
     UITableViewDataSource* dataSource = nullptr;
 
     UITableView();
+    ~UITableView();
 
     UIView* getDefaultFocus() override;
     UIView* getNextFocus(NavigationDirection direction) override;
+    void subviewFocusDidChange(UIView* focusedView, UIView* notifiedView) override;
 
     void addSubview(UIView *view) override;
     Size getContentSize() override;
