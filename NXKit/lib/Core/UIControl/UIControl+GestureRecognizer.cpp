@@ -15,6 +15,10 @@ UIControl::GestureRecognizer::GestureRecognizer(UIControl* control):
 
 void UIControl::GestureRecognizer::touchesBegan(std::vector<UITouch*> touches, UIEvent* event) {
     UIGestureRecognizer::touchesBegan(touches, event);
+    if (!control->isEnabled()) {
+        setState(UIGestureRecognizerState::FAILED);
+        return;
+    }
     if (!trackingTouch) {
         trackingTouch = touches[0];
         control->setHighlighted(true);

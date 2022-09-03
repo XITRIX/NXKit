@@ -165,6 +165,27 @@ int IndexPath::item() const {
     return a[0];
 }
 
+IndexPath IndexPath::prev() const {
+    IndexPath res = *this;
+
+    if (res.row() <= 0)
+        res.a[1]--;
+    else
+        res.a[0]--;
+
+    return res;
+}
+
+IndexPath IndexPath::next(int rowLimit) const {
+    IndexPath res = *this;
+
+    if (res.row() >= rowLimit - 1)
+        res.a[1]++;
+    else
+        res.a[0]++;
+    return res;
+}
+
 bool IndexPath::operator<(const IndexPath &o) const {
     if (section() == o.section()) {
         return row() < o.row();

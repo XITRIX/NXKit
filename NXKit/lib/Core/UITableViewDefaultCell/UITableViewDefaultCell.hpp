@@ -20,7 +20,7 @@ public:
     void setText(std::string text);
     void setImage(UIImage* image);
 
-    bool canBecomeFocused() override;
+//    bool canBecomeFocused() override;
 private:
     UILabel* label;
     UIImageView* imageView;

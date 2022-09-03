@@ -29,6 +29,53 @@ void UITableView::setContentOffset(Point offset, bool animated) {
         dequeCellsForCurrentContentOffset();
 }
 
+UIView* UITableView::getDefaultFocus() {
+    if (selectedIndexPath.section() != -1 && cellsInIndexPaths[selectedIndexPath.section()][selectedIndexPath.row()] != nullptr)
+        return cellsInIndexPaths[selectedIndexPath.section()][selectedIndexPath.row()];
+    return nullptr;
+}
+
+UIView* UITableView::getNextFocus(NavigationDirection direction) {
+//    if (currentFocus >= getSubviews().size()) currentFocus = (int) getSubviews().size() - 1;
+
+    if ((direction == NavigationDirection::LEFT || direction == NavigationDirection::RIGHT))
+        return UIView::getNextFocus(direction);
+
+    if (direction == NavigationDirection::UP) {
+        IndexPath newFocus = selectedIndexPath;
+        UIView* newFocusView = nullptr;
+
+        do {
+            newFocus = newFocus.prev();
+            if (newFocus.section() < 0) return UIScrollView::getNextFocus(direction);
+            newFocusView = cellsInIndexPaths[newFocus.section()][newFocus.row()];
+        } while (!newFocusView || !dataSource->tableViewCellCanBeFocusedAt(this, newFocus));
+
+        if (newFocusView && newFocusView->canBecomeFocused()) {
+            selectedIndexPath = newFocus;
+            return newFocusView;
+        }
+    }
+
+    if (direction == NavigationDirection::DOWN) {
+        IndexPath newFocus = selectedIndexPath;
+        UIView* newFocusView = nullptr;
+
+        do {
+            newFocus = newFocus.next(dataSource->tableViewNumberOfRowsInSection(this, newFocus.section()));
+            if (newFocus.section() >= dataSource->numberOfSectionsIn(this)) return UIScrollView::getNextFocus(direction);
+            newFocusView = cellsInIndexPaths[newFocus.section()][newFocus.row()];
+        } while (!newFocusView || !dataSource->tableViewCellCanBeFocusedAt(this, newFocus));
+
+        if (newFocusView && newFocusView->canBecomeFocused()) {
+            selectedIndexPath = newFocus;
+            return newFocusView;
+        }
+    }
+
+    return UIScrollView::getNextFocus(direction);
+}
+
 void UITableView::addSubview(UIView *view) { }
 
 Size UITableView::getContentSize() {
@@ -54,12 +101,19 @@ UITableViewCell* UITableView::dequeueReusableCell(std::string reuseId, IndexPath
     if (cellsInQueue[reuseId].size() > 0) {
         auto cell = pop(&cellsInQueue[reuseId]);
         cell->indexPath = indexPath;
+        cell->onEvent = [this, cell](UIControlTouchEvent event) {
+            if (event == UIControlTouchEvent::touchUpInside) {
+                if (this->delegate)
+                    this->delegate->tableViewDidSelectRowAtIndexPath(this, cell->indexPath);
+            }
+        };
         return cell;
     }
 
     auto cell = allocationMap[reuseId]();
     cell->reuseIdentifier = reuseId;
     cell->indexPath = indexPath;
+    cell->tableView = this;
     return cell;
 }
 
@@ -83,7 +137,7 @@ void UITableView::recalculateEstimatedHeights() {
         int rows = dataSource->tableViewNumberOfRowsInSection(this, section);
         for (int row = 0; row < rows; row++) {
             IndexPath indexPath = IndexPath(row, section);
-            if (selectedIndexPath.section() == -1 && delegate && dataSource->tableViewCellCanBeFocusedAt(this, indexPath))
+            if (selectedIndexPath.section() == -1 && dataSource && dataSource->tableViewCellCanBeFocusedAt(this, indexPath))
                 selectedIndexPath = indexPath;
             
             cellsHeights[section].push_back(isnan(rowHeight) ? estimatedRowHeight : rowHeight);
@@ -115,7 +169,6 @@ void UITableView::dequeCellsForCurrentContentOffset() {
             if (currentY >= bounds.minY() && currentY <= bounds.maxY()) {
                 IndexPath indexPath = IndexPath(row, section);
                 if (cellsInIndexPaths[indexPath.section()][indexPath.row()] == nullptr) {
-                    
                     auto cell = dataSource->tableViewCellForRowAt(this, indexPath);
                     if (row == 0) cell->setBorderTop(1);
                     else { cell->setBorderTop(0); }

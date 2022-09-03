@@ -12,12 +12,18 @@
 
 namespace NXKit {
 
+class UITableView;
 class UITableViewCell: public UIControl {
 public:
     UITableViewCell() {}
+
+    bool isEnabled() override;
+//    bool canBecomeFocused() override;
+
     std::string getReuseIdentifier() { return reuseIdentifier; }
 private:
     friend class UITableView;
+    UITableView* tableView;
     std::string reuseIdentifier;
     IndexPath indexPath;
 };

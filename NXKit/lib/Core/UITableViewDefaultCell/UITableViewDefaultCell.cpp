@@ -45,9 +45,9 @@ void UITableViewDefaultCell::setImage(UIImage* image) {
     imageView->setImage(image);
 }
 
-bool UITableViewDefaultCell::canBecomeFocused() {
-    return true;
-}
+//bool UITableViewDefaultCell::canBecomeFocused() {
+//    return true;
+//}
 
 
 }

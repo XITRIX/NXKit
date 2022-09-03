@@ -90,21 +90,19 @@ void Application::input() {
 
     bool anyButtonPressed           = false;
     bool repeating                  = false;
+    static bool repeatingLocked            = false;
     static Time buttonPressTime     = 0;
     static int repeatingButtonTimer = 0;
-
-//    controllerState.buttons[BUTTON_A]  |= inputManager->getKeyboardKeyState(BRLS_KBD_KEY_ENTER);
-//    controllerState.buttons[BUTTON_B]  |= inputManager->getKeyboardKeyState(BRLS_KBD_KEY_ESCAPE);
 
     for (int i = 0; i < _BUTTON_MAX; i++)
     {
         if (manager->getButton((ControllerButton)i))
         {
             anyButtonPressed = true;
-            repeating        = (repeatingButtonTimer > BUTTON_REPEAT_DELAY && repeatingButtonTimer % BUTTON_REPEAT_CADENCY == 0);
+            repeating        = (repeatingButtonTimer > BUTTON_REPEAT_DELAY && repeatingButtonTimer % BUTTON_REPEAT_CADENCY == 0 && !repeatingLocked);
 
             if (manager->getButtonDown((ControllerButton) i) || repeating) {
-                onControllerButtonPressed((ControllerButton) i, repeating);
+                repeatingLocked = !onControllerButtonPressed((ControllerButton) i, repeating);
             }
         }
 
@@ -117,26 +115,39 @@ void Application::input() {
         buttonPressTime = getCPUTimeUsec();
         repeatingButtonTimer++; // Increased once every ~1ms
     }
+    if (!anyButtonPressed) {
+        repeatingLocked = false;
+    }
 }
 
-void Application::onControllerButtonPressed(ControllerButton button, bool repeating) {
+bool Application::onControllerButtonPressed(ControllerButton button, bool repeating) {
     auto newFocus = focus;
+    NavigationDirection direction = NavigationDirection::UP;
     if (button == BUTTON_NAV_UP) {
         newFocus = focus->getNextFocus(NavigationDirection::UP);
+        direction = NavigationDirection::UP;
     }
     if (button == BUTTON_NAV_DOWN) {
         newFocus = focus->getNextFocus(NavigationDirection::DOWN);
+        direction = NavigationDirection::DOWN;
     }
     if (button == BUTTON_NAV_LEFT) {
         newFocus = focus->getNextFocus(NavigationDirection::LEFT);
+        direction = NavigationDirection::LEFT;
     }
     if (button == BUTTON_NAV_RIGHT) {
         newFocus = focus->getNextFocus(NavigationDirection::RIGHT);
+        direction = NavigationDirection::RIGHT;
     }
 
     if (newFocus && newFocus != focus) {
         setFocus(newFocus);
+        return true;
+    } else if (!newFocus && focus) {
+        focus->shakeHighlight(direction);
     }
+
+    return false;
 }
 NVGcontext* Application::getContext() {
     return videoContext->getNVGContext();

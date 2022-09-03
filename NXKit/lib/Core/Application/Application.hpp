@@ -56,7 +56,7 @@ private:
 
     int getFps();
     bool mainLoopIteration();
-    void onControllerButtonPressed(ControllerButton button, bool repeating);
+    bool onControllerButtonPressed(ControllerButton button, bool repeating);
     void input();
     void render();
     void renderFps();

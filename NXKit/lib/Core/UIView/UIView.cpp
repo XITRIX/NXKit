@@ -234,6 +234,21 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     nvgRestore(vgContext);
 }
 
+static int shakeAnimation(float t, float a) // a = amplitude
+{
+    // Damped sine wave
+    float w = 0.8f; // period
+    float c = 0.35f; // damp factor
+    return roundf(a * exp(-(c * t)) * sin(w * t));
+}
+
+void UIView::shakeHighlight(NavigationDirection direction) {
+    this->highlightShaking        = true;
+    this->highlightShakeStart     = getCPUTimeUsec() / 1000;
+    this->highlightShakeDirection = direction;
+    this->highlightShakeAmplitude = std::rand() % 15 + 10;
+}
+
 void UIView::drawHighlight(NVGcontext* vg, bool background) {
     if (!isFocused() || !highlightOnFocus) return;
 
@@ -246,15 +261,45 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
 
     auto frame = getFrame();
 
+    float x = padding - strokeWidth / 2;
+    float y = padding - strokeWidth / 2;
     float width  = frame.width() + padding * 2 + strokeWidth;
     float height = frame.height() + padding * 2 + strokeWidth;
+
+
+    // Shake animation
+    if (this->highlightShaking)
+    {
+        Time curTime = getCPUTimeUsec() / 1000;
+        Time t       = (curTime - highlightShakeStart) / 10;
+
+        if (t >= 150000)
+        {
+            this->highlightShaking = false;
+        }
+        else
+        {
+            switch (this->highlightShakeDirection)
+            {
+                case NavigationDirection::RIGHT:
+                    x += shakeAnimation(t, this->highlightShakeAmplitude);
+                    break;
+                case NavigationDirection::LEFT:
+                    x -= shakeAnimation(t, this->highlightShakeAmplitude);
+                    break;
+                case NavigationDirection::DOWN:
+                    y += shakeAnimation(t, this->highlightShakeAmplitude);
+                    break;
+                case NavigationDirection::UP:
+                    y -= shakeAnimation(t, this->highlightShakeAmplitude);
+                    break;
+            }
+        }
+    }
 
     // Draw
     if (background)
     {
-        float x = padding - strokeWidth / 2;
-        float y = padding - strokeWidth / 2;
-
         // Background
         UIColor highlightBackgroundColor = UIColor(252, 255, 248);
         nvgFillColor(vg, highlightBackgroundColor.raw());
@@ -264,8 +309,8 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
     }
     else
     {
-        float x = frame.minX() - padding - strokeWidth / 2;
-        float y = frame.minY() - padding - strokeWidth / 2;
+        x += frame.minX();
+        y += frame.minY();
 
         float shadowOffset = 10;
 

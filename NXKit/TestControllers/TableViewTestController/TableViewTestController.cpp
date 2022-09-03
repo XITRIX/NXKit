@@ -36,3 +36,8 @@ UITableViewCell* TableViewTestController::tableViewCellForRowAt(UITableView* tab
     item->borderColor = UIColor::separator;
     return item;
 }
+
+int TableViewTestController::tableViewCellCanBeFocusedAt(UITableView *tableView, IndexPath indexPath) {
+    if (indexPath.row() == 1) return false;
+    return true;
+}

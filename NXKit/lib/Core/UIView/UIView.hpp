@@ -153,9 +153,17 @@ private:
     bool needsLayout = true;
     Rect bounds;
 
+    // highlight shaking
+    bool highlightShaking = false;
+    Time highlightShakeStart;
+    NavigationDirection highlightShakeDirection;
+    float highlightShakeAmplitude;
+
     void internalDraw(NVGcontext* vgContext);
     void setSuperview(UIView* view);
     void drawHighlight(NVGcontext* vg, bool background);
+
+    void shakeHighlight(NavigationDirection direction);
 
     AnimationContext animationContext;
 };

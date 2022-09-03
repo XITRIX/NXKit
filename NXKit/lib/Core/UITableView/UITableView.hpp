@@ -24,7 +24,8 @@ public:
 };
 
 class UITableViewDelegate: public UIScrollViewDelegate {
-
+public:
+    virtual void tableViewDidSelectRowAtIndexPath(UITableView* tableView, IndexPath indexPath) {}
 };
 
 class UITableView: public UIScrollView {
@@ -36,6 +37,9 @@ public:
     UITableViewDataSource* dataSource = nullptr;
 
     UITableView();
+
+    UIView* getDefaultFocus() override;
+    UIView* getNextFocus(NavigationDirection direction) override;
 
     void addSubview(UIView *view) override;
     Size getContentSize() override;

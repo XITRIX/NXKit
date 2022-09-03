@@ -82,6 +82,9 @@ struct IndexPath {
     int section() const;
     int item() const;
 
+    IndexPath prev() const;
+    IndexPath next(int rowLimit) const;
+
     bool operator<(const IndexPath &o) const;
     bool operator==(const IndexPath &o) const;
 private:

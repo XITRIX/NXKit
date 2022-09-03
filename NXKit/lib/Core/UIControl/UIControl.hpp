@@ -28,7 +28,7 @@ public:
     UIControl();
     bool canBecomeFocused() override;
 
-    bool isEnabled();
+    virtual bool isEnabled();
     bool isSelected();
     bool isHighlighted();
 
