@@ -33,7 +33,7 @@ public:
 
     UIScrollView();
     Point getContentOffset();
-    void setContentOffset(Point offset, bool animated = true);
+    virtual void setContentOffset(Point offset, bool animated = true);
 
     void setBounds(Rect bounds) override;
     void addSubview(UIView *view) override;
@@ -47,7 +47,7 @@ public:
     void setFixWidth(bool fix);
     void setFixHeight(bool fix);
 
-    Size getContentSize();
+    virtual Size getContentSize();
 
 private:
     UIPanGestureRecognizer* panGestureRecognizer = new UIPanGestureRecognizer();

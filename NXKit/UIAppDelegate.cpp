@@ -10,6 +10,7 @@
 #include "TouchTestViewController.hpp"
 #include "AnimationTestViewController.hpp"
 #include "ListViewController.hpp"
+#include "TableViewTestController.hpp"
 #include "ControlTestViewController.hpp"
 
 void UIAppDelegate::applicationDidFinishLaunching() {
@@ -17,13 +18,14 @@ void UIAppDelegate::applicationDidFinishLaunching() {
     MyViewController* rootVC = new MyViewController();
     ListViewController* listVC = new ListViewController();
     TouchTestViewController* touchVC = new TouchTestViewController();
+    TableViewTestController* tableView = new TableViewTestController();
     ControlTestViewController* controlVC = new ControlTestViewController();
     AnimationTestViewController* animVC = new AnimationTestViewController();
 
     printf("Launching app...\n");
 
     UIWindow* window = new UIWindow();
-    UITabBarController* tabsVC = new UITabBarController({listVC, controlVC, animVC, nullptr, rootVC, touchVC});
+    UITabBarController* tabsVC = new UITabBarController({tableView, listVC, controlVC, animVC, nullptr, rootVC, touchVC});
     UINavigationController* vc = new UINavigationController(tabsVC);
     window->setRootViewController(vc);
     window->makeKeyAndVisible();

@@ -147,4 +147,33 @@ bool Rect::valid() {
     return this->origin.valid() && this->size.valid();
 }
 
+// MARK: - INDEX PATH -
+IndexPath::IndexPath(int row, int section) {
+    a[0] = row;
+    a[1] = section;
+}
+
+int IndexPath::row() const {
+    return a[0];
+}
+
+int IndexPath::section() const {
+    return a[1];
+}
+
+int IndexPath::item() const {
+    return a[0];
+}
+
+bool IndexPath::operator<(const IndexPath &o) const {
+    if (section() == o.section()) {
+        return row() < o.row();
+    }
+    return section() < o.section();
+}
+
+bool IndexPath::operator==(const IndexPath &o) const {
+    return section() == o.section() && row() == o.row();
+}
+
 }

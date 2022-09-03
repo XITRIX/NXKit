@@ -74,4 +74,18 @@ struct Rect {
     bool valid();
 };
 
+struct IndexPath {
+    IndexPath(int row, int section);
+    IndexPath(): IndexPath(0, 0) {}
+
+    int row() const;
+    int section() const;
+    int item() const;
+
+    bool operator<(const IndexPath &o) const;
+    bool operator==(const IndexPath &o) const;
+private:
+    int a[2];
+};
+
 }

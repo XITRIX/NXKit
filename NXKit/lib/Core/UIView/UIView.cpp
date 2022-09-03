@@ -621,7 +621,7 @@ float UIView::getShrink() {
     return YGNodeStyleGetFlexShrink(this->ygNode);
 }
 
-void UIView::setMargins(float top, float right, float bottom, float left) {
+void UIView::setMargins(float top, float left, float bottom, float right) {
     setMarginTop(top);
     setMarginRight(right);
     setMarginBottom(bottom);
@@ -630,6 +630,10 @@ void UIView::setMargins(float top, float right, float bottom, float left) {
 
 void UIView::setMargins(float margins) {
     setMargins(margins, margins, margins, margins);
+}
+
+void UIView::setMargins(UIEdgeInsets margins) {
+    setMargins(margins.top, margins.right, margins.bottom, margins.left);
 }
 
 void UIView::setMarginTop(float top) {
@@ -666,6 +670,13 @@ void UIView::setMarginLeft(float left) {
         YGNodeStyleSetMargin(this->ygNode, YGEdgeLeft, left);
 
     this->setNeedsLayout();
+}
+
+UIEdgeInsets UIView::getMargins() {
+    return UIEdgeInsets(YGNodeLayoutGetMargin(ygNode, YGEdgeTop),
+                        YGNodeLayoutGetMargin(ygNode, YGEdgeLeft),
+                        YGNodeLayoutGetMargin(ygNode, YGEdgeBottom),
+                        YGNodeLayoutGetMargin(ygNode, YGEdgeRight));
 }
 
 void UIView::setBorderTop(float top) {

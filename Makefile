@@ -50,6 +50,7 @@ ROMFS		:=	resource
 INCLUDES := $(INCLUDES) \
 			NXKit/TestControllers/ViewController \
 			NXKit/TestControllers/ListViewController \
+			NXKit/TestControllers/TableViewTestController \
 			NXKit/TestControllers/AnimationTestViewController \
 			NXKit/TestControllers/ControlTestViewController \
 			NXKit/TestControllers/TouchTestViewController
@@ -57,6 +58,7 @@ INCLUDES := $(INCLUDES) \
 SOURCES  := $(SOURCES) \
 			NXKit/TestControllers/ViewController \
 			NXKit/TestControllers/ListViewController \
+			NXKit/TestControllers/TableViewTestController \
 			NXKit/TestControllers/AnimationTestViewController \
 			NXKit/TestControllers/ControlTestViewController \
 			NXKit/TestControllers/TouchTestViewController
@@ -96,6 +98,8 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UIScrollView \
 			NXKit/lib/Core/UIStackView \
 			NXKit/lib/Core/UITabBarController \
+			NXKit/lib/Core/UITableView \
+			NXKit/lib/Core/UITableViewCell \
 			NXKit/lib/Core/UITapGestureRecognizer \
 			NXKit/lib/Core/UITouch \
 			NXKit/lib/Core/UIView \

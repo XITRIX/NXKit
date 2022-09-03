@@ -111,8 +111,10 @@ public:
     void setPercentHeight(float height);
 
     // Margins
-    void setMargins(float top, float right, float bottom, float left);
+    void setMargins(UIEdgeInsets margins);
+    void setMargins(float top, float left, float bottom, float right);
     void setMargins(float margins);
+    UIEdgeInsets getMargins();
 
     void setMarginTop(float top);
     void setMarginRight(float right);
@@ -142,6 +144,7 @@ protected:
 private:
     friend class Application;
     friend class UIViewController;
+    friend class UITableView;
 
     std::vector<UIGestureRecognizer*> gestureRecognizers;
     UIViewController* controller = nullptr;

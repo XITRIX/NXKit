@@ -106,6 +106,7 @@ void UIScrollView::updateScrollingIndicatior() {
 void UIScrollView::setBounds(Rect bounds) {
     if (!bounds.origin.valid()) return;
     UIView::setBounds(bounds);
+    if (delegate) delegate->scrollViewDidScroll(this);
 }
 
 std::deque<float> UIScrollView::createAnimationContext() {
@@ -257,12 +258,13 @@ Rect UIScrollView::getVisibleOffsetBounds() {
 }
 
 Point UIScrollView::getContentOffsetInBounds(Point offset) {
+    Size contentSize = getContentSize();
     Rect offsetBounds = getContentOffsetBounds();
     Rect visibleBounds = getVisibleBounds();
 
-    if (offset.x < offsetBounds.minX() || getContentSize().width < visibleBounds.width()) offset.x = offsetBounds.minX();
+    if (offset.x < offsetBounds.minX() || contentSize.width < visibleBounds.width()) offset.x = offsetBounds.minX();
     else if (offset.x > offsetBounds.maxX()) offset.x = offsetBounds.maxX();
-    if (offset.y < offsetBounds.minY() || getContentSize().height < visibleBounds.height()) offset.y = offsetBounds.minY();
+    if (offset.y < offsetBounds.minY() || contentSize.height < visibleBounds.height()) offset.y = offsetBounds.minY();
     else if (offset.y > offsetBounds.maxY()) offset.y = offsetBounds.maxY();
 
     return offset;

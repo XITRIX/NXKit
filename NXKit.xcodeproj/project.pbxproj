@@ -186,6 +186,14 @@
 		7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960882871F993009E0953 /* nanovg.c */; };
 		7CA9C4A82882C84E00E47DB3 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9608A2871F993009E0953 /* glad.c */; };
 		7CA9C4B62882D31900E47DB3 /* ios_video.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C4A92882CA4800E47DB3 /* ios_video.cpp */; };
+		7CCDCDB228C2730A00EFBFCA /* UITableView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB028C2730A00EFBFCA /* UITableView.cpp */; };
+		7CCDCDB328C2730A00EFBFCA /* UITableView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB028C2730A00EFBFCA /* UITableView.cpp */; };
+		7CCDCDB728C2A48300EFBFCA /* TableViewTestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB528C2A48300EFBFCA /* TableViewTestController.cpp */; };
+		7CCDCDB828C2A48300EFBFCA /* TableViewTestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB528C2A48300EFBFCA /* TableViewTestController.cpp */; };
+		7CCDCDBC28C376A500EFBFCA /* UITableViewCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBA28C376A500EFBFCA /* UITableViewCell.cpp */; };
+		7CCDCDBD28C376A500EFBFCA /* UITableViewCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBA28C376A500EFBFCA /* UITableViewCell.cpp */; };
+		7CCDCDC128C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBF28C3ACD900EFBFCA /* UITableViewDefaultCell.cpp */; };
+		7CCDCDC228C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBF28C3ACD900EFBFCA /* UITableViewDefaultCell.cpp */; };
 		7CE9B5D92874917F00659D24 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D42874917F00659D24 /* log.cpp */; };
 		7CE9B5DA2874917F00659D24 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D52874917F00659D24 /* Utils.cpp */; };
 		7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D82874917F00659D24 /* YGLayout.cpp */; };
@@ -432,6 +440,14 @@
 		7CA9C4AC2882CA6500E47DB3 /* ios_video.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ios_video.hpp; sourceTree = "<group>"; };
 		7CA9C4AD2882CE7500E47DB3 /* ios_main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ios_main.mm; sourceTree = "<group>"; };
 		7CA9C4AF2882CE8700E47DB3 /* ios_main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ios_main.h; sourceTree = "<group>"; };
+		7CCDCDB028C2730A00EFBFCA /* UITableView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITableView.cpp; sourceTree = "<group>"; };
+		7CCDCDB128C2730A00EFBFCA /* UITableView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITableView.hpp; sourceTree = "<group>"; };
+		7CCDCDB528C2A48300EFBFCA /* TableViewTestController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TableViewTestController.cpp; sourceTree = "<group>"; };
+		7CCDCDB628C2A48300EFBFCA /* TableViewTestController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TableViewTestController.hpp; sourceTree = "<group>"; };
+		7CCDCDBA28C376A500EFBFCA /* UITableViewCell.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITableViewCell.cpp; sourceTree = "<group>"; };
+		7CCDCDBB28C376A500EFBFCA /* UITableViewCell.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITableViewCell.hpp; sourceTree = "<group>"; };
+		7CCDCDBF28C3ACD900EFBFCA /* UITableViewDefaultCell.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITableViewDefaultCell.cpp; sourceTree = "<group>"; };
+		7CCDCDC028C3ACD900EFBFCA /* UITableViewDefaultCell.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITableViewDefaultCell.hpp; sourceTree = "<group>"; };
 		7CD926CC28951DFC005AD85D /* NotificationEvent.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NotificationEvent.hpp; sourceTree = "<group>"; };
 		7CE9B4CF2874917F00659D24 /* YGFloatOptional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGFloatOptional.h; sourceTree = "<group>"; };
 		7CE9B4D02874917F00659D24 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
@@ -929,6 +945,7 @@
 		7C888E3F28816531009A6B95 /* TestControllers */ = {
 			isa = PBXGroup;
 			children = (
+				7CCDCDB428C2A47200EFBFCA /* TableViewTestController */,
 				7C709CAD28C0BCFC000A474F /* ControlTestViewController */,
 				7C8D980C28BB59F300BDD667 /* AnimationTestViewController */,
 				7C8D980228BA218700BDD667 /* ListViewController */,
@@ -1192,16 +1209,19 @@
 		7CA960742871F841009E0953 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				7C709CA828C0B3EE000A474F /* UIAction */,
-				7C709C9C28C08CC1000A474F /* UIControl */,
+				7CCDCDBE28C3ACC300EFBFCA /* UITableViewDefaultCell */,
+				7CCDCDB928C3769400EFBFCA /* UITableViewCell */,
+				7CCDCDAF28C272F400EFBFCA /* UITableView */,
 				7CA960BE2871FABA009E0953 /* Application */,
 				7C78EBCB2873743C0082D3AC /* Driver */,
 				7C78EBD52873748B0082D3AC /* Geometry */,
 				7C47495E2886062500C5A988 /* NXAffineTransform */,
 				7C58C65128AF859A0039F0E5 /* NXTransform3D */,
+				7C709CA828C0B3EE000A474F /* UIAction */,
 				7C4630562884330500DF15F3 /* UIAppDelegate */,
 				7C78EBCC2873748B0082D3AC /* UIBlurView */,
 				7C78EBCF2873748B0082D3AC /* UIColor */,
+				7C709C9C28C08CC1000A474F /* UIControl */,
 				7C58C65828AFBAC00039F0E5 /* UIEdgeInsets */,
 				7C53FE4F2878EA180091DEF9 /* UIEvent */,
 				7C53FE4B28788D820091DEF9 /* UIGestureRecognizer */,
@@ -1338,6 +1358,42 @@
 				7CA9C47B2882ADD700E47DB3 /* main.m */,
 			);
 			path = iOS;
+			sourceTree = "<group>";
+		};
+		7CCDCDAF28C272F400EFBFCA /* UITableView */ = {
+			isa = PBXGroup;
+			children = (
+				7CCDCDB128C2730A00EFBFCA /* UITableView.hpp */,
+				7CCDCDB028C2730A00EFBFCA /* UITableView.cpp */,
+			);
+			path = UITableView;
+			sourceTree = "<group>";
+		};
+		7CCDCDB428C2A47200EFBFCA /* TableViewTestController */ = {
+			isa = PBXGroup;
+			children = (
+				7CCDCDB628C2A48300EFBFCA /* TableViewTestController.hpp */,
+				7CCDCDB528C2A48300EFBFCA /* TableViewTestController.cpp */,
+			);
+			path = TableViewTestController;
+			sourceTree = "<group>";
+		};
+		7CCDCDB928C3769400EFBFCA /* UITableViewCell */ = {
+			isa = PBXGroup;
+			children = (
+				7CCDCDBB28C376A500EFBFCA /* UITableViewCell.hpp */,
+				7CCDCDBA28C376A500EFBFCA /* UITableViewCell.cpp */,
+			);
+			path = UITableViewCell;
+			sourceTree = "<group>";
+		};
+		7CCDCDBE28C3ACC300EFBFCA /* UITableViewDefaultCell */ = {
+			isa = PBXGroup;
+			children = (
+				7CCDCDC028C3ACD900EFBFCA /* UITableViewDefaultCell.hpp */,
+				7CCDCDBF28C3ACD900EFBFCA /* UITableViewDefaultCell.cpp */,
+			);
+			path = UITableViewDefaultCell;
 			sourceTree = "<group>";
 		};
 		7CE9B17F2874917E00659D24 /* yoga */ = {
@@ -1528,10 +1584,12 @@
 				7CE9B5E02874917F00659D24 /* YGEnums.cpp in Sources */,
 				7C0638F32876215100621093 /* FontManager.cpp in Sources */,
 				7CE9B5D92874917F00659D24 /* log.cpp in Sources */,
+				7CCDCDBC28C376A500EFBFCA /* UITableViewCell.cpp in Sources */,
 				7C58C66228B055CD0039F0E5 /* UITapGestureRecognizer.cpp in Sources */,
 				7CA960792871F8BF009E0953 /* GLFWVideoContext.cpp in Sources */,
 				7C53FE4E28788D8E0091DEF9 /* UIGestureRecognizer.cpp in Sources */,
 				7C8D987A28BD657500BDD667 /* geometryelement.cpp in Sources */,
+				7CCDCDC128C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */,
 				7C8D987E28BD657500BDD667 /* paintelement.cpp in Sources */,
 				7C8D987C28BD657500BDD667 /* property.cpp in Sources */,
 				7C709CAB28C0B3F9000A474F /* UIAction.cpp in Sources */,
@@ -1556,6 +1614,7 @@
 				7C709CB028C0BD15000A474F /* ControlTestViewController.cpp in Sources */,
 				7C8D98A228BD658400BDD667 /* plutovg-dash.c in Sources */,
 				7C8D98A428BD658400BDD667 /* plutovg-paint.c in Sources */,
+				7CCDCDB228C2730A00EFBFCA /* UITableView.cpp in Sources */,
 				7C47495628854E2900C5A988 /* GLFWInputManager.cpp in Sources */,
 				7C8D986A28BD657500BDD667 /* parser.cpp in Sources */,
 				7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */,
@@ -1576,6 +1635,7 @@
 				7C23962F287E143700973CC0 /* compat_strl.c in Sources */,
 				7C888E47288165E9009A6B95 /* ViewController.cpp in Sources */,
 				7C8D987028BD657500BDD667 /* clippathelement.cpp in Sources */,
+				7CCDCDB728C2A48300EFBFCA /* TableViewTestController.cpp in Sources */,
 				7C23963D287E2BCC00973CC0 /* NXRect.cpp in Sources */,
 				7C239630287E143700973CC0 /* features_cpu.c in Sources */,
 				7C53FE5B2878F4E60091DEF9 /* UIWindow.cpp in Sources */,
@@ -1626,6 +1686,7 @@
 				7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */,
 				7C709CA728C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */,
 				7C8D987F28BD657500BDD667 /* paintelement.cpp in Sources */,
+				7CCDCDBD28C376A500EFBFCA /* UITableViewCell.cpp in Sources */,
 				7C8D986D28BD657500BDD667 /* canvas.cpp in Sources */,
 				7C8D981028BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
 				7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */,
@@ -1665,6 +1726,7 @@
 				7CA9C4A02882C83F00E47DB3 /* YGValue.cpp in Sources */,
 				7C8D987728BD657500BDD667 /* styledelement.cpp in Sources */,
 				7C8D989D28BD658400BDD667 /* sw_ft_raster.c in Sources */,
+				7CCDCDC228C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */,
 				7C8D987528BD657500BDD667 /* element.cpp in Sources */,
 				7C8D986528BD657500BDD667 /* lunasvg.cpp in Sources */,
 				7C8D982228BC118200BDD667 /* UIImage.cpp in Sources */,
@@ -1677,6 +1739,7 @@
 				7CA9C4A42882C83F00E47DB3 /* Yoga.cpp in Sources */,
 				7C8D98AD28BD658400BDD667 /* plutovg-rle.c in Sources */,
 				7CA9C4922882C43100E47DB3 /* NXPoint.cpp in Sources */,
+				7CCDCDB328C2730A00EFBFCA /* UITableView.cpp in Sources */,
 				7CA9C49C2882C83F00E47DB3 /* YGConfig.cpp in Sources */,
 				7CA9C4982882C83800E47DB3 /* compat_strl.c in Sources */,
 				7C8D981E28BC113700BDD667 /* UIImageView.cpp in Sources */,
@@ -1687,6 +1750,7 @@
 				7C8D986228BD657500BDD667 /* symbolelement.cpp in Sources */,
 				7C8D986928BD657500BDD667 /* maskelement.cpp in Sources */,
 				7C49617A28A8215000E30B4B /* TouchTestViewController.cpp in Sources */,
+				7CCDCDB828C2A48300EFBFCA /* TableViewTestController.cpp in Sources */,
 				7CA9C4942882C43100E47DB3 /* UIColor.cpp in Sources */,
 				7C8D982728BC172D00BDD667 /* Literals.cpp in Sources */,
 				7CA9C49A2882C83800E47DB3 /* features_cpu.c in Sources */,

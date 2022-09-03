@@ -9,7 +9,7 @@
 
 #include <NXKit.hpp>
 
-class ListItemView: public UIControl {
+class ListItemView: public UIControl  {
 public:
     ListItemView();
 

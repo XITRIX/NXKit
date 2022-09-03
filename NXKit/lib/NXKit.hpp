@@ -17,6 +17,8 @@
 #include <Core/UILabel/UILabel.hpp>
 #include <Core/UIControl/UIControl.hpp>
 #include <Core/UIStackView/UIStackView.hpp>
+#include <Core/UITableView/UITableView.hpp>
+#include <Core/UITableViewDefaultCell/UITableViewDefaultCell.hpp>
 #include <Core/UIImageView/UIImageView.hpp>
 #include <Platforms/InputManager.hpp>
 

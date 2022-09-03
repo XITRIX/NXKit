@@ -41,7 +41,7 @@ UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController*
     label->setGrow(1);
     label->verticalAlign = VerticalAlign::CENTER;
     label->getFont()->fontSize = 22;
-    label->setMargins(9, 8, 9, 0);
+    label->setMargins(9, 0, 9, 8);
 
     addSubview(selectionBar);
     addSubview(label);
