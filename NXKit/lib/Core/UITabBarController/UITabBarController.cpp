@@ -187,7 +187,9 @@ void UITabBarController::reloadViewForViewControllers() {
             item->tag = "Num" + std::to_string(i);
             item->setSelected(i == selectedIndex);
             item->addAction(BUTTON_A, UIAction([this]() {
-                Application::shared()->setFocus(getView()->getNextFocus(NavigationDirection::RIGHT));
+                auto newFocus = getView()->getNextFocus(NavigationDirection::RIGHT);
+                if (newFocus)
+                    Application::shared()->setFocus(newFocus);
             }));
             tabViews.push_back(item);
             tabs->addSubview(item);
