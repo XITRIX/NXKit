@@ -28,13 +28,9 @@ void Ticking::updateTickings()
 
     previousTime = currentTime;
 
-    // Update every running ticking, kill them and execute cb if they are finished
-    // We have to clone the running tickings list to avoid altering it while
-    // in the for loop (so if another ticking is started in a callback or during onUpdate())
-    std::vector<Ticking*> tickings(Ticking::runningTickings);
-
-    for (Ticking* ticking : tickings)
+    for (int i = 0; i < Ticking::runningTickings.size(); i++)
     {
+        Ticking* ticking = Ticking::runningTickings[i];
         bool run = ticking->onUpdate(delta);
 
         ticking->tickCallback();
@@ -63,17 +59,12 @@ void Ticking::stop()
 
 void Ticking::stop(bool finished)
 {
+    auto it = std::remove(Ticking::runningTickings.begin(), Ticking::runningTickings.end(), this);
+    if (Ticking::runningTickings.end() != it)
+        Ticking::runningTickings.erase(it);
+
     if (!this->running)
         return;
-
-    for (size_t i = 0; i < Ticking::runningTickings.size(); i++)
-    {
-        if (Ticking::runningTickings[i] == this)
-        {
-            Ticking::runningTickings.erase(Ticking::runningTickings.begin() + i);
-            break;
-        }
-    }
 
     this->running = false;
 
