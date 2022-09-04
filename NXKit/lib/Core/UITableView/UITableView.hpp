@@ -37,7 +37,7 @@ public:
     UITableViewDataSource* dataSource = nullptr;
 
     UITableView();
-    ~UITableView();
+    virtual ~UITableView();
 
     UIView* getDefaultFocus() override;
     UIView* getNextFocus(NavigationDirection direction) override;

@@ -99,6 +99,10 @@ UIImageView::UIImageView() {
     YGNodeSetMeasureFunc(this->ygNode, imageMeasureFunc);
 }
 
+UIImageView::~UIImageView() {
+    delete image;
+}
+
 void UIImageView::setImage(UIImage* image) {
     if (this->image)
         delete this->image;

@@ -36,10 +36,10 @@ Application::Application() {
 
 Application::~Application() {
     delete delegate;
-    delete videoContext;
     delete keyWindow;
     delete FontManager::shared();
     delete InputManager::shared();
+    delete videoContext;
 }
 
 void Application::setKeyWindow(UIWindow *window) {

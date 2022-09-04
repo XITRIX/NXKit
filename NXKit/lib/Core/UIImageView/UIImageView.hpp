@@ -27,6 +27,7 @@ enum class ImageScalingType
 class UIImageView: public UIView {
 public:
     UIImageView();
+    virtual ~UIImageView();
 
     void setImage(UIImage* image);
     UIImage* getImage() { return image; }
