@@ -153,4 +153,7 @@ protected:
     virtual void onReset() {};
 };
 
+void updateHighlightAnimation();
+void getHighlightAnimation(float* gradient_x, float* gradient_y, float* color);
+
 }

@@ -11,10 +11,6 @@
 #include <Core/Utils/Tools/Tools.hpp>
 #include <Core/Utils/Literals/Literals.hpp>
 #include <Core/Utils/Animation/AnimationContext/AnimationContext.hpp>
-#include <Core/Utils/Animation/NXFloat/NXFloat.hpp>
-#include <Core/Utils/Animation/NXPoint/NXPoint.hpp>
-#include <Core/Utils/Animation/NXSize/NXSize.hpp>
-#include <Core/Utils/Animation/NXRect/NXRect.hpp>
 #include <Core/UIColor/UIColor.hpp>
 #include <Core/UIResponder/UIResponder.hpp>
 #include <Core/UIEdgeInsets/UIEdgeInsets.hpp>

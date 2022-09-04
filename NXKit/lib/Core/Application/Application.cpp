@@ -12,7 +12,6 @@
 #include <Core/UIView/UIView.hpp>
 #include <Core/UIWindow/UIWindow.hpp>
 #include <Core/Utils/Animation/Core/Time.hpp>
-#include <Core/Utils/Animation/NXFloat/NXFloat.hpp>
 #include <Core/Utils/FontManager/FontManager.hpp>
 #include <Core/Driver/Video/video.hpp>
 

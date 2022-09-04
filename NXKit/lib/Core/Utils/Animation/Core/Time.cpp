@@ -15,6 +15,7 @@
 */
 
 #include <Core/Utils/Animation/Core/Time.hpp>
+#include <math.h>
 
 namespace NXKit {
 
@@ -102,6 +103,34 @@ void FiniteTicking::reset()
 {
     this->stop();
     this->onReset();
+}
+
+#define HIGHLIGHT_SPEED 125.0f
+
+static double highlightGradientX = 0;
+static double highlightGradientY = 0;
+static double highlightColor     = 0;
+
+void updateHighlightAnimation()
+{
+    Time currentTime = getCPUTimeUsec() / 1000;
+
+    // Update variables
+    highlightGradientX = (cos((double)currentTime / HIGHLIGHT_SPEED / 3.0) + 1.0) / 2.0;
+    highlightGradientY = (sin((double)currentTime / HIGHLIGHT_SPEED / 3.0) + 1.0) / 2.0;
+    highlightColor     = (sin((double)currentTime / HIGHLIGHT_SPEED * 2.0) + 1.0) / 2.0;
+}
+
+void getHighlightAnimation(float* gradientX, float* gradientY, float* color)
+{
+    if (gradientX)
+        *gradientX = (float)highlightGradientX;
+
+    if (gradientY)
+        *gradientY = (float)highlightGradientY;
+
+    if (color)
+        *color = (float)highlightColor;
 }
 
 }

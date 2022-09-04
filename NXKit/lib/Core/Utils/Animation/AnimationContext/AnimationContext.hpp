@@ -9,12 +9,11 @@
 
 #include <tweeny/tweeny.h>
 #include <Core/Utils/Animation/Core/Time.hpp>
-#include <Core/Utils/Animation/NXFloat/NXFloat.hpp>
 #include <deque>
 
 namespace NXKit {
 
-//using EasingFunction = tweeny::easing::enumerated;
+using EasingFunction = tweeny::easing::enumerated;
 
 class AnimationContext: public FiniteTicking {
 public:

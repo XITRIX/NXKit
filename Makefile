@@ -111,10 +111,6 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/Utils/GaussianBlur \
 			NXKit/lib/Core/Utils/Animation/Core \
 			NXKit/lib/Core/Utils/Animation/AnimationContext \
-			NXKit/lib/Core/Utils/Animation/NXFloat \
-			NXKit/lib/Core/Utils/Animation/NXPoint \
-			NXKit/lib/Core/Utils/Animation/NXRect \
-			NXKit/lib/Core/Utils/Animation/NXSize \
 			NXKit/lib/Core/Utils/FontManager \
 			NXKit/lib/Core/Utils/Literals \
 			NXKit/lib/extern/lib/nanovg-gl/ \
