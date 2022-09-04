@@ -40,6 +40,7 @@ public:
     static UIColor gray;
     static UIColor separator;
 
+    static UIColor systemBackground;
     static UIColor systemBlue;
 private:
     int value;

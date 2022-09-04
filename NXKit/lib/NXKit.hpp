@@ -9,6 +9,7 @@
 
 #include <Core/Application/Application.hpp>
 #include <Core/UIWindow/UIWindow.hpp>
+#include <Core/UIAlertController/UIAlertController.hpp>
 #include <Core/UIViewController/UIViewController.hpp>
 #include <Core/UINavigationController/UINavigationController.hpp>
 #include <Core/UITabBarController/UITabBarController.hpp>

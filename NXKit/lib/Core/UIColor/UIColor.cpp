@@ -18,6 +18,7 @@ UIColor UIColor::black = UIColor(0, 0, 0);
 UIColor UIColor::gray = UIColor(155, 155, 155);
 UIColor UIColor::separator = UIColor(208, 208, 208);
 
+UIColor UIColor::systemBackground = UIColor(235, 235, 235);
 UIColor UIColor::systemBlue = UIColor(49, 79, 235);
 
 UIColor::UIColor(short r, short g, short b, short a) {

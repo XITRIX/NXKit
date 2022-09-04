@@ -196,6 +196,8 @@
 		7CCDCDC228C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBF28C3ACD900EFBFCA /* UITableViewDefaultCell.cpp */; };
 		7CCDCDC628C4965300EFBFCA /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDC428C4965300EFBFCA /* UIButton.cpp */; };
 		7CCDCDC728C4965300EFBFCA /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDC428C4965300EFBFCA /* UIButton.cpp */; };
+		7CCDCDCF28C551F900EFBFCA /* UIAlertController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDCD28C551F900EFBFCA /* UIAlertController.cpp */; };
+		7CCDCDD028C551F900EFBFCA /* UIAlertController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDCD28C551F900EFBFCA /* UIAlertController.cpp */; };
 		7CE9B5D92874917F00659D24 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D42874917F00659D24 /* log.cpp */; };
 		7CE9B5DA2874917F00659D24 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D52874917F00659D24 /* Utils.cpp */; };
 		7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D82874917F00659D24 /* YGLayout.cpp */; };
@@ -452,6 +454,8 @@
 		7CCDCDC028C3ACD900EFBFCA /* UITableViewDefaultCell.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITableViewDefaultCell.hpp; sourceTree = "<group>"; };
 		7CCDCDC428C4965300EFBFCA /* UIButton.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIButton.cpp; sourceTree = "<group>"; };
 		7CCDCDC528C4965300EFBFCA /* UIButton.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIButton.hpp; sourceTree = "<group>"; };
+		7CCDCDCD28C551F900EFBFCA /* UIAlertController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIAlertController.cpp; sourceTree = "<group>"; };
+		7CCDCDCE28C551F900EFBFCA /* UIAlertController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIAlertController.hpp; sourceTree = "<group>"; };
 		7CD926CC28951DFC005AD85D /* NotificationEvent.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NotificationEvent.hpp; sourceTree = "<group>"; };
 		7CE9B4CF2874917F00659D24 /* YGFloatOptional.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YGFloatOptional.h; sourceTree = "<group>"; };
 		7CE9B4D02874917F00659D24 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
@@ -1219,6 +1223,7 @@
 				7C47495E2886062500C5A988 /* NXAffineTransform */,
 				7C58C65128AF859A0039F0E5 /* NXTransform3D */,
 				7C709CA828C0B3EE000A474F /* UIAction */,
+				7CCDCDCC28C551E800EFBFCA /* UIAlertController */,
 				7C4630562884330500DF15F3 /* UIAppDelegate */,
 				7C78EBCC2873748B0082D3AC /* UIBlurView */,
 				7CCDCDC328C4964300EFBFCA /* UIButton */,
@@ -1408,6 +1413,15 @@
 				7CCDCDC428C4965300EFBFCA /* UIButton.cpp */,
 			);
 			path = UIButton;
+			sourceTree = "<group>";
+		};
+		7CCDCDCC28C551E800EFBFCA /* UIAlertController */ = {
+			isa = PBXGroup;
+			children = (
+				7CCDCDCE28C551F900EFBFCA /* UIAlertController.hpp */,
+				7CCDCDCD28C551F900EFBFCA /* UIAlertController.cpp */,
+			);
+			path = UIAlertController;
 			sourceTree = "<group>";
 		};
 		7CE9B17F2874917E00659D24 /* yoga */ = {
@@ -1636,6 +1650,7 @@
 				7C8D987828BD657500BDD667 /* gelement.cpp in Sources */,
 				7C0638F42876233200621093 /* main.cpp in Sources */,
 				7C8D987628BD657500BDD667 /* styledelement.cpp in Sources */,
+				7CCDCDCF28C551F900EFBFCA /* UIAlertController.cpp in Sources */,
 				7CE9B5E42874917F00659D24 /* event.cpp in Sources */,
 				7C8D986128BD657500BDD667 /* symbolelement.cpp in Sources */,
 				7C8D985B28BD657500BDD667 /* layoutcontext.cpp in Sources */,
@@ -1742,6 +1757,7 @@
 				7C8D987728BD657500BDD667 /* styledelement.cpp in Sources */,
 				7C8D989D28BD658400BDD667 /* sw_ft_raster.c in Sources */,
 				7CCDCDC228C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */,
+				7CCDCDD028C551F900EFBFCA /* UIAlertController.cpp in Sources */,
 				7C8D987528BD657500BDD667 /* element.cpp in Sources */,
 				7C8D986528BD657500BDD667 /* lunasvg.cpp in Sources */,
 				7C8D982228BC118200BDD667 /* UIImage.cpp in Sources */,

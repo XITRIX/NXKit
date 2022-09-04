@@ -22,19 +22,24 @@ void ControlTestViewController::loadView() {
     view->setAlignItems(AlignItems::CENTER);
     view->setJustifyContent(JustifyContent::CENTER);
 
-    auto control = new UIButton();
+    auto control = new UIButton("Test button");
     control->setSize({ 280, 60 });
 //    control->setStyle(NXKit::UIButtonStyle::HIGHLIGHT);
     view->addSubview(control);
 
+//    control->addAction(BUTTON_A, UIAction([this]() {
+//        TouchTestViewController* touchVC = new TouchTestViewController();
+//        AnimationTestViewController* animVC = new AnimationTestViewController();
+//
+//        UITabBarController* tabsVC = new UITabBarController({animVC, nullptr, touchVC });
+//        UINavigationController* vc = new UINavigationController(tabsVC);
+//
+//        present(vc, true);
+//    }));
+
     control->addAction(BUTTON_A, UIAction([this]() {
-        TouchTestViewController* touchVC = new TouchTestViewController();
-        AnimationTestViewController* animVC = new AnimationTestViewController();
-
-        UITabBarController* tabsVC = new UITabBarController({animVC, nullptr, touchVC });
-        UINavigationController* vc = new UINavigationController(tabsVC);
-
-        present(vc, true);
+        auto alert = new UIAlertController();
+        present(alert, true);
     }));
 
     setView(view);

@@ -9,10 +9,10 @@
 
 namespace NXKit {
 
-UIButton::UIButton() {
+UIButton::UIButton(std::string title) {
     setAlignItems(NXKit::AlignItems::CENTER);
     setJustifyContent(NXKit::JustifyContent::CENTER);
-    label = new UILabel("Test text");
+    label = new UILabel(title);
     label->verticalAlign = VerticalAlign::CENTER;
     label->getFont()->fontSize = 18;
     addSubview(label);
@@ -23,6 +23,10 @@ UIButton::UIButton() {
     clipToBounds = false;
 
     setStyle(UIButtonStyle::PRIMARY);
+}
+
+void UIButton::setTitle(std::string title) {
+    label->setText(title);
 }
 
 void UIButton::becomeFocused() {

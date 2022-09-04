@@ -54,8 +54,8 @@ public:
     UIResponder* getNext() override;
 
 protected:
-    void makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion = [](){});
-    void makeViewDisappear(bool animated, std::function<void(bool)> completion);
+    virtual void makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion = [](){});
+    virtual void makeViewDisappear(bool animated, std::function<void(bool)> completion);
 
 private:
     std::string title;

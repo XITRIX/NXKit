@@ -19,7 +19,7 @@ UINavigationController::UINavigationController(UIViewController* rootController)
 
 void UINavigationController::loadView() {
     UIView* root = new UIView();
-    root->backgroundColor = UIColor(235, 235, 235);
+    root->backgroundColor = UIColor::systemBackground;
 
     overlay = new UIStackView(Axis::VERTICAL);
     overlay->setJustifyContent(JustifyContent::SPACE_BETWEEN);

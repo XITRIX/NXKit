@@ -62,9 +62,9 @@ static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float 
 
 UIBlurView::UIBlurView(Rect frame): UIStackView() {
     if (reduceTransparency)
-        backgroundColor = UIColor(235, 235, 235);
+        backgroundColor = UIColor::systemBackground;
     else
-        backgroundColor = UIColor(235, 235, 235).withAlphaComponent(0.6f);
+        backgroundColor = UIColor::systemBackground.withAlphaComponent(0.6f);
 }
 
 void UIBlurView::draw(NVGcontext *vgContext) {

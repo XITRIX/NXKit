@@ -22,12 +22,14 @@ enum class UIButtonStyle {
 
 class UIButton: public UIControl {
 public:
-    UIButton();
+    UIButton(std::string title = "");
 
     void becomeFocused() override;
     void resignFocused() override;
 
     void setStyle(UIButtonStyle style);
+
+    void setTitle(std::string title);
 private:
     UILabel* label;
     UIButtonStyle style;

@@ -439,6 +439,8 @@ std::deque<float> UIView::createAnimationContext() {
     context.push_back(bounds.origin.y);
     context.push_back(transformOrigin.x);
     context.push_back(transformOrigin.y);
+    context.push_back(transformSize.width);
+    context.push_back(transformSize.height);
     context.push_back(clickAlpha);
     context.push_back(alpha);
     return context;
@@ -456,6 +458,8 @@ void UIView::applyAnimationContext(std::deque<float>* context) {
     IFNNULL(bounds.origin.y, pop(context))
     IFNNULL(transformOrigin.x, pop(context))
     IFNNULL(transformOrigin.y, pop(context))
+    IFNNULL(transformSize.width, pop(context))
+    IFNNULL(transformSize.height, pop(context))
     IFNNULL(clickAlpha, pop(context))
     IFNNULL(alpha, pop(context))
 }

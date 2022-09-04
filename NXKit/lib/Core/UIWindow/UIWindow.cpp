@@ -10,6 +10,10 @@
 
 namespace NXKit {
 
+UIWindow::UIWindow() {
+    backgroundColor = UIColor::systemBackground;
+}
+
 UIWindow::~UIWindow() {
     delete rootViewController;
 }
