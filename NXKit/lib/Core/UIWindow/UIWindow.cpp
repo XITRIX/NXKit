@@ -67,9 +67,27 @@ void UIWindow::sendEvent(UIEvent* event) {
     }
 }
 
+void UIWindow::addPresentedViewController(UIViewController* controller) {
+    presentedViewControllers.push_back(controller);
+}
+
+void UIWindow::removePresentedViewController(UIViewController* controller) {
+    presentedViewControllers.erase(std::remove(presentedViewControllers.begin(), presentedViewControllers.end(), controller), presentedViewControllers.end());
+}
+
 void UIWindow::layoutSubviews() {
     UIView::layoutSubviews();
     rootViewController->getView()->setSize(getBounds().size);
+    for (auto controller: presentedViewControllers) {
+        controller->getView()->setSize(getBounds().size);
+    }
+}
+
+UIView* UIWindow::getDefaultFocus() {
+    if (presentedViewControllers.size() > 0) {
+        return presentedViewControllers.back()->getView()->getDefaultFocus();
+    }
+    return UIView::getDefaultFocus();
 }
 
 }

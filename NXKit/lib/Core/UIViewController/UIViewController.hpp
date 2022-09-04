@@ -46,13 +46,29 @@ public:
     UIEdgeInsets getAdditionalSafeAreaInsets() { return additionalSafeAreaInsets; }
     void setAdditionalSafeAreaInsets(UIEdgeInsets insets);
 
+    UIViewController* getPresentedViewController();
+    UIViewController* getPresentingViewController();
+    void present(UIViewController* controller, bool animated, std::function<void()> completion = [](){});
+    void dismiss(bool animated, std::function<void()> completion = [](){});
+
     UIResponder* getNext() override;
+
+protected:
+    void makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion = [](){});
+    void makeViewDisappear(bool animated, std::function<void(bool)> completion);
+
 private:
     std::string title;
     UIEdgeInsets additionalSafeAreaInsets;
     std::vector<UIViewController*> children;
     UIViewController* parent = nullptr;
     UIView* view = nullptr;
+
+    UIViewController* presentedViewController = nullptr;
+    UIViewController* presentingViewController = nullptr;
+
+    void setPresentedViewController(UIViewController* presentedViewController);
+    void setPresentingViewController(UIViewController* presentingViewController);
 };
 
 }

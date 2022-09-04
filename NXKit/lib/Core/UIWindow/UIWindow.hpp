@@ -22,8 +22,15 @@ public:
     void sendEvent(UIEvent* event);
 
     void layoutSubviews() override;
+    UIView* getDefaultFocus() override;
+
 private:
+    friend class UIViewController;
     UIViewController* rootViewController = nullptr;
+    std::vector<UIViewController*> presentedViewControllers;
+
+    void addPresentedViewController(UIViewController* controller);
+    void removePresentedViewController(UIViewController* controller);
 };
 
 }

@@ -7,6 +7,12 @@
 
 #include "ControlTestViewController.hpp"
 
+#include "ViewController.hpp"
+#include "TouchTestViewController.hpp"
+#include "AnimationTestViewController.hpp"
+#include "ListViewController.hpp"
+#include "TableViewTestController.hpp"
+
 ControlTestViewController::ControlTestViewController() {
     setTitle("Control test");
 }
@@ -20,6 +26,16 @@ void ControlTestViewController::loadView() {
     control->setSize({ 280, 60 });
 //    control->setStyle(NXKit::UIButtonStyle::HIGHLIGHT);
     view->addSubview(control);
+
+    control->addAction(BUTTON_A, UIAction([this]() {
+        TouchTestViewController* touchVC = new TouchTestViewController();
+        AnimationTestViewController* animVC = new AnimationTestViewController();
+
+        UITabBarController* tabsVC = new UITabBarController({touchVC, nullptr, animVC});
+        UINavigationController* vc = new UINavigationController(tabsVC);
+
+        present(vc, true);
+    }));
 
     setView(view);
 }

@@ -6,6 +6,7 @@
 //
 
 #include <Core/UIViewController/UIViewController.hpp>
+#include <Core/Application/Application.hpp>
 #include <Core/UIWindow/UIWindow.hpp>
 
 #include <typeinfo>
@@ -81,6 +82,108 @@ void UIViewController::removeFromParent() {
 
 void UIViewController::setAdditionalSafeAreaInsets(UIEdgeInsets insets) {
     additionalSafeAreaInsets = insets;
+}
+
+// MARK: - Presenting
+UIViewController* UIViewController::getPresentedViewController() {
+    auto parent = this;
+    while (parent->getParent()) {
+        parent = parent->getParent();
+    }
+    return parent->presentedViewController;
+}
+
+UIViewController* UIViewController::getPresentingViewController() {
+    auto parent = this;
+    while (parent->getParent()) {
+        parent = parent->getParent();
+    }
+    return parent->presentingViewController;
+}
+
+void UIViewController::setPresentedViewController(UIViewController* presentedViewController) {
+    auto parent = this;
+    while (parent->getParent()) {
+        parent = parent->getParent();
+    }
+    parent->presentedViewController = presentedViewController;
+}
+
+void UIViewController::setPresentingViewController(UIViewController* presentingViewController) {
+    auto parent = this;
+    while (parent->getParent()) {
+        parent = parent->getParent();
+    }
+    parent->presentingViewController = presentingViewController;
+}
+
+void UIViewController::present(UIViewController* controller, bool animated, std::function<void()> completion) {
+    if (getPresentedViewController()) {
+        printf("Warning: attempted to present \(controller), but \(this) is already presenting another view controller. Ignoring request.");
+        return;
+    }
+
+    if (controller->getPresentingViewController()) {
+        printf("Tried to present \(controller) but it is already being presented by \(controller->getPresentingViewController!)");
+        return;
+    }
+
+    setPresentedViewController(controller);
+    controller->setPresentingViewController(this);
+
+    Application::shared()->setFocus(nullptr);
+    controller->viewWillAppear(animated);
+
+    auto window = getView()->getWindow();
+    window->addSubview(controller->getView());
+    window->addPresentedViewController(controller);
+
+    controller->makeViewAppear(animated, this, [controller, animated, completion]() {
+        Application::shared()->setFocus(controller->getView()->getDefaultFocus());
+        controller->viewDidAppear(animated);
+        completion();
+    });
+}
+
+void UIViewController::dismiss(bool animated, std::function<void()> completion) {
+    if (parent) {
+        parent->dismiss(animated, completion);
+        return;
+    }
+
+    viewWillDisappear(animated);
+    presentingViewController->setPresentedViewController(nullptr);
+    Application::shared()->setFocus(nullptr);
+
+    makeViewDisappear(animated, [this, animated, completion](bool res) {
+        getView()->getWindow()->removePresentedViewController(this);
+        getView()->removeFromSuperview();
+        viewDidDisappear(animated);
+        Application::shared()->setFocus(presentingViewController->getView()->getDefaultFocus());
+        completion();
+        setPresentingViewController(nullptr);
+        delete this;
+    });
+}
+
+void UIViewController::makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion) {
+    // Animation could be added
+    getView()->transformOrigin = { 0, 720 };
+    getView()->animate(0.3f, [this]() {
+        getView()->transformOrigin = { 0, 0 };
+    }, EasingFunction::quadraticOut, [completion](bool res) {
+        completion();
+    });
+}
+
+void UIViewController::makeViewDisappear(bool animated, std::function<void(bool)> completion) {
+    // Animation could be added
+//    getView()->transformOrigin = { 0, 720 };
+    getView()->animate(0.3f, [this]() {
+        getView()->transformOrigin = { 0, 720 };
+    }, EasingFunction::quadraticOut, [completion](bool res) {
+        completion(true);
+    });
 }
 
 }

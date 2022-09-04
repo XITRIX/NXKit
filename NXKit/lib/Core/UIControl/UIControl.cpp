@@ -28,7 +28,7 @@ UIControl::UIControl() {
     addGestureRecognizer(gesture);
 }
 UIControl::~UIControl() {
-    InputManager::shared()->getInputUpdated()->unsubscribe(actionSub);
+//    InputManager::shared()->getInputUpdated()->unsubscribe(actionSub);
 }
 
 bool UIControl::canBecomeFocused() {

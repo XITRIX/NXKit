@@ -132,8 +132,12 @@ void Application::setInputType(ApplicationInputType inputType) {
 }
 
 bool Application::onControllerButtonPressed(ControllerButton button, bool repeating) {
+//    if (!focus) {
+//        setFocus(keyWindow->getDefaultFocus());
+//    }
+    
     if (!focus) {
-        setFocus(keyWindow->getDefaultFocus());
+        return false;
     }
 
     if (focus->press(button)) {
