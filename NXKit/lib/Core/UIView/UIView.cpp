@@ -149,6 +149,8 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     nvgTranslate(vgContext, scaleTransformX, scaleTransformY);
     nvgScale(vgContext, transformSize.width, transformSize.height);
 
+    nvgGlobalAlpha(vgContext, getInternalAlpha());
+
     // ClipToBounds
     if (clipToBounds)
         nvgIntersectScissor(vgContext, 0, 0, getFrame().size.width, getFrame().size.height);
@@ -389,7 +391,7 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
             (color * highlightColor1.g()) + (1 - color) * highlightColor1.g(),
             (color * highlightColor1.b()) + (1 - color) * highlightColor1.b());
 
-        UIColor borderColor = UIColor(100, 255, 225, 255);
+        UIColor borderColor = UIColor(100, 255, 225, 150);
 
         float strokeWidth = 5;
 
@@ -425,6 +427,12 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
     nvgRestore(vg);
 }
 
+float UIView::getInternalAlpha() {
+    if (superview)
+        return superview->getInternalAlpha() * alpha;
+    return alpha;
+}
+
 std::deque<float> UIView::createAnimationContext() {
     std::deque<float> context;
     context.push_back(bounds.origin.x);
@@ -432,6 +440,7 @@ std::deque<float> UIView::createAnimationContext() {
     context.push_back(transformOrigin.x);
     context.push_back(transformOrigin.y);
     context.push_back(clickAlpha);
+    context.push_back(alpha);
     return context;
 }
 
@@ -448,6 +457,7 @@ void UIView::applyAnimationContext(std::deque<float>* context) {
     IFNNULL(transformOrigin.x, pop(context))
     IFNNULL(transformOrigin.y, pop(context))
     IFNNULL(clickAlpha, pop(context))
+    IFNNULL(alpha, pop(context))
 }
 
 void UIView::animate(float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {

@@ -31,7 +31,7 @@ void ControlTestViewController::loadView() {
         TouchTestViewController* touchVC = new TouchTestViewController();
         AnimationTestViewController* animVC = new AnimationTestViewController();
 
-        UITabBarController* tabsVC = new UITabBarController({touchVC, nullptr, animVC});
+        UITabBarController* tabsVC = new UITabBarController({animVC, nullptr, touchVC });
         UINavigationController* vc = new UINavigationController(tabsVC);
 
         present(vc, true);

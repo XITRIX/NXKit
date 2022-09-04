@@ -118,6 +118,11 @@ void UIViewController::setPresentingViewController(UIViewController* presentingV
 }
 
 void UIViewController::present(UIViewController* controller, bool animated, std::function<void()> completion) {
+    if (parent) {
+        parent->present(controller, animated, completion);
+        return;
+    }
+
     if (getPresentedViewController()) {
         printf("Warning: attempted to present \(controller), but \(this) is already presenting another view controller. Ignoring request.");
         return;
@@ -168,10 +173,13 @@ void UIViewController::dismiss(bool animated, std::function<void()> completion) 
 
 void UIViewController::makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion) {
     // Animation could be added
-    getView()->transformOrigin = { 0, 720 };
-    getView()->animate(0.3f, [this]() {
-        getView()->transformOrigin = { 0, 0 };
-    }, EasingFunction::quadraticOut, [completion](bool res) {
+//    getView()->transformOrigin = { 0, 720 };
+    getView()->alpha = 0;
+    getView()->animate(0.2f, [this]() {
+//        getView()->transformOrigin = { 0, 0 };
+        getView()->alpha = 1.0f;
+    }, EasingFunction::quadraticInOut, [presentingViewController, completion](bool res) {
+        presentingViewController->getView()->setHidden(true);
         completion();
     });
 }
@@ -179,9 +187,11 @@ void UIViewController::makeViewAppear(bool animated, UIViewController* presentin
 void UIViewController::makeViewDisappear(bool animated, std::function<void(bool)> completion) {
     // Animation could be added
 //    getView()->transformOrigin = { 0, 720 };
-    getView()->animate(0.3f, [this]() {
-        getView()->transformOrigin = { 0, 720 };
-    }, EasingFunction::quadraticOut, [completion](bool res) {
+    this->getPresentingViewController()->getView()->setHidden(false);
+    getView()->animate(0.2f, [this]() {
+//        getView()->transformOrigin = { 0, 720 };
+        getView()->alpha = 0;
+    }, EasingFunction::quadraticInOut, [this, completion](bool res) {
         completion(true);
     });
 }

@@ -84,6 +84,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/NXTransform3D \
 			NXKit/lib/Core/UIAppDelegate \
 			NXKit/lib/Core/UIBlurView \
+			NXKit/lib/Core/UIButton \
 			NXKit/lib/Core/UIColor \
 			NXKit/lib/Core/UIControl \
 			NXKit/lib/Core/UIEdgeInsets \

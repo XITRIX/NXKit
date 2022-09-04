@@ -51,6 +51,7 @@ public:
     Size transformSize = Size(1, 1);
     bool clipToBounds = true;
     bool highlightOnFocus = true;
+    float alpha = 1;
     float clickAlpha = 0;
     bool showShadow = false;
     bool drawBackgroundOnHighlight = true;
@@ -150,6 +151,7 @@ private:
     friend class UIViewController;
     friend class UITableView;
 
+    AnimationContext animationContext;
     std::vector<UIGestureRecognizer*> gestureRecognizers;
     UIViewController* controller = nullptr;
     std::vector<UIView*> subviews;
@@ -171,7 +173,7 @@ private:
     void shakeHighlight(NavigationDirection direction);
     bool shouldDrawHighlight();
 
-    AnimationContext animationContext;
+    float getInternalAlpha();
 };
 
 }
