@@ -16,14 +16,9 @@ void ControlTestViewController::loadView() {
     view->setAlignItems(AlignItems::CENTER);
     view->setJustifyContent(JustifyContent::CENTER);
 
-    auto control = new UIControl();
-    control->setAlignItems(NXKit::AlignItems::CENTER);
-    control->setJustifyContent(NXKit::JustifyContent::CENTER);
-    control->setSize({ 280, 44 });
-
-    auto label = new UILabel("Test text");
-    control->addSubview(label);
-
+    auto control = new UIButton();
+    control->setSize({ 280, 60 });
+//    control->setStyle(NXKit::UIButtonStyle::HIGHLIGHT);
     view->addSubview(control);
 
     setView(view);

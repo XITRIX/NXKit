@@ -45,12 +45,16 @@ public:
     UIColor backgroundColor;
     UIColor borderColor = UIColor(0, 0, 0);
     float cornerRadius = 0;
+    float highlightCornerRadius = 0.5f;
     float borderThickness = 0;
     Point transformOrigin;
     Size transformSize = Size(1, 1);
     bool clipToBounds = true;
     bool highlightOnFocus = true;
     float clickAlpha = 0;
+    bool showShadow = false;
+    bool drawBackgroundOnHighlight = true;
+    float highlightSpacing = 0;
 
     UIView(Rect frame);
     UIView(float x, float y, float width, float height): UIView(Rect(x, y, width, height)) {}
@@ -161,6 +165,7 @@ private:
 
     void internalDraw(NVGcontext* vgContext);
     void setSuperview(UIView* view);
+    void drawShadow(NVGcontext* vg);
     void drawHighlight(NVGcontext* vg, bool background);
 
     void shakeHighlight(NavigationDirection direction);

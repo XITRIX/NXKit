@@ -16,6 +16,7 @@
 #include <Core/UIBlurView/UIBlurView.hpp>
 #include <Core/UILabel/UILabel.hpp>
 #include <Core/UIControl/UIControl.hpp>
+#include <Core/UIButton/UIButton.hpp>
 #include <Core/UIStackView/UIStackView.hpp>
 #include <Core/UITableView/UITableView.hpp>
 #include <Core/UITableViewDefaultCell/UITableViewDefaultCell.hpp>

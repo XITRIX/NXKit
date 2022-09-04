@@ -153,13 +153,16 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     if (clipToBounds)
         nvgIntersectScissor(vgContext, 0, 0, getFrame().size.width, getFrame().size.height);
 
+    if (showShadow)
+        drawShadow(vgContext);
+
+    drawHighlight(vgContext, true);
+
     // Background color
     nvgBeginPath(vgContext);
     nvgRoundedRect(vgContext, 0, 0, getFrame().size.width, getFrame().size.height, cornerRadius);
     nvgFillColor(vgContext, backgroundColor.raw());
     nvgFill(vgContext);
-    
-    drawHighlight(vgContext, true);
 
     if (clickAlpha > 0) {
         nvgFillColor(vgContext, UIColor(13, 182, 213, 38).withAlphaComponent(clickAlpha).raw());
@@ -251,20 +254,63 @@ bool UIView::shouldDrawHighlight() {
     return !(!isFocused() || !highlightOnFocus || Application::shared()->getInputType() == ApplicationInputType::TOUCH);
 }
 
+void UIView::drawShadow(NVGcontext* vg)
+{
+    float shadowWidth   = 0.0f;
+    float shadowFeather = 0.0f;
+    float shadowOpacity = 0.0f;
+    float shadowOffset  = 0.0f;
+
+    Rect frame = getBounds();
+
+//    switch (this->shadowType)
+//    {
+//        case ShadowType::GENERIC:
+            shadowWidth   = 2;
+            shadowFeather = 10;
+            shadowOpacity = 63.7f;
+            shadowOffset  = 10;
+//            break;
+//        case ShadowType::CUSTOM:
+//            break;
+//        case ShadowType::NONE:
+//            break;
+//    }
+
+    NVGpaint shadowPaint = nvgBoxGradient(
+        vg,
+        frame.minX(), frame.minY() + shadowWidth,
+        frame.width(), frame.height(),
+        this->cornerRadius * 2, shadowFeather,
+        UIColor(0, 0, 0, shadowOpacity).raw(), UIColor::clear.raw());
+
+    nvgBeginPath(vg);
+    nvgRect(
+        vg,
+        frame.minX() - shadowOffset,
+        frame.minY() - shadowOffset,
+        frame.width() + shadowOffset * 2,
+        frame.height() + shadowOffset * 3);
+    nvgRoundedRect(vg, frame.minX(), frame.minY(), frame.width(), frame.height(), this->cornerRadius);
+    nvgPathWinding(vg, NVG_HOLE);
+    nvgFillPaint(vg, shadowPaint);
+    nvgFill(vg);
+}
+
 void UIView::drawHighlight(NVGcontext* vg, bool background) {
     if (!shouldDrawHighlight()) return;
 
     nvgSave(vg);
     nvgResetScissor(vg);
 
-    float padding = 0;
-    float cornerRadius = 0.5f;
+    float padding = highlightSpacing;
+    float cornerRadius = highlightCornerRadius;
     float strokeWidth  = 5;
 
     auto frame = getFrame();
 
-    float x = padding - strokeWidth / 2;
-    float y = padding - strokeWidth / 2;
+    float x = -padding - strokeWidth / 2;
+    float y = -padding - strokeWidth / 2;
     float width  = frame.width() + padding * 2 + strokeWidth;
     float height = frame.height() + padding * 2 + strokeWidth;
 
@@ -303,11 +349,13 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
     if (background)
     {
         // Background
-        UIColor highlightBackgroundColor = UIColor(252, 255, 248);
-        nvgFillColor(vg, highlightBackgroundColor.raw());
-        nvgBeginPath(vg);
-        nvgRoundedRect(vg, x, y, width, height, cornerRadius);
-        nvgFill(vg);
+        if (drawBackgroundOnHighlight) {
+            UIColor highlightBackgroundColor = UIColor(252, 255, 248);
+            nvgFillColor(vg, highlightBackgroundColor.raw());
+            nvgBeginPath(vg);
+            nvgRoundedRect(vg, x, y, width, height, cornerRadius);
+            nvgFill(vg);
+        }
     }
     else
     {
@@ -341,7 +389,7 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
             (color * highlightColor1.g()) + (1 - color) * highlightColor1.g(),
             (color * highlightColor1.b()) + (1 - color) * highlightColor1.b());
 
-        UIColor borderColor = UIColor(80, 239, 217, 150);
+        UIColor borderColor = UIColor(100, 255, 225, 255);
 
         float strokeWidth = 5;
 

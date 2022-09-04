@@ -25,7 +25,7 @@ void UIAppDelegate::applicationDidFinishLaunching() {
     printf("Launching app...\n");
 
     UIWindow* window = new UIWindow();
-    UITabBarController* tabsVC = new UITabBarController({tableView, listVC, controlVC, animVC, nullptr, rootVC, touchVC});
+    UITabBarController* tabsVC = new UITabBarController({controlVC, tableView, listVC, animVC, nullptr, rootVC, touchVC});
     UINavigationController* vc = new UINavigationController(tabsVC);
     window->setRootViewController(vc);
     window->makeKeyAndVisible();
