@@ -13,6 +13,8 @@
 		7C23962E287E143700973CC0 /* encoding_utf.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C239628287E143600973CC0 /* encoding_utf.c */; };
 		7C23962F287E143700973CC0 /* compat_strl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962A287E143600973CC0 /* compat_strl.c */; };
 		7C239630287E143700973CC0 /* features_cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962C287E143600973CC0 /* features_cpu.c */; };
+		7C28B26128C6764500900D60 /* GroupTask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C28B25F28C6764500900D60 /* GroupTask.cpp */; };
+		7C28B26228C6764500900D60 /* GroupTask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C28B25F28C6764500900D60 /* GroupTask.cpp */; };
 		7C44163C28777D9B0076663D /* UIResponder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C44163A28777D9B0076663D /* UIResponder.cpp */; };
 		7C4630552884325800DF15F3 /* UIAppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4630532884325800DF15F3 /* UIAppDelegate.cpp */; };
 		7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4630532884325800DF15F3 /* UIAppDelegate.cpp */; };
@@ -239,6 +241,8 @@
 		7C23962A287E143600973CC0 /* compat_strl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = compat_strl.c; sourceTree = "<group>"; };
 		7C23962C287E143600973CC0 /* features_cpu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = features_cpu.c; sourceTree = "<group>"; };
 		7C23962D287E143600973CC0 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		7C28B25F28C6764500900D60 /* GroupTask.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GroupTask.cpp; sourceTree = "<group>"; };
+		7C28B26028C6764500900D60 /* GroupTask.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GroupTask.hpp; sourceTree = "<group>"; };
 		7C35D1B9287CD0E8005C0A7F /* tween.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tween.h; sourceTree = "<group>"; };
 		7C35D1BA287CD0E8005C0A7F /* tweentraits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tweentraits.h; sourceTree = "<group>"; };
 		7C35D1BB287CD0E8005C0A7F /* easing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = easing.h; sourceTree = "<group>"; };
@@ -618,6 +622,15 @@
 			path = Core;
 			sourceTree = "<group>";
 		};
+		7C28B25E28C6762900900D60 /* GroupTask */ = {
+			isa = PBXGroup;
+			children = (
+				7C28B26028C6764500900D60 /* GroupTask.hpp */,
+				7C28B25F28C6764500900D60 /* GroupTask.cpp */,
+			);
+			path = GroupTask;
+			sourceTree = "<group>";
+		};
 		7C35D1B8287CD0E8005C0A7F /* tweeny */ = {
 			isa = PBXGroup;
 			children = (
@@ -872,6 +885,7 @@
 				7C23960F287E139B00973CC0 /* Animation */,
 				7C0638F02876214000621093 /* FontManager */,
 				7C78EBDB2873748B0082D3AC /* GaussianBlur */,
+				7C28B25E28C6762900900D60 /* GroupTask */,
 				7CD926CC28951DFC005AD85D /* NotificationEvent.hpp */,
 			);
 			path = Utils;
@@ -1549,6 +1563,7 @@
 			files = (
 				7CE9B5E32874917F00659D24 /* YGNode.cpp in Sources */,
 				7C8D981D28BC113700BDD667 /* UIImageView.cpp in Sources */,
+				7C28B26128C6764500900D60 /* GroupTask.cpp in Sources */,
 				7C49617928A8215000E30B4B /* TouchTestViewController.cpp in Sources */,
 				7C8D98A628BD658400BDD667 /* plutovg-geometry.c in Sources */,
 				7CE9B5E02874917F00659D24 /* YGEnums.cpp in Sources */,
@@ -1738,6 +1753,7 @@
 				7C8D988128BD657500BDD667 /* svgelement.cpp in Sources */,
 				7CA9C4B62882D31900E47DB3 /* ios_video.cpp in Sources */,
 				7C8D986728BD657500BDD667 /* graphicselement.cpp in Sources */,
+				7C28B26228C6764500900D60 /* GroupTask.cpp in Sources */,
 				7CA9C48A2882C43100E47DB3 /* UIStackView.cpp in Sources */,
 				7C8D986F28BD657500BDD667 /* styleelement.cpp in Sources */,
 				7C709CA328C08F77000A474F /* Geometry.cpp in Sources */,

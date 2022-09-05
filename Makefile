@@ -108,12 +108,13 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UIView \
 			NXKit/lib/Core/UIViewController \
 			NXKit/lib/Core/UIWindow \
-			NXKit/lib/Core/Utils/Tools \
-			NXKit/lib/Core/Utils/GaussianBlur \
-			NXKit/lib/Core/Utils/Animation/Core \
 			NXKit/lib/Core/Utils/Animation/AnimationContext \
+			NXKit/lib/Core/Utils/Animation/Core \
 			NXKit/lib/Core/Utils/FontManager \
+			NXKit/lib/Core/Utils/GaussianBlur \
+			NXKit/lib/Core/Utils/GroupTask \
 			NXKit/lib/Core/Utils/Literals \
+			NXKit/lib/Core/Utils/Tools \
 			NXKit/lib/extern/lib/nanovg-gl/ \
 			NXKit/lib/extern/lib/glad \
 			NXKit/lib/extern/lib/lunasvg \
