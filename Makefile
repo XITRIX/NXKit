@@ -82,6 +82,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/Geometry \
 			NXKit/lib/Core/NXAffineTransform \
 			NXKit/lib/Core/NXTransform3D \
+			NXKit/lib/Core/UIAlertController \
 			NXKit/lib/Core/UIAppDelegate \
 			NXKit/lib/Core/UIBlurView \
 			NXKit/lib/Core/UIButton \

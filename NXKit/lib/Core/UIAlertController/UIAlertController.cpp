@@ -27,6 +27,9 @@ void UIAlertController::loadView() {
 
     auto button = new UIButton("Close");
     alert->addSubview(button);
+    button->addAction(BUTTON_A, UIAction([this]() {
+        dismiss(true);
+    }));
 
     setView(root);
 }
@@ -39,7 +42,7 @@ void UIAlertController::viewDidLoad() {
 
 void UIAlertController::makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion) {
     getView()->alpha = 0;
-    getView()->animate(0.15f, [this]() {
+    getView()->animate(0.1f, [this]() {
         getView()->alpha = 1;
     }, EasingFunction::quadraticOut);
 
@@ -52,7 +55,7 @@ void UIAlertController::makeViewAppear(bool animated, UIViewController* presenti
 }
 
 void UIAlertController::makeViewDisappear(bool animated, std::function<void(bool)> completion) {
-    getView()->animate(0.15f, [this]() {
+    getView()->animate(0.1f, [this]() {
         getView()->alpha = 0;
     }, EasingFunction::quadraticOut);
 

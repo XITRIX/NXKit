@@ -132,7 +132,7 @@ void UIView::setBounds(Rect bounds) {
 }
 
 void UIView::internalDraw(NVGcontext* vgContext) {
-    if (isHidden()) return;
+    if (isHidden() || alpha == 0) return;
 
     nvgSave(vgContext);
     layoutIfNeeded();

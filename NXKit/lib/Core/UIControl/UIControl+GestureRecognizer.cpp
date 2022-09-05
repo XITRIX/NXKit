@@ -6,6 +6,7 @@
 //
 
 #include <Core/UIControl/UIControl.hpp>
+#include <Core/Application/Application.hpp>
 
 namespace NXKit {
 
@@ -23,6 +24,7 @@ void UIControl::GestureRecognizer::touchesBegan(std::vector<UITouch*> touches, U
         trackingTouch = touches[0];
         control->setHighlighted(true);
         control->onEvent(UIControlTouchEvent::touchDown);
+        Application::shared()->setFocus(control);
     }
 }
 
