@@ -108,6 +108,8 @@ public:
     void setSize(Size size);
     void setWidth(float width);
     void setHeight(float height);
+    void setMinWidth(float width);
+    void setMinHeight(float height);
     void setPercentWidth(float width);
     void setPercentHeight(float height);
 

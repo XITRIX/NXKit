@@ -104,6 +104,36 @@ void UIView::setHeight(float height) {
     setNeedsLayout();
 }
 
+void UIView::setMinWidth(float width) {
+    bounds.size.width = width;
+    if (width == UIView::AUTO)
+    {
+        YGNodeStyleSetWidthAuto(this->ygNode);
+        YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
+    }
+    else
+    {
+        YGNodeStyleSetWidthAuto(this->ygNode);
+        YGNodeStyleSetMinWidth(this->ygNode, width);
+    }
+    setNeedsLayout();
+}
+
+void UIView::setMinHeight(float height) {
+    bounds.size.height = height;
+    if (height == UIView::AUTO)
+    {
+        YGNodeStyleSetHeightAuto(this->ygNode);
+        YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
+    }
+    else
+    {
+        YGNodeStyleSetHeightAuto(this->ygNode);
+        YGNodeStyleSetMinHeight(this->ygNode, height);
+    }
+    setNeedsLayout();
+}
+
 void UIView::setPercentWidth(float width) {
     YGNodeStyleSetMinWidthPercent(this->ygNode, width);
     YGNodeStyleSetWidthPercent(this->ygNode, width);
@@ -173,24 +203,8 @@ void UIView::internalDraw(NVGcontext* vgContext) {
         nvgFill(vgContext);
     }
 
-    nvgSave(vgContext);
     nvgTranslate(vgContext, -bounds.minX(), -bounds.minY());
     draw(vgContext);
-
-    nvgSave(vgContext);
-
-    UIView* focused = nullptr;
-    for (auto view: subviews) {
-        if (view->isFocused())
-            focused = view;
-
-        view->internalDraw(vgContext);
-    }
-    if (focused) {
-        focused->drawHighlight(vgContext, false);
-    }
-    nvgRestore(vgContext);
-    nvgRestore(vgContext);
 
     // Borders
     if (!shouldDrawHighlight()) {
@@ -232,6 +246,17 @@ void UIView::internalDraw(NVGcontext* vgContext) {
             nvgFillColor(vgContext, borderColor.raw());
             nvgFill(vgContext);
         }
+    }
+
+    UIView* focused = nullptr;
+    for (auto view: subviews) {
+        if (view->isFocused())
+            focused = view;
+
+        view->internalDraw(vgContext);
+    }
+    if (focused) {
+        focused->drawHighlight(vgContext, false);
     }
 
     nvgRestore(vgContext);
@@ -551,6 +576,7 @@ UIView* UIView::getDefaultFocus() {
     if (canBecomeFocused()) return this;
 
     for (auto view: subviews) {
+        if (view->isHidden()) continue;
         UIView* focus = view->getDefaultFocus();
         if (focus) return focus;
     }

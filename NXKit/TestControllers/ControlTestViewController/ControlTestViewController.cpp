@@ -27,6 +27,15 @@ void ControlTestViewController::loadView() {
 //    control->setStyle(NXKit::UIButtonStyle::HIGHLIGHT);
     view->addSubview(control);
 
+    auto task = new GroupTask([]() {
+        printf("Group test");
+    });
+    task->enter();
+    
+    view->animate(3, []() {}, EasingFunction::linear, [task](bool res) {
+        task->leave();
+    });
+
 //    control->addAction(BUTTON_A, UIAction([this]() {
 //        TouchTestViewController* touchVC = new TouchTestViewController();
 //        AnimationTestViewController* animVC = new AnimationTestViewController();
@@ -38,7 +47,14 @@ void ControlTestViewController::loadView() {
 //    }));
 
     control->addAction(BUTTON_A, UIAction([this]() {
-        auto alert = new UIAlertController();
+        auto alert = new UIAlertController("Hello title Hello title Hello title Hello title Hello title Hello title Hello title Hello title Hello title", "Just some text to fill message label Just some text to fill message label Just some text to fill message label Just some text to fill message label");
+        alert->addAction(UIAlertAction("Cancel", NXKit::UIAlertActionStyle::DEFAULT, []() { printf("Cancel\n"); }));
+        alert->addAction(UIAlertAction("Ok", NXKit::UIAlertActionStyle::DEFAULT, []() { printf("OK\n"); }));
+        alert->addAction(UIAlertAction("Delete", NXKit::UIAlertActionStyle::DESTRUCTIVE, []() { printf("Delete\n");
+
+
+            
+        }));
         present(alert, true);
     }));
 

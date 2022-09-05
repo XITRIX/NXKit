@@ -86,10 +86,13 @@ UIView* UIStackView::getDefaultFocus() {
 
     auto subviews = getSubviews();
 
-    if (subviews.size() > currentFocus)
-        return getSubviews()[currentFocus]->getDefaultFocus();
+    if (subviews.size() > currentFocus) {
+        auto currentSelection = getSubviews()[currentFocus]->getDefaultFocus();
+        if (currentSelection)
+            return currentSelection;
+    }
 
-    return nullptr;
+    return UIView::getDefaultFocus();
 }
 
 UIView* UIStackView::hitTest(Point point, UIEvent *withEvent) {

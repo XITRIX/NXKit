@@ -32,7 +32,7 @@ UIControl::~UIControl() {
 }
 
 bool UIControl::canBecomeFocused() {
-    return true;
+    return !isHidden();
 }
 
 bool UIControl::isEnabled() {

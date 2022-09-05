@@ -30,7 +30,7 @@ public:
     void setStyle(UIButtonStyle style);
 
     void setTitle(std::string title);
-private:
+protected:
     UILabel* label;
     UIButtonStyle style;
 };

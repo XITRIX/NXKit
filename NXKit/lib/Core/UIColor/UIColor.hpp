@@ -38,8 +38,8 @@ public:
     static UIColor white;
     static UIColor black;
     static UIColor gray;
-    static UIColor separator;
 
+    static UIColor separator;
     static UIColor systemBackground;
     static UIColor systemBlue;
 private:
