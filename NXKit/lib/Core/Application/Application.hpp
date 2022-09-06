@@ -12,6 +12,7 @@
 #include <Core/UIView/UIView.hpp>
 #include <Core/UIWindow/UIWindow.hpp>
 #include <Core/UIAppDelegate/UIAppDelegate.hpp>
+#include <Core/Utils/NotificationEvent.hpp>
 
 namespace NXKit {
 
@@ -48,6 +49,8 @@ public:
 
     ApplicationInputType getInputType() { return inputType; }
     UIAppDelegate* getDelegate() { return delegate; }
+
+    NotificationEvent<UIView*>* getFocusDidChangeEvent() { return &focusDidChangeEvent; };
 private:
     inline static Application* _shared;
 
@@ -58,6 +61,7 @@ private:
 
     void setInputType(ApplicationInputType inputType);
     ApplicationInputType inputType = ApplicationInputType::GAMEPAD;
+    NotificationEvent<UIView*> focusDidChangeEvent;
 
     unsigned windowWidth, windowHeight;
     float windowScale;

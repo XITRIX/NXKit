@@ -194,6 +194,8 @@ void Application::setFocus(UIView* view) {
         if (this->focus->superview)
             this->focus->superview->subviewFocusDidChange(this->focus, this->focus);
     }
+
+    focusDidChangeEvent.fire(focus);
 }
 
 int Application::getFps() {

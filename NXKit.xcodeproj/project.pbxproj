@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		7C0638F32876215100621093 /* FontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F12876215100621093 /* FontManager.cpp */; };
 		7C0638F42876233200621093 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E92874EA4000659D24 /* main.cpp */; };
+		7C07B87828C7C0A8009FFA69 /* UIActionsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C07B87628C7C0A8009FFA69 /* UIActionsView.cpp */; };
+		7C07B87928C7C0A8009FFA69 /* UIActionsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C07B87628C7C0A8009FFA69 /* UIActionsView.cpp */; };
 		7C239612287E13C100973CC0 /* Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239610287E13C100973CC0 /* Time.cpp */; };
 		7C23962E287E143700973CC0 /* encoding_utf.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C239628287E143600973CC0 /* encoding_utf.c */; };
 		7C23962F287E143700973CC0 /* compat_strl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962A287E143600973CC0 /* compat_strl.c */; };
@@ -222,6 +224,8 @@
 /* Begin PBXFileReference section */
 		7C0638F12876215100621093 /* FontManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FontManager.cpp; sourceTree = "<group>"; };
 		7C0638F22876215100621093 /* FontManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FontManager.hpp; sourceTree = "<group>"; };
+		7C07B87628C7C0A8009FFA69 /* UIActionsView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIActionsView.cpp; sourceTree = "<group>"; };
+		7C07B87728C7C0A8009FFA69 /* UIActionsView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIActionsView.hpp; sourceTree = "<group>"; };
 		7C239610287E13C100973CC0 /* Time.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Time.cpp; sourceTree = "<group>"; };
 		7C239611287E13C100973CC0 /* Time.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Time.hpp; sourceTree = "<group>"; };
 		7C239615287E142F00973CC0 /* utf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utf.h; sourceTree = "<group>"; };
@@ -507,6 +511,15 @@
 				7C0638F12876215100621093 /* FontManager.cpp */,
 			);
 			path = FontManager;
+			sourceTree = "<group>";
+		};
+		7C07B87528C7C08D009FFA69 /* UIActionsView */ = {
+			isa = PBXGroup;
+			children = (
+				7C07B87728C7C0A8009FFA69 /* UIActionsView.hpp */,
+				7C07B87628C7C0A8009FFA69 /* UIActionsView.cpp */,
+			);
+			path = UIActionsView;
 			sourceTree = "<group>";
 		};
 		7C23960F287E139B00973CC0 /* Animation */ = {
@@ -1175,6 +1188,7 @@
 		7CA960742871F841009E0953 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				7C07B87528C7C08D009FFA69 /* UIActionsView */,
 				7CA960BE2871FABA009E0953 /* Application */,
 				7C78EBCB2873743C0082D3AC /* Driver */,
 				7C78EBD52873748B0082D3AC /* Geometry */,
@@ -1592,6 +1606,7 @@
 				7C8D98AC28BD658400BDD667 /* plutovg-rle.c in Sources */,
 				7C58C65B28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */,
 				7C8D987428BD657500BDD667 /* element.cpp in Sources */,
+				7C07B87828C7C0A8009FFA69 /* UIActionsView.cpp in Sources */,
 				7C8D980F28BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
 				7C8D986828BD657500BDD667 /* maskelement.cpp in Sources */,
 				7C8D982628BC172D00BDD667 /* Literals.cpp in Sources */,
@@ -1678,6 +1693,7 @@
 				7C8D987928BD657500BDD667 /* gelement.cpp in Sources */,
 				7CA9C48F2882C43100E47DB3 /* GaussianBlur.cpp in Sources */,
 				7C709CB128C0BD15000A474F /* ControlTestViewController.cpp in Sources */,
+				7C07B87928C7C0A8009FFA69 /* UIActionsView.cpp in Sources */,
 				7CA9C46B2882ADD600E47DB3 /* AppDelegate.m in Sources */,
 				7C8D987D28BD657500BDD667 /* property.cpp in Sources */,
 				7CA9C48D2882C43100E47DB3 /* UITouch.cpp in Sources */,
