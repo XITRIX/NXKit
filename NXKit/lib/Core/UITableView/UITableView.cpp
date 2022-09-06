@@ -193,6 +193,7 @@ void UITableView::dequeCellsForCurrentContentOffset() {
                     if (row == 0) cell->setBorderTop(1);
                     else { cell->setBorderTop(0); }
                     cell->setBorderBottom(1);
+                    cell->borderColor = UIColor::separator;
                     
                     cell->layoutSubviews();
                     float height = cell->getBounds().height();

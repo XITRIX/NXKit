@@ -10,6 +10,7 @@
 #include <Core/UIViewController/UIViewController.hpp>
 #include <Core/Application/Application.hpp>
 #include <Core/UIStackView/UIStackView.hpp>
+#include <Core/Utils/GroupTask/GroupTask.hpp>
 #include <Platforms/InputManager.hpp>
 
 namespace NXKit {
@@ -844,6 +845,52 @@ float UIView::getBorderRight() {
 
 float UIView::getBorderBottom() {
     return YGNodeLayoutGetBorder(this->ygNode, YGEdgeBottom);
+}
+
+void UIView::animate(std::initializer_list<UIView*> views, float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {
+    if (duration <= 0) {
+        animations();
+        for (UIView* view: views) {
+            view->animationContext.reset(view->createAnimationContext());
+        }
+        completion(true);
+        return;
+    }
+
+    std::vector<UIView*> _views;
+    std::vector<std::deque<float>> contexts;
+    for (UIView* view: views) {
+        _views.push_back(view);
+        auto oldContext = view->createAnimationContext();
+        view->animationContext.reset(oldContext);
+        contexts.push_back(oldContext);
+    }
+
+    animations();
+
+    bool* _res = new bool(true);
+    GroupTask* group = new GroupTask([completion, _res]() {
+        completion(*_res);
+    });
+
+    for (int i = 0; i < views.size(); i++) {
+        UIView* view = _views[i];
+        view->animationContext.addStep(view->createAnimationContext(), duration * 1000, easing);
+
+        view->animationContext.setTickCallback([view]() {
+            auto values = view->animationContext.getValue();
+            view->applyAnimationContext(&values);
+        });
+
+        group->enter();
+        view->animationContext.setEndCallback([_res, group](bool res) {
+            *_res &= res;
+            group->leave();
+        });
+
+        view->applyAnimationContext(&contexts[i]);
+        view->animationContext.start();
+    }
 }
 
 }

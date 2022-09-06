@@ -36,6 +36,8 @@ enum class NavigationDirection {
 class UIView: public UIResponder {
 public:
     static constexpr float AUTO = NAN;
+    
+    static void animate(std::initializer_list<UIView*> views, float duration, std::function<void()> animations, EasingFunction easing = EasingFunction::linear, std::function<void(bool)> completion = [](bool res){});
 
     std::string tag;
     UIColor backgroundColor;

@@ -33,7 +33,6 @@ UITableViewCell* TableViewTestController::tableViewCellForRowAt(UITableView* tab
     auto item = (UITableViewDefaultCell*) tableView->dequeueReusableCell("Cell", indexPath);
     item->setText("Test text #" + std::to_string(indexPath.row() + 1));
     item->setImage(new UIImage(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(indexPath.row()%10) + ".svg", 2));
-    item->borderColor = UIColor::separator;
     return item;
 }
 
