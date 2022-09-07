@@ -7,10 +7,56 @@
 
 #include <Core/UIActionsView/UIActionsView.hpp>
 #include <Core/Application/Application.hpp>
+#include <Core/UIControl/UIControl.hpp>
+#include <Core/UILabel/UILabel.hpp>
 
 namespace NXKit {
 
-UIActionsView::UIActionsView() {
+class UIActionView: public UIControl {
+public:
+    UIActionView() {
+        setAxis(Axis::HORIZONTAL);
+        setPadding(4, 16, 4, 16);
+        cornerRadius = 6;
+
+        iconLabel = new UILabel();
+        iconLabel->verticalAlign = VerticalAlign::CENTER;
+        iconLabel->getFont()->fontSize = 25.5f;
+
+        label = new UILabel();
+        label->verticalAlign = VerticalAlign::CENTER;
+        label->getFont()->fontSize = 21.5f;
+        label->setMarginLeft(8);
+
+        addSubview(iconLabel);
+        addSubview(label);
+
+        onEvent = [this](UIControlTouchEvent event) {
+            if (event == UIControlTouchEvent::touchUpInside) {
+                this->action.action();
+            }
+        };
+    }
+
+    void setAction(ControllerButton button, UIAction action) {
+        this->button = button;
+        this->action = action;
+
+        iconLabel->setText(InputManager::shared()->getButtonIcon(button));
+        label->setText(action.name);
+    }
+
+    bool canBecomeFocused() override { return false; }
+private:
+    ControllerButton button;
+    UIAction action;
+    UILabel* label = nullptr;
+    UILabel* iconLabel = nullptr;
+};
+
+UIActionsView::UIActionsView():
+    UIStackView(Axis::HORIZONTAL)
+{
     focusChangeToken = Application::shared()->getFocusDidChangeEvent()->subscribe([this](UIView* focusView) {
         this->refreshActionsView(focusView);
     });
@@ -22,7 +68,37 @@ UIActionsView::~UIActionsView() {
 }
 
 void UIActionsView::refreshActionsView(UIView* view) {
-    
+    auto subviews = getSubviews();
+    for (auto subview: subviews) {
+        subview->removeFromSuperview();
+        actionViewsQueue.push_back(subview);
+    }
+
+    std::map<ControllerButton, UIAction> actionsMap;
+    UIResponder* responder = view;
+    while (responder) {
+        for (auto action: responder->getActions()) {
+            if (!actionsMap.count(action.first)) {
+                actionsMap[action.first] = action.second;
+            }
+        }
+        responder = responder->getNext();
+    }
+
+    for (auto action: actionsMap) {
+        auto item = dequeueActionView();
+        item->setAction(action.first, action.second);
+        addSubview(item);
+    }
+}
+
+UIActionView* UIActionsView::dequeueActionView() {
+    if (actionViewsQueue.size() > 0) {
+        UIActionView* actionView = (UIActionView*) actionViewsQueue.back();
+        actionViewsQueue.pop_back();
+        return actionView;
+    }
+    return new UIActionView();
 }
 
 }

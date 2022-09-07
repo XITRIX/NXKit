@@ -10,6 +10,7 @@
 #include <Core/UIBlurView/UIBlurView.hpp>
 #include <Core/UILabel/UILabel.hpp>
 #include <Core/UIImageView/UIImageView.hpp>
+#include <Core/UIActionsView/UIActionsView.hpp>
 
 namespace NXKit {
 
@@ -27,7 +28,6 @@ void UINavigationController::loadView() {
     //    root->cornerRadius = 40;
 
     float headerHeight = 88;
-    float footerHeight = 73;
     setAdditionalSafeAreaInsets(UIEdgeInsets(headerHeight, 0, footerHeight, 0));
 
     UIBlurView* blurHeader = new UIBlurView();
@@ -57,19 +57,8 @@ void UINavigationController::loadView() {
     header->addSubview(headerLabel);
     blurHeader->addSubview(header);
 
-    UIBlurView* blurFooter = new UIBlurView();
-    UIStackView *footer = new UIStackView();
-    footer->setAxis(Axis::HORIZONTAL);
-    //        footer->backgroundColor = UIColor(255, 255, 0);
-    footer->setSize(Size(UIView::AUTO, footerHeight));
-    footer->setBorderTop(1);
-    footer->setPaddingLeft(35);
-    footer->setPaddingRight(35);
-    footer->setMarginLeft(30);
-    footer->setMarginRight(30);
-
     overlay->addSubview(blurHeader);
-    
+
     addChild(rootController);
     root->addSubview(rootController->getView());
     rootController->didMoveToParent(this);
@@ -77,14 +66,35 @@ void UINavigationController::loadView() {
     rootController->getView()->setGrow(1);
     rootController->getView()->setShrink(1);
 
-    blurFooter->addSubview(footer);
-    overlay->addSubview(blurFooter);
+    overlay->addSubview(buildFooter());
 
     //    UIView* view = new UIView();
     //    view->addSubview(root);
 
     root->addSubview(overlay);
     setView(root);
+}
+
+UIView* UINavigationController::buildFooter() {
+    UIBlurView* blurFooter = new UIBlurView();
+    UIStackView *footer = new UIStackView();
+    footer->setAxis(Axis::HORIZONTAL);
+    footer->setAlignItems(AlignItems::STRETCH);
+    footer->setJustifyContent(JustifyContent::FLEX_END);
+    //        footer->backgroundColor = UIColor(255, 255, 0);
+    footer->setSize(Size(UIView::AUTO, footerHeight));
+    footer->setBorderTop(1);
+    footer->setMarginLeft(30);
+    footer->setMarginRight(30);
+//    footer->setPaddingLeft(8);
+//    footer->setPaddingRight(8);
+    footer->setPadding(4, 8, 4, 8);
+
+    auto actions = new UIActionsView();
+    footer->addSubview(actions);
+
+    blurFooter->addSubview(footer);
+    return blurFooter;
 }
 
 void UINavigationController::viewDidLoad() {

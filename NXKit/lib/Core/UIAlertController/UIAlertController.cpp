@@ -87,7 +87,7 @@ void UIAlertController::loadView() {
     buttons[0]->setWidth(0);
     buttons[0]->addAction(BUTTON_A, UIAction([this]() {
         dismiss(true, actions[0].handler);
-    }));
+    }, "OK"));
 
     buttons[1] = new UIAlertButton();
     buttons[1]->setHidden(true);
@@ -97,14 +97,14 @@ void UIAlertController::loadView() {
     buttons[1]->borderColor = UIColor::separator;
     buttons[1]->addAction(BUTTON_A, UIAction([this]() {
         dismiss(true, actions[1].handler);
-    }));
+    }, "OK"));
 
     buttons[2] = new UIAlertButton();
     buttons[2]->setHidden(true);
     buttons[2]->borderColor = UIColor::separator;
     buttons[2]->addAction(BUTTON_A, UIAction([this]() {
         dismiss(true, actions[2].handler);
-    }));
+    }, "OK"));
 
     buttonsView->addSubview(buttons[0]);
     buttonsView->addSubview(buttons[1]);
@@ -119,7 +119,7 @@ void UIAlertController::loadView() {
 void UIAlertController::viewDidLoad() {
     UIViewController::addAction(BUTTON_B, UIAction([this]() {
         dismiss(true);
-    }));
+    }, "Back"));
 
     if (actions.size() > 0) {
         buttonsView->setHidden(false);

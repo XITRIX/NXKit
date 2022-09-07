@@ -38,7 +38,7 @@ public:
     std::function<void(UIGestureRecognizerState)> onStateChanged = [](auto state){};
     UIGestureRecognizerDelegate* delegate = nullptr;
 
-    virtual ~UIGestureRecognizer() {}
+    virtual ~UIGestureRecognizer();
 
     bool isEnabled() { return enabled; }
     void setEnabled(bool enabled);

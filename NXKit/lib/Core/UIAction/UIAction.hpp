@@ -8,17 +8,19 @@
 #pragma once
 
 #include <functional>
+#include <string>
 
 namespace NXKit {
 
 struct UIAction {
     bool visible;
     bool enabled;
+    std::string name;
     std::function<void()> action;
 
     UIAction(): UIAction([](){}) { }
-    UIAction(std::function<void()> action, bool visible = true, bool enabled = true):
-        action(action), visible(visible), enabled(enabled)
+    UIAction(std::function<void()> action, std::string name = "", bool visible = true, bool enabled = true):
+        action(action), name(name), visible(visible), enabled(enabled)
     {}
 };
 

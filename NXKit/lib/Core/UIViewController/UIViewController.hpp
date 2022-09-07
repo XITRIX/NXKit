@@ -64,6 +64,8 @@ private:
     UIViewController* parent = nullptr;
     UIView* view = nullptr;
 
+    bool dismissing = false;
+
     UIViewController* presentedViewController = nullptr;
     UIViewController* presentingViewController = nullptr;
 

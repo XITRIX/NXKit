@@ -12,6 +12,7 @@
 #include <Core/UITouch/UITouch.hpp>
 
 #include <vector>
+#include <string>
 
 namespace NXKit {
 
@@ -235,6 +236,8 @@ public:
     virtual int touchCount() = 0;
     virtual UITouch* getTouch(int id) = 0;
     virtual std::vector<UITouch*> getTouches() = 0;
+
+    virtual std::string getButtonIcon(ControllerButton button) = 0;
 
     inline NotificationEvent<> *getInputUpdated() {
         return &inputUpdated;

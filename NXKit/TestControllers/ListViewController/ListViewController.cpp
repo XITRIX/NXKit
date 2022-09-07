@@ -37,9 +37,9 @@ ListItemView::ListItemView() {
         }
     };
 
-    addAction(BUTTON_A, UIAction([this](){
-        Application::shared()->setFocus(this);
-    }));
+//    addAction(BUTTON_A, UIAction([this](){
+//        Application::shared()->setFocus(this);
+//    }));
 }
 
 void ListItemView::setText(std::string text) {

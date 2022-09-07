@@ -48,11 +48,11 @@ UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController*
 
     setSelected(false);
 
-    onEvent = [this](UIControlTouchEvent event) {
-        if (event == UIControlTouchEvent::touchUpInside) {
-            Application::shared()->setFocus(this);
-        }
-    };
+//    onEvent = [this](UIControlTouchEvent event) {
+//        if (event == UIControlTouchEvent::touchUpInside) {
+//            Application::shared()->setFocus(this);
+//        }
+//    };
 //    auto tap = new UITapGestureRecognizer();
 //    tap->onStateChanged = [this](UIGestureRecognizerState state) {
 //        switch (state) {
@@ -100,7 +100,7 @@ UITabBarController::UITabBarController() {
             return;
         }
         Application::shared()->setFocus(tabs->getDefaultFocus());
-    }));
+    }, "Back"));
 }
 
 UITabBarController::UITabBarController(std::vector<UIViewController*> controllers):
@@ -194,7 +194,7 @@ void UITabBarController::reloadViewForViewControllers() {
                 auto newFocus = getView()->getNextFocus(NavigationDirection::RIGHT);
                 if (newFocus)
                     Application::shared()->setFocus(newFocus);
-            }));
+            }, "OK"));
             tabViews.push_back(item);
             tabs->addSubview(item);
         } else {

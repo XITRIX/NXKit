@@ -12,6 +12,7 @@
 
 namespace NXKit {
 
+class UIActionView;
 class UIActionsView: public UIStackView {
 public:
     UIActionsView();
@@ -20,6 +21,9 @@ public:
     void refreshActionsView(UIView* view);
 private:
     NotificationEvent<UIView*>::Subscription focusChangeToken;
+    std::vector<UIView*> actionViewsQueue;
+
+    UIActionView* dequeueActionView();
 };
 
 }

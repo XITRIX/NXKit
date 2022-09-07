@@ -45,6 +45,8 @@ public:
     UITouch* getTouch(int id) override;
     std::vector<UITouch*> getTouches() override;
 
+    std::string getButtonIcon(ControllerButton button) override;
+
     void update() override;
 
 protected:

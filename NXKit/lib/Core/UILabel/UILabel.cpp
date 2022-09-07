@@ -46,7 +46,7 @@ YGSize UILabel::labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widt
     };
 
     if (fullText == "")
-        return size;
+        return { 0, size.height };
 
     // XXX: workaround for a Yoga bug
     if (widthMode == YGMeasureModeAtMost && (width == 0 || std::isnan(width)))

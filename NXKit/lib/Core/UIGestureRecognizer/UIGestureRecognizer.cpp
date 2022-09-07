@@ -10,6 +10,12 @@
 
 namespace NXKit {
 
+UIGestureRecognizer::~UIGestureRecognizer() {
+    for (auto touch: allTouches) {
+        touch->hasBeenCancelledByAGestureRecognizer = true;
+    }
+}
+
 void UIGestureRecognizer::setEnabled(bool enabled) {
     this->enabled = enabled;
 }
@@ -50,6 +56,10 @@ void UIGestureRecognizer::_touchesBegan(std::vector<UITouch*> touches, UIEvent* 
     if (!recognitionCondition()) return;
 
     touchesBegan(touches, event);
+
+    // Check touche's hasBeenCancelledByAGestureRecognizer in case
+    // gesture has been deinited by action in touchBegan
+    if (touches.back()->hasBeenCancelledByAGestureRecognizer) return;
 
     if (firstTouch && state == UIGestureRecognizerState::POSSIBLE)
         onStateChanged(state);

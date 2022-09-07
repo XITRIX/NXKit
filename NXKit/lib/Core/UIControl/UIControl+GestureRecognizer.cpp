@@ -24,7 +24,6 @@ void UIControl::GestureRecognizer::touchesBegan(std::vector<UITouch*> touches, U
         trackingTouch = touches[0];
         control->setHighlighted(true);
         control->onEvent(UIControlTouchEvent::touchDown);
-        Application::shared()->setFocus(control);
     }
 }
 
@@ -51,6 +50,8 @@ void UIControl::GestureRecognizer::touchesEnded(std::vector<UITouch*> touches, U
         Point location = trackingTouch->locationIn(this->view);
         bool touchInside = view->getBounds().insetBy(UIEdgeInsets(extraTouchArea)).contains(location);
         if (touchInside) {
+//            if (control->canBecomeFocused())
+//                Application::shared()->setFocus(control);
             setState(UIGestureRecognizerState::ENDED);
             control->onEvent(UIControlTouchEvent::touchUpInside);
         }

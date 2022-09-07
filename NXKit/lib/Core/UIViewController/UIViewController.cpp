@@ -136,15 +136,14 @@ void UIViewController::present(UIViewController* controller, bool animated, std:
     setPresentedViewController(controller);
     controller->setPresentingViewController(this);
 
-    Application::shared()->setFocus(nullptr);
     controller->viewWillAppear(animated);
 
     auto window = getView()->getWindow();
     window->addSubview(controller->getView());
     window->addPresentedViewController(controller);
+    Application::shared()->setFocus(controller->getView()->getDefaultFocus());
 
     controller->makeViewAppear(animated, this, [controller, animated, completion]() {
-        Application::shared()->setFocus(controller->getView()->getDefaultFocus());
         controller->viewDidAppear(animated);
         completion();
     });
@@ -156,15 +155,17 @@ void UIViewController::dismiss(bool animated, std::function<void()> completion) 
         return;
     }
 
+    if (dismissing) return;
+    dismissing = true;
+
     viewWillDisappear(animated);
     presentingViewController->setPresentedViewController(nullptr);
-    Application::shared()->setFocus(nullptr);
+    Application::shared()->setFocus(presentingViewController->getView()->getDefaultFocus());
 
     makeViewDisappear(animated, [this, animated, completion](bool res) {
         getView()->getWindow()->removePresentedViewController(this);
         getView()->removeFromSuperview();
         viewDidDisappear(animated);
-        Application::shared()->setFocus(presentingViewController->getView()->getDefaultFocus());
         completion();
         setPresentingViewController(nullptr);
         delete this;

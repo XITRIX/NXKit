@@ -31,6 +31,9 @@ backgroundColor(0, 0, 0, 0)
 }
 
 UIView::~UIView() {
+    if (isFocused())
+        Application::shared()->setFocus(nullptr);
+
     for (auto recognizer: gestureRecognizers) {
         delete recognizer;
     }

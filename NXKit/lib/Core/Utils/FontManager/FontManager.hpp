@@ -16,10 +16,15 @@ public:
     FontManager();
 
     int getPrimaryFont() { return primaryFont; }
+    int getIconsFont() { return iconsFont; }
 private:
     inline static FontManager* _shared = nullptr;
 
+    void loadRegularFont();
+    void loadIconsFont();
+
     int primaryFont = -1;
+    int iconsFont = -1;
 };
 
 }

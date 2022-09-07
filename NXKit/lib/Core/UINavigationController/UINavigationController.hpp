@@ -19,9 +19,13 @@ public:
     void viewDidLoad() override;
     void viewDidLayoutSubviews() override;
 private:
+    float footerHeight = 73;
+    
     UIView* rootView;
     UIStackView* overlay;
     UIViewController* rootController;
+
+    UIView* buildFooter();
 };
 
 }
