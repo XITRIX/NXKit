@@ -11,6 +11,8 @@
 
 namespace NXKit {
 
-class SwitchVideoContext: public GLFWVideoContext {};
+class SwitchVideoContext: public GLFWVideoContext {
+    UIUserInterfaceStyle getUserInterfaceStyle() override;
+};
 
 }

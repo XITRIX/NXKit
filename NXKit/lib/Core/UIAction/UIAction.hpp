@@ -19,7 +19,7 @@ struct UIAction {
     std::function<void()> action;
 
     UIAction(): UIAction([](){}) { }
-    UIAction(std::function<void()> action, std::string name = "", bool visible = true, bool enabled = true):
+    UIAction(std::function<void()> action, std::string name = "", bool enabled = true, bool visible = true):
         action(action), name(name), visible(visible), enabled(enabled)
     {}
 };

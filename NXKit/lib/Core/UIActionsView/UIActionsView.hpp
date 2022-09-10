@@ -18,6 +18,8 @@ public:
     UIActionsView();
     ~UIActionsView();
 
+    UIViewController* inController = nullptr;
+
     void refreshActionsView(UIView* view);
 private:
     NotificationEvent<UIView*>::Subscription focusChangeToken;

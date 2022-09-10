@@ -168,6 +168,9 @@ void UIView::setBounds(Rect bounds) {
 void UIView::internalDraw(NVGcontext* vgContext) {
     if (isHidden() || alpha == 0) return;
 
+    auto trait = getTraitCollection();
+    UITraitCollection::current = trait;
+
     nvgSave(vgContext);
     layoutIfNeeded();
 
@@ -381,7 +384,7 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
     {
         // Background
         if (drawBackgroundOnHighlight) {
-            UIColor highlightBackgroundColor = UIColor(252, 255, 248);
+            UIColor highlightBackgroundColor = UIColor::tetriarySystemBackground;
             nvgFillColor(vg, highlightBackgroundColor.raw());
             nvgBeginPath(vg);
             nvgRoundedRect(vg, x, y, width, height, cornerRadius);
@@ -414,7 +417,7 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
         float gradientX, gradientY, color;
         getHighlightAnimation(&gradientX, &gradientY, &color);
 
-        UIColor highlightColor1 = UIColor(13, 182, 213);
+        UIColor highlightColor1 = UIColor(13, 182, 213, 25, 138, 198);
 
         UIColor pulsationColor = UIColor((color * highlightColor1.r()) + (1 - color) * highlightColor1.r(),
             (color * highlightColor1.g()) + (1 - color) * highlightColor1.g(),
@@ -676,7 +679,11 @@ Point UIView::convert(Point point, UIView* toView) {
 }
 
 UIView* UIView::hitTest(Point point, UIEvent* withEvent) {
-    if (!this->point(point, withEvent)) return nullptr;
+    if (isHidden() || !isUserInteractionEnabled || alpha == 0)
+        return nullptr;
+
+    if (!this->point(point, withEvent))
+        return nullptr;
 
     auto subviews = getSubviews();
     for (int i = (int) subviews.size()-1; i >= 0; i--) {
@@ -894,6 +901,17 @@ void UIView::animate(std::initializer_list<UIView*> views, float duration, std::
         view->applyAnimationContext(&contexts[i]);
         view->animationContext.start();
     }
+}
+
+// Trait collection
+UITraitCollection UIView::getTraitCollection() {
+    if (controller)
+        return controller->getTraitCollection();
+
+    if (superview)
+        return superview->getTraitCollection();
+
+    return UITraitCollection();
 }
 
 }

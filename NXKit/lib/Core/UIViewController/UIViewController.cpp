@@ -197,4 +197,20 @@ void UIViewController::makeViewDisappear(bool animated, std::function<void(bool)
     });
 }
 
+UITraitCollection UIViewController::getTraitCollection() {
+    UITraitCollection superCollection;
+    if (parent)
+        superCollection = parent->getTraitCollection();
+
+    auto superView = getView()->getSuperview();
+    if (superView) {
+        superCollection = superView->getTraitCollection();
+    }
+
+    if (overrideUserInterfaceStyle != UIUserInterfaceStyle::unspecified)
+        superCollection.userInterfaceStyle = overrideUserInterfaceStyle;
+
+    return superCollection;
+}
+
 }

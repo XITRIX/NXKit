@@ -11,6 +11,7 @@
 #include <Core/Driver/Video/video.hpp>
 #include <Core/UIView/UIView.hpp>
 #include <Core/UIWindow/UIWindow.hpp>
+#include <Core/UITraitCollection/UITraitCollection.hpp>
 #include <Core/UIAppDelegate/UIAppDelegate.hpp>
 #include <Core/Utils/NotificationEvent.hpp>
 
@@ -51,6 +52,7 @@ public:
     UIAppDelegate* getDelegate() { return delegate; }
 
     NotificationEvent<UIView*>* getFocusDidChangeEvent() { return &focusDidChangeEvent; };
+    UIUserInterfaceStyle getUserInterfaceStyle();
 private:
     inline static Application* _shared;
 

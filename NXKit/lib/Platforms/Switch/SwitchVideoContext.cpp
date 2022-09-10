@@ -6,3 +6,8 @@
 //
 
 #include <Platforms/Switch/SwitchVideoContext.hpp>
+
+
+UIUserInterfaceStyle SwitchVideoContext::getUserInterfaceStyle() {
+    return UIUserInterfaceStyle::dark;
+}

@@ -94,4 +94,10 @@ UIView* UIWindow::getDefaultFocus() {
     return UIView::getDefaultFocus();
 }
 
+UITraitCollection UIWindow::getTraitCollection() {
+    UITraitCollection traits;
+    traits.userInterfaceStyle = Application::shared()->getUserInterfaceStyle();
+    return traits;
+}
+
 }

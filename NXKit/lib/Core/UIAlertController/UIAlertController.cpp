@@ -26,7 +26,7 @@ public:
     void setStyle(UIAlertActionStyle style) {
         switch (style) {
             case UIAlertActionStyle::DEFAULT:
-                label->textColor = UIColor::systemBlue;
+                label->textColor = UIColor::systemTint;
                 break;
             case UIAlertActionStyle::DESTRUCTIVE:
                 label->textColor = UIColor::red;
@@ -72,8 +72,6 @@ void UIAlertController::loadView() {
         messageLabel->textColor = UIColor(155, 155, 155);
         textsView->addSubview(messageLabel);
     }
-
-
 
     buttonsView = new UIStackView(Axis::HORIZONTAL);
     buttonsView->borderColor = UIColor::separator;

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <nanovg.h>
+#include <Core/UITraitCollection/UITraitCollection.hpp>
 
 namespace NXKit {
 
@@ -52,6 +53,8 @@ public:
     virtual float getScaleFactor() = 0;
     
     virtual bool mainLoopInteraction() = 0;
+
+    virtual UIUserInterfaceStyle getUserInterfaceStyle() { return UIUserInterfaceStyle::unspecified; }
     
     /**
      * Can be called by the application to reset the graphics

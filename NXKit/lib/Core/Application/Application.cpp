@@ -251,4 +251,8 @@ VideoContext* Application::getVideoContext() {
     return videoContext;
 }
 
+UIUserInterfaceStyle Application::getUserInterfaceStyle() {
+    return videoContext->getUserInterfaceStyle();
+}
+
 }

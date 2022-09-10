@@ -15,6 +15,7 @@
 #include <Core/UIResponder/UIResponder.hpp>
 #include <Core/UIEdgeInsets/UIEdgeInsets.hpp>
 #include <Core/UIGestureRecognizer/UIGestureRecognizer.hpp>
+#include <Core/UITraitCollection/UITraitCollection.hpp>
 #include <tweeny/tweeny.h>
 
 #include <yoga/YGNode.h>
@@ -33,7 +34,7 @@ enum class NavigationDirection {
     LEFT
 };
 
-class UIView: public UIResponder {
+class UIView: public UIResponder, public UITraitEnvironment {
 public:
     static constexpr float AUTO = NAN;
     
@@ -54,6 +55,7 @@ public:
     bool showShadow = false;
     bool drawBackgroundOnHighlight = true;
     float highlightSpacing = 0;
+    bool isUserInteractionEnabled = true;
 
     UIView(Rect frame);
     UIView(float x, float y, float width, float height): UIView(Rect(x, y, width, height)) {}
@@ -143,6 +145,9 @@ public:
     virtual void layoutSubviews();
 
     virtual UIEdgeInsets safeAreaInsets();
+
+    // Trait Environment
+    UITraitCollection getTraitCollection() override;
 protected:
     YGNode* ygNode;
 

@@ -59,6 +59,8 @@
 		7C78EBE12873748B0082D3AC /* UILabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD82873748B0082D3AC /* UILabel.cpp */; };
 		7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBDD2873748B0082D3AC /* GaussianBlur.cpp */; };
 		7C78EBE8287386070082D3AC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C78EBE7287386070082D3AC /* OpenGL.framework */; };
+		7C82CB5428CCC97700634A8E /* UITraitCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C82CB5228CCC97700634A8E /* UITraitCollection.cpp */; };
+		7C82CB5528CCC97700634A8E /* UITraitCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C82CB5228CCC97700634A8E /* UITraitCollection.cpp */; };
 		7C888E4328816547009A6B95 /* UINavigationController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4128816547009A6B95 /* UINavigationController.cpp */; };
 		7C888E47288165E9009A6B95 /* ViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E45288165E9009A6B95 /* ViewController.cpp */; };
 		7C888E4B28818212009A6B95 /* UITabBarController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4928818212009A6B95 /* UITabBarController.cpp */; };
@@ -319,6 +321,8 @@
 		7C78EBDC2873748B0082D3AC /* GaussianBlur.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GaussianBlur.hpp; sourceTree = "<group>"; };
 		7C78EBDD2873748B0082D3AC /* GaussianBlur.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GaussianBlur.cpp; sourceTree = "<group>"; };
 		7C78EBE7287386070082D3AC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		7C82CB5228CCC97700634A8E /* UITraitCollection.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITraitCollection.cpp; sourceTree = "<group>"; };
+		7C82CB5328CCC97700634A8E /* UITraitCollection.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITraitCollection.hpp; sourceTree = "<group>"; };
 		7C888E4128816547009A6B95 /* UINavigationController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UINavigationController.cpp; sourceTree = "<group>"; };
 		7C888E4228816547009A6B95 /* UINavigationController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UINavigationController.hpp; sourceTree = "<group>"; };
 		7C888E45288165E9009A6B95 /* ViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ViewController.cpp; sourceTree = "<group>"; };
@@ -921,6 +925,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		7C82CB5028CCC96600634A8E /* UITraitCollection */ = {
+			isa = PBXGroup;
+			children = (
+				7C82CB5328CCC97700634A8E /* UITraitCollection.hpp */,
+				7C82CB5228CCC97700634A8E /* UITraitCollection.cpp */,
+			);
+			path = UITraitCollection;
+			sourceTree = "<group>";
+		};
 		7C888E3F28816531009A6B95 /* TestControllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -1188,6 +1201,7 @@
 		7CA960742871F841009E0953 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				7C82CB5028CCC96600634A8E /* UITraitCollection */,
 				7C07B87528C7C08D009FFA69 /* UIActionsView */,
 				7CA960BE2871FABA009E0953 /* Application */,
 				7C78EBCB2873743C0082D3AC /* Driver */,
@@ -1627,6 +1641,7 @@
 				7C8D985B28BD657500BDD667 /* layoutcontext.cpp in Sources */,
 				7C8D989F28BD658400BDD667 /* sw_ft_math.c in Sources */,
 				7CE9B5E22874917F00659D24 /* YGConfig.cpp in Sources */,
+				7C82CB5428CCC97700634A8E /* UITraitCollection.cpp in Sources */,
 				7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */,
 				7C709CA628C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */,
 				7C23962E287E143700973CC0 /* encoding_utf.c in Sources */,
@@ -1716,6 +1731,7 @@
 				7C58C66328B055CD0039F0E5 /* UITapGestureRecognizer.cpp in Sources */,
 				7CA9C4A22882C83F00E47DB3 /* YGEnums.cpp in Sources */,
 				7CA9C48E2882C43100E47DB3 /* Time.cpp in Sources */,
+				7C82CB5528CCC97700634A8E /* UITraitCollection.cpp in Sources */,
 				7CA9C4A82882C84E00E47DB3 /* glad.c in Sources */,
 				7CA9C4872882C43100E47DB3 /* UILabel.cpp in Sources */,
 				7C58C65528AF85AD0039F0E5 /* NXTransform3D.cpp in Sources */,

@@ -167,7 +167,7 @@ static std::string trim(const std::string& str)
 
 UILabel::UILabel(std::string text) : UIView(),
 text(text),
-textColor(0, 0, 0),
+textColor(UIColor::label),
 shadowColor(0, 0, 0)
 {
     font = UIFont {

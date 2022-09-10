@@ -35,6 +35,7 @@ void UINavigationController::loadView() {
     header->setSize(Size(UIView::AUTO, headerHeight));
     header->setAxis(Axis::HORIZONTAL);
     header->setBorderBottom(1);
+    header->borderColor = UIColor::label;
     header->setPaddingLeft(35);
     header->setPaddingRight(35);
     header->setMarginLeft(30);
@@ -51,7 +52,6 @@ void UINavigationController::loadView() {
 
     headerLabel->getFont()->fontSize = 28;
     headerLabel->setMarginTop(7);
-//    headerLabel->backgroundColor = UIColor(255, 0, 0);
 
     header->addSubview(imageView);
     header->addSubview(headerLabel);
@@ -81,9 +81,9 @@ UIView* UINavigationController::buildFooter() {
     footer->setAxis(Axis::HORIZONTAL);
     footer->setAlignItems(AlignItems::STRETCH);
     footer->setJustifyContent(JustifyContent::FLEX_END);
-    //        footer->backgroundColor = UIColor(255, 255, 0);
     footer->setSize(Size(UIView::AUTO, footerHeight));
     footer->setBorderTop(1);
+    footer->borderColor = UIColor::label;
     footer->setMarginLeft(30);
     footer->setMarginRight(30);
 //    footer->setPaddingLeft(8);
@@ -91,6 +91,7 @@ UIView* UINavigationController::buildFooter() {
     footer->setPadding(4, 8, 4, 8);
 
     auto actions = new UIActionsView();
+    actions->inController = this;
     footer->addSubview(actions);
 
     blurFooter->addSubview(footer);

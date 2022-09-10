@@ -33,7 +33,7 @@ UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController*
     setHeight(70);
 
     selectionBar = new UIView();
-    selectionBar->backgroundColor = UIColor::systemBlue;
+    selectionBar->backgroundColor = UIColor::systemTint;
     selectionBar->setWidth(4);
     selectionBar->setMargins(9, 8, 9, 8);
 
@@ -48,11 +48,11 @@ UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController*
 
     setSelected(false);
 
-//    onEvent = [this](UIControlTouchEvent event) {
-//        if (event == UIControlTouchEvent::touchUpInside) {
-//            Application::shared()->setFocus(this);
-//        }
-//    };
+    onEvent = [this](UIControlTouchEvent event) {
+        if (event == UIControlTouchEvent::touchUpInside) {
+            Application::shared()->setFocus(this);
+        }
+    };
 //    auto tap = new UITapGestureRecognizer();
 //    tap->onStateChanged = [this](UIGestureRecognizerState state) {
 //        switch (state) {
@@ -85,11 +85,11 @@ void UITabBarItemView::becomeFocused() {
 void UITabBarItemView::setSelected(bool selected) {
     UIControl::setSelected(selected);
     if (selected) {
-        label->textColor = UIColor::systemBlue;
-        selectionBar->backgroundColor = UIColor::systemBlue;
+        label->textColor = UIColor::systemTint;
+        selectionBar->backgroundColor = UIColor::systemTint;
     } else {
-        label->textColor = UIColor(0, 0, 0);
-        selectionBar->backgroundColor = UIColor(0, 0, 0, 0);
+        label->textColor = UIColor::label;
+        selectionBar->backgroundColor = UIColor::clear;
     }
 }
 
@@ -131,7 +131,7 @@ void UITabBarController::loadView() {
     scrollView->tag = "TabBar scroll";
     scrollView->setFixWidth(true);
     scrollView->setPercentWidth(32);
-    scrollView->backgroundColor = UIColor(240, 240, 240);
+    scrollView->backgroundColor = UIColor::secondarySystemBackground;
     scrollView->addSubview(tabs);
 
     view->addSubview(scrollView);

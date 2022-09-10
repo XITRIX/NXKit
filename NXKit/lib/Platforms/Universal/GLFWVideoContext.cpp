@@ -237,4 +237,8 @@ GLFWwindow* GLFWVideoContext::getGLFWWindow()
     return this->window;
 }
 
+UIUserInterfaceStyle GLFWVideoContext::getUserInterfaceStyle() {
+    return UIUserInterfaceStyle::dark;
+}
+
 }

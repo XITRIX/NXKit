@@ -8,6 +8,7 @@
 #pragma once
 
 #include <nanovg.h>
+#include <Core/UITraitCollection/UITraitCollection.hpp>
 
 namespace NXKit {
 
@@ -15,6 +16,8 @@ struct UIColor {
 public:
     UIColor(): UIColor(0, 0, 0, 0) {}
     UIColor(short r, short g, short b, short a);
+    UIColor(short r, short g, short b, short a, short dr, short dg, short db, short da);
+    UIColor(short r, short g, short b, short dr, short dg, short db): UIColor(r, g, b, 255, dr, dg, db, 255) {}
     UIColor(short r, short g, short b): UIColor(r, g, b, 255) {}
 
     static UIColor f(float r, float g, float b, float a = 1);
@@ -41,9 +44,15 @@ public:
 
     static UIColor separator;
     static UIColor systemBackground;
-    static UIColor systemBlue;
+    static UIColor secondarySystemBackground;
+    static UIColor tetriarySystemBackground;
+    static UIColor systemTint;
+
+    static UIColor label;
 private:
     int value;
+    int darkValue;
+    bool darkInited = false;
 };
 
 }

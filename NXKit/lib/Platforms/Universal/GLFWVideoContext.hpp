@@ -42,6 +42,7 @@ public:
     void getContextPixels(int x, int y, int w, int h, unsigned char** pixels) override;
     float getScaleFactor() override;
     bool mainLoopInteraction() override;
+    UIUserInterfaceStyle getUserInterfaceStyle() override;
 
     GLFWwindow* getGLFWWindow();
 

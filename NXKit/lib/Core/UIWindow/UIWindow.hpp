@@ -25,6 +25,8 @@ public:
     void layoutSubviews() override;
     UIView* getDefaultFocus() override;
 
+    UITraitCollection getTraitCollection() override;
+
 private:
     friend class UIViewController;
     UIViewController* rootViewController = nullptr;

@@ -12,7 +12,7 @@
 
 namespace NXKit {
 
-class UIViewController: public UIResponder {
+class UIViewController: public UIResponder, public UITraitEnvironment {
 public:
     virtual ~UIViewController();
 
@@ -52,6 +52,9 @@ public:
     void dismiss(bool animated, std::function<void()> completion = [](){});
 
     UIResponder* getNext() override;
+
+    UITraitCollection getTraitCollection() override;
+    UIUserInterfaceStyle overrideUserInterfaceStyle = UIUserInterfaceStyle::unspecified;
 
 protected:
     virtual void makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion = [](){});

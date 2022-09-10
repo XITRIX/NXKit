@@ -35,9 +35,9 @@ public:
     bool isHighlighted();
 
 protected:
-    void setEnabled(bool enabled);
-    void setSelected(bool selected);
-    void setHighlighted(bool highlighted);
+    virtual void setEnabled(bool enabled);
+    virtual void setSelected(bool selected);
+    virtual void setHighlighted(bool highlighted);
 
 private:
     bool enabled = true;

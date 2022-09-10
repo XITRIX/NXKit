@@ -44,13 +44,13 @@ void UIButton::setStyle(UIButtonStyle style) {
     switch (style) {
         case UIButtonStyle::DEFAULT:
             backgroundColor = UIColor::white;
-            label->textColor = UIColor::black;
+            label->textColor = UIColor::label;
             highlightSpacing = 0;
             borderThickness = 0;
             showShadow = true;
             break;
         case UIButtonStyle::PRIMARY:
-            backgroundColor = UIColor::systemBlue;
+            backgroundColor = UIColor::systemTint;
             label->textColor = UIColor::white;
             highlightSpacing = 2;
             borderThickness = 0;
@@ -58,14 +58,14 @@ void UIButton::setStyle(UIButtonStyle style) {
             break;
         case UIButtonStyle::HIGHLIGHT:
             backgroundColor = UIColor::white;
-            label->textColor = UIColor::systemBlue;
+            label->textColor = UIColor::systemTint;
             highlightSpacing = 0;
             borderThickness = 0;
             showShadow = true;
             break;
         case UIButtonStyle::BORDERED:
             backgroundColor = UIColor::clear;
-            label->textColor = UIColor::black;
+            label->textColor = UIColor::label;
             borderColor = UIColor::black;
             highlightSpacing = 0;
             borderThickness = 1.5f;
@@ -73,7 +73,7 @@ void UIButton::setStyle(UIButtonStyle style) {
             break;
         case UIButtonStyle::BORDERLESS:
             backgroundColor = UIColor::clear;
-            label->textColor = UIColor::black;
+            label->textColor = UIColor::label;
             highlightSpacing = 0;
             borderThickness = 0;
             showShadow = false;
