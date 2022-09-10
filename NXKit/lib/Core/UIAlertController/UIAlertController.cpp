@@ -26,7 +26,7 @@ public:
     void setStyle(UIAlertActionStyle style) {
         switch (style) {
             case UIAlertActionStyle::DEFAULT:
-                label->textColor = UIColor::systemTint;
+                label->textColor = label->getTintColor();
                 break;
             case UIAlertActionStyle::DESTRUCTIVE:
                 label->textColor = UIColor::red;

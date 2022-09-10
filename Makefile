@@ -106,6 +106,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UITableViewDefaultCell \
 			NXKit/lib/Core/UITapGestureRecognizer \
 			NXKit/lib/Core/UITouch \
+			NXKit/lib/Core/UITraitCollection \
 			NXKit/lib/Core/UIView \
 			NXKit/lib/Core/UIViewController \
 			NXKit/lib/Core/UIWindow \

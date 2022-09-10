@@ -165,6 +165,20 @@ void UIView::setBounds(Rect bounds) {
     this->bounds = bounds;
 }
 
+UIColor UIView::getTintColor() {
+    if (tintColor.has_value())
+        return tintColor.value();
+
+    if (superview)
+        return superview->getTintColor();
+
+    return UIColor::systemTint;
+}
+
+void UIView::setTintColor(std::optional<UIColor> color) {
+    tintColor = color;
+}
+
 void UIView::internalDraw(NVGcontext* vgContext) {
     if (isHidden() || alpha == 0) return;
 

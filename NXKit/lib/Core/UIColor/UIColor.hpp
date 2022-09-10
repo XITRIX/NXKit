@@ -49,6 +49,7 @@ public:
     static UIColor systemTint;
 
     static UIColor label;
+    static UIColor invertLabel;
 private:
     int value;
     int darkValue;

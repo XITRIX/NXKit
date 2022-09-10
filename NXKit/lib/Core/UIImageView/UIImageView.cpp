@@ -117,6 +117,9 @@ void UIImageView::setScalingType(ImageScalingType scalingType) {
 }
 
 void UIImageView::draw(NVGcontext* vgContext) {
+    if (image->isDrawingTypeTemplate())
+        paint.innerColor = getTintColor().raw();
+    
     Rect bounds = getBounds();
     nvgBeginPath(vgContext);
     nvgRoundedRect(vgContext, 0, 0, bounds.width(), bounds.height(), cornerRadius);

@@ -47,7 +47,7 @@ void UINavigationController::loadView() {
     UIImageView* imageView = new UIImageView();
     imageView->setSize(Size(48, 48));
     imageView->setMarginRight(18);
-    imageView->setImage(new UIImage("Images/logo.png"_res, 2));
+    imageView->setImage(new UIImage("Images/logo.png"_res));
 //    imageView->setScalingType(ImageScalingType::CENTER);
 
     headerLabel->getFont()->fontSize = 28;

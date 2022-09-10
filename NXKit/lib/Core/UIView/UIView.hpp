@@ -21,6 +21,7 @@
 #include <yoga/YGNode.h>
 
 #include <vector>
+#include <optional>
 
 namespace NXKit {
 
@@ -69,6 +70,9 @@ public:
     void removeFromSuperview();
 
     UIResponder* getNext() override;
+
+    UIColor getTintColor();
+    void setTintColor(std::optional<UIColor> color);
 
     Point convert(Point point, UIView* toView);
 
@@ -155,6 +159,8 @@ private:
     friend class Application;
     friend class UIViewController;
     friend class UITableView;
+
+    std::optional<UIColor> tintColor;
 
     AnimationContext animationContext;
     std::vector<UIGestureRecognizer*> gestureRecognizers;

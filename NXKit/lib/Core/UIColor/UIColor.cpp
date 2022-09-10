@@ -24,6 +24,7 @@ UIColor UIColor::tetriarySystemBackground = UIColor(252, 255, 248, 31, 34, 39);
 UIColor UIColor::systemTint = UIColor(49, 79, 235, 0, 255, 204);
 
 UIColor UIColor::label = UIColor(45, 45, 45, 255, 255, 255);
+UIColor UIColor::invertLabel = UIColor(255, 255, 255, 52, 41, 55);
 
 UIColor::UIColor(short r, short g, short b, short a) {
     value = (a & 0xff) << 24 | (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);

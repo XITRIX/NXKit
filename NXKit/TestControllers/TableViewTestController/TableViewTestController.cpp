@@ -32,7 +32,8 @@ int TableViewTestController::tableViewNumberOfRowsInSection(UITableView* tableVi
 UITableViewCell* TableViewTestController::tableViewCellForRowAt(UITableView* tableView, IndexPath indexPath) {
     auto item = (UITableViewDefaultCell*) tableView->dequeueReusableCell("Cell", indexPath);
     item->setText("Test text #" + std::to_string(indexPath.row() + 1));
-    item->setImage(new UIImage(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(indexPath.row()%10) + ".svg", 2));
+    item->setImage(new UIImage(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(indexPath.row()%10) + ".svg", true, 2));
+    item->setTintColor(UIColor::label);
     return item;
 }
 

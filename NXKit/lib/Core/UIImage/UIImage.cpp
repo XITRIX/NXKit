@@ -12,7 +12,9 @@ using namespace lunasvg;
 
 namespace NXKit {
 
-UIImage::UIImage(std::string path, float upscale): upscale(upscale) {
+UIImage::UIImage(std::string path, bool isTemplate, float upscale):
+    upscale(upscale), isTemplate(isTemplate)
+{
     auto context = Application::shared()->getVideoContext()->getNVGContext();
     
     pngTexture = nvgCreateImage(context, path.c_str(), 0);
@@ -31,7 +33,15 @@ UIImage::UIImage(std::string path, float upscale): upscale(upscale) {
         auto bitmap = svgFile->renderToBitmap(size.width, size.height);
         bitmap.convertToRGBA();
 
-        pngTexture = nvgCreateImageRGBA(context, bitmap.width(), bitmap.height(), 0, bitmap.data());
+        auto bitmapData = bitmap.data();
+        if (isTemplate) {
+            for (int i = 0; i < bitmap.height() * bitmap.width() * 4; i++) {
+                if (i % 4 == 3) continue;
+                bitmapData[i] = 255;
+            }
+        }
+
+        pngTexture = nvgCreateImageRGBA(context, bitmap.width(), bitmap.height(), 0, bitmapData);
         imageType = UIImageType::SVG;
         return;
     }

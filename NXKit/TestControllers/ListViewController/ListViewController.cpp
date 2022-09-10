@@ -75,7 +75,7 @@ void ListViewController::viewDidLoad() {
     for (int i = 0; i < 200; i++) {
         auto item = new ListItemView();
         item->setText("Test text #" + std::to_string(i + 1));
-        item->setImage(new UIImage(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(i%10) + ".svg", 2));
+        item->setImage(new UIImage(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(i%10) + ".svg", true, 2));
         item->setBorderBottom(1);
         if (i == 0) item->setBorderTop(1);
         item->borderColor = UIColor::separator;

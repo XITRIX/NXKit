@@ -50,15 +50,15 @@ void UIButton::setStyle(UIButtonStyle style) {
             showShadow = true;
             break;
         case UIButtonStyle::PRIMARY:
-            backgroundColor = UIColor::systemTint;
-            label->textColor = UIColor::white;
+            backgroundColor = getTintColor();
+            label->textColor = UIColor::invertLabel;
             highlightSpacing = 2;
             borderThickness = 0;
             showShadow = true;
             break;
         case UIButtonStyle::HIGHLIGHT:
             backgroundColor = UIColor::white;
-            label->textColor = UIColor::systemTint;
+            label->textColor = getTintColor();
             highlightSpacing = 0;
             borderThickness = 0;
             showShadow = true;

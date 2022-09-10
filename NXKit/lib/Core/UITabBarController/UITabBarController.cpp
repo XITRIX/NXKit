@@ -33,7 +33,7 @@ UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController*
     setHeight(70);
 
     selectionBar = new UIView();
-    selectionBar->backgroundColor = UIColor::systemTint;
+    selectionBar->backgroundColor = selectionBar->getTintColor();
     selectionBar->setWidth(4);
     selectionBar->setMargins(9, 8, 9, 8);
 
@@ -85,8 +85,8 @@ void UITabBarItemView::becomeFocused() {
 void UITabBarItemView::setSelected(bool selected) {
     UIControl::setSelected(selected);
     if (selected) {
-        label->textColor = UIColor::systemTint;
-        selectionBar->backgroundColor = UIColor::systemTint;
+        label->textColor = label->getTintColor();
+        selectionBar->backgroundColor = selectionBar->getTintColor();
     } else {
         label->textColor = UIColor::label;
         selectionBar->backgroundColor = UIColor::clear;
