@@ -205,4 +205,12 @@ void UITabBarController::reloadViewForViewControllers() {
     setSelected(tabViews.front());
 }
 
+void UITabBarController::childNavigationItemDidChange(UIViewController* controller) {
+    for (auto tab: tabViews) {
+        if (tab->controller == controller) {
+            tab->label->setText(controller->getTitle());
+        }
+    }
+}
+
 }

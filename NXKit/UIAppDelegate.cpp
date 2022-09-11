@@ -27,6 +27,8 @@ void UIAppDelegate::applicationDidFinishLaunching() {
     UIWindow* window = new UIWindow();
     UITabBarController* tabsVC = new UITabBarController({controlVC, tableView, listVC, animVC, nullptr, rootVC, touchVC});
     UINavigationController* vc = new UINavigationController(tabsVC);
+    tabsVC->setTitle("Demo App");
+    tabsVC->setImage(new UIImage("Images/logo.png"_res));
     window->setRootViewController(vc);
     window->makeKeyAndVisible();
 

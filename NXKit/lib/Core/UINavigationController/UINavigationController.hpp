@@ -18,8 +18,7 @@ class UINavigationBar: public UIStackView {
 public:
     UINavigationBar();
 
-    void setTitle(std::string title);
-    void setIcon(UIImage* image);
+    void pushNavigationItem(UINavigationItem navigationItem);
 
 private:
     UILabel* titleLabel;
@@ -34,6 +33,7 @@ public:
     void viewDidLayoutSubviews() override;
 
     void show(UIViewController* controller, void* sender = nullptr) override;
+    void childNavigationItemDidChange(UIViewController* controller) override;
 
     std::vector<UIViewController*> getViewControllers() { return viewControllers; }
 

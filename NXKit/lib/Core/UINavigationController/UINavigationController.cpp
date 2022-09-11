@@ -30,8 +30,6 @@ UINavigationBar::UINavigationBar() {
     imageView = new UIImageView();
     imageView->setSize(Size(48, 48));
     imageView->setMarginRight(18);
-    imageView->setImage(new UIImage("Images/logo.png"_res));
-//    imageView->setScalingType(ImageScalingType::CENTER);
 
     titleLabel->getFont()->fontSize = 28;
     titleLabel->setMarginTop(7);
@@ -40,12 +38,11 @@ UINavigationBar::UINavigationBar() {
     addSubview(titleLabel);
 }
 
-void UINavigationBar::setTitle(std::string title) {
-    titleLabel->setText(title);
-}
+void UINavigationBar::pushNavigationItem(UINavigationItem navigationItem) {
+    titleLabel->setText(navigationItem.title);
+    imageView->setHidden(!navigationItem.image);
 
-void UINavigationBar::setIcon(UIImage* image) {
-    imageView->setImage(image);
+    if (navigationItem.image) { imageView->setImage(navigationItem.image, false); }
 }
 
 UINavigationController::UINavigationController(UIViewController* rootController) {
@@ -126,9 +123,8 @@ void UINavigationController::show(UIViewController* controller, void* sender) {
 void UINavigationController::pushViewController(UIViewController* otherViewController, bool animated) {
     if (viewControllers.size() == 0) animated = false;
 
-//    getView();
-//    navigationBar->setTitle(otherViewController->getTitle());
-//    navigationBar->setIcon(otherViewController->getImage());
+    getView();
+    navigationBar->pushNavigationItem(otherViewController->getNavigationItem());
 
     if (!animated) {
         if (viewControllers.size() > 0) {
@@ -200,8 +196,7 @@ UIViewController* UINavigationController::popViewController(bool animated, bool 
 
     UIViewController* newTop = viewControllers.back();
 
-//    navigationBar->setTitle(newTop->getTitle());
-//    navigationBar->setIcon(newTop->getImage());
+    navigationBar->pushNavigationItem(newTop->getNavigationItem());
 
     if (!animated) {
         oldTop->getView()->removeFromSuperview();
@@ -239,6 +234,10 @@ UIViewController* UINavigationController::popViewController(bool animated, bool 
     }
 
     return oldTop;
+}
+
+void UINavigationController::childNavigationItemDidChange(UIViewController* controller) {
+    navigationBar->pushNavigationItem(viewControllers.back()->getNavigationItem());
 }
 
 }

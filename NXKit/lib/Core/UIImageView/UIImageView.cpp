@@ -103,8 +103,8 @@ UIImageView::~UIImageView() {
     delete image;
 }
 
-void UIImageView::setImage(UIImage* image) {
-    if (this->image)
+void UIImageView::setImage(UIImage* image, bool freeOld) {
+    if (this->image && freeOld)
         delete this->image;
     
     this->image = image;

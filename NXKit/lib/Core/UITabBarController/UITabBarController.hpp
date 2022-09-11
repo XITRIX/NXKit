@@ -50,6 +50,7 @@ public:
     void loadView() override;
     void viewDidLoad() override;
     void viewDidLayoutSubviews() override;
+    void childNavigationItemDidChange(UIViewController* controller) override;
 
     std::vector<UIViewController*> getViewControllers() { return viewControllers; }
     void setViewControllers(std::vector<UIViewController*> controllers);

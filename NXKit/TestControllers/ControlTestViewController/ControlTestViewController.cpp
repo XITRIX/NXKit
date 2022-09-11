@@ -36,21 +36,13 @@ void ControlTestViewController::loadView() {
     control3->setMarginTop(9);
     view->addSubview(control3);
 
-//    auto task = new GroupTask([]() {
-//        printf("Group test");
-//    });
-//    task->enter();
-//
-//    view->animate(3, []() {}, EasingFunction::linear, [task](bool res) {
-//        task->leave();
-//    });
-
     control->addAction(BUTTON_A, UIAction([this]() {
         TouchTestViewController* touchVC = new TouchTestViewController();
         AnimationTestViewController* animVC = new AnimationTestViewController();
 
         UITabBarController* tabsVC = new UITabBarController({animVC, nullptr, touchVC });
         UINavigationController* vc = new UINavigationController(tabsVC);
+        tabsVC->setTitle("Presentation test");
 
         present(vc, true);
     }, "OK"));

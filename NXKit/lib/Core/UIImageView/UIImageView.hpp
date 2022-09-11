@@ -29,7 +29,7 @@ public:
     UIImageView();
     virtual ~UIImageView();
 
-    void setImage(UIImage* image);
+    void setImage(UIImage* image, bool freeOld = true);
     UIImage* getImage() { return image; }
 
     void setScalingType(ImageScalingType scalingType);
