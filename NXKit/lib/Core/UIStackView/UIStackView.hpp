@@ -63,6 +63,8 @@ public:
     void setPaddingLeft(float left);
     void setPaddingRight(float right);
     void setPaddingBottom(float bottom);
+
+    bool passthroughTouches = false;
 private:
     Axis axis = Axis::VERTICAL;
     int currentFocus = 0;

@@ -14,6 +14,9 @@
 namespace NXKit {
 
 UIViewController::~UIViewController() {
+    if (navigationItem.image)
+        delete navigationItem.image;
+
     for (auto child: children) {
         delete child;
     }
@@ -57,7 +60,19 @@ UIResponder* UIViewController::getNext() {
 }
 
 void UIViewController::setTitle(std::string title) {
-    this->title = title;
+    navigationItem.title = title;
+
+    if (parent)
+        parent->childNavigationItemDidChange(this);
+}
+
+void UIViewController::setImage(UIImage* image) {
+    if (navigationItem.image)
+        delete navigationItem.image;
+    navigationItem.image = image;
+
+    if (parent)
+        parent->childNavigationItemDidChange(this);
 }
 
 void UIViewController::addChild(UIViewController* child) {
@@ -170,6 +185,12 @@ void UIViewController::dismiss(bool animated, std::function<void()> completion) 
         setPresentingViewController(nullptr);
         delete this;
     });
+}
+
+void UIViewController::show(UIViewController* controller, void* sender) {
+    if (parent)
+        return parent->show(controller, sender);
+    present(controller, true);
 }
 
 void UIViewController::makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion) {

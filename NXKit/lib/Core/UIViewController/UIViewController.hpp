@@ -8,9 +8,15 @@
 #pragma once
 
 #include <Core/UIResponder/UIResponder.hpp>
+#include <Core/UIImage/UIImage.hpp>
 #include <Core/UIView/UIView.hpp>
 
 namespace NXKit {
+
+struct UINavigationItem {
+    std::string title;
+    UIImage* image = nullptr;
+};
 
 class UIViewController: public UIResponder, public UITraitEnvironment {
 public:
@@ -35,9 +41,6 @@ public:
     std::vector<UIViewController*> getChildren() { return children; }
     UIViewController* getParent() { return parent; }
 
-    std::string getTitle() { return title; }
-    void setTitle(std::string title);
-
     void addChild(UIViewController* child);
     void willMoveToParent(UIViewController* parent);
     void didMoveToParent(UIViewController* parent);
@@ -51,10 +54,21 @@ public:
     void present(UIViewController* controller, bool animated, std::function<void()> completion = [](){});
     void dismiss(bool animated, std::function<void()> completion = [](){});
 
+    virtual void show(UIViewController* controller, void* sender = nullptr);
+
     UIResponder* getNext() override;
 
     UITraitCollection getTraitCollection() override;
     UIUserInterfaceStyle overrideUserInterfaceStyle = UIUserInterfaceStyle::unspecified;
+
+    std::string getTitle() { return navigationItem.title; }
+    void setTitle(std::string title);
+
+    UIImage* getImage() { return navigationItem.image; }
+    void setImage(UIImage* image);
+
+    UINavigationItem getNavigationItem() { return navigationItem; }
+    virtual void childNavigationItemDidChange(UIViewController* controller) {}
 
 protected:
     virtual void makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion = [](){});
@@ -66,6 +80,9 @@ private:
     std::vector<UIViewController*> children;
     UIViewController* parent = nullptr;
     UIView* view = nullptr;
+    UINavigationItem navigationItem;
+
+    void setNavigationItem(UINavigationItem item);
 
     bool dismissing = false;
 

@@ -16,11 +16,12 @@ void AnimationTestViewController::loadView() {
     view->setAlignItems(AlignItems::CENTER);
     view->setJustifyContent(JustifyContent::CENTER);
 
-    ball = new UIView();
+    ball = new UIControl();
     ball->setSize(Size(80, 80));
     ball->cornerRadius = 40;
     ball->transformOrigin = Point(120, 0);
     ball->backgroundColor = UIColor::red;
+    ball->highlightOnFocus = false;
 
     view->addSubview(ball);
 

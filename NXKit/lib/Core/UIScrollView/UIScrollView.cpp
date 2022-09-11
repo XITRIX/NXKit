@@ -85,7 +85,8 @@ void UIScrollView::setContentOffset(Point offset, bool animated) {
 
     if (animated) {
         animate(0.1f, [this, offset]() {
-            setContentOffset(offset, false);
+//            setContentOffset(offset, false);
+            setBounds({ offset, getBounds().size });
         });
     } else {
         setBounds({ offset, getBounds().size });

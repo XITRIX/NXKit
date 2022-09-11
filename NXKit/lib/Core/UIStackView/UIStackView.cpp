@@ -97,7 +97,7 @@ UIView* UIStackView::getDefaultFocus() {
 
 UIView* UIStackView::hitTest(Point point, UIEvent *withEvent) {
     auto super = UIView::hitTest(point, withEvent);
-    if (super == this && !canBecomeFocused() && backgroundColor == UIColor::clear)
+    if (super == this && passthroughTouches)
         return nullptr;
     return super;
 }

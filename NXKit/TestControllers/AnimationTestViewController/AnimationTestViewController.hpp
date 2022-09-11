@@ -15,7 +15,7 @@ public:
     void loadView() override;
     void viewDidLoad() override;
 private:
-    UIView* ball = nullptr;
+    UIControl* ball = nullptr;
 
     void animate(bool revers);
 };

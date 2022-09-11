@@ -61,7 +61,7 @@ void UIControl::setHighlighted(bool highlighted) {
 }
 
 bool UIControl::press(ControllerButton button) {
-    if (button == BUTTON_A) {
+    if (button == BUTTON_A && getActions().count(BUTTON_A)) {
         getActions()[BUTTON_A].action();
         clickAlpha = 1;
         animate(0.2, [this]() {

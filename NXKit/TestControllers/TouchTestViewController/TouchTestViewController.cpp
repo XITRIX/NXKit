@@ -37,6 +37,7 @@ void TouchTestViewController::loadView() {
     green->setAlignItems(AlignItems::CENTER);
 
     target = new TargetView();
+    target->highlightOnFocus = false;
     target->tag = "TARGET";
     target->backgroundColor = UIColor::blue;
     target->setSize(Size(50, 50));

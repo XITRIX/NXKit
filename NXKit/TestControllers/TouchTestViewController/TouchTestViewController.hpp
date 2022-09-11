@@ -9,7 +9,7 @@
 
 #include <NXKit.hpp>
 
-class TargetView: public UIView {
+class TargetView: public UIControl {
     void layoutSubviews() override;
 };
 
