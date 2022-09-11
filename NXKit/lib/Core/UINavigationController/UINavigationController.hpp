@@ -17,6 +17,7 @@ namespace NXKit {
 class UINavigationBar: public UIStackView {
 public:
     UINavigationBar();
+    virtual ~UINavigationBar();
 
     void pushNavigationItem(UINavigationItem navigationItem);
 
@@ -28,6 +29,8 @@ private:
 class UINavigationController: public UIViewController {
 public:
     UINavigationController(UIViewController* rootController);
+    virtual ~UINavigationController();
+    
     void loadView() override;
     void viewDidLoad() override;
     void viewDidLayoutSubviews() override;

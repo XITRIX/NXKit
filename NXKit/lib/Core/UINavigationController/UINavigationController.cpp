@@ -38,6 +38,10 @@ UINavigationBar::UINavigationBar() {
     addSubview(titleLabel);
 }
 
+UINavigationBar::~UINavigationBar() {
+    imageView->setImage(nullptr, false);
+}
+
 void UINavigationBar::pushNavigationItem(UINavigationItem navigationItem) {
     titleLabel->setText(navigationItem.title);
     imageView->setHidden(!navigationItem.image);
@@ -47,6 +51,13 @@ void UINavigationBar::pushNavigationItem(UINavigationItem navigationItem) {
 
 UINavigationController::UINavigationController(UIViewController* rootController) {
     pushViewController(rootController, false);
+}
+
+UINavigationController::~UINavigationController() {
+    for (auto vc: viewControllers) {
+        if (vc->getParent() != this)
+            delete vc;
+    }
 }
 
 void UINavigationController::loadView() {

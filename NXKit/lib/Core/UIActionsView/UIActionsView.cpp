@@ -74,6 +74,8 @@ UIActionsView::UIActionsView():
 
 UIActionsView::~UIActionsView() {
     Application::shared()->getFocusDidChangeEvent()->unsubscribe(focusChangeToken);
+    for (auto action: actionViewsQueue)
+        delete action;
 }
 
 void UIActionsView::refreshActionsView(UIView* view) {

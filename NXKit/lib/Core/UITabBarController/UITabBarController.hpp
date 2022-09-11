@@ -45,7 +45,7 @@ class UITabBarController: public UIViewController {
 public:
     UITabBarController();
     UITabBarController(std::vector<UIViewController*> controllers);
-    ~UITabBarController();
+    virtual ~UITabBarController();
 
     void loadView() override;
     void viewDidLoad() override;

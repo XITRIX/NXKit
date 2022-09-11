@@ -895,6 +895,7 @@ void UIView::animate(std::initializer_list<UIView*> views, float duration, std::
     bool* _res = new bool(true);
     GroupTask* group = new GroupTask([completion, _res]() {
         completion(*_res);
+        delete _res;
     });
 
     for (int i = 0; i < views.size(); i++) {

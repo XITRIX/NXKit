@@ -92,6 +92,7 @@ void UIViewController::didMoveToParent(UIViewController* parent) {
 
 void UIViewController::removeFromParent() {
     parent->children.erase(std::remove(parent->children.begin(), parent->children.end(), this));
+    this->parent = nullptr;
     viewDidDisappear(true);
 }
 
