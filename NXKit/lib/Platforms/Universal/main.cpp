@@ -10,6 +10,7 @@
 #include <Platforms/Universal/GLFWInputManager.hpp>
 
 #ifdef __SWITCH__
+#include <Platforms/Switch/SwitchVideoContext.hpp>
 #include <Platforms/Switch/SwitchInputManager.hpp>
 #endif
 
@@ -22,13 +23,17 @@ constexpr uint32_t ORIGINAL_WINDOW_HEIGHT = 720;
 
 int main(int argc, const char * argv[]) {
     Application* application = new Application();
-    auto videoContext = new GLFWVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
-    application->setVideoContext(videoContext);
 
 #ifdef __SWITCH__
+    auto videoContext = new SwitchVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
+    application->setVideoContext(videoContext);
+
     InputManager::initWith(new SwitchInputManager());
     application->setResourcesPath("romfs:/");
 #else
+    auto videoContext = new GLFWVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
+    application->setVideoContext(videoContext);
+
     InputManager::initWith(new GLFWInputManager());
 #endif
 

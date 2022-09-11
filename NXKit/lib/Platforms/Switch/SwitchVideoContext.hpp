@@ -12,6 +12,11 @@
 namespace NXKit {
 
 class SwitchVideoContext: public GLFWVideoContext {
+public:
+    SwitchVideoContext(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight):
+        GLFWVideoContext(windowTitle, windowWidth, windowHeight)
+    {}
+
     UIUserInterfaceStyle getUserInterfaceStyle() override;
 };
 

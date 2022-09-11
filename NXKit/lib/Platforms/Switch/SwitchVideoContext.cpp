@@ -7,10 +7,18 @@
 
 #include <Platforms/Switch/SwitchVideoContext.hpp>
 
+#include <switch.h>
+
 namespace NXKit {
 
 UIUserInterfaceStyle SwitchVideoContext::getUserInterfaceStyle() {
-    return UIUserInterfaceStyle::dark;
+    ColorSetId colorSetId;
+    setsysGetColorSetId(&colorSetId);
+
+    if (colorSetId == ColorSetId_Dark)
+        return UIUserInterfaceStyle::dark;
+    else
+        return UIUserInterfaceStyle::light;
 }
 
 }
