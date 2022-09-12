@@ -13,6 +13,15 @@
 
 namespace NXKit {
 
+UIViewController::UIViewController() {
+    addAction(BUTTON_B, UIAction([this]() {
+        if (getPresentingViewController())
+            dismiss(true);
+    }, "Back", true, true, [this]() {
+        return !parent;
+    }));
+}
+
 UIViewController::~UIViewController() {
     if (navigationItem.image)
         delete navigationItem.image;

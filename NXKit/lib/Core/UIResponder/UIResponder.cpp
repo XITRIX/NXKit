@@ -30,25 +30,47 @@ void UIResponder::touchesCancelled(std::vector<UITouch*> touches, UIEvent* withE
 }
 
 bool UIResponder::press(ControllerButton button) {
-    if (getActions().count(button)) {
-        getActions()[button].action();
-        return true;
-    } else if (getNext()) {
+    if (actions.count(button)) {
+        for (auto action: actions[button]) {
+            if (action.condition()) {
+                action.action();
+                return true;
+            }
+        }
+    }
+    
+    if (getNext()) {
         return getNext()->press(button);
     } else {
         return false;
     }
 }
 
-std::map<ControllerButton, UIAction> UIResponder::getActions() {
+std::map<ControllerButton, std::deque<UIAction>> UIResponder::getActions() {
     return actions;
 }
 
-void UIResponder::addAction(ControllerButton button, UIAction action) {
-    actions[button] = action;
+UIAction UIResponder::getFirstAvailableAction(ControllerButton button) {
+    for (auto action: actions[button]) {
+        if (action.condition())
+            return action;
+    }
+    return UIAction();
 }
 
-void UIResponder::removeAction(ControllerButton button) {
+void UIResponder::addAction(ControllerButton button, UIAction action) {
+    actions[button].push_front(action);
+}
+
+void UIResponder::popAction(ControllerButton button) {
+    if (actions[button].size() > 0)
+        actions[button].pop_front();
+
+    if (actions[button].size() == 0)
+        actions.erase(button);
+}
+
+void UIResponder::removeActions(ControllerButton button) {
     actions.erase(button);
 }
 

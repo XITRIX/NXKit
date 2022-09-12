@@ -17,10 +17,11 @@ struct UIAction {
     bool enabled;
     std::string name;
     std::function<void()> action;
+    std::function<bool()> condition;
 
-    UIAction(): UIAction([](){}) { }
-    UIAction(std::function<void()> action, std::string name = "", bool enabled = true, bool visible = true):
-        action(action), name(name), visible(visible), enabled(enabled)
+    UIAction(): UIAction([](){}, "", false, false, []() { return false; }) { }
+    UIAction(std::function<void()> action, std::string name = "", bool enabled = true, bool visible = true, std::function<bool()> condition = [](){ return true; }):
+        action(action), name(name), visible(visible), enabled(enabled), condition(condition)
     {}
 };
 

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <vector>
+#include <deque>
 
 #include <Core/UITouch/UITouch.hpp>
 #include <Core/UIEvent/UIEvent.hpp>
@@ -29,12 +30,14 @@ public:
 
     virtual bool press(ControllerButton button);
 
-    std::map<ControllerButton, UIAction> getActions();
+    std::map<ControllerButton, std::deque<UIAction>> getActions();
+    UIAction getFirstAvailableAction(ControllerButton button);
     void addAction(ControllerButton button, UIAction action);
-    void removeAction(ControllerButton button);
+    void popAction(ControllerButton button);
+    void removeActions(ControllerButton button);
 
 private:
-    std::map<ControllerButton, UIAction> actions;
+    std::map<ControllerButton, std::deque<UIAction>> actions;
 };
 
 }

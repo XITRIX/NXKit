@@ -13,7 +13,7 @@ UIControl::UIControl() {
     auto gesture = new GestureRecognizer(this);
     gesture->onStateChanged = [this](UIGestureRecognizerState state) {
         if (state == UIGestureRecognizerState::ENDED) {
-            getActions()[BUTTON_A].action();
+            getFirstAvailableAction(BUTTON_A).action();
         }
     };
 //    actionSub = InputManager::shared()->getInputUpdated()->subscribe([this]() {
@@ -61,8 +61,12 @@ void UIControl::setHighlighted(bool highlighted) {
 }
 
 bool UIControl::press(ControllerButton button) {
-    if (button == BUTTON_A && getActions().count(BUTTON_A)) {
-        getActions()[BUTTON_A].action();
+    if (button == BUTTON_A) {
+        auto action = getFirstAvailableAction(BUTTON_A);
+        if (!action.condition())
+            return UIView::press(button);
+        
+        action.action();
         clickAlpha = 1;
         animate(0.2, [this]() {
             clickAlpha = 0;

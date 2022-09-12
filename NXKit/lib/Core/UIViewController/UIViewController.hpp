@@ -20,6 +20,7 @@ struct UINavigationItem {
 
 class UIViewController: public UIResponder, public UITraitEnvironment {
 public:
+    UIViewController();
     virtual ~UIViewController();
 
     UIView* getView();

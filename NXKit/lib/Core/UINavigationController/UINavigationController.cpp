@@ -51,6 +51,13 @@ void UINavigationBar::pushNavigationItem(UINavigationItem navigationItem) {
 
 UINavigationController::UINavigationController(UIViewController* rootController) {
     pushViewController(rootController, false);
+
+    addAction(BUTTON_B, UIAction([this]() {
+        if (viewControllers.size() > 1)
+            popViewController(true, true);
+    }, "Back", true, true, [this]() {
+        return viewControllers.size() > 1;
+    }));
 }
 
 UINavigationController::~UINavigationController() {
@@ -107,9 +114,6 @@ UIView* UINavigationController::buildFooter() {
 void UINavigationController::viewDidLoad() {
     getView()->clipToBounds = true;
 
-    addAction(BUTTON_B, UIAction([this]() {
-        popViewController(true, true);
-    }, "Back"));
 }
 
 void UINavigationController::viewDidLayoutSubviews() {

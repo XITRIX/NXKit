@@ -95,12 +95,11 @@ void UITabBarItemView::setSelected(bool selected) {
 
 UITabBarController::UITabBarController() {
     addAction(BUTTON_B, UIAction([this]() {
-        if (tabs->getDefaultFocus()->isFocused() && getPresentingViewController()) {
-            dismiss(true);
-            return;
-        }
-        Application::shared()->setFocus(tabs->getDefaultFocus());
-    }, "Back"));
+        if (Application::shared()->getFocus() != tabs->getDefaultFocus())
+            Application::shared()->setFocus(tabs->getDefaultFocus());
+    }, "Back", true, true, [this]() {
+        return Application::shared()->getFocus() != tabs->getDefaultFocus();
+    }));
 }
 
 UITabBarController::UITabBarController(std::vector<UIViewController*> controllers):

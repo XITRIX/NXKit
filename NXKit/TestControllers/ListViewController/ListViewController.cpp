@@ -33,7 +33,7 @@ ListItemView::ListItemView() {
 
     onEvent = [this](UIControlTouchEvent event) {
         if (event == NXKit::UIControlTouchEvent::touchUpInside) {
-            getActions()[BUTTON_A].action();
+            getFirstAvailableAction(BUTTON_A).action();
         }
     };
 

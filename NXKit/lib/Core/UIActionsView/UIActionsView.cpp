@@ -92,9 +92,14 @@ void UIActionsView::refreshActionsView(UIView* view) {
     std::map<ControllerButton, UIAction> actionsMap;
     UIResponder* responder = view;
     while (responder) {
-        for (auto action: responder->getActions()) {
-            if (!actionsMap.count(action.first)) {
-                actionsMap[action.first] = action.second;
+        for (auto actions: responder->getActions()) {
+            if (!actionsMap.count(actions.first)) {
+                for (auto action: actions.second) {
+                    if (action.condition()) {
+                        actionsMap[actions.first] = action;
+                        break;
+                    }
+                }
             }
         }
         responder = responder->getNext();
