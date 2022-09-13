@@ -117,15 +117,15 @@ bool Rect::intersects(const Rect& other) const {
     return !((minX() > other.maxX() || maxX() < other.minX()) || (minY() > other.maxY() || maxY() < other.minY()));
 }
 
-Rect& Rect::offsetBy(const Point& offet) {
-    origin.x += offet.x;
-    origin.y += offet.y;
+Rect& Rect::offsetBy(const Point& offset) {
+    origin.x += offset.x;
+    origin.y += offset.y;
     return *this;
 }
 
-Rect& Rect::offsetBy(const float& offetX, const float& offetY) {
-    origin.x += offetX;
-    origin.y += offetY;
+Rect& Rect::offsetBy(const float& offsetX, const float& offsetY) {
+    origin.x += offsetX;
+    origin.y += offsetY;
     return *this;
 }
 

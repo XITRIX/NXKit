@@ -65,8 +65,8 @@ struct Rect {
 
     bool contains(Point point);
     bool intersects(const Rect& other) const;
-    Rect& offsetBy(const Point& offet);
-    Rect& offsetBy(const float& offetX, const float& offetY);
+    Rect& offsetBy(const Point& offset);
+    Rect& offsetBy(const float& offsetX, const float& offsetY);
     Rect& insetBy(const UIEdgeInsets& insets);
 
     bool operator==(const Rect& rhs);
