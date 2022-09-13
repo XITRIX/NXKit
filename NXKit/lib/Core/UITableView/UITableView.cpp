@@ -186,7 +186,8 @@ void UITableView::dequeCellsForCurrentContentOffset() {
 
     for (int section = 0; section < cellsHeights.size(); section++) {
         for (int row = 0; row < cellsHeights[section].size(); row++) {
-            if (currentY >= bounds.minY() && currentY <= bounds.maxY()) {
+            auto nextCellBottom = currentY + cellsHeights[section][row];
+            if (nextCellBottom >= bounds.minY() && currentY <= bounds.maxY()) {
                 IndexPath indexPath = IndexPath(row, section);
                 if (cellsInIndexPaths[indexPath.section()][indexPath.row()] == nullptr) {
                     auto cell = dataSource->tableViewCellForRowAt(this, indexPath);
