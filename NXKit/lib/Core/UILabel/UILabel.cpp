@@ -306,4 +306,15 @@ enum NVGalign UILabel::getNVGVerticalAlign()
     }
 }
 
+std::deque<float> UILabel::createAnimationContext() {
+    std::deque<float> context = UIView::createAnimationContext();
+    context.push_back(font.fontSize);
+    return context;
+}
+
+void UILabel::applyAnimationContext(std::deque<float>* context) {
+    UIView::applyAnimationContext(context);
+    IFNNULL(font.fontSize, pop(context));
+}
+
 }

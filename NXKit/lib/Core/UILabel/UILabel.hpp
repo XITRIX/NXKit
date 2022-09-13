@@ -49,6 +49,9 @@ public:
     void draw(NVGcontext *vgContext) override;
     void layoutSubviews() override;
 
+    std::deque<float> createAnimationContext() override;
+    void applyAnimationContext(std::deque<float>* context) override;
+
     std::string getText();
     void setText(std::string text);
 
