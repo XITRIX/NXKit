@@ -24,11 +24,19 @@ UITableViewDefaultCell::UITableViewDefaultCell() {
     imageView->setMarginRight(20);
 
     label = new UILabel("Test text");
+    label->setGrow(1);
     label->verticalAlign = VerticalAlign::CENTER;
     label->getFont()->fontSize = 22;
 
+    detailLabel = new UILabel();
+    detailLabel->verticalAlign = VerticalAlign::CENTER;
+    detailLabel->horizontalAlign = HorizontalAlign::RIGHT;
+    detailLabel->textColor = getTintColor();
+    detailLabel->getFont()->fontSize = 22;
+
     addSubview(imageView);
     addSubview(label);
+    addSubview(detailLabel);
 
     onEvent = [this](UIControlTouchEvent event) {
         if (event == NXKit::UIControlTouchEvent::touchUpInside) {
@@ -41,8 +49,18 @@ void UITableViewDefaultCell::setText(std::string text) {
     label->setText(text);
 }
 
+void UITableViewDefaultCell::setDetailText(std::string text) {
+    detailLabel->setText(text);
+}
+
 void UITableViewDefaultCell::setImage(UIImage* image) {
+    imageView->setHidden(!image);
     imageView->setImage(image);
+}
+
+void UITableViewDefaultCell::tintColorDidChange() {
+    UIView::tintColorDidChange();
+    detailLabel->textColor = getTintColor();
 }
 
 //bool UITableViewDefaultCell::canBecomeFocused() {

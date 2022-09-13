@@ -13,6 +13,13 @@
 
 namespace NXKit {
 
+#define IFNNULL(prop, val)  \
+{                           \
+    float v = val;          \
+    if (!isnan(v))          \
+        prop = v;           \
+}
+
 template <typename T>
 T pop(std::vector<T>* vector) {
     T val = vector->back();

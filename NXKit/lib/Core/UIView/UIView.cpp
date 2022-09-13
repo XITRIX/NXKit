@@ -7,27 +7,18 @@
 
 #include <Core/UIView/UIView.hpp>
 #include <Core/UIWindow/UIWindow.hpp>
-#include <Core/UIViewController/UIViewController.hpp>
 #include <Core/Application/Application.hpp>
-#include <Core/UIStackView/UIStackView.hpp>
 #include <Core/Utils/GroupTask/GroupTask.hpp>
-#include <Platforms/InputManager.hpp>
 
 namespace NXKit {
 
-UIView::UIView(Rect frame):
-backgroundColor(0, 0, 0, 0)
-{
+UIView::UIView(Rect frame) :
+        backgroundColor(0, 0, 0, 0) {
     this->ygNode = YGNodeNew();
     YGNodeSetContext(this->ygNode, this);
 
     setPosition(frame.origin);
     setSize(frame.size);
-
-//    auto inputManager = InputManager::shared();
-//    inputManager->getInputUpdated()->subscribe([inputManager](){
-        //        inputManager->
-//    });
 }
 
 UIView::~UIView() {
@@ -54,24 +45,18 @@ void UIView::setPosition(Point position) {
 
 void UIView::setSize(Size size) {
     bounds.size = size;
-    if (size.width == UIView::AUTO)
-    {
+    if (size.width == UIView::AUTO) {
         YGNodeStyleSetWidthAuto(this->ygNode);
         YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
-    }
-    else
-    {
+    } else {
         YGNodeStyleSetWidth(this->ygNode, size.width);
         YGNodeStyleSetMinWidth(this->ygNode, size.width);
     }
 
-    if (size.height == UIView::AUTO)
-    {
+    if (size.height == UIView::AUTO) {
         YGNodeStyleSetHeightAuto(this->ygNode);
         YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
-    }
-    else
-    {
+    } else {
         YGNodeStyleSetHeight(this->ygNode, size.height);
         YGNodeStyleSetMinHeight(this->ygNode, size.height);
     }
@@ -80,13 +65,10 @@ void UIView::setSize(Size size) {
 
 void UIView::setWidth(float width) {
     bounds.size.width = width;
-    if (width == UIView::AUTO)
-    {
+    if (width == UIView::AUTO) {
         YGNodeStyleSetWidthAuto(this->ygNode);
         YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
-    }
-    else
-    {
+    } else {
         YGNodeStyleSetWidth(this->ygNode, width);
         YGNodeStyleSetMinWidth(this->ygNode, width);
     }
@@ -95,13 +77,10 @@ void UIView::setWidth(float width) {
 
 void UIView::setHeight(float height) {
     bounds.size.height = height;
-    if (height == UIView::AUTO)
-    {
+    if (height == UIView::AUTO) {
         YGNodeStyleSetHeightAuto(this->ygNode);
         YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
-    }
-    else
-    {
+    } else {
         YGNodeStyleSetHeight(this->ygNode, height);
         YGNodeStyleSetMinHeight(this->ygNode, height);
     }
@@ -110,13 +89,10 @@ void UIView::setHeight(float height) {
 
 void UIView::setMinWidth(float width) {
     bounds.size.width = width;
-    if (width == UIView::AUTO)
-    {
+    if (width == UIView::AUTO) {
         YGNodeStyleSetWidthAuto(this->ygNode);
         YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
-    }
-    else
-    {
+    } else {
         YGNodeStyleSetWidthAuto(this->ygNode);
         YGNodeStyleSetMinWidth(this->ygNode, width);
     }
@@ -125,13 +101,10 @@ void UIView::setMinWidth(float width) {
 
 void UIView::setMinHeight(float height) {
     bounds.size.height = height;
-    if (height == UIView::AUTO)
-    {
+    if (height == UIView::AUTO) {
         YGNodeStyleSetHeightAuto(this->ygNode);
         YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
-    }
-    else
-    {
+    } else {
         YGNodeStyleSetHeightAuto(this->ygNode);
         YGNodeStyleSetMinHeight(this->ygNode, height);
     }
@@ -151,7 +124,7 @@ void UIView::setPercentHeight(float height) {
 }
 
 Rect UIView::getFrame() {
-    return Rect( YGNodeLayoutGetLeft(this->ygNode), YGNodeLayoutGetTop(this->ygNode), YGNodeLayoutGetWidth(this->ygNode), YGNodeLayoutGetHeight(this->ygNode) );
+    return Rect(YGNodeLayoutGetLeft(this->ygNode), YGNodeLayoutGetTop(this->ygNode), YGNodeLayoutGetWidth(this->ygNode), YGNodeLayoutGetHeight(this->ygNode));
 }
 
 Rect UIView::getBounds() {
@@ -177,6 +150,17 @@ UIColor UIView::getTintColor() {
 
 void UIView::setTintColor(std::optional<UIColor> color) {
     tintColor = color;
+    for (auto subview: subviews) {
+        if (!subview->tintColor.has_value())
+            subview->tintColorDidChange();
+    }
+}
+
+void UIView::tintColorDidChange() {
+    for (auto subview: subviews) {
+        if (!subview->tintColor.has_value())
+            subview->tintColorDidChange();
+    }
 }
 
 void UIView::internalDraw(NVGcontext* vgContext) {
@@ -189,10 +173,10 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     layoutIfNeeded();
 
     // Frame position
-    nvgTranslate(vgContext, getFrame().origin.x , getFrame().origin.y);
+    nvgTranslate(vgContext, getFrame().origin.x, getFrame().origin.y);
 
     // Position transform
-    nvgTranslate(vgContext, transformOrigin.x , transformOrigin.y);
+    nvgTranslate(vgContext, transformOrigin.x, transformOrigin.y);
 
     // Scale transform
     float scaleTransformX = (getFrame().size.width / 2.0f) - (getFrame().size.width / 2.0f) * transformSize.width;
@@ -232,35 +216,35 @@ void UIView::internalDraw(NVGcontext* vgContext) {
         if (borderThickness > 0) {
             float offset = borderThickness / 2;
             Rect borderRect = Rect(offset, offset, getFrame().size.width - offset * 2, getFrame().size.height - offset * 2);
-            
+
             nvgBeginPath(vgContext);
             nvgStrokeColor(vgContext, borderColor.raw());
             nvgStrokeWidth(vgContext, this->borderThickness);
             nvgRoundedRect(vgContext, borderRect.origin.x, borderRect.origin.y, borderRect.size.width, borderRect.size.height, this->cornerRadius);
             nvgStroke(vgContext);
         }
-        
+
         if (getBorderTop() > 0) {
             nvgBeginPath(vgContext);
             nvgRect(vgContext, 0, 0, getFrame().size.width, getBorderTop());
             nvgFillColor(vgContext, borderColor.raw());
             nvgFill(vgContext);
         }
-        
+
         if (getBorderLeft() > 0) {
             nvgBeginPath(vgContext);
             nvgRect(vgContext, 0, 0, getBorderLeft(), getFrame().size.height);
             nvgFillColor(vgContext, borderColor.raw());
             nvgFill(vgContext);
         }
-        
+
         if (getBorderRight() > 0) {
             nvgBeginPath(vgContext);
             nvgRect(vgContext, (getFrame().size.width - getBorderRight()), 0, getBorderRight(), getFrame().size.height);
             nvgFillColor(vgContext, borderColor.raw());
             nvgFill(vgContext);
         }
-        
+
         if (getBorderBottom() > 0) {
             nvgBeginPath(vgContext);
             nvgRect(vgContext, 0, (getFrame().size.height - getBorderBottom()), getFrame().size.width, getBorderBottom());
@@ -288,12 +272,12 @@ static int shakeAnimation(float t, float a) // a = amplitude
     // Damped sine wave
     float w = 0.8f; // period
     float c = 0.35f; // damp factor
-    return roundf(a * exp(-(c * t)) * sin(w * t));
+    return static_cast<int>(roundf(a * exp(-(c * t)) * sin(w * t)));
 }
 
 void UIView::shakeHighlight(NavigationDirection direction) {
-    this->highlightShaking        = true;
-    this->highlightShakeStart     = getCPUTimeUsec() / 1000;
+    this->highlightShaking = true;
+    this->highlightShakeStart = getCPUTimeUsec() / 1000;
     this->highlightShakeDirection = direction;
     this->highlightShakeAmplitude = std::rand() % 15 + 10;
 }
@@ -302,22 +286,21 @@ bool UIView::shouldDrawHighlight() {
     return !(!isFocused() || !highlightOnFocus || Application::shared()->getInputType() == ApplicationInputType::TOUCH);
 }
 
-void UIView::drawShadow(NVGcontext* vg)
-{
-    float shadowWidth   = 0.0f;
+void UIView::drawShadow(NVGcontext* vg) {
+    float shadowWidth = 0.0f;
     float shadowFeather = 0.0f;
     float shadowOpacity = 0.0f;
-    float shadowOffset  = 0.0f;
+    float shadowOffset = 0.0f;
 
     Rect frame = getBounds();
 
 //    switch (this->shadowType)
 //    {
 //        case ShadowType::GENERIC:
-            shadowWidth   = 2;
-            shadowFeather = 10;
-            shadowOpacity = 63.7f;
-            shadowOffset  = 10;
+    shadowWidth = 2;
+    shadowFeather = 10;
+    shadowOpacity = 63.7f;
+    shadowOffset = 10;
 //            break;
 //        case ShadowType::CUSTOM:
 //            break;
@@ -326,19 +309,19 @@ void UIView::drawShadow(NVGcontext* vg)
 //    }
 
     NVGpaint shadowPaint = nvgBoxGradient(
-        vg,
-        frame.minX(), frame.minY() + shadowWidth,
-        frame.width(), frame.height(),
-        this->cornerRadius * 2, shadowFeather,
-        UIColor(0, 0, 0, shadowOpacity).raw(), UIColor::clear.raw());
+            vg,
+            frame.minX(), frame.minY() + shadowWidth,
+            frame.width(), frame.height(),
+            this->cornerRadius * 2, shadowFeather,
+            UIColor(0, 0, 0, shadowOpacity).raw(), UIColor::clear.raw());
 
     nvgBeginPath(vg);
     nvgRect(
-        vg,
-        frame.minX() - shadowOffset,
-        frame.minY() - shadowOffset,
-        frame.width() + shadowOffset * 2,
-        frame.height() + shadowOffset * 3);
+            vg,
+            frame.minX() - shadowOffset,
+            frame.minY() - shadowOffset,
+            frame.width() + shadowOffset * 2,
+            frame.height() + shadowOffset * 3);
     nvgRoundedRect(vg, frame.minX(), frame.minY(), frame.width(), frame.height(), this->cornerRadius);
     nvgPathWinding(vg, NVG_HOLE);
     nvgFillPaint(vg, shadowPaint);
@@ -353,30 +336,25 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
 
     float padding = highlightSpacing;
     float cornerRadius = highlightCornerRadius;
-    float strokeWidth  = 5;
+    float strokeWidth = 5;
 
     auto frame = getFrame();
 
     float x = -padding - strokeWidth / 2;
     float y = -padding - strokeWidth / 2;
-    float width  = frame.width() + padding * 2 + strokeWidth;
+    float width = frame.width() + padding * 2 + strokeWidth;
     float height = frame.height() + padding * 2 + strokeWidth;
 
 
     // Shake animation
-    if (this->highlightShaking)
-    {
+    if (this->highlightShaking) {
         Time curTime = getCPUTimeUsec() / 1000;
-        Time t       = (curTime - highlightShakeStart) / 10;
+        Time t = (curTime - highlightShakeStart) / 10;
 
-        if (t >= 150000)
-        {
+        if (t >= 150000) {
             this->highlightShaking = false;
-        }
-        else
-        {
-            switch (this->highlightShakeDirection)
-            {
+        } else {
+            switch (this->highlightShakeDirection) {
                 case NavigationDirection::RIGHT:
                     x += shakeAnimation(t, this->highlightShakeAmplitude);
                     break;
@@ -394,8 +372,7 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
     }
 
     // Draw
-    if (background)
-    {
+    if (background) {
         // Background
         if (drawBackgroundOnHighlight) {
             UIColor highlightBackgroundColor = UIColor::tetriarySystemBackground;
@@ -404,9 +381,7 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
             nvgRoundedRect(vg, x, y, width, height, cornerRadius);
             nvgFill(vg);
         }
-    }
-    else
-    {
+    } else {
         x += frame.minX();
         y += frame.minY();
 
@@ -414,14 +389,14 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
 
         // Shadow
         NVGpaint shadowPaint = nvgBoxGradient(vg,
-            x, y + 2,
-            width, height,
-            cornerRadius * 2, 10,
-            UIColor(0, 0, 0, 128).raw(), UIColor::clear.raw());
+                x, y + 2,
+                width, height,
+                cornerRadius * 2, 10,
+                UIColor(0, 0, 0, 128).raw(), UIColor::clear.raw());
 
         nvgBeginPath(vg);
         nvgRect(vg, x - shadowOffset, y - shadowOffset,
-            width + shadowOffset * 2, height + shadowOffset * 3);
+                width + shadowOffset * 2, height + shadowOffset * 3);
         nvgRoundedRect(vg, x, y, width, height, cornerRadius);
         nvgPathWinding(vg, NVG_HOLE);
         nvgFillPaint(vg, shadowPaint);
@@ -434,22 +409,22 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
         UIColor highlightColor1 = UIColor(13, 182, 213, 25, 138, 198);
 
         UIColor pulsationColor = UIColor((color * highlightColor1.r()) + (1 - color) * highlightColor1.r(),
-            (color * highlightColor1.g()) + (1 - color) * highlightColor1.g(),
-            (color * highlightColor1.b()) + (1 - color) * highlightColor1.b());
+                (color * highlightColor1.g()) + (1 - color) * highlightColor1.g(),
+                (color * highlightColor1.b()) + (1 - color) * highlightColor1.b());
 
         UIColor borderColor = UIColor(100, 255, 225, 150);
 
         float strokeWidth = 5;
 
         NVGpaint border1Paint = nvgRadialGradient(vg,
-            x + gradientX * width, y + gradientY * height,
-            strokeWidth * 10, strokeWidth * 40,
-            borderColor.raw(), UIColor::clear.raw());
+                x + gradientX * width, y + gradientY * height,
+                strokeWidth * 10, strokeWidth * 40,
+                borderColor.raw(), UIColor::clear.raw());
 
         NVGpaint border2Paint = nvgRadialGradient(vg,
-            x + (1 - gradientX) * width, y + (1 - gradientY) * height,
-            strokeWidth * 10, strokeWidth * 40,
-            borderColor.raw(), UIColor::clear.raw());
+                x + (1 - gradientX) * width, y + (1 - gradientY) * height,
+                strokeWidth * 10, strokeWidth * 40,
+                borderColor.raw(), UIColor::clear.raw());
 
         nvgBeginPath(vg);
         nvgStrokeColor(vg, pulsationColor.raw());
@@ -492,13 +467,6 @@ std::deque<float> UIView::createAnimationContext() {
     return context;
 }
 
-#define IFNNULL(prop, val)  \
-{                           \
-    float v = val;          \
-    if (!isnan(v))          \
-        prop = v;           \
-}
-
 void UIView::applyAnimationContext(std::deque<float>* context) {
     IFNNULL(bounds.origin.x, pop(context))
     IFNNULL(bounds.origin.y, pop(context))
@@ -517,7 +485,7 @@ void UIView::animate(float duration, std::function<void()> animations, EasingFun
         completion(true);
         return;
     }
-    
+
     auto oldContext = createAnimationContext();
     animationContext.reset(oldContext);
     animations();
@@ -624,7 +592,7 @@ std::vector<UIGestureRecognizer*> UIView::getGestureRecognizers() {
     return gestureRecognizers;
 }
 
-void UIView::addSubview(UIView *view) {
+void UIView::addSubview(UIView* view) {
     view->setSuperview(this);
     subviews.push_back(view);
     setNeedsLayout();
@@ -661,7 +629,7 @@ std::vector<UIView*> UIView::getSubviews() {
 
 void UIView::removeFromSuperview() {
     if (!superview) return;
-    
+
     superview->subviews.erase(std::remove(superview->subviews.begin(), superview->subviews.end(), this));
     YGNodeRemoveChild(superview->ygNode, ygNode);
     superview = nullptr;
@@ -700,7 +668,7 @@ UIView* UIView::hitTest(Point point, UIEvent* withEvent) {
         return nullptr;
 
     auto subviews = getSubviews();
-    for (int i = (int) subviews.size()-1; i >= 0; i--) {
+    for (int i = (int) subviews.size() - 1; i >= 0; i--) {
         Point convertedPoint = subviews[i]->convert(point, this);
         UIView* test = subviews[i]->hitTest(convertedPoint, withEvent);
         if (test) return test;
@@ -709,7 +677,7 @@ UIView* UIView::hitTest(Point point, UIEvent* withEvent) {
     return this;
 }
 
-bool UIView::point(Point insidePoint, UIEvent *withEvent) {
+bool UIView::point(Point insidePoint, UIEvent* withEvent) {
     return bounds.contains(insidePoint);
 }
 
@@ -763,6 +731,7 @@ UIView* UIView::getSuperview() {
 
 void UIView::setSuperview(UIView* view) {
     superview = view;
+    tintColorDidChange();
 }
 
 void UIView::setGrow(float grow) {
@@ -834,9 +803,9 @@ void UIView::setMarginLeft(float left) {
 
 UIEdgeInsets UIView::getMargins() {
     return UIEdgeInsets(YGNodeLayoutGetMargin(ygNode, YGEdgeTop),
-                        YGNodeLayoutGetMargin(ygNode, YGEdgeLeft),
-                        YGNodeLayoutGetMargin(ygNode, YGEdgeBottom),
-                        YGNodeLayoutGetMargin(ygNode, YGEdgeRight));
+            YGNodeLayoutGetMargin(ygNode, YGEdgeLeft),
+            YGNodeLayoutGetMargin(ygNode, YGEdgeBottom),
+            YGNodeLayoutGetMargin(ygNode, YGEdgeRight));
 }
 
 void UIView::setBorderTop(float top) {

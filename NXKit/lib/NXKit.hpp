@@ -21,6 +21,7 @@
 #include <Core/UIStackView/UIStackView.hpp>
 #include <Core/UITableView/UITableView.hpp>
 #include <Core/UITableViewDefaultCell/UITableViewDefaultCell.hpp>
+#include <Core/UITableViewSwitchCell/UITableViewSwitchCell.hpp>
 #include <Core/UIImageView/UIImageView.hpp>
 #include <Core/Utils/GroupTask/GroupTask.hpp>
 #include <Platforms/InputManager.hpp>

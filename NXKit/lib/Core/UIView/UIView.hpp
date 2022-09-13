@@ -73,6 +73,7 @@ public:
 
     UIColor getTintColor();
     void setTintColor(std::optional<UIColor> color);
+    virtual void tintColorDidChange();
 
     Point convert(Point point, UIView* toView);
 

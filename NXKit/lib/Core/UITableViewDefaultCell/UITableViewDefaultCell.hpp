@@ -18,12 +18,15 @@ public:
     UITableViewDefaultCell();
 
     void setText(std::string text);
+    void setDetailText(std::string text);
     void setImage(UIImage* image);
 
-//    bool canBecomeFocused() override;
-private:
-    UILabel* label;
-    UIImageView* imageView;
+    void tintColorDidChange() override;
+
+//private:
+    UILabel* label = nullptr;
+    UILabel* detailLabel = nullptr;
+    UIImageView* imageView = nullptr;
 };
 
 }

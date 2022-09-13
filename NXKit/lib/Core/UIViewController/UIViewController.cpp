@@ -7,9 +7,6 @@
 
 #include <Core/UIViewController/UIViewController.hpp>
 #include <Core/Application/Application.hpp>
-#include <Core/UIWindow/UIWindow.hpp>
-
-#include <typeinfo>
 
 namespace NXKit {
 
