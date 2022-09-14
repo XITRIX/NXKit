@@ -43,6 +43,8 @@ public:
     static UIColor red;
     static UIColor green;
     static UIColor blue;
+    static UIColor orange;
+    static UIColor cyan;
     static UIColor white;
     static UIColor black;
     static UIColor gray;

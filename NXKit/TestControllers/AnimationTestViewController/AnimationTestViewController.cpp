@@ -35,7 +35,7 @@ void AnimationTestViewController::viewDidLoad() {
 void AnimationTestViewController::animate(bool revers) {
     UIView::animate({ ball }, 1, [this, revers]() {
         ball->transformOrigin = Point(revers ? 160 : -160, 0);
-        ball->backgroundColor = revers ? UIColor::red : UIColor::blue;
+        ball->backgroundColor = revers ? UIColor::cyan : UIColor::orange;
     }, EasingFunction::exponentialInOut, [this](bool res) {
         if (!res) return;
         animate(ball->transformOrigin.x < 0);
