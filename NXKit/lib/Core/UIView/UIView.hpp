@@ -114,13 +114,26 @@ public:
     float getGrow();
     void setShrink(float grow);
     float getShrink();
+
     void setSize(Size size);
+
     void setWidth(float width);
     void setHeight(float height);
+
     void setMinWidth(float width);
     void setMinHeight(float height);
+
+    void setMaxWidth(float width);
+    void setMaxHeight(float height);
+
     void setPercentWidth(float width);
     void setPercentHeight(float height);
+
+    void setMinPercentWidth(float width);
+    void setMinPercentHeight(float height);
+
+    void setMaxPercentWidth(float width);
+    void setMaxPercentHeight(float height);
 
     // Margins
     void setMargins(UIEdgeInsets margins);

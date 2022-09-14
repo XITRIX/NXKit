@@ -11,9 +11,9 @@
 namespace NXKit {
 
 bool UITableViewCell::isEnabled() {
-    if (tableView->dataSource)
+    if (tableView && tableView->dataSource)
         return tableView->dataSource->tableViewCellCanBeFocusedAt(tableView, indexPath);
-    return false;
+    return true;
 }
 
 //bool UITableViewCell::canBecomeFocused() {

@@ -96,7 +96,7 @@ void UIScrollView::setContentOffset(Point offset, bool animated) {
 
 void UIScrollView::updateScrollingIndicatior() {
     Rect visible = getVisibleBounds();
-    scrollingIndicatorV->setHidden(visible.height() > getContentSize().height);
+    scrollingIndicatorV->setHidden(visible.height() >= getContentSize().height);
     float height = visible.height() * (visible.height() / getContentSize().height);
     scrollingIndicatorV->setHeight(height);
 

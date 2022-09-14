@@ -47,18 +47,18 @@ void UIView::setSize(Size size) {
     bounds.size = size;
     if (size.width == UIView::AUTO) {
         YGNodeStyleSetWidthAuto(this->ygNode);
-        YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
+//        YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
     } else {
         YGNodeStyleSetWidth(this->ygNode, size.width);
-        YGNodeStyleSetMinWidth(this->ygNode, size.width);
+//        YGNodeStyleSetMinWidth(this->ygNode, size.width);
     }
 
     if (size.height == UIView::AUTO) {
         YGNodeStyleSetHeightAuto(this->ygNode);
-        YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
+//        YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
     } else {
         YGNodeStyleSetHeight(this->ygNode, size.height);
-        YGNodeStyleSetMinHeight(this->ygNode, size.height);
+//        YGNodeStyleSetMinHeight(this->ygNode, size.height);
     }
     setNeedsLayout();
 }
@@ -67,10 +67,10 @@ void UIView::setWidth(float width) {
     bounds.size.width = width;
     if (width == UIView::AUTO) {
         YGNodeStyleSetWidthAuto(this->ygNode);
-        YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
+//        YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
     } else {
         YGNodeStyleSetWidth(this->ygNode, width);
-        YGNodeStyleSetMinWidth(this->ygNode, width);
+//        YGNodeStyleSetMinWidth(this->ygNode, width);
     }
     setNeedsLayout();
 }
@@ -79,10 +79,10 @@ void UIView::setHeight(float height) {
     bounds.size.height = height;
     if (height == UIView::AUTO) {
         YGNodeStyleSetHeightAuto(this->ygNode);
-        YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
+//        YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
     } else {
         YGNodeStyleSetHeight(this->ygNode, height);
-        YGNodeStyleSetMinHeight(this->ygNode, height);
+//        YGNodeStyleSetMinHeight(this->ygNode, height);
     }
     setNeedsLayout();
 }
@@ -90,10 +90,8 @@ void UIView::setHeight(float height) {
 void UIView::setMinWidth(float width) {
     bounds.size.width = width;
     if (width == UIView::AUTO) {
-        YGNodeStyleSetWidthAuto(this->ygNode);
         YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
     } else {
-        YGNodeStyleSetWidthAuto(this->ygNode);
         YGNodeStyleSetMinWidth(this->ygNode, width);
     }
     setNeedsLayout();
@@ -102,11 +100,29 @@ void UIView::setMinWidth(float width) {
 void UIView::setMinHeight(float height) {
     bounds.size.height = height;
     if (height == UIView::AUTO) {
-        YGNodeStyleSetHeightAuto(this->ygNode);
         YGNodeStyleSetMinHeight(this->ygNode, YGUndefined);
     } else {
-        YGNodeStyleSetHeightAuto(this->ygNode);
         YGNodeStyleSetMinHeight(this->ygNode, height);
+    }
+    setNeedsLayout();
+}
+
+void UIView::setMaxWidth(float width) {
+    bounds.size.width = width;
+    if (width == UIView::AUTO) {
+        YGNodeStyleSetMaxWidth(this->ygNode, YGUndefined);
+    } else {
+        YGNodeStyleSetMaxWidth(this->ygNode, width);
+    }
+    setNeedsLayout();
+}
+
+void UIView::setMaxHeight(float height) {
+    bounds.size.height = height;
+    if (height == UIView::AUTO) {
+        YGNodeStyleSetMaxHeight(this->ygNode, YGUndefined);
+    } else {
+        YGNodeStyleSetMaxHeight(this->ygNode, height);
     }
     setNeedsLayout();
 }
@@ -120,6 +136,26 @@ void UIView::setPercentWidth(float width) {
 void UIView::setPercentHeight(float height) {
     YGNodeStyleSetMinHeightPercent(this->ygNode, height);
     YGNodeStyleSetHeightPercent(this->ygNode, height);
+    setNeedsLayout();
+}
+
+void UIView::setMinPercentWidth(float width) {
+    YGNodeStyleSetMinWidthPercent(this->ygNode, width);
+    setNeedsLayout();
+}
+
+void UIView::setMinPercentHeight(float height) {
+    YGNodeStyleSetMinHeightPercent(this->ygNode, height);
+    setNeedsLayout();
+}
+
+void UIView::setMaxPercentWidth(float width) {
+    YGNodeStyleSetMaxWidthPercent(this->ygNode, width);
+    setNeedsLayout();
+}
+
+void UIView::setMaxPercentHeight(float height) {
+    YGNodeStyleSetMaxHeightPercent(this->ygNode, height);
     setNeedsLayout();
 }
 

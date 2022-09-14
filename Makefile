@@ -86,6 +86,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UIAlertController \
 			NXKit/lib/Core/UIAppDelegate \
 			NXKit/lib/Core/UIBlurView \
+			NXKit/lib/Core/UIBottomSheetController \
 			NXKit/lib/Core/UIButton \
 			NXKit/lib/Core/UIColor \
 			NXKit/lib/Core/UIControl \
@@ -99,6 +100,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UIPanGestureRecognizer \
 			NXKit/lib/Core/UIResponder \
 			NXKit/lib/Core/UIScrollView \
+			NXKit/lib/Core/UISelectorViewController \
 			NXKit/lib/Core/UIStackView \
 			NXKit/lib/Core/UITabBarController \
 			NXKit/lib/Core/UITableView \

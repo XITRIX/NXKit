@@ -36,6 +36,16 @@ void ControlTestViewController::loadView() {
     control3->setMarginTop(9);
     view->addSubview(control3);
 
+    auto control4 = new UIButton("Bottom sheet example");
+    control4->setSize({ 280, 60 });
+    control4->setMarginTop(9);
+    view->addSubview(control4);
+
+    auto control5 = new UIButton("Selector example");
+    control5->setSize({ 280, 60 });
+    control5->setMarginTop(9);
+    view->addSubview(control5);
+
     control->addAction(BUTTON_A, UIAction([this]() {
         TouchTestViewController* touchVC = new TouchTestViewController();
         AnimationTestViewController* animVC = new AnimationTestViewController();
@@ -60,6 +70,23 @@ void ControlTestViewController::loadView() {
         alert->addAction(UIAlertAction("Ok", NXKit::UIAlertActionStyle::DEFAULT, []() { printf("OK\n"); }));
         alert->addAction(UIAlertAction("Delete", NXKit::UIAlertActionStyle::DESTRUCTIVE, []() { printf("Delete\n"); }));
         present(alert, true);
+    }, "OK"));
+
+    control4->addAction(BUTTON_A, UIAction([this]() {
+        ListViewController* listVC = new ListViewController();
+
+        UINavigationController* nvc = new UINavigationController(listVC);
+        UIBottomSheetController* vc = new UIBottomSheetController(nvc);
+//        tabsVC->setTitle("Presentation test");
+
+        present(vc, true);
+    }, "OK"));
+
+    control5->addAction(BUTTON_A, UIAction([this]() {
+//        AnimationTestViewController* animVC = new AnimationTestViewController();
+//        TouchTestViewController* touchVC = new TouchTestViewController();
+        UISelectorViewController* selector = new UISelectorViewController();
+        present(selector, true);
     }, "OK"));
 
     setView(view);

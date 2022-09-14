@@ -21,7 +21,7 @@ public:
 
     void pushNavigationItem(UINavigationItem navigationItem);
 
-private:
+//private:
     UILabel* titleLabel;
     UIImageView* imageView;
 };

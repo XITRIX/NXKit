@@ -12,6 +12,8 @@
 #include <Core/UIAlertController/UIAlertController.hpp>
 #include <Core/UIViewController/UIViewController.hpp>
 #include <Core/UINavigationController/UINavigationController.hpp>
+#include <Core/UIBottomSheetController/UIBottomSheetController.hpp>
+#include <Core/UISelectorViewController/UISelectorViewController.hpp>
 #include <Core/UITabBarController/UITabBarController.hpp>
 #include <Core/UIScrollView/UIScrollView.hpp>
 #include <Core/UIBlurView/UIBlurView.hpp>
