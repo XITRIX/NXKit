@@ -6,6 +6,7 @@
 //
 
 #include <Core/UIColor/UIColor.hpp>
+#include <Core/Utils/Tools/Tools.hpp>
 
 namespace NXKit {
 
@@ -89,6 +90,40 @@ NVGcolor UIColor::raw() {
 
 bool UIColor::operator==(const UIColor& rhs) {
     return value == rhs.value;
+}
+
+void UIColor::fillAnimationContext(std::deque<float>* context) {
+    auto cache = UITraitCollection::current;
+
+    UITraitCollection::current.userInterfaceStyle = UIUserInterfaceStyle::light;
+
+    context->push_back(r());
+    context->push_back(g());
+    context->push_back(b());
+    context->push_back(a());
+
+    UITraitCollection::current.userInterfaceStyle = UIUserInterfaceStyle::dark;
+
+    context->push_back(r());
+    context->push_back(g());
+    context->push_back(b());
+    context->push_back(a());
+
+    UITraitCollection::current = cache;
+}
+
+UIColor UIColor::fromAnimationContext(std::deque<float>* context) {
+    auto r = minmax(0.0f, pop(context), 255.0f);
+    auto g = minmax(0.0f, pop(context), 255.0f);
+    auto b = minmax(0.0f, pop(context), 255.0f);
+    auto a = minmax(0.0f, pop(context), 255.0f);
+
+    auto dr = minmax(0.0f, pop(context), 255.0f);
+    auto dg = minmax(0.0f, pop(context), 255.0f);
+    auto db = minmax(0.0f, pop(context), 255.0f);
+    auto da = minmax(0.0f, pop(context), 255.0f);
+
+    return UIColor(r, g, b, a, dr, dg, db, da);
 }
 
 }

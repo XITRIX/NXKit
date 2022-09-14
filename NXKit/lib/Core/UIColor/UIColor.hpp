@@ -10,6 +10,8 @@
 #include <nanovg.h>
 #include <Core/UITraitCollection/UITraitCollection.hpp>
 
+#include <deque>
+
 namespace NXKit {
 
 struct UIColor {
@@ -33,6 +35,9 @@ public:
     NVGcolor raw();
 
     bool operator==(const UIColor& rhs);
+
+    void fillAnimationContext(std::deque<float>* context);
+    static UIColor fromAnimationContext(std::deque<float>* context);
 
     static UIColor clear;
     static UIColor red;

@@ -464,6 +464,7 @@ std::deque<float> UIView::createAnimationContext() {
     context.push_back(transformSize.height);
     context.push_back(clickAlpha);
     context.push_back(alpha);
+    backgroundColor.fillAnimationContext(&context);
     return context;
 }
 
@@ -476,6 +477,7 @@ void UIView::applyAnimationContext(std::deque<float>* context) {
     IFNNULL(transformSize.height, pop(context))
     IFNNULL(clickAlpha, pop(context))
     IFNNULL(alpha, pop(context))
+    backgroundColor = UIColor::fromAnimationContext(context);
 }
 
 void UIView::animate(float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {

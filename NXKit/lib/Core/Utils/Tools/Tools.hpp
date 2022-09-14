@@ -36,4 +36,8 @@ T pop(std::deque<T>* vector) {
 
 float ntz(float value);
 
+bool floatSame(float a, float b, float epsilon = 1);
+
+float minmax(float min, float val, float max);
+
 }

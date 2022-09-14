@@ -19,7 +19,7 @@ void AnimationTestViewController::loadView() {
     ball = new UIControl();
     ball->setSize(Size(80, 80));
     ball->cornerRadius = 40;
-    ball->transformOrigin = Point(120, 0);
+    ball->transformOrigin = Point(160, 0);
     ball->backgroundColor = UIColor::red;
     ball->highlightOnFocus = false;
 
@@ -34,8 +34,9 @@ void AnimationTestViewController::viewDidLoad() {
 
 void AnimationTestViewController::animate(bool revers) {
     UIView::animate({ ball }, 1, [this, revers]() {
-        ball->transformOrigin = Point(revers ? 120 : -120, 0);
-    }, EasingFunction::elasticInOut, [this](bool res) {
+        ball->transformOrigin = Point(revers ? 160 : -160, 0);
+        ball->backgroundColor = revers ? UIColor::red : UIColor::blue;
+    }, EasingFunction::exponentialInOut, [this](bool res) {
         if (!res) return;
         animate(ball->transformOrigin.x < 0);
     });
