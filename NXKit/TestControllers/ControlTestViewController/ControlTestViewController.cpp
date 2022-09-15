@@ -82,10 +82,20 @@ void ControlTestViewController::loadView() {
         present(vc, true);
     }, "OK"));
 
+    static int selectedCell = -1;
     control5->addAction(BUTTON_A, UIAction([this]() {
 //        AnimationTestViewController* animVC = new AnimationTestViewController();
 //        TouchTestViewController* touchVC = new TouchTestViewController();
-        UISelectorViewController* selector = new UISelectorViewController();
+        std::vector<std::string> data;
+        for (int i = 0; i < 15; i++)
+            data.push_back("Cell #" + std::to_string(i + 1));
+
+        UISelectorViewController* selector = new UISelectorViewController("Demo select", data, [this](int index) {
+            selectedCell = index;
+            UIAlertController* alert = new UIAlertController("Select successful", "You selected cell #" + std::to_string(index));
+            alert->addAction(UIAlertAction("Oke"));
+            present(alert, true);
+        }, selectedCell);
         present(selector, true);
     }, "OK"));
 

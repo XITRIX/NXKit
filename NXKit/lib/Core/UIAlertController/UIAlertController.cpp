@@ -60,7 +60,7 @@ void UIAlertController::loadView() {
         titleLabel = new UILabel(title);
         titleLabel->horizontalAlign = HorizontalAlign::CENTER;
         titleLabel->getFont()->fontSize = 24;
-        titleLabel->setMargins(20, 0, 20, 20);
+        titleLabel->setMargins(20, 20, 20, 20);
         textsView->addSubview(titleLabel);
     }
 
@@ -68,8 +68,8 @@ void UIAlertController::loadView() {
         messageLabel = new UILabel(message);
         messageLabel->horizontalAlign = HorizontalAlign::CENTER;
         messageLabel->getFont()->fontSize = 18;
-        titleLabel->setMargins(20, 0, 20, 20);
-        messageLabel->textColor = UIColor(155, 155, 155);
+        titleLabel->setMargins(20, 20, 20, 20);
+        messageLabel->textColor = UIColor::gray;
         textsView->addSubview(messageLabel);
     }
 

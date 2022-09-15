@@ -7,36 +7,43 @@
 
 #include <Core/UISelectorViewController/UISelectorViewController.hpp>
 #include <Core/UINavigationController/UINavigationController.hpp>
-#include <Core/UITableViewDefaultCell/UITableViewDefaultCell.hpp>
+#include <Core/UITableViewRadioCell/UITableViewRadioCell.hpp>
 #include <Core/UIScrollView/UIScrollView.hpp>
 #include <Core/UIActionsView/UIActionsView.hpp>
 #include <Core/UIStackView/UIStackView.hpp>
+#include <Core/Application/Application.hpp>
 
 namespace NXKit {
 
-UISelectorViewController::UISelectorViewController() {}
+UISelectorViewController::UISelectorViewController(std::string title, std::vector<std::string> data, std::function<void(int)> onComplete, int selectedIndex)
+    : title(title), data(data), onComplete(onComplete), selectedIndex(selectedIndex)
+{ }
 
 void UISelectorViewController::loadView() {
-    UIStackView* view = new UIStackView(Axis::VERTICAL);
+    UIStackView* view = new UIStackView();
+    view->setAxis(Axis::VERTICAL);
 
     view->setJustifyContent(JustifyContent::FLEX_END);
     view->setAlignItems(AlignItems::STRETCH);
 
+    setView(view);
+
     view->addSubview(makeContentView());
     view->addSubview(makeFooter());
-
-    setView(view);
 }
 
 void UISelectorViewController::viewWillAppear(bool animated) {
-    getView()->setNeedsLayout();
+    if (selectedView) {
+        getView()->layoutIfNeeded();
+        Application::shared()->setFocus(selectedView);
+    }
 }
 
 UIView* UISelectorViewController::makeContentView() {
     UINavigationBar* navigationBar = new UINavigationBar();
     navigationBar->setSize(Size(UIView::AUTO, headerHeight));
     navigationBar->titleLabel->getFont()->fontSize = 24;
-    navigationBar->pushNavigationItem({ .title = "Text", .image = nullptr });
+    navigationBar->pushNavigationItem({ .title = title, .image = nullptr });
 
     UIStackView* container = new UIStackView(Axis::VERTICAL);
     container->backgroundColor = UIColor::systemBackground;
@@ -49,16 +56,26 @@ UIView* UISelectorViewController::makeContentView() {
     view->setAlignItems(AlignItems::CENTER);
     view->setPadding(32, 80, 32, 40);
 
-    for (int i = 0; i < 3; i++) {
-        UITableViewDefaultCell* cell = new UITableViewDefaultCell();
+    for (int i = 0; i < data.size(); i++) {
+        UITableViewRadioCell* cell = new UITableViewRadioCell();
+        if (i == selectedIndex) selectedView = cell
+            ;
         cell->setHeight(60);
         cell->setPercentWidth(60);
         cell->label->getFont()->fontSize = 20;
         if (i == 0) cell->setBorderTop(1);
         cell->setBorderBottom(1);
         cell->borderColor = UIColor::separator;
-        cell->setText("Cell Test");
+        cell->setText(data[i]);
+        cell->setOn(i == selectedIndex);
         cell->setImage(nullptr);
+
+        cell->addAction(BUTTON_A, UIAction([this, i]() {
+            dismiss(true, [this, i]() {
+                onComplete(i);
+            });
+        }, "OK"));
+
         view->addSubview(cell);
     }
     scroll->addSubview(view);

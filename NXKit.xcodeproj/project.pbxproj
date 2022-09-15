@@ -19,6 +19,8 @@
 		7C28B26228C6764500900D60 /* GroupTask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C28B25F28C6764500900D60 /* GroupTask.cpp */; };
 		7C3AD9BE28D247DC00254B8B /* UISelectorViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AD9BC28D247DC00254B8B /* UISelectorViewController.cpp */; };
 		7C3AD9BF28D247DC00254B8B /* UISelectorViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AD9BC28D247DC00254B8B /* UISelectorViewController.cpp */; };
+		7C3AD9C928D37B6400254B8B /* UITableViewRadioCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AD9C728D37B6400254B8B /* UITableViewRadioCell.cpp */; };
+		7C3AD9CA28D37B6400254B8B /* UITableViewRadioCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AD9C728D37B6400254B8B /* UITableViewRadioCell.cpp */; };
 		7C44163C28777D9B0076663D /* UIResponder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C44163A28777D9B0076663D /* UIResponder.cpp */; };
 		7C4630552884325800DF15F3 /* UIAppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4630532884325800DF15F3 /* UIAppDelegate.cpp */; };
 		7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4630532884325800DF15F3 /* UIAppDelegate.cpp */; };
@@ -269,6 +271,8 @@
 		7C35D1C4287CD0E8005C0A7F /* tweeny.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tweeny.h; sourceTree = "<group>"; };
 		7C3AD9BC28D247DC00254B8B /* UISelectorViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UISelectorViewController.cpp; sourceTree = "<group>"; };
 		7C3AD9BD28D247DC00254B8B /* UISelectorViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UISelectorViewController.hpp; sourceTree = "<group>"; };
+		7C3AD9C728D37B6400254B8B /* UITableViewRadioCell.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITableViewRadioCell.cpp; sourceTree = "<group>"; };
+		7C3AD9C828D37B6400254B8B /* UITableViewRadioCell.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITableViewRadioCell.hpp; sourceTree = "<group>"; };
 		7C44163A28777D9B0076663D /* UIResponder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIResponder.cpp; sourceTree = "<group>"; };
 		7C44163B28777D9B0076663D /* UIResponder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIResponder.hpp; sourceTree = "<group>"; };
 		7C4630532884325800DF15F3 /* UIAppDelegate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIAppDelegate.cpp; sourceTree = "<group>"; };
@@ -686,6 +690,15 @@
 				7C3AD9BC28D247DC00254B8B /* UISelectorViewController.cpp */,
 			);
 			path = UISelectorViewController;
+			sourceTree = "<group>";
+		};
+		7C3AD9C628D37B3D00254B8B /* UITableViewRadioCell */ = {
+			isa = PBXGroup;
+			children = (
+				7C3AD9C828D37B6400254B8B /* UITableViewRadioCell.hpp */,
+				7C3AD9C728D37B6400254B8B /* UITableViewRadioCell.cpp */,
+			);
+			path = UITableViewRadioCell;
 			sourceTree = "<group>";
 		};
 		7C44163928777D8D0076663D /* UIResponder */ = {
@@ -1252,6 +1265,7 @@
 				7CCDCDAF28C272F400EFBFCA /* UITableView */,
 				7CCDCDB928C3769400EFBFCA /* UITableViewCell */,
 				7CCDCDBE28C3ACC300EFBFCA /* UITableViewDefaultCell */,
+				7C3AD9C628D37B3D00254B8B /* UITableViewRadioCell */,
 				7CC054F828D1348100205B99 /* UITableViewSwitchCell */,
 				7C58C65F28B055C10039F0E5 /* UITapGestureRecognizer */,
 				7C53FE4728788A930091DEF9 /* UITouch */,
@@ -1728,6 +1742,7 @@
 				7CE9B5DC2874917F00659D24 /* Yoga.cpp in Sources */,
 				7C888E4328816547009A6B95 /* UINavigationController.cpp in Sources */,
 				7CE9B5DA2874917F00659D24 /* Utils.cpp in Sources */,
+				7C3AD9C928D37B6400254B8B /* UITableViewRadioCell.cpp in Sources */,
 				7CE9B5E12874917F00659D24 /* YGValue.cpp in Sources */,
 				7C8D98A828BD658400BDD667 /* plutovg-blend.c in Sources */,
 			);
@@ -1789,6 +1804,7 @@
 				7C8D989D28BD658400BDD667 /* sw_ft_raster.c in Sources */,
 				7CCDCDC228C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */,
 				7C3AD9BF28D247DC00254B8B /* UISelectorViewController.cpp in Sources */,
+				7C3AD9CA28D37B6400254B8B /* UITableViewRadioCell.cpp in Sources */,
 				7CCDCDD028C551F900EFBFCA /* UIAlertController.cpp in Sources */,
 				7C8D987528BD657500BDD667 /* element.cpp in Sources */,
 				7C8D986528BD657500BDD667 /* lunasvg.cpp in Sources */,

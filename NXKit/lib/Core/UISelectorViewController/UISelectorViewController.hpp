@@ -9,11 +9,14 @@
 
 #include <Core/UIViewController/UIViewController.hpp>
 
+#include <vector>
+#include <optional>
+
 namespace NXKit {
 
 class UISelectorViewController: public UIViewController {
 public:
-    UISelectorViewController();
+    UISelectorViewController(std::string title, std::vector<std::string> data, std::function<void(int)> onComplete, int selectedIndex = -1);
 
     void loadView() override;
     void viewWillAppear(bool animated) override;
@@ -30,6 +33,13 @@ private:
     UIView* scrollView = nullptr;
     UIView* contentView = nullptr;
     UIView* containerView = nullptr;
+    
+    UIView* selectedView = nullptr;
+
+    std::string title;
+    std::function<void(int)> onComplete;
+    std::vector<std::string> data;
+    int selectedIndex;
 
     UIView* makeContentView();
     UIView* makeFooter();

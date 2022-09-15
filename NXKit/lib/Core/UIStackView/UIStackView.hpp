@@ -66,6 +66,8 @@ public:
 
     bool passthroughTouches = false;
 private:
+    friend class UISelectorViewController;
+
     Axis axis = Axis::VERTICAL;
     int currentFocus = 0;
 };

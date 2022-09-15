@@ -14,7 +14,7 @@ TableViewTestController::TableViewTestController() {
 void TableViewTestController::loadView() {
     tableView = new UITableView();
     tableView->setFixWidth(true);
-    tableView->scrollingMode = UIScrollViewScrollingMode::scrollingEdge;
+    tableView->scrollingMode = UIScrollViewScrollingMode::centered;
     setView(tableView);
 }
 
