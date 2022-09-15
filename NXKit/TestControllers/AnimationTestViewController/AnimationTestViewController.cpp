@@ -29,13 +29,16 @@ void AnimationTestViewController::loadView() {
 }
 
 void AnimationTestViewController::viewDidLoad() {
+    colors = { UIColor::cyan, UIColor::orange, UIColor::green, UIColor::systemTint, UIColor::red };
     animate(false);
 }
 
 void AnimationTestViewController::animate(bool revers) {
+    static int counter = 0;
     UIView::animate({ ball }, 1, [this, revers]() {
         ball->transformOrigin = Point(revers ? 160 : -160, 0);
-        ball->backgroundColor = revers ? UIColor::cyan : UIColor::orange;
+        ball->backgroundColor = colors[counter];
+        ++counter %= colors.size();
     }, EasingFunction::exponentialInOut, [this](bool res) {
         if (!res) return;
         animate(ball->transformOrigin.x < 0);

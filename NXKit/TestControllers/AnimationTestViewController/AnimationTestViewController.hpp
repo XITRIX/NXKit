@@ -18,4 +18,6 @@ private:
     UIControl* ball = nullptr;
 
     void animate(bool revers);
+
+    std::vector<UIColor> colors;
 };
