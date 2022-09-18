@@ -54,13 +54,13 @@ void UIAlertController::loadView() {
     root->addSubview(alert);
 
     auto textsView = new UIStackView(Axis::VERTICAL);
-    textsView->setPadding(45, 115, 45, 115);
+    textsView->setMargins(45, 115, 45, 115);
 
     if (title != "") {
         titleLabel = new UILabel(title);
         titleLabel->horizontalAlign = HorizontalAlign::CENTER;
         titleLabel->getFont()->fontSize = 24;
-        titleLabel->setMargins(20, 20, 20, 20);
+        titleLabel->setMargins(0, 0, 20, 0);
         textsView->addSubview(titleLabel);
     }
 
@@ -68,7 +68,7 @@ void UIAlertController::loadView() {
         messageLabel = new UILabel(message);
         messageLabel->horizontalAlign = HorizontalAlign::CENTER;
         messageLabel->getFont()->fontSize = 18;
-        titleLabel->setMargins(20, 20, 20, 20);
+        messageLabel->setMargins(0, 0, 0, 0);
         messageLabel->textColor = UIColor::gray;
         textsView->addSubview(messageLabel);
     }

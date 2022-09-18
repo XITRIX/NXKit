@@ -58,8 +58,7 @@ UIView* UISelectorViewController::makeContentView() {
 
     for (int i = 0; i < data.size(); i++) {
         UITableViewRadioCell* cell = new UITableViewRadioCell();
-        if (i == selectedIndex) selectedView = cell
-            ;
+        if (i == selectedIndex) selectedView = cell;
         cell->setHeight(60);
         cell->setPercentWidth(60);
         cell->label->getFont()->fontSize = 20;

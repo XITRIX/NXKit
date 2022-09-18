@@ -180,10 +180,10 @@ shadowColor(0, 0, 0)
 }
 
 void UILabel::draw(NVGcontext *vg) {
-    int x = 0;
-    int y = 0;
-    int width = getFrame().size.width;
-    int height = getFrame().size.height;
+    float x = 0;
+    float y = 0;
+    float width = getFrame().size.width;
+    float height = getFrame().size.height;
 
 
     if (width == 0)
