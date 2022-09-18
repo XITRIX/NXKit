@@ -517,7 +517,7 @@ void UIView::applyAnimationContext(std::deque<float>* context) {
 }
 
 void UIView::animate(float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {
-    if (duration <= 0) {
+    if (duration <= 0 || noAnimations) {
         animations();
         animationContext.reset(createAnimationContext());
         completion(true);
@@ -879,6 +879,13 @@ float UIView::getBorderBottom() {
 }
 
 void UIView::animate(std::initializer_list<UIView*> views, float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {
+    // Maybe needs improvements
+    if (noAnimations) {
+        animations();
+        completion(true);
+        return;
+    }
+
     if (duration <= 0) {
         animations();
         for (UIView* view: views) {
@@ -923,6 +930,15 @@ void UIView::animate(std::initializer_list<UIView*> views, float duration, std::
         view->applyAnimationContext(&contexts[i]);
         view->animationContext.start();
     }
+}
+
+bool UIView::noAnimations = false;
+
+void UIView::performWithoutAnimation(std::function<void()> function) {
+    bool old = noAnimations;
+    noAnimations = true;
+    function();
+    noAnimations = old;
 }
 
 // Trait collection

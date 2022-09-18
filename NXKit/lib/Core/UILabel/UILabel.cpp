@@ -89,7 +89,7 @@ YGSize UILabel::labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widt
     }
     else
     {
-        //        fatal("Unsupported Label width measure mode: " + std::to_string(widthMode));
+        printf("Unsupported Label width measure mode: %s\n", std::to_string(widthMode).c_str());
     }
 
     // Height
@@ -138,7 +138,7 @@ YGSize UILabel::labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widt
         }
         else
         {
-            //            fatal("Unsupported Label height measure mode: " + std::to_string(heightMode));
+            printf("Unsupported Label height measure mode: %s\n", std::to_string(heightMode).c_str());
         }
     }
     // No wrapping necessary or allowed, return the normal height

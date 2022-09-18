@@ -183,7 +183,8 @@ void UIScrollView::layoutSubviews() {
 
     if (contentView) {
         Size frameSize = getBounds().size;
-        Size size = Size(fixWidth ? frameSize.width : UIView::AUTO, fixHeight ? frameSize.height : UIView::AUTO);
+        Size size = Size(fixWidth ? frameSize.width : UIView::AUTO,
+                         fixHeight ? frameSize.height : UIView::AUTO);
         contentView->setSize(size);
     }
 

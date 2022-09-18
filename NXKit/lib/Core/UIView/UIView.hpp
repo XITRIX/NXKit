@@ -96,6 +96,8 @@ public:
     virtual void applyAnimationContext(std::deque<float>* context);
     void animate(float duration, std::function<void()> animations, EasingFunction easing = EasingFunction::linear, std::function<void(bool)> completion = [](bool res){});
 
+    static void performWithoutAnimation(std::function<void()> function);
+
     void addGestureRecognizer(UIGestureRecognizer* gestureRecognizer);
     std::vector<UIGestureRecognizer*> getGestureRecognizers();
 
@@ -174,6 +176,7 @@ private:
     friend class UIViewController;
     friend class UITableView;
 
+    static bool noAnimations;
     std::optional<UIColor> tintColor;
 
     AnimationContext animationContext;

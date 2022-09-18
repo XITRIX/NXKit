@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Core/UIViewController/UIViewController.hpp>
+#include <Core/UIScrollView/UIScrollView.hpp>
 
 #include <vector>
 #include <optional>
@@ -19,7 +20,6 @@ public:
     UISelectorViewController(std::string title, std::vector<std::string> data, std::function<void(int)> onComplete, int selectedIndex = -1);
 
     void loadView() override;
-    void viewWillAppear(bool animated) override;
     void viewDidLayoutSubviews() override;
 
 protected:
@@ -30,7 +30,7 @@ private:
     float headerHeight = 70;
     float footerHeight = 73;
     
-    UIView* scrollView = nullptr;
+    UIScrollView* scrollView = nullptr;
     UIView* contentView = nullptr;
     UIView* containerView = nullptr;
     

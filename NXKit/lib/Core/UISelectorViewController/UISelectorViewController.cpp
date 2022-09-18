@@ -32,13 +32,6 @@ void UISelectorViewController::loadView() {
     view->addSubview(makeFooter());
 }
 
-void UISelectorViewController::viewWillAppear(bool animated) {
-    if (selectedView) {
-        getView()->layoutIfNeeded();
-        Application::shared()->setFocus(selectedView);
-    }
-}
-
 UIView* UISelectorViewController::makeContentView() {
     UINavigationBar* navigationBar = new UINavigationBar();
     navigationBar->setSize(Size(UIView::AUTO, headerHeight));
@@ -125,8 +118,19 @@ void UISelectorViewController::viewDidLayoutSubviews() {
     float contHeight = contentView->getBounds().size.height;
     
     float height = std::min(heightLimit, contHeight);
-    if (!floatSame(scrollView->getBounds().size.height, height))
+    if (!floatSame(scrollView->getBounds().size.height, height)) {
         scrollView->setHeight(height);
+
+        if (selectedView) {
+            Application::shared()->setFocus(selectedView);
+
+            Rect focusedViewFrame = selectedView->getFrame();
+            Point origin = selectedView->getSuperview()->convert(focusedViewFrame.origin, scrollView);
+            origin.y -= height / 2 - focusedViewFrame.height() / 2;
+
+            scrollView->setContentOffset(origin, true);
+        }
+    }
 }
 
 void UISelectorViewController::makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion) {
