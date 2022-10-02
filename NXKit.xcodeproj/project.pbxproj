@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		7C0638F32876215100621093 /* FontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F12876215100621093 /* FontManager.cpp */; };
-		7C0638F42876233200621093 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E92874EA4000659D24 /* main.cpp */; };
 		7C07B87828C7C0A8009FFA69 /* UIActionsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C07B87628C7C0A8009FFA69 /* UIActionsView.cpp */; };
 		7C07B87928C7C0A8009FFA69 /* UIActionsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C07B87628C7C0A8009FFA69 /* UIActionsView.cpp */; };
 		7C239612287E13C100973CC0 /* Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239610287E13C100973CC0 /* Time.cpp */; };
@@ -26,7 +25,6 @@
 		7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4630532884325800DF15F3 /* UIAppDelegate.cpp */; };
 		7C4749522884604B00C5A988 /* UIScrollView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4749502884604B00C5A988 /* UIScrollView.cpp */; };
 		7C4749532884608700C5A988 /* UIScrollView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4749502884604B00C5A988 /* UIScrollView.cpp */; };
-		7C47495628854E2900C5A988 /* GLFWInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495428854E2900C5A988 /* GLFWInputManager.cpp */; };
 		7C47495D2885EDCB00C5A988 /* IOSInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495B2885EDCB00C5A988 /* IOSInputManager.cpp */; };
 		7C4749612886063B00C5A988 /* NXAffineTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495F2886063B00C5A988 /* NXAffineTransform.cpp */; };
 		7C49617928A8215000E30B4B /* TouchTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C49617728A8215000E30B4B /* TouchTestViewController.cpp */; };
@@ -140,10 +138,15 @@
 		7C8D98AB28BD658400BDD667 /* plutovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989628BD658300BDD667 /* plutovg.c */; };
 		7C8D98AC28BD658400BDD667 /* plutovg-rle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989828BD658300BDD667 /* plutovg-rle.c */; };
 		7C8D98AD28BD658400BDD667 /* plutovg-rle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989828BD658300BDD667 /* plutovg-rle.c */; };
+		7C9ECB6E28E9B80F00E53F6A /* SDLInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB6C28E9B80F00E53F6A /* SDLInputManager.cpp */; };
+		7C9ECB6F28E9B80F00E53F6A /* SDLInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB6C28E9B80F00E53F6A /* SDLInputManager.cpp */; };
+		7C9ECB7128E9CA1B00E53F6A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB7028E9CA1B00E53F6A /* main.cpp */; };
+		7C9ECB7228E9CA1B00E53F6A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB7028E9CA1B00E53F6A /* main.cpp */; };
+		7C9ECB7528E9CA2700E53F6A /* SDLVideoContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB7328E9CA2700E53F6A /* SDLVideoContext.cpp */; };
+		7C9ECB7628E9CA2700E53F6A /* SDLVideoContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB7328E9CA2700E53F6A /* SDLVideoContext.cpp */; };
 		7CA389722882F8C6005C7A91 /* ios_main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C4AD2882CE7500E47DB3 /* ios_main.mm */; };
 		7CA3897728835B5F005C7A91 /* nx_application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA3897428835AB8005C7A91 /* nx_application.cpp */; };
 		7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE592878F4E60091DEF9 /* UIWindow.cpp */; };
-		7CA960792871F8BF009E0953 /* GLFWVideoContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960762871F8BF009E0953 /* GLFWVideoContext.cpp */; };
 		7CA960B12871F993009E0953 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960882871F993009E0953 /* nanovg.c */; };
 		7CA960B22871F993009E0953 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9608A2871F993009E0953 /* glad.c */; };
 		7CA960C12871FAC6009E0953 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960BF2871FAC6009E0953 /* Application.cpp */; };
@@ -415,6 +418,11 @@
 		7C8D989628BD658300BDD667 /* plutovg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = plutovg.c; sourceTree = "<group>"; };
 		7C8D989728BD658300BDD667 /* plutovg-private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "plutovg-private.h"; sourceTree = "<group>"; };
 		7C8D989828BD658300BDD667 /* plutovg-rle.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "plutovg-rle.c"; sourceTree = "<group>"; };
+		7C9ECB6C28E9B80F00E53F6A /* SDLInputManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SDLInputManager.cpp; sourceTree = "<group>"; };
+		7C9ECB6D28E9B80F00E53F6A /* SDLInputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SDLInputManager.hpp; sourceTree = "<group>"; };
+		7C9ECB7028E9CA1B00E53F6A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		7C9ECB7328E9CA2700E53F6A /* SDLVideoContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SDLVideoContext.cpp; sourceTree = "<group>"; };
+		7C9ECB7428E9CA2700E53F6A /* SDLVideoContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SDLVideoContext.hpp; sourceTree = "<group>"; };
 		7CA3897328835AA1005C7A91 /* nx_application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nx_application.h; sourceTree = "<group>"; };
 		7CA3897428835AB8005C7A91 /* nx_application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = nx_application.cpp; sourceTree = "<group>"; };
 		7CA3898528836343005C7A91 /* Fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; name = Fonts; path = resources/Fonts; sourceTree = SOURCE_ROOT; };
@@ -1013,6 +1021,7 @@
 			children = (
 				7C47495528854E2900C5A988 /* InputManager.hpp */,
 				7CA9C4682882ADD600E47DB3 /* iOS */,
+				7C9ECB6B28E9B7E600E53F6A /* SDL */,
 				7C58C66928B2504C0039F0E5 /* Switch */,
 				7C888E6F28819F3F009A6B95 /* Universal */,
 			);
@@ -1181,6 +1190,18 @@
 				7C8D989828BD658300BDD667 /* plutovg-rle.c */,
 			);
 			path = plutovg;
+			sourceTree = "<group>";
+		};
+		7C9ECB6B28E9B7E600E53F6A /* SDL */ = {
+			isa = PBXGroup;
+			children = (
+				7C9ECB7028E9CA1B00E53F6A /* main.cpp */,
+				7C9ECB7428E9CA2700E53F6A /* SDLVideoContext.hpp */,
+				7C9ECB7328E9CA2700E53F6A /* SDLVideoContext.cpp */,
+				7C9ECB6D28E9B80F00E53F6A /* SDLInputManager.hpp */,
+				7C9ECB6C28E9B80F00E53F6A /* SDLInputManager.cpp */,
+			);
+			path = SDL;
 			sourceTree = "<group>";
 		};
 		7CA38982288362FE005C7A91 /* Resources */ = {
@@ -1656,7 +1677,6 @@
 				7CE9B5D92874917F00659D24 /* log.cpp in Sources */,
 				7CCDCDBC28C376A500EFBFCA /* UITableViewCell.cpp in Sources */,
 				7C58C66228B055CD0039F0E5 /* UITapGestureRecognizer.cpp in Sources */,
-				7CA960792871F8BF009E0953 /* GLFWVideoContext.cpp in Sources */,
 				7C53FE4E28788D8E0091DEF9 /* UIGestureRecognizer.cpp in Sources */,
 				7C8D987A28BD657500BDD667 /* geometryelement.cpp in Sources */,
 				7CCDCDC128C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */,
@@ -1685,12 +1705,10 @@
 				7C8D98A228BD658400BDD667 /* plutovg-dash.c in Sources */,
 				7C8D98A428BD658400BDD667 /* plutovg-paint.c in Sources */,
 				7CCDCDB228C2730A00EFBFCA /* UITableView.cpp in Sources */,
-				7C47495628854E2900C5A988 /* GLFWInputManager.cpp in Sources */,
 				7C8D986A28BD657500BDD667 /* parser.cpp in Sources */,
 				7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */,
 				7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */,
 				7C8D987828BD657500BDD667 /* gelement.cpp in Sources */,
-				7C0638F42876233200621093 /* main.cpp in Sources */,
 				7C8D987628BD657500BDD667 /* styledelement.cpp in Sources */,
 				7CCDCDCF28C551F900EFBFCA /* UIAlertController.cpp in Sources */,
 				7CE9B5E42874917F00659D24 /* event.cpp in Sources */,
@@ -1701,6 +1719,7 @@
 				7CE9B5E22874917F00659D24 /* YGConfig.cpp in Sources */,
 				7C82CB5428CCC97700634A8E /* UITraitCollection.cpp in Sources */,
 				7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */,
+				7C9ECB7128E9CA1B00E53F6A /* main.cpp in Sources */,
 				7C709CA628C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */,
 				7C23962E287E143700973CC0 /* encoding_utf.c in Sources */,
 				7CCDCDC628C4965300EFBFCA /* UIButton.cpp in Sources */,
@@ -1721,6 +1740,7 @@
 				7CE9B5E8287495F900659D24 /* UIStackView.cpp in Sources */,
 				7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */,
 				7C8D980A28BAC24000BDD667 /* AnimationContext.cpp in Sources */,
+				7C9ECB7528E9CA2700E53F6A /* SDLVideoContext.cpp in Sources */,
 				7CE9B5DF2874917F00659D24 /* YGNodePrint.cpp in Sources */,
 				7C8D986C28BD657500BDD667 /* canvas.cpp in Sources */,
 				7CE9B5DD2874917F00659D24 /* YGStyle.cpp in Sources */,
@@ -1731,6 +1751,7 @@
 				7C4630552884325800DF15F3 /* UIAppDelegate.cpp in Sources */,
 				7C709C9F28C08CCE000A474F /* UIControl.cpp in Sources */,
 				7C8D985D28BD657500BDD667 /* defselement.cpp in Sources */,
+				7C9ECB6E28E9B80F00E53F6A /* SDLInputManager.cpp in Sources */,
 				7C8D988228BD657500BDD667 /* useelement.cpp in Sources */,
 				7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */,
 				7C8D987228BD657500BDD667 /* markerelement.cpp in Sources */,
@@ -1760,10 +1781,12 @@
 				7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */,
 				7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */,
 				7C709CA728C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */,
+				7C9ECB6F28E9B80F00E53F6A /* SDLInputManager.cpp in Sources */,
 				7C8D987F28BD657500BDD667 /* paintelement.cpp in Sources */,
 				7CCDCDBD28C376A500EFBFCA /* UITableViewCell.cpp in Sources */,
 				7C8D986D28BD657500BDD667 /* canvas.cpp in Sources */,
 				7C8D981028BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
+				7C9ECB7228E9CA1B00E53F6A /* main.cpp in Sources */,
 				7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */,
 				7C8D987928BD657500BDD667 /* gelement.cpp in Sources */,
 				7CA9C48F2882C43100E47DB3 /* GaussianBlur.cpp in Sources */,
@@ -1805,6 +1828,7 @@
 				7CCDCDC228C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */,
 				7C3AD9BF28D247DC00254B8B /* UISelectorViewController.cpp in Sources */,
 				7C3AD9CA28D37B6400254B8B /* UITableViewRadioCell.cpp in Sources */,
+				7C9ECB7628E9CA2700E53F6A /* SDLVideoContext.cpp in Sources */,
 				7CCDCDD028C551F900EFBFCA /* UIAlertController.cpp in Sources */,
 				7C8D987528BD657500BDD667 /* element.cpp in Sources */,
 				7C8D986528BD657500BDD667 /* lunasvg.cpp in Sources */,
@@ -2014,7 +2038,10 @@
 				);
 				LIBRARY_SEARCH_PATHS = /opt/homebrew/lib;
 				MACOSX_DEPLOYMENT_TARGET = 12.3;
-				OTHER_LDFLAGS = "-lglfw";
+				OTHER_LDFLAGS = (
+					"-lglfw",
+					"-lSDL2",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -2032,7 +2059,10 @@
 				);
 				LIBRARY_SEARCH_PATHS = /opt/homebrew/lib;
 				MACOSX_DEPLOYMENT_TARGET = 12.3;
-				OTHER_LDFLAGS = "-lglfw";
+				OTHER_LDFLAGS = (
+					"-lglfw",
+					"-lSDL2",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
