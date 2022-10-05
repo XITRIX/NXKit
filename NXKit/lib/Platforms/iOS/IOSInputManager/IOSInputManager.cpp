@@ -88,7 +88,7 @@ UITouch* IOSInputManager::getTouch(int id) {
 }
 
 std::vector<UITouch*> IOSInputManager::getTouches() {
-    return {};
+    return touches;
 }
 
 void IOSInputManager::setKey(BrlsKeyboardScancode key, bool state) {
@@ -109,7 +109,69 @@ void IOSInputManager::setKey(BrlsKeyboardScancode key, bool state) {
 }
 
 void IOSInputManager::update() {
+    updateKeyboard();
+    updateTouch();
+}
 
+void IOSInputManager::updateTouch() {
+    std::map<unsigned long, UITouch*> oldTouches;
+    for (auto touch: touches) {
+        oldTouches[touch->touchId] = touch;
+    }
+
+    for (auto touchIter: currentTouches)
+    {
+        auto find = oldTouches.find(touchIter.first);
+        if (find == oldTouches.end()) {
+            auto touch = new UITouch(touchIter.first, Point(touchIter.second.x, touchIter.second.y), getCPUTimeUsec());
+            touch->window = Application::shared()->getKeyWindow();
+            touch->view = touch->window->hitTest(touch->absoluteLocation, nullptr);
+            touch->gestureRecognizers = getRecognizerHierachyFrom(touch->view);
+            touch->phase = UITouchPhase::BEGIN;
+            touches.push_back(touch);
+//             printf("Touch begin at: X - %f, Y - %f\n", touchIter.second.x, touchIter.second.y);
+        } else {
+            auto touch = find->second;
+            touch->timestamp = getCPUTimeUsec();
+            touch->phase = UITouchPhase::MOVED;
+            touch->updateAbsoluteLocation(Point(touchIter.second.x, touchIter.second.y));
+            oldTouches.erase(find);
+//             printf("Touch moved at: X - %f, Y - %f\n", touchIter.second.x, touchIter.second.y);
+        }
+    }
+
+    for (auto touchIter: oldTouches) {
+        UITouch* touch = touchIter.second;
+        if (touch->phase == UITouchPhase::MOVED) {
+            touch->timestamp = getCPUTimeUsec();
+            touch->phase = UITouchPhase::ENDED;
+//             printf("Touch ended\n");
+        } else if (touch->phase == UITouchPhase::ENDED) {
+            touches.erase(std::remove(touches.begin(), touches.end(), touch));
+//             printf("Touch removed\n");
+            delete touch;
+        }
+    }
+}
+
+void IOSInputManager::updateKeyboard() {
+    for (int i = 0; i < _BRLS_KBD_KEY_LAST; i++) {
+        bool key = currentKeys[i];
+        if (keys[i] != key) {
+            if (key) {
+                keysDown[i] = true;
+                keysUp[i] = false;
+            }
+            else {
+                keysDown[i] = false;
+                keysUp[i] = true;
+            }
+            keys[i] = key;
+        } else {
+            keysDown[i] = false;
+            keysUp[i] = false;
+        }
+    }
 }
 
 std::string IOSInputManager::getButtonIcon(ControllerButton button) {
@@ -149,6 +211,17 @@ std::string IOSInputManager::getButtonIcon(ControllerButton button) {
         default:
             return "\uE152";
     }
+}
+
+std::vector<UIGestureRecognizer*> IOSInputManager::getRecognizerHierachyFrom(UIView* view) {
+    std::vector<UIGestureRecognizer*> recognizers;
+    while (view) {
+        for (auto recognizer : view->getGestureRecognizers())
+            recognizers.push_back(recognizer);
+        view = view->getSuperview();
+    }
+
+    return recognizers;
 }
 
 }

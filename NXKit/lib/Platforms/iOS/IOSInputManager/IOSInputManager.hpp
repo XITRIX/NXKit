@@ -8,6 +8,7 @@
 #pragma once
 
 #include "InputManager.hpp"
+#include <map>
 
 namespace NXKit {
 
@@ -47,10 +48,20 @@ public:
     void update() override;
     
     void setKey(BrlsKeyboardScancode key, bool state);
+
+    bool currentKeys[_BRLS_KBD_KEY_LAST];
+    std::map<unsigned long, Point> currentTouches;
 private:
     bool keys[_BRLS_KBD_KEY_LAST];
     bool keysUp[_BRLS_KBD_KEY_LAST];
     bool keysDown[_BRLS_KBD_KEY_LAST];
+
+    std::vector<UITouch*> touches;
+
+    void updateKeyboard();
+    void updateTouch();
+
+    std::vector<UIGestureRecognizer*> getRecognizerHierachyFrom(UIView* view);
 };
 
 }

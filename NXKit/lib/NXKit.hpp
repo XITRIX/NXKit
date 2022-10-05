@@ -28,4 +28,4 @@
 #include <Core/Utils/GroupTask/GroupTask.hpp>
 #include <Platforms/InputManager.hpp>
 
-using namespace NXKit;
+//using namespace NXKit;

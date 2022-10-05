@@ -36,6 +36,9 @@ static int getContextBluredImage(NVGcontext* vgContext, float x, float y, float 
     int lh = static_cast<int>(h * scaleFactor);
     float lr = r * scaleFactor;
 
+    if (lw > 10000)
+        return 0;
+
     Application::shared()->getVideoContext()->getContextPixels(lx, ly, lw, lh, &image);
 
     if (image == NULL || lw <= 0 || lh <= 0)

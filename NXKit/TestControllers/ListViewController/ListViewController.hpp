@@ -9,6 +9,8 @@
 
 #include <NXKit.hpp>
 
+using namespace NXKit;
+
 class ListItemView: public UIControl  {
 public:
     ListItemView();

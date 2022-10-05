@@ -9,6 +9,8 @@
 
 #import <NXKit.hpp>
 
+using namespace NXKit;
+
 class AnimationTestViewController: public UIViewController {
 public:
     AnimationTestViewController();

@@ -16,7 +16,6 @@
 //#define GLFW_INCLUDE_NONE
 //#include <OpenGL/OpenGL.h>
 #include <SDL2/SDL.h>
-#include <glad/glad.h>
 
 #include <string>
 
@@ -48,8 +47,8 @@ private:
     NVGcontext* nvgContext = nullptr;
 
 #ifdef __SWITCH__
-    GLFWmonitor* monitor = nullptr;
-    int oldWidth, oldHeight;
+//    GLFWmonitor* monitor = nullptr;
+//    int oldWidth, oldHeight;
 #endif
 };
 

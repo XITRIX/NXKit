@@ -27,10 +27,10 @@ class UIView;
 
 class UITouch {
 public:
-    UITouch(int touchId, Point atPoint, Time timestamp);
+    UITouch(unsigned long touchId, Point atPoint, Time timestamp);
     UITouch(): UITouch(0, Point(), getCPUTimeUsec()) {}
 
-    int touchId;
+    unsigned long touchId;
 
     UIView* view = nullptr;
     UIView* window = nullptr;

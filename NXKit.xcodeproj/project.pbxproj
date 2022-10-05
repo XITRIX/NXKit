@@ -9,52 +9,144 @@
 /* Begin PBXBuildFile section */
 		7C0638F32876215100621093 /* FontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F12876215100621093 /* FontManager.cpp */; };
 		7C07B87828C7C0A8009FFA69 /* UIActionsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C07B87628C7C0A8009FFA69 /* UIActionsView.cpp */; };
-		7C07B87928C7C0A8009FFA69 /* UIActionsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C07B87628C7C0A8009FFA69 /* UIActionsView.cpp */; };
 		7C239612287E13C100973CC0 /* Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239610287E13C100973CC0 /* Time.cpp */; };
 		7C23962E287E143700973CC0 /* encoding_utf.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C239628287E143600973CC0 /* encoding_utf.c */; };
 		7C23962F287E143700973CC0 /* compat_strl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962A287E143600973CC0 /* compat_strl.c */; };
 		7C239630287E143700973CC0 /* features_cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962C287E143600973CC0 /* features_cpu.c */; };
 		7C28B26128C6764500900D60 /* GroupTask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C28B25F28C6764500900D60 /* GroupTask.cpp */; };
-		7C28B26228C6764500900D60 /* GroupTask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C28B25F28C6764500900D60 /* GroupTask.cpp */; };
 		7C3AD9BE28D247DC00254B8B /* UISelectorViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AD9BC28D247DC00254B8B /* UISelectorViewController.cpp */; };
-		7C3AD9BF28D247DC00254B8B /* UISelectorViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AD9BC28D247DC00254B8B /* UISelectorViewController.cpp */; };
 		7C3AD9C928D37B6400254B8B /* UITableViewRadioCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AD9C728D37B6400254B8B /* UITableViewRadioCell.cpp */; };
-		7C3AD9CA28D37B6400254B8B /* UITableViewRadioCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AD9C728D37B6400254B8B /* UITableViewRadioCell.cpp */; };
 		7C44163C28777D9B0076663D /* UIResponder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C44163A28777D9B0076663D /* UIResponder.cpp */; };
 		7C4630552884325800DF15F3 /* UIAppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4630532884325800DF15F3 /* UIAppDelegate.cpp */; };
-		7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4630532884325800DF15F3 /* UIAppDelegate.cpp */; };
 		7C4749522884604B00C5A988 /* UIScrollView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4749502884604B00C5A988 /* UIScrollView.cpp */; };
-		7C4749532884608700C5A988 /* UIScrollView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4749502884604B00C5A988 /* UIScrollView.cpp */; };
-		7C47495D2885EDCB00C5A988 /* IOSInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495B2885EDCB00C5A988 /* IOSInputManager.cpp */; };
 		7C4749612886063B00C5A988 /* NXAffineTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495F2886063B00C5A988 /* NXAffineTransform.cpp */; };
 		7C49617928A8215000E30B4B /* TouchTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C49617728A8215000E30B4B /* TouchTestViewController.cpp */; };
-		7C49617A28A8215000E30B4B /* TouchTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C49617728A8215000E30B4B /* TouchTestViewController.cpp */; };
 		7C53FE4A28788AA20091DEF9 /* UITouch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4828788AA20091DEF9 /* UITouch.cpp */; };
 		7C53FE4E28788D8E0091DEF9 /* UIGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4C28788D8E0091DEF9 /* UIGestureRecognizer.cpp */; };
 		7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE502878EA220091DEF9 /* UIEvent.cpp */; };
 		7C53FE562878ED350091DEF9 /* UIViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE542878ED350091DEF9 /* UIViewController.cpp */; };
 		7C53FE5B2878F4E60091DEF9 /* UIWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE592878F4E60091DEF9 /* UIWindow.cpp */; };
 		7C58C65428AF85A80039F0E5 /* NXTransform3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C65228AF85A80039F0E5 /* NXTransform3D.cpp */; };
-		7C58C65528AF85AD0039F0E5 /* NXTransform3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C65228AF85A80039F0E5 /* NXTransform3D.cpp */; };
 		7C58C65B28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C65928AFBAD50039F0E5 /* UIEdgeInsets.cpp */; };
-		7C58C65C28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C65928AFBAD50039F0E5 /* UIEdgeInsets.cpp */; };
 		7C58C66228B055CD0039F0E5 /* UITapGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C66028B055CD0039F0E5 /* UITapGestureRecognizer.cpp */; };
-		7C58C66328B055CD0039F0E5 /* UITapGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C66028B055CD0039F0E5 /* UITapGestureRecognizer.cpp */; };
 		7C58C66728B0DA510039F0E5 /* UIPanGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C66528B0DA510039F0E5 /* UIPanGestureRecognizer.cpp */; };
-		7C58C66828B0DA510039F0E5 /* UIPanGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C66528B0DA510039F0E5 /* UIPanGestureRecognizer.cpp */; };
-		7C58C67428B382F90039F0E5 /* NXAffineTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495F2886063B00C5A988 /* NXAffineTransform.cpp */; };
-		7C65882528A29CD40036AAD5 /* ViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E45288165E9009A6B95 /* ViewController.cpp */; };
+		7C706CDE28EDFAE000B07BB5 /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984128BD657300BDD667 /* parser.cpp */; };
+		7C706CE028EDFAE000B07BB5 /* Tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D982928BCC64600BDD667 /* Tools.cpp */; };
+		7C706CE128EDFAE000B07BB5 /* YGNodePrint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E22874917F00659D24 /* YGNodePrint.cpp */; };
+		7C706CE228EDFAE000B07BB5 /* ListViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980328BA219A00BDD667 /* ListViewController.cpp */; };
+		7C706CE328EDFAE000B07BB5 /* UIAppDelegate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4630532884325800DF15F3 /* UIAppDelegate.cpp */; };
+		7C706CE428EDFAE000B07BB5 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960882871F993009E0953 /* nanovg.c */; };
+		7C706CE528EDFAE000B07BB5 /* UIControl+GestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA428C0ABED000A474F /* UIControl+GestureRecognizer.cpp */; };
+		7C706CE628EDFAE000B07BB5 /* paintelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985528BD657400BDD667 /* paintelement.cpp */; };
+		7C706CE728EDFAE000B07BB5 /* UITableViewCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBA28C376A500EFBFCA /* UITableViewCell.cpp */; };
+		7C706CE828EDFAE000B07BB5 /* canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984428BD657300BDD667 /* canvas.cpp */; };
+		7C706CE928EDFAE000B07BB5 /* AnimationTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */; };
+		7C706CEA28EDFAE000B07BB5 /* UIWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE592878F4E60091DEF9 /* UIWindow.cpp */; };
+		7C706CEB28EDFAE000B07BB5 /* gelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985128BD657400BDD667 /* gelement.cpp */; };
+		7C706CEC28EDFAE000B07BB5 /* GaussianBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBDD2873748B0082D3AC /* GaussianBlur.cpp */; };
+		7C706CED28EDFAE000B07BB5 /* ControlTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CAE28C0BD15000A474F /* ControlTestViewController.cpp */; };
+		7C706CEE28EDFAE000B07BB5 /* UIActionsView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C07B87628C7C0A8009FFA69 /* UIActionsView.cpp */; };
+		7C706CF028EDFAE000B07BB5 /* property.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985328BD657400BDD667 /* property.cpp */; };
+		7C706CF128EDFAE000B07BB5 /* UITouch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4828788AA20091DEF9 /* UITouch.cpp */; };
+		7C706CF228EDFAE000B07BB5 /* defselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983428BD657200BDD667 /* defselement.cpp */; };
+		7C706CF328EDFAE000B07BB5 /* UIEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE502878EA220091DEF9 /* UIEvent.cpp */; };
+		7C706CF428EDFAE000B07BB5 /* AnimationContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980828BAC24000BDD667 /* AnimationContext.cpp */; };
+		7C706CF528EDFAE000B07BB5 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4EE2874917F00659D24 /* event.cpp */; };
+		7C706CF628EDFAE000B07BB5 /* FontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F12876215100621093 /* FontManager.cpp */; };
+		7C706CF728EDFAE000B07BB5 /* UIBlurView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */; };
+		7C706CF828EDFAE000B07BB5 /* UIGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4C28788D8E0091DEF9 /* UIGestureRecognizer.cpp */; };
+		7C706CF928EDFAE000B07BB5 /* sw_ft_stroker.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988728BD658300BDD667 /* sw_ft_stroker.c */; };
+		7C706CFA28EDFAE000B07BB5 /* ViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E45288165E9009A6B95 /* ViewController.cpp */; };
+		7C706CFB28EDFAE000B07BB5 /* sw_ft_math.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988E28BD658300BDD667 /* sw_ft_math.c */; };
+		7C706CFC28EDFAE000B07BB5 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960BF2871FAC6009E0953 /* Application.cpp */; };
+		7C706CFD28EDFAE000B07BB5 /* UIResponder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C44163A28777D9B0076663D /* UIResponder.cpp */; };
+		7C706CFE28EDFAE000B07BB5 /* UINavigationController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4128816547009A6B95 /* UINavigationController.cpp */; };
+		7C706CFF28EDFAE000B07BB5 /* encoding_utf.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C239628287E143600973CC0 /* encoding_utf.c */; };
+		7C706D0128EDFAE000B07BB5 /* YGStyle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DC2874917F00659D24 /* YGStyle.cpp */; };
+		7C706D0228EDFAE000B07BB5 /* UITapGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C66028B055CD0039F0E5 /* UITapGestureRecognizer.cpp */; };
+		7C706D0328EDFAE000B07BB5 /* YGEnums.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E42874917F00659D24 /* YGEnums.cpp */; };
+		7C706D0428EDFAE000B07BB5 /* Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239610287E13C100973CC0 /* Time.cpp */; };
+		7C706D0528EDFAE000B07BB5 /* UITraitCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C82CB5228CCC97700634A8E /* UITraitCollection.cpp */; };
+		7C706D0628EDFAE000B07BB5 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9608A2871F993009E0953 /* glad.c */; };
+		7C706D0728EDFAE000B07BB5 /* UILabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD82873748B0082D3AC /* UILabel.cpp */; };
+		7C706D0828EDFAE000B07BB5 /* NXTransform3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C65228AF85A80039F0E5 /* NXTransform3D.cpp */; };
+		7C706D0928EDFAE000B07BB5 /* NXAffineTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495F2886063B00C5A988 /* NXAffineTransform.cpp */; };
+		7C706D0B28EDFAE000B07BB5 /* UIControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709C9D28C08CCE000A474F /* UIControl.cpp */; };
+		7C706D0C28EDFAE000B07BB5 /* plutovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989628BD658300BDD667 /* plutovg.c */; };
+		7C706D0D28EDFAE000B07BB5 /* YGValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E62874917F00659D24 /* YGValue.cpp */; };
+		7C706D0E28EDFAE000B07BB5 /* styledelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985028BD657400BDD667 /* styledelement.cpp */; };
+		7C706D0F28EDFAE000B07BB5 /* sw_ft_raster.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988A28BD658300BDD667 /* sw_ft_raster.c */; };
+		7C706D1028EDFAE000B07BB5 /* UITableViewDefaultCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBF28C3ACD900EFBFCA /* UITableViewDefaultCell.cpp */; };
+		7C706D1128EDFAE000B07BB5 /* UISelectorViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AD9BC28D247DC00254B8B /* UISelectorViewController.cpp */; };
+		7C706D1228EDFAE000B07BB5 /* UITableViewRadioCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AD9C728D37B6400254B8B /* UITableViewRadioCell.cpp */; };
+		7C706D1328EDFAE000B07BB5 /* UIAlertController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDCD28C551F900EFBFCA /* UIAlertController.cpp */; };
+		7C706D1428EDFAE000B07BB5 /* element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984F28BD657400BDD667 /* element.cpp */; };
+		7C706D1528EDFAE000B07BB5 /* lunasvg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983A28BD657200BDD667 /* lunasvg.cpp */; };
+		7C706D1628EDFAE000B07BB5 /* UIImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D981F28BC118200BDD667 /* UIImage.cpp */; };
+		7C706D1728EDFAE000B07BB5 /* UITableViewSwitchCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC054F928D1349D00205B99 /* UITableViewSwitchCell.cpp */; };
+		7C706D1828EDFAE000B07BB5 /* plutovg-dash.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989228BD658300BDD667 /* plutovg-dash.c */; };
+		7C706D1928EDFAE000B07BB5 /* UITabBarController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4928818212009A6B95 /* UITabBarController.cpp */; };
+		7C706D1A28EDFAE000B07BB5 /* stopelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983528BD657200BDD667 /* stopelement.cpp */; };
+		7C706D1B28EDFAE000B07BB5 /* clippathelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984D28BD657400BDD667 /* clippathelement.cpp */; };
+		7C706D1C28EDFAE000B07BB5 /* UIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD32873748B0082D3AC /* UIView.cpp */; };
+		7C706D1D28EDFAE000B07BB5 /* experiments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DF2874917F00659D24 /* experiments.cpp */; };
+		7C706D1E28EDFAE000B07BB5 /* Yoga.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DB2874917F00659D24 /* Yoga.cpp */; };
+		7C706D1F28EDFAE000B07BB5 /* plutovg-rle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989828BD658300BDD667 /* plutovg-rle.c */; };
+		7C706D2028EDFAE000B07BB5 /* UITableView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB028C2730A00EFBFCA /* UITableView.cpp */; };
+		7C706D2128EDFAE000B07BB5 /* YGConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E92874917F00659D24 /* YGConfig.cpp */; };
+		7C706D2228EDFAE000B07BB5 /* UIBottomSheetController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC0551528D22D1000205B99 /* UIBottomSheetController.cpp */; };
+		7C706D2328EDFAE000B07BB5 /* compat_strl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962A287E143600973CC0 /* compat_strl.c */; };
+		7C706D2428EDFAE000B07BB5 /* UIImageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D981B28BC113700BDD667 /* UIImageView.cpp */; };
+		7C706D2528EDFAE000B07BB5 /* YGNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4EA2874917F00659D24 /* YGNode.cpp */; };
+		7C706D2628EDFAE000B07BB5 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D82874917F00659D24 /* YGLayout.cpp */; };
+		7C706D2728EDFAE000B07BB5 /* plutovg-blend.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989528BD658300BDD667 /* plutovg-blend.c */; };
+		7C706D2828EDFAE000B07BB5 /* layoutcontext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983328BD657200BDD667 /* layoutcontext.cpp */; };
+		7C706D2928EDFAE000B07BB5 /* symbolelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983728BD657200BDD667 /* symbolelement.cpp */; };
+		7C706D2A28EDFAE000B07BB5 /* maskelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983D28BD657200BDD667 /* maskelement.cpp */; };
+		7C706D2B28EDFAE000B07BB5 /* TouchTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C49617728A8215000E30B4B /* TouchTestViewController.cpp */; };
+		7C706D2C28EDFAE000B07BB5 /* TableViewTestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB528C2A48300EFBFCA /* TableViewTestController.cpp */; };
+		7C706D2D28EDFAE000B07BB5 /* UIColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD12873748B0082D3AC /* UIColor.cpp */; };
+		7C706D2E28EDFAE000B07BB5 /* Literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D982428BC172D00BDD667 /* Literals.cpp */; };
+		7C706D2F28EDFAE000B07BB5 /* features_cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962C287E143600973CC0 /* features_cpu.c */; };
+		7C706D3028EDFAE000B07BB5 /* geometryelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985228BD657400BDD667 /* geometryelement.cpp */; };
+		7C706D3128EDFAE000B07BB5 /* plutovg-geometry.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989428BD658300BDD667 /* plutovg-geometry.c */; };
+		7C706D3228EDFAE000B07BB5 /* UIAction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA928C0B3F9000A474F /* UIAction.cpp */; };
+		7C706D3328EDFAE000B07BB5 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D52874917F00659D24 /* Utils.cpp */; };
+		7C706D3428EDFAE000B07BB5 /* UIViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE542878ED350091DEF9 /* UIViewController.cpp */; };
+		7C706D3528EDFAE000B07BB5 /* UIScrollView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4749502884604B00C5A988 /* UIScrollView.cpp */; };
+		7C706D3628EDFAE000B07BB5 /* useelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985828BD657400BDD667 /* useelement.cpp */; };
+		7C706D3728EDFAE000B07BB5 /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDC428C4965300EFBFCA /* UIButton.cpp */; };
+		7C706D3828EDFAE000B07BB5 /* markerelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984E28BD657400BDD667 /* markerelement.cpp */; };
+		7C706D3C28EDFAE000B07BB5 /* svgelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985728BD657400BDD667 /* svgelement.cpp */; };
+		7C706D3E28EDFAE000B07BB5 /* graphicselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983B28BD657200BDD667 /* graphicselement.cpp */; };
+		7C706D3F28EDFAE000B07BB5 /* GroupTask.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C28B25F28C6764500900D60 /* GroupTask.cpp */; };
+		7C706D4028EDFAE000B07BB5 /* UIStackView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E6287495F900659D24 /* UIStackView.cpp */; };
+		7C706D4128EDFAE000B07BB5 /* styleelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984728BD657300BDD667 /* styleelement.cpp */; };
+		7C706D4228EDFAE000B07BB5 /* Geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA128C08F77000A474F /* Geometry.cpp */; };
+		7C706D4328EDFAE000B07BB5 /* UIPanGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C66528B0DA510039F0E5 /* UIPanGestureRecognizer.cpp */; };
+		7C706D4428EDFAE000B07BB5 /* UIEdgeInsets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C58C65928AFBAD50039F0E5 /* UIEdgeInsets.cpp */; };
+		7C706D4528EDFAE000B07BB5 /* plutovg-paint.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989328BD658300BDD667 /* plutovg-paint.c */; };
+		7C706D4628EDFAE000B07BB5 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D42874917F00659D24 /* log.cpp */; };
+		7C706D5228EDFB2500B07BB5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C706CD928EDFACE00B07BB5 /* main.m */; };
+		7C706D5528EDFB2F00B07BB5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D5328EDFB2F00B07BB5 /* AppDelegate.m */; };
+		7C706D5828EDFB4A00B07BB5 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D5628EDFB4A00B07BB5 /* SceneDelegate.m */; };
+		7C706D5928EDFB6A00B07BB5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7C706CDA28EDFACE00B07BB5 /* LaunchScreen.storyboard */; };
+		7C706D5A28EDFB7D00B07BB5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7C706CD828EDFACE00B07BB5 /* Assets.xcassets */; };
+		7C706D5D28EE0FA900B07BB5 /* GLViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D5C28EE0FA900B07BB5 /* GLViewController.mm */; };
+		7C706D6128EE13FC00B07BB5 /* IOSMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D6028EE13FC00B07BB5 /* IOSMain.mm */; };
+		7C706D6628EE1A2800B07BB5 /* IOSVideoContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D6428EE1A2800B07BB5 /* IOSVideoContext.mm */; };
+		7C706D6828EE1C3700B07BB5 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C706D6728EE1C3700B07BB5 /* OpenGLES.framework */; };
+		7C706D6A28EE1C3F00B07BB5 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C706D6928EE1C3F00B07BB5 /* GLKit.framework */; };
+		7C706D6E28EE1ED300B07BB5 /* IOSInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D6C28EE1ED300B07BB5 /* IOSInputManager.cpp */; };
+		7C706D6F28EE26E300B07BB5 /* resource in Resources */ = {isa = PBXBuildFile; fileRef = 7C709CB328C1DC0C000A474F /* resource */; };
+		7C706D7028EE419B00B07BB5 /* GLFWVideoContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960762871F8BF009E0953 /* GLFWVideoContext.cpp */; };
+		7C706D7128EE419B00B07BB5 /* GLFWInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495428854E2900C5A988 /* GLFWInputManager.cpp */; };
+		7C706D7228EE419B00B07BB5 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E92874EA4000659D24 /* main.cpp */; };
 		7C709C9F28C08CCE000A474F /* UIControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709C9D28C08CCE000A474F /* UIControl.cpp */; };
-		7C709CA028C08CD1000A474F /* UIControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709C9D28C08CCE000A474F /* UIControl.cpp */; };
 		7C709CA228C08F77000A474F /* Geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA128C08F77000A474F /* Geometry.cpp */; };
-		7C709CA328C08F77000A474F /* Geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA128C08F77000A474F /* Geometry.cpp */; };
 		7C709CA628C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA428C0ABED000A474F /* UIControl+GestureRecognizer.cpp */; };
-		7C709CA728C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA428C0ABED000A474F /* UIControl+GestureRecognizer.cpp */; };
 		7C709CAB28C0B3F9000A474F /* UIAction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA928C0B3F9000A474F /* UIAction.cpp */; };
-		7C709CAC28C0B3F9000A474F /* UIAction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA928C0B3F9000A474F /* UIAction.cpp */; };
 		7C709CB028C0BD15000A474F /* ControlTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CAE28C0BD15000A474F /* ControlTestViewController.cpp */; };
-		7C709CB128C0BD15000A474F /* ControlTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CAE28C0BD15000A474F /* ControlTestViewController.cpp */; };
-		7C709CB428C1DC23000A474F /* resource in Resources */ = {isa = PBXBuildFile; fileRef = 7C709CB328C1DC0C000A474F /* resource */; };
 		7C78EBDE2873748B0082D3AC /* UIBlurView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */; };
 		7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD12873748B0082D3AC /* UIColor.cpp */; };
 		7C78EBE02873748B0082D3AC /* UIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD32873748B0082D3AC /* UIView.cpp */; };
@@ -62,151 +154,56 @@
 		7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBDD2873748B0082D3AC /* GaussianBlur.cpp */; };
 		7C78EBE8287386070082D3AC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C78EBE7287386070082D3AC /* OpenGL.framework */; };
 		7C82CB5428CCC97700634A8E /* UITraitCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C82CB5228CCC97700634A8E /* UITraitCollection.cpp */; };
-		7C82CB5528CCC97700634A8E /* UITraitCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C82CB5228CCC97700634A8E /* UITraitCollection.cpp */; };
 		7C888E4328816547009A6B95 /* UINavigationController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4128816547009A6B95 /* UINavigationController.cpp */; };
 		7C888E47288165E9009A6B95 /* ViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E45288165E9009A6B95 /* ViewController.cpp */; };
 		7C888E4B28818212009A6B95 /* UITabBarController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4928818212009A6B95 /* UITabBarController.cpp */; };
 		7C8D980528BA219A00BDD667 /* ListViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980328BA219A00BDD667 /* ListViewController.cpp */; };
-		7C8D980628BA219A00BDD667 /* ListViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980328BA219A00BDD667 /* ListViewController.cpp */; };
 		7C8D980A28BAC24000BDD667 /* AnimationContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980828BAC24000BDD667 /* AnimationContext.cpp */; };
-		7C8D980B28BAC24000BDD667 /* AnimationContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980828BAC24000BDD667 /* AnimationContext.cpp */; };
 		7C8D980F28BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */; };
-		7C8D981028BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D980D28BB5A0A00BDD667 /* AnimationTestViewController.cpp */; };
 		7C8D981D28BC113700BDD667 /* UIImageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D981B28BC113700BDD667 /* UIImageView.cpp */; };
-		7C8D981E28BC113700BDD667 /* UIImageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D981B28BC113700BDD667 /* UIImageView.cpp */; };
 		7C8D982128BC118200BDD667 /* UIImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D981F28BC118200BDD667 /* UIImage.cpp */; };
-		7C8D982228BC118200BDD667 /* UIImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D981F28BC118200BDD667 /* UIImage.cpp */; };
 		7C8D982628BC172D00BDD667 /* Literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D982428BC172D00BDD667 /* Literals.cpp */; };
-		7C8D982728BC172D00BDD667 /* Literals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D982428BC172D00BDD667 /* Literals.cpp */; };
 		7C8D982A28BCC64600BDD667 /* Tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D982928BCC64600BDD667 /* Tools.cpp */; };
-		7C8D982B28BCC64600BDD667 /* Tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D982928BCC64600BDD667 /* Tools.cpp */; };
 		7C8D985B28BD657500BDD667 /* layoutcontext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983328BD657200BDD667 /* layoutcontext.cpp */; };
-		7C8D985C28BD657500BDD667 /* layoutcontext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983328BD657200BDD667 /* layoutcontext.cpp */; };
 		7C8D985D28BD657500BDD667 /* defselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983428BD657200BDD667 /* defselement.cpp */; };
-		7C8D985E28BD657500BDD667 /* defselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983428BD657200BDD667 /* defselement.cpp */; };
 		7C8D985F28BD657500BDD667 /* stopelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983528BD657200BDD667 /* stopelement.cpp */; };
-		7C8D986028BD657500BDD667 /* stopelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983528BD657200BDD667 /* stopelement.cpp */; };
 		7C8D986128BD657500BDD667 /* symbolelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983728BD657200BDD667 /* symbolelement.cpp */; };
-		7C8D986228BD657500BDD667 /* symbolelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983728BD657200BDD667 /* symbolelement.cpp */; };
 		7C8D986428BD657500BDD667 /* lunasvg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983A28BD657200BDD667 /* lunasvg.cpp */; };
-		7C8D986528BD657500BDD667 /* lunasvg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983A28BD657200BDD667 /* lunasvg.cpp */; };
 		7C8D986628BD657500BDD667 /* graphicselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983B28BD657200BDD667 /* graphicselement.cpp */; };
-		7C8D986728BD657500BDD667 /* graphicselement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983B28BD657200BDD667 /* graphicselement.cpp */; };
 		7C8D986828BD657500BDD667 /* maskelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983D28BD657200BDD667 /* maskelement.cpp */; };
-		7C8D986928BD657500BDD667 /* maskelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D983D28BD657200BDD667 /* maskelement.cpp */; };
 		7C8D986A28BD657500BDD667 /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984128BD657300BDD667 /* parser.cpp */; };
-		7C8D986B28BD657500BDD667 /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984128BD657300BDD667 /* parser.cpp */; };
 		7C8D986C28BD657500BDD667 /* canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984428BD657300BDD667 /* canvas.cpp */; };
-		7C8D986D28BD657500BDD667 /* canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984428BD657300BDD667 /* canvas.cpp */; };
 		7C8D986E28BD657500BDD667 /* styleelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984728BD657300BDD667 /* styleelement.cpp */; };
-		7C8D986F28BD657500BDD667 /* styleelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984728BD657300BDD667 /* styleelement.cpp */; };
 		7C8D987028BD657500BDD667 /* clippathelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984D28BD657400BDD667 /* clippathelement.cpp */; };
-		7C8D987128BD657500BDD667 /* clippathelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984D28BD657400BDD667 /* clippathelement.cpp */; };
 		7C8D987228BD657500BDD667 /* markerelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984E28BD657400BDD667 /* markerelement.cpp */; };
-		7C8D987328BD657500BDD667 /* markerelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984E28BD657400BDD667 /* markerelement.cpp */; };
 		7C8D987428BD657500BDD667 /* element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984F28BD657400BDD667 /* element.cpp */; };
-		7C8D987528BD657500BDD667 /* element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D984F28BD657400BDD667 /* element.cpp */; };
 		7C8D987628BD657500BDD667 /* styledelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985028BD657400BDD667 /* styledelement.cpp */; };
-		7C8D987728BD657500BDD667 /* styledelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985028BD657400BDD667 /* styledelement.cpp */; };
 		7C8D987828BD657500BDD667 /* gelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985128BD657400BDD667 /* gelement.cpp */; };
-		7C8D987928BD657500BDD667 /* gelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985128BD657400BDD667 /* gelement.cpp */; };
 		7C8D987A28BD657500BDD667 /* geometryelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985228BD657400BDD667 /* geometryelement.cpp */; };
-		7C8D987B28BD657500BDD667 /* geometryelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985228BD657400BDD667 /* geometryelement.cpp */; };
 		7C8D987C28BD657500BDD667 /* property.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985328BD657400BDD667 /* property.cpp */; };
-		7C8D987D28BD657500BDD667 /* property.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985328BD657400BDD667 /* property.cpp */; };
 		7C8D987E28BD657500BDD667 /* paintelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985528BD657400BDD667 /* paintelement.cpp */; };
-		7C8D987F28BD657500BDD667 /* paintelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985528BD657400BDD667 /* paintelement.cpp */; };
 		7C8D988028BD657500BDD667 /* svgelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985728BD657400BDD667 /* svgelement.cpp */; };
-		7C8D988128BD657500BDD667 /* svgelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985728BD657400BDD667 /* svgelement.cpp */; };
 		7C8D988228BD657500BDD667 /* useelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985828BD657400BDD667 /* useelement.cpp */; };
-		7C8D988328BD657500BDD667 /* useelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D985828BD657400BDD667 /* useelement.cpp */; };
 		7C8D989A28BD658400BDD667 /* sw_ft_stroker.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988728BD658300BDD667 /* sw_ft_stroker.c */; };
-		7C8D989B28BD658400BDD667 /* sw_ft_stroker.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988728BD658300BDD667 /* sw_ft_stroker.c */; };
 		7C8D989C28BD658400BDD667 /* sw_ft_raster.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988A28BD658300BDD667 /* sw_ft_raster.c */; };
-		7C8D989D28BD658400BDD667 /* sw_ft_raster.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988A28BD658300BDD667 /* sw_ft_raster.c */; };
 		7C8D989F28BD658400BDD667 /* sw_ft_math.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988E28BD658300BDD667 /* sw_ft_math.c */; };
-		7C8D98A028BD658400BDD667 /* sw_ft_math.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D988E28BD658300BDD667 /* sw_ft_math.c */; };
 		7C8D98A228BD658400BDD667 /* plutovg-dash.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989228BD658300BDD667 /* plutovg-dash.c */; };
-		7C8D98A328BD658400BDD667 /* plutovg-dash.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989228BD658300BDD667 /* plutovg-dash.c */; };
 		7C8D98A428BD658400BDD667 /* plutovg-paint.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989328BD658300BDD667 /* plutovg-paint.c */; };
-		7C8D98A528BD658400BDD667 /* plutovg-paint.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989328BD658300BDD667 /* plutovg-paint.c */; };
 		7C8D98A628BD658400BDD667 /* plutovg-geometry.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989428BD658300BDD667 /* plutovg-geometry.c */; };
-		7C8D98A728BD658400BDD667 /* plutovg-geometry.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989428BD658300BDD667 /* plutovg-geometry.c */; };
 		7C8D98A828BD658400BDD667 /* plutovg-blend.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989528BD658300BDD667 /* plutovg-blend.c */; };
-		7C8D98A928BD658400BDD667 /* plutovg-blend.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989528BD658300BDD667 /* plutovg-blend.c */; };
 		7C8D98AA28BD658400BDD667 /* plutovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989628BD658300BDD667 /* plutovg.c */; };
-		7C8D98AB28BD658400BDD667 /* plutovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989628BD658300BDD667 /* plutovg.c */; };
 		7C8D98AC28BD658400BDD667 /* plutovg-rle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989828BD658300BDD667 /* plutovg-rle.c */; };
-		7C8D98AD28BD658400BDD667 /* plutovg-rle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8D989828BD658300BDD667 /* plutovg-rle.c */; };
-		7C9ECB6E28E9B80F00E53F6A /* SDLInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB6C28E9B80F00E53F6A /* SDLInputManager.cpp */; };
-		7C9ECB6F28E9B80F00E53F6A /* SDLInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB6C28E9B80F00E53F6A /* SDLInputManager.cpp */; };
-		7C9ECB7128E9CA1B00E53F6A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB7028E9CA1B00E53F6A /* main.cpp */; };
-		7C9ECB7228E9CA1B00E53F6A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB7028E9CA1B00E53F6A /* main.cpp */; };
-		7C9ECB7528E9CA2700E53F6A /* SDLVideoContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB7328E9CA2700E53F6A /* SDLVideoContext.cpp */; };
-		7C9ECB7628E9CA2700E53F6A /* SDLVideoContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C9ECB7328E9CA2700E53F6A /* SDLVideoContext.cpp */; };
-		7CA389722882F8C6005C7A91 /* ios_main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C4AD2882CE7500E47DB3 /* ios_main.mm */; };
-		7CA3897728835B5F005C7A91 /* nx_application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA3897428835AB8005C7A91 /* nx_application.cpp */; };
-		7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE592878F4E60091DEF9 /* UIWindow.cpp */; };
 		7CA960B12871F993009E0953 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960882871F993009E0953 /* nanovg.c */; };
 		7CA960B22871F993009E0953 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9608A2871F993009E0953 /* glad.c */; };
 		7CA960C12871FAC6009E0953 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960BF2871FAC6009E0953 /* Application.cpp */; };
-		7CA9C46B2882ADD600E47DB3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C46A2882ADD600E47DB3 /* AppDelegate.m */; };
-		7CA9C46E2882ADD600E47DB3 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C46D2882ADD600E47DB3 /* SceneDelegate.m */; };
-		7CA9C4712882ADD600E47DB3 /* GLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C4702882ADD600E47DB3 /* GLViewController.m */; };
-		7CA9C4742882ADD600E47DB3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7CA9C4722882ADD600E47DB3 /* Main.storyboard */; };
-		7CA9C4762882ADD700E47DB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7CA9C4752882ADD700E47DB3 /* Assets.xcassets */; };
-		7CA9C4792882ADD700E47DB3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7CA9C4772882ADD700E47DB3 /* LaunchScreen.storyboard */; };
-		7CA9C47C2882ADD700E47DB3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C47B2882ADD700E47DB3 /* main.m */; };
-		7CA9C4822882C3F700E47DB3 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960BF2871FAC6009E0953 /* Application.cpp */; };
-		7CA9C4842882C40500E47DB3 /* UIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD32873748B0082D3AC /* UIView.cpp */; };
-		7CA9C4852882C41000E47DB3 /* UIBlurView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBCE2873748B0082D3AC /* UIBlurView.cpp */; };
-		7CA9C4862882C43100E47DB3 /* FontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0638F12876215100621093 /* FontManager.cpp */; };
-		7CA9C4872882C43100E47DB3 /* UILabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD82873748B0082D3AC /* UILabel.cpp */; };
-		7CA9C4882882C43100E47DB3 /* UIViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE542878ED350091DEF9 /* UIViewController.cpp */; };
-		7CA9C4892882C43100E47DB3 /* UITabBarController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4928818212009A6B95 /* UITabBarController.cpp */; };
-		7CA9C48A2882C43100E47DB3 /* UIStackView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E6287495F900659D24 /* UIStackView.cpp */; };
-		7CA9C48B2882C43100E47DB3 /* UIGestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4C28788D8E0091DEF9 /* UIGestureRecognizer.cpp */; };
-		7CA9C48C2882C43100E47DB3 /* UIResponder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C44163A28777D9B0076663D /* UIResponder.cpp */; };
-		7CA9C48D2882C43100E47DB3 /* UITouch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE4828788AA20091DEF9 /* UITouch.cpp */; };
-		7CA9C48E2882C43100E47DB3 /* Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C239610287E13C100973CC0 /* Time.cpp */; };
-		7CA9C48F2882C43100E47DB3 /* GaussianBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBDD2873748B0082D3AC /* GaussianBlur.cpp */; };
-		7CA9C4902882C43100E47DB3 /* UIEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C53FE502878EA220091DEF9 /* UIEvent.cpp */; };
-		7CA9C4942882C43100E47DB3 /* UIColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBD12873748B0082D3AC /* UIColor.cpp */; };
-		7CA9C4952882C43100E47DB3 /* UINavigationController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4128816547009A6B95 /* UINavigationController.cpp */; };
-		7CA9C4982882C83800E47DB3 /* compat_strl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962A287E143600973CC0 /* compat_strl.c */; };
-		7CA9C4992882C83800E47DB3 /* encoding_utf.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C239628287E143600973CC0 /* encoding_utf.c */; };
-		7CA9C49A2882C83800E47DB3 /* features_cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C23962C287E143600973CC0 /* features_cpu.c */; };
-		7CA9C49B2882C83F00E47DB3 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D52874917F00659D24 /* Utils.cpp */; };
-		7CA9C49C2882C83F00E47DB3 /* YGConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E92874917F00659D24 /* YGConfig.cpp */; };
-		7CA9C49D2882C83F00E47DB3 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D82874917F00659D24 /* YGLayout.cpp */; };
-		7CA9C49E2882C83F00E47DB3 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D42874917F00659D24 /* log.cpp */; };
-		7CA9C49F2882C83F00E47DB3 /* YGStyle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DC2874917F00659D24 /* YGStyle.cpp */; };
-		7CA9C4A02882C83F00E47DB3 /* YGValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E62874917F00659D24 /* YGValue.cpp */; };
-		7CA9C4A12882C83F00E47DB3 /* YGNodePrint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E22874917F00659D24 /* YGNodePrint.cpp */; };
-		7CA9C4A22882C83F00E47DB3 /* YGEnums.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4E42874917F00659D24 /* YGEnums.cpp */; };
-		7CA9C4A32882C83F00E47DB3 /* YGNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4EA2874917F00659D24 /* YGNode.cpp */; };
-		7CA9C4A42882C83F00E47DB3 /* Yoga.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DB2874917F00659D24 /* Yoga.cpp */; };
-		7CA9C4A52882C84400E47DB3 /* experiments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4DF2874917F00659D24 /* experiments.cpp */; };
-		7CA9C4A62882C84400E47DB3 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4EE2874917F00659D24 /* event.cpp */; };
-		7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960882871F993009E0953 /* nanovg.c */; };
-		7CA9C4A82882C84E00E47DB3 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9608A2871F993009E0953 /* glad.c */; };
-		7CA9C4B62882D31900E47DB3 /* ios_video.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9C4A92882CA4800E47DB3 /* ios_video.cpp */; };
 		7CC054FB28D1349D00205B99 /* UITableViewSwitchCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC054F928D1349D00205B99 /* UITableViewSwitchCell.cpp */; };
-		7CC054FC28D1349D00205B99 /* UITableViewSwitchCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC054F928D1349D00205B99 /* UITableViewSwitchCell.cpp */; };
 		7CC0551728D22D1000205B99 /* UIBottomSheetController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC0551528D22D1000205B99 /* UIBottomSheetController.cpp */; };
-		7CC0551828D22D1000205B99 /* UIBottomSheetController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC0551528D22D1000205B99 /* UIBottomSheetController.cpp */; };
 		7CCDCDB228C2730A00EFBFCA /* UITableView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB028C2730A00EFBFCA /* UITableView.cpp */; };
-		7CCDCDB328C2730A00EFBFCA /* UITableView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB028C2730A00EFBFCA /* UITableView.cpp */; };
 		7CCDCDB728C2A48300EFBFCA /* TableViewTestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB528C2A48300EFBFCA /* TableViewTestController.cpp */; };
-		7CCDCDB828C2A48300EFBFCA /* TableViewTestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB528C2A48300EFBFCA /* TableViewTestController.cpp */; };
 		7CCDCDBC28C376A500EFBFCA /* UITableViewCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBA28C376A500EFBFCA /* UITableViewCell.cpp */; };
-		7CCDCDBD28C376A500EFBFCA /* UITableViewCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBA28C376A500EFBFCA /* UITableViewCell.cpp */; };
 		7CCDCDC128C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBF28C3ACD900EFBFCA /* UITableViewDefaultCell.cpp */; };
-		7CCDCDC228C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDBF28C3ACD900EFBFCA /* UITableViewDefaultCell.cpp */; };
 		7CCDCDC628C4965300EFBFCA /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDC428C4965300EFBFCA /* UIButton.cpp */; };
-		7CCDCDC728C4965300EFBFCA /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDC428C4965300EFBFCA /* UIButton.cpp */; };
 		7CCDCDCF28C551F900EFBFCA /* UIAlertController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDCD28C551F900EFBFCA /* UIAlertController.cpp */; };
-		7CCDCDD028C551F900EFBFCA /* UIAlertController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDCD28C551F900EFBFCA /* UIAlertController.cpp */; };
 		7CE9B5D92874917F00659D24 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D42874917F00659D24 /* log.cpp */; };
 		7CE9B5DA2874917F00659D24 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D52874917F00659D24 /* Utils.cpp */; };
 		7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B4D82874917F00659D24 /* YGLayout.cpp */; };
@@ -285,8 +282,6 @@
 		7C47495428854E2900C5A988 /* GLFWInputManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GLFWInputManager.cpp; sourceTree = "<group>"; };
 		7C47495528854E2900C5A988 /* InputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = InputManager.hpp; sourceTree = "<group>"; };
 		7C474958288553FD00C5A988 /* GLFWInputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GLFWInputManager.hpp; sourceTree = "<group>"; };
-		7C47495B2885EDCB00C5A988 /* IOSInputManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IOSInputManager.cpp; sourceTree = "<group>"; };
-		7C47495C2885EDCB00C5A988 /* IOSInputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IOSInputManager.hpp; sourceTree = "<group>"; };
 		7C47495F2886063B00C5A988 /* NXAffineTransform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NXAffineTransform.cpp; sourceTree = "<group>"; };
 		7C4749602886063B00C5A988 /* NXAffineTransform.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NXAffineTransform.hpp; sourceTree = "<group>"; };
 		7C49617728A8215000E30B4B /* TouchTestViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TouchTestViewController.cpp; sourceTree = "<group>"; };
@@ -315,6 +310,27 @@
 		7C58C66D28B2530E0039F0E5 /* SwitchVideoContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SwitchVideoContext.hpp; sourceTree = "<group>"; };
 		7C58C67028B253790039F0E5 /* SwitchInputManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SwitchInputManager.cpp; sourceTree = "<group>"; };
 		7C58C67128B253790039F0E5 /* SwitchInputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SwitchInputManager.hpp; sourceTree = "<group>"; };
+		7C706CD728EDFACE00B07BB5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7C706CD828EDFACE00B07BB5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7C706CD928EDFACE00B07BB5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		7C706CDB28EDFACE00B07BB5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		7C706D5028EDFAE000B07BB5 /* NXKit-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NXKit-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7C706D5128EDFAE000B07BB5 /* NXKit-iOS copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "NXKit-iOS copy-Info.plist"; path = "/Users/xitrix/Documents/Dev/C++/NXKit/NXKit-iOS copy-Info.plist"; sourceTree = "<absolute>"; };
+		7C706D5328EDFB2F00B07BB5 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		7C706D5428EDFB2F00B07BB5 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		7C706D5628EDFB4A00B07BB5 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
+		7C706D5728EDFB4A00B07BB5 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		7C706D5B28EE0FA900B07BB5 /* GLViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLViewController.h; sourceTree = "<group>"; };
+		7C706D5C28EE0FA900B07BB5 /* GLViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GLViewController.mm; sourceTree = "<group>"; };
+		7C706D6028EE13FC00B07BB5 /* IOSMain.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = IOSMain.mm; sourceTree = "<group>"; };
+		7C706D6228EE140E00B07BB5 /* IOSMain.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IOSMain.hpp; sourceTree = "<group>"; };
+		7C706D6328EE15BF00B07BB5 /* Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Header.h; sourceTree = "<group>"; };
+		7C706D6428EE1A2800B07BB5 /* IOSVideoContext.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = IOSVideoContext.mm; sourceTree = "<group>"; };
+		7C706D6528EE1A2800B07BB5 /* IOSVideoContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IOSVideoContext.hpp; sourceTree = "<group>"; };
+		7C706D6728EE1C3700B07BB5 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.1.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
+		7C706D6928EE1C3F00B07BB5 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.1.sdk/System/Library/Frameworks/GLKit.framework; sourceTree = DEVELOPER_DIR; };
+		7C706D6C28EE1ED300B07BB5 /* IOSInputManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IOSInputManager.cpp; sourceTree = "<group>"; };
+		7C706D6D28EE1ED300B07BB5 /* IOSInputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IOSInputManager.hpp; sourceTree = "<group>"; };
 		7C709C9D28C08CCE000A474F /* UIControl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIControl.cpp; sourceTree = "<group>"; };
 		7C709C9E28C08CCE000A474F /* UIControl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIControl.hpp; sourceTree = "<group>"; };
 		7C709CA128C08F77000A474F /* Geometry.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Geometry.cpp; sourceTree = "<group>"; };
@@ -423,9 +439,6 @@
 		7C9ECB7028E9CA1B00E53F6A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		7C9ECB7328E9CA2700E53F6A /* SDLVideoContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SDLVideoContext.cpp; sourceTree = "<group>"; };
 		7C9ECB7428E9CA2700E53F6A /* SDLVideoContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SDLVideoContext.hpp; sourceTree = "<group>"; };
-		7CA3897328835AA1005C7A91 /* nx_application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nx_application.h; sourceTree = "<group>"; };
-		7CA3897428835AB8005C7A91 /* nx_application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = nx_application.cpp; sourceTree = "<group>"; };
-		7CA3898528836343005C7A91 /* Fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = folder; name = Fonts; path = resources/Fonts; sourceTree = SOURCE_ROOT; };
 		7CA960692871F7A2009E0953 /* NXKit */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NXKit; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CA960762871F8BF009E0953 /* GLFWVideoContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLFWVideoContext.cpp; sourceTree = "<group>"; };
 		7CA960782871F8BF009E0953 /* video.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = video.hpp; sourceTree = "<group>"; };
@@ -443,23 +456,7 @@
 		7CA960BF2871FAC6009E0953 /* Application.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Application.cpp; sourceTree = "<group>"; };
 		7CA960C02871FAC6009E0953 /* Application.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Application.hpp; sourceTree = "<group>"; };
 		7CA960C22871FCC2009E0953 /* NXKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NXKit.entitlements; sourceTree = "<group>"; };
-		7CA9C4672882ADD600E47DB3 /* NXKit-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NXKit-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		7CA9C4692882ADD600E47DB3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		7CA9C46A2882ADD600E47DB3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		7CA9C46C2882ADD600E47DB3 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
-		7CA9C46D2882ADD600E47DB3 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
-		7CA9C46F2882ADD600E47DB3 /* GLViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLViewController.h; sourceTree = "<group>"; };
-		7CA9C4702882ADD600E47DB3 /* GLViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GLViewController.m; sourceTree = "<group>"; };
-		7CA9C4732882ADD600E47DB3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		7CA9C4752882ADD700E47DB3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		7CA9C4782882ADD700E47DB3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		7CA9C47A2882ADD700E47DB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		7CA9C47B2882ADD700E47DB3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		7CA9C4972882C5EB00E47DB3 /* GLFWVideoContext.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GLFWVideoContext.hpp; sourceTree = "<group>"; };
-		7CA9C4A92882CA4800E47DB3 /* ios_video.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ios_video.cpp; sourceTree = "<group>"; };
-		7CA9C4AC2882CA6500E47DB3 /* ios_video.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ios_video.hpp; sourceTree = "<group>"; };
-		7CA9C4AD2882CE7500E47DB3 /* ios_main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ios_main.mm; sourceTree = "<group>"; };
-		7CA9C4AF2882CE8700E47DB3 /* ios_main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ios_main.h; sourceTree = "<group>"; };
 		7CC054F928D1349D00205B99 /* UITableViewSwitchCell.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITableViewSwitchCell.cpp; sourceTree = "<group>"; };
 		7CC054FA28D1349D00205B99 /* UITableViewSwitchCell.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITableViewSwitchCell.hpp; sourceTree = "<group>"; };
 		7CC0551528D22D1000205B99 /* UIBottomSheetController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIBottomSheetController.cpp; sourceTree = "<group>"; };
@@ -514,18 +511,20 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		7C706D4728EDFAE000B07BB5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7C706D6A28EE1C3F00B07BB5 /* GLKit.framework in Frameworks */,
+				7C706D6828EE1C3700B07BB5 /* OpenGLES.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7CA960662871F7A2009E0953 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				7C78EBE8287386070082D3AC /* OpenGL.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7CA9C4642882ADD600E47DB3 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -735,15 +734,6 @@
 			path = UIScrollView;
 			sourceTree = "<group>";
 		};
-		7C47495A2885EDB400C5A988 /* InputManager */ = {
-			isa = PBXGroup;
-			children = (
-				7C47495C2885EDCB00C5A988 /* IOSInputManager.hpp */,
-				7C47495B2885EDCB00C5A988 /* IOSInputManager.cpp */,
-			);
-			path = InputManager;
-			sourceTree = "<group>";
-		};
 		7C47495E2886062500C5A988 /* NXAffineTransform */ = {
 			isa = PBXGroup;
 			children = (
@@ -855,6 +845,54 @@
 			path = Switch;
 			sourceTree = "<group>";
 		};
+		7C706CD628EDFAB600B07BB5 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				7C706D5F28EE13E200B07BB5 /* IOSMain */,
+				7C706D5E28EE13C000B07BB5 /* IOSVideoContext */,
+				7C706D6B28EE1ED300B07BB5 /* IOSInputManager */,
+				7C706D5B28EE0FA900B07BB5 /* GLViewController.h */,
+				7C706D5C28EE0FA900B07BB5 /* GLViewController.mm */,
+				7C706D5728EDFB4A00B07BB5 /* SceneDelegate.h */,
+				7C706D5628EDFB4A00B07BB5 /* SceneDelegate.m */,
+				7C706D5428EDFB2F00B07BB5 /* AppDelegate.h */,
+				7C706D5328EDFB2F00B07BB5 /* AppDelegate.m */,
+				7C706CD828EDFACE00B07BB5 /* Assets.xcassets */,
+				7C706CDA28EDFACE00B07BB5 /* LaunchScreen.storyboard */,
+				7C706CD728EDFACE00B07BB5 /* Info.plist */,
+				7C706CD928EDFACE00B07BB5 /* main.m */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		7C706D5E28EE13C000B07BB5 /* IOSVideoContext */ = {
+			isa = PBXGroup;
+			children = (
+				7C706D6528EE1A2800B07BB5 /* IOSVideoContext.hpp */,
+				7C706D6428EE1A2800B07BB5 /* IOSVideoContext.mm */,
+			);
+			path = IOSVideoContext;
+			sourceTree = "<group>";
+		};
+		7C706D5F28EE13E200B07BB5 /* IOSMain */ = {
+			isa = PBXGroup;
+			children = (
+				7C706D6228EE140E00B07BB5 /* IOSMain.hpp */,
+				7C706D6028EE13FC00B07BB5 /* IOSMain.mm */,
+				7C706D6328EE15BF00B07BB5 /* Header.h */,
+			);
+			path = IOSMain;
+			sourceTree = "<group>";
+		};
+		7C706D6B28EE1ED300B07BB5 /* IOSInputManager */ = {
+			isa = PBXGroup;
+			children = (
+				7C706D6D28EE1ED300B07BB5 /* IOSInputManager.hpp */,
+				7C706D6C28EE1ED300B07BB5 /* IOSInputManager.cpp */,
+			);
+			path = IOSInputManager;
+			sourceTree = "<group>";
+		};
 		7C709C9C28C08CC1000A474F /* UIControl */ = {
 			isa = PBXGroup;
 			children = (
@@ -962,6 +1000,8 @@
 		7C78EBE6287386070082D3AC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7C706D6928EE1C3F00B07BB5 /* GLKit.framework */,
+				7C706D6728EE1C3700B07BB5 /* OpenGLES.framework */,
 				7C78EBE7287386070082D3AC /* OpenGL.framework */,
 			);
 			name = Frameworks;
@@ -1020,7 +1060,7 @@
 			isa = PBXGroup;
 			children = (
 				7C47495528854E2900C5A988 /* InputManager.hpp */,
-				7CA9C4682882ADD600E47DB3 /* iOS */,
+				7C706CD628EDFAB600B07BB5 /* iOS */,
 				7C9ECB6B28E9B7E600E53F6A /* SDL */,
 				7C58C66928B2504C0039F0E5 /* Switch */,
 				7C888E6F28819F3F009A6B95 /* Universal */,
@@ -1204,14 +1244,6 @@
 			path = SDL;
 			sourceTree = "<group>";
 		};
-		7CA38982288362FE005C7A91 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				7CA3898528836343005C7A91 /* Fonts */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-		};
 		7CA960602871F7A2009E0953 = {
 			isa = PBXGroup;
 			children = (
@@ -1219,6 +1251,7 @@
 				7CA9606B2871F7A2009E0953 /* NXKit */,
 				7CA9606A2871F7A2009E0953 /* Products */,
 				7C78EBE6287386070082D3AC /* Frameworks */,
+				7C706D5128EDFAE000B07BB5 /* NXKit-iOS copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1226,7 +1259,7 @@
 			isa = PBXGroup;
 			children = (
 				7CA960692871F7A2009E0953 /* NXKit */,
-				7CA9C4672882ADD600E47DB3 /* NXKit-iOS.app */,
+				7C706D5028EDFAE000B07BB5 /* NXKit-iOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1387,32 +1420,6 @@
 				7CA960BF2871FAC6009E0953 /* Application.cpp */,
 			);
 			path = Application;
-			sourceTree = "<group>";
-		};
-		7CA9C4682882ADD600E47DB3 /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				7C47495A2885EDB400C5A988 /* InputManager */,
-				7CA38982288362FE005C7A91 /* Resources */,
-				7CA3897328835AA1005C7A91 /* nx_application.h */,
-				7CA3897428835AB8005C7A91 /* nx_application.cpp */,
-				7CA9C4AF2882CE8700E47DB3 /* ios_main.h */,
-				7CA9C4AD2882CE7500E47DB3 /* ios_main.mm */,
-				7CA9C4AC2882CA6500E47DB3 /* ios_video.hpp */,
-				7CA9C4A92882CA4800E47DB3 /* ios_video.cpp */,
-				7CA9C4692882ADD600E47DB3 /* AppDelegate.h */,
-				7CA9C46A2882ADD600E47DB3 /* AppDelegate.m */,
-				7CA9C46C2882ADD600E47DB3 /* SceneDelegate.h */,
-				7CA9C46D2882ADD600E47DB3 /* SceneDelegate.m */,
-				7CA9C46F2882ADD600E47DB3 /* GLViewController.h */,
-				7CA9C4702882ADD600E47DB3 /* GLViewController.m */,
-				7CA9C4722882ADD600E47DB3 /* Main.storyboard */,
-				7CA9C4752882ADD700E47DB3 /* Assets.xcassets */,
-				7CA9C4772882ADD700E47DB3 /* LaunchScreen.storyboard */,
-				7CA9C47A2882ADD700E47DB3 /* Info.plist */,
-				7CA9C47B2882ADD700E47DB3 /* main.m */,
-			);
-			path = iOS;
 			sourceTree = "<group>";
 		};
 		7CC054F828D1348100205B99 /* UITableViewSwitchCell */ = {
@@ -1577,6 +1584,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		7C706CDC28EDFAE000B07BB5 /* NXKit-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7C706D4D28EDFAE000B07BB5 /* Build configuration list for PBXNativeTarget "NXKit-iOS" */;
+			buildPhases = (
+				7C706CDD28EDFAE000B07BB5 /* Sources */,
+				7C706D4728EDFAE000B07BB5 /* Frameworks */,
+				7C706D4828EDFAE000B07BB5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "NXKit-iOS";
+			productName = "NXKit-iOS";
+			productReference = 7C706D5028EDFAE000B07BB5 /* NXKit-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
 		7CA960682871F7A2009E0953 /* NXKit */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7CA960702871F7A2009E0953 /* Build configuration list for PBXNativeTarget "NXKit" */;
@@ -1594,23 +1618,6 @@
 			productReference = 7CA960692871F7A2009E0953 /* NXKit */;
 			productType = "com.apple.product-type.tool";
 		};
-		7CA9C4662882ADD600E47DB3 /* NXKit-iOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 7CA9C47F2882ADD700E47DB3 /* Build configuration list for PBXNativeTarget "NXKit-iOS" */;
-			buildPhases = (
-				7CA9C4632882ADD600E47DB3 /* Sources */,
-				7CA9C4642882ADD600E47DB3 /* Frameworks */,
-				7CA9C4652882ADD600E47DB3 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "NXKit-iOS";
-			productName = "NXKit-iOS";
-			productReference = 7CA9C4672882ADD600E47DB3 /* NXKit-iOS.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1621,9 +1628,6 @@
 				LastUpgradeCheck = 1400;
 				TargetAttributes = {
 					7CA960682871F7A2009E0953 = {
-						CreatedOnToolsVersion = 14.0;
-					};
-					7CA9C4662882ADD600E47DB3 = {
 						CreatedOnToolsVersion = 14.0;
 					};
 				};
@@ -1642,26 +1646,136 @@
 			projectRoot = "";
 			targets = (
 				7CA960682871F7A2009E0953 /* NXKit */,
-				7CA9C4662882ADD600E47DB3 /* NXKit-iOS */,
+				7C706CDC28EDFAE000B07BB5 /* NXKit-iOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		7CA9C4652882ADD600E47DB3 /* Resources */ = {
+		7C706D4828EDFAE000B07BB5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7C709CB428C1DC23000A474F /* resource in Resources */,
-				7CA9C4792882ADD700E47DB3 /* LaunchScreen.storyboard in Resources */,
-				7CA9C4762882ADD700E47DB3 /* Assets.xcassets in Resources */,
-				7CA9C4742882ADD600E47DB3 /* Main.storyboard in Resources */,
+				7C706D6F28EE26E300B07BB5 /* resource in Resources */,
+				7C706D5A28EDFB7D00B07BB5 /* Assets.xcassets in Resources */,
+				7C706D5928EDFB6A00B07BB5 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		7C706CDD28EDFAE000B07BB5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7C706CDE28EDFAE000B07BB5 /* parser.cpp in Sources */,
+				7C706CE028EDFAE000B07BB5 /* Tools.cpp in Sources */,
+				7C706D6E28EE1ED300B07BB5 /* IOSInputManager.cpp in Sources */,
+				7C706CE128EDFAE000B07BB5 /* YGNodePrint.cpp in Sources */,
+				7C706CE228EDFAE000B07BB5 /* ListViewController.cpp in Sources */,
+				7C706CE328EDFAE000B07BB5 /* UIAppDelegate.cpp in Sources */,
+				7C706CE428EDFAE000B07BB5 /* nanovg.c in Sources */,
+				7C706CE528EDFAE000B07BB5 /* UIControl+GestureRecognizer.cpp in Sources */,
+				7C706CE628EDFAE000B07BB5 /* paintelement.cpp in Sources */,
+				7C706CE728EDFAE000B07BB5 /* UITableViewCell.cpp in Sources */,
+				7C706D5528EDFB2F00B07BB5 /* AppDelegate.m in Sources */,
+				7C706D6128EE13FC00B07BB5 /* IOSMain.mm in Sources */,
+				7C706CE828EDFAE000B07BB5 /* canvas.cpp in Sources */,
+				7C706CE928EDFAE000B07BB5 /* AnimationTestViewController.cpp in Sources */,
+				7C706CEA28EDFAE000B07BB5 /* UIWindow.cpp in Sources */,
+				7C706CEB28EDFAE000B07BB5 /* gelement.cpp in Sources */,
+				7C706CEC28EDFAE000B07BB5 /* GaussianBlur.cpp in Sources */,
+				7C706CED28EDFAE000B07BB5 /* ControlTestViewController.cpp in Sources */,
+				7C706CEE28EDFAE000B07BB5 /* UIActionsView.cpp in Sources */,
+				7C706CF028EDFAE000B07BB5 /* property.cpp in Sources */,
+				7C706CF128EDFAE000B07BB5 /* UITouch.cpp in Sources */,
+				7C706CF228EDFAE000B07BB5 /* defselement.cpp in Sources */,
+				7C706CF328EDFAE000B07BB5 /* UIEvent.cpp in Sources */,
+				7C706CF428EDFAE000B07BB5 /* AnimationContext.cpp in Sources */,
+				7C706CF528EDFAE000B07BB5 /* event.cpp in Sources */,
+				7C706CF628EDFAE000B07BB5 /* FontManager.cpp in Sources */,
+				7C706CF728EDFAE000B07BB5 /* UIBlurView.cpp in Sources */,
+				7C706CF828EDFAE000B07BB5 /* UIGestureRecognizer.cpp in Sources */,
+				7C706CF928EDFAE000B07BB5 /* sw_ft_stroker.c in Sources */,
+				7C706D5D28EE0FA900B07BB5 /* GLViewController.mm in Sources */,
+				7C706CFA28EDFAE000B07BB5 /* ViewController.cpp in Sources */,
+				7C706CFB28EDFAE000B07BB5 /* sw_ft_math.c in Sources */,
+				7C706D5828EDFB4A00B07BB5 /* SceneDelegate.m in Sources */,
+				7C706CFC28EDFAE000B07BB5 /* Application.cpp in Sources */,
+				7C706CFD28EDFAE000B07BB5 /* UIResponder.cpp in Sources */,
+				7C706CFE28EDFAE000B07BB5 /* UINavigationController.cpp in Sources */,
+				7C706CFF28EDFAE000B07BB5 /* encoding_utf.c in Sources */,
+				7C706D0128EDFAE000B07BB5 /* YGStyle.cpp in Sources */,
+				7C706D0228EDFAE000B07BB5 /* UITapGestureRecognizer.cpp in Sources */,
+				7C706D0328EDFAE000B07BB5 /* YGEnums.cpp in Sources */,
+				7C706D0428EDFAE000B07BB5 /* Time.cpp in Sources */,
+				7C706D0528EDFAE000B07BB5 /* UITraitCollection.cpp in Sources */,
+				7C706D0628EDFAE000B07BB5 /* glad.c in Sources */,
+				7C706D0728EDFAE000B07BB5 /* UILabel.cpp in Sources */,
+				7C706D0828EDFAE000B07BB5 /* NXTransform3D.cpp in Sources */,
+				7C706D0928EDFAE000B07BB5 /* NXAffineTransform.cpp in Sources */,
+				7C706D0B28EDFAE000B07BB5 /* UIControl.cpp in Sources */,
+				7C706D0C28EDFAE000B07BB5 /* plutovg.c in Sources */,
+				7C706D0D28EDFAE000B07BB5 /* YGValue.cpp in Sources */,
+				7C706D0E28EDFAE000B07BB5 /* styledelement.cpp in Sources */,
+				7C706D0F28EDFAE000B07BB5 /* sw_ft_raster.c in Sources */,
+				7C706D1028EDFAE000B07BB5 /* UITableViewDefaultCell.cpp in Sources */,
+				7C706D1128EDFAE000B07BB5 /* UISelectorViewController.cpp in Sources */,
+				7C706D1228EDFAE000B07BB5 /* UITableViewRadioCell.cpp in Sources */,
+				7C706D1328EDFAE000B07BB5 /* UIAlertController.cpp in Sources */,
+				7C706D1428EDFAE000B07BB5 /* element.cpp in Sources */,
+				7C706D1528EDFAE000B07BB5 /* lunasvg.cpp in Sources */,
+				7C706D1628EDFAE000B07BB5 /* UIImage.cpp in Sources */,
+				7C706D1728EDFAE000B07BB5 /* UITableViewSwitchCell.cpp in Sources */,
+				7C706D1828EDFAE000B07BB5 /* plutovg-dash.c in Sources */,
+				7C706D1928EDFAE000B07BB5 /* UITabBarController.cpp in Sources */,
+				7C706D1A28EDFAE000B07BB5 /* stopelement.cpp in Sources */,
+				7C706D1B28EDFAE000B07BB5 /* clippathelement.cpp in Sources */,
+				7C706D1C28EDFAE000B07BB5 /* UIView.cpp in Sources */,
+				7C706D1D28EDFAE000B07BB5 /* experiments.cpp in Sources */,
+				7C706D1E28EDFAE000B07BB5 /* Yoga.cpp in Sources */,
+				7C706D1F28EDFAE000B07BB5 /* plutovg-rle.c in Sources */,
+				7C706D2028EDFAE000B07BB5 /* UITableView.cpp in Sources */,
+				7C706D2128EDFAE000B07BB5 /* YGConfig.cpp in Sources */,
+				7C706D2228EDFAE000B07BB5 /* UIBottomSheetController.cpp in Sources */,
+				7C706D2328EDFAE000B07BB5 /* compat_strl.c in Sources */,
+				7C706D2428EDFAE000B07BB5 /* UIImageView.cpp in Sources */,
+				7C706D2528EDFAE000B07BB5 /* YGNode.cpp in Sources */,
+				7C706D2628EDFAE000B07BB5 /* YGLayout.cpp in Sources */,
+				7C706D2728EDFAE000B07BB5 /* plutovg-blend.c in Sources */,
+				7C706D2828EDFAE000B07BB5 /* layoutcontext.cpp in Sources */,
+				7C706D2928EDFAE000B07BB5 /* symbolelement.cpp in Sources */,
+				7C706D2A28EDFAE000B07BB5 /* maskelement.cpp in Sources */,
+				7C706D2B28EDFAE000B07BB5 /* TouchTestViewController.cpp in Sources */,
+				7C706D2C28EDFAE000B07BB5 /* TableViewTestController.cpp in Sources */,
+				7C706D2D28EDFAE000B07BB5 /* UIColor.cpp in Sources */,
+				7C706D2E28EDFAE000B07BB5 /* Literals.cpp in Sources */,
+				7C706D2F28EDFAE000B07BB5 /* features_cpu.c in Sources */,
+				7C706D3028EDFAE000B07BB5 /* geometryelement.cpp in Sources */,
+				7C706D3128EDFAE000B07BB5 /* plutovg-geometry.c in Sources */,
+				7C706D6628EE1A2800B07BB5 /* IOSVideoContext.mm in Sources */,
+				7C706D3228EDFAE000B07BB5 /* UIAction.cpp in Sources */,
+				7C706D3328EDFAE000B07BB5 /* Utils.cpp in Sources */,
+				7C706D3428EDFAE000B07BB5 /* UIViewController.cpp in Sources */,
+				7C706D3528EDFAE000B07BB5 /* UIScrollView.cpp in Sources */,
+				7C706D3628EDFAE000B07BB5 /* useelement.cpp in Sources */,
+				7C706D3728EDFAE000B07BB5 /* UIButton.cpp in Sources */,
+				7C706D5228EDFB2500B07BB5 /* main.m in Sources */,
+				7C706D3828EDFAE000B07BB5 /* markerelement.cpp in Sources */,
+				7C706D3C28EDFAE000B07BB5 /* svgelement.cpp in Sources */,
+				7C706D3E28EDFAE000B07BB5 /* graphicselement.cpp in Sources */,
+				7C706D3F28EDFAE000B07BB5 /* GroupTask.cpp in Sources */,
+				7C706D4028EDFAE000B07BB5 /* UIStackView.cpp in Sources */,
+				7C706D4128EDFAE000B07BB5 /* styleelement.cpp in Sources */,
+				7C706D4228EDFAE000B07BB5 /* Geometry.cpp in Sources */,
+				7C706D4328EDFAE000B07BB5 /* UIPanGestureRecognizer.cpp in Sources */,
+				7C706D4428EDFAE000B07BB5 /* UIEdgeInsets.cpp in Sources */,
+				7C706D4528EDFAE000B07BB5 /* plutovg-paint.c in Sources */,
+				7C706D4628EDFAE000B07BB5 /* log.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7CA960652871F7A2009E0953 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1684,6 +1798,7 @@
 				7C8D987C28BD657500BDD667 /* property.cpp in Sources */,
 				7C709CAB28C0B3F9000A474F /* UIAction.cpp in Sources */,
 				7CA960C12871FAC6009E0953 /* Application.cpp in Sources */,
+				7C706D7228EE419B00B07BB5 /* main.cpp in Sources */,
 				7C239612287E13C100973CC0 /* Time.cpp in Sources */,
 				7CE9B5DE2874917F00659D24 /* experiments.cpp in Sources */,
 				7C8D986E28BD657500BDD667 /* styleelement.cpp in Sources */,
@@ -1693,6 +1808,7 @@
 				7C4749522884604B00C5A988 /* UIScrollView.cpp in Sources */,
 				7C8D980528BA219A00BDD667 /* ListViewController.cpp in Sources */,
 				7C8D982128BC118200BDD667 /* UIImage.cpp in Sources */,
+				7C706D7028EE419B00B07BB5 /* GLFWVideoContext.cpp in Sources */,
 				7C8D989C28BD658400BDD667 /* sw_ft_raster.c in Sources */,
 				7C8D98AC28BD658400BDD667 /* plutovg-rle.c in Sources */,
 				7C58C65B28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */,
@@ -1719,7 +1835,6 @@
 				7CE9B5E22874917F00659D24 /* YGConfig.cpp in Sources */,
 				7C82CB5428CCC97700634A8E /* UITraitCollection.cpp in Sources */,
 				7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */,
-				7C9ECB7128E9CA1B00E53F6A /* main.cpp in Sources */,
 				7C709CA628C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */,
 				7C23962E287E143700973CC0 /* encoding_utf.c in Sources */,
 				7CCDCDC628C4965300EFBFCA /* UIButton.cpp in Sources */,
@@ -1737,10 +1852,10 @@
 				7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */,
 				7C53FE562878ED350091DEF9 /* UIViewController.cpp in Sources */,
 				7C8D988028BD657500BDD667 /* svgelement.cpp in Sources */,
+				7C706D7128EE419B00B07BB5 /* GLFWInputManager.cpp in Sources */,
 				7CE9B5E8287495F900659D24 /* UIStackView.cpp in Sources */,
 				7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */,
 				7C8D980A28BAC24000BDD667 /* AnimationContext.cpp in Sources */,
-				7C9ECB7528E9CA2700E53F6A /* SDLVideoContext.cpp in Sources */,
 				7CE9B5DF2874917F00659D24 /* YGNodePrint.cpp in Sources */,
 				7C8D986C28BD657500BDD667 /* canvas.cpp in Sources */,
 				7CE9B5DD2874917F00659D24 /* YGStyle.cpp in Sources */,
@@ -1751,7 +1866,6 @@
 				7C4630552884325800DF15F3 /* UIAppDelegate.cpp in Sources */,
 				7C709C9F28C08CCE000A474F /* UIControl.cpp in Sources */,
 				7C8D985D28BD657500BDD667 /* defselement.cpp in Sources */,
-				7C9ECB6E28E9B80F00E53F6A /* SDLInputManager.cpp in Sources */,
 				7C8D988228BD657500BDD667 /* useelement.cpp in Sources */,
 				7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */,
 				7C8D987228BD657500BDD667 /* markerelement.cpp in Sources */,
@@ -1769,136 +1883,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7CA9C4632882ADD600E47DB3 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7C8D986B28BD657500BDD667 /* parser.cpp in Sources */,
-				7CA9C4712882ADD600E47DB3 /* GLViewController.m in Sources */,
-				7C8D982B28BCC64600BDD667 /* Tools.cpp in Sources */,
-				7CA9C4A12882C83F00E47DB3 /* YGNodePrint.cpp in Sources */,
-				7C8D980628BA219A00BDD667 /* ListViewController.cpp in Sources */,
-				7C463057288434A500DF15F3 /* UIAppDelegate.cpp in Sources */,
-				7CA9C4A72882C84800E47DB3 /* nanovg.c in Sources */,
-				7C709CA728C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */,
-				7C9ECB6F28E9B80F00E53F6A /* SDLInputManager.cpp in Sources */,
-				7C8D987F28BD657500BDD667 /* paintelement.cpp in Sources */,
-				7CCDCDBD28C376A500EFBFCA /* UITableViewCell.cpp in Sources */,
-				7C8D986D28BD657500BDD667 /* canvas.cpp in Sources */,
-				7C8D981028BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
-				7C9ECB7228E9CA1B00E53F6A /* main.cpp in Sources */,
-				7CA3897828835C0A005C7A91 /* UIWindow.cpp in Sources */,
-				7C8D987928BD657500BDD667 /* gelement.cpp in Sources */,
-				7CA9C48F2882C43100E47DB3 /* GaussianBlur.cpp in Sources */,
-				7C709CB128C0BD15000A474F /* ControlTestViewController.cpp in Sources */,
-				7C07B87928C7C0A8009FFA69 /* UIActionsView.cpp in Sources */,
-				7CA9C46B2882ADD600E47DB3 /* AppDelegate.m in Sources */,
-				7C8D987D28BD657500BDD667 /* property.cpp in Sources */,
-				7CA9C48D2882C43100E47DB3 /* UITouch.cpp in Sources */,
-				7C8D985E28BD657500BDD667 /* defselement.cpp in Sources */,
-				7CA9C4902882C43100E47DB3 /* UIEvent.cpp in Sources */,
-				7C8D980B28BAC24000BDD667 /* AnimationContext.cpp in Sources */,
-				7CA9C4A62882C84400E47DB3 /* event.cpp in Sources */,
-				7CA9C4862882C43100E47DB3 /* FontManager.cpp in Sources */,
-				7CA9C4852882C41000E47DB3 /* UIBlurView.cpp in Sources */,
-				7CA9C48B2882C43100E47DB3 /* UIGestureRecognizer.cpp in Sources */,
-				7C8D989B28BD658400BDD667 /* sw_ft_stroker.c in Sources */,
-				7C65882528A29CD40036AAD5 /* ViewController.cpp in Sources */,
-				7C8D98A028BD658400BDD667 /* sw_ft_math.c in Sources */,
-				7CA9C4822882C3F700E47DB3 /* Application.cpp in Sources */,
-				7CA9C48C2882C43100E47DB3 /* UIResponder.cpp in Sources */,
-				7CA9C4952882C43100E47DB3 /* UINavigationController.cpp in Sources */,
-				7CA9C4992882C83800E47DB3 /* encoding_utf.c in Sources */,
-				7CA3897728835B5F005C7A91 /* nx_application.cpp in Sources */,
-				7CA9C49F2882C83F00E47DB3 /* YGStyle.cpp in Sources */,
-				7C58C66328B055CD0039F0E5 /* UITapGestureRecognizer.cpp in Sources */,
-				7CA9C4A22882C83F00E47DB3 /* YGEnums.cpp in Sources */,
-				7CA9C48E2882C43100E47DB3 /* Time.cpp in Sources */,
-				7C82CB5528CCC97700634A8E /* UITraitCollection.cpp in Sources */,
-				7CA9C4A82882C84E00E47DB3 /* glad.c in Sources */,
-				7CA9C4872882C43100E47DB3 /* UILabel.cpp in Sources */,
-				7C58C65528AF85AD0039F0E5 /* NXTransform3D.cpp in Sources */,
-				7C58C67428B382F90039F0E5 /* NXAffineTransform.cpp in Sources */,
-				7CA9C47C2882ADD700E47DB3 /* main.m in Sources */,
-				7C709CA028C08CD1000A474F /* UIControl.cpp in Sources */,
-				7C8D98AB28BD658400BDD667 /* plutovg.c in Sources */,
-				7CA9C4A02882C83F00E47DB3 /* YGValue.cpp in Sources */,
-				7C8D987728BD657500BDD667 /* styledelement.cpp in Sources */,
-				7C8D989D28BD658400BDD667 /* sw_ft_raster.c in Sources */,
-				7CCDCDC228C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */,
-				7C3AD9BF28D247DC00254B8B /* UISelectorViewController.cpp in Sources */,
-				7C3AD9CA28D37B6400254B8B /* UITableViewRadioCell.cpp in Sources */,
-				7C9ECB7628E9CA2700E53F6A /* SDLVideoContext.cpp in Sources */,
-				7CCDCDD028C551F900EFBFCA /* UIAlertController.cpp in Sources */,
-				7C8D987528BD657500BDD667 /* element.cpp in Sources */,
-				7C8D986528BD657500BDD667 /* lunasvg.cpp in Sources */,
-				7C8D982228BC118200BDD667 /* UIImage.cpp in Sources */,
-				7CC054FC28D1349D00205B99 /* UITableViewSwitchCell.cpp in Sources */,
-				7C8D98A328BD658400BDD667 /* plutovg-dash.c in Sources */,
-				7CA9C4892882C43100E47DB3 /* UITabBarController.cpp in Sources */,
-				7C8D986028BD657500BDD667 /* stopelement.cpp in Sources */,
-				7C8D987128BD657500BDD667 /* clippathelement.cpp in Sources */,
-				7CA9C4842882C40500E47DB3 /* UIView.cpp in Sources */,
-				7CA9C4A52882C84400E47DB3 /* experiments.cpp in Sources */,
-				7CA9C4A42882C83F00E47DB3 /* Yoga.cpp in Sources */,
-				7C8D98AD28BD658400BDD667 /* plutovg-rle.c in Sources */,
-				7CCDCDB328C2730A00EFBFCA /* UITableView.cpp in Sources */,
-				7CA9C49C2882C83F00E47DB3 /* YGConfig.cpp in Sources */,
-				7CC0551828D22D1000205B99 /* UIBottomSheetController.cpp in Sources */,
-				7CA9C4982882C83800E47DB3 /* compat_strl.c in Sources */,
-				7C8D981E28BC113700BDD667 /* UIImageView.cpp in Sources */,
-				7CA9C4A32882C83F00E47DB3 /* YGNode.cpp in Sources */,
-				7CA9C49D2882C83F00E47DB3 /* YGLayout.cpp in Sources */,
-				7C8D98A928BD658400BDD667 /* plutovg-blend.c in Sources */,
-				7C8D985C28BD657500BDD667 /* layoutcontext.cpp in Sources */,
-				7C8D986228BD657500BDD667 /* symbolelement.cpp in Sources */,
-				7C8D986928BD657500BDD667 /* maskelement.cpp in Sources */,
-				7C49617A28A8215000E30B4B /* TouchTestViewController.cpp in Sources */,
-				7CCDCDB828C2A48300EFBFCA /* TableViewTestController.cpp in Sources */,
-				7CA9C4942882C43100E47DB3 /* UIColor.cpp in Sources */,
-				7C8D982728BC172D00BDD667 /* Literals.cpp in Sources */,
-				7CA9C49A2882C83800E47DB3 /* features_cpu.c in Sources */,
-				7C8D987B28BD657500BDD667 /* geometryelement.cpp in Sources */,
-				7C8D98A728BD658400BDD667 /* plutovg-geometry.c in Sources */,
-				7C709CAC28C0B3F9000A474F /* UIAction.cpp in Sources */,
-				7CA9C49B2882C83F00E47DB3 /* Utils.cpp in Sources */,
-				7CA9C4882882C43100E47DB3 /* UIViewController.cpp in Sources */,
-				7C4749532884608700C5A988 /* UIScrollView.cpp in Sources */,
-				7C8D988328BD657500BDD667 /* useelement.cpp in Sources */,
-				7CCDCDC728C4965300EFBFCA /* UIButton.cpp in Sources */,
-				7C8D987328BD657500BDD667 /* markerelement.cpp in Sources */,
-				7C47495D2885EDCB00C5A988 /* IOSInputManager.cpp in Sources */,
-				7CA9C46E2882ADD600E47DB3 /* SceneDelegate.m in Sources */,
-				7CA389722882F8C6005C7A91 /* ios_main.mm in Sources */,
-				7C8D988128BD657500BDD667 /* svgelement.cpp in Sources */,
-				7CA9C4B62882D31900E47DB3 /* ios_video.cpp in Sources */,
-				7C8D986728BD657500BDD667 /* graphicselement.cpp in Sources */,
-				7C28B26228C6764500900D60 /* GroupTask.cpp in Sources */,
-				7CA9C48A2882C43100E47DB3 /* UIStackView.cpp in Sources */,
-				7C8D986F28BD657500BDD667 /* styleelement.cpp in Sources */,
-				7C709CA328C08F77000A474F /* Geometry.cpp in Sources */,
-				7C58C66828B0DA510039F0E5 /* UIPanGestureRecognizer.cpp in Sources */,
-				7C58C65C28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */,
-				7C8D98A528BD658400BDD667 /* plutovg-paint.c in Sources */,
-				7CA9C49E2882C83F00E47DB3 /* log.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		7CA9C4722882ADD600E47DB3 /* Main.storyboard */ = {
+		7C706CDA28EDFACE00B07BB5 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				7CA9C4732882ADD600E47DB3 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		7CA9C4772882ADD700E47DB3 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				7CA9C4782882ADD700E47DB3 /* Base */,
+				7C706CDB28EDFACE00B07BB5 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -1906,6 +1897,73 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		7C706D4E28EDFAE000B07BB5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D59DHVRS87;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "ru.xitrix.NXKit-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7C706D4F28EDFAE000B07BB5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D59DHVRS87;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "ru.xitrix.NXKit-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		7CA9606E2871F7A2009E0953 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2067,78 +2125,18 @@
 			};
 			name = Release;
 		};
-		7CA9C47D2882ADD700E47DB3 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = D59DHVRS87;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Info.plist;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "ru.xitrix.NXKit-iOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		7CA9C47E2882ADD700E47DB3 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = D59DHVRS87;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Info.plist;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "ru.xitrix.NXKit-iOS";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		7C706D4D28EDFAE000B07BB5 /* Build configuration list for PBXNativeTarget "NXKit-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7C706D4E28EDFAE000B07BB5 /* Debug */,
+				7C706D4F28EDFAE000B07BB5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		7CA960642871F7A2009E0953 /* Build configuration list for PBXProject "NXKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2153,15 +2151,6 @@
 			buildConfigurations = (
 				7CA960712871F7A2009E0953 /* Debug */,
 				7CA960722871F7A2009E0953 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		7CA9C47F2882ADD700E47DB3 /* Build configuration list for PBXNativeTarget "NXKit-iOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7CA9C47D2882ADD700E47DB3 /* Debug */,
-				7CA9C47E2882ADD700E47DB3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

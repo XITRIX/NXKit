@@ -6,6 +6,7 @@
 //
 
 #include "SDLInputManager.hpp"
+#include <Core/Application/Application.hpp>
 
 namespace NXKit {
 
@@ -46,8 +47,8 @@ bool SDLInputManager::getButtonDown(ControllerButton button) { return false; }
 
 float SDLInputManager::getAxis(short controller, ControllerAxis axis) { return 0; }
 
-int SDLInputManager::touchCount() { return 0; }
-UITouch* SDLInputManager::getTouch(int id) { return nullptr; }
+int SDLInputManager::touchCount() { return (int) touches.size(); }
+UITouch* SDLInputManager::getTouch(int id) { return touches[id]; }
 std::vector<UITouch*> SDLInputManager::getTouches() { return touches; }
 
 std::string SDLInputManager::getButtonIcon(ControllerButton button) {
@@ -93,6 +94,7 @@ void SDLInputManager::update() {
     SDL_PumpEvents();
 
     updateMouse();
+    updateTouch();
 
 //    SDL_Event e;
 //    while (SDL_PollEvent(&e)) {
@@ -105,7 +107,7 @@ void SDLInputManager::updateMouse() {
     coursorPosition = Point(x, y);
 
     for (int i = 0; i < _BRLS_MOUSE_LAST; i++) {
-        bool button = (buttons & SDL_BUTTON(i)) != 0;
+        bool button = (buttons & SDL_BUTTON(i+1)) != 0;
         if (mouseButtons[i] != button) {
             if (button) {
                 printf("tap %d, %d\n", x, y);
@@ -122,6 +124,55 @@ void SDLInputManager::updateMouse() {
             mouseButtonsUp[i] = false;
         }
     }
+}
+
+void SDLInputManager::updateTouch() {
+//    SDL_GetTou
+//    SDL_GetTouch
+//    if (getMouseButtonDown(BrlsMouseButton::BRLS_MOUSE_LKB)) {
+//        auto touch = new UITouch(0, getCoursorPosition(), getCPUTimeUsec());
+//        touch->window = Application::shared()->getKeyWindow();
+//        touch->view = touch->window->hitTest(touch->absoluteLocation, nullptr);
+//        touch->gestureRecognizers = getRecognizerHierachyFrom(touch->view);
+//        touch->phase = UITouchPhase::BEGIN;
+//        touches.push_back(touch);
+//    } else if (getMouseButtonUp(BrlsMouseButton::BRLS_MOUSE_LKB)) {
+//        for (int i = 0; i < touchCount(); i++) {
+//            auto touch = touches[i];
+//            if (touch->touchId == 0) {
+//                touch->timestamp = getCPUTimeUsec();
+//                touch->phase = UITouchPhase::ENDED;
+//            }
+//        }
+//    } else if (getMouseButton(BrlsMouseButton::BRLS_MOUSE_LKB)) {
+//        for (int i = 0; i < touchCount(); i++) {
+//            auto touch = touches[i];
+//            if (touch->touchId == 0) {
+//                touch->timestamp = getCPUTimeUsec();
+//                touch->phase = UITouchPhase::MOVED;
+//                touch->updateAbsoluteLocation(getCoursorPosition());
+//            }
+//        }
+//    } else {
+//        for (int i = 0; i < touchCount(); i++) {
+//            auto touch = touches[i];
+//            if (touch->touchId == 0) {
+//                touches.erase(touches.begin() + i);
+//                delete touch;
+//            }
+//        }
+//    }
+}
+
+std::vector<UIGestureRecognizer*> SDLInputManager::getRecognizerHierachyFrom(UIView* view) {
+    std::vector<UIGestureRecognizer*> recognizers;
+    while (view) {
+        for (auto recognizer : view->getGestureRecognizers())
+            recognizers.push_back(recognizer);
+        view = view->getSuperview();
+    }
+
+    return recognizers;
 }
 
 }

@@ -9,6 +9,8 @@
 
 #include "NXKit.hpp"
 
+using namespace NXKit;
+
 class MyViewController: public UIViewController {
 public:
     MyViewController();

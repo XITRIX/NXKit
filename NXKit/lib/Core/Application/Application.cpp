@@ -222,7 +222,7 @@ int Application::getFps() {
 
 void Application::render() {
     videoContext->beginFrame();
-    videoContext->clear(nvgRGB(0, 0, 0));
+    videoContext->clear(nvgRGB(220, 0, 0));
 
     nvgBeginFrame(getContext(), windowWidth, windowHeight, windowScale);
     keyWindow->internalDraw(getContext());

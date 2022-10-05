@@ -23,7 +23,14 @@
 //#include <SDL2/SDL.h>
 
 // nanovg implementation
+#ifdef IOS
+#import <OpenGLES/ES3/glext.h>
+#define NANOVG_GLES3_IMPLEMENTATION
+#else
+#include <glad/glad.h>
 #define NANOVG_GL3_IMPLEMENTATION
+#endif
+
 #include <nanovg-gl/nanovg_gl.h>
 
 #ifdef __SWITCH__
@@ -80,17 +87,45 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
 //    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 //    glutInitContextVersion(3,2);
+
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) { return; }
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+
+//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+
+#ifdef __SWITCH__
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,     SDL_GL_CONTEXT_PROFILE_CORE);
+#else
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE,         8);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,     SDL_GL_CONTEXT_PROFILE_CORE);
+//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,         1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS,         1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES,         8);
+
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+    SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);  // SDL docs say this gives speed up on iOS
+    SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);  // SDL docs say this gives speed up on iOS
+#endif
+
+
+//    EAGLContext
 //#else
 //    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 //    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -120,7 +155,10 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     SDL_AddEventWatch(resizingEventWatcher, window);
 
     // Load OpenGL routines using glad
+#ifdef __glad_h_
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+#endif
+
     SDL_GL_SetSwapInterval(1);
 
     //    Logger::info("glfw: GL Vendor: {}", glGetString(GL_VENDOR));
@@ -128,7 +166,11 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     //    Logger::info("glfw: GL Version: {}", glGetString(GL_VERSION));
 
     // Initialize nanovg
-    this->nvgContext = nvgCreateGL3(NVG_STENCIL_STROKES);
+#ifdef IOS
+    this->nvgContext = nvgCreateGLES3(NVG_STENCIL_STROKES | NVG_ANTIALIAS);
+#else
+    this->nvgContext = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_ANTIALIAS);
+#endif
     if (!this->nvgContext)
     {
         //        Logger::error("glfw: unable to init nanovg");
@@ -143,7 +185,7 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     glfwWindowFramebufferSizeCallback(window, width, height);
 
 #ifdef __SWITCH__
-    monitor = glfwGetPrimaryMonitor();
+//    monitor = glfwGetPrimaryMonitor();
 #endif
 }
 
@@ -162,22 +204,24 @@ float SDLVideoContext::getScaleFactor() {
 void SDLVideoContext::beginFrame()
 {
 #ifdef __SWITCH__
-    const GLFWvidmode* return_struct = glfwGetVideoMode(monitor);
-    int width = return_struct->width;
-    int height = return_struct->height;
-
-    if (oldWidth != width || oldHeight != height) {
-        oldWidth = width;
-        oldHeight = height;
-
-        glfwSetWindowSize(window, width, height);
-    }
+//    const GLFWvidmode* return_struct = glfwGetVideoMode(monitor);
+//    int width = return_struct->width;
+//    int height = return_struct->height;
+//
+//    if (oldWidth != width || oldHeight != height) {
+//        oldWidth = width;
+//        oldHeight = height;
+//
+//        glfwSetWindowSize(window, width, height);
+//    }
 #endif
 }
 
 void SDLVideoContext::endFrame()
 {
 //    glfwSwapBuffers(this->window);
+//    glClearColor(rand() % 255 / 255.0f, rand() % 255 / 255.0f, rand() % 255 / 255.0f, 1);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     SDL_GL_SwapWindow(this->window);
 }
 
@@ -264,8 +308,13 @@ void SDLVideoContext::getContextPixels(int x, int y, int w, int h, unsigned char
 
 SDLVideoContext::~SDLVideoContext()
 {
-    if (this->nvgContext)
+    if (this->nvgContext) {
+#ifdef IOS
+        nvgDeleteGLES3(this->nvgContext);
+#else
         nvgDeleteGL3(this->nvgContext);
+#endif
+    }
 
 //    glfwDestroyWindow(this->window);
 //    SDL_GL

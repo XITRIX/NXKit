@@ -75,13 +75,13 @@ protected:
 
 //    virtual void updateKeyboard();
     virtual void updateMouse();
-//    virtual void updateTouch();
+    virtual void updateTouch();
 //    virtual void updateGamepads();
 //    virtual void updateUniversalGamepad();
 //    virtual void updateButton(short controller, ControllerButton button, bool newValue);
 //    static void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-//    std::vector<UIGestureRecognizer*> getRecognizerHierachyFrom(UIView* view);
+    std::vector<UIGestureRecognizer*> getRecognizerHierachyFrom(UIView* view);
 };
 
 }

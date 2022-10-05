@@ -7,6 +7,8 @@
 
 #include <NXKit.hpp>
 
+using namespace NXKit;
+
 class ControlTestViewController: public UIViewController {
 public:
     ControlTestViewController();

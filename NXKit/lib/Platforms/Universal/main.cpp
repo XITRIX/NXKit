@@ -21,6 +21,8 @@ constexpr uint32_t ORIGINAL_WINDOW_HEIGHT = 720;
 #include <switch.h>
 #endif
 
+using namespace NXKit;
+
 int main(int argc, const char * argv[]) {
     Application* application = new Application();
 

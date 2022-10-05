@@ -7,7 +7,6 @@
 
 #include <NXKit.hpp>
 #include <Platforms/SDL/SDLVideoContext.hpp>
-#include <Platforms/Universal/GLFWInputManager.hpp>
 #include <Platforms/SDL/SDLInputManager.hpp>
 
 #ifdef __SWITCH__
@@ -22,7 +21,17 @@ constexpr uint32_t ORIGINAL_WINDOW_HEIGHT = 720;
 #include <switch.h>
 #endif
 
-int main(int argc, const char * argv[]) {
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#endif
+
+#include <SDL2/SDL_main.h>
+
+#include <string>
+
+using namespace NXKit;
+
+int main(int argc, char *argv[]) {
     Application* application = new Application();
 
 #ifdef __SWITCH__
@@ -35,8 +44,8 @@ int main(int argc, const char * argv[]) {
     auto videoContext = new SDLVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
     application->setVideoContext(videoContext);
 
-//    InputManager::initWith(new GLFWInputManager());
     InputManager::initWith(new SDLInputManager());
+    
 #endif
 
     application->getDelegate()->applicationDidFinishLaunching();

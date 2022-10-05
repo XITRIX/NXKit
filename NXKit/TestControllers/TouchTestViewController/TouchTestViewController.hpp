@@ -9,6 +9,8 @@
 
 #include <NXKit.hpp>
 
+using namespace NXKit;
+
 class TargetView: public UIControl {
     void layoutSubviews() override;
 };

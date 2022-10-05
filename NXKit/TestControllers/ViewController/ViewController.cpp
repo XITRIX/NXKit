@@ -7,6 +7,8 @@
 
 #include "ViewController.hpp"
 
+using namespace NXKit;
+
 MyViewController::MyViewController() {
     setTitle("Text scrolling View");
 }
