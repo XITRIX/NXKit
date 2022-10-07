@@ -12,7 +12,7 @@
 #include "ListViewController.hpp"
 #include "TableViewTestController.hpp"
 #include "ControlTestViewController.hpp"
-#include "TextTestController.hpp"
+//#include "TextTestController.hpp"
 
 void UIAppDelegate::applicationDidFinishLaunching() {
 //    TextTestController* textVC = new TextTestController();

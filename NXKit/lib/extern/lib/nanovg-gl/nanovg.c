@@ -2435,7 +2435,8 @@ float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char*
 	FONStextIter iter, prevIter;
 	FONSquad q;
 	NVGvertex* verts;
-	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
+//	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
+    float scale = ctx->devicePxRatio;
 	float invscale = 1.0f / scale;
 	int cverts = 0;
 	int nverts = 0;
@@ -2582,7 +2583,8 @@ enum NVGcodepointType {
 int nvgTextBreakLines(NVGcontext* ctx, const char* string, const char* end, float breakRowWidth, NVGtextRow* rows, int maxRows)
 {
 	NVGstate* state = nvg__getState(ctx);
-	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
+//	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
+    float scale = ctx->devicePxRatio;
 	float invscale = 1.0f / scale;
 	FONStextIter iter, prevIter;
 	FONSquad q;
@@ -2884,7 +2886,8 @@ void nvgTextBoxBounds(NVGcontext* ctx, float x, float y, float breakRowWidth, co
 void nvgTextMetrics(NVGcontext* ctx, float* ascender, float* descender, float* lineh)
 {
 	NVGstate* state = nvg__getState(ctx);
-	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
+//	float scale = nvg__getFontScale(state) * ctx->devicePxRatio;
+    float scale = ctx->devicePxRatio;
 	float invscale = 1.0f / scale;
 
 	if (state->fontId == FONS_INVALID) return;
