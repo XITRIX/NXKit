@@ -12,8 +12,15 @@
 #include "ListViewController.hpp"
 #include "TableViewTestController.hpp"
 #include "ControlTestViewController.hpp"
+#include "TextTestController.hpp"
 
 void UIAppDelegate::applicationDidFinishLaunching() {
+//    TextTestController* textVC = new TextTestController();
+//
+//    UIWindow* window = new UIWindow();
+//    window->setRootViewController(textVC);
+//    window->makeKeyAndVisible();
+
     // Test VC
     MyViewController* rootVC = new MyViewController();
     ListViewController* listVC = new ListViewController();

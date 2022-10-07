@@ -142,6 +142,8 @@
 		7C706D7028EE419B00B07BB5 /* GLFWVideoContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960762871F8BF009E0953 /* GLFWVideoContext.cpp */; };
 		7C706D7128EE419B00B07BB5 /* GLFWInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495428854E2900C5A988 /* GLFWInputManager.cpp */; };
 		7C706D7228EE419B00B07BB5 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E92874EA4000659D24 /* main.cpp */; };
+		7C706D7E28EF8AFB00B07BB5 /* TextTestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D7C28EF8AFB00B07BB5 /* TextTestController.cpp */; };
+		7C706D7F28EF8B0000B07BB5 /* TextTestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D7C28EF8AFB00B07BB5 /* TextTestController.cpp */; };
 		7C709C9F28C08CCE000A474F /* UIControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709C9D28C08CCE000A474F /* UIControl.cpp */; };
 		7C709CA228C08F77000A474F /* Geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA128C08F77000A474F /* Geometry.cpp */; };
 		7C709CA628C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709CA428C0ABED000A474F /* UIControl+GestureRecognizer.cpp */; };
@@ -324,13 +326,14 @@
 		7C706D5C28EE0FA900B07BB5 /* GLViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GLViewController.mm; sourceTree = "<group>"; };
 		7C706D6028EE13FC00B07BB5 /* IOSMain.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = IOSMain.mm; sourceTree = "<group>"; };
 		7C706D6228EE140E00B07BB5 /* IOSMain.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IOSMain.hpp; sourceTree = "<group>"; };
-		7C706D6328EE15BF00B07BB5 /* Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Header.h; sourceTree = "<group>"; };
 		7C706D6428EE1A2800B07BB5 /* IOSVideoContext.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = IOSVideoContext.mm; sourceTree = "<group>"; };
 		7C706D6528EE1A2800B07BB5 /* IOSVideoContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IOSVideoContext.hpp; sourceTree = "<group>"; };
 		7C706D6728EE1C3700B07BB5 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.1.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
 		7C706D6928EE1C3F00B07BB5 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.1.sdk/System/Library/Frameworks/GLKit.framework; sourceTree = DEVELOPER_DIR; };
 		7C706D6C28EE1ED300B07BB5 /* IOSInputManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IOSInputManager.cpp; sourceTree = "<group>"; };
 		7C706D6D28EE1ED300B07BB5 /* IOSInputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IOSInputManager.hpp; sourceTree = "<group>"; };
+		7C706D7C28EF8AFB00B07BB5 /* TextTestController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TextTestController.cpp; sourceTree = "<group>"; };
+		7C706D7D28EF8AFB00B07BB5 /* TextTestController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TextTestController.hpp; sourceTree = "<group>"; };
 		7C709C9D28C08CCE000A474F /* UIControl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIControl.cpp; sourceTree = "<group>"; };
 		7C709C9E28C08CCE000A474F /* UIControl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UIControl.hpp; sourceTree = "<group>"; };
 		7C709CA128C08F77000A474F /* Geometry.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Geometry.cpp; sourceTree = "<group>"; };
@@ -848,19 +851,10 @@
 		7C706CD628EDFAB600B07BB5 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
+				7C706D7A28EF6AAE00B07BB5 /* Core */,
 				7C706D5F28EE13E200B07BB5 /* IOSMain */,
 				7C706D5E28EE13C000B07BB5 /* IOSVideoContext */,
 				7C706D6B28EE1ED300B07BB5 /* IOSInputManager */,
-				7C706D5B28EE0FA900B07BB5 /* GLViewController.h */,
-				7C706D5C28EE0FA900B07BB5 /* GLViewController.mm */,
-				7C706D5728EDFB4A00B07BB5 /* SceneDelegate.h */,
-				7C706D5628EDFB4A00B07BB5 /* SceneDelegate.m */,
-				7C706D5428EDFB2F00B07BB5 /* AppDelegate.h */,
-				7C706D5328EDFB2F00B07BB5 /* AppDelegate.m */,
-				7C706CD828EDFACE00B07BB5 /* Assets.xcassets */,
-				7C706CDA28EDFACE00B07BB5 /* LaunchScreen.storyboard */,
-				7C706CD728EDFACE00B07BB5 /* Info.plist */,
-				7C706CD928EDFACE00B07BB5 /* main.m */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -879,7 +873,6 @@
 			children = (
 				7C706D6228EE140E00B07BB5 /* IOSMain.hpp */,
 				7C706D6028EE13FC00B07BB5 /* IOSMain.mm */,
-				7C706D6328EE15BF00B07BB5 /* Header.h */,
 			);
 			path = IOSMain;
 			sourceTree = "<group>";
@@ -891,6 +884,32 @@
 				7C706D6C28EE1ED300B07BB5 /* IOSInputManager.cpp */,
 			);
 			path = IOSInputManager;
+			sourceTree = "<group>";
+		};
+		7C706D7A28EF6AAE00B07BB5 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				7C706D5B28EE0FA900B07BB5 /* GLViewController.h */,
+				7C706D5C28EE0FA900B07BB5 /* GLViewController.mm */,
+				7C706D5728EDFB4A00B07BB5 /* SceneDelegate.h */,
+				7C706D5628EDFB4A00B07BB5 /* SceneDelegate.m */,
+				7C706D5428EDFB2F00B07BB5 /* AppDelegate.h */,
+				7C706D5328EDFB2F00B07BB5 /* AppDelegate.m */,
+				7C706CD828EDFACE00B07BB5 /* Assets.xcassets */,
+				7C706CDA28EDFACE00B07BB5 /* LaunchScreen.storyboard */,
+				7C706CD728EDFACE00B07BB5 /* Info.plist */,
+				7C706CD928EDFACE00B07BB5 /* main.m */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		7C706D7B28EF8AEB00B07BB5 /* TextTestController */ = {
+			isa = PBXGroup;
+			children = (
+				7C706D7D28EF8AFB00B07BB5 /* TextTestController.hpp */,
+				7C706D7C28EF8AFB00B07BB5 /* TextTestController.cpp */,
+			);
+			path = TextTestController;
 			sourceTree = "<group>";
 		};
 		7C709C9C28C08CC1000A474F /* UIControl */ = {
@@ -1019,6 +1038,7 @@
 		7C888E3F28816531009A6B95 /* TestControllers */ = {
 			isa = PBXGroup;
 			children = (
+				7C706D7B28EF8AEB00B07BB5 /* TextTestController */,
 				7CCDCDB428C2A47200EFBFCA /* TableViewTestController */,
 				7C709CAD28C0BCFC000A474F /* ControlTestViewController */,
 				7C8D980C28BB59F300BDD667 /* AnimationTestViewController */,
@@ -1683,6 +1703,7 @@
 				7C706D6128EE13FC00B07BB5 /* IOSMain.mm in Sources */,
 				7C706CE828EDFAE000B07BB5 /* canvas.cpp in Sources */,
 				7C706CE928EDFAE000B07BB5 /* AnimationTestViewController.cpp in Sources */,
+				7C706D7F28EF8B0000B07BB5 /* TextTestController.cpp in Sources */,
 				7C706CEA28EDFAE000B07BB5 /* UIWindow.cpp in Sources */,
 				7C706CEB28EDFAE000B07BB5 /* gelement.cpp in Sources */,
 				7C706CEC28EDFAE000B07BB5 /* GaussianBlur.cpp in Sources */,
@@ -1818,6 +1839,7 @@
 				7C8D986828BD657500BDD667 /* maskelement.cpp in Sources */,
 				7C8D982628BC172D00BDD667 /* Literals.cpp in Sources */,
 				7C709CB028C0BD15000A474F /* ControlTestViewController.cpp in Sources */,
+				7C706D7E28EF8AFB00B07BB5 /* TextTestController.cpp in Sources */,
 				7C8D98A228BD658400BDD667 /* plutovg-dash.c in Sources */,
 				7C8D98A428BD658400BDD667 /* plutovg-paint.c in Sources */,
 				7CCDCDB228C2730A00EFBFCA /* UITableView.cpp in Sources */,
@@ -1910,9 +1932,9 @@
 					"$(inherited)",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Info.plist;
+				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Core/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -1941,9 +1963,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D59DHVRS87;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Info.plist;
+				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Core/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;

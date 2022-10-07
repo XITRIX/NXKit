@@ -144,7 +144,7 @@ void UIAlertController::addAction(UIAlertAction action) {
 
 void UIAlertController::makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion) {
     getView()->alpha = 0;
-    alert->transformSize = { 0.98f, 0.98f };
+    alert->transformSize = { 0.95f, 0.95f };
 
     UIView::animate({ getView(), alert }, 0.15f, [this]() {
         getView()->alpha = 1;
@@ -157,7 +157,7 @@ void UIAlertController::makeViewAppear(bool animated, UIViewController* presenti
 void UIAlertController::makeViewDisappear(bool animated, std::function<void(bool)> completion) {
     UIView::animate({ getView(), alert}, 0.15f, [this]() {
         getView()->alpha = 0;
-        alert->transformSize = { 0.98f, 0.98f };
+        alert->transformSize = { 0.95f, 0.95f };
     }, EasingFunction::quadraticOut, [completion](bool res) {
         completion(true);
     });
