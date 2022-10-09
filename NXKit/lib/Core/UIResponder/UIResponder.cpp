@@ -9,17 +9,17 @@
 
 namespace NXKit {
 
-void UIResponder::touchesBegan(std::vector<UITouch*> touches, UIEvent* withEvent) {
+void UIResponder::touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> withEvent) {
     if (!getNext()) return;
     getNext()->touchesBegan(touches, withEvent);
 }
 
-void UIResponder::touchesMoved(std::vector<UITouch*> touches, UIEvent* withEvent) {
+void UIResponder::touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> withEvent) {
     if (!getNext()) return;
     getNext()->touchesMoved(touches, withEvent);
 }
 
-void UIResponder::touchesEnded(std::vector<UITouch*> touches, UIEvent* withEvent) {
+void UIResponder::touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> withEvent) {
     if (!getNext()) return;
     getNext()->touchesEnded(touches, withEvent);
 }

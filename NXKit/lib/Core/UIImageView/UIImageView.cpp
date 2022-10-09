@@ -100,12 +100,12 @@ UIImageView::UIImageView() {
 }
 
 UIImageView::~UIImageView() {
-    delete image;
+//    delete image;
 }
 
-void UIImageView::setImage(UIImage* image, bool freeOld) {
-    if (this->image && freeOld)
-        delete this->image;
+void UIImageView::setImage(std::shared_ptr<UIImage> image, bool freeOld) {
+//    if (this->image && freeOld)
+//        delete this->image;
     
     this->image = image;
     setNeedsLayout();

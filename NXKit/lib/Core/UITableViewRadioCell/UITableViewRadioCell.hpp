@@ -23,14 +23,14 @@ class UITableViewRadioCell: public UITableViewCell  {
 public:
     UITableViewRadioCell();
 
-    void setImage(UIImage* image);
+    void setImage(std::shared_ptr<UIImage> image);
     void setText(std::string text);
     void setOn(bool isOn);
 
 //private:
-    UILabel* label = nullptr;
-    UICheckBoxView* checkbox = nullptr;
-    UIImageView* imageView = nullptr;
+    std::shared_ptr<UILabel> label;
+    std::shared_ptr<UICheckBoxView> checkbox;
+    std::shared_ptr<UIImageView> imageView;
 };
 
 }

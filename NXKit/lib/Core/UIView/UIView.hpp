@@ -16,12 +16,14 @@
 #include <Core/UIEdgeInsets/UIEdgeInsets.hpp>
 #include <Core/UIGestureRecognizer/UIGestureRecognizer.hpp>
 #include <Core/UITraitCollection/UITraitCollection.hpp>
+#include <Core/Utils/SharedBase/SharedBase.hpp>
 #include <tweeny/tweeny.h>
 
 #include <yoga/YGNode.h>
 
 #include <vector>
 #include <optional>
+#include <memory>
 
 namespace NXKit {
 
@@ -35,11 +37,11 @@ enum class NavigationDirection {
     LEFT
 };
 
-class UIView: public UIResponder, public UITraitEnvironment {
+class UIView: public UIResponder, public UITraitEnvironment, public enable_shared_from_base<UIView> {
 public:
     static constexpr float AUTO = NAN;
     
-    static void animate(std::initializer_list<UIView*> views, float duration, std::function<void()> animations, EasingFunction easing = EasingFunction::linear, std::function<void(bool)> completion = [](bool res){});
+    static void animate(std::initializer_list<std::shared_ptr<UIView>> views, float duration, std::function<void()> animations, EasingFunction easing = EasingFunction::linear, std::function<void(bool)> completion = [](bool res){});
 
     std::string tag;
     UIColor backgroundColor;
@@ -64,32 +66,32 @@ public:
     virtual ~UIView();
 
     virtual void draw(NVGcontext* vgContext) {}
-    virtual void addSubview(UIView* view);
-    virtual void insertSubview(UIView* view, int position);
-    std::vector<UIView*> getSubviews();
+    virtual void addSubview(std::shared_ptr<UIView> view);
+    virtual void insertSubview(std::shared_ptr<UIView> view, int position);
+    std::vector<std::shared_ptr<UIView>> getSubviews();
     void removeFromSuperview();
 
-    UIResponder* getNext() override;
+    std::shared_ptr<UIResponder> getNext() override;
 
     UIColor getTintColor();
     void setTintColor(std::optional<UIColor> color);
     virtual void tintColorDidChange();
 
-    Point convert(Point point, UIView* toView);
+    Point convert(Point point, std::shared_ptr<UIView> toView);
 
-    virtual UIView* hitTest(Point point, UIEvent* withEvent);
+    virtual std::shared_ptr<UIView> hitTest(Point point, UIEvent* withEvent);
     virtual bool point(Point insidePoint, UIEvent* withEvent);
 
     UIWindow* getWindow();
-    UIView* getSuperview();
+    std::shared_ptr<UIView> getSuperview();
 
-    virtual UIView* getDefaultFocus();
-    virtual UIView* getNextFocus(NavigationDirection direction);
+    virtual std::shared_ptr<UIView> getDefaultFocus();
+    virtual std::shared_ptr<UIView> getNextFocus(NavigationDirection direction);
 
     bool isFocused();
     virtual void becomeFocused() {}
     virtual void resignFocused() {}
-    virtual void subviewFocusDidChange(UIView* focusedView, UIView* notifiedView);
+    virtual void subviewFocusDidChange(std::shared_ptr<UIView> focusedView, std::shared_ptr<UIView> notifiedView);
     virtual bool canBecomeFocused() { return false; }
 
     virtual std::deque<float> createAnimationContext();
@@ -98,8 +100,8 @@ public:
 
     static void performWithoutAnimation(std::function<void()> function);
 
-    void addGestureRecognizer(UIGestureRecognizer* gestureRecognizer);
-    std::vector<UIGestureRecognizer*> getGestureRecognizers();
+    void addGestureRecognizer(std::shared_ptr<UIGestureRecognizer> gestureRecognizer);
+    std::vector<std::shared_ptr<UIGestureRecognizer>> getGestureRecognizers();
 
     // Yoga node
     YGNode* getYGNode() { return this->ygNode; }
@@ -180,10 +182,10 @@ private:
     std::optional<UIColor> tintColor;
 
     AnimationContext animationContext;
-    std::vector<UIGestureRecognizer*> gestureRecognizers;
-    UIViewController* controller = nullptr;
-    std::vector<UIView*> subviews;
-    UIView* superview = nullptr;
+    std::vector<std::shared_ptr<UIGestureRecognizer>> gestureRecognizers;
+    std::shared_ptr<UIViewController> controller = nullptr;
+    std::vector<std::shared_ptr<UIView>> subviews;
+    std::weak_ptr<UIView> superview;
     bool needsLayout = true;
     Rect bounds;
 
@@ -194,7 +196,7 @@ private:
     float highlightShakeAmplitude;
 
     void internalDraw(NVGcontext* vgContext);
-    void setSuperview(UIView* view);
+    void setSuperview(std::weak_ptr<UIView> view);
     void drawShadow(NVGcontext* vg);
     void drawHighlight(NVGcontext* vg, bool background);
 

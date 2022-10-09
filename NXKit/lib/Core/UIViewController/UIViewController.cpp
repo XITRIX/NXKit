@@ -15,37 +15,37 @@ UIViewController::UIViewController() {
         if (getPresentingViewController())
             dismiss(true);
     }, "Back", true, true, [this]() {
-        return !parent;
+        return parent.expired();
     }));
 }
 
 UIViewController::~UIViewController() {
     if (navigationItem.image)
-        delete navigationItem.image;
+//        delete navigationItem.image;
 
     for (auto child: children) {
-        delete child;
+//        delete child;
     }
 
     if (view) {
         view->removeFromSuperview();
-        delete view;
+//        delete view;
     }
 }
 
-UIView* UIViewController::getView() {
+std::shared_ptr<UIView> UIViewController::getView() {
     loadViewIfNeeded();
     return view;
 }
 
-void UIViewController::setView(UIView* view) {
+void UIViewController::setView(std::shared_ptr<UIView> view) {
     this->view = view;
-    this->view->controller = this;
+    this->view->controller = shared_from_this();
     viewDidLoad();
 }
 
 void UIViewController::loadView() {
-    setView(new UIView());
+    setView(std::make_shared<UIView>());
 }
 
 void UIViewController::loadViewIfNeeded() {
@@ -58,48 +58,52 @@ bool UIViewController::isViewLoaded() {
     return view != nullptr;
 }
 
-UIResponder* UIViewController::getNext() {
-    auto window = dynamic_cast<UIWindow*>(view->getSuperview());
+std::shared_ptr<UIResponder> UIViewController::getNext() {
+    auto window = std::dynamic_pointer_cast<UIWindow>(view->getSuperview());
     if (window) return window;
-    if (parent) return parent;
+    if (auto spt = parent.lock()) return spt;
     return nullptr;
 }
 
 void UIViewController::setTitle(std::string title) {
     navigationItem.title = title;
 
-    if (parent)
-        parent->childNavigationItemDidChange(this);
+    if (auto spt = parent.lock()) {
+        spt->childNavigationItemDidChange(shared_from_this());
+    }
 }
 
-void UIViewController::setImage(UIImage* image) {
-    if (navigationItem.image)
-        delete navigationItem.image;
+void UIViewController::setImage(std::shared_ptr<UIImage> image) {
+//    if (navigationItem.image)
+//        delete navigationItem.image;
     navigationItem.image = image;
 
-    if (parent)
-        parent->childNavigationItemDidChange(this);
+    if (auto spt = parent.lock()) {
+        spt->childNavigationItemDidChange(shared_from_this());
+    }
 }
 
-void UIViewController::addChild(UIViewController* child) {
+void UIViewController::addChild(std::shared_ptr<UIViewController> child) {
     children.push_back(child);
-    child->willMoveToParent(this);
+    child->willMoveToParent(shared_from_this());
     child->viewWillAppear(true);
 }
 
-void UIViewController::willMoveToParent(UIViewController* parent) {
+void UIViewController::willMoveToParent(std::shared_ptr<UIViewController> parent) {
     if (parent)
         this->parent = parent;
 }
 
-void UIViewController::didMoveToParent(UIViewController* parent) {
+void UIViewController::didMoveToParent(std::shared_ptr<UIViewController> parent) {
     viewDidAppear(true);
 }
 
 void UIViewController::removeFromParent() {
-    parent->children.erase(std::remove(parent->children.begin(), parent->children.end(), this));
-    this->parent = nullptr;
-    viewDidDisappear(true);
+    if (auto spt = parent.lock()) {
+        spt->children.erase(std::remove(spt->children.begin(), spt->children.end(), shared_from_this()));
+        this->parent.reset();
+        viewDidDisappear(true);
+    }
 }
 
 void UIViewController::setAdditionalSafeAreaInsets(UIEdgeInsets insets) {
@@ -107,41 +111,41 @@ void UIViewController::setAdditionalSafeAreaInsets(UIEdgeInsets insets) {
 }
 
 // MARK: - Presenting
-UIViewController* UIViewController::getPresentedViewController() {
+std::shared_ptr<UIViewController> UIViewController::getPresentedViewController() {
     auto parent = this;
     while (parent->getParent()) {
-        parent = parent->getParent();
+        parent = parent->getParent().get();
     }
     return parent->presentedViewController;
 }
 
-UIViewController* UIViewController::getPresentingViewController() {
+std::shared_ptr<UIViewController> UIViewController::getPresentingViewController() {
     auto parent = this;
     while (parent->getParent()) {
-        parent = parent->getParent();
+        parent = parent->getParent().get();
     }
     return parent->presentingViewController;
 }
 
-void UIViewController::setPresentedViewController(UIViewController* presentedViewController) {
+void UIViewController::setPresentedViewController(std::shared_ptr<UIViewController> presentedViewController) {
     auto parent = this;
     while (parent->getParent()) {
-        parent = parent->getParent();
+        parent = parent->getParent().get();
     }
     parent->presentedViewController = presentedViewController;
 }
 
-void UIViewController::setPresentingViewController(UIViewController* presentingViewController) {
+void UIViewController::setPresentingViewController(std::shared_ptr<UIViewController> presentingViewController) {
     auto parent = this;
     while (parent->getParent()) {
-        parent = parent->getParent();
+        parent = parent->getParent().get();
     }
     parent->presentingViewController = presentingViewController;
 }
 
-void UIViewController::present(UIViewController* controller, bool animated, std::function<void()> completion) {
-    if (parent) {
-        parent->present(controller, animated, completion);
+void UIViewController::present(std::shared_ptr<UIViewController> controller, bool animated, std::function<void()> completion) {
+    if (!parent.expired()) {
+        parent.lock()->present(controller, animated, completion);
         return;
     }
 
@@ -156,7 +160,7 @@ void UIViewController::present(UIViewController* controller, bool animated, std:
     }
 
     setPresentedViewController(controller);
-    controller->setPresentingViewController(this);
+    controller->setPresentingViewController(shared_from_this());
 
     auto window = getView()->getWindow();
     window->addSubview(controller->getView());
@@ -166,15 +170,15 @@ void UIViewController::present(UIViewController* controller, bool animated, std:
     
     Application::shared()->setFocus(controller->getView()->getDefaultFocus());
 
-    controller->makeViewAppear(animated, this, [controller, animated, completion]() {
+    controller->makeViewAppear(animated, shared_from_this(), [controller, animated, completion]() {
         controller->viewDidAppear(animated);
         completion();
     });
 }
 
 void UIViewController::dismiss(bool animated, std::function<void()> completion) {
-    if (parent) {
-        parent->dismiss(animated, completion);
+    if (!parent.expired()) {
+        parent.lock()->dismiss(animated, completion);
         return;
     }
 
@@ -186,7 +190,7 @@ void UIViewController::dismiss(bool animated, std::function<void()> completion) 
     Application::shared()->setFocus(nullptr);
 
     makeViewDisappear(animated, [this, animated, completion](bool res) {
-        getView()->getWindow()->removePresentedViewController(this);
+        getView()->getWindow()->removePresentedViewController(shared_from_this());
         getView()->removeFromSuperview();
         viewDidDisappear(animated);
         Application::shared()->setFocus(presentingViewController->getView()->getDefaultFocus());
@@ -196,13 +200,13 @@ void UIViewController::dismiss(bool animated, std::function<void()> completion) 
     });
 }
 
-void UIViewController::show(UIViewController* controller, void* sender) {
-    if (parent)
-        return parent->show(controller, sender);
+void UIViewController::show(std::shared_ptr<UIViewController> controller, void* sender) {
+    if (!parent.expired())
+        return parent.lock()->show(controller, sender);
     present(controller, true);
 }
 
-void UIViewController::makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion) {
+void UIViewController::makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion) {
     // Animation could be added
     getView()->transformOrigin = { 0, 720 };
 //    getView()->alpha = 0;
@@ -229,8 +233,8 @@ void UIViewController::makeViewDisappear(bool animated, std::function<void(bool)
 
 UITraitCollection UIViewController::getTraitCollection() {
     UITraitCollection superCollection;
-    if (parent)
-        superCollection = parent->getTraitCollection();
+    if (!parent.expired())
+        superCollection = parent.lock()->getTraitCollection();
 
     auto superView = getView()->getSuperview();
     if (superView) {

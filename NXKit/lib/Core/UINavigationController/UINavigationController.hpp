@@ -22,39 +22,39 @@ public:
     void pushNavigationItem(UINavigationItem navigationItem);
 
 //private:
-    UILabel* titleLabel;
-    UIImageView* imageView;
+    std::shared_ptr<UILabel> titleLabel;
+    std::shared_ptr<UIImageView> imageView;
 };
 
 class UINavigationController: public UIViewController {
 public:
-    UINavigationController(UIViewController* rootController);
+    UINavigationController(std::shared_ptr<UIViewController> rootController);
     virtual ~UINavigationController();
     
     void loadView() override;
     void viewDidLoad() override;
     void viewDidLayoutSubviews() override;
 
-    void show(UIViewController* controller, void* sender = nullptr) override;
-    void childNavigationItemDidChange(UIViewController* controller) override;
+    void show(std::shared_ptr<UIViewController> controller, void* sender = nullptr) override;
+    void childNavigationItemDidChange(std::shared_ptr<UIViewController> controller) override;
 
-    std::vector<UIViewController*> getViewControllers() { return viewControllers; }
+    std::vector<std::shared_ptr<UIViewController>> getViewControllers() { return viewControllers; }
 
-    void pushViewController(UIViewController* otherViewController, bool animated);
-    UIViewController* popViewController(bool animated, bool free = true);
+    void pushViewController(std::shared_ptr<UIViewController> otherViewController, bool animated);
+    std::shared_ptr<UIViewController> popViewController(bool animated, bool free = true);
 private:
     float headerHeight = 88;
     float footerHeight = 73;
     bool isTranslucent = false;
     
-    std::vector<UIViewController*> viewControllers;
+    std::vector<std::shared_ptr<UIViewController>> viewControllers;
     
-    UIView* rootView;
-    UIStackView* overlay;
+    std::shared_ptr<UIView> rootView;
+    std::shared_ptr<UIStackView> overlay;
 
-    UINavigationBar* navigationBar = nullptr;
+    std::shared_ptr<UINavigationBar> navigationBar = nullptr;
 
-    UIView* buildFooter();
+    std::shared_ptr<UIView> buildFooter();
 };
 
 }

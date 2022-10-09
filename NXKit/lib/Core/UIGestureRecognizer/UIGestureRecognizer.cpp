@@ -36,10 +36,10 @@ void UIGestureRecognizer::setState(UIGestureRecognizerState state) {
     }
 }
 
-void UIGestureRecognizer::touchesBegan(std::vector<UITouch*> touches, UIEvent* event) {}
-void UIGestureRecognizer::touchesMoved(std::vector<UITouch*> touches, UIEvent* event) {}
-void UIGestureRecognizer::touchesEnded(std::vector<UITouch*> touches, UIEvent* event) {}
-void UIGestureRecognizer::touchesCancelled(std::vector<UITouch*> touches, UIEvent* event) {}
+void UIGestureRecognizer::touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {}
+void UIGestureRecognizer::touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {}
+void UIGestureRecognizer::touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {}
+void UIGestureRecognizer::touchesCancelled(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {}
 
 
 bool UIGestureRecognizer::recognitionCondition() {
@@ -47,7 +47,7 @@ bool UIGestureRecognizer::recognitionCondition() {
            state != UIGestureRecognizerState::CANCELLED;
 }
 
-void UIGestureRecognizer::_touchesBegan(std::vector<UITouch*> touches, UIEvent* event) {
+void UIGestureRecognizer::_touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     bool firstTouch = allTouches.size() == 0;
 
     for (auto touch : touches)
@@ -65,12 +65,12 @@ void UIGestureRecognizer::_touchesBegan(std::vector<UITouch*> touches, UIEvent* 
         onStateChanged(state);
 }
 
-void UIGestureRecognizer::_touchesMoved(std::vector<UITouch*> touches, UIEvent* event) {
+void UIGestureRecognizer::_touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     if (!recognitionCondition()) return;
     touchesMoved(touches, event);
 }
 
-void UIGestureRecognizer::_touchesEnded(std::vector<UITouch*> touches, UIEvent* event) {
+void UIGestureRecognizer::_touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     bool condition = recognitionCondition();
 
     for (auto touch : touches)
@@ -83,7 +83,7 @@ void UIGestureRecognizer::_touchesEnded(std::vector<UITouch*> touches, UIEvent* 
         setState(UIGestureRecognizerState::POSSIBLE);
 }
 
-void UIGestureRecognizer::_touchesCancelled(std::vector<UITouch*> touches, UIEvent* event) {
+void UIGestureRecognizer::_touchesCancelled(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     for (auto touch : touches)
         removeTouch(touch);
 
@@ -92,20 +92,20 @@ void UIGestureRecognizer::_touchesCancelled(std::vector<UITouch*> touches, UIEve
     touchesCancelled(touches, event);
 }
 
-void UIGestureRecognizer::addTouch(UITouch* touch) {
+void UIGestureRecognizer::addTouch(std::shared_ptr<UITouch> touch) {
     allTouches.push_back(touch);
 }
 
-void UIGestureRecognizer::removeTouch(UITouch* touch) {
+void UIGestureRecognizer::removeTouch(std::shared_ptr<UITouch> touch) {
     allTouches.erase(std::remove(allTouches.begin(), allTouches.end(), touch));
     if (allTouches.size() <= 0 && state == UIGestureRecognizerState::FAILED)
         setState(UIGestureRecognizerState::POSSIBLE);
 }
 
 void UIGestureRecognizer::cancelOtherGestureRecognizersThatShouldNotRecognizeSimultaneously() {
-    for (UITouch* touch : allTouches) {
+    for (auto touch : allTouches) {
         for (auto rec : touch->gestureRecognizers) {
-            if (rec != this && (!rec->delegate || !rec->delegate->gestureRecognizerShouldRecognizeSimultaneouslyWith(rec, this))) {
+            if (rec.get() != this && (!rec->delegate || !rec->delegate->gestureRecognizerShouldRecognizeSimultaneouslyWith(rec, shared_from_this()))) {
                 rec->setState(UIGestureRecognizerState::CANCELLED);
                 rec->touchesCancelled({touch}, nullptr);
             }

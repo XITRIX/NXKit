@@ -10,7 +10,7 @@
 namespace NXKit {
 
 UIControl::UIControl() {
-    auto gesture = new GestureRecognizer(this);
+    auto gesture = std::make_shared<GestureRecognizer>(shared_from_base<UIControl>());
     gesture->onStateChanged = [this](UIGestureRecognizerState state) {
         if (state == UIGestureRecognizerState::ENDED) {
             getFirstAvailableAction(BUTTON_A).action();

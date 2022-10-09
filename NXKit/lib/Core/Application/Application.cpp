@@ -29,19 +29,19 @@ Application* Application::shared() {
 }
 
 Application::Application() {
-    delegate = new UIAppDelegate();
+    delegate = std::make_shared<UIAppDelegate>();
     Application::_shared = this;
 }
 
 Application::~Application() {
-    delete delegate;
-    delete keyWindow;
+//    delete delegate;
+//    delete keyWindow;
     delete FontManager::shared();
     delete InputManager::shared();
-    delete videoContext;
+//    delete videoContext;
 }
 
-void Application::setKeyWindow(UIWindow *window) {
+void Application::setKeyWindow(std::shared_ptr<UIWindow> window) {
     keyWindow = window;
     keyWindow->setSize(Size(windowWidth, windowHeight));
 }
@@ -68,11 +68,12 @@ bool Application::mainLoop() {
     InputManager::shared()->update();
     input();
 
-    UIEvent* event = new UIEvent();
-    event->allTouches = InputManager::shared()->getTouches();
-    if (event->allTouches.size() > 0) setInputType(ApplicationInputType::TOUCH);
-    keyWindow->sendEvent(event);
-    delete event;
+    {
+        auto event = std::make_shared<UIEvent>();
+        event->allTouches = InputManager::shared()->getTouches();
+        if (event->allTouches.size() > 0) setInputType(ApplicationInputType::TOUCH);
+        keyWindow->sendEvent(event);
+    }
 
     // Animations
     updateHighlightAnimation();
@@ -176,11 +177,11 @@ NVGcontext* Application::getContext() {
     return videoContext->getNVGContext();
 }
 
-UIView* Application::getFocus() {
+std::shared_ptr<UIView> Application::getFocus() {
     return this->focus;
 }
 
-void Application::setFocus(UIView* view) {
+void Application::setFocus(std::shared_ptr<UIView> view) {
     if (this->focus == view) return;
 
     if (this->focus) {
@@ -191,8 +192,8 @@ void Application::setFocus(UIView* view) {
     if (this->focus) {
         this->focus->becomeFocused();
         
-        if (this->focus->superview)
-            this->focus->superview->subviewFocusDidChange(this->focus, this->focus);
+        if (!this->focus->superview.expired())
+            this->focus->superview.lock()->subviewFocusDidChange(this->focus, this->focus);
     }
 
     focusDidChangeEvent.fire(focus);
@@ -243,11 +244,11 @@ void Application::flushContext() {
     nvgEndFrame(getContext());
 }
 
-void Application::setVideoContext(VideoContext* videoContext) {
+void Application::setVideoContext(std::shared_ptr<VideoContext> videoContext) {
     this->videoContext = videoContext;
 }
 
-VideoContext* Application::getVideoContext() {
+std::shared_ptr<VideoContext> Application::getVideoContext() {
     return videoContext;
 }
 

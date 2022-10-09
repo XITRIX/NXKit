@@ -234,8 +234,8 @@ public:
     virtual float getAxis(short controller, ControllerAxis axis) = 0;
 
     virtual int touchCount() = 0;
-    virtual UITouch* getTouch(int id) = 0;
-    virtual std::vector<UITouch*> getTouches() = 0;
+    virtual std::shared_ptr<UITouch> getTouch(int id) = 0;
+    virtual std::vector<std::shared_ptr<UITouch>> getTouches() = 0;
 
     virtual std::string getButtonIcon(ControllerButton button) = 0;
 

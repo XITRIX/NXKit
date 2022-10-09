@@ -18,40 +18,41 @@ ControlTestViewController::ControlTestViewController() {
 }
 
 void ControlTestViewController::loadView() {
-    UIStackView* view = new UIStackView();
+    auto view = std::make_shared<UIStackView>();
     view->setAlignItems(AlignItems::CENTER);
     view->setJustifyContent(JustifyContent::CENTER);
 
-    auto control = new UIButton("Present example");
+    auto control = std::make_shared<UIButton>("Present example");
     control->setSize({ 280, 60 });
     view->addSubview(control);
 
-    auto control2 = new UIButton("Show example");
+    auto control2 = std::make_shared<UIButton>("Show example");
     control2->setSize({ 280, 60 });
     control2->setMarginTop(9);
     view->addSubview(control2);
 
-    auto control3 = new UIButton("Alert example");
+    auto control3 = std::make_shared<UIButton>("Alert example");
     control3->setSize({ 280, 60 });
     control3->setMarginTop(9);
     view->addSubview(control3);
 
-    auto control4 = new UIButton("Bottom sheet example");
+    auto control4 = std::make_shared<UIButton>("Bottom sheet example");
     control4->setSize({ 280, 60 });
     control4->setMarginTop(9);
     view->addSubview(control4);
 
-    auto control5 = new UIButton("Selector example");
+    auto control5 = std::make_shared<UIButton>("Selector example");
     control5->setSize({ 280, 60 });
     control5->setMarginTop(9);
     view->addSubview(control5);
 
     control->addAction(BUTTON_A, UIAction([this]() {
-        TouchTestViewController* touchVC = new TouchTestViewController();
-        AnimationTestViewController* animVC = new AnimationTestViewController();
+        auto touchVC = std::make_shared<TouchTestViewController>();
+        auto animVC = std::make_shared<AnimationTestViewController>();
 
-        UITabBarController* tabsVC = new UITabBarController({animVC, nullptr, touchVC });
-        UINavigationController* vc = new UINavigationController(tabsVC);
+        std::vector<std::shared_ptr<UIViewController>> controllers = {animVC, nullptr, touchVC };
+        auto tabsVC = std::make_shared<UITabBarController>(controllers);
+        auto vc = std::make_shared<UINavigationController>(tabsVC);
         tabsVC->setTitle("Presentation test");
 
         present(vc, true);
@@ -60,12 +61,12 @@ void ControlTestViewController::loadView() {
     control2->addAction(BUTTON_A, UIAction([this]() {
 //        AnimationTestViewController* animVC = new AnimationTestViewController();
 //        TouchTestViewController* touchVC = new TouchTestViewController();
-        ListViewController* listVC = new ListViewController();
+        auto listVC = std::make_shared<ListViewController>();
         show(listVC);
     }, "OK"));
 
     control3->addAction(BUTTON_A, UIAction([this]() {
-        auto alert = new UIAlertController("Hello title Hello title Hello title Hello title Hello title Hello title Hello title Hello title Hello title", "Just some text to fill message label Just some text to fill message label Just some text to fill message label Just some text to fill message label");
+        auto alert = std::make_shared<UIAlertController>("Hello title Hello title Hello title Hello title Hello title Hello title Hello title Hello title Hello title", "Just some text to fill message label Just some text to fill message label Just some text to fill message label Just some text to fill message label");
         alert->addAction(UIAlertAction("Cancel", NXKit::UIAlertActionStyle::DEFAULT, []() { printf("Cancel\n"); }));
         alert->addAction(UIAlertAction("Ok", NXKit::UIAlertActionStyle::DEFAULT, []() { printf("OK\n"); }));
         alert->addAction(UIAlertAction("Delete", NXKit::UIAlertActionStyle::DESTRUCTIVE, []() { printf("Delete\n"); }));
@@ -73,10 +74,10 @@ void ControlTestViewController::loadView() {
     }, "OK"));
 
     control4->addAction(BUTTON_A, UIAction([this]() {
-        ListViewController* listVC = new ListViewController();
+        auto listVC = std::make_shared<ListViewController>();
 
-        UINavigationController* nvc = new UINavigationController(listVC);
-        UIBottomSheetController* vc = new UIBottomSheetController(nvc);
+        auto nvc = std::make_shared<UINavigationController>(listVC);
+        auto vc = std::make_shared<UIBottomSheetController>(nvc);
 //        tabsVC->setTitle("Presentation test");
 
         present(vc, true);
@@ -90,9 +91,9 @@ void ControlTestViewController::loadView() {
         for (int i = 0; i < 15; i++)
             data.push_back("Cell #" + std::to_string(i + 1));
 
-        UISelectorViewController* selector = new UISelectorViewController("Demo select", data, [this](int index) {
+        auto selector = std::make_shared<UISelectorViewController>("Demo select", data, [this](int index) {
             selectedCell = index;
-            UIAlertController* alert = new UIAlertController("Select successful", "You selected cell #" + std::to_string(index));
+            auto alert = std::make_shared<UIAlertController>("Select successful", "You selected cell #" + std::to_string(index));
             alert->addAction(UIAlertAction("Oke"));
             present(alert, true);
         }, selectedCell);

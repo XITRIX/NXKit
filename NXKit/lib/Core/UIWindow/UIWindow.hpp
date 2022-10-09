@@ -16,24 +16,24 @@ public:
     UIWindow();
     ~UIWindow();
 
-    UIViewController* getRootViewController();
-    void setRootViewController(UIViewController* viewController);
+    std::shared_ptr<UIViewController> getRootViewController();
+    void setRootViewController(std::shared_ptr<UIViewController> viewController);
 
     void makeKeyAndVisible();
-    void sendEvent(UIEvent* event);
+    void sendEvent(std::shared_ptr<UIEvent> event);
 
     void layoutSubviews() override;
-    UIView* getDefaultFocus() override;
+    std::shared_ptr<UIView> getDefaultFocus() override;
 
     UITraitCollection getTraitCollection() override;
 
 private:
     friend class UIViewController;
-    UIViewController* rootViewController = nullptr;
-    std::vector<UIViewController*> presentedViewControllers;
+    std::shared_ptr<UIViewController> rootViewController = nullptr;
+    std::vector<std::shared_ptr<UIViewController>> presentedViewControllers;
 
-    void addPresentedViewController(UIViewController* controller);
-    void removePresentedViewController(UIViewController* controller);
+    void addPresentedViewController(std::shared_ptr<UIViewController> controller);
+    void removePresentedViewController(std::shared_ptr<UIViewController> controller);
 };
 
 }

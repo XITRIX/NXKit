@@ -61,16 +61,16 @@ UITableViewRadioCell::UITableViewRadioCell() {
     setAxis(Axis::HORIZONTAL);
     setAlignItems(AlignItems::CENTER);
 
-    imageView = new UIImageView();
+    imageView = std::make_shared<UIImageView>();
     imageView->setSize({ 44, 44 });
     imageView->setMarginRight(20);
 
-    label = new UILabel("Test text");
+    label = std::make_shared<UILabel>("Test text");
     label->setGrow(1);
     label->verticalAlign = VerticalAlign::CENTER;
     label->getFont()->fontSize = 22;
 
-    checkbox = new UICheckBoxView();
+    checkbox = std::make_shared<UICheckBoxView>();
 
     addSubview(imageView);
     addSubview(label);
@@ -91,7 +91,7 @@ void UITableViewRadioCell::setOn(bool isOn) {
     checkbox->setHidden(!isOn);
 }
 
-void UITableViewRadioCell::setImage(UIImage* image) {
+void UITableViewRadioCell::setImage(std::shared_ptr<UIImage> image) {
     imageView->setHidden(!image);
     imageView->setImage(image);
 }

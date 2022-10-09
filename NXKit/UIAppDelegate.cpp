@@ -15,28 +15,29 @@
 //#include "TextTestController.hpp"
 
 void UIAppDelegate::applicationDidFinishLaunching() {
-//    TextTestController* textVC = new TextTestController();
+//    auto textVC = std::make_shared<TextTestController>();
 //
-//    UIWindow* window = new UIWindow();
+//    auto window = std::make_shared<UIWindow>();
 //    window->setRootViewController(textVC);
 //    window->makeKeyAndVisible();
 
     // Test VC
-    MyViewController* rootVC = new MyViewController();
-    ListViewController* listVC = new ListViewController();
-    TouchTestViewController* touchVC = new TouchTestViewController();
-    TableViewTestController* tableView = new TableViewTestController();
-    ControlTestViewController* controlVC = new ControlTestViewController();
-    AnimationTestViewController* animVC = new AnimationTestViewController();
+    auto rootVC = std::make_shared<MyViewController>();
+    auto listVC = std::make_shared<ListViewController>();
+    auto touchVC = std::make_shared<TouchTestViewController>();
+    auto tableView = std::make_shared<TableViewTestController>();
+    auto controlVC = std::make_shared<ControlTestViewController>();
+    auto animVC = std::make_shared<AnimationTestViewController>();
 
     printf("Launching app...\n");
 
-    UIWindow* window = new UIWindow();
-    UITabBarController* tabsVC = new UITabBarController({controlVC, tableView, listVC, animVC, nullptr, rootVC, touchVC});
-    UINavigationController* vc = new UINavigationController(tabsVC);
+    auto window = std::make_shared<UIWindow>();
+    std::vector<std::shared_ptr<UIViewController>> controllers = {controlVC, tableView, listVC, animVC, nullptr, rootVC, touchVC};
+    auto tabsVC = std::make_shared<UITabBarController>(controllers);
+//    auto vc = std::make_shared<UINavigationController>(tabsVC);
     tabsVC->setTitle("Demo App");
-    tabsVC->setImage(new UIImage("Images/logo.png"_res));
-    window->setRootViewController(vc);
+    tabsVC->setImage(std::make_shared<UIImage>("Images/logo.png"_res));
+    window->setRootViewController(tabsVC);
     window->makeKeyAndVisible();
 
     // Focus test

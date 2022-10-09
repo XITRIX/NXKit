@@ -17,13 +17,13 @@ class UITouch;
 
 class UIEvent {
 public:
-    std::vector<UITouch*> allTouches;
+    std::vector<std::shared_ptr<UITouch>> allTouches;
     std::time_t timestamp = getCPUTimeUsec();
 
     UIEvent() {}
-    UIEvent(UITouch* touch);
+    UIEvent(std::shared_ptr<UITouch> touch);
 private:
-    static std::vector<UIEvent*> activeEvents;
+    static std::vector<std::shared_ptr<UIEvent>> activeEvents;
 };
 
 }

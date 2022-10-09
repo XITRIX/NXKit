@@ -18,14 +18,14 @@ public:
     UIActionsView();
     ~UIActionsView();
 
-    UIViewController* inController = nullptr;
+    std::shared_ptr<UIViewController> inController = nullptr;
 
-    void refreshActionsView(UIView* view);
+    void refreshActionsView(std::shared_ptr<UIView> view);
 private:
-    NotificationEvent<UIView*>::Subscription focusChangeToken;
-    std::vector<UIView*> actionViewsQueue;
+    NotificationEvent<std::shared_ptr<UIView>>::Subscription focusChangeToken;
+    std::vector<std::shared_ptr<UIView>> actionViewsQueue;
 
-    UIActionView* dequeueActionView();
+    std::shared_ptr<UIActionView> dequeueActionView();
 };
 
 }

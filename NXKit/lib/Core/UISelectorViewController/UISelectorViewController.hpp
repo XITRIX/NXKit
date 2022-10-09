@@ -23,26 +23,26 @@ public:
     void viewDidLayoutSubviews() override;
 
 protected:
-    void makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion = [](){}) override;
+    void makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion = [](){}) override;
     void makeViewDisappear(bool animated, std::function<void(bool)> completion) override;
 
 private:
     float headerHeight = 70;
     float footerHeight = 73;
     
-    UIScrollView* scrollView = nullptr;
-    UIView* contentView = nullptr;
-    UIView* containerView = nullptr;
+    std::shared_ptr<UIScrollView> scrollView = nullptr;
+    std::shared_ptr<UIView> contentView = nullptr;
+    std::shared_ptr<UIView> containerView = nullptr;
     
-    UIView* selectedView = nullptr;
+    std::shared_ptr<UIView> selectedView = nullptr;
 
     std::string title;
     std::function<void(int)> onComplete;
     std::vector<std::string> data;
     int selectedIndex;
 
-    UIView* makeContentView();
-    UIView* makeFooter();
+    std::shared_ptr<UIView> makeContentView();
+    std::shared_ptr<UIView> makeFooter();
 };
 
 }

@@ -22,15 +22,15 @@ void UITouch::updateAbsoluteLocation(Point newLocation) {
     absoluteLocation = newLocation;
 }
 
-Point UITouch::locationIn(UIView* view) {
+Point UITouch::locationIn(std::shared_ptr<UIView> view) {
     return window->convert(absoluteLocation, view);
 }
 
-Point UITouch::previousLocationIn(UIView* view) {
+Point UITouch::previousLocationIn(std::shared_ptr<UIView> view) {
     return window->convert(previousAbsoluteLocation, view);
 }
 
-void UITouch::runTouchActionOnRecognizerHierachy(std::function<void(UIGestureRecognizer*)> action) {
+void UITouch::runTouchActionOnRecognizerHierachy(std::function<void(std::shared_ptr<UIGestureRecognizer>)> action) {
     for (auto recognizer: gestureRecognizers) {
         if (hasBeenCancelledByAGestureRecognizer) return;
         if (!recognizer->isEnabled()) continue;

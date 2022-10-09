@@ -29,8 +29,8 @@ public:
     UIImageView();
     virtual ~UIImageView();
 
-    void setImage(UIImage* image, bool freeOld = true);
-    UIImage* getImage() { return image; }
+    void setImage(std::shared_ptr<UIImage> image, bool freeOld = true);
+    std::shared_ptr<UIImage> getImage() { return image; }
 
     void setScalingType(ImageScalingType scalingType);
     ImageScalingType getScalingType() { return scalingType; }
@@ -40,7 +40,7 @@ public:
 
 private:
     NVGpaint paint;
-    UIImage* image = nullptr;
+    std::shared_ptr<UIImage> image = nullptr;
     ImageScalingType scalingType = ImageScalingType::FIT;
     
     void invalidateImageBounds();

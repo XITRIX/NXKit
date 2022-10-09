@@ -10,11 +10,11 @@
 
 namespace NXKit {
 
-UIControl::GestureRecognizer::GestureRecognizer(UIControl* control):
+UIControl::GestureRecognizer::GestureRecognizer(std::shared_ptr<UIControl> control):
     control(control)
 { }
 
-void UIControl::GestureRecognizer::touchesBegan(std::vector<UITouch*> touches, UIEvent* event) {
+void UIControl::GestureRecognizer::touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     UIGestureRecognizer::touchesBegan(touches, event);
     if (!control->isEnabled()) {
         setState(UIGestureRecognizerState::FAILED);
@@ -27,11 +27,11 @@ void UIControl::GestureRecognizer::touchesBegan(std::vector<UITouch*> touches, U
     }
 }
 
-void UIControl::GestureRecognizer::touchesMoved(std::vector<UITouch*> touches, UIEvent* event) {
+void UIControl::GestureRecognizer::touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     UIGestureRecognizer::touchesMoved(touches, event);
     if (trackingTouch == touches[0]) {
-        Point location = trackingTouch->locationIn(this->view);
-        bool touchInside = view->getBounds().insetBy(UIEdgeInsets(extraTouchArea)).contains(location);
+        Point location = trackingTouch->locationIn(this->view.lock());
+        bool touchInside = view.lock()->getBounds().insetBy(UIEdgeInsets(extraTouchArea)).contains(location);
 
         if (control->isHighlighted() && !touchInside) {
             control->onEvent(UIControlTouchEvent::touchDragOutside);
@@ -43,12 +43,12 @@ void UIControl::GestureRecognizer::touchesMoved(std::vector<UITouch*> touches, U
     }
 }
 
-void UIControl::GestureRecognizer::touchesEnded(std::vector<UITouch*> touches, UIEvent* event) {
+void UIControl::GestureRecognizer::touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     UIGestureRecognizer::touchesEnded(touches, event);
     if (trackingTouch == touches[0]) {
         control->setHighlighted(false);
-        Point location = trackingTouch->locationIn(this->view);
-        bool touchInside = view->getBounds().insetBy(UIEdgeInsets(extraTouchArea)).contains(location);
+        Point location = trackingTouch->locationIn(this->view.lock());
+        bool touchInside = view.lock()->getBounds().insetBy(UIEdgeInsets(extraTouchArea)).contains(location);
         if (touchInside) {
 //            if (control->canBecomeFocused())
 //                Application::shared()->setFocus(control);
@@ -63,7 +63,7 @@ void UIControl::GestureRecognizer::touchesEnded(std::vector<UITouch*> touches, U
     }
 }
 
-void UIControl::GestureRecognizer::touchesCancelled(std::vector<UITouch*> touches, UIEvent* event) {
+void UIControl::GestureRecognizer::touchesCancelled(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     UIGestureRecognizer::touchesCancelled(touches, event);
     control->setHighlighted(false);
     trackingTouch = nullptr;

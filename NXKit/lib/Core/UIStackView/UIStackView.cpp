@@ -19,7 +19,7 @@ UIStackView::UIStackView(Rect frame): UIView(frame) {
     //    YGNodeStyleSetJustifyContent(this->ygNode, YGJustify::YGJustifyCenter);
 }
 
-void UIStackView::addSubview(UIView* view) {
+void UIStackView::addSubview(std::shared_ptr<UIView> view) {
     YGNodeInsertChild(this->ygNode, view->getYGNode(), (int) getSubviews().size());
     UIView::addSubview(view);
 }
@@ -37,7 +37,7 @@ void UIStackView::setAxis(Axis axis) {
     setNeedsLayout();
 }
 
-UIView* UIStackView::getNextFocus(NavigationDirection direction) {
+std::shared_ptr<UIView> UIStackView::getNextFocus(NavigationDirection direction) {
     if (currentFocus >= getSubviews().size()) currentFocus = (int) getSubviews().size() - 1;
 
     if ((direction == NavigationDirection::UP || direction == NavigationDirection::DOWN) && axis == Axis::HORIZONTAL)
@@ -48,7 +48,7 @@ UIView* UIStackView::getNextFocus(NavigationDirection direction) {
 
     if (direction == NavigationDirection::UP || direction == NavigationDirection::LEFT) {
         float newFocus = currentFocus;
-        UIView* newFocusView = nullptr;
+        std::shared_ptr<UIView> newFocusView;
 
         do {
             newFocus--;
@@ -64,7 +64,7 @@ UIView* UIStackView::getNextFocus(NavigationDirection direction) {
 
     if (direction == NavigationDirection::DOWN || direction == NavigationDirection::RIGHT) {
         float newFocus = currentFocus;
-        UIView* newFocusView = nullptr;
+        std::shared_ptr<UIView> newFocusView = nullptr;
 
         do {
             newFocus++;
@@ -81,8 +81,8 @@ UIView* UIStackView::getNextFocus(NavigationDirection direction) {
     return UIView::getNextFocus(direction);
 }
 
-UIView* UIStackView::getDefaultFocus() {
-    if (canBecomeFocused()) return this;
+std::shared_ptr<UIView> UIStackView::getDefaultFocus() {
+    if (canBecomeFocused()) return shared_from_base<UIStackView>();
 
     auto subviews = getSubviews();
 
@@ -95,14 +95,14 @@ UIView* UIStackView::getDefaultFocus() {
     return UIView::getDefaultFocus();
 }
 
-UIView* UIStackView::hitTest(Point point, UIEvent *withEvent) {
+std::shared_ptr<UIView> UIStackView::hitTest(Point point, UIEvent *withEvent) {
     auto super = UIView::hitTest(point, withEvent);
-    if (super == this && passthroughTouches)
+    if (super.get() == this && passthroughTouches)
         return nullptr;
     return super;
 }
 
-void UIStackView::subviewFocusDidChange(UIView *focusedView, UIView *notifiedView) {
+void UIStackView::subviewFocusDidChange(std::shared_ptr<UIView> focusedView, std::shared_ptr<UIView> notifiedView) {
     auto subviews = getSubviews();
     auto find = std::find(subviews.begin(), subviews.end(), notifiedView);
     if (find != subviews.end())

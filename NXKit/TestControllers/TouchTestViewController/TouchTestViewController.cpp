@@ -7,7 +7,7 @@
 
 #include "TouchTestViewController.hpp"
 
-UIView* target;
+std::shared_ptr<UIView> target;
 
 TouchTestViewController::TouchTestViewController() {
     setTitle("Touch test");
@@ -22,21 +22,21 @@ void TouchTestViewController::viewWillLayoutSubviews() {
 }
 
 void TouchTestViewController::loadView() {
-    auto view = new UIStackView(Axis::HORIZONTAL);
+    auto view = std::make_shared<UIStackView>(Axis::HORIZONTAL);
 
-    auto red = new UIView();
+    auto red = std::make_shared<UIView>();
     red->backgroundColor = UIColor::red;
     red->setGrow(1);
     red->tag = "RED";
 
-    auto green = new UIStackView();
+    auto green = std::make_shared<UIStackView>();
     green->backgroundColor = UIColor::green;
     green->setGrow(1);
     green->tag = "GREEN";
     green->setJustifyContent(JustifyContent::CENTER);
     green->setAlignItems(AlignItems::CENTER);
 
-    target = new TargetView();
+    target = std::make_shared<TargetView>();
     target->highlightOnFocus = false;
     target->tag = "TARGET";
     target->backgroundColor = UIColor::blue;

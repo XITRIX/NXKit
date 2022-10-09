@@ -15,19 +15,19 @@ UIWindow::UIWindow() {
 }
 
 UIWindow::~UIWindow() {
-    delete rootViewController;
+//    delete rootViewController;
 }
 
-UIViewController* UIWindow::getRootViewController() {
+std::shared_ptr<UIViewController> UIWindow::getRootViewController() {
     return rootViewController;
 }
 
-void UIWindow::setRootViewController(UIViewController *viewController) {
+void UIWindow::setRootViewController(std::shared_ptr<UIViewController> viewController) {
     rootViewController = viewController;
 }
 
 void UIWindow::makeKeyAndVisible() {
-    Application::shared()->setKeyWindow(this);
+    Application::shared()->setKeyWindow(shared_from_base<UIWindow>());
 
     if (rootViewController) {
         rootViewController->loadViewIfNeeded();
@@ -38,13 +38,13 @@ void UIWindow::makeKeyAndVisible() {
     }
 }
 
-void UIWindow::sendEvent(UIEvent* event) {
+void UIWindow::sendEvent(std::shared_ptr<UIEvent> event) {
     auto allTouches = event->allTouches;
 
     for (auto touch: allTouches) {
         switch (touch->phase) {
             case UITouchPhase::BEGIN:
-                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->_touchesBegan({ touch }, event); });
+                touch->runTouchActionOnRecognizerHierachy([touch, event](std::shared_ptr<UIGestureRecognizer> recognizer) { recognizer->_touchesBegan({ touch }, event); });
 
                 if (!touch->hasBeenCancelledByAGestureRecognizer) {
                     touch->view->touchesBegan({ touch }, event);
@@ -53,7 +53,7 @@ void UIWindow::sendEvent(UIEvent* event) {
             case UITouchPhase::MOVED:
                 if (touch->previousAbsoluteLocation == touch->absoluteLocation) break;
                 
-                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->_touchesMoved({ touch }, event); });
+                touch->runTouchActionOnRecognizerHierachy([touch, event](std::shared_ptr<UIGestureRecognizer> recognizer) { recognizer->_touchesMoved({ touch }, event); });
 
                 if (!touch->hasBeenCancelledByAGestureRecognizer) {
                     touch->view->touchesMoved({ touch }, event);
@@ -61,7 +61,7 @@ void UIWindow::sendEvent(UIEvent* event) {
                 break;
             case UITouchPhase::ENDED:
                 bool hasBeenCancelledByAGestureRecognizer = touch->hasBeenCancelledByAGestureRecognizer;
-                touch->runTouchActionOnRecognizerHierachy([touch, event](UIGestureRecognizer* recognizer) { recognizer->_touchesEnded({ touch }, event); });
+                touch->runTouchActionOnRecognizerHierachy([touch, event](std::shared_ptr<UIGestureRecognizer> recognizer) { recognizer->_touchesEnded({ touch }, event); });
 
                 if (!hasBeenCancelledByAGestureRecognizer) {
                     touch->view->touchesEnded({ touch }, event);
@@ -71,11 +71,11 @@ void UIWindow::sendEvent(UIEvent* event) {
     }
 }
 
-void UIWindow::addPresentedViewController(UIViewController* controller) {
+void UIWindow::addPresentedViewController(std::shared_ptr<UIViewController> controller) {
     presentedViewControllers.push_back(controller);
 }
 
-void UIWindow::removePresentedViewController(UIViewController* controller) {
+void UIWindow::removePresentedViewController(std::shared_ptr<UIViewController> controller) {
     presentedViewControllers.erase(std::remove(presentedViewControllers.begin(), presentedViewControllers.end(), controller), presentedViewControllers.end());
 }
 
@@ -87,7 +87,7 @@ void UIWindow::layoutSubviews() {
     }
 }
 
-UIView* UIWindow::getDefaultFocus() {
+std::shared_ptr<UIView> UIWindow::getDefaultFocus() {
     if (presentedViewControllers.size() > 0) {
         return presentedViewControllers.back()->getView()->getDefaultFocus();
     }

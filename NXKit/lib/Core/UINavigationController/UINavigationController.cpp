@@ -26,8 +26,8 @@ UINavigationBar::UINavigationBar() {
     setJustifyContent(JustifyContent::FLEX_START);
     setAlignItems(AlignItems::CENTER);
 
-    titleLabel = new UILabel("Demo app");
-    imageView = new UIImageView();
+    titleLabel = std::make_shared<UILabel>("Demo app");
+    imageView = std::make_shared<UIImageView>();
     imageView->setSize(Size(48, 48));
     imageView->setMarginRight(18);
 
@@ -49,7 +49,7 @@ void UINavigationBar::pushNavigationItem(UINavigationItem navigationItem) {
     if (navigationItem.image) { imageView->setImage(navigationItem.image, false); }
 }
 
-UINavigationController::UINavigationController(UIViewController* rootController) {
+UINavigationController::UINavigationController(std::shared_ptr<UIViewController> rootController) {
     pushViewController(rootController, false);
 
     addAction(BUTTON_B, UIAction([this]() {
@@ -62,25 +62,25 @@ UINavigationController::UINavigationController(UIViewController* rootController)
 
 UINavigationController::~UINavigationController() {
     for (auto vc: viewControllers) {
-        if (vc->getParent() != this)
-            delete vc;
+//        if (vc->getParent().get() != this)
+//            delete vc;
     }
 }
 
 void UINavigationController::loadView() {
-    UIView* root = new UIView();
+    auto root = std::make_shared<UIView>();
     setView(root);
 
     root->backgroundColor = UIColor::systemBackground;
 
-    overlay = new UIStackView(Axis::VERTICAL);
+    overlay = std::make_shared<UIStackView>(Axis::VERTICAL);
     overlay->passthroughTouches = true;
     overlay->setJustifyContent(JustifyContent::SPACE_BETWEEN);
 
     setAdditionalSafeAreaInsets(UIEdgeInsets(headerHeight, 0, footerHeight, 0));
 
-    UIBlurView* blurHeader = new UIBlurView();
-    navigationBar = new UINavigationBar();
+    auto blurHeader = std::make_shared<UIBlurView>();
+    navigationBar = std::make_shared<UINavigationBar>();
     navigationBar->setSize(Size(UIView::AUTO, headerHeight));
     blurHeader->addSubview(navigationBar);
 
@@ -90,9 +90,9 @@ void UINavigationController::loadView() {
     root->addSubview(overlay);
 }
 
-UIView* UINavigationController::buildFooter() {
-    UIBlurView* blurFooter = new UIBlurView();
-    UIStackView *footer = new UIStackView();
+std::shared_ptr<UIView> UINavigationController::buildFooter() {
+    auto blurFooter = std::make_shared<UIBlurView>();
+    auto footer = std::make_shared<UIStackView>();
     footer->setAxis(Axis::HORIZONTAL);
     footer->setAlignItems(AlignItems::STRETCH);
     footer->setJustifyContent(JustifyContent::FLEX_END);
@@ -103,8 +103,8 @@ UIView* UINavigationController::buildFooter() {
     footer->setMarginRight(30);
     footer->setPadding(4, 8, 4, 8);
 
-    auto actions = new UIActionsView();
-    actions->inController = this;
+    auto actions = std::make_shared<UIActionsView>();
+    actions->inController = shared_from_this();
     footer->addSubview(actions);
 
     blurFooter->addSubview(footer);
@@ -131,11 +131,11 @@ void UINavigationController::viewDidLayoutSubviews() {
     }
 }
 
-void UINavigationController::show(UIViewController* controller, void* sender) {
+void UINavigationController::show(std::shared_ptr<UIViewController> controller, void* sender) {
     pushViewController(controller, true);
 }
 
-void UINavigationController::pushViewController(UIViewController* otherViewController, bool animated) {
+void UINavigationController::pushViewController(std::shared_ptr<UIViewController> otherViewController, bool animated) {
     if (viewControllers.size() == 0) animated = false;
 
     getView();
@@ -152,7 +152,7 @@ void UINavigationController::pushViewController(UIViewController* otherViewContr
 
         addChild(otherViewController);
         getView()->insertSubview(otherViewController->getView(), 0);
-        otherViewController->didMoveToParent(this);
+        otherViewController->didMoveToParent(shared_from_this());
         Application::shared()->setFocus(otherViewController->getView()->getDefaultFocus());
 
         otherViewController->getView()->setGrow(1);
@@ -191,7 +191,7 @@ void UINavigationController::pushViewController(UIViewController* otherViewContr
             oldView->removeFromParent();
 
             // Finish adding new View
-            otherViewController->didMoveToParent(this);
+            otherViewController->didMoveToParent(shared_from_this());
 
             otherViewController->getView()->setGrow(1);
             otherViewController->getView()->setShrink(1);
@@ -202,14 +202,14 @@ void UINavigationController::pushViewController(UIViewController* otherViewContr
     }
 }
 
-UIViewController* UINavigationController::popViewController(bool animated, bool free) {
+std::shared_ptr<UIViewController> UINavigationController::popViewController(bool animated, bool free) {
     if (viewControllers.size() <= 1) return nullptr;
 
-    UIViewController* oldTop = viewControllers.back();
+    auto oldTop = viewControllers.back();
     viewControllers.pop_back();
     oldTop->willMoveToParent(nullptr);
 
-    UIViewController* newTop = viewControllers.back();
+    auto newTop = viewControllers.back();
 
     navigationBar->pushNavigationItem(newTop->getNavigationItem());
 
@@ -219,10 +219,10 @@ UIViewController* UINavigationController::popViewController(bool animated, bool 
 
         addChild(viewControllers.back());
         getView()->insertSubview(viewControllers.back()->getView(), 0);
-        viewControllers.back()->didMoveToParent(this);
+        viewControllers.back()->didMoveToParent(shared_from_this());
         Application::shared()->setFocus(viewControllers.back()->getView()->getDefaultFocus());
 
-        if (free) delete oldTop;
+//        if (free) delete oldTop;
     } else {
         addChild(viewControllers.back());
         getView()->insertSubview(viewControllers.back()->getView(), 0);
@@ -241,17 +241,17 @@ UIViewController* UINavigationController::popViewController(bool animated, bool 
             oldTop->getView()->removeFromSuperview();
             oldTop->removeFromParent();
 
-            viewControllers.back()->didMoveToParent(this);
+            viewControllers.back()->didMoveToParent(shared_from_this());
             Application::shared()->setFocus(viewControllers.back()->getView()->getDefaultFocus());
 
-            if (free) delete oldTop;
+//            if (free) delete oldTop;
         });
     }
 
     return oldTop;
 }
 
-void UINavigationController::childNavigationItemDidChange(UIViewController* controller) {
+void UINavigationController::childNavigationItemDidChange(std::shared_ptr<UIViewController> controller) {
     navigationBar->pushNavigationItem(viewControllers.back()->getNavigationItem());
 }
 

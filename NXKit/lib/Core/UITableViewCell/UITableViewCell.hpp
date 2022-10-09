@@ -23,7 +23,7 @@ public:
     std::string getReuseIdentifier() { return reuseIdentifier; }
 private:
     friend class UITableView;
-    UITableView* tableView = nullptr;
+    std::shared_ptr<UITableView> tableView;
     std::string reuseIdentifier;
     IndexPath indexPath;
 };

@@ -9,7 +9,7 @@
 
 namespace NXKit {
 
-UIEvent::UIEvent(UITouch* touch) {
+UIEvent::UIEvent(std::shared_ptr<UITouch> touch) {
     allTouches.push_back(touch);
 }
 

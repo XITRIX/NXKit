@@ -40,12 +40,12 @@ UIAlertController::UIAlertController(std::string title, std::string message):
 { }
 
 void UIAlertController::loadView() {
-    auto root = new UIStackView();
+    auto root = std::make_shared<UIStackView>();
     root->backgroundColor = UIColor::black.withAlphaComponent(0.6f);
     root->setAlignItems(AlignItems::CENTER);
     root->setJustifyContent(JustifyContent::CENTER);
 
-    alert = new UIStackView(Axis::VERTICAL);
+    alert = std::make_shared<UIStackView>(Axis::VERTICAL);
     alert->cornerRadius = 4;
     alert->backgroundColor = UIColor::systemBackground;
     alert->setPercentWidth(60);
@@ -53,11 +53,11 @@ void UIAlertController::loadView() {
     alert->setJustifyContent(JustifyContent::CENTER);
     root->addSubview(alert);
 
-    auto textsView = new UIStackView(Axis::VERTICAL);
+    auto textsView = std::make_shared<UIStackView>(Axis::VERTICAL);
     textsView->setMargins(45, 115, 45, 115);
 
     if (title != "") {
-        titleLabel = new UILabel(title);
+        titleLabel = std::make_shared<UILabel>(title);
         titleLabel->horizontalAlign = HorizontalAlign::CENTER;
         titleLabel->getFont()->fontSize = 24;
         titleLabel->setMargins(0, 0, 20, 0);
@@ -65,7 +65,7 @@ void UIAlertController::loadView() {
     }
 
     if (message != "") {
-        messageLabel = new UILabel(message);
+        messageLabel = std::make_shared<UILabel>(message);
         messageLabel->horizontalAlign = HorizontalAlign::CENTER;
         messageLabel->getFont()->fontSize = 18;
         messageLabel->setMargins(0, 0, 0, 0);
@@ -73,13 +73,13 @@ void UIAlertController::loadView() {
         textsView->addSubview(messageLabel);
     }
 
-    buttonsView = new UIStackView(Axis::HORIZONTAL);
+    buttonsView = std::make_shared<UIStackView>(Axis::HORIZONTAL);
     buttonsView->borderColor = UIColor::separator;
     buttonsView->setBorderTop(2);
     buttonsView->setHidden(true);
 //    buttonsView->setBorderBottom(2);
 
-    buttons[0] = new UIAlertButton();
+    buttons[0] = std::make_shared<UIAlertButton>();
     buttons[0]->setHidden(true);
     buttons[0]->setGrow(1);
     buttons[0]->setWidth(0);
@@ -87,7 +87,7 @@ void UIAlertController::loadView() {
         dismiss(true, actions[0].handler);
     }, "OK"));
 
-    buttons[1] = new UIAlertButton();
+    buttons[1] = std::make_shared<UIAlertButton>();
     buttons[1]->setHidden(true);
     buttons[1]->setGrow(1);
     buttons[1]->setWidth(0);
@@ -97,7 +97,7 @@ void UIAlertController::loadView() {
         dismiss(true, actions[1].handler);
     }, "OK"));
 
-    buttons[2] = new UIAlertButton();
+    buttons[2] = std::make_shared<UIAlertButton>();
     buttons[2]->setHidden(true);
     buttons[2]->borderColor = UIColor::separator;
     buttons[2]->addAction(BUTTON_A, UIAction([this]() {
@@ -123,18 +123,18 @@ void UIAlertController::viewDidLoad() {
         buttonsView->setHidden(false);
         buttons[0]->setHidden(false);
         buttons[0]->setTitle(actions[0].title);
-        ((UIAlertButton*) buttons[0])->setStyle(actions[0].style);
+        std::dynamic_pointer_cast<UIAlertButton>(buttons[0])->setStyle(actions[0].style);
     }
     if (actions.size() > 1) {
         buttons[1]->setHidden(false);
         buttons[1]->setTitle(actions[1].title);
-        ((UIAlertButton*) buttons[1])->setStyle(actions[1].style);
+        std::dynamic_pointer_cast<UIAlertButton>(buttons[1])->setStyle(actions[1].style);
     }
     if (actions.size() > 1) {
         buttonsView->setBorderBottom(2);
         buttons[2]->setHidden(false);
         buttons[2]->setTitle(actions[2].title);
-        ((UIAlertButton*) buttons[2])->setStyle(actions[2].style);
+        std::dynamic_pointer_cast<UIAlertButton>(buttons[2])->setStyle(actions[2].style);
     }
 }
 
@@ -142,7 +142,7 @@ void UIAlertController::addAction(UIAlertAction action) {
     actions.push_back(action);
 }
 
-void UIAlertController::makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion) {
+void UIAlertController::makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion) {
     getView()->alpha = 0;
     alert->transformSize = { 0.95f, 0.95f };
 

@@ -286,6 +286,7 @@
 		7C474958288553FD00C5A988 /* GLFWInputManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GLFWInputManager.hpp; sourceTree = "<group>"; };
 		7C47495F2886063B00C5A988 /* NXAffineTransform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NXAffineTransform.cpp; sourceTree = "<group>"; };
 		7C4749602886063B00C5A988 /* NXAffineTransform.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NXAffineTransform.hpp; sourceTree = "<group>"; };
+		7C48E66428F227C4001A518A /* SharedBase.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SharedBase.hpp; sourceTree = "<group>"; };
 		7C49617728A8215000E30B4B /* TouchTestViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TouchTestViewController.cpp; sourceTree = "<group>"; };
 		7C49617828A8215000E30B4B /* TouchTestViewController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TouchTestViewController.hpp; sourceTree = "<group>"; };
 		7C53FE4828788AA20091DEF9 /* UITouch.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITouch.cpp; sourceTree = "<group>"; };
@@ -746,6 +747,14 @@
 			path = NXAffineTransform;
 			sourceTree = "<group>";
 		};
+		7C48E66328F227BE001A518A /* SharedBase */ = {
+			isa = PBXGroup;
+			children = (
+				7C48E66428F227C4001A518A /* SharedBase.hpp */,
+			);
+			path = SharedBase;
+			sourceTree = "<group>";
+		};
 		7C49617628A8213700E30B4B /* TouchTestViewController */ = {
 			isa = PBXGroup;
 			children = (
@@ -996,6 +1005,7 @@
 		7C78EBDA2873748B0082D3AC /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				7C48E66328F227BE001A518A /* SharedBase */,
 				7CEC275828BEA8CC005E6A9D /* Tools */,
 				7C8D982328BC172000BDD667 /* Literals */,
 				7C23960F287E139B00973CC0 /* Animation */,

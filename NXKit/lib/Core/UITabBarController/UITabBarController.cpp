@@ -19,25 +19,25 @@ UITabBarSeparatorView::UITabBarSeparatorView() {
     setAlignItems(AlignItems::STRETCH);
     setJustifyContent(JustifyContent::CENTER);
 
-    auto line = new UIView();
+    auto line = std::make_shared<UIView>();
     line->setHeight(1);
     line->backgroundColor = UIColor::separator;
 
     addSubview(line);
 }
 
-UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController* controller):
+UITabBarItemView::UITabBarItemView(std::shared_ptr<UITabBarController> parent, std::shared_ptr<UIViewController> controller):
     parent(parent), controller(controller)
 {
     setAxis(Axis::HORIZONTAL);
     setHeight(70);
 
-    selectionBar = new UIView();
+    selectionBar = std::make_shared<UIView>();
     selectionBar->backgroundColor = selectionBar->getTintColor();
     selectionBar->setWidth(4);
     selectionBar->setMargins(9, 8, 9, 8);
 
-    label = new UILabel("Test Item");
+    label = std::make_shared<UILabel>("Test Item");
     label->setGrow(1);
     label->verticalAlign = VerticalAlign::CENTER;
     label->getFont()->fontSize = 22;
@@ -50,7 +50,7 @@ UITabBarItemView::UITabBarItemView(UITabBarController* parent, UIViewController*
 
     onEvent = [this](UIControlTouchEvent event) {
         if (event == UIControlTouchEvent::touchUpInside) {
-            Application::shared()->setFocus(this);
+            Application::shared()->setFocus(shared_from_base<UITabBarItemView>());
         }
     };
 //    auto tap = new UITapGestureRecognizer();
@@ -79,7 +79,7 @@ void UITabBarItemView::setTitle(std::string text) {
 }
 
 void UITabBarItemView::becomeFocused() {
-    parent->setSelected(this);
+    parent->setSelected(shared_from_base<UITabBarItemView>());
 }
 
 void UITabBarItemView::setSelected(bool selected) {
@@ -102,7 +102,7 @@ UITabBarController::UITabBarController() {
     }));
 }
 
-UITabBarController::UITabBarController(std::vector<UIViewController*> controllers):
+UITabBarController::UITabBarController(std::vector<std::shared_ptr<UIViewController>> controllers):
     UITabBarController()
 {
     viewControllers = controllers;
@@ -110,23 +110,23 @@ UITabBarController::UITabBarController(std::vector<UIViewController*> controller
 
 UITabBarController::~UITabBarController() {
     for (auto vc: viewControllers) {
-        if (vc && vc->getParent() != this)
-            delete vc;
+//        if (vc && vc->getParent().get() != this)
+//            delete vc;
     }
 }
 
 void UITabBarController::loadView() {
-    UIStackView* view = new UIStackView(Axis::HORIZONTAL);
+    auto view = std::make_shared<UIStackView>(Axis::HORIZONTAL);
     view->tag = "TabBar stack 2";
 
-    tabs = new UIStackView(Axis::VERTICAL);
+    tabs = std::make_shared<UIStackView>(Axis::VERTICAL);
     tabs->tag = "TabBarItems stack";
     tabs->setPadding(32, 40, 47, 80);
 
-    contentView = new UIView();
+    contentView = std::make_shared<UIView>();
     contentView->setGrow(1);
 
-    UIScrollView* scrollView = new UIScrollView();
+    auto scrollView = std::make_shared<UIScrollView>();
     scrollView->tag = "TabBar scroll";
     scrollView->setFixWidth(true);
     scrollView->setPercentWidth(32);
@@ -144,7 +144,7 @@ void UITabBarController::viewDidLoad() {
     tabs->clipToBounds = true;
 }
 
-void UITabBarController::setSelected(UITabBarItemView* item) {
+void UITabBarController::setSelected(std::shared_ptr<UITabBarItemView> item) {
     size_t newIndex = std::find(tabViews.begin(), tabViews.end(), item) - tabViews.begin();
     if (selectedIndex == newIndex) return;
 
@@ -161,7 +161,7 @@ void UITabBarController::setSelected(UITabBarItemView* item) {
 
     addChild(item->controller);
     contentView->addSubview(item->controller->getView());
-    item->controller->didMoveToParent(this);
+    item->controller->didMoveToParent(shared_from_this());
 
     content = item->controller;
 }
@@ -171,21 +171,21 @@ void UITabBarController::viewDidLayoutSubviews() {
     content->getView()->setSize(contentView->getFrame().size);
 }
 
-void UITabBarController::setViewControllers(std::vector<UIViewController*> controllers) {
+void UITabBarController::setViewControllers(std::vector<std::shared_ptr<UIViewController>> controllers) {
     viewControllers = controllers;
     if (isViewLoaded()) reloadViewForViewControllers();
 }
 
 void UITabBarController::reloadViewForViewControllers() {
-    for (auto tab: tabViews) delete tab;
+//    for (auto tab: tabViews) delete tab;
     tabViews.clear();
-    for (UIView* tab: tabs->getSubviews()) { tab->removeFromSuperview(); }
+    for (auto tab: tabs->getSubviews()) { tab->removeFromSuperview(); }
     selectedIndex = -1;
 
     for (int i = 0; i < viewControllers.size(); i++) {
         auto controller = viewControllers[i];
         if (controller) {
-            UITabBarItemView* item = new UITabBarItemView(this, viewControllers[i]);
+            auto item = std::make_shared<UITabBarItemView>(shared_from_base<UITabBarController>(), viewControllers[i]);
             item->setTitle(controller->getTitle());
             item->tag = "Num" + std::to_string(i);
             item->setSelected(i == selectedIndex);
@@ -197,14 +197,14 @@ void UITabBarController::reloadViewForViewControllers() {
             tabViews.push_back(item);
             tabs->addSubview(item);
         } else {
-            tabs->addSubview(new UITabBarSeparatorView());
+            tabs->addSubview(std::make_shared<UITabBarSeparatorView>());
         }
     }
 
     setSelected(tabViews.front());
 }
 
-void UITabBarController::childNavigationItemDidChange(UIViewController* controller) {
+void UITabBarController::childNavigationItemDidChange(std::shared_ptr<UIViewController> controller) {
     for (auto tab: tabViews) {
         if (tab->controller == controller) {
             tab->label->setText(controller->getTitle());

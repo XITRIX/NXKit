@@ -19,14 +19,14 @@ public:
 
     void setText(std::string text);
     void setDetailText(std::string text);
-    void setImage(UIImage* image);
+    void setImage(std::shared_ptr<UIImage> image);
 
     void tintColorDidChange() override;
 
 //private:
-    UILabel* label = nullptr;
-    UILabel* detailLabel = nullptr;
-    UIImageView* imageView = nullptr;
+    std::shared_ptr<UILabel> label = nullptr;
+    std::shared_ptr<UILabel> detailLabel = nullptr;
+    std::shared_ptr<UIImageView> imageView = nullptr;
 };
 
 }

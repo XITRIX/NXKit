@@ -43,14 +43,14 @@ protected:
 
     std::vector<UIAlertAction> actions;
 
-    UILabel* titleLabel = nullptr;
-    UILabel* messageLabel = nullptr;
-    UIButton* buttons[3];
+    std::shared_ptr<UILabel> titleLabel = nullptr;
+    std::shared_ptr<UILabel> messageLabel = nullptr;
+    std::shared_ptr<UIButton> buttons[3];
 
-    UIStackView* alert = nullptr;
-    UIStackView* buttonsView = nullptr;
+    std::shared_ptr<UIStackView> alert = nullptr;
+    std::shared_ptr<UIStackView> buttonsView = nullptr;
 
-    void makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion = [](){}) override;
+    void makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion = [](){}) override;
     void makeViewDisappear(bool animated, std::function<void(bool)> completion) override;
 };
 

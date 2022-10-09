@@ -21,11 +21,11 @@ namespace NXKit {
 
 class UIResponder {
 public:
-    virtual UIResponder* getNext() { return nullptr; }
+    virtual std::shared_ptr<UIResponder> getNext() { return nullptr; }
 
-    virtual void touchesBegan(std::vector<UITouch*> touches, UIEvent* withEvent);
-    virtual void touchesMoved(std::vector<UITouch*> touches, UIEvent* withEvent);
-    virtual void touchesEnded(std::vector<UITouch*> touches, UIEvent* withEvent);
+    virtual void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> withEvent);
+    virtual void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> withEvent);
+    virtual void touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> withEvent);
     virtual void touchesCancelled(std::vector<UITouch*> touches, UIEvent* withEvent);
 
     virtual bool press(ControllerButton button);

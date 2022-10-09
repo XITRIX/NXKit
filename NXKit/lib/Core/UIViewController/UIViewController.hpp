@@ -15,16 +15,16 @@ namespace NXKit {
 
 struct UINavigationItem {
     std::string title;
-    UIImage* image = nullptr;
+    std::shared_ptr<UIImage> image = nullptr;
 };
 
-class UIViewController: public UIResponder, public UITraitEnvironment {
+class UIViewController: public UIResponder, public UITraitEnvironment, public enable_shared_from_base<UIViewController> {
 public:
     UIViewController();
     virtual ~UIViewController();
 
-    UIView* getView();
-    void setView(UIView* view);
+    std::shared_ptr<UIView> getView();
+    void setView(std::shared_ptr<UIView> view);
 
     virtual void loadView();
     void loadViewIfNeeded();
@@ -39,25 +39,25 @@ public:
     virtual void viewWillLayoutSubviews() {}
     virtual void viewDidLayoutSubviews() {}
 
-    std::vector<UIViewController*> getChildren() { return children; }
-    UIViewController* getParent() { return parent; }
+    std::vector<std::shared_ptr<UIViewController>> getChildren() { return children; }
+    std::shared_ptr<UIViewController> getParent() { return parent.lock(); }
 
-    void addChild(UIViewController* child);
-    void willMoveToParent(UIViewController* parent);
-    void didMoveToParent(UIViewController* parent);
+    void addChild(std::shared_ptr<UIViewController> child);
+    void willMoveToParent(std::shared_ptr<UIViewController> parent);
+    void didMoveToParent(std::shared_ptr<UIViewController> parent);
     void removeFromParent();
 
     UIEdgeInsets getAdditionalSafeAreaInsets() { return additionalSafeAreaInsets; }
     void setAdditionalSafeAreaInsets(UIEdgeInsets insets);
 
-    UIViewController* getPresentedViewController();
-    UIViewController* getPresentingViewController();
-    void present(UIViewController* controller, bool animated, std::function<void()> completion = [](){});
+    std::shared_ptr<UIViewController> getPresentedViewController();
+    std::shared_ptr<UIViewController> getPresentingViewController();
+    void present(std::shared_ptr<UIViewController> controller, bool animated, std::function<void()> completion = [](){});
     void dismiss(bool animated, std::function<void()> completion = [](){});
 
-    virtual void show(UIViewController* controller, void* sender = nullptr);
+    virtual void show(std::shared_ptr<UIViewController> controller, void* sender = nullptr);
 
-    UIResponder* getNext() override;
+    std::shared_ptr<UIResponder> getNext() override;
 
     UITraitCollection getTraitCollection() override;
     UIUserInterfaceStyle overrideUserInterfaceStyle = UIUserInterfaceStyle::unspecified;
@@ -65,33 +65,33 @@ public:
     std::string getTitle() { return navigationItem.title; }
     void setTitle(std::string title);
 
-    UIImage* getImage() { return navigationItem.image; }
-    void setImage(UIImage* image);
+    std::shared_ptr<UIImage> getImage() { return navigationItem.image; }
+    void setImage(std::shared_ptr<UIImage> image);
 
     UINavigationItem getNavigationItem() { return navigationItem; }
-    virtual void childNavigationItemDidChange(UIViewController* controller) {}
+    virtual void childNavigationItemDidChange(std::shared_ptr<UIViewController> controller) {}
 
 protected:
-    virtual void makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion = [](){});
+    virtual void makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion = [](){});
     virtual void makeViewDisappear(bool animated, std::function<void(bool)> completion);
 
 private:
     std::string title;
     UIEdgeInsets additionalSafeAreaInsets;
-    std::vector<UIViewController*> children;
-    UIViewController* parent = nullptr;
-    UIView* view = nullptr;
+    std::vector<std::shared_ptr<UIViewController>> children;
+    std::weak_ptr<UIViewController> parent;
+    std::shared_ptr<UIView> view = nullptr;
     UINavigationItem navigationItem;
 
     void setNavigationItem(UINavigationItem item);
 
     bool dismissing = false;
 
-    UIViewController* presentedViewController = nullptr;
-    UIViewController* presentingViewController = nullptr;
+    std::shared_ptr<UIViewController> presentedViewController = nullptr;
+    std::shared_ptr<UIViewController> presentingViewController = nullptr;
 
-    void setPresentedViewController(UIViewController* presentedViewController);
-    void setPresentingViewController(UIViewController* presentingViewController);
+    void setPresentedViewController(std::shared_ptr<UIViewController> presentedViewController);
+    void setPresentingViewController(std::shared_ptr<UIViewController> presentingViewController);
 };
 
 }

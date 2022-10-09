@@ -17,15 +17,15 @@ namespace NXKit {
 class UITableView;
 class UITableViewDataSource {
 public:
-    virtual int numberOfSectionsIn(UITableView* tableView) { return 1; }
-    virtual int tableViewCellCanBeFocusedAt(UITableView* tableView, IndexPath indexPath) { return true; }
-    virtual int tableViewNumberOfRowsInSection(UITableView* tableView, int section) = 0;
-    virtual UITableViewCell* tableViewCellForRowAt(UITableView* tableView, IndexPath indexPath) = 0;
+    virtual int numberOfSectionsIn(std::shared_ptr<UITableView> tableView) { return 1; }
+    virtual int tableViewCellCanBeFocusedAt(std::shared_ptr<UITableView> tableView, IndexPath indexPath) { return true; }
+    virtual int tableViewNumberOfRowsInSection(std::shared_ptr<UITableView> tableView, int section) = 0;
+    virtual std::shared_ptr<UITableViewCell> tableViewCellForRowAt(std::shared_ptr<UITableView> tableView, IndexPath indexPath) = 0;
 };
 
 class UITableViewDelegate: public UIScrollViewDelegate {
 public:
-    virtual void tableViewDidSelectRowAtIndexPath(UITableView* tableView, IndexPath indexPath) {}
+    virtual void tableViewDidSelectRowAtIndexPath(std::shared_ptr<UITableView> tableView, IndexPath indexPath) {}
 };
 
 class UITableView: public UIScrollView {
@@ -33,23 +33,23 @@ public:
     float rowHeight = AUTO;
     float estimatedRowHeight = 70;
 
-    UITableViewDelegate* delegate = nullptr;
-    UITableViewDataSource* dataSource = nullptr;
+    std::shared_ptr<UITableViewDelegate> delegate;
+    std::shared_ptr<UITableViewDataSource> dataSource = nullptr;
 
     UITableView();
     virtual ~UITableView();
 
-    UIView* getDefaultFocus() override;
-    UIView* getNextFocus(NavigationDirection direction) override;
-    void subviewFocusDidChange(UIView* focusedView, UIView* notifiedView) override;
+    std::shared_ptr<UIView> getDefaultFocus() override;
+    std::shared_ptr<UIView> getNextFocus(NavigationDirection direction) override;
+    void subviewFocusDidChange(std::shared_ptr<UIView> focusedView, std::shared_ptr<UIView> notifiedView) override;
 
-    void addSubview(UIView *view) override;
+    void addSubview(std::shared_ptr<UIView> view) override;
     Size getContentSize() override;
     void layoutSubviews() override;
     void setContentOffset(Point offset, bool animated = true) override;
 
     void registerView(std::string reuseId, std::function<UITableViewCell*()> allocator);
-    UITableViewCell* dequeueReusableCell(std::string reuseId, IndexPath indexPath);
+    std::shared_ptr<UITableViewCell> dequeueReusableCell(std::string reuseId, IndexPath indexPath);
     void reloadData();
 
     void setPaddings(float top, float left, float bottom, float right);
@@ -58,15 +58,15 @@ public:
 private:
     UIEdgeInsets paddings;
     std::map<std::string, std::function<UITableViewCell*()>> allocationMap;
-    std::map<std::string, std::vector<UITableViewCell*>> cellsInQueue;
+    std::map<std::string, std::vector<std::shared_ptr<UITableViewCell>>> cellsInQueue;
     std::vector<std::vector<float>> cellsHeights;
-    std::vector<UITableViewCell*> dequeuedCells;
-    std::vector<std::vector<UITableViewCell*>> cellsInIndexPaths;
+    std::vector<std::shared_ptr<UITableViewCell>> dequeuedCells;
+    std::vector<std::vector<std::shared_ptr<UITableViewCell>>> cellsInIndexPaths;
     IndexPath selectedIndexPath = IndexPath(-1, -1);
 
     void recalculateEstimatedHeights();
     void dequeCellsForCurrentContentOffset();
-    void addCellSubview(UITableViewCell *view);
+    void addCellSubview(std::shared_ptr<UITableViewCell> view);
 };
 
 }

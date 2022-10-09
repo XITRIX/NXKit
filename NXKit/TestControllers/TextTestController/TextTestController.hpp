@@ -17,5 +17,5 @@ public:
     void viewDidLoad() override;
 
 private:
-    UILabel* label;
+    std::shared_ptr<UILabel> label;
 };

@@ -23,7 +23,7 @@ public:
 
 class UITabBarItemView: public UIControl {
 public:
-    UITabBarItemView(UITabBarController* parent, UIViewController* controller);
+    UITabBarItemView(std::shared_ptr<UITabBarController> parent, std::shared_ptr<UIViewController> controller);
     virtual ~UITabBarItemView();
 
     void setTitle(std::string text);
@@ -33,10 +33,10 @@ public:
     bool isEnabled() override;
 private:
     friend class UITabBarController;
-    UILabel* label = nullptr;
-    UIView* selectionBar = nullptr;
-    UITabBarController* parent = nullptr;
-    UIViewController* controller = nullptr;
+    std::shared_ptr<UILabel> label;
+    std::shared_ptr<UIView> selectionBar;
+    std::shared_ptr<UITabBarController> parent;
+    std::shared_ptr<UIViewController> controller;
 
 //    bool selected = false;
 };
@@ -44,31 +44,31 @@ private:
 class UITabBarController: public UIViewController {
 public:
     UITabBarController();
-    UITabBarController(std::vector<UIViewController*> controllers);
+    UITabBarController(std::vector<std::shared_ptr<UIViewController>> controllers);
     virtual ~UITabBarController();
 
     void loadView() override;
     void viewDidLoad() override;
     void viewDidLayoutSubviews() override;
-    void childNavigationItemDidChange(UIViewController* controller) override;
+    void childNavigationItemDidChange(std::shared_ptr<UIViewController> controller) override;
 
-    std::vector<UIViewController*> getViewControllers() { return viewControllers; }
-    void setViewControllers(std::vector<UIViewController*> controllers);
+    std::vector<std::shared_ptr<UIViewController>> getViewControllers() { return viewControllers; }
+    void setViewControllers(std::vector<std::shared_ptr<UIViewController>> controllers);
 
     int getSelectedIndex() { return selectedIndex; }
     void setSelectedIndex(int index);
 private:
     friend class UITabBarItemView;
 
-    std::vector<UIViewController*> viewControllers;
+    std::vector<std::shared_ptr<UIViewController>> viewControllers;
     int selectedIndex = -1;
 
-    UIStackView* tabs = nullptr;
-    UIView* contentView = nullptr;
-    UIViewController* content = nullptr;
-    std::vector<UITabBarItemView*> tabViews;
+    std::shared_ptr<UIStackView> tabs = nullptr;
+    std::shared_ptr<UIView> contentView = nullptr;
+    std::shared_ptr<UIViewController> content = nullptr;
+    std::vector<std::shared_ptr<UITabBarItemView>> tabViews;
 
-    void setSelected(UITabBarItemView* item);
+    void setSelected(std::shared_ptr<UITabBarItemView> item);
     void reloadViewForViewControllers();
 };
 

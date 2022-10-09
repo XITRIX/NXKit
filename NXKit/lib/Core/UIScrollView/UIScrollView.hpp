@@ -28,7 +28,7 @@ public:
 
 class UIScrollView: public UIView {
 public:
-    UIScrollViewDelegate* delegate = nullptr;
+    std::shared_ptr<UIScrollViewDelegate> delegate;
     UIScrollViewScrollingMode scrollingMode = UIScrollViewScrollingMode::centered;
 
     UIScrollView();
@@ -36,13 +36,13 @@ public:
     virtual void setContentOffset(Point offset, bool animated = true);
 
     void setBounds(Rect bounds) override;
-    void addSubview(UIView *view) override;
+    void addSubview(std::shared_ptr<UIView> view) override;
     std::deque<float> createAnimationContext() override;
     void applyAnimationContext(std::deque<float>* context) override;
 
-    void subviewFocusDidChange(UIView *focusedView, UIView *notifiedView) override;
+    void subviewFocusDidChange(std::shared_ptr<UIView> focusedView, std::shared_ptr<UIView> notifiedView) override;
     void layoutSubviews() override;
-    UIView* getNextFocus(NavigationDirection direction) override;
+    std::shared_ptr<UIView> getNextFocus(NavigationDirection direction) override;
 
     void setFixWidth(bool fix);
     void setFixHeight(bool fix);
@@ -50,15 +50,15 @@ public:
     virtual Size getContentSize();
 
 private:
-    UIPanGestureRecognizer* panGestureRecognizer = new UIPanGestureRecognizer();
+    std::shared_ptr<UIPanGestureRecognizer> panGestureRecognizer;
     UIEdgeInsets lastSafeAreaInset;
     bool fixWidth = false, fixHeight = false;
     bool dragging = false;
     bool decelerating = false;
 
-    UIView *contentView = nullptr;
+    std::shared_ptr<UIView> contentView = nullptr;
 
-    UIView* scrollingIndicatorV = nullptr;
+    std::shared_ptr<UIView> scrollingIndicatorV = nullptr;
 
     Rect getContentOffsetBounds();
     Rect getVisibleBounds();

@@ -44,13 +44,13 @@ public:
     UIStackView(Rect frame);
     UIStackView(): UIStackView(Axis::VERTICAL) {}
 
-    void addSubview(UIView* view) override;
-    UIView* getNextFocus(NavigationDirection direction) override;
-    UIView* getDefaultFocus() override;
+    void addSubview(std::shared_ptr<UIView> view) override;
+    std::shared_ptr<UIView> getNextFocus(NavigationDirection direction) override;
+    std::shared_ptr<UIView> getDefaultFocus() override;
 
-    UIView* hitTest(Point point, UIEvent *withEvent) override;
+    std::shared_ptr<UIView> hitTest(Point point, UIEvent *withEvent) override;
 
-    void subviewFocusDidChange(UIView *focusedView, UIView *notifiedView) override;
+    void subviewFocusDidChange(std::shared_ptr<UIView> focusedView, std::shared_ptr<UIView> notifiedView) override;
 
     void setAxis(Axis axis);
     Axis getAxis() { return axis; }

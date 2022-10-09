@@ -19,16 +19,16 @@ UITableViewDefaultCell::UITableViewDefaultCell() {
     setAxis(Axis::HORIZONTAL);
     setAlignItems(AlignItems::CENTER);
 
-    imageView = new UIImageView();
+    imageView = std::make_shared<UIImageView>();
     imageView->setSize({ 44, 44 });
     imageView->setMarginRight(20);
 
-    label = new UILabel("Test text");
+    label = std::make_shared<UILabel>("Test text");
     label->setGrow(1);
     label->verticalAlign = VerticalAlign::CENTER;
     label->getFont()->fontSize = 22;
 
-    detailLabel = new UILabel();
+    detailLabel = std::make_shared<UILabel>();
     detailLabel->verticalAlign = VerticalAlign::CENTER;
     detailLabel->horizontalAlign = HorizontalAlign::RIGHT;
     detailLabel->textColor = getTintColor();
@@ -53,7 +53,7 @@ void UITableViewDefaultCell::setDetailText(std::string text) {
     detailLabel->setText(text);
 }
 
-void UITableViewDefaultCell::setImage(UIImage* image) {
+void UITableViewDefaultCell::setImage(std::shared_ptr<UIImage> image) {
     imageView->setHidden(!image);
     imageView->setImage(image);
 }

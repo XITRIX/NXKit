@@ -20,7 +20,7 @@ UISelectorViewController::UISelectorViewController(std::string title, std::vecto
 { }
 
 void UISelectorViewController::loadView() {
-    UIStackView* view = new UIStackView();
+    auto view = std::make_shared<UIStackView>();
     view->setAxis(Axis::VERTICAL);
 
     view->setJustifyContent(JustifyContent::FLEX_END);
@@ -32,25 +32,25 @@ void UISelectorViewController::loadView() {
     view->addSubview(makeFooter());
 }
 
-UIView* UISelectorViewController::makeContentView() {
-    UINavigationBar* navigationBar = new UINavigationBar();
+std::shared_ptr<UIView> UISelectorViewController::makeContentView() {
+    auto navigationBar = std::make_shared<UINavigationBar>();
     navigationBar->setSize(Size(UIView::AUTO, headerHeight));
     navigationBar->titleLabel->getFont()->fontSize = 24;
     navigationBar->pushNavigationItem({ .title = title, .image = nullptr });
 
-    UIStackView* container = new UIStackView(Axis::VERTICAL);
+    auto container = std::make_shared<UIStackView>(Axis::VERTICAL);
     container->backgroundColor = UIColor::systemBackground;
     container->showShadow = true;
 
-    UIScrollView* scroll = new UIScrollView();
+    auto scroll = std::make_shared<UIScrollView>();
     scroll->setFixWidth(true);
 
-    UIStackView* view = new UIStackView(Axis::VERTICAL);
+    auto view = std::make_shared<UIStackView>(Axis::VERTICAL);
     view->setAlignItems(AlignItems::CENTER);
     view->setPadding(32, 80, 32, 40);
 
     for (int i = 0; i < data.size(); i++) {
-        UITableViewRadioCell* cell = new UITableViewRadioCell();
+        auto cell = std::make_shared<UITableViewRadioCell>();
         if (i == selectedIndex) selectedView = cell;
         cell->setHeight(60);
         cell->setPercentWidth(60);
@@ -85,11 +85,11 @@ UIView* UISelectorViewController::makeContentView() {
     return container;
 }
 
-UIView* UISelectorViewController::makeFooter() {
-    UIStackView *container = new UIStackView();
+std::shared_ptr<UIView> UISelectorViewController::makeFooter() {
+    auto container = std::make_shared<UIStackView>();
     container->backgroundColor = UIColor::systemBackground;
 
-    UIStackView *footer = new UIStackView();
+    auto footer = std::make_shared<UIStackView>();
     footer->setAxis(Axis::HORIZONTAL);
     footer->setAlignItems(AlignItems::STRETCH);
     footer->setJustifyContent(JustifyContent::FLEX_END);
@@ -100,8 +100,8 @@ UIView* UISelectorViewController::makeFooter() {
     footer->setMarginRight(30);
     footer->setPadding(4, 8, 4, 8);
 
-    auto actions = new UIActionsView();
-    actions->inController = this;
+    auto actions = std::make_shared<UIActionsView>();
+    actions->inController = shared_from_this();
     footer->addSubview(actions);
 
     container->addSubview(footer);
@@ -133,7 +133,7 @@ void UISelectorViewController::viewDidLayoutSubviews() {
     }
 }
 
-void UISelectorViewController::makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion) {
+void UISelectorViewController::makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion) {
     getView()->setNeedsLayout();
     containerView->transformOrigin = { 0, 20 };
     containerView->alpha = 0;

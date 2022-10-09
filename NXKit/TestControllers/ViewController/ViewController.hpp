@@ -19,11 +19,11 @@ public:
     void viewDidLoad() override;
     void viewDidLayoutSubviews() override;
     
-    void touchesBegan(std::vector<UITouch*> touches, UIEvent* withEvent) override;
-    void touchesMoved(std::vector<UITouch*> touches, UIEvent* withEvent) override;
-    void touchesEnded(std::vector<UITouch*> touches, UIEvent* withEvent) override;
+    void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> withEvent) override;
+    void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> withEvent) override;
+    void touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> withEvent) override;
     
 private:
-    UIScrollView* scroll = nullptr;
-    UILabel* text = nullptr;
+    std::shared_ptr<UIScrollView> scroll;
+    std::shared_ptr<UILabel> text;
 };

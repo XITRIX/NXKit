@@ -32,8 +32,8 @@ public:
 
     unsigned long touchId;
 
-    UIView* view = nullptr;
-    UIView* window = nullptr;
+    std::shared_ptr<UIView> view;
+    std::shared_ptr<UIView> window;
 
     UITouchPhase phase = UITouchPhase::BEGIN;
     std::time_t timestamp;
@@ -43,11 +43,11 @@ public:
 
     void updateAbsoluteLocation(Point newLocation);
 
-    Point locationIn(UIView* view);
-    Point previousLocationIn(UIView* view);
+    Point locationIn(std::shared_ptr<UIView> view);
+    Point previousLocationIn(std::shared_ptr<UIView> view);
 
-    std::vector<UIGestureRecognizer*> gestureRecognizers;
-    void runTouchActionOnRecognizerHierachy(std::function<void(UIGestureRecognizer*)> action);
+    std::vector<std::shared_ptr<UIGestureRecognizer>> gestureRecognizers;
+    void runTouchActionOnRecognizerHierachy(std::function<void(std::shared_ptr<UIGestureRecognizer>)> action);
 
     bool hasBeenCancelledByAGestureRecognizer = false;
 };

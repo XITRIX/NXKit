@@ -32,38 +32,38 @@ public:
     Application();
     virtual ~Application();
 
-    UIWindow* getKeyWindow() { return keyWindow; }
-    void setKeyWindow(UIWindow* window);
+    std::shared_ptr<UIWindow> getKeyWindow() { return keyWindow; }
+    void setKeyWindow(std::shared_ptr<UIWindow> window);
     
     bool mainLoop();
     void flushContext();
     void onWindowResized(unsigned width, unsigned height, float scale);
     NVGcontext* getContext();
-    VideoContext* getVideoContext();
+    std::shared_ptr<VideoContext> getVideoContext();
     std::string getResourcesPath() { return resourcesPath; }
 
     void setResourcesPath(std::string resourcesPath) { this->resourcesPath = resourcesPath; }
-    void setVideoContext(VideoContext*);
+    void setVideoContext(std::shared_ptr<VideoContext> videoContext);
 
-    UIView* getFocus();
-    void setFocus(UIView* view);
+    std::shared_ptr<UIView> getFocus();
+    void setFocus(std::shared_ptr<UIView> view);
 
     ApplicationInputType getInputType() { return inputType; }
-    UIAppDelegate* getDelegate() { return delegate; }
+    std::shared_ptr<UIAppDelegate> getDelegate() { return delegate; }
 
-    NotificationEvent<UIView*>* getFocusDidChangeEvent() { return &focusDidChangeEvent; };
+    NotificationEvent<std::shared_ptr<UIView>>* getFocusDidChangeEvent() { return &focusDidChangeEvent; };
     UIUserInterfaceStyle getUserInterfaceStyle();
 private:
     inline static Application* _shared;
 
-    VideoContext* videoContext = nullptr;
-    UIAppDelegate* delegate = nullptr;
-    UIWindow* keyWindow = nullptr;
-    UIView* focus = nullptr;
+    std::shared_ptr<VideoContext> videoContext;
+    std::shared_ptr<UIAppDelegate> delegate;
+    std::shared_ptr<UIWindow> keyWindow ;
+    std::shared_ptr<UIView> focus;
 
     void setInputType(ApplicationInputType inputType);
     ApplicationInputType inputType = ApplicationInputType::GAMEPAD;
-    NotificationEvent<UIView*> focusDidChangeEvent;
+    NotificationEvent<std::shared_ptr<UIView>> focusDidChangeEvent;
 
     unsigned windowWidth, windowHeight;
     float windowScale;

@@ -15,22 +15,22 @@ namespace NXKit {
 
 class UIPanGestureRecognizer: public UIGestureRecognizer {
 public:
-    void touchesBegan(std::vector<UITouch*> touches, UIEvent* event) override;
-    void touchesMoved(std::vector<UITouch*> touches, UIEvent* event) override;
-    void touchesEnded(std::vector<UITouch*> touches, UIEvent* event) override;
+    void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
+    void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
+    void touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
 
-    Point translationInView(UIView* view);
-    void setTranslation(Point translation, UIView* inView);
+    Point translationInView(std::shared_ptr<UIView> view);
+    void setTranslation(Point translation, std::shared_ptr<UIView> inView);
 
-    Point velocityIn(UIView* view);
+    Point velocityIn(std::shared_ptr<UIView> view);
 
 private:
-    UITouch* trackingTouch = nullptr;
+    std::shared_ptr<UITouch> trackingTouch;
     Point initialTouchPoint;
     time_t touchesMovedTimestamp;
     time_t previousTouchesMovedTimestamp;
 
-    Point velocityIn(UIView* view, float timeDiffSeconds);
+    Point velocityIn(std::shared_ptr<UIView> view, float timeDiffSeconds);
 };
 
 }

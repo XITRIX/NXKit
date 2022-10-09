@@ -24,7 +24,7 @@ constexpr uint32_t ORIGINAL_WINDOW_HEIGHT = 720;
 using namespace NXKit;
 
 int main(int argc, const char * argv[]) {
-    Application* application = new Application();
+    std::shared_ptr<Application> application = std::make_shared<Application>();
 
 #ifdef __SWITCH__
     auto videoContext = new SwitchVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
@@ -33,7 +33,7 @@ int main(int argc, const char * argv[]) {
     InputManager::initWith(new SwitchInputManager());
     application->setResourcesPath("romfs:/");
 #else
-    auto videoContext = new GLFWVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
+    auto videoContext = std::make_shared<GLFWVideoContext>("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
     application->setVideoContext(videoContext);
 
     InputManager::initWith(new GLFWInputManager());
@@ -43,6 +43,5 @@ int main(int argc, const char * argv[]) {
 
     while (application->mainLoop());
 
-    delete application;
     return 0;
 }

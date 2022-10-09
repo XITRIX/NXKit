@@ -26,12 +26,12 @@ UIView::~UIView() {
         Application::shared()->setFocus(nullptr);
 
     for (auto recognizer: gestureRecognizers) {
-        delete recognizer;
+//        delete recognizer;
     }
 
     for (auto view: subviews) {
-        if (!view->controller)
-            delete view;
+//        if (!view->controller)
+//            delete view;
     }
 
     YGNodeFree(ygNode);
@@ -178,8 +178,8 @@ UIColor UIView::getTintColor() {
     if (tintColor.has_value())
         return tintColor.value();
 
-    if (superview)
-        return superview->getTintColor();
+    if (!superview.expired())
+        return superview.lock()->getTintColor();
 
     return UIColor::systemTint;
 }
@@ -289,7 +289,7 @@ void UIView::internalDraw(NVGcontext* vgContext) {
         }
     }
 
-    UIView* focused = nullptr;
+    std::shared_ptr<UIView> focused = nullptr;
     for (auto view: subviews) {
         if (view->isFocused())
             focused = view;
@@ -485,8 +485,8 @@ void UIView::drawHighlight(NVGcontext* vg, bool background) {
 }
 
 float UIView::getInternalAlpha() {
-    if (superview)
-        return superview->getInternalAlpha() * alpha;
+    if (!superview.expired())
+        return superview.lock()->getInternalAlpha() * alpha;
     return alpha;
 }
 
@@ -596,55 +596,55 @@ void UIView::layoutSubviews() {
 }
 
 bool UIView::isFocused() {
-    return Application::shared()->getFocus() == this;
+    return Application::shared()->getFocus().get() == this;
 }
 
-UIView* UIView::getDefaultFocus() {
-    if (canBecomeFocused()) return this;
+std::shared_ptr<UIView> UIView::getDefaultFocus() {
+    if (canBecomeFocused()) return shared_from_this();
 
     for (auto view: subviews) {
         if (view->isHidden()) continue;
-        UIView* focus = view->getDefaultFocus();
+        std::shared_ptr<UIView> focus = view->getDefaultFocus();
         if (focus) return focus;
     }
 
     return nullptr;
 }
 
-void UIView::subviewFocusDidChange(UIView* focusedView, UIView* notifiedView) {
-    if (superview)
-        superview->subviewFocusDidChange(focusedView, this);
+void UIView::subviewFocusDidChange(std::shared_ptr<UIView> focusedView, std::shared_ptr<UIView> notifiedView) {
+    if (!superview.expired())
+        superview.lock()->subviewFocusDidChange(focusedView, shared_from_this());
 }
 
-UIView* UIView::getNextFocus(NavigationDirection direction) {
-    if (!superview) return nullptr;
-    return superview->getNextFocus(direction);
+std::shared_ptr<UIView> UIView::getNextFocus(NavigationDirection direction) {
+    if (superview.expired()) return nullptr;
+    return superview.lock()->getNextFocus(direction);
 }
 
-void UIView::addGestureRecognizer(UIGestureRecognizer* gestureRecognizer) {
-    gestureRecognizer->view = this;
+void UIView::addGestureRecognizer(std::shared_ptr<UIGestureRecognizer> gestureRecognizer) {
+    gestureRecognizer->view = weak_from_this();
     gestureRecognizers.push_back(gestureRecognizer);
 }
 
-std::vector<UIGestureRecognizer*> UIView::getGestureRecognizers() {
+std::vector<std::shared_ptr<UIGestureRecognizer>> UIView::getGestureRecognizers() {
     return gestureRecognizers;
 }
 
-void UIView::addSubview(UIView* view) {
-    view->setSuperview(this);
+void UIView::addSubview(std::shared_ptr<UIView> view) {
+    view->setSuperview(shared_from_this());
     subviews.push_back(view);
     setNeedsLayout();
 }
 
-void UIView::insertSubview(UIView* view, int position) {
-    view->setSuperview(this);
+void UIView::insertSubview(std::shared_ptr<UIView> view, int position) {
+    view->setSuperview(weak_from_this());
     subviews.insert(subviews.begin() + position, view);
     setNeedsLayout();
 }
 
-UIResponder* UIView::getNext() {
+std::shared_ptr<UIResponder> UIView::getNext() {
     if (controller) return controller;
-    if (superview) return superview;
+    if (!superview.expired()) return superview.lock();
     return nullptr;
 }
 
@@ -661,44 +661,44 @@ bool UIView::isHidden() {
     return YGNodeStyleGetDisplay(this->ygNode) == YGDisplayNone;
 }
 
-std::vector<UIView*> UIView::getSubviews() {
+std::vector<std::shared_ptr<UIView>> UIView::getSubviews() {
     return subviews;
 }
 
 void UIView::removeFromSuperview() {
-    if (!superview) return;
+    if (superview.expired()) return;
 
-    superview->subviews.erase(std::remove(superview->subviews.begin(), superview->subviews.end(), this));
-    YGNodeRemoveChild(superview->ygNode, ygNode);
-    superview = nullptr;
+    superview.lock()->subviews.erase(std::remove(superview.lock()->subviews.begin(), superview.lock()->subviews.end(), shared_from_this()));
+    YGNodeRemoveChild(superview.lock()->ygNode, ygNode);
+    superview.reset();
 }
 
-Point UIView::convert(Point point, UIView* toView) {
+Point UIView::convert(Point point, std::shared_ptr<UIView> toView) {
     Point selfAbsoluteOrigin;
     Point otherAbsoluteOrigin;
 
-    UIView* current = this;
+    std::shared_ptr<UIView> current = shared_from_this();
     while (current) {
         if (current == toView) {
             return point - selfAbsoluteOrigin;
         }
         selfAbsoluteOrigin += current->getFrame().origin;
         selfAbsoluteOrigin -= current->bounds.origin;
-        current = current->superview;
+        current = current->superview.lock();
     }
 
     current = toView;
     while (current) {
         otherAbsoluteOrigin += current->getFrame().origin;
         otherAbsoluteOrigin -= current->bounds.origin;
-        current = current->superview;
+        current = current->superview.lock();
     }
 
     Point originDifference = otherAbsoluteOrigin - selfAbsoluteOrigin;
     return point - originDifference;
 }
 
-UIView* UIView::hitTest(Point point, UIEvent* withEvent) {
+std::shared_ptr<UIView> UIView::hitTest(Point point, UIEvent* withEvent) {
     if (isHidden() || !isUserInteractionEnabled || alpha == 0)
         return nullptr;
 
@@ -707,12 +707,12 @@ UIView* UIView::hitTest(Point point, UIEvent* withEvent) {
 
     auto subviews = getSubviews();
     for (int i = (int) subviews.size() - 1; i >= 0; i--) {
-        Point convertedPoint = subviews[i]->convert(point, this);
-        UIView* test = subviews[i]->hitTest(convertedPoint, withEvent);
+        Point convertedPoint = subviews[i]->convert(point, shared_from_this());
+        std::shared_ptr<UIView> test = subviews[i]->hitTest(convertedPoint, withEvent);
         if (test) return test;
     }
 
-    return this;
+    return shared_from_this();
 }
 
 bool UIView::point(Point insidePoint, UIEvent* withEvent) {
@@ -724,8 +724,8 @@ UIEdgeInsets UIView::safeAreaInsets() {
     if (controller && controller->getParent()) {
         insets += controller->getParent()->getAdditionalSafeAreaInsets();
     }
-    if (superview) {
-        insets += superview->safeAreaInsets();
+    if (!superview.expired()) {
+        insets += superview.lock()->safeAreaInsets();
 
         if (getFrame().origin.y > 0 && insets.top > 0) {
             insets.top -= getFrame().origin.y;
@@ -737,13 +737,13 @@ UIEdgeInsets UIView::safeAreaInsets() {
             if (insets.left < 0) insets.left = 0;
         }
 
-        auto right = superview->getBounds().size.width - getFrame().origin.x - getBounds().size.width;
+        auto right = superview.lock()->getBounds().size.width - getFrame().origin.x - getBounds().size.width;
         if (right > 0 || insets.right > 0) {
             insets.right -= right;
             if (insets.right < 0) insets.right = 0;
         }
 
-        auto bottom = superview->getBounds().size.height - getFrame().origin.y - getBounds().size.height;
+        auto bottom = superview.lock()->getBounds().size.height - getFrame().origin.y - getBounds().size.height;
         if (bottom > 0 || insets.bottom > 0) {
             insets.bottom -= bottom;
             if (insets.bottom < 0) insets.bottom = 0;
@@ -758,16 +758,16 @@ UIWindow* UIView::getWindow() {
     while (superview) {
         auto cast = dynamic_cast<UIWindow*>(superview);
         if (cast) return cast;
-        superview = superview->getSuperview();
+        superview = superview->getSuperview().get();
     }
     return nullptr;
 }
 
-UIView* UIView::getSuperview() {
-    return superview;
+std::shared_ptr<UIView> UIView::getSuperview() {
+    return superview.lock();
 }
 
-void UIView::setSuperview(UIView* view) {
+void UIView::setSuperview(std::weak_ptr<UIView> view) {
     superview = view;
     tintColorDidChange();
 }
@@ -878,7 +878,7 @@ float UIView::getBorderBottom() {
     return YGNodeLayoutGetBorder(this->ygNode, YGEdgeBottom);
 }
 
-void UIView::animate(std::initializer_list<UIView*> views, float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {
+void UIView::animate(std::initializer_list<std::shared_ptr<UIView>> views, float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {
     // Maybe needs improvements
     if (noAnimations) {
         animations();
@@ -888,16 +888,16 @@ void UIView::animate(std::initializer_list<UIView*> views, float duration, std::
 
     if (duration <= 0) {
         animations();
-        for (UIView* view: views) {
+        for (std::shared_ptr<UIView> view: views) {
             view->animationContext.reset(view->createAnimationContext());
         }
         completion(true);
         return;
     }
 
-    std::vector<UIView*> _views;
+    std::vector<std::shared_ptr<UIView>> _views;
     std::vector<std::deque<float>> contexts;
-    for (UIView* view: views) {
+    for (std::shared_ptr<UIView> view: views) {
         _views.push_back(view);
         auto oldContext = view->createAnimationContext();
         view->animationContext.reset(oldContext);
@@ -913,7 +913,7 @@ void UIView::animate(std::initializer_list<UIView*> views, float duration, std::
     });
 
     for (int i = 0; i < views.size(); i++) {
-        UIView* view = _views[i];
+        std::shared_ptr<UIView> view = _views[i];
         view->animationContext.addStep(view->createAnimationContext(), duration * 1000, easing);
 
         view->animationContext.setTickCallback([view]() {
@@ -946,8 +946,8 @@ UITraitCollection UIView::getTraitCollection() {
     if (controller)
         return controller->getTraitCollection();
 
-    if (superview)
-        return superview->getTraitCollection();
+    if (!superview.expired())
+        return superview.lock()->getTraitCollection();
 
     return UITraitCollection();
 }

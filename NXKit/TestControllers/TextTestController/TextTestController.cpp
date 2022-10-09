@@ -12,11 +12,11 @@
 //}
 
 void TextTestController::loadView() {
-    auto view = new UIStackView(Axis::VERTICAL);
+    auto view = std::make_shared<UIStackView>(Axis::VERTICAL);
     view->setJustifyContent(JustifyContent::CENTER);
     view->setAlignItems(AlignItems::CENTER);
 
-    label = new UILabel("Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст ");
+    label = std::make_shared<UILabel>("Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст Просто текст ");
     label->setMargins(UIEdgeInsets(216));
     label->horizontalAlign = HorizontalAlign::CENTER;
     label->backgroundColor = UIColor::red;

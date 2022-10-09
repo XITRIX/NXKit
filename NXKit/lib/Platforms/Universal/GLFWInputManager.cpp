@@ -46,7 +46,7 @@ static const size_t GLFW_BUTTONS_MAPPING[GLFW_GAMEPAD_BUTTON_MAX] = {
 };
 
 GLFWInputManager::GLFWInputManager() {
-    window = ((GLFWVideoContext*) Application::shared()->getVideoContext())->getGLFWWindow();
+    window = std::dynamic_pointer_cast<GLFWVideoContext>(Application::shared()->getVideoContext())->getGLFWWindow();
 //    glfwSetJoystickCallback(glfwJoystickCallback);
 }
 
@@ -118,11 +118,11 @@ int GLFWInputManager::touchCount() {
     return (int) touches.size();
 }
 
-UITouch* GLFWInputManager::getTouch(int id) {
+std::shared_ptr<UITouch> GLFWInputManager::getTouch(int id) {
     return touches[id];
 }
 
-std::vector<UITouch*> GLFWInputManager::getTouches() {
+std::vector<std::shared_ptr<UITouch>> GLFWInputManager::getTouches() {
     return touches;
 }
 
@@ -170,8 +170,8 @@ void GLFWInputManager::updateMouse() {
     }
 }
 
-std::vector<UIGestureRecognizer*> GLFWInputManager::getRecognizerHierachyFrom(UIView* view) {
-    std::vector<UIGestureRecognizer*> recognizers;
+std::vector<std::shared_ptr<UIGestureRecognizer>> GLFWInputManager::getRecognizerHierachyFrom(std::shared_ptr<UIView> view) {
+    std::vector<std::shared_ptr<UIGestureRecognizer>> recognizers;
     while (view) {
         for (auto recognizer : view->getGestureRecognizers())
             recognizers.push_back(recognizer);
@@ -183,7 +183,7 @@ std::vector<UIGestureRecognizer*> GLFWInputManager::getRecognizerHierachyFrom(UI
 
 void GLFWInputManager::updateTouch() {
     if (getMouseButtonDown(BrlsMouseButton::BRLS_MOUSE_LKB)) {
-        auto touch = new UITouch(0, getCoursorPosition(), getCPUTimeUsec());
+        auto touch = std::make_shared<UITouch>(0, getCoursorPosition(), getCPUTimeUsec());
         touch->window = Application::shared()->getKeyWindow();
         touch->view = touch->window->hitTest(touch->absoluteLocation, nullptr);
         touch->gestureRecognizers = getRecognizerHierachyFrom(touch->view);
@@ -211,7 +211,7 @@ void GLFWInputManager::updateTouch() {
             auto touch = touches[i];
             if (touch->touchId == 0) {
                 touches.erase(touches.begin() + i);
-                delete touch;
+//                delete touch;
             }
         }
     }

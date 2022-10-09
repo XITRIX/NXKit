@@ -15,12 +15,12 @@ namespace NXKit {
 
 class UITapGestureRecognizer: public UIGestureRecognizer {
 public:
-    void touchesBegan(std::vector<UITouch*> touches, UIEvent* event) override;
-    void touchesMoved(std::vector<UITouch*> touches, UIEvent* event) override;
-    void touchesEnded(std::vector<UITouch*> touches, UIEvent* event) override;
+    void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
+    void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
+    void touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
 
 private:
-    UITouch* trackingTouch = nullptr;
+    std::shared_ptr<UITouch> trackingTouch;
     Point startPoint;
 };
 

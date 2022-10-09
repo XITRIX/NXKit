@@ -9,12 +9,12 @@
 
 namespace NXKit {
 
-UIBottomSheetController::UIBottomSheetController(UIViewController* rootViewController):
+UIBottomSheetController::UIBottomSheetController(std::shared_ptr<UIViewController> rootViewController):
     rootViewController(rootViewController)
 {}
 
 void UIBottomSheetController::loadView() {
-    UIStackView* view = new UIStackView(Axis::VERTICAL);
+    auto view = std::make_shared<UIStackView>(Axis::VERTICAL);
 
     view->backgroundColor = UIColor::black.withAlphaComponent(0.6f);
     view->setJustifyContent(JustifyContent::FLEX_END);
@@ -23,14 +23,14 @@ void UIBottomSheetController::loadView() {
 //    rootViewController->
     addChild(rootViewController);
     view->addSubview(rootViewController->getView());
-    rootViewController->didMoveToParent(this);
+    rootViewController->didMoveToParent(shared_from_this());
 
     rootViewController->getView()->setPercentHeight(80);
     
     setView(view);
 }
 
-void UIBottomSheetController::makeViewAppear(bool animated, UIViewController* presentingViewController, std::function<void()> completion) {
+void UIBottomSheetController::makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion) {
     getView()->alpha = 0;
 //    alert->transformSize = { 0.98f, 0.98f };
 

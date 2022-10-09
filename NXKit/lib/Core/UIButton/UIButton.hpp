@@ -31,7 +31,7 @@ public:
 
     void setTitle(std::string title);
 protected:
-    UILabel* label;
+    std::shared_ptr<UILabel> label;
     UIButtonStyle style;
 };
 

@@ -13,7 +13,8 @@ namespace NXKit {
 #define SCROLLING_INDICATOR_WIDTH 4
 
 UIScrollView::UIScrollView() {
-    scrollingIndicatorV = new UIView();
+    panGestureRecognizer = std::make_shared<UIPanGestureRecognizer>();
+    scrollingIndicatorV = std::make_shared<UIView>();
     scrollingIndicatorV->setWidth(SCROLLING_INDICATOR_WIDTH);
     scrollingIndicatorV->cornerRadius = SCROLLING_INDICATOR_WIDTH / 2;
     scrollingIndicatorV->backgroundColor = UIColor::gray;
@@ -41,7 +42,7 @@ UIScrollView::UIScrollView() {
     addGestureRecognizer(panGestureRecognizer);
 }
 
-void UIScrollView::addSubview(UIView *view) {
+void UIScrollView::addSubview(std::shared_ptr<UIView> view) {
     if (contentView != nullptr) return;
 
     contentView = view;
@@ -49,7 +50,7 @@ void UIScrollView::addSubview(UIView *view) {
 }
 
 void UIScrollView::startDeceleting() {
-    Point velocity = panGestureRecognizer->velocityIn(this);
+    Point velocity = panGestureRecognizer->velocityIn(shared_from_this());
     if (velocity.magnitude() <= 0) return;
 
     decelerating = true;
@@ -144,12 +145,12 @@ Size UIScrollView::getContentSize() {
     return contentView->getFrame().size;
 }
 
-void UIScrollView::subviewFocusDidChange(UIView *focusedView, UIView *notifiedView) {
+void UIScrollView::subviewFocusDidChange(std::shared_ptr<UIView> focusedView, std::shared_ptr<UIView> notifiedView) {
     if (!getFrame().valid()) return UIView::subviewFocusDidChange(focusedView, notifiedView);
 
     if (scrollingMode == UIScrollViewScrollingMode::centered) {
         Rect focusedViewFrame = focusedView->getFrame();
-        Point origin = focusedView->getSuperview()->convert(focusedViewFrame.origin, this);
+        Point origin = focusedView->getSuperview()->convert(focusedViewFrame.origin, shared_from_this());
         origin.y -= getFrame().height() / 2 - focusedViewFrame.height() / 2;
         Point newOffset = getContentOffsetInBounds(origin);
         setContentOffset(newOffset);
@@ -159,7 +160,7 @@ void UIScrollView::subviewFocusDidChange(UIView *focusedView, UIView *notifiedVi
         Rect bounds = getVisibleOffsetBounds();
         Point newOffset = bounds.origin;
         Rect focusedViewFrame = focusedView->getFrame();
-        focusedViewFrame.origin = focusedView->getSuperview()->convert(focusedViewFrame.origin, this);
+        focusedViewFrame.origin = focusedView->getSuperview()->convert(focusedViewFrame.origin, shared_from_this());
 
         float padding = 20;
 
@@ -201,7 +202,7 @@ void UIScrollView::layoutSubviews() {
     updateScrollingIndicatior();
 }
 
-UIView* UIScrollView::getNextFocus(NavigationDirection direction) {
+std::shared_ptr<UIView> UIScrollView::getNextFocus(NavigationDirection direction) {
     Rect offsetBounds = getContentOffsetBounds();
 
     if (direction == NavigationDirection::UP && getContentOffset().y > offsetBounds.minY()) {
@@ -225,8 +226,8 @@ UIView* UIScrollView::getNextFocus(NavigationDirection direction) {
 }
 
 void UIScrollView::onPan() {
-    Point translation = panGestureRecognizer->translationInView(this);
-    panGestureRecognizer->setTranslation(Point(), this);
+    Point translation = panGestureRecognizer->translationInView(shared_from_this());
+    panGestureRecognizer->setTranslation(Point(), shared_from_this());
 
     Point newOffset = getContentOffset() - translation;
     newOffset = getContentOffsetInBounds(newOffset);

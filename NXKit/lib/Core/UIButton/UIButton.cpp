@@ -12,7 +12,7 @@ namespace NXKit {
 UIButton::UIButton(std::string title) {
     setAlignItems(NXKit::AlignItems::CENTER);
     setJustifyContent(NXKit::JustifyContent::CENTER);
-    label = new UILabel(title);
+    label = std::make_shared<UILabel>(title);
     label->verticalAlign = VerticalAlign::CENTER;
     label->getFont()->fontSize = 18;
     addSubview(label);

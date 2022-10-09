@@ -12,11 +12,11 @@ AnimationTestViewController::AnimationTestViewController() {
 }
 
 void AnimationTestViewController::loadView() {
-    auto view = new UIStackView();
+    auto view = std::make_shared<UIStackView>();
     view->setAlignItems(AlignItems::CENTER);
     view->setJustifyContent(JustifyContent::CENTER);
 
-    ball = new UIControl();
+    ball = std::make_shared<UIControl>();
     ball->setSize(Size(80, 80));
     ball->cornerRadius = 40;
     ball->transformOrigin = Point(160, 0);

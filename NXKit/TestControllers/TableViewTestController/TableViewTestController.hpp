@@ -15,9 +15,9 @@ public:
     void loadView() override;
     void viewDidLoad() override;
 
-    int tableViewNumberOfRowsInSection(UITableView* tableView, int section) override;
-    UITableViewCell* tableViewCellForRowAt(UITableView* tableView, IndexPath indexPath) override;
-    int tableViewCellCanBeFocusedAt(UITableView *tableView, IndexPath indexPath) override;
+    int tableViewNumberOfRowsInSection(std::shared_ptr<UITableView> tableView, int section) override;
+    std::shared_ptr<UITableViewCell> tableViewCellForRowAt(std::shared_ptr<UITableView> tableView, IndexPath indexPath) override;
+    int tableViewCellCanBeFocusedAt(std::shared_ptr<UITableView> tableView, IndexPath indexPath) override;
 private:
-    UITableView* tableView;
+    std::shared_ptr<UITableView> tableView;
 };
