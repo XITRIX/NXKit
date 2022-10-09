@@ -183,7 +183,7 @@ private:
 
     AnimationContext animationContext;
     std::vector<std::shared_ptr<UIGestureRecognizer>> gestureRecognizers;
-    std::shared_ptr<UIViewController> controller = nullptr;
+    std::weak_ptr<UIViewController> controller;
     std::vector<std::shared_ptr<UIView>> subviews;
     std::weak_ptr<UIView> superview;
     bool needsLayout = true;

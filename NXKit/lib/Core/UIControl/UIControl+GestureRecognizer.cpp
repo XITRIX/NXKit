@@ -10,7 +10,7 @@
 
 namespace NXKit {
 
-UIControl::GestureRecognizer::GestureRecognizer(std::shared_ptr<UIControl> control):
+UIControl::GestureRecognizer::GestureRecognizer(UIControl* control):
     control(control)
 { }
 

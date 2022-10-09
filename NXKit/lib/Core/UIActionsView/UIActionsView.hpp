@@ -18,7 +18,7 @@ public:
     UIActionsView();
     ~UIActionsView();
 
-    std::shared_ptr<UIViewController> inController = nullptr;
+    std::weak_ptr<UIViewController> inController;
 
     void refreshActionsView(std::shared_ptr<UIView> view);
 private:

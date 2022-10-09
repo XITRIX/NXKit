@@ -85,8 +85,8 @@ void UIActionsView::refreshActionsView(std::shared_ptr<UIView> view) {
         actionViewsQueue.push_back(subview);
     }
 
-    if (inController) {
-        view = inController->getView()->getDefaultFocus();
+    if (!inController.expired()) {
+        view = inController.lock()->getView()->getDefaultFocus();
     }
 
     std::map<ControllerButton, UIAction> actionsMap;

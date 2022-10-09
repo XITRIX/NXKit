@@ -104,7 +104,7 @@ std::shared_ptr<UIView> UINavigationController::buildFooter() {
     footer->setPadding(4, 8, 4, 8);
 
     auto actions = std::make_shared<UIActionsView>();
-    actions->inController = shared_from_this();
+    actions->inController = weak_from_this();
     footer->addSubview(actions);
 
     blurFooter->addSubview(footer);
@@ -152,7 +152,7 @@ void UINavigationController::pushViewController(std::shared_ptr<UIViewController
 
         addChild(otherViewController);
         getView()->insertSubview(otherViewController->getView(), 0);
-        otherViewController->didMoveToParent(shared_from_this());
+        otherViewController->didMoveToParent(weak_from_this().lock());
         Application::shared()->setFocus(otherViewController->getView()->getDefaultFocus());
 
         otherViewController->getView()->setGrow(1);

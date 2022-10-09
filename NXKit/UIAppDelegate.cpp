@@ -31,7 +31,7 @@ void UIAppDelegate::applicationDidFinishLaunching() {
 
     printf("Launching app...\n");
 
-    auto window = std::make_shared<UIWindow>();
+    auto window = make_shared<UIWindow>();
     std::vector<std::shared_ptr<UIViewController>> controllers = {controlVC, tableView, listVC, animVC, nullptr, rootVC, touchVC};
     auto tabsVC = std::make_shared<UITabBarController>(controllers);
 //    auto vc = std::make_shared<UINavigationController>(tabsVC);

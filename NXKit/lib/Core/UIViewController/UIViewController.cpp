@@ -40,7 +40,7 @@ std::shared_ptr<UIView> UIViewController::getView() {
 
 void UIViewController::setView(std::shared_ptr<UIView> view) {
     this->view = view;
-    this->view->controller = shared_from_this();
+    this->view->controller = weak_from_this();
     viewDidLoad();
 }
 
@@ -85,13 +85,12 @@ void UIViewController::setImage(std::shared_ptr<UIImage> image) {
 
 void UIViewController::addChild(std::shared_ptr<UIViewController> child) {
     children.push_back(child);
-    child->willMoveToParent(shared_from_this());
+    child->willMoveToParent(weak_from_this().lock());
     child->viewWillAppear(true);
 }
 
 void UIViewController::willMoveToParent(std::shared_ptr<UIViewController> parent) {
-    if (parent)
-        this->parent = parent;
+    this->parent = parent;
 }
 
 void UIViewController::didMoveToParent(std::shared_ptr<UIViewController> parent) {

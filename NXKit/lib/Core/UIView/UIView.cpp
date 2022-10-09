@@ -573,7 +573,7 @@ void UIView::layoutIfNeeded() {
 }
 
 void UIView::layoutSubviews() {
-    if (controller) controller->viewWillLayoutSubviews();
+    if (!controller.expired()) controller.lock()->viewWillLayoutSubviews();
 
     needsLayout = false;
 
@@ -592,7 +592,7 @@ void UIView::layoutSubviews() {
 
     bounds = getBounds();
 
-    if (controller) controller->viewDidLayoutSubviews();
+    if (!controller.expired()) controller.lock()->viewDidLayoutSubviews();
 }
 
 bool UIView::isFocused() {
@@ -631,7 +631,7 @@ std::vector<std::shared_ptr<UIGestureRecognizer>> UIView::getGestureRecognizers(
 }
 
 void UIView::addSubview(std::shared_ptr<UIView> view) {
-    view->setSuperview(shared_from_this());
+    view->setSuperview(weak_from_this());
     subviews.push_back(view);
     setNeedsLayout();
 }
@@ -643,7 +643,7 @@ void UIView::insertSubview(std::shared_ptr<UIView> view, int position) {
 }
 
 std::shared_ptr<UIResponder> UIView::getNext() {
-    if (controller) return controller;
+    if (!controller.expired()) return controller.lock();
     if (!superview.expired()) return superview.lock();
     return nullptr;
 }
@@ -721,8 +721,8 @@ bool UIView::point(Point insidePoint, UIEvent* withEvent) {
 
 UIEdgeInsets UIView::safeAreaInsets() {
     auto insets = UIEdgeInsets::zero;
-    if (controller && controller->getParent()) {
-        insets += controller->getParent()->getAdditionalSafeAreaInsets();
+    if (!controller.expired() && controller.lock()->getParent()) {
+        insets += controller.lock()->getParent()->getAdditionalSafeAreaInsets();
     }
     if (!superview.expired()) {
         insets += superview.lock()->safeAreaInsets();
@@ -943,8 +943,8 @@ void UIView::performWithoutAnimation(std::function<void()> function) {
 
 // Trait collection
 UITraitCollection UIView::getTraitCollection() {
-    if (controller)
-        return controller->getTraitCollection();
+    if (!controller.expired())
+        return controller.lock()->getTraitCollection();
 
     if (!superview.expired())
         return superview.lock()->getTraitCollection();
