@@ -9,8 +9,9 @@
 
 namespace NXKit {
 
-class UIAppDelegate {
+class UIAppDelegate: public enable_shared_from_base<UIAppDelegate> {
 public:
+    virtual ~UIAppDelegate() {}
     void applicationDidFinishLaunching();
 };
 

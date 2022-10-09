@@ -12,11 +12,11 @@ AnimationTestViewController::AnimationTestViewController() {
 }
 
 void AnimationTestViewController::loadView() {
-    auto view = std::make_shared<UIStackView>();
+    auto view = NXKit::make_shared<UIStackView>();
     view->setAlignItems(AlignItems::CENTER);
     view->setJustifyContent(JustifyContent::CENTER);
 
-    ball = std::make_shared<UIControl>();
+    ball = NXKit::make_shared<UIControl>();
     ball->setSize(Size(80, 80));
     ball->cornerRadius = 40;
     ball->transformOrigin = Point(160, 0);
@@ -35,6 +35,19 @@ void AnimationTestViewController::viewDidLoad() {
 
 void AnimationTestViewController::animate(bool revers) {
     static int counter = 0;
+//    auto w_this = weak_from_this();
+
+//    ball->animate(1, [this, revers]() {
+//        ball->transformOrigin = Point(revers ? 160 : -160, 0);
+//        ball->backgroundColor = colors[counter];
+//        ++counter %= colors.size();
+//    }, EasingFunction::exponentialInOut, [this](bool res) {
+////        if (w_this.expired()) return;
+//
+//        if (!res) return;
+//        animate(ball->transformOrigin.x < 0);
+//    });
+
     UIView::animate({ ball }, 1, [this, revers]() {
         ball->transformOrigin = Point(revers ? 160 : -160, 0);
         ball->backgroundColor = colors[counter];

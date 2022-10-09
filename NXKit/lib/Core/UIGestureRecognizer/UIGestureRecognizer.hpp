@@ -37,7 +37,7 @@ class UIGestureRecognizer: public enable_shared_from_base<UIGestureRecognizer> {
 public:
     std::weak_ptr<UIView> view;
     std::function<void(UIGestureRecognizerState)> onStateChanged = [](auto state){};
-    std::shared_ptr<UIGestureRecognizerDelegate> delegate;
+    std::weak_ptr<UIGestureRecognizerDelegate> delegate;
 
     virtual ~UIGestureRecognizer();
 

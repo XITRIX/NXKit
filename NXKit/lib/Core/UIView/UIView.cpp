@@ -22,6 +22,8 @@ UIView::UIView(Rect frame) :
 }
 
 UIView::~UIView() {
+    animationContext.stop();
+
     if (isFocused())
         Application::shared()->setFocus(nullptr);
 
@@ -596,7 +598,8 @@ void UIView::layoutSubviews() {
 }
 
 bool UIView::isFocused() {
-    return Application::shared()->getFocus().get() == this;
+    if (Application::shared()->getFocus().expired()) return false;
+    return Application::shared()->getFocus().lock().get() == this;
 }
 
 std::shared_ptr<UIView> UIView::getDefaultFocus() {
@@ -758,13 +761,13 @@ UIWindow* UIView::getWindow() {
     while (superview) {
         auto cast = dynamic_cast<UIWindow*>(superview);
         if (cast) return cast;
-        superview = superview->getSuperview().get();
+        superview = superview->getSuperview().lock().get();
     }
     return nullptr;
 }
 
-std::shared_ptr<UIView> UIView::getSuperview() {
-    return superview.lock();
+std::weak_ptr<UIView> UIView::getSuperview() {
+    return superview;
 }
 
 void UIView::setSuperview(std::weak_ptr<UIView> view) {
@@ -888,17 +891,17 @@ void UIView::animate(std::initializer_list<std::shared_ptr<UIView>> views, float
 
     if (duration <= 0) {
         animations();
-        for (std::shared_ptr<UIView> view: views) {
+        for (auto view: views) {
             view->animationContext.reset(view->createAnimationContext());
         }
         completion(true);
         return;
     }
 
-    std::vector<std::shared_ptr<UIView>> _views;
+    std::vector<UIView*> _views;
     std::vector<std::deque<float>> contexts;
-    for (std::shared_ptr<UIView> view: views) {
-        _views.push_back(view);
+    for (auto view: views) {
+        _views.push_back(view.get());
         auto oldContext = view->createAnimationContext();
         view->animationContext.reset(oldContext);
         contexts.push_back(oldContext);
@@ -913,7 +916,7 @@ void UIView::animate(std::initializer_list<std::shared_ptr<UIView>> views, float
     });
 
     for (int i = 0; i < views.size(); i++) {
-        std::shared_ptr<UIView> view = _views[i];
+        UIView* view = _views[i];
         view->animationContext.addStep(view->createAnimationContext(), duration * 1000, easing);
 
         view->animationContext.setTickCallback([view]() {

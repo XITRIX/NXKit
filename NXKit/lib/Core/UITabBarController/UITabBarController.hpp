@@ -35,7 +35,8 @@ private:
     friend class UITabBarController;
     std::shared_ptr<UILabel> label;
     std::shared_ptr<UIView> selectionBar;
-    std::shared_ptr<UITabBarController> parent;
+    
+    UITabBarController* parent;
     std::shared_ptr<UIViewController> controller;
 
 //    bool selected = false;

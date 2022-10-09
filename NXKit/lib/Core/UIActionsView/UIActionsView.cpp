@@ -19,11 +19,11 @@ public:
         setPadding(4, 16, 4, 16);
         cornerRadius = 6;
 
-        iconLabel = std::make_shared<UILabel>();
+        iconLabel = NXKit::make_shared<UILabel>();
         iconLabel->verticalAlign = VerticalAlign::CENTER;
         iconLabel->getFont()->fontSize = 25.5f;
 
-        label = std::make_shared<UILabel>();
+        label = NXKit::make_shared<UILabel>();
         label->verticalAlign = VerticalAlign::CENTER;
         label->getFont()->fontSize = 21.5f;
         label->setMarginLeft(8);
@@ -69,7 +69,8 @@ UIActionsView::UIActionsView():
     focusChangeToken = Application::shared()->getFocusDidChangeEvent()->subscribe([this](std::shared_ptr<UIView> focusView) {
         this->refreshActionsView(focusView);
     });
-    refreshActionsView(Application::shared()->getFocus());
+    
+    refreshActionsView(Application::shared()->getFocus().lock());
 }
 
 UIActionsView::~UIActionsView() {
@@ -124,7 +125,7 @@ std::shared_ptr<UIActionView> UIActionsView::dequeueActionView() {
         actionViewsQueue.pop_back();
         return actionView;
     }
-    return std::make_shared<UIActionView>();
+    return NXKit::make_shared<UIActionView>();
 }
 
 }

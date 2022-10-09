@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Core/Geometry/Geometry.hpp>
+#include <Core/Utils/SharedBase/SharedBase.hpp>
 #include <string>
 #include <nanovg.h>
 #include <lunasvg/lunasvg.h>
@@ -19,10 +20,10 @@ enum class UIImageType {
     SVG,
 };
 
-class UIImage {
+class UIImage: public enable_shared_from_base<UIImage> {
 public:
     UIImage(std::string path, bool isTemplate = false, float upscale = 1);
-    ~UIImage();
+    virtual ~UIImage();
 
     Size getSize() { return size; }
     UIImageType getImageType() { return imageType; }

@@ -105,9 +105,11 @@ void UIGestureRecognizer::removeTouch(std::shared_ptr<UITouch> touch) {
 void UIGestureRecognizer::cancelOtherGestureRecognizersThatShouldNotRecognizeSimultaneously() {
     for (auto touch : allTouches) {
         for (auto rec : touch->gestureRecognizers) {
-            if (rec.get() != this && (!rec->delegate || !rec->delegate->gestureRecognizerShouldRecognizeSimultaneouslyWith(rec, shared_from_this()))) {
-                rec->setState(UIGestureRecognizerState::CANCELLED);
-                rec->touchesCancelled({touch}, nullptr);
+            if (rec.expired()) continue;
+            auto lrec = rec.lock();
+            if (lrec.get() != this && (lrec->delegate.expired() || !lrec->delegate.lock()->gestureRecognizerShouldRecognizeSimultaneouslyWith(lrec, shared_from_this()))) {
+                lrec->setState(UIGestureRecognizerState::CANCELLED);
+                lrec->touchesCancelled({touch}, nullptr);
             }
         }
     }

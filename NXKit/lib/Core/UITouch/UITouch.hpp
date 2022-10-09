@@ -10,6 +10,7 @@
 #include <Core/Utils/Animation/Core/Time.hpp>
 #include <Core/Geometry/Geometry.hpp>
 #include <Core/UIGestureRecognizer/UIGestureRecognizer.hpp>
+#include <Core/Utils/SharedBase/SharedBase.hpp>
 
 #include <ctime>
 #include <vector>
@@ -25,10 +26,11 @@ enum class UITouchPhase {
 
 class UIView;
 
-class UITouch {
+class UITouch: public enable_shared_from_base<UITouch> {
 public:
     UITouch(unsigned long touchId, Point atPoint, Time timestamp);
     UITouch(): UITouch(0, Point(), getCPUTimeUsec()) {}
+    virtual ~UITouch() {}
 
     unsigned long touchId;
 
@@ -46,7 +48,7 @@ public:
     Point locationIn(std::shared_ptr<UIView> view);
     Point previousLocationIn(std::shared_ptr<UIView> view);
 
-    std::vector<std::shared_ptr<UIGestureRecognizer>> gestureRecognizers;
+    std::vector<std::weak_ptr<UIGestureRecognizer>> gestureRecognizers;
     void runTouchActionOnRecognizerHierachy(std::function<void(std::shared_ptr<UIGestureRecognizer>)> action);
 
     bool hasBeenCancelledByAGestureRecognizer = false;

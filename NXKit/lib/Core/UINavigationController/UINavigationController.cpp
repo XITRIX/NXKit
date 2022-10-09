@@ -26,8 +26,8 @@ UINavigationBar::UINavigationBar() {
     setJustifyContent(JustifyContent::FLEX_START);
     setAlignItems(AlignItems::CENTER);
 
-    titleLabel = std::make_shared<UILabel>("Demo app");
-    imageView = std::make_shared<UIImageView>();
+    titleLabel = NXKit::make_shared<UILabel>("Demo app");
+    imageView = NXKit::make_shared<UIImageView>();
     imageView->setSize(Size(48, 48));
     imageView->setMarginRight(18);
 
@@ -68,19 +68,19 @@ UINavigationController::~UINavigationController() {
 }
 
 void UINavigationController::loadView() {
-    auto root = std::make_shared<UIView>();
+    auto root = NXKit::make_shared<UIView>();
     setView(root);
 
     root->backgroundColor = UIColor::systemBackground;
 
-    overlay = std::make_shared<UIStackView>(Axis::VERTICAL);
+    overlay = NXKit::make_shared<UIStackView>(Axis::VERTICAL);
     overlay->passthroughTouches = true;
     overlay->setJustifyContent(JustifyContent::SPACE_BETWEEN);
 
     setAdditionalSafeAreaInsets(UIEdgeInsets(headerHeight, 0, footerHeight, 0));
 
-    auto blurHeader = std::make_shared<UIBlurView>();
-    navigationBar = std::make_shared<UINavigationBar>();
+    auto blurHeader = NXKit::make_shared<UIBlurView>();
+    navigationBar = NXKit::make_shared<UINavigationBar>();
     navigationBar->setSize(Size(UIView::AUTO, headerHeight));
     blurHeader->addSubview(navigationBar);
 
@@ -91,8 +91,8 @@ void UINavigationController::loadView() {
 }
 
 std::shared_ptr<UIView> UINavigationController::buildFooter() {
-    auto blurFooter = std::make_shared<UIBlurView>();
-    auto footer = std::make_shared<UIStackView>();
+    auto blurFooter = NXKit::make_shared<UIBlurView>();
+    auto footer = NXKit::make_shared<UIStackView>();
     footer->setAxis(Axis::HORIZONTAL);
     footer->setAlignItems(AlignItems::STRETCH);
     footer->setJustifyContent(JustifyContent::FLEX_END);
@@ -103,7 +103,7 @@ std::shared_ptr<UIView> UINavigationController::buildFooter() {
     footer->setMarginRight(30);
     footer->setPadding(4, 8, 4, 8);
 
-    auto actions = std::make_shared<UIActionsView>();
+    auto actions = NXKit::make_shared<UIActionsView>();
     actions->inController = weak_from_this();
     footer->addSubview(actions);
 

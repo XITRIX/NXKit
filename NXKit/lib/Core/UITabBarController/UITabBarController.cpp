@@ -19,7 +19,7 @@ UITabBarSeparatorView::UITabBarSeparatorView() {
     setAlignItems(AlignItems::STRETCH);
     setJustifyContent(JustifyContent::CENTER);
 
-    auto line = std::make_shared<UIView>();
+    auto line = NXKit::make_shared<UIView>();
     line->setHeight(1);
     line->backgroundColor = UIColor::separator;
 
@@ -27,17 +27,17 @@ UITabBarSeparatorView::UITabBarSeparatorView() {
 }
 
 UITabBarItemView::UITabBarItemView(std::shared_ptr<UITabBarController> parent, std::shared_ptr<UIViewController> controller):
-    parent(parent), controller(controller)
+    parent(parent.get()), controller(controller)
 {
     setAxis(Axis::HORIZONTAL);
     setHeight(70);
 
-    selectionBar = std::make_shared<UIView>();
+    selectionBar = NXKit::make_shared<UIView>();
     selectionBar->backgroundColor = selectionBar->getTintColor();
     selectionBar->setWidth(4);
     selectionBar->setMargins(9, 8, 9, 8);
 
-    label = std::make_shared<UILabel>("Test Item");
+    label = NXKit::make_shared<UILabel>("Test Item");
     label->setGrow(1);
     label->verticalAlign = VerticalAlign::CENTER;
     label->getFont()->fontSize = 22;
@@ -79,7 +79,8 @@ void UITabBarItemView::setTitle(std::string text) {
 }
 
 void UITabBarItemView::becomeFocused() {
-    parent->setSelected(shared_from_base<UITabBarItemView>());
+//    if (!parent.expired())
+        parent->setSelected(shared_from_base<UITabBarItemView>());
 }
 
 void UITabBarItemView::setSelected(bool selected) {
@@ -95,10 +96,10 @@ void UITabBarItemView::setSelected(bool selected) {
 
 UITabBarController::UITabBarController() {
     addAction(BUTTON_B, UIAction([this]() {
-        if (Application::shared()->getFocus() != tabs->getDefaultFocus())
+        if (Application::shared()->getFocus().lock() != tabs->getDefaultFocus())
             Application::shared()->setFocus(tabs->getDefaultFocus());
     }, "Back", true, true, [this]() {
-        return Application::shared()->getFocus() != tabs->getDefaultFocus();
+        return Application::shared()->getFocus().lock() != tabs->getDefaultFocus();
     }));
 }
 
@@ -116,17 +117,17 @@ UITabBarController::~UITabBarController() {
 }
 
 void UITabBarController::loadView() {
-    auto view = std::make_shared<UIStackView>(Axis::HORIZONTAL);
+    auto view = NXKit::make_shared<UIStackView>(Axis::HORIZONTAL);
     view->tag = "TabBar stack 2";
 
-    tabs = std::make_shared<UIStackView>(Axis::VERTICAL);
+    tabs = NXKit::make_shared<UIStackView>(Axis::VERTICAL);
     tabs->tag = "TabBarItems stack";
     tabs->setPadding(32, 40, 47, 80);
 
-    contentView = std::make_shared<UIView>();
+    contentView = NXKit::make_shared<UIView>();
     contentView->setGrow(1);
 
-    auto scrollView = std::make_shared<UIScrollView>();
+    auto scrollView = NXKit::make_shared<UIScrollView>();
     scrollView->tag = "TabBar scroll";
     scrollView->setFixWidth(true);
     scrollView->setPercentWidth(32);
@@ -185,7 +186,7 @@ void UITabBarController::reloadViewForViewControllers() {
     for (int i = 0; i < viewControllers.size(); i++) {
         auto controller = viewControllers[i];
         if (controller) {
-            auto item = std::make_shared<UITabBarItemView>(shared_from_base<UITabBarController>(), viewControllers[i]);
+            auto item = NXKit::make_shared<UITabBarItemView>(shared_from_base<UITabBarController>(), viewControllers[i]);
             item->setTitle(controller->getTitle());
             item->tag = "Num" + std::to_string(i);
             item->setSelected(i == selectedIndex);
@@ -197,7 +198,7 @@ void UITabBarController::reloadViewForViewControllers() {
             tabViews.push_back(item);
             tabs->addSubview(item);
         } else {
-            tabs->addSubview(std::make_shared<UITabBarSeparatorView>());
+            tabs->addSubview(NXKit::make_shared<UITabBarSeparatorView>());
         }
     }
 

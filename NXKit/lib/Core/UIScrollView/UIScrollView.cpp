@@ -13,8 +13,8 @@ namespace NXKit {
 #define SCROLLING_INDICATOR_WIDTH 4
 
 UIScrollView::UIScrollView() {
-    panGestureRecognizer = std::make_shared<UIPanGestureRecognizer>();
-    scrollingIndicatorV = std::make_shared<UIView>();
+    panGestureRecognizer = NXKit::make_shared<UIPanGestureRecognizer>();
+    scrollingIndicatorV = NXKit::make_shared<UIView>();
     scrollingIndicatorV->setWidth(SCROLLING_INDICATOR_WIDTH);
     scrollingIndicatorV->cornerRadius = SCROLLING_INDICATOR_WIDTH / 2;
     scrollingIndicatorV->backgroundColor = UIColor::gray;
@@ -150,7 +150,7 @@ void UIScrollView::subviewFocusDidChange(std::shared_ptr<UIView> focusedView, st
 
     if (scrollingMode == UIScrollViewScrollingMode::centered) {
         Rect focusedViewFrame = focusedView->getFrame();
-        Point origin = focusedView->getSuperview()->convert(focusedViewFrame.origin, shared_from_this());
+        Point origin = focusedView->getSuperview().lock()->convert(focusedViewFrame.origin, shared_from_this());
         origin.y -= getFrame().height() / 2 - focusedViewFrame.height() / 2;
         Point newOffset = getContentOffsetInBounds(origin);
         setContentOffset(newOffset);
@@ -160,7 +160,7 @@ void UIScrollView::subviewFocusDidChange(std::shared_ptr<UIView> focusedView, st
         Rect bounds = getVisibleOffsetBounds();
         Point newOffset = bounds.origin;
         Rect focusedViewFrame = focusedView->getFrame();
-        focusedViewFrame.origin = focusedView->getSuperview()->convert(focusedViewFrame.origin, shared_from_this());
+        focusedViewFrame.origin = focusedView->getSuperview().lock()->convert(focusedViewFrame.origin, shared_from_this());
 
         float padding = 20;
 

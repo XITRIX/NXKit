@@ -19,16 +19,16 @@ UITableViewDefaultCell::UITableViewDefaultCell() {
     setAxis(Axis::HORIZONTAL);
     setAlignItems(AlignItems::CENTER);
 
-    imageView = std::make_shared<UIImageView>();
+    imageView = NXKit::make_shared<UIImageView>();
     imageView->setSize({ 44, 44 });
     imageView->setMarginRight(20);
 
-    label = std::make_shared<UILabel>("Test text");
+    label = NXKit::make_shared<UILabel>("Test text");
     label->setGrow(1);
     label->verticalAlign = VerticalAlign::CENTER;
     label->getFont()->fontSize = 22;
 
-    detailLabel = std::make_shared<UILabel>();
+    detailLabel = NXKit::make_shared<UILabel>();
     detailLabel->verticalAlign = VerticalAlign::CENTER;
     detailLabel->horizontalAlign = HorizontalAlign::RIGHT;
     detailLabel->textColor = getTintColor();

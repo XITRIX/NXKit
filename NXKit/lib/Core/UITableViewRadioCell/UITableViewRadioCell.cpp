@@ -61,16 +61,16 @@ UITableViewRadioCell::UITableViewRadioCell() {
     setAxis(Axis::HORIZONTAL);
     setAlignItems(AlignItems::CENTER);
 
-    imageView = std::make_shared<UIImageView>();
+    imageView = NXKit::make_shared<UIImageView>();
     imageView->setSize({ 44, 44 });
     imageView->setMarginRight(20);
 
-    label = std::make_shared<UILabel>("Test text");
+    label = NXKit::make_shared<UILabel>("Test text");
     label->setGrow(1);
     label->verticalAlign = VerticalAlign::CENTER;
     label->getFont()->fontSize = 22;
 
-    checkbox = std::make_shared<UICheckBoxView>();
+    checkbox = NXKit::make_shared<UICheckBoxView>();
 
     addSubview(imageView);
     addSubview(label);

@@ -45,7 +45,7 @@ void UIViewController::setView(std::shared_ptr<UIView> view) {
 }
 
 void UIViewController::loadView() {
-    setView(std::make_shared<UIView>());
+    setView(NXKit::make_shared<UIView>());
 }
 
 void UIViewController::loadViewIfNeeded() {
@@ -59,7 +59,7 @@ bool UIViewController::isViewLoaded() {
 }
 
 std::shared_ptr<UIResponder> UIViewController::getNext() {
-    auto window = std::dynamic_pointer_cast<UIWindow>(view->getSuperview());
+    auto window = std::dynamic_pointer_cast<UIWindow>(view->getSuperview().lock());
     if (window) return window;
     if (auto spt = parent.lock()) return spt;
     return nullptr;
@@ -189,13 +189,14 @@ void UIViewController::dismiss(bool animated, std::function<void()> completion) 
     Application::shared()->setFocus(nullptr);
 
     makeViewDisappear(animated, [this, animated, completion](bool res) {
-        getView()->getWindow()->removePresentedViewController(shared_from_this());
+        auto controller = shared_from_this();
+        getView()->getWindow()->removePresentedViewController(controller);
         getView()->removeFromSuperview();
         viewDidDisappear(animated);
         Application::shared()->setFocus(presentingViewController->getView()->getDefaultFocus());
         completion();
         setPresentingViewController(nullptr);
-        delete this;
+//        delete this;
     });
 }
 
@@ -236,8 +237,8 @@ UITraitCollection UIViewController::getTraitCollection() {
         superCollection = parent.lock()->getTraitCollection();
 
     auto superView = getView()->getSuperview();
-    if (superView) {
-        superCollection = superView->getTraitCollection();
+    if (!superView.expired()) {
+        superCollection = superView.lock()->getTraitCollection();
     }
 
     if (overrideUserInterfaceStyle != UIUserInterfaceStyle::unspecified)

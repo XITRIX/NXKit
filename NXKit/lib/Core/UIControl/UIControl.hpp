@@ -50,7 +50,7 @@ private:
     // MARK: - Gesture recognizer
     class GestureRecognizer: public UIGestureRecognizer {
     public:
-        GestureRecognizer(UIControl* control);
+        GestureRecognizer();
         
         void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
         void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
@@ -60,7 +60,7 @@ private:
     private:
         float extraTouchArea = 20;
         std::shared_ptr<UITouch> trackingTouch;
-        UIControl* control;
+        std::shared_ptr<UIControl> getControl();
     };
 };
 

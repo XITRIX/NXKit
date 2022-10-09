@@ -14,7 +14,7 @@ UIBottomSheetController::UIBottomSheetController(std::shared_ptr<UIViewControlle
 {}
 
 void UIBottomSheetController::loadView() {
-    auto view = std::make_shared<UIStackView>(Axis::VERTICAL);
+    auto view = NXKit::make_shared<UIStackView>(Axis::VERTICAL);
 
     view->backgroundColor = UIColor::black.withAlphaComponent(0.6f);
     view->setJustifyContent(JustifyContent::FLEX_END);

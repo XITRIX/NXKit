@@ -27,7 +27,8 @@ void UIWindow::setRootViewController(std::shared_ptr<UIViewController> viewContr
 }
 
 void UIWindow::makeKeyAndVisible() {
-    Application::shared()->setKeyWindow(shared_from_base<UIWindow>());
+    auto shared = shared_from_base<UIWindow>();
+    Application::shared()->setKeyWindow(shared);
 
     if (rootViewController) {
         rootViewController->loadViewIfNeeded();

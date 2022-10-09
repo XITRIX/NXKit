@@ -83,7 +83,7 @@ public:
     virtual bool point(Point insidePoint, UIEvent* withEvent);
 
     UIWindow* getWindow();
-    std::shared_ptr<UIView> getSuperview();
+    std::weak_ptr<UIView> getSuperview();
 
     virtual std::shared_ptr<UIView> getDefaultFocus();
     virtual std::shared_ptr<UIView> getNextFocus(NavigationDirection direction);

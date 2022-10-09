@@ -15,29 +15,30 @@
 //#include "TextTestController.hpp"
 
 void UIAppDelegate::applicationDidFinishLaunching() {
-//    auto textVC = std::make_shared<TextTestController>();
+//    auto textVC = NXKit::make_shared<TextTestController>();
 //
-//    auto window = std::make_shared<UIWindow>();
+//    auto window = NXKit::make_shared<UIWindow>();
 //    window->setRootViewController(textVC);
 //    window->makeKeyAndVisible();
 
     // Test VC
-    auto rootVC = std::make_shared<MyViewController>();
-    auto listVC = std::make_shared<ListViewController>();
-    auto touchVC = std::make_shared<TouchTestViewController>();
-    auto tableView = std::make_shared<TableViewTestController>();
-    auto controlVC = std::make_shared<ControlTestViewController>();
-    auto animVC = std::make_shared<AnimationTestViewController>();
+//    auto rootVC = NXKit::make_shared<MyViewController>();
+    auto listVC = NXKit::make_shared<ListViewController>();
+//    auto touchVC = NXKit::make_shared<TouchTestViewController>();
+//    auto tableView = NXKit::make_shared<TableViewTestController>();
+    auto controlVC = NXKit::make_shared<ControlTestViewController>();
+    auto animVC = NXKit::make_shared<AnimationTestViewController>();
 
     printf("Launching app...\n");
 
-    auto window = make_shared<UIWindow>();
-    std::vector<std::shared_ptr<UIViewController>> controllers = {controlVC, tableView, listVC, animVC, nullptr, rootVC, touchVC};
-    auto tabsVC = std::make_shared<UITabBarController>(controllers);
-//    auto vc = std::make_shared<UINavigationController>(tabsVC);
+    auto window = NXKit::make_shared<UIWindow>();
+//    std::vector<std::shared_ptr<UIViewController>> controllers = {controlVC, tableView, listVC, animVC, nullptr, rootVC, touchVC};
+    std::vector<std::shared_ptr<UIViewController>> controllers = {animVC, controlVC, listVC};
+    auto tabsVC = NXKit::make_shared<UITabBarController>(controllers);
+    auto vc = NXKit::make_shared<UINavigationController>(tabsVC);
     tabsVC->setTitle("Demo App");
-    tabsVC->setImage(std::make_shared<UIImage>("Images/logo.png"_res));
-    window->setRootViewController(tabsVC);
+    tabsVC->setImage(NXKit::make_shared<UIImage>("Images/logo.png"_res));
+    window->setRootViewController(vc);
     window->makeKeyAndVisible();
 
     // Focus test

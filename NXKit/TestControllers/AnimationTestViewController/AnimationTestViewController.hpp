@@ -17,7 +17,7 @@ public:
     void loadView() override;
     void viewDidLoad() override;
 private:
-    std::shared_ptr<UIControl> ball = nullptr;
+    std::shared_ptr<UIControl> ball;
 
     void animate(bool revers);
 

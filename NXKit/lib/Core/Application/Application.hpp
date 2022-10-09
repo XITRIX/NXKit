@@ -14,6 +14,7 @@
 #include <Core/UITraitCollection/UITraitCollection.hpp>
 #include <Core/UIAppDelegate/UIAppDelegate.hpp>
 #include <Core/Utils/NotificationEvent.hpp>
+#include <Core/Utils/SharedBase/SharedBase.hpp>
 
 namespace NXKit {
 
@@ -25,7 +26,7 @@ enum class ApplicationInputType {
     TOUCH
 };
 
-class Application {
+class Application: public enable_shared_from_base<Application> {
 public:
     static Application* shared();
 
@@ -45,7 +46,7 @@ public:
     void setResourcesPath(std::string resourcesPath) { this->resourcesPath = resourcesPath; }
     void setVideoContext(std::shared_ptr<VideoContext> videoContext);
 
-    std::shared_ptr<UIView> getFocus();
+    std::weak_ptr<UIView> getFocus();
     void setFocus(std::shared_ptr<UIView> view);
 
     ApplicationInputType getInputType() { return inputType; }
@@ -53,13 +54,14 @@ public:
 
     NotificationEvent<std::shared_ptr<UIView>>* getFocusDidChangeEvent() { return &focusDidChangeEvent; };
     UIUserInterfaceStyle getUserInterfaceStyle();
+    
 private:
     inline static Application* _shared;
 
     std::shared_ptr<VideoContext> videoContext;
     std::shared_ptr<UIAppDelegate> delegate;
-    std::shared_ptr<UIWindow> keyWindow ;
-    std::shared_ptr<UIView> focus;
+    std::shared_ptr<UIWindow> keyWindow;
+    std::weak_ptr<UIView> focus;
 
     void setInputType(ApplicationInputType inputType);
     ApplicationInputType inputType = ApplicationInputType::GAMEPAD;
@@ -75,7 +77,6 @@ private:
     void input();
     void render();
     void renderFps();
-
 };
 
 }

@@ -20,7 +20,7 @@ UISelectorViewController::UISelectorViewController(std::string title, std::vecto
 { }
 
 void UISelectorViewController::loadView() {
-    auto view = std::make_shared<UIStackView>();
+    auto view = NXKit::make_shared<UIStackView>();
     view->setAxis(Axis::VERTICAL);
 
     view->setJustifyContent(JustifyContent::FLEX_END);
@@ -33,24 +33,24 @@ void UISelectorViewController::loadView() {
 }
 
 std::shared_ptr<UIView> UISelectorViewController::makeContentView() {
-    auto navigationBar = std::make_shared<UINavigationBar>();
+    auto navigationBar = NXKit::make_shared<UINavigationBar>();
     navigationBar->setSize(Size(UIView::AUTO, headerHeight));
     navigationBar->titleLabel->getFont()->fontSize = 24;
     navigationBar->pushNavigationItem({ .title = title, .image = nullptr });
 
-    auto container = std::make_shared<UIStackView>(Axis::VERTICAL);
+    auto container = NXKit::make_shared<UIStackView>(Axis::VERTICAL);
     container->backgroundColor = UIColor::systemBackground;
     container->showShadow = true;
 
-    auto scroll = std::make_shared<UIScrollView>();
+    auto scroll = NXKit::make_shared<UIScrollView>();
     scroll->setFixWidth(true);
 
-    auto view = std::make_shared<UIStackView>(Axis::VERTICAL);
+    auto view = NXKit::make_shared<UIStackView>(Axis::VERTICAL);
     view->setAlignItems(AlignItems::CENTER);
     view->setPadding(32, 80, 32, 40);
 
     for (int i = 0; i < data.size(); i++) {
-        auto cell = std::make_shared<UITableViewRadioCell>();
+        auto cell = NXKit::make_shared<UITableViewRadioCell>();
         if (i == selectedIndex) selectedView = cell;
         cell->setHeight(60);
         cell->setPercentWidth(60);
@@ -86,10 +86,10 @@ std::shared_ptr<UIView> UISelectorViewController::makeContentView() {
 }
 
 std::shared_ptr<UIView> UISelectorViewController::makeFooter() {
-    auto container = std::make_shared<UIStackView>();
+    auto container = NXKit::make_shared<UIStackView>();
     container->backgroundColor = UIColor::systemBackground;
 
-    auto footer = std::make_shared<UIStackView>();
+    auto footer = NXKit::make_shared<UIStackView>();
     footer->setAxis(Axis::HORIZONTAL);
     footer->setAlignItems(AlignItems::STRETCH);
     footer->setJustifyContent(JustifyContent::FLEX_END);
@@ -100,7 +100,7 @@ std::shared_ptr<UIView> UISelectorViewController::makeFooter() {
     footer->setMarginRight(30);
     footer->setPadding(4, 8, 4, 8);
 
-    auto actions = std::make_shared<UIActionsView>();
+    auto actions = NXKit::make_shared<UIActionsView>();
     actions->inController = shared_from_this();
     footer->addSubview(actions);
 
@@ -125,7 +125,7 @@ void UISelectorViewController::viewDidLayoutSubviews() {
             Application::shared()->setFocus(selectedView);
 
             Rect focusedViewFrame = selectedView->getFrame();
-            Point origin = selectedView->getSuperview()->convert(focusedViewFrame.origin, scrollView);
+            Point origin = selectedView->getSuperview().lock()->convert(focusedViewFrame.origin, scrollView);
             origin.y -= height / 2 - focusedViewFrame.height() / 2;
 
             scrollView->setContentOffset(origin, true);

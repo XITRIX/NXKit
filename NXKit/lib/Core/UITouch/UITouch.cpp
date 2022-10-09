@@ -33,8 +33,8 @@ Point UITouch::previousLocationIn(std::shared_ptr<UIView> view) {
 void UITouch::runTouchActionOnRecognizerHierachy(std::function<void(std::shared_ptr<UIGestureRecognizer>)> action) {
     for (auto recognizer: gestureRecognizers) {
         if (hasBeenCancelledByAGestureRecognizer) return;
-        if (!recognizer->isEnabled()) continue;
-        action(recognizer);
+        if (recognizer.expired() || !recognizer.lock()->isEnabled()) continue;
+        action(recognizer.lock());
     }
 }
 

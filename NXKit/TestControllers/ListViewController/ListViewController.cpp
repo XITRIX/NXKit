@@ -17,13 +17,13 @@ ListItemView::ListItemView() {
     setAxis(Axis::HORIZONTAL);
     setAlignItems(AlignItems::CENTER);
 
-    imageView = std::make_shared<UIImageView>();
+    imageView = NXKit::make_shared<UIImageView>();
     imageView->setSize({ 44, 44 });
     imageView->setMarginRight(20);
 
 //    backgroundColor = UIColor::red;
 
-    label = std::make_shared<UILabel>("Test text");
+    label = NXKit::make_shared<UILabel>("Test text");
     label->verticalAlign = VerticalAlign::CENTER;
 //    label->backgroundColor = UIColor::blue;
     label->getFont()->fontSize = 22;
@@ -59,11 +59,11 @@ ListViewController::ListViewController() {
 }
 
 void ListViewController::loadView() {
-    scrollView = std::make_shared<UIScrollView>();
+    scrollView = NXKit::make_shared<UIScrollView>();
     scrollView->setFixWidth(true);
     scrollView->scrollingMode = UIScrollViewScrollingMode::scrollingEdge;
 
-    stackView = std::make_shared<UIStackView>();
+    stackView = NXKit::make_shared<UIStackView>();
     stackView->setPadding(32, 80, 47, 40);
 
     scrollView->addSubview(stackView);
@@ -73,9 +73,9 @@ void ListViewController::loadView() {
 
 void ListViewController::viewDidLoad() {
     for (int i = 0; i < 20; i++) {
-        auto item = std::make_shared<ListItemView>();
+        auto item = NXKit::make_shared<ListItemView>();
         item->setText("Test text #" + std::to_string(i + 1));
-        item->setImage(std::make_shared<UIImage>(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(i%10) + ".svg", true, 2));
+        item->setImage(NXKit::make_shared<UIImage>(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(i%10) + ".svg", true, 2));
         item->setBorderBottom(1);
         if (i == 0) item->setBorderTop(1);
         item->borderColor = UIColor::separator;

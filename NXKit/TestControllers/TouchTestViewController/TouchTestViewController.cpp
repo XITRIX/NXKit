@@ -22,21 +22,21 @@ void TouchTestViewController::viewWillLayoutSubviews() {
 }
 
 void TouchTestViewController::loadView() {
-    auto view = std::make_shared<UIStackView>(Axis::HORIZONTAL);
+    auto view = NXKit::make_shared<UIStackView>(Axis::HORIZONTAL);
 
-    auto red = std::make_shared<UIView>();
+    auto red = NXKit::make_shared<UIView>();
     red->backgroundColor = UIColor::red;
     red->setGrow(1);
     red->tag = "RED";
 
-    auto green = std::make_shared<UIStackView>();
+    auto green = NXKit::make_shared<UIStackView>();
     green->backgroundColor = UIColor::green;
     green->setGrow(1);
     green->tag = "GREEN";
     green->setJustifyContent(JustifyContent::CENTER);
     green->setAlignItems(AlignItems::CENTER);
 
-    target = std::make_shared<TargetView>();
+    target = NXKit::make_shared<TargetView>();
     target->highlightOnFocus = false;
     target->tag = "TARGET";
     target->backgroundColor = UIColor::blue;

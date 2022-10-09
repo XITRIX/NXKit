@@ -29,16 +29,16 @@ Application* Application::shared() {
 }
 
 Application::Application() {
-    delegate = std::make_shared<UIAppDelegate>();
+    delegate = NXKit::make_shared<UIAppDelegate>();
     Application::_shared = this;
 }
 
 Application::~Application() {
-//    delete delegate;
-//    delete keyWindow;
+    keyWindow = nullptr;
+    delegate = nullptr;
+    videoContext = nullptr;
     delete FontManager::shared();
     delete InputManager::shared();
-//    delete videoContext;
 }
 
 void Application::setKeyWindow(std::shared_ptr<UIWindow> window) {
@@ -69,7 +69,7 @@ bool Application::mainLoop() {
     input();
 
     {
-        auto event = std::make_shared<UIEvent>();
+        auto event = NXKit::make_shared<UIEvent>();
         event->allTouches = InputManager::shared()->getTouches();
         if (event->allTouches.size() > 0) setInputType(ApplicationInputType::TOUCH);
         keyWindow->sendEvent(event);
@@ -135,39 +135,42 @@ bool Application::onControllerButtonPressed(ControllerButton button, bool repeat
 //    if (!focus) {
 //        setFocus(keyWindow->getDefaultFocus());
 //    }
+
+
+
     
-    if (!focus) {
+    if (focus.expired()) {
         return false;
     }
 
-    if (focus->press(button)) {
+    if (focus.lock()->press(button)) {
         return false;
     }
 
     auto newFocus = focus;
     NavigationDirection direction = NavigationDirection::UP;
     if (button == BUTTON_NAV_UP) {
-        newFocus = focus->getNextFocus(NavigationDirection::UP);
+        newFocus = focus.lock()->getNextFocus(NavigationDirection::UP);
         direction = NavigationDirection::UP;
     }
     if (button == BUTTON_NAV_DOWN) {
-        newFocus = focus->getNextFocus(NavigationDirection::DOWN);
+        newFocus = focus.lock()->getNextFocus(NavigationDirection::DOWN);
         direction = NavigationDirection::DOWN;
     }
     if (button == BUTTON_NAV_LEFT) {
-        newFocus = focus->getNextFocus(NavigationDirection::LEFT);
+        newFocus = focus.lock()->getNextFocus(NavigationDirection::LEFT);
         direction = NavigationDirection::LEFT;
     }
     if (button == BUTTON_NAV_RIGHT) {
-        newFocus = focus->getNextFocus(NavigationDirection::RIGHT);
+        newFocus = focus.lock()->getNextFocus(NavigationDirection::RIGHT);
         direction = NavigationDirection::RIGHT;
     }
 
-    if (newFocus && newFocus != focus) {
-        setFocus(newFocus);
+    if (!newFocus.expired() && newFocus.lock() != focus.lock()) {
+        setFocus(newFocus.lock());
         return true;
-    } else if (!newFocus && focus) {
-        focus->shakeHighlight(direction);
+    } else if (newFocus.expired() && !focus.expired()) {
+        focus.lock()->shakeHighlight(direction);
         return false;
     }
 
@@ -177,26 +180,28 @@ NVGcontext* Application::getContext() {
     return videoContext->getNVGContext();
 }
 
-std::shared_ptr<UIView> Application::getFocus() {
+std::weak_ptr<UIView> Application::getFocus() {
     return this->focus;
 }
 
 void Application::setFocus(std::shared_ptr<UIView> view) {
-    if (this->focus == view) return;
+    if (this->focus.lock() == view) return;
 
-    if (this->focus) {
-        this->focus->resignFocused();
+    if (!this->focus.expired()) {
+        this->focus.lock()->resignFocused();
     }
     this->focus = view;
 
-    if (this->focus) {
-        this->focus->becomeFocused();
-        
-        if (!this->focus->superview.expired())
-            this->focus->superview.lock()->subviewFocusDidChange(this->focus, this->focus);
+    if (!this->focus.expired()) {
+        this->focus.lock()->becomeFocused();
+
+        if (!this->focus.expired()) {
+            if (!this->focus.lock()->superview.expired())
+                this->focus.lock()->superview.lock()->subviewFocusDidChange(this->focus.lock(), this->focus.lock());
+        }
     }
 
-    focusDidChangeEvent.fire(focus);
+    focusDidChangeEvent.fire(focus.lock());
 }
 
 int Application::getFps() {

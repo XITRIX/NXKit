@@ -170,12 +170,12 @@ void GLFWInputManager::updateMouse() {
     }
 }
 
-std::vector<std::shared_ptr<UIGestureRecognizer>> GLFWInputManager::getRecognizerHierachyFrom(std::shared_ptr<UIView> view) {
-    std::vector<std::shared_ptr<UIGestureRecognizer>> recognizers;
+std::vector<std::weak_ptr<UIGestureRecognizer>> GLFWInputManager::getRecognizerHierachyFrom(std::shared_ptr<UIView> view) {
+    std::vector<std::weak_ptr<UIGestureRecognizer>> recognizers;
     while (view) {
         for (auto recognizer : view->getGestureRecognizers())
             recognizers.push_back(recognizer);
-        view = view->getSuperview();
+        view = view->getSuperview().lock();
     }
 
     return recognizers;
@@ -183,7 +183,7 @@ std::vector<std::shared_ptr<UIGestureRecognizer>> GLFWInputManager::getRecognize
 
 void GLFWInputManager::updateTouch() {
     if (getMouseButtonDown(BrlsMouseButton::BRLS_MOUSE_LKB)) {
-        auto touch = std::make_shared<UITouch>(0, getCoursorPosition(), getCPUTimeUsec());
+        auto touch = NXKit::make_shared<UITouch>(0, getCoursorPosition(), getCPUTimeUsec());
         touch->window = Application::shared()->getKeyWindow();
         touch->view = touch->window->hitTest(touch->absoluteLocation, nullptr);
         touch->gestureRecognizers = getRecognizerHierachyFrom(touch->view);

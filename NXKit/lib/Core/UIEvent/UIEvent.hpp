@@ -8,6 +8,8 @@
 #pragma once
 
 #include <Core/Utils/Animation/Core/Time.hpp>
+#include <Core/Utils/SharedBase/SharedBase.hpp>
+
 #include <vector>
 #include <chrono>
 
@@ -15,8 +17,10 @@ namespace NXKit {
 
 class UITouch;
 
-class UIEvent {
+class UIEvent: public enable_shared_from_base<UIEvent> {
 public:
+    virtual ~UIEvent() {}
+
     std::vector<std::shared_ptr<UITouch>> allTouches;
     std::time_t timestamp = getCPUTimeUsec();
 

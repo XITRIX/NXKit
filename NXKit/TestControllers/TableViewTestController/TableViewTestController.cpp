@@ -12,7 +12,7 @@ TableViewTestController::TableViewTestController() {
 }
 
 void TableViewTestController::loadView() {
-    tableView = std::make_shared<UITableView>();
+    tableView = NXKit::make_shared<UITableView>();
     tableView->setFixWidth(true);
     tableView->scrollingMode = UIScrollViewScrollingMode::centered;
     setView(tableView);
@@ -34,7 +34,7 @@ std::shared_ptr<UITableViewCell> TableViewTestController::tableViewCellForRowAt(
         auto item = std::dynamic_pointer_cast<UITableViewSwitchCell>(tableView->dequeueReusableCell("SwitchCell", indexPath));
         item->setText("Switch cell #" + std::to_string(indexPath.row() + 1));
         item->setOn(true, false);
-        item->setImage(std::make_shared<UIImage>(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(indexPath.row()%10) + ".svg", true, 2));
+        item->setImage(NXKit::make_shared<UIImage>(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(indexPath.row()%10) + ".svg", true, 2));
         item->imageView->setTintColor(UIColor::label);
         return item;
     }
@@ -42,7 +42,7 @@ std::shared_ptr<UITableViewCell> TableViewTestController::tableViewCellForRowAt(
     auto item = std::dynamic_pointer_cast<UITableViewDefaultCell>(tableView->dequeueReusableCell("Cell", indexPath));
     item->setText("Detail cell #" + std::to_string(indexPath.row() + 1));
     item->setDetailText("Detail text");
-    item->setImage(std::make_shared<UIImage>(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(indexPath.row()%10) + ".svg", true, 2));
+    item->setImage(NXKit::make_shared<UIImage>(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(indexPath.row()%10) + ".svg", true, 2));
     item->imageView->setTintColor(UIColor::label);
     return item;
 }

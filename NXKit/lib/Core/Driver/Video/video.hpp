@@ -18,6 +18,7 @@
 
 #include <nanovg.h>
 #include <Core/UITraitCollection/UITraitCollection.hpp>
+#include <Core/Utils/SharedBase/SharedBase.hpp>
 
 namespace NXKit {
 
@@ -26,7 +27,7 @@ namespace NXKit {
 // The VideoContext implementation must also provide the nanovg implementation. As such, there
 // can only be one VideoContext linked at any time in the binary.
 // Context creation and teardown can be done in the constructor and destructor.
-class VideoContext
+class VideoContext: public enable_shared_from_base<VideoContext>
 {
 public:
     virtual ~VideoContext() {};

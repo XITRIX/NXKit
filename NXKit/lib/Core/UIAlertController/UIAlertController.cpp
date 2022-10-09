@@ -40,12 +40,12 @@ UIAlertController::UIAlertController(std::string title, std::string message):
 { }
 
 void UIAlertController::loadView() {
-    auto root = std::make_shared<UIStackView>();
+    auto root = NXKit::make_shared<UIStackView>();
     root->backgroundColor = UIColor::black.withAlphaComponent(0.6f);
     root->setAlignItems(AlignItems::CENTER);
     root->setJustifyContent(JustifyContent::CENTER);
 
-    alert = std::make_shared<UIStackView>(Axis::VERTICAL);
+    alert = NXKit::make_shared<UIStackView>(Axis::VERTICAL);
     alert->cornerRadius = 4;
     alert->backgroundColor = UIColor::systemBackground;
     alert->setPercentWidth(60);
@@ -53,11 +53,11 @@ void UIAlertController::loadView() {
     alert->setJustifyContent(JustifyContent::CENTER);
     root->addSubview(alert);
 
-    auto textsView = std::make_shared<UIStackView>(Axis::VERTICAL);
+    auto textsView = NXKit::make_shared<UIStackView>(Axis::VERTICAL);
     textsView->setMargins(45, 115, 45, 115);
 
     if (title != "") {
-        titleLabel = std::make_shared<UILabel>(title);
+        titleLabel = NXKit::make_shared<UILabel>(title);
         titleLabel->horizontalAlign = HorizontalAlign::CENTER;
         titleLabel->getFont()->fontSize = 24;
         titleLabel->setMargins(0, 0, 20, 0);
@@ -65,7 +65,7 @@ void UIAlertController::loadView() {
     }
 
     if (message != "") {
-        messageLabel = std::make_shared<UILabel>(message);
+        messageLabel = NXKit::make_shared<UILabel>(message);
         messageLabel->horizontalAlign = HorizontalAlign::CENTER;
         messageLabel->getFont()->fontSize = 18;
         messageLabel->setMargins(0, 0, 0, 0);
@@ -73,13 +73,13 @@ void UIAlertController::loadView() {
         textsView->addSubview(messageLabel);
     }
 
-    buttonsView = std::make_shared<UIStackView>(Axis::HORIZONTAL);
+    buttonsView = NXKit::make_shared<UIStackView>(Axis::HORIZONTAL);
     buttonsView->borderColor = UIColor::separator;
     buttonsView->setBorderTop(2);
     buttonsView->setHidden(true);
 //    buttonsView->setBorderBottom(2);
 
-    buttons[0] = std::make_shared<UIAlertButton>();
+    buttons[0] = NXKit::make_shared<UIAlertButton>();
     buttons[0]->setHidden(true);
     buttons[0]->setGrow(1);
     buttons[0]->setWidth(0);
@@ -87,7 +87,7 @@ void UIAlertController::loadView() {
         dismiss(true, actions[0].handler);
     }, "OK"));
 
-    buttons[1] = std::make_shared<UIAlertButton>();
+    buttons[1] = NXKit::make_shared<UIAlertButton>();
     buttons[1]->setHidden(true);
     buttons[1]->setGrow(1);
     buttons[1]->setWidth(0);
@@ -97,7 +97,7 @@ void UIAlertController::loadView() {
         dismiss(true, actions[1].handler);
     }, "OK"));
 
-    buttons[2] = std::make_shared<UIAlertButton>();
+    buttons[2] = NXKit::make_shared<UIAlertButton>();
     buttons[2]->setHidden(true);
     buttons[2]->borderColor = UIColor::separator;
     buttons[2]->addAction(BUTTON_A, UIAction([this]() {
