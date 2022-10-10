@@ -83,11 +83,11 @@ int IOSInputManager::touchCount() {
     return 0;
 }
 
-UITouch* IOSInputManager::getTouch(int id) {
+std::shared_ptr<UITouch> IOSInputManager::getTouch(int id) {
     return nullptr;
 }
 
-std::vector<UITouch*> IOSInputManager::getTouches() {
+std::vector<std::shared_ptr<UITouch>> IOSInputManager::getTouches() {
     return touches;
 }
 
@@ -114,7 +114,7 @@ void IOSInputManager::update() {
 }
 
 void IOSInputManager::updateTouch() {
-    std::map<unsigned long, UITouch*> oldTouches;
+    std::map<unsigned long, std::shared_ptr<UITouch>> oldTouches;
     for (auto touch: touches) {
         oldTouches[touch->touchId] = touch;
     }
@@ -123,7 +123,7 @@ void IOSInputManager::updateTouch() {
     {
         auto find = oldTouches.find(touchIter.first);
         if (find == oldTouches.end()) {
-            auto touch = new UITouch(touchIter.first, Point(touchIter.second.x, touchIter.second.y), getCPUTimeUsec());
+            auto touch = make_shared<UITouch>(touchIter.first, Point(touchIter.second.x, touchIter.second.y), getCPUTimeUsec());
             touch->window = Application::shared()->getKeyWindow();
             touch->view = touch->window->hitTest(touch->absoluteLocation, nullptr);
             touch->gestureRecognizers = getRecognizerHierachyFrom(touch->view);
@@ -141,7 +141,7 @@ void IOSInputManager::updateTouch() {
     }
 
     for (auto touchIter: oldTouches) {
-        UITouch* touch = touchIter.second;
+        std::shared_ptr<UITouch> touch = touchIter.second;
         if (touch->phase == UITouchPhase::MOVED) {
             touch->timestamp = getCPUTimeUsec();
             touch->phase = UITouchPhase::ENDED;
@@ -149,7 +149,7 @@ void IOSInputManager::updateTouch() {
         } else if (touch->phase == UITouchPhase::ENDED) {
             touches.erase(std::remove(touches.begin(), touches.end(), touch));
 //             printf("Touch removed\n");
-            delete touch;
+//            delete touch;
         }
     }
 }
@@ -213,12 +213,12 @@ std::string IOSInputManager::getButtonIcon(ControllerButton button) {
     }
 }
 
-std::vector<UIGestureRecognizer*> IOSInputManager::getRecognizerHierachyFrom(UIView* view) {
-    std::vector<UIGestureRecognizer*> recognizers;
+std::vector<std::weak_ptr<UIGestureRecognizer>> IOSInputManager::getRecognizerHierachyFrom(std::shared_ptr<UIView> view) {
+    std::vector<std::weak_ptr<UIGestureRecognizer>> recognizers;
     while (view) {
         for (auto recognizer : view->getGestureRecognizers())
             recognizers.push_back(recognizer);
-        view = view->getSuperview();
+        view = view->getSuperview().lock();
     }
 
     return recognizers;

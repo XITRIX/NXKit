@@ -24,7 +24,7 @@ public:
     }
 //    virtual ~enable_shared_from_base() {}
 
-protected:
+//protected:
     std::shared_ptr<Base> shared_from_this() {
         return std::shared_ptr<Base>(__weak_this_);
     }

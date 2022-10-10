@@ -18,10 +18,10 @@ IOSMain::IOSMain(GLViewController* controller): controller(controller)
 
     ((GLKView *)controller.view).context = context;
 
-    application = new NXKit::Application();
+    application = NXKit::make_shared<NXKit::Application>();
     application->setResourcesPath(std::string([[NSBundle mainBundle].resourcePath UTF8String]) + "/resource/");
     
-    videoContext = new NXKit::IOSVideoContext(controller);
+    videoContext = NXKit::make_shared<NXKit::IOSVideoContext>(controller);
 
     application->setVideoContext(videoContext);
 
@@ -32,7 +32,7 @@ IOSMain::IOSMain(GLViewController* controller): controller(controller)
 }
 
 IOSMain::~IOSMain() {
-    delete application;
+//    delete application;
 }
 
 void IOSMain::applicationLoop() {

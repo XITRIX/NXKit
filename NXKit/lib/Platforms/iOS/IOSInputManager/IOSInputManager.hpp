@@ -40,8 +40,8 @@ public:
     float getAxis(short controller, ControllerAxis axis) override;
 
     int touchCount() override;
-    UITouch* getTouch(int id) override;
-    std::vector<UITouch*> getTouches() override;
+    std::shared_ptr<UITouch> getTouch(int id) override;
+    std::vector<std::shared_ptr<UITouch>> getTouches() override;
 
     std::string getButtonIcon(ControllerButton button) override;
 
@@ -56,12 +56,12 @@ private:
     bool keysUp[_BRLS_KBD_KEY_LAST];
     bool keysDown[_BRLS_KBD_KEY_LAST];
 
-    std::vector<UITouch*> touches;
+    std::vector<std::shared_ptr<UITouch>> touches;
 
     void updateKeyboard();
     void updateTouch();
 
-    std::vector<UIGestureRecognizer*> getRecognizerHierachyFrom(UIView* view);
+    std::vector<std::weak_ptr<UIGestureRecognizer>> getRecognizerHierachyFrom(std::shared_ptr<UIView> view);
 };
 
 }

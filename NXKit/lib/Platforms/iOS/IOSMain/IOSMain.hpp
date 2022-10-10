@@ -22,9 +22,9 @@ public:
 
     void applicationLoop();
     
-    NXKit::Application* application;
+    std::shared_ptr<NXKit::Application> application;
     NXKit::IOSInputManager* inputManager;
 private:
     GLViewController* controller;
-    NXKit::IOSVideoContext* videoContext;
+    std::shared_ptr<NXKit::IOSVideoContext> videoContext;
 };
