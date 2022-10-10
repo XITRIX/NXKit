@@ -27,7 +27,7 @@ int main(int argc, const char * argv[]) {
     std::shared_ptr<Application> application = NXKit::make_shared<Application>();
 
 #ifdef __SWITCH__
-    auto videoContext = new SwitchVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
+    auto videoContext = NXKit::make_shared<SwitchVideoContext>("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
     application->setVideoContext(videoContext);
 
     InputManager::initWith(new SwitchInputManager());

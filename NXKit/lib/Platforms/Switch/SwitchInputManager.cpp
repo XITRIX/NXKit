@@ -20,7 +20,7 @@ SwitchInputManager::~SwitchInputManager() {
 void SwitchInputManager::updateTouch() {
     HidTouchScreenState hidState;
     
-    std::map<int, UITouch*> oldTouches;
+    std::map<int, std::shared_ptr<UITouch>> oldTouches;
     for (auto touch: touches) {
         oldTouches[touch->touchId] = touch;
     }
@@ -31,7 +31,7 @@ void SwitchInputManager::updateTouch() {
         {
             auto find = oldTouches.find(hidState.touches[i].finger_id);
             if (find == oldTouches.end()) {
-                auto touch = new UITouch(hidState.touches[i].finger_id, Point(hidState.touches[i].x, hidState.touches[i].y), getCPUTimeUsec());
+                auto touch = NXKit::make_shared<UITouch>(hidState.touches[i].finger_id, Point(hidState.touches[i].x, hidState.touches[i].y), getCPUTimeUsec());
                 touch->window = Application::shared()->getKeyWindow();
                 touch->view = touch->window->hitTest(touch->absoluteLocation, nullptr);
                 touch->gestureRecognizers = getRecognizerHierachyFrom(touch->view);
@@ -49,7 +49,7 @@ void SwitchInputManager::updateTouch() {
         }
 
         for (auto touchIter: oldTouches) {
-            UITouch* touch = touchIter.second;
+            auto touch = touchIter.second;
             if (touch->phase == UITouchPhase::MOVED) {
                 touch->timestamp = getCPUTimeUsec();
                 touch->phase = UITouchPhase::ENDED;
@@ -57,7 +57,7 @@ void SwitchInputManager::updateTouch() {
             } else if (touch->phase == UITouchPhase::ENDED) {
                 touches.erase(std::remove(touches.begin(), touches.end(), touch));
                 // printf("Touch removed\n");
-                delete touch;
+//                delete touch;
             }
         }
     }

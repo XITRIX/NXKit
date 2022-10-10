@@ -39,7 +39,7 @@ public:
     }
 };
 
-template<class _Tp, class ..._Args, class = std::_EnableIf<std::is_polymorphic<_Tp>::value>, class = std::_EnableIf<!std::is_array<_Tp>::value> >
+template<class _Tp, class ..._Args, class = std::enable_if<std::is_polymorphic<_Tp>::value>, class = std::enable_if<!std::is_array<_Tp>::value> >
 std::shared_ptr<_Tp> make_shared(_Args&& ...__args) {
     std::allocator<_Tp> alloc;
     using traits_t = std::allocator_traits<decltype(alloc)>;
