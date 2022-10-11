@@ -88,6 +88,12 @@ void UIWindow::layoutSubviews() {
     }
 }
 
+UIEdgeInsets UIWindow::safeAreaInsets() {
+    auto insets = UIView::safeAreaInsets();
+    insets += additionalSafeAreaInsets;
+    return insets;
+}
+
 std::shared_ptr<UIView> UIWindow::getDefaultFocus() {
     if (presentedViewControllers.size() > 0) {
         return presentedViewControllers.back()->getView()->getDefaultFocus();

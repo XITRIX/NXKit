@@ -10,7 +10,6 @@
 #include <Core/UIBlurView/UIBlurView.hpp>
 #include <Core/UILabel/UILabel.hpp>
 #include <Core/UIImageView/UIImageView.hpp>
-#include <Core/UIActionsView/UIActionsView.hpp>
 #include <Core/Application/Application.hpp>
 
 namespace NXKit {
@@ -96,16 +95,16 @@ std::shared_ptr<UIView> UINavigationController::buildFooter() {
     footer->setAxis(Axis::HORIZONTAL);
     footer->setAlignItems(AlignItems::STRETCH);
     footer->setJustifyContent(JustifyContent::FLEX_END);
-    footer->setSize(Size(UIView::AUTO, footerHeight));
     footer->setBorderTop(1);
     footer->borderColor = UIColor::label;
     footer->setMarginLeft(30);
     footer->setMarginRight(30);
     footer->setPadding(4, 8, 4, 8);
 
-    auto actions = NXKit::make_shared<UIActionsView>();
-    actions->inController = weak_from_this();
-    footer->addSubview(actions);
+    acctionsBar = NXKit::make_shared<UIActionsView>();
+    acctionsBar->setSize(Size(UIView::AUTO, footerHeight));
+    acctionsBar->inController = weak_from_this();
+    footer->addSubview(acctionsBar);
 
     blurFooter->addSubview(footer);
     return blurFooter;
@@ -129,6 +128,10 @@ void UINavigationController::viewDidLayoutSubviews() {
         viewControllers.back()->getView()->setSize(size);
         viewControllers.back()->getView()->setPosition(Point(0, headerHeight));
     }
+
+    auto insets = getView()->safeAreaInsets();
+    navigationBar->setMarginTop(insets.top);
+    acctionsBar->setPaddingBottom(insets.bottom);
 }
 
 void UINavigationController::show(std::shared_ptr<UIViewController> controller, void* sender) {

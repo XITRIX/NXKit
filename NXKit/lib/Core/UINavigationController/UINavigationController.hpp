@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Core/UIViewController/UIViewController.hpp>
+#include <Core/UIActionsView/UIActionsView.hpp>
 #include <Core/UIStackView/UIStackView.hpp>
 #include <Core/UIImageView/UIImageView.hpp>
 #include <Core/UILabel/UILabel.hpp>
@@ -53,6 +54,7 @@ private:
     std::shared_ptr<UIStackView> overlay;
 
     std::shared_ptr<UINavigationBar> navigationBar = nullptr;
+    std::shared_ptr<UIActionsView> acctionsBar = nullptr;
 
     std::shared_ptr<UIView> buildFooter();
 };

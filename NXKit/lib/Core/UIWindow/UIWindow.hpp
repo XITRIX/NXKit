@@ -13,6 +13,8 @@ namespace NXKit {
 
 class UIWindow: public UIView {
 public:
+    UIEdgeInsets additionalSafeAreaInsets;
+
     UIWindow();
     ~UIWindow();
 
@@ -24,6 +26,7 @@ public:
 
     void layoutSubviews() override;
     std::shared_ptr<UIView> getDefaultFocus() override;
+    UIEdgeInsets safeAreaInsets() override;
 
     UITraitCollection getTraitCollection() override;
 

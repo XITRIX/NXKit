@@ -152,4 +152,12 @@
 }
 
 
+- (void)viewSafeAreaInsetsDidChange
+{
+    [super viewSafeAreaInsetsDidChange];
+    auto iosInsets = self.view.safeAreaInsets;
+    NXKit::UIEdgeInsets insets(iosInsets.top, iosInsets.left, iosInsets.bottom, iosInsets.right);
+    main->application->getKeyWindow()->additionalSafeAreaInsets = insets;
+}
+
 @end
