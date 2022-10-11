@@ -40,8 +40,8 @@ public:
     float getAxis(short controller, ControllerAxis axis) override;
 
     int touchCount() override;
-    UITouch* getTouch(int id) override;
-    std::vector<UITouch*> getTouches() override;
+    std::shared_ptr<UITouch> getTouch(int id) override;
+    std::vector<std::shared_ptr<UITouch>> getTouches() override;
 
     std::string getButtonIcon(ControllerButton button) override;
 
@@ -71,7 +71,7 @@ protected:
 
 //    float axis[GLFW_JOYSTICK_LAST][_AXES_MAX];
 
-    std::vector<UITouch*> touches;
+    std::vector<std::shared_ptr<UITouch>> touches;
 
 //    virtual void updateKeyboard();
     virtual void updateMouse();
@@ -81,7 +81,7 @@ protected:
 //    virtual void updateButton(short controller, ControllerButton button, bool newValue);
 //    static void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-    std::vector<UIGestureRecognizer*> getRecognizerHierachyFrom(UIView* view);
+    std::vector<std::weak_ptr<UIGestureRecognizer>> getRecognizerHierachyFrom(std::shared_ptr<UIView> view);
 };
 
 }

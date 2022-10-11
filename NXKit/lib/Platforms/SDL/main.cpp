@@ -32,7 +32,7 @@ constexpr uint32_t ORIGINAL_WINDOW_HEIGHT = 720;
 using namespace NXKit;
 
 int main(int argc, char *argv[]) {
-    Application* application = new Application();
+    auto application = make_shared<Application>();
 
 #ifdef __SWITCH__
     auto videoContext = new SwitchVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     InputManager::initWith(new SwitchInputManager());
     application->setResourcesPath("romfs:/");
 #else
-    auto videoContext = new SDLVideoContext("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
+    auto videoContext = make_shared<SDLVideoContext>("Title", ORIGINAL_WINDOW_WIDTH, ORIGINAL_WINDOW_HEIGHT);
     application->setVideoContext(videoContext);
 
     InputManager::initWith(new SDLInputManager());
@@ -52,6 +52,6 @@ int main(int argc, char *argv[]) {
 
     while (application->mainLoop());
 
-    delete application;
+    application = nullptr;
     return 0;
 }

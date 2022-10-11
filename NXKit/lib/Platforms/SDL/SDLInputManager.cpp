@@ -48,8 +48,8 @@ bool SDLInputManager::getButtonDown(ControllerButton button) { return false; }
 float SDLInputManager::getAxis(short controller, ControllerAxis axis) { return 0; }
 
 int SDLInputManager::touchCount() { return (int) touches.size(); }
-UITouch* SDLInputManager::getTouch(int id) { return touches[id]; }
-std::vector<UITouch*> SDLInputManager::getTouches() { return touches; }
+std::shared_ptr<UITouch> SDLInputManager::getTouch(int id) { return touches[id]; }
+std::vector<std::shared_ptr<UITouch>> SDLInputManager::getTouches() { return touches; }
 
 std::string SDLInputManager::getButtonIcon(ControllerButton button) {
     switch (button) {
@@ -164,12 +164,12 @@ void SDLInputManager::updateTouch() {
 //    }
 }
 
-std::vector<UIGestureRecognizer*> SDLInputManager::getRecognizerHierachyFrom(UIView* view) {
-    std::vector<UIGestureRecognizer*> recognizers;
+std::vector<std::weak_ptr<UIGestureRecognizer>> SDLInputManager::getRecognizerHierachyFrom(std::shared_ptr<UIView> view) {
+    std::vector<std::weak_ptr<UIGestureRecognizer>> recognizers;
     while (view) {
         for (auto recognizer : view->getGestureRecognizers())
             recognizers.push_back(recognizer);
-        view = view->getSuperview();
+        view = view->getSuperview().lock();
     }
 
     return recognizers;
