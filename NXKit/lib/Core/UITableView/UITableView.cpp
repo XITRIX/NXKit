@@ -12,16 +12,19 @@
 namespace NXKit {
 
 UITableView::UITableView() {
-    UIScrollView::delegate = std::dynamic_pointer_cast<UIScrollViewDelegate>(delegate);
+    UIScrollView::delegate = std::dynamic_pointer_cast<UIScrollViewDelegate>(delegate.lock());
     setPaddings(32, 40, 47, 80);
 }
 
 UITableView::~UITableView() {
-//    for (auto it = cellsInQueue.begin(); it != cellsInQueue.end(); it++) {
-//        for (auto cell: it->second) {
+//    cellsInQueue.clear();
+    cellsInIndexPaths.clear();
+    dequeuedCells.clear();
+    for (auto it = cellsInQueue.begin(); it != cellsInQueue.end(); it++) {
+        for (auto cell: it->second) {
 //            delete cell;
-//        }
-//    }
+        }
+    }
 }
 
 void UITableView::setPaddings(float top, float left, float bottom, float right) {
@@ -40,7 +43,7 @@ void UITableView::setContentOffset(Point offset, bool animated) {
 
 std::shared_ptr<UIView> UITableView::getDefaultFocus() {
     if (selectedIndexPath.section() != -1 && cellsInIndexPaths[selectedIndexPath.section()][selectedIndexPath.row()] != nullptr)
-        return cellsInIndexPaths[selectedIndexPath.section()][selectedIndexPath.row()];
+        return cellsInIndexPaths[selectedIndexPath.section()][selectedIndexPath.row()]->shared_from_this();
     return nullptr;
 }
 
@@ -57,8 +60,8 @@ std::shared_ptr<UIView> UITableView::getNextFocus(NavigationDirection direction)
         do {
             newFocus = newFocus.prev();
             if (newFocus.section() < 0) return UIScrollView::getNextFocus(direction);
-            newFocusView = cellsInIndexPaths[newFocus.section()][newFocus.row()];
-        } while (!newFocusView || !dataSource->tableViewCellCanBeFocusedAt(shared_from_base<UITableView>(), newFocus));
+            newFocusView = cellsInIndexPaths[newFocus.section()][newFocus.row()]->shared_from_this();
+        } while (!newFocusView || !dataSource.lock()->tableViewCellCanBeFocusedAt(shared_from_base<UITableView>(), newFocus));
 
         if (newFocusView && newFocusView->canBecomeFocused()) {
             selectedIndexPath = newFocus;
@@ -71,10 +74,10 @@ std::shared_ptr<UIView> UITableView::getNextFocus(NavigationDirection direction)
         std::shared_ptr<UIView> newFocusView = nullptr;
 
         do {
-            newFocus = newFocus.next(dataSource->tableViewNumberOfRowsInSection(shared_from_base<UITableView>(), newFocus.section()));
-            if (newFocus.section() >= dataSource->numberOfSectionsIn(shared_from_base<UITableView>())) return UIScrollView::getNextFocus(direction);
-            newFocusView = cellsInIndexPaths[newFocus.section()][newFocus.row()];
-        } while (!newFocusView || !dataSource->tableViewCellCanBeFocusedAt(shared_from_base<UITableView>(), newFocus));
+            newFocus = newFocus.next(dataSource.lock()->tableViewNumberOfRowsInSection(shared_from_base<UITableView>(), newFocus.section()));
+            if (newFocus.section() >= dataSource.lock()->numberOfSectionsIn(shared_from_base<UITableView>())) return UIScrollView::getNextFocus(direction);
+            newFocusView = cellsInIndexPaths[newFocus.section()][newFocus.row()]->shared_from_this();
+        } while (!newFocusView || !dataSource.lock()->tableViewCellCanBeFocusedAt(shared_from_base<UITableView>(), newFocus));
 
         if (newFocusView && newFocusView->canBecomeFocused()) {
             selectedIndexPath = newFocus;
@@ -88,7 +91,7 @@ std::shared_ptr<UIView> UITableView::getNextFocus(NavigationDirection direction)
 void UITableView::subviewFocusDidChange(std::shared_ptr<UIView> focusedView, std::shared_ptr<UIView> notifiedView) {
     UIScrollView::subviewFocusDidChange(focusedView, notifiedView);
     auto cell = std::dynamic_pointer_cast<UITableViewCell>(notifiedView);
-    if (cell && cell->tableView.get() == this) {
+    if (cell && !cell->tableView.expired() && cell->tableView.lock().get() == this) {
         selectedIndexPath = cell->indexPath;
     }
 }
@@ -109,7 +112,7 @@ Size UITableView::getContentSize() {
     return size;
 }
 
-void UITableView::registerView(std::string reuseId, std::function<UITableViewCell*()> allocator) {
+void UITableView::registerView(std::string reuseId, std::function<std::shared_ptr<UITableViewCell>()> allocator) {
     allocationMap[reuseId] = allocator;
     cellsInQueue[reuseId] = std::vector<std::shared_ptr<UITableViewCell>>();
 }
@@ -119,7 +122,7 @@ std::shared_ptr<UITableViewCell> UITableView::dequeueReusableCell(std::string re
     if (cellsInQueue[reuseId].size() > 0) {
         auto cell = pop(&cellsInQueue[reuseId]);
         cell->indexPath = indexPath;
-        return cell;
+        return cell->shared_from_base<UITableViewCell>();
     }
 
     // Instantiate new Cell
@@ -129,8 +132,8 @@ std::shared_ptr<UITableViewCell> UITableView::dequeueReusableCell(std::string re
     cell->tableView = shared_from_base<UITableView>();
     cell->onEvent = [this, cell](UIControlTouchEvent event) {
         if (event == UIControlTouchEvent::touchUpInside) {
-            if (this->delegate)
-                this->delegate->tableViewDidSelectRowAtIndexPath(shared_from_base<UITableView>(), cell->indexPath);
+            if (!this->delegate.expired())
+                this->delegate.lock()->tableViewDidSelectRowAtIndexPath(shared_from_base<UITableView>(), cell->indexPath);
             Application::shared()->setFocus(cell);
         }
     };
@@ -138,7 +141,7 @@ std::shared_ptr<UITableViewCell> UITableView::dequeueReusableCell(std::string re
 }
 
 void UITableView::reloadData() {
-    if (!dataSource) return;
+    if (dataSource.expired()) return;
 
     recalculateEstimatedHeights();
     dequeCellsForCurrentContentOffset();
@@ -148,20 +151,20 @@ void UITableView::recalculateEstimatedHeights() {
     cellsHeights.clear();
     cellsInIndexPaths.clear();
 
-    int sections = dataSource->numberOfSectionsIn(shared_from_base<UITableView>());
+    int sections = dataSource.lock()->numberOfSectionsIn(shared_from_base<UITableView>());
 
     for (int section = 0; section < sections; section++) {
         cellsHeights.push_back(std::vector<float>());
-        cellsInIndexPaths.push_back(std::vector<std::shared_ptr<UITableViewCell>>());
+        cellsInIndexPaths.push_back(std::vector<UITableViewCell*>());
 
-        int rows = dataSource->tableViewNumberOfRowsInSection(shared_from_base<UITableView>(), section);
+        int rows = dataSource.lock()->tableViewNumberOfRowsInSection(shared_from_base<UITableView>(), section);
         for (int row = 0; row < rows; row++) {
             IndexPath indexPath = IndexPath(row, section);
-            if (selectedIndexPath.section() == -1 && dataSource && dataSource->tableViewCellCanBeFocusedAt(shared_from_base<UITableView>(), indexPath))
+            if (selectedIndexPath.section() == -1 && !dataSource.expired() && dataSource.lock()->tableViewCellCanBeFocusedAt(shared_from_base<UITableView>(), indexPath))
                 selectedIndexPath = indexPath;
             
             cellsHeights[section].push_back(isnan(rowHeight) ? estimatedRowHeight : rowHeight);
-            cellsInIndexPaths[section].push_back(nullptr);
+            cellsInIndexPaths[section].push_back(NULL);
         }
     }
 }
@@ -176,7 +179,7 @@ void UITableView::dequeCellsForCurrentContentOffset() {
         auto cell = dequeuedCells[i];
         if (!cell->getFrame().intersects(bounds)) {
             cell->removeFromSuperview();
-            cellsInQueue[cell->getReuseIdentifier()].push_back(cell);
+            cellsInQueue[cell->getReuseIdentifier()].push_back(cell->shared_from_base<UITableViewCell>());
             dequeuedCells.erase(dequeuedCells.begin() + i);
             cellsInIndexPaths[cell->indexPath.section()][cell->indexPath.row()] = nullptr;
         } else {
@@ -190,7 +193,7 @@ void UITableView::dequeCellsForCurrentContentOffset() {
             if (nextCellBottom >= bounds.minY() && currentY <= bounds.maxY()) {
                 IndexPath indexPath = IndexPath(row, section);
                 if (cellsInIndexPaths[indexPath.section()][indexPath.row()] == nullptr) {
-                    auto cell = dataSource->tableViewCellForRowAt(shared_from_base<UITableView>(), indexPath);
+                    auto cell = dataSource.lock()->tableViewCellForRowAt(shared_from_base<UITableView>(), indexPath);
                     if (row == 0) cell->setBorderTop(1);
                     else { cell->setBorderTop(0); }
                     cell->setBorderBottom(1);
@@ -204,8 +207,8 @@ void UITableView::dequeCellsForCurrentContentOffset() {
                     cell->setPosition(Point(paddings.left, currentY));
                     
                     addCellSubview(cell);
-                    dequeuedCells.push_back(cell);
-                    cellsInIndexPaths[indexPath.section()][indexPath.row()] = cell;
+                    dequeuedCells.push_back(cell.get());
+                    cellsInIndexPaths[indexPath.section()][indexPath.row()] = cell.get();
                 }
             }
             currentY += cellsHeights[section][row];

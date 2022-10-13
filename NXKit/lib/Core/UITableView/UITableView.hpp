@@ -33,8 +33,8 @@ public:
     float rowHeight = AUTO;
     float estimatedRowHeight = 70;
 
-    std::shared_ptr<UITableViewDelegate> delegate;
-    std::shared_ptr<UITableViewDataSource> dataSource = nullptr;
+    std::weak_ptr<UITableViewDelegate> delegate;
+    std::weak_ptr<UITableViewDataSource> dataSource;
 
     UITableView();
     virtual ~UITableView();
@@ -48,7 +48,7 @@ public:
     void layoutSubviews() override;
     void setContentOffset(Point offset, bool animated = true) override;
 
-    void registerView(std::string reuseId, std::function<UITableViewCell*()> allocator);
+    void registerView(std::string reuseId, std::function<std::shared_ptr<UITableViewCell>()> allocator);
     std::shared_ptr<UITableViewCell> dequeueReusableCell(std::string reuseId, IndexPath indexPath);
     void reloadData();
 
@@ -57,11 +57,11 @@ public:
     UIEdgeInsets getPaddings() { return paddings; }
 private:
     UIEdgeInsets paddings;
-    std::map<std::string, std::function<UITableViewCell*()>> allocationMap;
+    std::map<std::string, std::function<std::shared_ptr<UITableViewCell>()>> allocationMap;
     std::map<std::string, std::vector<std::shared_ptr<UITableViewCell>>> cellsInQueue;
     std::vector<std::vector<float>> cellsHeights;
-    std::vector<std::shared_ptr<UITableViewCell>> dequeuedCells;
-    std::vector<std::vector<std::shared_ptr<UITableViewCell>>> cellsInIndexPaths;
+    std::vector<UITableViewCell*> dequeuedCells;
+    std::vector<std::vector<UITableViewCell*>> cellsInIndexPaths;
     IndexPath selectedIndexPath = IndexPath(-1, -1);
 
     void recalculateEstimatedHeights();
