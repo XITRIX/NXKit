@@ -28,6 +28,7 @@ public:
 
 class UIScrollView: public UIView {
 public:
+    UIEdgeInsets contentInset;
     std::shared_ptr<UIScrollViewDelegate> delegate;
     UIScrollViewScrollingMode scrollingMode = UIScrollViewScrollingMode::centered;
 

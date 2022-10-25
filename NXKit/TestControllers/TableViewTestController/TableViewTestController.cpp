@@ -20,8 +20,8 @@ void TableViewTestController::loadView() {
 
 void TableViewTestController::viewDidLoad() {
     tableView->dataSource = shared_from_base<TableViewTestController>();
-    tableView->registerView("Cell", []() { return new UITableViewDefaultCell(); });
-    tableView->registerView("SwitchCell", []() { return new UITableViewSwitchCell(); });
+    tableView->registerView("Cell", []() { return make_shared<UITableViewDefaultCell>(); });
+    tableView->registerView("SwitchCell", []() { return make_shared<UITableViewSwitchCell>(); });
     tableView->reloadData();
 }
 

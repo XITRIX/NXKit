@@ -22,6 +22,7 @@
 #include <Core/UIButton/UIButton.hpp>
 #include <Core/UIStackView/UIStackView.hpp>
 #include <Core/UITableView/UITableView.hpp>
+#include <Core/UITableView2/UITableView2.hpp>
 #include <Core/UITableViewDefaultCell/UITableViewDefaultCell.hpp>
 #include <Core/UITableViewSwitchCell/UITableViewSwitchCell.hpp>
 #include <Core/UIImageView/UIImageView.hpp>

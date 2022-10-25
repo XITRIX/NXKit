@@ -88,7 +88,7 @@ void ControlTestViewController::loadView() {
 //        AnimationTestViewController* animVC = new AnimationTestViewController();
 //        TouchTestViewController* touchVC = new TouchTestViewController();
         std::vector<std::string> data;
-        for (int i = 0; i < 15; i++)
+        for (int i = 0; i < 200; i++)
             data.push_back("Cell #" + std::to_string(i + 1));
 
         auto selector = NXKit::make_shared<UISelectorViewController>("Demo select", data, [this](int index) {

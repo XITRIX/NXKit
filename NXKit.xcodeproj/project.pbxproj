@@ -139,9 +139,6 @@
 		7C706D6A28EE1C3F00B07BB5 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C706D6928EE1C3F00B07BB5 /* GLKit.framework */; };
 		7C706D6E28EE1ED300B07BB5 /* IOSInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D6C28EE1ED300B07BB5 /* IOSInputManager.cpp */; };
 		7C706D6F28EE26E300B07BB5 /* resource in Resources */ = {isa = PBXBuildFile; fileRef = 7C709CB328C1DC0C000A474F /* resource */; };
-		7C706D7028EE419B00B07BB5 /* GLFWVideoContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960762871F8BF009E0953 /* GLFWVideoContext.cpp */; };
-		7C706D7128EE419B00B07BB5 /* GLFWInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495428854E2900C5A988 /* GLFWInputManager.cpp */; };
-		7C706D7228EE419B00B07BB5 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E92874EA4000659D24 /* main.cpp */; };
 		7C706D7E28EF8AFB00B07BB5 /* TextTestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D7C28EF8AFB00B07BB5 /* TextTestController.cpp */; };
 		7C706D7F28EF8B0000B07BB5 /* TextTestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C706D7C28EF8AFB00B07BB5 /* TextTestController.cpp */; };
 		7C709C9F28C08CCE000A474F /* UIControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C709C9D28C08CCE000A474F /* UIControl.cpp */; };
@@ -156,6 +153,13 @@
 		7C78EBE22873748B0082D3AC /* GaussianBlur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C78EBDD2873748B0082D3AC /* GaussianBlur.cpp */; };
 		7C78EBE8287386070082D3AC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C78EBE7287386070082D3AC /* OpenGL.framework */; };
 		7C82CB5428CCC97700634A8E /* UITraitCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C82CB5228CCC97700634A8E /* UITraitCollection.cpp */; };
+		7C85101828F4887900295F9B /* UITableView2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C85101628F4887900295F9B /* UITableView2.cpp */; };
+		7C85101928F4887900295F9B /* UITableView2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C85101628F4887900295F9B /* UITableView2.cpp */; };
+		7C85101D28F54C5100295F9B /* GLFWVideoContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960762871F8BF009E0953 /* GLFWVideoContext.cpp */; };
+		7C85101E28F54C5100295F9B /* GLFWInputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C47495428854E2900C5A988 /* GLFWInputManager.cpp */; };
+		7C85101F28F54C6200295F9B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CE9B5E92874EA4000659D24 /* main.cpp */; };
+		7C85102428F610D600295F9B /* TableView2TestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C85102228F610D600295F9B /* TableView2TestController.cpp */; };
+		7C85102528F610D600295F9B /* TableView2TestController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C85102228F610D600295F9B /* TableView2TestController.cpp */; };
 		7C888E4328816547009A6B95 /* UINavigationController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4128816547009A6B95 /* UINavigationController.cpp */; };
 		7C888E47288165E9009A6B95 /* ViewController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E45288165E9009A6B95 /* ViewController.cpp */; };
 		7C888E4B28818212009A6B95 /* UITabBarController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C888E4928818212009A6B95 /* UITabBarController.cpp */; };
@@ -358,6 +362,10 @@
 		7C78EBE7287386070082D3AC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		7C82CB5228CCC97700634A8E /* UITraitCollection.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITraitCollection.cpp; sourceTree = "<group>"; };
 		7C82CB5328CCC97700634A8E /* UITraitCollection.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITraitCollection.hpp; sourceTree = "<group>"; };
+		7C85101628F4887900295F9B /* UITableView2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITableView2.cpp; sourceTree = "<group>"; };
+		7C85101728F4887900295F9B /* UITableView2.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITableView2.hpp; sourceTree = "<group>"; };
+		7C85102228F610D600295F9B /* TableView2TestController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TableView2TestController.cpp; sourceTree = "<group>"; };
+		7C85102328F610D600295F9B /* TableView2TestController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TableView2TestController.hpp; sourceTree = "<group>"; };
 		7C888E4128816547009A6B95 /* UINavigationController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UINavigationController.cpp; sourceTree = "<group>"; };
 		7C888E4228816547009A6B95 /* UINavigationController.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UINavigationController.hpp; sourceTree = "<group>"; };
 		7C888E45288165E9009A6B95 /* ViewController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ViewController.cpp; sourceTree = "<group>"; };
@@ -1045,14 +1053,33 @@
 			path = UITraitCollection;
 			sourceTree = "<group>";
 		};
+		7C85101528F4886800295F9B /* UITableView2 */ = {
+			isa = PBXGroup;
+			children = (
+				7C85101728F4887900295F9B /* UITableView2.hpp */,
+				7C85101628F4887900295F9B /* UITableView2.cpp */,
+			);
+			path = UITableView2;
+			sourceTree = "<group>";
+		};
+		7C85102128F610BA00295F9B /* TableView2TestController */ = {
+			isa = PBXGroup;
+			children = (
+				7C85102328F610D600295F9B /* TableView2TestController.hpp */,
+				7C85102228F610D600295F9B /* TableView2TestController.cpp */,
+			);
+			path = TableView2TestController;
+			sourceTree = "<group>";
+		};
 		7C888E3F28816531009A6B95 /* TestControllers */ = {
 			isa = PBXGroup;
 			children = (
-				7C706D7B28EF8AEB00B07BB5 /* TextTestController */,
-				7CCDCDB428C2A47200EFBFCA /* TableViewTestController */,
-				7C709CAD28C0BCFC000A474F /* ControlTestViewController */,
 				7C8D980C28BB59F300BDD667 /* AnimationTestViewController */,
+				7C709CAD28C0BCFC000A474F /* ControlTestViewController */,
 				7C8D980228BA218700BDD667 /* ListViewController */,
+				7C85102128F610BA00295F9B /* TableView2TestController */,
+				7CCDCDB428C2A47200EFBFCA /* TableViewTestController */,
+				7C706D7B28EF8AEB00B07BB5 /* TextTestController */,
 				7C49617628A8213700E30B4B /* TouchTestViewController */,
 				7C888E44288165DB009A6B95 /* ViewController */,
 			);
@@ -1297,9 +1324,9 @@
 		7CA9606B2871F7A2009E0953 /* NXKit */ = {
 			isa = PBXGroup;
 			children = (
+				7CA960C22871FCC2009E0953 /* NXKit.entitlements */,
 				7C4630532884325800DF15F3 /* UIAppDelegate.cpp */,
 				7C888E3F28816531009A6B95 /* TestControllers */,
-				7CA960C22871FCC2009E0953 /* NXKit.entitlements */,
 				7CA960732871F839009E0953 /* lib */,
 			);
 			path = NXKit;
@@ -1347,6 +1374,7 @@
 				7CE9B5E5287495E400659D24 /* UIStackView */,
 				7C888E48288181F8009A6B95 /* UITabBarController */,
 				7CCDCDAF28C272F400EFBFCA /* UITableView */,
+				7C85101528F4886800295F9B /* UITableView2 */,
 				7CCDCDB928C3769400EFBFCA /* UITableViewCell */,
 				7CCDCDBE28C3ACC300EFBFCA /* UITableViewDefaultCell */,
 				7C3AD9C628D37B3D00254B8B /* UITableViewRadioCell */,
@@ -1765,7 +1793,9 @@
 				7C706D1B28EDFAE000B07BB5 /* clippathelement.cpp in Sources */,
 				7C706D1C28EDFAE000B07BB5 /* UIView.cpp in Sources */,
 				7C706D1D28EDFAE000B07BB5 /* experiments.cpp in Sources */,
+				7C85101928F4887900295F9B /* UITableView2.cpp in Sources */,
 				7C706D1E28EDFAE000B07BB5 /* Yoga.cpp in Sources */,
+				7C85102528F610D600295F9B /* TableView2TestController.cpp in Sources */,
 				7C706D1F28EDFAE000B07BB5 /* plutovg-rle.c in Sources */,
 				7C706D2028EDFAE000B07BB5 /* UITableView.cpp in Sources */,
 				7C706D2128EDFAE000B07BB5 /* YGConfig.cpp in Sources */,
@@ -1826,10 +1856,10 @@
 				7C8D987A28BD657500BDD667 /* geometryelement.cpp in Sources */,
 				7CCDCDC128C3ACD900EFBFCA /* UITableViewDefaultCell.cpp in Sources */,
 				7C8D987E28BD657500BDD667 /* paintelement.cpp in Sources */,
+				7C85101D28F54C5100295F9B /* GLFWVideoContext.cpp in Sources */,
 				7C8D987C28BD657500BDD667 /* property.cpp in Sources */,
 				7C709CAB28C0B3F9000A474F /* UIAction.cpp in Sources */,
 				7CA960C12871FAC6009E0953 /* Application.cpp in Sources */,
-				7C706D7228EE419B00B07BB5 /* main.cpp in Sources */,
 				7C239612287E13C100973CC0 /* Time.cpp in Sources */,
 				7CE9B5DE2874917F00659D24 /* experiments.cpp in Sources */,
 				7C8D986E28BD657500BDD667 /* styleelement.cpp in Sources */,
@@ -1839,11 +1869,11 @@
 				7C4749522884604B00C5A988 /* UIScrollView.cpp in Sources */,
 				7C8D980528BA219A00BDD667 /* ListViewController.cpp in Sources */,
 				7C8D982128BC118200BDD667 /* UIImage.cpp in Sources */,
-				7C706D7028EE419B00B07BB5 /* GLFWVideoContext.cpp in Sources */,
 				7C8D989C28BD658400BDD667 /* sw_ft_raster.c in Sources */,
 				7C8D98AC28BD658400BDD667 /* plutovg-rle.c in Sources */,
 				7C58C65B28AFBAD50039F0E5 /* UIEdgeInsets.cpp in Sources */,
 				7C8D987428BD657500BDD667 /* element.cpp in Sources */,
+				7C85101E28F54C5100295F9B /* GLFWInputManager.cpp in Sources */,
 				7C07B87828C7C0A8009FFA69 /* UIActionsView.cpp in Sources */,
 				7C8D980F28BB5A0A00BDD667 /* AnimationTestViewController.cpp in Sources */,
 				7C8D986828BD657500BDD667 /* maskelement.cpp in Sources */,
@@ -1861,12 +1891,15 @@
 				7CCDCDCF28C551F900EFBFCA /* UIAlertController.cpp in Sources */,
 				7CE9B5E42874917F00659D24 /* event.cpp in Sources */,
 				7C3AD9BE28D247DC00254B8B /* UISelectorViewController.cpp in Sources */,
+				7C85101828F4887900295F9B /* UITableView2.cpp in Sources */,
 				7C8D986128BD657500BDD667 /* symbolelement.cpp in Sources */,
 				7C8D985B28BD657500BDD667 /* layoutcontext.cpp in Sources */,
 				7C8D989F28BD658400BDD667 /* sw_ft_math.c in Sources */,
 				7CE9B5E22874917F00659D24 /* YGConfig.cpp in Sources */,
+				7C85102428F610D600295F9B /* TableView2TestController.cpp in Sources */,
 				7C82CB5428CCC97700634A8E /* UITraitCollection.cpp in Sources */,
 				7C53FE522878EA220091DEF9 /* UIEvent.cpp in Sources */,
+				7C85101F28F54C6200295F9B /* main.cpp in Sources */,
 				7C709CA628C0ABED000A474F /* UIControl+GestureRecognizer.cpp in Sources */,
 				7C23962E287E143700973CC0 /* encoding_utf.c in Sources */,
 				7CCDCDC628C4965300EFBFCA /* UIButton.cpp in Sources */,
@@ -1884,7 +1917,6 @@
 				7C78EBDF2873748B0082D3AC /* UIColor.cpp in Sources */,
 				7C53FE562878ED350091DEF9 /* UIViewController.cpp in Sources */,
 				7C8D988028BD657500BDD667 /* svgelement.cpp in Sources */,
-				7C706D7128EE419B00B07BB5 /* GLFWInputManager.cpp in Sources */,
 				7CE9B5E8287495F900659D24 /* UIStackView.cpp in Sources */,
 				7CE9B5DB2874917F00659D24 /* YGLayout.cpp in Sources */,
 				7C8D980A28BAC24000BDD667 /* AnimationContext.cpp in Sources */,
@@ -1945,6 +1977,8 @@
 				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Core/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
+				INFOPLIST_KEY_UIRequiresFullScreen = NO;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -1976,6 +2010,8 @@
 				INFOPLIST_FILE = NXKit/lib/Platforms/iOS/Core/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
+				INFOPLIST_KEY_UIRequiresFullScreen = NO;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;

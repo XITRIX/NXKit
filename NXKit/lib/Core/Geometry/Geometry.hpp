@@ -42,6 +42,7 @@ struct Size {
     Size& operator-=(const Size& rhs);
 
     bool valid();
+    Size inset(UIEdgeInsets inset) const;
 };
 
 struct Rect {

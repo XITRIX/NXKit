@@ -15,7 +15,9 @@ namespace NXKit {
 class UITableView;
 class UITableViewCell: public UIControl {
 public:
-    UITableViewCell() {}
+    UITableViewCell() {
+        borderColor = UIColor::separator;
+    }
 
     bool isEnabled() override;
 //    bool canBecomeFocused() override;

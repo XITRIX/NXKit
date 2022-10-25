@@ -91,6 +91,10 @@ bool Size::valid() {
     return !isnan(this->width) && !isnan(this->height);
 }
 
+Size Size::inset(UIEdgeInsets inset) const {
+    return Size(width + inset.left + inset.right, height + inset.top + inset.bottom);
+}
+
 // MARK: - RECT -
 Rect::Rect(): origin(), size() { }
 Rect::Rect(Point origin, Size size): origin(origin), size(size) { }

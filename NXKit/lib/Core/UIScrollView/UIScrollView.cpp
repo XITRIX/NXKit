@@ -142,7 +142,7 @@ void UIScrollView::setFixHeight(bool fix) {
 
 Size UIScrollView::getContentSize() {
     if (!contentView) return Size();
-    return contentView->getFrame().size;
+    return contentView->getFrame().size.inset(contentInset);
 }
 
 void UIScrollView::subviewFocusDidChange(std::shared_ptr<UIView> focusedView, std::shared_ptr<UIView> notifiedView) {
@@ -184,8 +184,13 @@ void UIScrollView::layoutSubviews() {
 
     if (contentView) {
         Size frameSize = getBounds().size;
-        Size size = Size(fixWidth ? frameSize.width : UIView::AUTO,
-                         fixHeight ? frameSize.height : UIView::AUTO);
+
+        auto margins = getMargins();
+        Size fixSize = Size(frameSize.width - margins.left - margins.right,
+                            frameSize.height - margins.top - margins.bottom);
+
+        Size size = Size(fixWidth ? fixSize.width : UIView::AUTO,
+                         fixHeight ? fixSize.height : UIView::AUTO);
         contentView->setSize(size);
     }
 

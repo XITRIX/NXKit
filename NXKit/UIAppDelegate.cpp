@@ -11,6 +11,7 @@
 #include "AnimationTestViewController.hpp"
 #include "ListViewController.hpp"
 #include "TableViewTestController.hpp"
+#include "TableView2TestController.hpp"
 #include "ControlTestViewController.hpp"
 //#include "TextTestController.hpp"
 
@@ -22,18 +23,19 @@ void UIAppDelegate::applicationDidFinishLaunching() {
 //    window->makeKeyAndVisible();
 
     // Test VC
-//    auto rootVC = NXKit::make_shared<MyViewController>();
+    auto rootVC = NXKit::make_shared<MyViewController>();
     auto listVC = NXKit::make_shared<ListViewController>();
-//    auto touchVC = NXKit::make_shared<TouchTestViewController>();
-//    auto tableView = NXKit::make_shared<TableViewTestController>();
+    auto touchVC = NXKit::make_shared<TouchTestViewController>();
+    auto tableView = NXKit::make_shared<TableViewTestController>();
+    auto tableView2 = NXKit::make_shared<TableView2TestController>();
     auto controlVC = NXKit::make_shared<ControlTestViewController>();
     auto animVC = NXKit::make_shared<AnimationTestViewController>();
 
     printf("Launching app...\n");
 
     auto window = NXKit::make_shared<UIWindow>();
-//    std::vector<std::shared_ptr<UIViewController>> controllers = {controlVC, tableView, listVC, animVC, nullptr, rootVC, touchVC};
-    std::vector<std::shared_ptr<UIViewController>> controllers = {animVC, controlVC, listVC};
+    std::vector<std::shared_ptr<UIViewController>> controllers = {controlVC, tableView2, listVC, animVC, nullptr, rootVC, touchVC};
+//    std::vector<std::shared_ptr<UIViewController>> controllers = {animVC, controlVC, listVC};
     auto tabsVC = NXKit::make_shared<UITabBarController>(controllers);
     auto vc = NXKit::make_shared<UINavigationController>(tabsVC);
     tabsVC->setTitle("Demo App");

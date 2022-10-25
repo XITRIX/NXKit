@@ -51,6 +51,7 @@ INCLUDES := $(INCLUDES) \
 			NXKit/TestControllers/ViewController \
 			NXKit/TestControllers/ListViewController \
 			NXKit/TestControllers/TableViewTestController \
+			NXKit/TestControllers/TableView2TestController \
 			NXKit/TestControllers/AnimationTestViewController \
 			NXKit/TestControllers/ControlTestViewController \
 			NXKit/TestControllers/TouchTestViewController
@@ -59,6 +60,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/TestControllers/ViewController \
 			NXKit/TestControllers/ListViewController \
 			NXKit/TestControllers/TableViewTestController \
+			NXKit/TestControllers/TableView2TestController \
 			NXKit/TestControllers/AnimationTestViewController \
 			NXKit/TestControllers/ControlTestViewController \
 			NXKit/TestControllers/TouchTestViewController
@@ -104,6 +106,7 @@ SOURCES  := $(SOURCES) \
 			NXKit/lib/Core/UIStackView \
 			NXKit/lib/Core/UITabBarController \
 			NXKit/lib/Core/UITableView \
+			NXKit/lib/Core/UITableView2 \
 			NXKit/lib/Core/UITableViewCell \
 			NXKit/lib/Core/UITableViewDefaultCell \
 			NXKit/lib/Core/UITableViewRadioCell \
