@@ -37,6 +37,7 @@ UIView::~UIView() {
     }
 
     YGNodeFree(ygNode);
+    if (contexts) { Application::shared()->getVideoContext()->freeFBO(contexts); }
 }
 
 void UIView::setPosition(Point position) {
@@ -208,25 +209,30 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     UITraitCollection::current = trait;
 
     nvgSave(vgContext);
-    layoutIfNeeded();
+//    layoutIfNeeded();
 
     // Frame position
-    nvgTranslate(vgContext, getFrame().origin.x, getFrame().origin.y);
+//    nvgTranslate(vgContext, getFrame().origin.x, getFrame().origin.y);
+//    auto frame = getFrame();
+//    if (frame.origin.x > 0) {
+//        nvgTranslate(vgContext, -2, 0);
+//        nvgScale(vgContext, 0.9f, 0.8f);
+//    }
 
     // Position transform
-    nvgTranslate(vgContext, transformOrigin.x, transformOrigin.y);
+//    nvgTranslate(vgContext, transformOrigin.x, transformOrigin.y);
 
     // Scale transform
-    float scaleTransformX = (getFrame().size.width / 2.0f) - (getFrame().size.width / 2.0f) * transformSize.width;
-    float scaleTransformY = (getFrame().size.height / 2.0f) - (getFrame().size.height / 2.0f) * transformSize.height;
-    nvgTranslate(vgContext, scaleTransformX, scaleTransformY);
-    nvgScale(vgContext, transformSize.width, transformSize.height);
+//    float scaleTransformX = (getFrame().size.width / 2.0f) - (getFrame().size.width / 2.0f) * transformSize.width;
+//    float scaleTransformY = (getFrame().size.height / 2.0f) - (getFrame().size.height / 2.0f) * transformSize.height;
+//    nvgTranslate(vgContext, scaleTransformX, scaleTransformY);
+//    nvgScale(vgContext, transformSize.width, transformSize.height);
 
-    nvgGlobalAlpha(vgContext, getInternalAlpha());
+//    nvgGlobalAlpha(vgContext, getInternalAlpha());
 
     // ClipToBounds
-    if (clipToBounds)
-        nvgIntersectScissor(vgContext, 0, 0, getFrame().size.width, getFrame().size.height);
+//    if (clipToBounds)
+//        nvgIntersectScissor(vgContext, 0, 0, getFrame().size.width, getFrame().size.height);
 
     if (showShadow)
         drawShadow(vgContext);
@@ -246,7 +252,7 @@ void UIView::internalDraw(NVGcontext* vgContext) {
         nvgFill(vgContext);
     }
 
-    nvgTranslate(vgContext, -bounds.minX(), -bounds.minY());
+//    nvgTranslate(vgContext, -bounds.minX(), -bounds.minY());
     draw(vgContext);
 
     // Borders
@@ -291,15 +297,14 @@ void UIView::internalDraw(NVGcontext* vgContext) {
         }
     }
 
-    std::shared_ptr<UIView> focused = nullptr;
     for (auto view: subviews) {
         if (view->isFocused())
             focused = view;
 
-        view->internalDraw(vgContext);
+//        view->internalDraw(vgContext);
     }
-    if (focused) {
-        focused->drawHighlight(vgContext, false);
+    if (!focused.expired()) {
+        focused.lock()->drawHighlight(vgContext, false);
     }
 
     nvgRestore(vgContext);
@@ -516,6 +521,7 @@ void UIView::applyAnimationContext(std::deque<float>* context) {
     IFNNULL(clickAlpha, pop(context))
     IFNNULL(alpha, pop(context))
     backgroundColor = UIColor::fromAnimationContext(context);
+    setNeedsDisplay();
 }
 
 void UIView::animate(float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {
@@ -540,6 +546,8 @@ void UIView::animate(float duration, std::function<void()> animations, EasingFun
 }
 
 void UIView::setNeedsLayout() {
+    setNeedsDisplay();
+
     YGNode* parentNode = YGNodeGetParent(this->ygNode);
     if (!parentNode) {
         needsLayout = true;
@@ -575,6 +583,8 @@ void UIView::layoutIfNeeded() {
 }
 
 void UIView::layoutSubviews() {
+    setNeedsDisplay();
+    
     if (!controller.expired()) controller.lock()->viewWillLayoutSubviews();
 
     needsLayout = false;
@@ -595,6 +605,74 @@ void UIView::layoutSubviews() {
     bounds = getBounds();
 
     if (!controller.expired()) controller.lock()->viewDidLayoutSubviews();
+}
+
+void UIView::displayIfNeeded(NVGcontext* vgContext) {
+    if (needsDisplay || shouldDrawHighlight() || highlightShaking || !focused.expired()) display(vgContext);
+
+    for (auto view: subviews) {
+        view->displayIfNeeded(vgContext);
+    }
+}
+
+void UIView::display(NVGcontext* vgContext) {
+    needsDisplay = false;
+    layoutIfNeeded();
+    if (contexts) { Application::shared()->getVideoContext()->freeFBO(contexts); }
+
+    auto frame = getFrame();
+    if (!frame.valid()) return;
+
+    contexts = Application::shared()->getVideoContext()->makeFBO(frame);
+
+//    if (tag == "Test") return;
+    Application::shared()->getVideoContext()->drawPaintWithFBO(contexts, [this, vgContext]() {
+        internalDraw(vgContext);
+    }, frame);
+}
+
+void UIView::render(NVGcontext* vgContext) {
+//    backgroundColor = UIColor::random();
+
+//    displayIfNeeded(vgContext);
+    if (!contexts) return;
+
+    auto frame = getFrame();
+
+
+    nvgSave(vgContext);
+
+
+    // Frame position
+
+    // Position transform
+    nvgTranslate(vgContext, frame.origin.x, frame.origin.y);
+    nvgTranslate(vgContext, transformOrigin.x, transformOrigin.y);
+    nvgTranslate(vgContext, -bounds.minX(), -bounds.minY());
+
+    // Scale transform
+//    float scaleTransformX = (frame.size.width / 2.0f) - (frame.size.width / 2.0f) * transformSize.width;
+//    float scaleTransformY = (frame.size.height / 2.0f) - (frame.size.height / 2.0f) * transformSize.height;
+//    nvgTranslate(vgContext, scaleTransformX, scaleTransformY);
+//    nvgScale(vgContext, transformSize.width, transformSize.height);
+
+
+    nvgGlobalAlpha(vgContext, getInternalAlpha());
+    
+    nvgBeginPath(vgContext);
+    nvgRect(vgContext, 0, 0, frame.width(), frame.height());
+    auto texture = Application::shared()->getVideoContext()->getPaintWithFBO(contexts, frame);
+
+    
+    nvgFillPaint(vgContext, texture);
+    nvgFill(vgContext);
+
+//    if (!superview.expired() && superview.lock()->superview.expired())
+
+    for (auto view: subviews) {
+        view->render(vgContext);
+    }
+    nvgRestore(vgContext);
 }
 
 bool UIView::isFocused() {
@@ -683,7 +761,7 @@ Point UIView::convert(Point point, std::shared_ptr<UIView> toView) {
     std::shared_ptr<UIView> current = shared_from_this();
     while (current) {
         if (current == toView) {
-            return point - selfAbsoluteOrigin;
+            return point + selfAbsoluteOrigin;
         }
         selfAbsoluteOrigin += current->getFrame().origin;
         selfAbsoluteOrigin -= current->bounds.origin;

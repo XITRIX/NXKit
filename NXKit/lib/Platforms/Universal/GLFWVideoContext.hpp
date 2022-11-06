@@ -18,9 +18,13 @@
 
 #include <Core/Driver/Video/video.hpp>
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+//#define GLM_FORCE_PURE
+//#define GLM_ENABLE_EXPERIMENTAL
+//#include <glad/glad.h>
+#include <GLES3/gl3.h>
+#include "nanovg.h"
 
+#include <GLFW/glfw3.h>
 #include <string>
 
 namespace NXKit {
@@ -43,6 +47,11 @@ public:
     float getScaleFactor() override;
     bool mainLoopInteraction() override;
     UIUserInterfaceStyle getUserInterfaceStyle() override;
+
+    void freeFBO(void* fbo) override;
+    void* makeFBO(Rect frame) override;
+    void drawPaintWithFBO(void* fbo, std::function<void()> draw, Rect frame) override;
+    NVGpaint getPaintWithFBO(void* fbo, Rect frame) override;
 
     GLFWwindow* getGLFWWindow();
 

@@ -20,6 +20,7 @@ void UIAppDelegate::applicationDidFinishLaunching() {
 //
 //    auto window = NXKit::make_shared<UIWindow>();
 //    window->setRootViewController(textVC);
+//    window->backgroundColor = UIColor::blue;
 //    window->makeKeyAndVisible();
 
     // Test VC

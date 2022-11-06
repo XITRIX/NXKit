@@ -2154,10 +2154,12 @@
 		7CA960712871F7A2009E0953 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = NXKit/NXKit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = D59DHVRS87;
 				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = YG_ENABLE_EVENTS;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/opt/homebrew/include,
@@ -2175,10 +2177,12 @@
 		7CA960722871F7A2009E0953 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = NXKit/NXKit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = D59DHVRS87;
 				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = YG_ENABLE_EVENTS;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/opt/homebrew/include,

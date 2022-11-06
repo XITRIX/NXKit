@@ -18,13 +18,32 @@
 //#include <borealis/core/logger.hpp>
 #include <Platforms/Universal/GLFWVideoContext.hpp>
 
-#define GLM_FORCE_PURE
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glad/glad.h>
-
 // nanovg implementation
+//#define NANOVG_GL3_IMPLEMENTATION
+//#include <nanovg-gl/nanovg_gl.h>
+//#include <nanovg-gl/nanovg_gl_utils.h>
+
+
+#ifdef __APPLE__
+#    define GLFW_INCLUDE_GLCOREARB
+#endif
+
+//#include <GLFW/glfw3.h>
+//#include <OpenGL/gl3.h>
+//#include "nanovg.h"
+//#define NANOVG_GL3_IMPLEMENTATION
+//#include "nanovg_gl.h"
+//#include "nanovg_gl_utils.h"
+
+
+#ifdef __APPLE__
+#    define GLFW_INCLUDE_GLCOREARB
+#endif
+#include <GLFW/glfw3.h>
+#include "nanovg.h"
 #define NANOVG_GL3_IMPLEMENTATION
-#include <nanovg-gl/nanovg_gl.h>
+#include "nanovg_gl.h"
+#include "nanovg_gl_utils.h"
 
 #ifdef __SWITCH__
 #include <switch.h>
@@ -58,21 +77,29 @@ GLFWVideoContext::GLFWVideoContext(std::string windowTitle, uint32_t windowWidth
         //        Logger::error("glfw: failed to initialize");
         return;
     }
-    
-    // Create window
-#if defined(__APPLE__) || defined(_WIN32) 
-    // Explicitly ask for a 3.2 context on OS X
+
+#ifndef _WIN32 // don't require this on win32, and works with more cards
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // Force scaling off to keep desired framebuffer size
-    //        glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
-#else
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
+    
+    // Create window
+//#if defined(__APPLE__) || defined(_WIN32) 
+//    // Explicitly ask for a 3.2 context on OS X
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+//    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+//    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//    // Force scaling off to keep desired framebuffer size
+//    //        glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+//#else
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//#endif
 
     this->window = glfwCreateWindow(windowWidth, windowHeight, windowTitle.c_str(), nullptr, nullptr);
 
@@ -89,7 +116,7 @@ GLFWVideoContext::GLFWVideoContext(std::string windowTitle, uint32_t windowWidth
     glfwSetFramebufferSizeCallback(window, glfwWindowFramebufferSizeCallback);
 
     // Load OpenGL routines using glad
-    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+//    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
 
     //    Logger::info("glfw: GL Vendor: {}", glGetString(GL_VENDOR));
@@ -139,6 +166,12 @@ void GLFWVideoContext::beginFrame()
         glfwSetWindowSize(window, width, height);
     }
 #endif
+    int wWidth, wHeight;
+    int fWidth, fHeight;
+
+    glfwGetWindowSize(window, &wWidth, &wHeight);
+    glfwGetFramebufferSize(window, &fWidth, &fHeight);
+    glViewport(0, 0, fWidth, fHeight);
 }
 
 void GLFWVideoContext::endFrame()
@@ -239,6 +272,37 @@ GLFWwindow* GLFWVideoContext::getGLFWWindow()
 
 UIUserInterfaceStyle GLFWVideoContext::getUserInterfaceStyle() {
     return UIUserInterfaceStyle::dark;
+}
+
+void GLFWVideoContext::freeFBO(void* fbo) {
+    nvgluDeleteFramebuffer((NVGLUframebuffer*) fbo);
+}
+
+void* GLFWVideoContext::makeFBO(Rect frame) {
+    auto scaleFactor = getScaleFactor();
+    return nvgluCreateFramebuffer(getNVGContext(), frame.width() * scaleFactor, frame.height() * scaleFactor, NVG_IMAGE_REPEATX | NVG_IMAGE_REPEATY);
+}
+
+void GLFWVideoContext::drawPaintWithFBO(void* fbo, std::function<void()> draw, Rect frame) {
+    auto scaleFactor = getScaleFactor();
+    auto fb = (NVGLUframebuffer*) fbo;
+    nvgluBindFramebuffer(fb);
+    
+    glViewport(0, 0, frame.width()*scaleFactor, frame.height()*scaleFactor);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+
+    nvgBeginFrame(getNVGContext(), frame.width(), frame.height(), scaleFactor);
+    nvgSave(getNVGContext());
+    draw();
+    nvgRestore(getNVGContext());
+    nvgEndFrame(getNVGContext());
+    nvgluBindFramebuffer(NULL);
+}
+
+NVGpaint GLFWVideoContext::getPaintWithFBO(void* fbo, Rect frame) {
+    auto fb = (NVGLUframebuffer*) fbo;
+    return nvgImagePattern(getNVGContext(), 0, 0, frame.width(), frame.height(), 0, fb->image, 1.0f);
 }
 
 }

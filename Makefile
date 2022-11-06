@@ -150,7 +150,7 @@ CXXFLAGS	:= $(CFLAGS) -std=c++1z -O2
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:=  -lglfw3 -lEGL -lglapi -ldrm_nouveau -lnx
+LIBS	:=  -lglfw3 -lEGL -lglapi -lGLESv2 -ldrm_nouveau -lnx
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

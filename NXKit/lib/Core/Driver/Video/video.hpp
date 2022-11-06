@@ -19,6 +19,8 @@
 #include <nanovg.h>
 #include <Core/UITraitCollection/UITraitCollection.hpp>
 #include <Core/Utils/SharedBase/SharedBase.hpp>
+#include <Core/Geometry/Geometry.hpp>
+#include <functional>
 
 namespace NXKit {
 
@@ -65,6 +67,11 @@ public:
     virtual void resetState() = 0;
     
     virtual NVGcontext* getNVGContext() = 0;
+
+    virtual void freeFBO(void* fbo) = 0;
+    virtual void* makeFBO(Rect frame) = 0;
+    virtual void drawPaintWithFBO(void* fbo, std::function<void()> draw, Rect frame) = 0;
+    virtual NVGpaint getPaintWithFBO(void* fbo, Rect frame) = 0;
 };
 
 }

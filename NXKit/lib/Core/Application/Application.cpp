@@ -189,11 +189,13 @@ void Application::setFocus(std::shared_ptr<UIView> view) {
 
     if (!this->focus.expired()) {
         this->focus.lock()->resignFocused();
+        this->focus.lock()->setNeedsDisplay();
     }
     this->focus = view;
 
     if (!this->focus.expired()) {
         this->focus.lock()->becomeFocused();
+        this->focus.lock()->setNeedsDisplay();
 
         if (!this->focus.expired()) {
             if (!this->focus.lock()->superview.expired())
@@ -227,11 +229,14 @@ int Application::getFps() {
 }
 
 void Application::render() {
+    keyWindow->displayIfNeeded(getContext());
+    
     videoContext->beginFrame();
     videoContext->clear(nvgRGB(220, 0, 0));
 
     nvgBeginFrame(getContext(), windowWidth, windowHeight, windowScale);
-    keyWindow->internalDraw(getContext());
+
+    keyWindow->render(getContext());// internalDraw(getContext());
 
     renderFps();
 

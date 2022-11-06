@@ -166,6 +166,13 @@ public:
     void layoutIfNeeded();
     virtual void layoutSubviews();
 
+    // Layout
+    void setNeedsDisplay() { needsDisplay = true; }
+    void displayIfNeeded(NVGcontext* vgContext);
+    void display(NVGcontext* vgContext);
+
+    void render(NVGcontext* vgContext);
+
     virtual UIEdgeInsets safeAreaInsets();
 
     // Trait Environment
@@ -178,15 +185,21 @@ private:
     friend class UIViewController;
     friend class UITableView;
 
+    void* contexts = nullptr;
+//    NVGpaint contexts;
+
     static bool noAnimations;
     std::optional<UIColor> tintColor;
+    NVGpaint getPaint();
 
+    std::weak_ptr<UIView> focused;
     AnimationContext animationContext;
     std::vector<std::shared_ptr<UIGestureRecognizer>> gestureRecognizers;
     std::weak_ptr<UIViewController> controller;
     std::vector<std::shared_ptr<UIView>> subviews;
     std::weak_ptr<UIView> superview;
     bool needsLayout = true;
+    bool needsDisplay = true;
     Rect bounds;
 
     // highlight shaking
