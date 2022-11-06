@@ -19,7 +19,7 @@ void AnimationTestViewController::loadView() {
     ball = NXKit::make_shared<UIControl>();
     ball->setSize(Size(80, 80));
     ball->cornerRadius = 40;
-    ball->transformOrigin = Point(160, 0);
+    ball->transform = NXAffineTransform::translationBy(160, 0);
     ball->backgroundColor = UIColor::red;
     ball->highlightOnFocus = false;
 
@@ -49,11 +49,11 @@ void AnimationTestViewController::animate(bool revers) {
 //    });
 
     UIView::animate({ ball }, 1, [this, revers]() {
-        ball->transformOrigin = Point(revers ? 160 : -160, 0);
+        ball->transform = NXAffineTransform::translationBy(revers ? 160 : -160, 0);
         ball->backgroundColor = colors[counter];
         ++counter %= colors.size();
     }, EasingFunction::exponentialInOut, [this](bool res) {
         if (!res) return;
-        animate(ball->transformOrigin.x < 0);
+        animate(ball->transform.tX < 0);
     });
 }

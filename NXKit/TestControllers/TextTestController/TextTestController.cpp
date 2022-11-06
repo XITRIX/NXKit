@@ -39,6 +39,6 @@ void TextTestController::viewDidLoad() {
             scale -= 0.01f;
         }
 
-        label->transformSize = Size(scale, scale);
+        label->transform = NXAffineTransform::scale(scale);
     });
 }

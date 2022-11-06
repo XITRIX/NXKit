@@ -135,11 +135,11 @@ void UISelectorViewController::viewDidLayoutSubviews() {
 
 void UISelectorViewController::makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion) {
     getView()->setNeedsLayout();
-    containerView->transformOrigin = { 0, 20 };
+    containerView->transform = NXAffineTransform::translationBy(0, 20);
     containerView->alpha = 0;
     UIView::animate({ getView(), containerView }, 0.15f, [this]() {
         getView()->backgroundColor = UIColor::black.withAlphaComponent(0.6f);
-        containerView->transformOrigin = { 0, 0 };
+        containerView->transform = NXAffineTransform::identity;
         containerView->alpha = 1;
     }, EasingFunction::quadraticOut, [completion](bool res) {
         completion();
@@ -149,7 +149,7 @@ void UISelectorViewController::makeViewAppear(bool animated, std::shared_ptr<UIV
 void UISelectorViewController::makeViewDisappear(bool animated, std::function<void(bool)> completion) {
     UIView::animate({ getView(), containerView }, 0.15f, [this]() {
         getView()->backgroundColor = UIColor::clear;
-        containerView->transformOrigin = { 0, 20 };
+        containerView->transform = NXAffineTransform::translationBy(0, 20);
         containerView->alpha = 0;
     }, EasingFunction::quadraticOut, [completion](bool res) {
         completion(true);

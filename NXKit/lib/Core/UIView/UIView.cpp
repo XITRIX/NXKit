@@ -214,13 +214,9 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     nvgTranslate(vgContext, getFrame().origin.x, getFrame().origin.y);
 
     // Position transform
-    nvgTranslate(vgContext, transformOrigin.x, transformOrigin.y);
+    nvgTransform(vgContext, transform.m11, transform.m12, transform.m21, transform.m22, transform.tX, transform.tY);
 
     // Scale transform
-    float scaleTransformX = (getFrame().size.width / 2.0f) - (getFrame().size.width / 2.0f) * transformSize.width;
-    float scaleTransformY = (getFrame().size.height / 2.0f) - (getFrame().size.height / 2.0f) * transformSize.height;
-    nvgTranslate(vgContext, scaleTransformX, scaleTransformY);
-    nvgScale(vgContext, transformSize.width, transformSize.height);
 
     nvgGlobalAlpha(vgContext, getInternalAlpha());
 
@@ -496,12 +492,9 @@ std::deque<float> UIView::createAnimationContext() {
     std::deque<float> context;
     context.push_back(bounds.origin.x);
     context.push_back(bounds.origin.y);
-    context.push_back(transformOrigin.x);
-    context.push_back(transformOrigin.y);
-    context.push_back(transformSize.width);
-    context.push_back(transformSize.height);
     context.push_back(clickAlpha);
     context.push_back(alpha);
+    transform.fillAnimationContext(&context);
     backgroundColor.fillAnimationContext(&context);
     return context;
 }
@@ -509,12 +502,9 @@ std::deque<float> UIView::createAnimationContext() {
 void UIView::applyAnimationContext(std::deque<float>* context) {
     IFNNULL(bounds.origin.x, pop(context))
     IFNNULL(bounds.origin.y, pop(context))
-    IFNNULL(transformOrigin.x, pop(context))
-    IFNNULL(transformOrigin.y, pop(context))
-    IFNNULL(transformSize.width, pop(context))
-    IFNNULL(transformSize.height, pop(context))
     IFNNULL(clickAlpha, pop(context))
     IFNNULL(alpha, pop(context))
+    transform = NXAffineTransform::fromAnimationContext(context);
     backgroundColor = UIColor::fromAnimationContext(context);
 }
 

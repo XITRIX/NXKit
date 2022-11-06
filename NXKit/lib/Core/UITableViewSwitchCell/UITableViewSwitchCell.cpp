@@ -22,16 +22,14 @@ void UITableViewSwitchCell::setOn(bool on, bool animated) {
 
     if (animated) {
         detailLabel->animate(0.06, [this]() {
-            detailLabel->transformSize = { 0.8f, 0.8f };
-            detailLabel->transformOrigin = { detailLabel->getBounds().width() * 0.1f, 0 };
+            detailLabel->transform = NXAffineTransform::translationBy(detailLabel->getBounds().width() * 0.1f, 0).concat(NXAffineTransform::scale(0.8f));
 //            detailLabel->getFont()->fontSize = 17.6f;
         }, EasingFunction::quarticOut, [this](bool res) {
             if (!res) return;
 
             updateUI();
             detailLabel->animate(0.06, [this]() {
-                detailLabel->transformSize = Size(1, 1);
-                detailLabel->transformOrigin = Point();
+                detailLabel->transform = NXAffineTransform::identity;
 //                detailLabel->getFont()->fontSize = 22;
             }, EasingFunction::quarticIn, [this](bool res) {
 //                setNeedsLayout();

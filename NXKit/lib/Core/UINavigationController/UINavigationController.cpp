@@ -173,22 +173,22 @@ void UINavigationController::pushViewController(std::shared_ptr<UIViewController
 
         // Move new view to initial state
         otherViewController->getView()->alpha = 0;
-        otherViewController->getView()->transformOrigin = Point(20, 0);
+        otherViewController->getView()->transform = NXAffineTransform::translationBy(20, 0);
 
         // Remove focus from old View
         Application::shared()->setFocus(nullptr);
 
         UIView::animate({ otherViewController->getView(), oldView->getView() }, 0.1f, [oldView, otherViewController]() {
             // Animate old View
-            oldView->getView()->transformOrigin = Point(-20, 0);
+            otherViewController->getView()->transform = NXAffineTransform::translationBy(-20, 0);
             oldView->getView()->alpha = 0;
 
             // Animate new View
             otherViewController->getView()->alpha = 1;
-            otherViewController->getView()->transformOrigin = Point();
+            otherViewController->getView()->transform = NXAffineTransform::identity;
         }, EasingFunction::linear, [this, oldView, otherViewController](bool res) {
             // Reset old View state and remove
-            oldView->getView()->transformOrigin = Point();
+            otherViewController->getView()->transform = NXAffineTransform::identity;
             oldView->getView()->alpha = 1;
             oldView->getView()->removeFromSuperview();
             oldView->removeFromParent();
@@ -232,14 +232,14 @@ std::shared_ptr<UIViewController> UINavigationController::popViewController(bool
 
 
         newTop->getView()->alpha = 0;
-        newTop->getView()->transformOrigin = Point(-20, 0);
+        newTop->getView()->transform = NXAffineTransform::translationBy(-20, 0);
 
         UIView::animate({ oldTop->getView(), viewControllers.back()->getView() }, 0.1f, [this, oldTop, newTop]() {
             newTop->getView()->alpha = 1;
-            newTop->getView()->transformOrigin = Point(0, 0);
+            newTop->getView()->transform = NXAffineTransform::identity;
 
             oldTop->getView()->alpha = 0;
-            oldTop->getView()->transformOrigin = Point(20, 0);
+            oldTop->getView()->transform = NXAffineTransform::translationBy(20, 0);
         }, EasingFunction::linear, [this, oldTop, newTop, free](bool res) {
             oldTop->getView()->removeFromSuperview();
             oldTop->removeFromParent();

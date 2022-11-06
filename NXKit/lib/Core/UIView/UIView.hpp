@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Core/Geometry/Geometry.hpp>
+#include <Core/NXAffineTransform/NXAffineTransform.hpp>
 #include <Core/Utils/Tools/Tools.hpp>
 #include <Core/Utils/Literals/Literals.hpp>
 #include <Core/Utils/Animation/AnimationContext/AnimationContext.hpp>
@@ -49,8 +50,9 @@ public:
     float cornerRadius = 0;
     float highlightCornerRadius = 0.5f;
     float borderThickness = 0;
-    Point transformOrigin;
-    Size transformSize = Size(1, 1);
+//    Point transformOrigin;
+//    Size transformSize = Size(1, 1);
+    NXAffineTransform transform = NXAffineTransform::identity;
     bool clipToBounds = true;
     bool highlightOnFocus = true;
     float alpha = 1;

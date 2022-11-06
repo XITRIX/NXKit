@@ -7,6 +7,9 @@
 
 #pragma once
 
+#include <optional>
+#include <deque>
+
 namespace NXKit {
 
 struct NXAffineTransform {
@@ -19,6 +22,19 @@ public:
     static NXAffineTransform translationBy(float x, float y);
     static NXAffineTransform scaleBy(float x, float y);
     static NXAffineTransform scale(float factor);
+
+    NXAffineTransform concat(const NXAffineTransform& other) const;
+    std::optional<NXAffineTransform> inverted() const;
+    bool isIdentity() const;
+
+    static const NXAffineTransform identity;
+
+    bool operator==(const NXAffineTransform& rhs) const;
+
+    void fillAnimationContext(std::deque<float>* context);
+    static NXAffineTransform fromAnimationContext(std::deque<float>* context);
 };
+
+NXAffineTransform NXAffineTransformConcat(const NXAffineTransform& a, const NXAffineTransform& b);
 
 }
