@@ -91,7 +91,7 @@ void Application::input() {
 
     bool anyButtonPressed           = false;
     bool repeating                  = false;
-    static bool repeatingLocked            = false;
+    static bool repeatingLocked     = false;
     static Time buttonPressTime     = 0;
     static int repeatingButtonTimer = 0;
 

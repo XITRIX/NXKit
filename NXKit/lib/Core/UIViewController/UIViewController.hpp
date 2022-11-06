@@ -13,6 +13,11 @@
 
 namespace NXKit {
 
+enum class UIViewControllerPresentAnimation {
+    CrossFade,
+    DownToTop
+};
+
 struct UINavigationItem {
     std::string title;
     std::shared_ptr<UIImage> image = nullptr;
@@ -20,6 +25,8 @@ struct UINavigationItem {
 
 class UIViewController: public UIResponder, public UITraitEnvironment, public enable_shared_from_base<UIViewController> {
 public:
+    UIViewControllerPresentAnimation presentAnimation = UIViewControllerPresentAnimation::CrossFade;
+
     UIViewController();
     virtual ~UIViewController();
 

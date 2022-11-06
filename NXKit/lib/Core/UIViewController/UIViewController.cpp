@@ -209,11 +209,24 @@ void UIViewController::show(std::shared_ptr<UIViewController> controller, void* 
 
 void UIViewController::makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion) {
     // Animation could be added
-    getView()->transform = NXAffineTransform::translationBy(0, 720);
-//    getView()->alpha = 0;
+    switch (presentAnimation) {
+        case UIViewControllerPresentAnimation::CrossFade:
+            getView()->alpha = 0;
+            break;
+        case UIViewControllerPresentAnimation::DownToTop:
+            getView()->transform = NXAffineTransform::translationBy(0, 720);
+            break;
+    }
+
     getView()->animate(0.2f, [this]() {
-        getView()->transform = NXAffineTransform::identity;
-//        getView()->alpha = 1.0f;
+        switch (presentAnimation) {
+            case UIViewControllerPresentAnimation::CrossFade:
+                getView()->alpha = 1.0f;
+                break;
+            case UIViewControllerPresentAnimation::DownToTop:
+                getView()->transform = NXAffineTransform::identity;
+                break;
+        }
     }, EasingFunction::quadraticInOut, [presentingViewController, completion](bool res) {
         presentingViewController->getView()->setHidden(true);
         completion();
@@ -222,11 +235,17 @@ void UIViewController::makeViewAppear(bool animated, std::shared_ptr<UIViewContr
 
 void UIViewController::makeViewDisappear(bool animated, std::function<void(bool)> completion) {
     // Animation could be added
-//    getView()->transformOrigin = { 0, 0 };
     getView()->animate(0.2f, [this]() {
         getPresentingViewController()->getView()->setHidden(false);
-        getView()->transform = NXAffineTransform::translationBy(0, 720);
-//        getView()->alpha = 0;
+
+        switch (presentAnimation) {
+            case UIViewControllerPresentAnimation::CrossFade:
+                getView()->alpha = 0;
+                break;
+            case UIViewControllerPresentAnimation::DownToTop:
+                getView()->transform = NXAffineTransform::translationBy(0, 720);
+                break;
+        }
     }, EasingFunction::quadraticInOut, [this, completion](bool res) {
         completion(true);
     });
