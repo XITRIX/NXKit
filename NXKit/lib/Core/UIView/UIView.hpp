@@ -82,7 +82,7 @@ public:
     virtual std::shared_ptr<UIView> hitTest(Point point, UIEvent* withEvent);
     virtual bool point(Point insidePoint, UIEvent* withEvent);
 
-    UIWindow* getWindow();
+    std::weak_ptr<UIWindow> getWindow();
     std::weak_ptr<UIView> getSuperview();
 
     virtual std::shared_ptr<UIView> getDefaultFocus();

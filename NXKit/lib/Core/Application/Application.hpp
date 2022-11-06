@@ -54,6 +54,8 @@ public:
 
     NotificationEvent<std::shared_ptr<UIView>>* getFocusDidChangeEvent() { return &focusDidChangeEvent; };
     UIUserInterfaceStyle getUserInterfaceStyle();
+
+    float getWindowScale() { return windowScale; }
     
 private:
     inline static Application* _shared;

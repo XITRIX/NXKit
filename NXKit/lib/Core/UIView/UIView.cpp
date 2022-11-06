@@ -756,14 +756,14 @@ UIEdgeInsets UIView::safeAreaInsets() {
     return insets;
 }
 
-UIWindow* UIView::getWindow() {
+std::weak_ptr<UIWindow> UIView::getWindow() {
     auto superview = this;
     while (superview) {
-        auto cast = dynamic_cast<UIWindow*>(superview);
-        if (cast) return cast;
+        auto cast = superview->weak_from_base<UIWindow>();
+        if (!cast.expired()) return cast;
         superview = superview->getSuperview().lock().get();
     }
-    return nullptr;
+    return std::weak_ptr<UIWindow>();
 }
 
 std::weak_ptr<UIView> UIView::getSuperview() {

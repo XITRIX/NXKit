@@ -57,6 +57,8 @@ public:
 
     static UIColor label;
     static UIColor invertLabel;
+
+    static UIColor random();
 private:
     int value;
     int darkValue;

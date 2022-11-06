@@ -35,7 +35,15 @@ public:
 
     template <class Derived>
     std::shared_ptr<Derived> shared_from_base() {
-        return std::static_pointer_cast<Derived>(this->shared_from_this());
+        return std::dynamic_pointer_cast<Derived>(this->shared_from_this());
+    }
+
+    template <class Derived>
+    std::weak_ptr<Derived> weak_from_base() {
+        if (!this->weak_from_this().expired()) {
+            return std::dynamic_pointer_cast<Derived>(this->weak_from_this().lock());
+        }
+        return std::weak_ptr<Derived>();
     }
 };
 

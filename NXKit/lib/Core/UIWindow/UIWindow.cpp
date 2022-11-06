@@ -82,7 +82,10 @@ void UIWindow::removePresentedViewController(std::shared_ptr<UIViewController> c
 
 void UIWindow::layoutSubviews() {
     UIView::layoutSubviews();
-    rootViewController->getView()->setSize(getBounds().size);
+    
+    if (rootViewController)
+        rootViewController->getView()->setSize(getBounds().size);
+
     for (auto controller: presentedViewControllers) {
         controller->getView()->setSize(getBounds().size);
     }

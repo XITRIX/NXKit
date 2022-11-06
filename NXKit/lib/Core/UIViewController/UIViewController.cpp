@@ -90,7 +90,8 @@ void UIViewController::addChild(std::shared_ptr<UIViewController> child) {
 }
 
 void UIViewController::willMoveToParent(std::shared_ptr<UIViewController> parent) {
-    this->parent = parent;
+    if (parent)
+        this->parent = parent;
 }
 
 void UIViewController::didMoveToParent(std::shared_ptr<UIViewController> parent) {
@@ -162,8 +163,8 @@ void UIViewController::present(std::shared_ptr<UIViewController> controller, boo
     controller->setPresentingViewController(shared_from_this());
 
     auto window = getView()->getWindow();
-    window->addSubview(controller->getView());
-    window->addPresentedViewController(controller);
+    window.lock()->addSubview(controller->getView());
+    window.lock()->addPresentedViewController(controller);
 
     controller->viewWillAppear(animated);
     
@@ -190,7 +191,7 @@ void UIViewController::dismiss(bool animated, std::function<void()> completion) 
 
     makeViewDisappear(animated, [this, animated, completion](bool res) {
         auto controller = shared_from_this();
-        getView()->getWindow()->removePresentedViewController(controller);
+        getView()->getWindow().lock()->removePresentedViewController(controller);
         getView()->removeFromSuperview();
         viewDidDisappear(animated);
         Application::shared()->setFocus(presentingViewController->getView()->getDefaultFocus());
