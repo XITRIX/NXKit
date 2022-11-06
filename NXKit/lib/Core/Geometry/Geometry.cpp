@@ -9,6 +9,21 @@
 
 namespace NXKit {
 
+// MARK: - PRIVATE -
+float min(float a, float b, float c, float d) {
+    auto minValue = (a < b) ? a : b;
+    minValue = (minValue < c) ? minValue : c;
+    minValue = (minValue < d) ? minValue : d;
+    return minValue;
+}
+
+float max(float a, float b, float c, float d) {
+    auto maxValue = (a > b) ? a : b;
+    maxValue = (maxValue > c) ? maxValue : c;
+    maxValue = (maxValue > d) ? maxValue : d;
+    return maxValue;
+}
+
 // MARK: - POINT -
 Point::Point(): x(0), y(0) { }
 Point::Point(float x, float y): x(x), y(y) { }
@@ -49,6 +64,13 @@ Point Point::operator*(const float& rhs) {
     res.x *= rhs;
     res.y *= rhs;
     return res;
+}
+
+Point Point::applying(const NXAffineTransform& t) const {
+    return Point(
+        x * t.m11 + y * t.m21 + t.tX,
+        x * t.m12 + y * t.m22 + t.tY
+    );
 }
 
 bool Point::valid() {
@@ -121,6 +143,24 @@ bool Rect::intersects(const Rect& other) const {
     return !((minX() > other.maxX() || maxX() < other.minX()) || (minY() > other.maxY() || maxY() < other.minY()));
 }
 
+Rect Rect::intersection(const Rect& other) const {
+    auto largestMinX = std::max(minX(), other.minX());
+    auto largestMinY = std::max(minY(), other.minY());
+
+    auto smallestMaxX = std::min(maxX(), other.maxX());
+    auto smallestMaxY = std::min(maxY(), other.maxY());
+
+    auto width = smallestMaxX - largestMinX;
+    auto height = smallestMaxY - largestMinY;
+
+    if (width > 0 && height > 0) {
+        // The intersection rectangle has dimensions, i.e. there is an intersection:
+        return Rect(largestMinX, largestMinY, width, height);
+    } else {
+        return Rect::null;
+    }
+}
+
 Rect& Rect::offsetBy(const Point& offset) {
     origin.x += offset.x;
     origin.y += offset.y;
@@ -141,6 +181,50 @@ Rect& Rect::insetBy(const UIEdgeInsets& insets) {
     return *this;
 }
 
+Rect Rect::applying(const NXAffineTransform& t) const {
+    if (t.isIdentity()) { return *this; }
+
+    auto newTopLeft = Point(minX(), minY()).applying(t);
+    auto newTopRight = Point(maxX(), minY()).applying(t);
+    auto newBottomLeft = Point(minX(), maxY()).applying(t);
+    auto newBottomRight = Point(maxX(), maxY()).applying(t);
+
+
+    auto newMinX = min(newTopLeft.x, newTopRight.x, newBottomLeft.x, newBottomRight.x);
+    auto newMaxX = max(newTopLeft.x, newTopRight.x, newBottomLeft.x, newBottomRight.x);
+
+    auto newMinY = min(newTopLeft.y, newTopRight.y, newBottomLeft.y, newBottomRight.y);
+    auto newMaxY = max(newTopLeft.y, newTopRight.y, newBottomLeft.y, newBottomRight.y);
+
+    // XXX: What happens if the point that was furthest left is now on the right (because of a rotation)?
+    // i.e. Should do we return a normalised rect or one with a negative width?
+    return Rect(
+        newMinX,
+        newMinY,
+        newMaxX - newMinX,
+        newMaxY - newMinY);
+}
+
+Rect Rect::applying(const NXTransform3D& t) const {
+    if (t == NXTransform3DIdentity) { return *this; }
+
+    auto topLeft = t.transformingVector(minX(), minY(), 0);
+    auto topRight = t.transformingVector(maxX(), minY(), 0);
+    auto bottomLeft = t.transformingVector(minX(), maxY(), 0);
+    auto bottomRight = t.transformingVector(maxX(), maxY(), 0);
+
+    auto newMinX = min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+    auto newMaxX = max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+
+    auto newMinY = min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+    auto newMaxY = max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+
+    return Rect(newMinX,
+                newMinY,
+                newMaxX - newMinX,
+                newMaxY - newMinY);
+}
+
 bool Rect::operator==(const Rect& rhs) {
     return
     this->origin.x == rhs.origin.x && this->origin.y == rhs.origin.y &&
@@ -150,6 +234,9 @@ bool Rect::operator==(const Rect& rhs) {
 bool Rect::valid() {
     return this->origin.valid() && this->size.valid();
 }
+
+Rect Rect::zero = Rect();
+Rect Rect::null = Rect(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), 0, 0);
 
 // MARK: - INDEX PATH -
 IndexPath::IndexPath(int row, int section) {

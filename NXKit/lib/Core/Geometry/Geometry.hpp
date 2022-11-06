@@ -8,6 +8,7 @@
 #pragma once
 #include <math.h>
 #include <Core/UIEdgeInsets/UIEdgeInsets.hpp>
+#include <Core/NXTransform3D/NXTransform3D.hpp>
 
 namespace NXKit {
 
@@ -24,6 +25,8 @@ struct Point {
     Point& operator-=(const Point& rhs);
     Point operator/(const float& rhs);
     Point operator*(const float& rhs);
+
+    Point applying(const NXAffineTransform& t) const;
 
     bool valid();
     float magnitude();
@@ -66,13 +69,19 @@ struct Rect {
 
     bool contains(Point point);
     bool intersects(const Rect& other) const;
+    Rect intersection(const Rect& other) const;
     Rect& offsetBy(const Point& offset);
     Rect& offsetBy(const float& offsetX, const float& offsetY);
     Rect& insetBy(const UIEdgeInsets& insets);
+    Rect applying(const NXAffineTransform& t) const;
+    Rect applying(const NXTransform3D& t) const;
 
     bool operator==(const Rect& rhs);
 
     bool valid();
+
+    static Rect zero;
+    static Rect null;
 };
 
 struct IndexPath {

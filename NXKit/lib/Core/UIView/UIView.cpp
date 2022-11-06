@@ -162,13 +162,20 @@ void UIView::setMaxPercentHeight(float height) {
 }
 
 Rect UIView::getFrame() {
-    return Rect(YGNodeLayoutGetLeft(this->ygNode), YGNodeLayoutGetTop(this->ygNode), YGNodeLayoutGetWidth(this->ygNode), YGNodeLayoutGetHeight(this->ygNode));
+    auto transformedBounds = bounds.applying(transform);
+
+    auto anchorPointOffset = Point(
+        transformedBounds.width() * anchorPoint.x,
+        transformedBounds.height() * anchorPoint.y);
+
+    return Rect(
+        position.x - anchorPointOffset.x,
+        position.y - anchorPointOffset.y,
+        transformedBounds.width(),
+        transformedBounds.height());
 }
 
 Rect UIView::getBounds() {
-    Rect bounds;
-    bounds.origin = this->bounds.origin;
-    bounds.size = Size(YGNodeLayoutGetWidth(this->ygNode), YGNodeLayoutGetHeight(this->ygNode));
     return bounds;
 }
 
@@ -217,6 +224,10 @@ void UIView::internalDraw(NVGcontext* vgContext) {
     nvgTransform(vgContext, transform.m11, transform.m12, transform.m21, transform.m22, transform.tX, transform.tY);
 
     // Scale transform
+    // TODO: Need to be replaced with anchor point
+    float scaleTransformX = (getFrame().size.width / 2.0f) - (getFrame().size.width / 2.0f) * transform.m11;
+    float scaleTransformY = (getFrame().size.height / 2.0f) - (getFrame().size.height / 2.0f) * transform.m22;
+    nvgTranslate(vgContext, scaleTransformX, scaleTransformY);
 
     nvgGlobalAlpha(vgContext, getInternalAlpha());
 
@@ -492,6 +503,10 @@ std::deque<float> UIView::createAnimationContext() {
     std::deque<float> context;
     context.push_back(bounds.origin.x);
     context.push_back(bounds.origin.y);
+    context.push_back(bounds.size.width);
+    context.push_back(bounds.size.height);
+//    context.push_back(position.x);
+//    context.push_back(position.y);
     context.push_back(clickAlpha);
     context.push_back(alpha);
     transform.fillAnimationContext(&context);
@@ -502,6 +517,10 @@ std::deque<float> UIView::createAnimationContext() {
 void UIView::applyAnimationContext(std::deque<float>* context) {
     IFNNULL(bounds.origin.x, pop(context))
     IFNNULL(bounds.origin.y, pop(context))
+    IFNNULL(bounds.size.width, pop(context))
+    IFNNULL(bounds.size.height, pop(context))
+//    IFNNULL(position.x, pop(context))
+//    IFNNULL(position.y, pop(context))
     IFNNULL(clickAlpha, pop(context))
     IFNNULL(alpha, pop(context))
     transform = NXAffineTransform::fromAnimationContext(context);
@@ -576,13 +595,14 @@ void UIView::layoutSubviews() {
         YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
     }
 
+    position = Point(YGNodeLayoutGetLeft(this->ygNode), YGNodeLayoutGetTop(this->ygNode));
+    bounds.size = Size(YGNodeLayoutGetWidth(this->ygNode), YGNodeLayoutGetHeight(this->ygNode));
+
     for (auto view: getSubviews()) {
         auto viewParentNode = YGNodeGetParent(view->ygNode);
         if (!viewParentNode || viewParentNode != this->ygNode) continue;
         view->layoutSubviews();
     }
-
-    bounds = getBounds();
 
     if (!controller.expired()) controller.lock()->viewDidLayoutSubviews();
 }

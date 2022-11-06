@@ -189,7 +189,10 @@ private:
     std::vector<std::shared_ptr<UIView>> subviews;
     std::weak_ptr<UIView> superview;
     bool needsLayout = true;
+
     Rect bounds;
+    Point position;
+    Point anchorPoint;// = Point(0.5f, 0.5f);
 
     // highlight shaking
     bool highlightShaking = false;
