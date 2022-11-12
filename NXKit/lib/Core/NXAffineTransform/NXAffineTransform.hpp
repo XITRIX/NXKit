@@ -23,6 +23,8 @@ public:
     static NXAffineTransform scaleBy(float x, float y);
     static NXAffineTransform scale(float factor);
 
+    void apply(NXAffineTransform t);
+
     NXAffineTransform concat(const NXAffineTransform& other) const;
     std::optional<NXAffineTransform> inverted() const;
     bool isIdentity() const;
@@ -31,6 +33,7 @@ public:
 
     bool operator==(const NXAffineTransform& rhs) const;
 
+    void apply(std::deque<float>* context);
     void fillAnimationContext(std::deque<float>* context);
     static NXAffineTransform fromAnimationContext(std::deque<float>* context);
 };

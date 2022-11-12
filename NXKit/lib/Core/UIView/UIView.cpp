@@ -505,8 +505,8 @@ std::deque<float> UIView::createAnimationContext() {
     context.push_back(bounds.origin.y);
     context.push_back(bounds.size.width);
     context.push_back(bounds.size.height);
-//    context.push_back(position.x);
-//    context.push_back(position.y);
+    context.push_back(position.x);
+    context.push_back(position.y);
     context.push_back(clickAlpha);
     context.push_back(alpha);
     transform.fillAnimationContext(&context);
@@ -519,12 +519,12 @@ void UIView::applyAnimationContext(std::deque<float>* context) {
     IFNNULL(bounds.origin.y, pop(context))
     IFNNULL(bounds.size.width, pop(context))
     IFNNULL(bounds.size.height, pop(context))
-//    IFNNULL(position.x, pop(context))
-//    IFNNULL(position.y, pop(context))
+    IFNNULL(position.x, pop(context))
+    IFNNULL(position.y, pop(context))
     IFNNULL(clickAlpha, pop(context))
     IFNNULL(alpha, pop(context))
-    transform = NXAffineTransform::fromAnimationContext(context);
-    backgroundColor = UIColor::fromAnimationContext(context);
+    transform.apply(context);
+    backgroundColor.apply(context);
 }
 
 void UIView::animate(float duration, std::function<void()> animations, EasingFunction easing, std::function<void(bool)> completion) {
@@ -536,9 +536,18 @@ void UIView::animate(float duration, std::function<void()> animations, EasingFun
     }
 
     auto oldContext = createAnimationContext();
-    animationContext.reset(oldContext);
     animations();
-    animationContext.addStep(createAnimationContext(), duration * 1000, easing);
+    auto newContext = createAnimationContext();
+
+    for (int i = 0; i < newContext.size(); i++) {
+        if (oldContext[i] == newContext[i]) {
+            oldContext[i] = std::numeric_limits<float>::quiet_NaN();
+            newContext[i] = std::numeric_limits<float>::quiet_NaN();
+        }
+    }
+
+    animationContext.reset(oldContext);
+    animationContext.addStep(newContext, duration * 1000, easing);
     animationContext.setTickCallback([this]() {
         auto values = animationContext.getValue();
         applyAnimationContext(&values);
@@ -927,7 +936,17 @@ void UIView::animate(std::initializer_list<std::shared_ptr<UIView>> views, float
 
     for (int i = 0; i < views.size(); i++) {
         UIView* view = _views[i];
-        view->animationContext.addStep(view->createAnimationContext(), duration * 1000, easing);
+
+        auto newContext = view->createAnimationContext();
+
+        for (int j = 0; j < newContext.size(); j++) {
+            if (contexts[i][j] == newContext[j]) {
+                contexts[i][j] = std::numeric_limits<float>::quiet_NaN();
+                newContext[j] = std::numeric_limits<float>::quiet_NaN();
+            }
+        }
+
+        view->animationContext.addStep(newContext, duration * 1000, easing);
 
         view->animationContext.setTickCallback([view]() {
             auto values = view->animationContext.getValue();

@@ -46,14 +46,18 @@ void Application::setKeyWindow(std::shared_ptr<UIWindow> window) {
     keyWindow->setSize(Size(windowWidth, windowHeight));
 }
 
+void Application::setUIScaling(float scale) {
+    this->uiScale = scale;
+}
+
 void Application::onWindowResized(unsigned width, unsigned height, float scale) {
-    windowWidth  = width;
-    windowHeight = height;
+    windowWidth = width * uiScale;
+    windowHeight = height * uiScale;
 
     // Rescale UI
     windowScale = scale;
     if (keyWindow)
-        keyWindow->setSize(Size(width, height));
+        keyWindow->setSize(Size(windowWidth, windowHeight));
 }
 
 bool Application::mainLoopIteration() {

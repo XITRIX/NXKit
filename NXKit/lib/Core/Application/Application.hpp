@@ -55,7 +55,9 @@ public:
     NotificationEvent<std::shared_ptr<UIView>>* getFocusDidChangeEvent() { return &focusDidChangeEvent; };
     UIUserInterfaceStyle getUserInterfaceStyle();
 
+    void setUIScaling(float scale);
     float getWindowScale() { return windowScale; }
+    float getUIScale() { return this->uiScale; }
     
 private:
     inline static Application* _shared;
@@ -71,6 +73,7 @@ private:
 
     unsigned windowWidth, windowHeight;
     float windowScale;
+    float uiScale = 1;
     std::string resourcesPath;
 
     int getFps();

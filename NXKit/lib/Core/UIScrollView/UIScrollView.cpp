@@ -102,7 +102,7 @@ void UIScrollView::updateScrollingIndicatior() {
     scrollingIndicatorV->setHeight(height);
 
     float pos = (getContentOffset().y + visible.minY()) * (visible.height() / getContentSize().height) + visible.minY();
-    scrollingIndicatorV->setPosition(Point(getFrame().width() - 16, pos + getContentOffset().y));
+    scrollingIndicatorV->setPosition(Point(getFrame().width() - 16 - safeAreaInsets().right, pos + getContentOffset().y));
 }
 
 void UIScrollView::setBounds(Rect bounds) {
@@ -123,7 +123,12 @@ std::deque<float> UIScrollView::createAnimationContext() {
 void UIScrollView::applyAnimationContext(std::deque<float>* context) {
     UIView::applyAnimationContext(context);
 
-    auto newOffset = Point(pop(context), pop(context));
+    auto oldOffset = getContentOffset();
+
+    Point newOffset;
+    IFNNULLOR(newOffset.x, pop(context), oldOffset.x);
+    IFNNULLOR(newOffset.y, pop(context), oldOffset.y);
+
     newOffset = getContentOffsetInBounds(newOffset);
     setContentOffset(newOffset, false);
 
@@ -186,8 +191,9 @@ void UIScrollView::layoutSubviews() {
         Size frameSize = getBounds().size;
 
         auto margins = getMargins();
-        Size fixSize = Size(frameSize.width - margins.left - margins.right,
-                            frameSize.height - margins.top - margins.bottom);
+        auto safeArea = safeAreaInsets();
+        Size fixSize = Size(frameSize.width - margins.left - margins.right - safeArea.left - safeArea.right,
+                            frameSize.height - margins.top - margins.bottom - safeArea.top - safeArea.bottom);
 
         Size size = Size(fixWidth ? fixSize.width : UIView::AUTO,
                          fixHeight ? fixSize.height : UIView::AUTO);

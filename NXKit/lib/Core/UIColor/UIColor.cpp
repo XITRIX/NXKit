@@ -118,6 +118,37 @@ void UIColor::fillAnimationContext(std::deque<float>* context) {
     UITraitCollection::current = cache;
 }
 
+float getColor(float val, float alt) {
+    if (!isnan(val))
+        return minmax(0.0f, val, 255.0f);
+    return alt;
+}
+
+void UIColor::apply(std::deque<float>* context) {
+    auto cache = UITraitCollection::current;
+
+    UITraitCollection::current.userInterfaceStyle = UIUserInterfaceStyle::light;
+
+    auto rc = getColor(pop(context), r());
+    auto gc = getColor(pop(context), g());
+    auto bc = getColor(pop(context), b());
+    auto ac = getColor(pop(context), a());
+
+    UITraitCollection::current.userInterfaceStyle = UIUserInterfaceStyle::dark;
+
+    auto drc = getColor(pop(context), r());
+    auto dgc = getColor(pop(context), g());
+    auto dbc = getColor(pop(context), b());
+    auto dac = getColor(pop(context), a());
+
+    UITraitCollection::current = cache;
+
+    auto color = UIColor(rc, gc, bc, ac, drc, dgc, dbc, dac);
+
+    value = color.value;
+    darkValue = color.darkValue;
+}
+
 UIColor UIColor::fromAnimationContext(std::deque<float>* context) {
     auto r = minmax(0.0f, pop(context), 255.0f);
     auto g = minmax(0.0f, pop(context), 255.0f);

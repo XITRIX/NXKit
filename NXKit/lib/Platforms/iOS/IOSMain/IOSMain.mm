@@ -28,6 +28,7 @@ IOSMain::IOSMain(GLViewController* controller): controller(controller)
     inputManager = new IOSInputManager();
     InputManager::initWith(inputManager);
 
+//    application->setUIScaling(2f);
     application->getDelegate()->applicationDidFinishLaunching();
 }
 

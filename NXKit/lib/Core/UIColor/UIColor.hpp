@@ -37,6 +37,7 @@ public:
     bool operator==(const UIColor& rhs);
 
     void fillAnimationContext(std::deque<float>* context);
+    void apply(std::deque<float>* context);
     static UIColor fromAnimationContext(std::deque<float>* context);
 
     static UIColor clear;

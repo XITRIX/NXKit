@@ -20,6 +20,15 @@ namespace NXKit {
         prop = v;           \
 }
 
+#define IFNNULLOR(prop, val, or)  \
+{                           \
+    float v = val;          \
+    if (!isnan(v))          \
+        prop = v;           \
+    else                    \
+        prop = or;          \
+}
+
 template <typename T>
 T pop(std::vector<T>* vector) {
     T val = vector->back();

@@ -55,6 +55,14 @@ std::optional<NXAffineTransform> NXAffineTransform::inverted() const {
     return transform;
 }
 
+void NXAffineTransform::apply(NXAffineTransform t) {
+    IFNNULL(this->m11, t.m11);
+    IFNNULL(this->m12, t.m12);
+    IFNNULL(this->m21, t.m21);
+    IFNNULL(this->m22, t.m22);
+    IFNNULL(this->tX, t.tX);
+    IFNNULL(this->tY, t.tY);
+}
 
 NXAffineTransform NXAffineTransform::concat(const NXAffineTransform& other) const {
     return NXAffineTransformConcat(*this, other);
@@ -80,6 +88,15 @@ void NXAffineTransform::fillAnimationContext(std::deque<float>* context) {
     context->push_back(m22);
     context->push_back(tX);
     context->push_back(tY);
+}
+
+void NXAffineTransform::apply(std::deque<float>* context) {
+    IFNNULL(m11, pop(context));
+    IFNNULL(m12, pop(context));
+    IFNNULL(m21, pop(context));
+    IFNNULL(m22, pop(context));
+    IFNNULL(tX, pop(context));
+    IFNNULL(tY, pop(context));
 }
 
 NXAffineTransform NXAffineTransform::fromAnimationContext(std::deque<float>* context) {

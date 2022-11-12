@@ -41,6 +41,9 @@ int main(int argc, const char * argv[]) {
 
     application->getDelegate()->applicationDidFinishLaunching();
 
+    NXKit::UIEdgeInsets insets(40, 40, 40, 40);
+    application->getKeyWindow()->additionalSafeAreaInsets = insets;
+
     while (application->mainLoop());
 
 //    application->free();
