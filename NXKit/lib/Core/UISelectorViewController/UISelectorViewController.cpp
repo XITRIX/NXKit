@@ -93,7 +93,6 @@ std::shared_ptr<UIView> UISelectorViewController::makeFooter() {
     footer->setAxis(Axis::HORIZONTAL);
     footer->setAlignItems(AlignItems::STRETCH);
     footer->setJustifyContent(JustifyContent::FLEX_END);
-    footer->setSize(Size(UIView::AUTO, footerHeight));
     footer->setBorderTop(1);
     footer->borderColor = UIColor::label;
     footer->setMarginLeft(30);
@@ -101,8 +100,10 @@ std::shared_ptr<UIView> UISelectorViewController::makeFooter() {
     footer->setPadding(4, 8, 4, 8);
 
     auto actions = NXKit::make_shared<UIActionsView>();
+    actions->setSize(Size(UIView::AUTO, footerHeight));
     actions->inController = shared_from_this();
     footer->addSubview(actions);
+    acctionsBar = actions;
 
     container->addSubview(footer);
 
@@ -131,6 +132,9 @@ void UISelectorViewController::viewDidLayoutSubviews() {
             scrollView->setContentOffset(origin, true);
         }
     }
+
+    auto insets = getView()->safeAreaInsets();
+    acctionsBar->setMarginBottom(insets.bottom);
 }
 
 void UISelectorViewController::makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion) {

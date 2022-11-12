@@ -45,7 +45,7 @@ public:
     std::shared_ptr<UIViewController> popViewController(bool animated, bool free = true);
 private:
     float headerHeight = 88;
-    float footerHeight = 73;
+    float footerHeight = 65;
     bool isTranslucent = false;
     
     std::vector<std::shared_ptr<UIViewController>> viewControllers;

@@ -28,13 +28,14 @@ protected:
 
 private:
     float headerHeight = 70;
-    float footerHeight = 73;
+    float footerHeight = 65;
     
     std::shared_ptr<UIScrollView> scrollView = nullptr;
     std::shared_ptr<UIView> contentView = nullptr;
     std::shared_ptr<UIView> containerView = nullptr;
     
     std::shared_ptr<UIView> selectedView = nullptr;
+    std::shared_ptr<UIView> acctionsBar = nullptr;
 
     std::string title;
     std::function<void(int)> onComplete;

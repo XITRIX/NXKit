@@ -97,9 +97,8 @@ std::shared_ptr<UIView> UINavigationController::buildFooter() {
     footer->setJustifyContent(JustifyContent::FLEX_END);
     footer->setBorderTop(1);
     footer->borderColor = UIColor::label;
-    footer->setMarginLeft(30);
-    footer->setMarginRight(30);
-    footer->setPadding(0, 8, 0, 8);
+    footer->setMargins(0, 30, 4, 30);
+    footer->setPadding(4, 8, 0, 8);
 
     acctionsBar = NXKit::make_shared<UIActionsView>();
     acctionsBar->setSize(Size(UIView::AUTO, footerHeight));
@@ -131,7 +130,7 @@ void UINavigationController::viewDidLayoutSubviews() {
 
     auto insets = getView()->safeAreaInsets();
     navigationBar->setMarginTop(insets.top);
-    acctionsBar->setPaddingBottom(insets.bottom);
+    acctionsBar->setMarginBottom(insets.bottom);
 }
 
 void UINavigationController::show(std::shared_ptr<UIViewController> controller, void* sender) {
