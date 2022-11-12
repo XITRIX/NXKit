@@ -20,13 +20,13 @@ namespace NXKit {
         prop = v;           \
 }
 
-#define IFNNULLOR(prop, val, or)  \
+#define IFNNULLOR(prop, val, orr)  \
 {                           \
     float v = val;          \
     if (!isnan(v))          \
         prop = v;           \
     else                    \
-        prop = or;          \
+        prop = orr;         \
 }
 
 template <typename T>
