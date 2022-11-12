@@ -102,6 +102,8 @@ void UIScrollView::updateScrollingIndicatior() {
     scrollingIndicatorV->setHeight(height);
 
     float pos = (getContentOffset().y + visible.minY()) * (visible.height() / getContentSize().height) + visible.minY();
+    if (isnan(pos)) return;
+    
     scrollingIndicatorV->setPosition(Point(getFrame().width() - 16 - safeAreaInsets().right, pos + getContentOffset().y));
 }
 

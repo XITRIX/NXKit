@@ -6,6 +6,7 @@
 //
 
 #include <Core/Geometry/Geometry.hpp>
+#include <Core/Utils/Tools/Tools.hpp>
 
 namespace NXKit {
 
@@ -86,7 +87,7 @@ Size::Size(): width(0), height(0) { }
 Size::Size(float width, float height): width(width), height(height) { }
 
 bool Size::operator==(const Size& rhs) {
-    return this->width == rhs.width && this->height == rhs.height;
+    return isEqual(this->width, rhs.width) && isEqual(this->height, rhs.height);
 }
 
 Size Size::operator+(const Size& first) const {

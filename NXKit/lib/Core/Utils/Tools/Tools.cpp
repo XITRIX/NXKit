@@ -23,4 +23,10 @@ float minmax(float min, float val, float max) {
     return val;
 }
 
+float isEqual(float val1, float val2) {
+    if (isnan(val1) && isnan(val2))
+        return true;
+    return val1 == val2;
+}
+
 }

@@ -49,4 +49,6 @@ bool floatSame(float a, float b, float epsilon = 1);
 
 float minmax(float min, float val, float max);
 
+float isEqual(float val1, float val2);
+
 }

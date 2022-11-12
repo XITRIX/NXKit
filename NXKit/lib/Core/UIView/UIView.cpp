@@ -40,13 +40,19 @@ UIView::~UIView() {
 }
 
 void UIView::setPosition(Point position) {
+    if (this->position == position) return;
+
+    this->position = position;
+
     YGNodeStyleSetPosition(this->ygNode, YGEdgeLeft, position.x);
     YGNodeStyleSetPosition(this->ygNode, YGEdgeTop, position.y);
     setNeedsLayout();
 }
 
 void UIView::setSize(Size size) {
+    if (bounds.size == size) return;
     bounds.size = size;
+
     if (size.width == UIView::AUTO) {
         YGNodeStyleSetWidthAuto(this->ygNode);
 //        YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
@@ -78,6 +84,8 @@ void UIView::setWidth(float width) {
 }
 
 void UIView::setHeight(float height) {
+    if (bounds.size.height == height) return;
+
     bounds.size.height = height;
     if (height == UIView::AUTO) {
         YGNodeStyleSetHeightAuto(this->ygNode);
@@ -90,6 +98,8 @@ void UIView::setHeight(float height) {
 }
 
 void UIView::setMinWidth(float width) {
+    if (bounds.size.width == width) return;
+
     bounds.size.width = width;
     if (width == UIView::AUTO) {
         YGNodeStyleSetMinWidth(this->ygNode, YGUndefined);
@@ -672,6 +682,8 @@ std::shared_ptr<UIResponder> UIView::getNext() {
 
 
 void UIView::setHidden(bool hidden) {
+    if (isHidden() == hidden) return;
+
     if (hidden)
         YGNodeStyleSetDisplay(this->ygNode, YGDisplayNone);
     else
@@ -822,10 +834,13 @@ void UIView::setMargins(float margins) {
 }
 
 void UIView::setMargins(UIEdgeInsets margins) {
+    if (getMargins() == margins) return;
     setMargins(margins.top, margins.right, margins.bottom, margins.left);
 }
 
 void UIView::setMarginTop(float top) {
+    if (getMargins().top == top) return;
+
     if (top == UIView::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeTop);
     else
@@ -835,6 +850,8 @@ void UIView::setMarginTop(float top) {
 }
 
 void UIView::setMarginRight(float right) {
+    if (getMargins().right == right) return;
+
     if (right == UIView::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeRight);
     else
@@ -844,6 +861,8 @@ void UIView::setMarginRight(float right) {
 }
 
 void UIView::setMarginBottom(float bottom) {
+    if (getMargins().bottom == bottom) return;
+
     if (bottom == UIView::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeBottom);
     else
@@ -853,6 +872,8 @@ void UIView::setMarginBottom(float bottom) {
 }
 
 void UIView::setMarginLeft(float left) {
+    if (getMargins().left == left) return;
+
     if (left == UIView::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeLeft);
     else
