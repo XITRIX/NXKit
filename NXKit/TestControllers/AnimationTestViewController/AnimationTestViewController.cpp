@@ -35,18 +35,6 @@ void AnimationTestViewController::viewDidLoad() {
 
 void AnimationTestViewController::animate(bool revers) {
     static int counter = 0;
-//    auto w_this = weak_from_this();
-
-//    ball->animate(1, [this, revers]() {
-//        ball->transformOrigin = Point(revers ? 160 : -160, 0);
-//        ball->backgroundColor = colors[counter];
-//        ++counter %= colors.size();
-//    }, EasingFunction::exponentialInOut, [this](bool res) {
-////        if (w_this.expired()) return;
-//
-//        if (!res) return;
-//        animate(ball->transformOrigin.x < 0);
-//    });
 
     UIView::animate({ ball }, 1, [this, revers]() {
         ball->transform = NXAffineTransform::translationBy(revers ? 160 : -160, 0);

@@ -35,48 +35,38 @@ UIColor UIColor::random() {
 
 UIColor::UIColor(short r, short g, short b, short a) {
     value = (a & 0xff) << 24 | (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
+    darkValue = value;
 }
 
 UIColor::UIColor(short r, short g, short b, short a, short dr, short dg, short db, short da) {
     value = (a & 0xff) << 24 | (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
     darkValue = (da & 0xff) << 24 | (dr & 0xff) << 16 | (dg & 0xff) << 8 | (db & 0xff);
-    darkInited = true;
 }
 
 UIColor UIColor::f(float r, float g, float b, float a) {
     return UIColor(r * 255, g * 255, b * 255, a * 255);
 }
 
-bool currentStyleIsDark() {
-    return UITraitCollection::current.userInterfaceStyle == UIUserInterfaceStyle::dark;
+int UIColor::colorByCurrentStyle() {
+    if (UITraitCollection::current.userInterfaceStyle == UIUserInterfaceStyle::dark)
+        return darkValue;
+    return value;
 }
 
 unsigned char UIColor::r() {
-    if (darkInited && currentStyleIsDark()) {
-        return static_cast<unsigned char>((darkValue >> 16) & 0xff);
-    }
-    return static_cast<unsigned char>((value >> 16) & 0xff);
+    return static_cast<unsigned char>((colorByCurrentStyle() >> 16) & 0xff);
 }
 
 unsigned char UIColor::g() {
-    if (darkInited && currentStyleIsDark()) {
-        return static_cast<unsigned char>((darkValue >> 8) & 0xff);
-    }
-    return static_cast<unsigned char>((value >> 8) & 0xff);
+    return static_cast<unsigned char>((colorByCurrentStyle() >> 8) & 0xff);
 }
 
 unsigned char UIColor::b() {
-    if (darkInited && currentStyleIsDark()) {
-        return static_cast<unsigned char>(darkValue & 0xff);
-    }
-    return static_cast<unsigned char>(value & 0xff);
+    return static_cast<unsigned char>(colorByCurrentStyle() & 0xff);
 }
 
 unsigned char UIColor::a() {
-    if (darkInited && currentStyleIsDark()) {
-        return static_cast<unsigned char>((darkValue >> 24) & 0xff);
-    }
-    return static_cast<unsigned char>((value >> 24) & 0xff);
+    return static_cast<unsigned char>((colorByCurrentStyle() >> 24) & 0xff);
 }
 
 UIColor UIColor::withAlphaComponent(float alpha) {

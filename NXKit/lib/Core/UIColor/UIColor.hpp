@@ -63,7 +63,8 @@ public:
 private:
     int value;
     int darkValue;
-    bool darkInited = false;
+
+    int colorByCurrentStyle();
 };
 
 }
