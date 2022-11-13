@@ -228,7 +228,8 @@ void UIViewController::makeViewAppear(bool animated, std::shared_ptr<UIViewContr
                 break;
         }
     }, EasingFunction::quadraticInOut, [presentingViewController, completion](bool res) {
-        presentingViewController->getView()->setHidden(true);
+        if (res)
+            presentingViewController->getView()->setHidden(true);
         completion();
     });
 }
