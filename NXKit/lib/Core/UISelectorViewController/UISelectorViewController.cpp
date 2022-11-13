@@ -126,7 +126,7 @@ void UISelectorViewController::viewDidLayoutSubviews() {
             Application::shared()->setFocus(selectedView);
 
             Rect focusedViewFrame = selectedView->getFrame();
-            Point origin = selectedView->getSuperview().lock()->convert(focusedViewFrame.origin, scrollView);
+            Point origin = scrollView->convert(focusedViewFrame.origin, selectedView->getSuperview().lock());
             origin.y -= height / 2 - focusedViewFrame.height() / 2;
 
             scrollView->setContentOffset(origin, true);

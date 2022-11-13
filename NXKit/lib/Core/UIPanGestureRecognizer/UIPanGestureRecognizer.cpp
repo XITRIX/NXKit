@@ -16,7 +16,7 @@ Point UIPanGestureRecognizer::translationInView(std::shared_ptr<UIView> view) {
     if (!trackingTouch) return Point();
 
     auto positionInTargetView = trackingTouch->locationIn(view);
-    auto initialPositionInTargetView = view ? view->convert(initialTouchPoint, trackingTouch->window) : initialTouchPoint;
+    auto initialPositionInTargetView = view ? trackingTouch->window->convert(initialTouchPoint, view) : initialTouchPoint;
 
     return positionInTargetView - initialPositionInTargetView;
 }

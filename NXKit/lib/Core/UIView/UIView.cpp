@@ -221,6 +221,10 @@ void UIView::tintColorDidChange() {
 void UIView::internalDraw(NVGcontext* vgContext) {
     if (isHidden() || alpha == 0) return;
 
+    if (!drawingControlView.expired() && drawingControlView.lock()->shouldSkipSubviewDrawing(this)) {
+        return;
+    }
+
     auto trait = getTraitCollection();
     UITraitCollection::current = trait;
 
@@ -626,6 +630,25 @@ void UIView::layoutSubviews() {
     if (!controller.expired()) controller.lock()->viewDidLayoutSubviews();
 }
 
+void UIView::parentHierarchyViewChanged() {
+    if (!superview.expired())
+        drawingControlView = superview.lock()->canSkipSubviewDrawing();
+
+    for (auto view: subviews) {
+        view->parentHierarchyViewChanged();
+    }
+}
+
+std::weak_ptr<UIView> UIView::canSkipSubviewDrawing() {
+    if (!superview.expired())
+        return superview.lock()->canSkipSubviewDrawing();
+    return std::weak_ptr<UIView>();
+}
+
+bool UIView::shouldSkipSubviewDrawing(UIView* subview) {
+    return false;
+}
+
 bool UIView::isFocused() {
     if (Application::shared()->getFocus().expired()) return false;
     return Application::shared()->getFocus().lock().get() == this;
@@ -714,7 +737,7 @@ Point UIView::convert(Point point, std::shared_ptr<UIView> toView) {
     std::shared_ptr<UIView> current = shared_from_this();
     while (current) {
         if (current == toView) {
-            return point - selfAbsoluteOrigin;
+            return point + selfAbsoluteOrigin;
         }
         selfAbsoluteOrigin += current->getFrame().origin;
         selfAbsoluteOrigin -= current->bounds.origin;
@@ -741,7 +764,7 @@ std::shared_ptr<UIView> UIView::hitTest(Point point, UIEvent* withEvent) {
 
     auto subviews = getSubviews();
     for (int i = (int) subviews.size() - 1; i >= 0; i--) {
-        Point convertedPoint = subviews[i]->convert(point, shared_from_this());
+        Point convertedPoint = shared_from_this()->convert(point, subviews[i]);
         std::shared_ptr<UIView> test = subviews[i]->hitTest(convertedPoint, withEvent);
         if (test) return test;
     }
@@ -804,6 +827,9 @@ std::weak_ptr<UIView> UIView::getSuperview() {
 void UIView::setSuperview(std::weak_ptr<UIView> view) {
     superview = view;
     tintColorDidChange();
+    for (auto view: subviews) {
+        view->parentHierarchyViewChanged();
+    }
 }
 
 void UIView::setGrow(float grow) {

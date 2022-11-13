@@ -50,6 +50,10 @@ public:
 
     virtual Size getContentSize();
 
+protected:
+    std::weak_ptr<UIView> canSkipSubviewDrawing() override;
+    bool shouldSkipSubviewDrawing(UIView* subview) override;
+
 private:
     std::shared_ptr<UIPanGestureRecognizer> panGestureRecognizer;
     UIEdgeInsets lastSafeAreaInset;

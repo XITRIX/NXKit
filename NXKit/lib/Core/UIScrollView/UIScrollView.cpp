@@ -157,7 +157,7 @@ void UIScrollView::subviewFocusDidChange(std::shared_ptr<UIView> focusedView, st
 
     if (scrollingMode == UIScrollViewScrollingMode::centered) {
         Rect focusedViewFrame = focusedView->getFrame();
-        Point origin = focusedView->getSuperview().lock()->convert(focusedViewFrame.origin, shared_from_this());
+        Point origin = convert(focusedViewFrame.origin, focusedView->getSuperview().lock());
         origin.y -= getFrame().height() / 2 - focusedViewFrame.height() / 2;
         Point newOffset = getContentOffsetInBounds(origin);
         setContentOffset(newOffset);
@@ -167,7 +167,7 @@ void UIScrollView::subviewFocusDidChange(std::shared_ptr<UIView> focusedView, st
         Rect bounds = getVisibleOffsetBounds();
         Point newOffset = bounds.origin;
         Rect focusedViewFrame = focusedView->getFrame();
-        focusedViewFrame.origin = focusedView->getSuperview().lock()->convert(focusedViewFrame.origin, shared_from_this());
+        focusedViewFrame.origin = convert(focusedViewFrame.origin, focusedView->getSuperview().lock());
 
         float padding = 20;
 
@@ -284,6 +284,17 @@ Point UIScrollView::getContentOffsetInBounds(Point offset) {
     else if (offset.y > offsetBounds.maxY()) offset.y = offsetBounds.maxY();
 
     return offset;
+}
+
+
+std::weak_ptr<UIView> UIScrollView::canSkipSubviewDrawing() {
+    return weak_from_this();
+}
+
+bool UIScrollView::shouldSkipSubviewDrawing(UIView* subview) {
+    auto point = subview->convert(Point(), shared_from_this());
+    auto frame = Rect(point, subview->getFrame().size);
+    return !getBounds().intersects(frame);
 }
 
 }

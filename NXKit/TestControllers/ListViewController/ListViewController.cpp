@@ -72,7 +72,7 @@ void ListViewController::loadView() {
 }
 
 void ListViewController::viewDidLoad() {
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 200; i++) {
         auto item = NXKit::make_shared<ListItemView>();
         item->setText("Test text #" + std::to_string(i + 1));
         item->setImage(NXKit::make_shared<UIImage>(Application::shared()->getResourcesPath() + "Images/test/" + std::to_string(i%10) + ".svg", true, 2));

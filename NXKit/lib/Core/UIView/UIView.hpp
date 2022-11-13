@@ -175,6 +175,10 @@ public:
 protected:
     YGNode* ygNode;
 
+    virtual void parentHierarchyViewChanged();
+    virtual std::weak_ptr<UIView> canSkipSubviewDrawing();
+    virtual bool shouldSkipSubviewDrawing(UIView* subview);
+
 private:
     friend class Application;
     friend class UIViewController;
@@ -195,6 +199,7 @@ private:
     Point anchorPoint;// = Point(0.5f, 0.5f);
 
     // highlight shaking
+    std::weak_ptr<UIView> drawingControlView;
     bool highlightShaking = false;
     Time highlightShakeStart;
     NavigationDirection highlightShakeDirection;
