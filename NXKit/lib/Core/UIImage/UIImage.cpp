@@ -12,17 +12,31 @@ using namespace lunasvg;
 
 namespace NXKit {
 
+std::map<std::string, std::pair<int, int>> UIImage::pngTextureStash;
+
 UIImage::UIImage(std::string path, bool isTemplate, float upscale):
-    upscale(upscale), isTemplate(isTemplate)
+    path(path), upscale(upscale), isTemplate(isTemplate)
 {
     auto context = Application::shared()->getVideoContext()->getNVGContext();
-    
+
+    if (pngTextureStash.count(path)) {
+        pngTexture = pngTextureStash[path].first;
+
+        int width, height;
+        nvgImageSize(context, this->pngTexture, &width, &height);
+        size = Size(width, height);
+
+        pngTextureStash[path].second++;
+        return;
+    }
+
     pngTexture = nvgCreateImage(context, path.c_str(), 0);
     if (pngTexture != 0) {
         int width, height;
         nvgImageSize(context, this->pngTexture, &width, &height);
         size = Size(width, height);
-        imageType = UIImageType::PNG;
+//        imageType = UIImageType::PNG;
+        pngTextureStash[path] = std::pair<int, int>(pngTexture, 1);
         return;
     }
 
@@ -42,15 +56,21 @@ UIImage::UIImage(std::string path, bool isTemplate, float upscale):
         }
 
         pngTexture = nvgCreateImageRGBA(context, bitmap.width(), bitmap.height(), 0, bitmapData);
-        imageType = UIImageType::SVG;
+//        imageType = UIImageType::SVG;
+        pngTextureStash[path] = std::pair<int, int>(pngTexture, 1);
         return;
     }
 }
 
 UIImage::~UIImage() {
     auto context = Application::shared()->getVideoContext()->getNVGContext();
-    if (pngTexture != 0)
-        nvgDeleteImage(context, pngTexture);
+    if (pngTexture != 0) {
+        pngTextureStash[path].second--;
+        if (pngTextureStash[path].second == 0) {
+            nvgDeleteImage(context, pngTexture);
+            pngTextureStash.erase(path);
+        }
+    }
 }
 
 NVGpaint UIImage::getPaint() {

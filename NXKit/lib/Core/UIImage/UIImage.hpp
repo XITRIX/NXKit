@@ -12,6 +12,7 @@
 #include <string>
 #include <nanovg.h>
 #include <lunasvg/lunasvg.h>
+#include <map>
 
 namespace NXKit {
 
@@ -26,15 +27,18 @@ public:
     virtual ~UIImage();
 
     Size getSize() { return size; }
-    UIImageType getImageType() { return imageType; }
+//    UIImageType getImageType() { return imageType; }
 
     bool isDrawingTypeTemplate() { return isTemplate; }
 
     NVGpaint getPaint();
 private:
+    static std::map<std::string, std::pair<int, int>> pngTextureStash;
+
     bool isTemplate = false;
-    UIImageType imageType;
+//    UIImageType imageType;
     int pngTexture = 0;
+    std::string path;
     std::unique_ptr<lunasvg::Document> svgFile;
     float upscale = 1;
     Size size;
