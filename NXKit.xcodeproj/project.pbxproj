@@ -202,6 +202,8 @@
 		7CA960B12871F993009E0953 /* nanovg.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960882871F993009E0953 /* nanovg.c */; };
 		7CA960B22871F993009E0953 /* glad.c in Sources */ = {isa = PBXBuildFile; fileRef = 7CA9608A2871F993009E0953 /* glad.c */; };
 		7CA960C12871FAC6009E0953 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CA960BF2871FAC6009E0953 /* Application.cpp */; };
+		7CB925EF2921735600265C36 /* CAFloat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CB925ED2921735600265C36 /* CAFloat.cpp */; };
+		7CB925F02921735600265C36 /* CAFloat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CB925ED2921735600265C36 /* CAFloat.cpp */; };
 		7CC054FB28D1349D00205B99 /* UITableViewSwitchCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC054F928D1349D00205B99 /* UITableViewSwitchCell.cpp */; };
 		7CC0551728D22D1000205B99 /* UIBottomSheetController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC0551528D22D1000205B99 /* UIBottomSheetController.cpp */; };
 		7CCDCDB228C2730A00EFBFCA /* UITableView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDCDB028C2730A00EFBFCA /* UITableView.cpp */; };
@@ -469,6 +471,8 @@
 		7CA960C02871FAC6009E0953 /* Application.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Application.hpp; sourceTree = "<group>"; };
 		7CA960C22871FCC2009E0953 /* NXKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NXKit.entitlements; sourceTree = "<group>"; };
 		7CA9C4972882C5EB00E47DB3 /* GLFWVideoContext.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GLFWVideoContext.hpp; sourceTree = "<group>"; };
+		7CB925ED2921735600265C36 /* CAFloat.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CAFloat.cpp; sourceTree = "<group>"; };
+		7CB925EE2921735600265C36 /* CAFloat.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CAFloat.hpp; sourceTree = "<group>"; };
 		7CC054F928D1349D00205B99 /* UITableViewSwitchCell.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UITableViewSwitchCell.cpp; sourceTree = "<group>"; };
 		7CC054FA28D1349D00205B99 /* UITableViewSwitchCell.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UITableViewSwitchCell.hpp; sourceTree = "<group>"; };
 		7CC0551528D22D1000205B99 /* UIBottomSheetController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UIBottomSheetController.cpp; sourceTree = "<group>"; };
@@ -565,6 +569,7 @@
 			isa = PBXGroup;
 			children = (
 				7C239634287E175100973CC0 /* Core */,
+				7CB925EC2921733C00265C36 /* CAFloat */,
 				7C8D980728BAC22D00BDD667 /* AnimationContext */,
 			);
 			path = Animation;
@@ -1480,6 +1485,15 @@
 			path = Application;
 			sourceTree = "<group>";
 		};
+		7CB925EC2921733C00265C36 /* CAFloat */ = {
+			isa = PBXGroup;
+			children = (
+				7CB925EE2921735600265C36 /* CAFloat.hpp */,
+				7CB925ED2921735600265C36 /* CAFloat.cpp */,
+			);
+			path = CAFloat;
+			sourceTree = "<group>";
+		};
 		7CC054F828D1348100205B99 /* UITableViewSwitchCell */ = {
 			isa = PBXGroup;
 			children = (
@@ -1817,6 +1831,7 @@
 				7C706D3128EDFAE000B07BB5 /* plutovg-geometry.c in Sources */,
 				7C706D6628EE1A2800B07BB5 /* IOSVideoContext.mm in Sources */,
 				7C706D3228EDFAE000B07BB5 /* UIAction.cpp in Sources */,
+				7CB925F02921735600265C36 /* CAFloat.cpp in Sources */,
 				7C706D3328EDFAE000B07BB5 /* Utils.cpp in Sources */,
 				7C706D3428EDFAE000B07BB5 /* UIViewController.cpp in Sources */,
 				7C706D3528EDFAE000B07BB5 /* UIScrollView.cpp in Sources */,
@@ -1847,6 +1862,7 @@
 				7C49617928A8215000E30B4B /* TouchTestViewController.cpp in Sources */,
 				7C8D98A628BD658400BDD667 /* plutovg-geometry.c in Sources */,
 				7CE9B5E02874917F00659D24 /* YGEnums.cpp in Sources */,
+				7CB925EF2921735600265C36 /* CAFloat.cpp in Sources */,
 				7CC0551728D22D1000205B99 /* UIBottomSheetController.cpp in Sources */,
 				7C0638F32876215100621093 /* FontManager.cpp in Sources */,
 				7CE9B5D92874917F00659D24 /* log.cpp in Sources */,

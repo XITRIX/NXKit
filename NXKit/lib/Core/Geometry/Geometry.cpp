@@ -86,7 +86,7 @@ float Point::magnitude() {
 Size::Size(): width(0), height(0) { }
 Size::Size(float width, float height): width(width), height(height) { }
 
-bool Size::operator==(const Size& rhs) {
+bool Size::operator==(const Size& rhs) const {
     return isEqual(this->width, rhs.width) && isEqual(this->height, rhs.height);
 }
 
@@ -226,7 +226,7 @@ Rect Rect::applying(const NXTransform3D& t) const {
                 newMaxY - newMinY);
 }
 
-bool Rect::operator==(const Rect& rhs) {
+bool Rect::operator==(const Rect& rhs) const {
     return
     this->origin.x == rhs.origin.x && this->origin.y == rhs.origin.y &&
     this->size.width == rhs.size.width && this->size.height == rhs.size.height;

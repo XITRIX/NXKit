@@ -38,7 +38,7 @@ struct Size {
     Size();
     Size(float width, float height);
 
-    bool operator==(const Size& rhs);
+    bool operator==(const Size& rhs) const;
     Size operator+(const Size& first) const;
     Size operator-(const Size& first) const;
     Size& operator+=(const Size& rhs);
@@ -76,7 +76,7 @@ struct Rect {
     Rect applying(const NXAffineTransform& t) const;
     Rect applying(const NXTransform3D& t) const;
 
-    bool operator==(const Rect& rhs);
+    bool operator==(const Rect& rhs) const;
 
     bool valid();
 

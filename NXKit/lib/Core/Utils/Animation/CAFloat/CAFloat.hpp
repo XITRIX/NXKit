@@ -1,5 +1,5 @@
 //
-//  AnimationContext.hpp
+//  CAFloat.hpp
 //  NXKit
 //
 //  Created by Даниил Виноградов on 27.08.2022.
@@ -8,22 +8,37 @@
 #pragma once
 
 #include <tweeny/tweeny.h>
-#include <Core/Utils/Animation/CAFloat/CAFloat.hpp>
-#include <deque>
+#include <Core/Utils/Animation/Core/Time.hpp>
 
-namespace NXKit {
+namespace NXKit
+{
 
-class AnimationContext: public FiniteTicking {
-public:
+using EasingFunction = tweeny::easing::enumerated;
+
+// An animatable is a float which value can be animated from an initial value to a target value,
+// during a given amount of time. An easing function can also be specified.
+//
+// Declare the animatable and then use reset(initialValue) to reset the animation.
+// Add as many steps as you like by calling addStep(targetValue, duration, easing) one or multiple times.
+// Then, start and stop the animation with start() and stop().
+//
+// setEndCallback() and setTickCallback() allow you to execute code as long as the animation runs and / or once when it finishes.
+// Use .getValue() to get the current value at any time.
+//
+// An animatable has overloads for float conversion, comparison (==) and assignment operator (=) to allow
+// basic usage as a simple float. Assignment operator is a shortcut to the reset() method.
+class CAFloat : public FiniteTicking
+{
+  public:
     /**
      * Creates an animatable with the given initial value.
      */
-    AnimationContext();
+    CAFloat(float value = 0.0f);
 
     /**
      * Returns the current animatable value.
      */
-    std::deque<float> getValue();
+    float getValue();
 
     /**
      * Stops and resets the animation, going back to the given initial value.
@@ -31,7 +46,7 @@ public:
      * If an animation was already ongoing for that animatable, its end callback
      * will be called.
      */
-    void reset(std::deque<float> initialValue);
+    void reset(float initialValue);
 
     /**
      * Stops and resets the animation. The value will stay where it's at.
@@ -50,27 +65,27 @@ public:
      * Duration is int32_t due to internal limitations, so a step cannot last for longer than 2 147 483 647ms.
      * The sum of the duration of all steps cannot exceed 71582min.
      */
-    void addStep(std::deque<float> targetValue, int32_t duration, EasingFunction easing = EasingFunction::linear);
+    void addStep(float targetValue, int32_t duration, EasingFunction easing = EasingFunction::linear);
 
     /**
      * Returns the progress of the animation between 0.0f and 1.0f.
      */
     float getProgress();
 
-//    operator float() const;
-//    operator float();
-//    void operator=(const float value);
-//    bool operator==(const float value);
+    operator float() const;
+    operator float();
+    void operator=(const float value);
+    bool operator==(const float value);
 
-protected:
+  protected:
     bool onUpdate(Time delta) override;
 
     void onReset() override;
     void onRewind() override;
 
-private:
-    std::deque<float> currentValues;
-    std::vector<tweeny::tween<float>> tweens;
+  private:
+    float currentValue = 0.0f;
+    tweeny::tween<float> tween;
 };
 
-}
+} // namespace brls
