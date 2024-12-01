@@ -1,5 +1,22 @@
 # ThorVG
 
+#project(Skia)
+#
+#add_library(Skia
+#
+#)
+#
+##target_sources(${PROJECT_NAME} PRIVATE
+##)
+#
+#target_link_libraries(Skia
+#    skia/out/mac-arm64/libskia.a
+#)
+#
+#target_include_directories(Skia PUBLIC
+#        skia/include
+#)
+
 project(ThorVG)
 
 add_definitions(

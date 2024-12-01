@@ -4,26 +4,25 @@
 
 #pragma once
 
-#include <SDL.h>
-#include <thorvg.h>
 
-class Application {
+#include <tools/sk_app/Application.h>
+#include "tools/sk_app/Window.h"
+#include "tools/sk_app/CommandSet.h"
+#include "include/core/SkFontMgr.h"
+
+class UIApplication: public sk_app::Application, sk_app::Window::Layer {
 public:
-    Application();
+    UIApplication(int argc, char** argv, void* platformData);
+
+    void onIdle() override;
+    void onBackendCreated() override;
+    void onResize(int width, int height) override;
+    void onPaint(SkSurface *surface) override;
 
 private:
-    const int FPS = 120;
-    static Application* shared;
+    sk_app::Window* fWindow = nullptr;
+    sk_sp<SkFontMgr> mgr;
+    sk_sp<SkTypeface> typeface;
 
-    int width, height = 0;
-
-    SDL_Window *window = nullptr;
-    tvg::SwCanvas* canvas = nullptr;
-
-    void initVideo();
-    void render();
-    void resize();
-    void draw();
-
-    static int resizingEventWatcher(void* data, SDL_Event* event);
+    float fRotationAngle = 0;
 };

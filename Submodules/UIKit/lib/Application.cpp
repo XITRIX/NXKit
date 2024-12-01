@@ -2,158 +2,189 @@
 // Created by Даниил Виноградов on 17.11.2024.
 //
 
+#include <SDL_syswm.h>
 #include "Application.h"
 
-#include <glad/glad.h>
+#include "include/core/SkFont.h"
+#include "include/core/SkImageFilter.h"
+#include "include/core/SkShader.h"
+#include "include/core/SkSurface.h"
+#include "include/core/SkCanvas.h"
+#include "include/effects/SkBlurMaskFilter.h"
+#include "include/effects/SkGradientShader.h"
+#include "include/effects/SkImageFilters.h"
+#include "tools/sk_app/Window.h"
+#include "include/core/SkGraphics.h"
+#include "tools/window/DisplayParams.h"
+#include "include/core/SkRRect.h"
 
-#define WIDTH 1280
-#define HEIGHT 720
+#include "include/ports/SkFontMgr_empty.h"
+#include "include/ports/SkFontMgr_mac_ct.h"
 
-Application* Application::shared = nullptr;
+sk_app::Application *sk_app::Application::Create(int argc, char **argv, void *platformData) {
+    return new UIApplication(argc, argv, platformData);
+}
 
-int Application::resizingEventWatcher(void* data, SDL_Event* event) {
-    if (event->type == SDL_WINDOWEVENT &&
-        event->window.event == SDL_WINDOWEVENT_RESIZED) {
-        SDL_Window* win = SDL_GetWindowFromID(event->window.windowID);
-        if (win == (SDL_Window*)data) {
-            printf("resizing.....\n");
-            Application::shared->resize();
-            Application::shared->render();
-        }
+UIApplication::UIApplication(int argc, char **argv, void *platformData) {
+    SkGraphics::Init();
+    fWindow = sk_app::Windows::CreateNativeWindow(platformData);
+
+//    auto paramsBuilder = skwindow::DisplayParamsBuilder::Make();
+//    paramsBuilder->msaaSampleCount(1);
+//    GrContextOptions grctxOpts;
+////    CommonFlags::SetCtxOptions(&grctxOpts);
+////    grctxOpts.fPersistentCache = &fPersistentCache;
+//    grctxOpts.fShaderCacheStrategy = GrContextOptions::ShaderCacheStrategy::kSkSL;
+////    grctxOpts.fShaderErrorHandler = &gShaderErrorHandler;
+//    grctxOpts.fSuppressPrints = true;
+//    grctxOpts.fSupportBilerpFromGlyphAtlas = true;
+//    paramsBuilder->grContextOptions(grctxOpts);
+//    fWindow->setRequestedDisplayParams(paramsBuilder->build());
+
+    fWindow->pushLayer(this);
+
+    fWindow->attach(sk_app::Window::kMetal_BackendType);
+
+//    mgr = SkFontMgr_New_Custom_Empty();
+    mgr = SkFontMgr_New_CoreText(nullptr);
+
+//    auto file = romfs::get("SF-Compact.ttf");
+    printf("Fonts %d\n", mgr->countFamilies());
+
+    SkString name;
+    mgr->getFamilyName(0, &name);
+    printf("Font: - %s\n", name.data());
+
+    auto family = mgr->matchFamily("SF Pro");
+
+    SkFontStyle fontStyle;
+//    family->getStyle(0, &fontStyle);
+    typeface = mgr->matchFamilyStyle("SF Pro", fontStyle);
+//    typeface = mgr->makeFromData(SkData::MakeWithoutCopy(file.data(), file.size()));
+}
+
+void UIApplication::onPaint(SkSurface *surface) {
+    auto canvas = surface->getCanvas();
+    canvas->clear(SK_ColorWHITE);
+
+    SkPaint paint;
+    paint.setColor(SK_ColorRED);
+    paint.setAntiAlias(true);
+
+//    paint.setImageFilter(std::move(newBlurFilter));
+
+    // Draw a rectangle with red paint
+    SkRect rect = SkRect::MakeXYWH(10, 10, 512, 200);
+    SkRRect rrect;
+    SkVector corners[] = {{24, 36}, {36, 24}, {24, 24}, {24, 24}};
+    rrect.setRectRadii(rect, corners);
+    canvas->drawRRect(rrect, paint);
+
+    // Set up a linear gradient and draw a circle
+    {
+        SkPoint linearPoints[] = { { 0, 0 }, { 300, 300 } };
+        SkColor linearColors[] = { SK_ColorGREEN, SK_ColorBLACK };
+        paint.setShader(SkGradientShader::MakeLinear(linearPoints, linearColors, nullptr, 2,
+                                                     SkTileMode::kMirror));
+        paint.setAntiAlias(true);
+
+        canvas->drawCircle(200, 200, 64, paint);
+
+        // Detach shader
+        paint.setShader(nullptr);
     }
-    return 0;
-}
 
-Application::Application() {
-    if (!shared)
-        shared = this;
+    // Draw a message with a nice black paint
 
-    initVideo();
-}
+    SkFont font(typeface);
+    font.setSubpixel(true);
+    font.setSize(49);
+    paint.setColor(SK_ColorBLACK);
 
-void Application::initVideo() {
-    tvg::Initializer::init(0);
-    SDL_Init(SDL_INIT_EVERYTHING);
+    canvas->save();
+    static const char message[] = "Hello World ";
 
-//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-//    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-//    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
-//    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-//    SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
-//    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-//    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-//    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-//    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-
-    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
-
-    Uint32 windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;// | SDL_WINDOW_OPENGL;
-
-    window = SDL_CreateWindow("SDL2 Window",
-                                          SDL_WINDOWPOS_CENTERED,
-                                          SDL_WINDOWPOS_CENTERED,
-                                          WIDTH, HEIGHT,
-                                          windowFlags);
-
-    SDL_AddEventWatch(resizingEventWatcher, window);
-
-//    SDL_GLContext context = SDL_GL_CreateContext(window);
-//    SDL_GL_MakeCurrent(window, context);
-//
-//    gladLoadGLES2Loader((GLADloadproc)SDL_GL_GetProcAddress);
-//    SDL_GL_SetSwapInterval(1);
-//
-//    canvas = tvg::GlCanvas::gen();
-    canvas = tvg::SwCanvas::gen();
-    resize();
-
-    bool quit = false;
-//
-    const int frameDelay = 1000 / FPS;
-
-    while (!quit) {
-        auto frameStart = SDL_GetTicks();
-//
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_QUIT) {
-                quit = true;
-                break;
-            }
-        }
-
-        render();
-
-        auto frameTime = SDL_GetTicks() - frameStart;
-
-        if (frameDelay > frameTime) {
-            SDL_Delay(frameDelay - frameTime);
-        }
+    // Translate and rotate
+    canvas->translate(300, 300);
+    fRotationAngle += 0.2f;
+    if (fRotationAngle > 360) {
+        fRotationAngle -= 360;
     }
+    canvas->rotate(fRotationAngle);
 
-    tvg::Initializer::term();
-}
+    // Draw the text
+    canvas->drawString(message, 200, 20, font, paint);
+//    canvas->drawSimpleText(message, strlen(message), SkTextEncoding::kUTF8, 0, 0, font, paint);
 
-void Application::render() {
-//    resize();
-    draw();
-//    SDL_GL_SwapWindow(window);
-    SDL_UpdateWindowSurface(window);
-}
+    canvas->restore();
 
-void Application::draw() {
-    canvas->clear();
-
-    auto background = tvg::Shape::gen();               //generate a shape
-    background->appendRect(0, 0, width, height, 0, 0);  //define it as a rounded rectangle (x, y, w, h, rx, ry)
-    background->fill(255, 255, 255);                   //set its color (r, g, b)
-    canvas->push(std::move(background));                    //push the rectangle into the canvas
-
-    auto rect = tvg::Shape::gen();               //generate a shape
-    rect->appendRect(50, 50, 200, 200, 20, 20);  //define it as a rounded rectangle (x, y, w, h, rx, ry)
-    rect->fill(100, 100, 100);                   //set its color (r, g, b)
-    canvas->push(std::move(rect));                    //push the rectangle into the canvas
-
-    auto circle = tvg::Shape::gen();             //generate a shape
-    circle->appendCircle(400, 400, 100, 100);    //define it as a circle (cx, cy, rx, ry)
-
-    auto fill = tvg::RadialGradient::gen();      //generate a radial gradient
-    fill->radial(400, 400, 150, 400, 400, 0);                 //set the radial gradient geometry info (cx, cy, radius)
-
-    tvg::Fill::ColorStop colorStops[2];          //gradient colors
-    colorStops[0] = {0.0, 255, 255, 255, 255};   //1st color values (offset, r, g, b, a)
-    colorStops[1] = {1.0, 0, 0, 0, 255};         //2nd color values (offset, r, g, b, a)
-    fill->colorStops(colorStops, 2);             //set the gradient colors info
-
-    circle->fill(std::move(fill));                    //set the circle fill
-    canvas->push(std::move(circle));                  //push the circle into the canvas
-
-    canvas->draw();
-    canvas->sync();
-}
-
-void Application::resize() {
-//    SDL_Get
-//    SDL_GL_GetDrawableSize(window, &_width, &_height);
-
-    auto surface = SDL_GetWindowSurface(window);
-    if (!surface) return;
-
-    if (width == surface->w && height == surface->h)
-        return;
-
-    width = surface->w;
-    height = surface->h;
-
-//    width = _width;
-//    height = _height;
+//    const SkRect middle = SkRect::MakeXYWH(64, 64, 128, 128);
+//    // Use middle rectangle as clip mask
+//    canvas->clipRect(middle, true);
 //
-//    canvas->target(0, width, height, tvg::ColorSpace::ABGR8888S);
-//    canvas->viewport(0, 0, width, height);
-    //Set the canvas target and draw on it.
+//    sk_sp<SkImageFilter> newBlurFilter = SkImageFilters::Blur(25, 25, SkTileMode::kClamp, nullptr);
+//    paint.setImageFilter(newBlurFilter);
+//
+//    SkCanvas::SaveLayerRec slr(&middle, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+//    canvas->saveLayer(slr);
+//
+//    // Fill the clip middle rectangle with a transparent white
+//    canvas->drawColor(0x40FFFFFF);
+//    canvas->restore();
 
-    canvas->target((uint32_t*)surface->pixels, surface->w, surface->pitch / 4, surface->h, tvg::ColorSpace::ARGB8888);
+    SkPaint p;
+    p.setAntiAlias(true);
+    p.setStyle(SkPaint::kFill_Style);
+    p.setStrokeWidth(10);
+
+//    // Draw red squares
+//    p.setColor(SK_ColorRED);
+//    const SkRect red = SkRect::MakeXYWH(0, 0, 128, 128);
+//    canvas->drawRect(red, p);
+//    const SkRect red2 = SkRect::MakeXYWH(128, 128, 128, 128);
+//    canvas->drawRect(red2, p);
+//
+//    // Draw blue squares
+//    p.setColor(SK_ColorBLUE);
+////    p.setAlphaf(0.5f);
+//    const SkRect blue = SkRect::MakeXYWH(128, 0, 128, 128);
+//    canvas->drawRect(blue, p);
+//    const SkRect blue2 = SkRect::MakeXYWH(0, 128, 128, 128);
+//    canvas->drawRect(blue2, p);
+
+    // Create middle overlay rectangle for background blur
+    const SkRect middle = SkRect::MakeXYWH(64, 64, 128, 128);
+
+    canvas->save();
+    // Use middle rectangle as clip mask
+    canvas->clipRect(middle, true);
+
+    // Two blur filters, one that we're currently using and the newer one in current version of Skia.
+    // Both blur filters select a tile mode for clamping the blur filter at the rectangle's edges.
+    // However, the result on the CPU does NOT appear to clamp at all, while the result on GPU does!
+//    sk_sp<SkImageFilter> oldBlurFilter = SkBlurImageFilter::Make(25, 25, nullptr, nullptr, SkBlurImageFilter::kClamp_TileMode);
+    sk_sp<SkImageFilter> newBlurFilter = SkImageFilters::Blur(25, 25, SkTileMode::kClamp, nullptr);
+
+    p.setImageFilter(std::move(newBlurFilter));
+
+    // Make a separate layer using the blur filter, clipped to the middle rectangle's bounds
+    SkCanvas::SaveLayerRec slr(&middle, &p, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+    canvas->saveLayer(slr);
+
+    // Fill the clip middle rectangle with a transparent white
+    canvas->drawColor(0x40FFFFFF);
+    canvas->restore();
+    canvas->restore();
+}
+
+void UIApplication::onIdle() {
+    fWindow->inval();
+}
+
+void UIApplication::onResize(int width, int height) {
+    printf("Resize\n");
+}
+
+void UIApplication::onBackendCreated() {
+    fWindow->show();
 }

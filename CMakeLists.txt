@@ -56,4 +56,6 @@ if (APPLE)
     target_sources(${PROJECT_NAME} PRIVATE
             ${google_angle_libs}
     )
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE "-framework Foundation" "-framework VideoToolbox" "-framework AVKit" "-framework MetalKit")
 endif ()
