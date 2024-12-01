@@ -6,11 +6,6 @@ set(CMAKE_TOOLCHAIN_FILE ${EXTERN_PATH}/vcpkg/scripts/buildsystems/vcpkg.cmake C
 project(ThorVGApp)
 set(CMAKE_CXX_STANDARD 17)
 
-add_definitions(
-        -DLV_CONF_SKIP
-        -DLV_USE_SDL
-)
-
 add_subdirectory(${EXTERN_PATH})
 add_subdirectory(${EXTERN_PATH}/UIKit)
 

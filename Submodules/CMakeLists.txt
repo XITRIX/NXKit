@@ -26,6 +26,7 @@ add_library(${PROJECT_NAME}
         thorvg/src/renderer/tvgSaver.cpp
         thorvg/src/renderer/tvgScene.cpp
         thorvg/src/renderer/tvgShape.cpp
+        thorvg/src/renderer/tvgSwCanvas.cpp
         thorvg/src/renderer/tvgTaskScheduler.cpp
         thorvg/src/renderer/tvgText.cpp
 
@@ -41,6 +42,18 @@ add_library(${PROJECT_NAME}
         thorvg/src/renderer/gl_engine/tvgGlShaderSrc.cpp
         thorvg/src/renderer/gl_engine/tvgGlTessellator.cpp
 
+#       SW Renderer
+        thorvg/src/renderer/sw_engine/tvgSwFill.cpp
+        thorvg/src/renderer/sw_engine/tvgSwImage.cpp
+        thorvg/src/renderer/sw_engine/tvgSwMath.cpp
+        thorvg/src/renderer/sw_engine/tvgSwMemPool.cpp
+        thorvg/src/renderer/sw_engine/tvgSwPostEffect.cpp
+        thorvg/src/renderer/sw_engine/tvgSwRaster.cpp
+        thorvg/src/renderer/sw_engine/tvgSwRenderer.cpp
+        thorvg/src/renderer/sw_engine/tvgSwRle.cpp
+        thorvg/src/renderer/sw_engine/tvgSwShape.cpp
+        thorvg/src/renderer/sw_engine/tvgSwStroke.cpp
+
 #       Loaders
         thorvg/src/loaders/raw/tvgRawLoader.cpp
 )
@@ -55,6 +68,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         thorvg/src/common
         thorvg/src/renderer
         thorvg/src/renderer/gl_engine
+        thorvg/src/renderer/sw_engine
         thorvg/src/loaders/raw
 )
 

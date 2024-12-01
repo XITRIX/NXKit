@@ -17,6 +17,7 @@ int Application::resizingEventWatcher(void* data, SDL_Event* event) {
         SDL_Window* win = SDL_GetWindowFromID(event->window.windowID);
         if (win == (SDL_Window*)data) {
             printf("resizing.....\n");
+            Application::shared->resize();
             Application::shared->render();
         }
     }
@@ -34,21 +35,21 @@ void Application::initVideo() {
     tvg::Initializer::init(0);
     SDL_Init(SDL_INIT_EVERYTHING);
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-    SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+//    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+//    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
+//    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+//    SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
+//    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+//    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+//    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+//    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+//    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 
     SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
-    Uint32 windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL;
+    Uint32 windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;// | SDL_WINDOW_OPENGL;
 
     window = SDL_CreateWindow("SDL2 Window",
                                           SDL_WINDOWPOS_CENTERED,
@@ -58,13 +59,14 @@ void Application::initVideo() {
 
     SDL_AddEventWatch(resizingEventWatcher, window);
 
-    SDL_GLContext context = SDL_GL_CreateContext(window);
-    SDL_GL_MakeCurrent(window, context);
-
-    gladLoadGLES2Loader((GLADloadproc)SDL_GL_GetProcAddress);
-    SDL_GL_SetSwapInterval(1);
-
-    canvas = tvg::GlCanvas::gen();
+//    SDL_GLContext context = SDL_GL_CreateContext(window);
+//    SDL_GL_MakeCurrent(window, context);
+//
+//    gladLoadGLES2Loader((GLADloadproc)SDL_GL_GetProcAddress);
+//    SDL_GL_SetSwapInterval(1);
+//
+//    canvas = tvg::GlCanvas::gen();
+    canvas = tvg::SwCanvas::gen();
     resize();
 
     bool quit = false;
@@ -98,7 +100,8 @@ void Application::initVideo() {
 void Application::render() {
 //    resize();
     draw();
-    SDL_GL_SwapWindow(window);
+//    SDL_GL_SwapWindow(window);
+    SDL_UpdateWindowSurface(window);
 }
 
 void Application::draw() {
@@ -133,15 +136,24 @@ void Application::draw() {
 }
 
 void Application::resize() {
-    int _width, _height;
-    SDL_GL_GetDrawableSize(window, &_width, &_height);
+//    SDL_Get
+//    SDL_GL_GetDrawableSize(window, &_width, &_height);
 
-    if (width == _width && height == _height)
+    auto surface = SDL_GetWindowSurface(window);
+    if (!surface) return;
+
+    if (width == surface->w && height == surface->h)
         return;
 
-    width = _width;
-    height = _height;
+    width = surface->w;
+    height = surface->h;
 
-    canvas->target(0, width, height);
-    canvas->viewport(0, 0, width, height);
+//    width = _width;
+//    height = _height;
+//
+//    canvas->target(0, width, height, tvg::ColorSpace::ABGR8888S);
+//    canvas->viewport(0, 0, width, height);
+    //Set the canvas target and draw on it.
+
+    canvas->target((uint32_t*)surface->pixels, surface->w, surface->pitch / 4, surface->h, tvg::ColorSpace::ARGB8888);
 }

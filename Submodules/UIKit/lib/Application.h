@@ -18,7 +18,7 @@ private:
     int width, height = 0;
 
     SDL_Window *window = nullptr;
-    tvg::GlCanvas* canvas = nullptr;
+    tvg::SwCanvas* canvas = nullptr;
 
     void initVideo();
     void render();
