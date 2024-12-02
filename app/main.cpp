@@ -1,4 +1,4 @@
-//#include <Application.h>
+#include <Application.h>
 #include <tools/sk_app/Application.h>
 
 //class MainApp: sk_app::Application {
@@ -14,7 +14,7 @@
 //    return new MainApp(argc, argv, platformData);
 //}
 
-//int main() {
-//    new Application();
-//    return 0;
-//}
+int main() {
+    new Application();
+    return 0;
+}

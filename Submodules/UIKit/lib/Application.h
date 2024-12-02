@@ -1,28 +1,13 @@
-//
-// Created by Даниил Виноградов on 17.11.2024.
-//
+#include <SDL.h>
 
-#pragma once
-
-
-#include <tools/sk_app/Application.h>
-#include "tools/sk_app/Window.h"
-#include "tools/sk_app/CommandSet.h"
-#include "include/core/SkFontMgr.h"
-
-class UIApplication: public sk_app::Application, sk_app::Window::Layer {
+class Application {
 public:
-    UIApplication(int argc, char** argv, void* platformData);
-
-    void onIdle() override;
-    void onBackendCreated() override;
-    void onResize(int width, int height) override;
-    void onPaint(SkSurface *surface) override;
+    Application();
 
 private:
-    sk_app::Window* fWindow = nullptr;
-    sk_sp<SkFontMgr> mgr;
-    sk_sp<SkTypeface> typeface;
+    SDL_Window* window;
+    SDL_Renderer* renderer;
 
-    float fRotationAngle = 0;
+    bool runLoop();
+    void render();
 };

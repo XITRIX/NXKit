@@ -3,17 +3,18 @@ project(UIKit)
 find_package(SDL2 REQUIRED)
 
 add_definitions(
-        -DSK_GANESH
         -DSK_METAL
-        -DSK_TRIVIAL_ABI=[[clang::trivial_abi]]
+        -DSK_GANESH
+#        -DSK_GRAPHITE
+#        -DSK_TRIVIAL_ABI=[[clang::trivial_abi]]
 )
 
 add_library(${PROJECT_NAME}
         lib/Application.cpp
-        ${EXTERN_PATH}/skia/tools/sk_app/mac/main_mac.mm
-        ${EXTERN_PATH}/skia/tools/sk_app/mac/Window_mac.mm
-        ${EXTERN_PATH}/skia/tools/sk_app/CommandSet.cpp
-        ${EXTERN_PATH}/skia/tools/sk_app/Window.cpp
+#        ${EXTERN_PATH}/skia/tools/sk_app/mac/main_mac.mm
+#        ${EXTERN_PATH}/skia/tools/sk_app/mac/Window_mac.mm
+#        ${EXTERN_PATH}/skia/tools/sk_app/CommandSet.cpp
+#        ${EXTERN_PATH}/skia/tools/sk_app/Window.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
