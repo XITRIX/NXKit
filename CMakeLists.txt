@@ -6,6 +6,11 @@ set(CMAKE_TOOLCHAIN_FILE ${EXTERN_PATH}/vcpkg/scripts/buildsystems/vcpkg.cmake C
 project(ThorVGApp)
 set(CMAKE_CXX_STANDARD 17)
 
+add_definitions(
+        -DSK_TRIVIAL_ABI=[[clang::trivial_abi]]
+)
+
+
 add_subdirectory(${EXTERN_PATH})
 add_subdirectory(${EXTERN_PATH}/UIKit)
 
@@ -36,25 +41,6 @@ if (APPLE)
             XCODE_EMBED_FRAMEWORKS "${IOS_FRAMEWORKS}"
             INSTALL_RPATH "@executable_path/../Frameworks"
             XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../Frameworks"
-    )
-
-#    list(APPEND APPLE_FRAMEWORKS ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/angle/mac/MetalANGLE.framework)
-#
-#    set_target_properties(${PROJECT_NAME} PROPERTIES
-#            XCODE_EMBED_FRAMEWORKS "${APPLE_FRAMEWORKS}")
-
-    list(APPEND google_angle_libs
-            ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/angle/mac/libEGL.dylib
-            ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/angle/mac/libGLESv2.dylib
-    )
-
-    set_property(
-            SOURCE ${google_angle_libs}
-            PROPERTY MACOSX_PACKAGE_LOCATION "Frameworks"
-    )
-
-    target_sources(${PROJECT_NAME} PRIVATE
-            ${google_angle_libs}
     )
 
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework Foundation" "-framework VideoToolbox" "-framework AVKit" "-framework MetalKit")

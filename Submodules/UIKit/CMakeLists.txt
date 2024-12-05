@@ -3,18 +3,12 @@ project(UIKit)
 find_package(SDL2 REQUIRED)
 
 add_definitions(
-        -DSK_METAL
-        -DSK_GANESH
-#        -DSK_GRAPHITE
-#        -DSK_TRIVIAL_ABI=[[clang::trivial_abi]]
+        -DSK_TRIVIAL_ABI=[[clang::trivial_abi]]
 )
 
 add_library(${PROJECT_NAME}
         lib/Application.cpp
-#        ${EXTERN_PATH}/skia/tools/sk_app/mac/main_mac.mm
-#        ${EXTERN_PATH}/skia/tools/sk_app/mac/Window_mac.mm
-#        ${EXTERN_PATH}/skia/tools/sk_app/CommandSet.cpp
-#        ${EXTERN_PATH}/skia/tools/sk_app/Window.cpp
+        lib/platforms/mac/SkiaInit.mm
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -23,11 +17,23 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         lib
 )
 
+
+list(APPEND google_angle_libs
+        ${EXTERN_PATH}/angle/mac/libEGL.dylib
+        ${EXTERN_PATH}/angle/mac/libGLESv2.dylib
+)
+
 find_package(SDL2 REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        ${EXTERN_PATH}/skia/out/mac-arm64/libskia.a
-        ${EXTERN_PATH}/skia/out/mac-arm64/libwindow.a
+        ${google_angle_libs}
+        ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskia.a
+        ${EXTERN_PATH}/skia/out/mac-arm64-angle/libwindow.a
         SDL2::SDL2
         GLAD
         ThorVG
+)
+
+set_property(
+        SOURCE ${google_angle_libs}
+        PROPERTY MACOSX_PACKAGE_LOCATION "Frameworks"
 )
