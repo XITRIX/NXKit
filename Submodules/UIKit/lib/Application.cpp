@@ -8,10 +8,9 @@
 #include <include/core/SkCanvas.h>
 
 // SKIA METAL GPU
-#include "include/gpu/ganesh/GrDirectContext.h"
 #include "include/gpu/ganesh/GrBackendSurface.h"
 
-#include "platforms/mac/SkiaInit.h"
+#include "platforms/SkiaInit.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkImageFilters.h"
 

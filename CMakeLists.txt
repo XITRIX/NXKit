@@ -1,47 +1,27 @@
 cmake_minimum_required(VERSION 3.29)
 
+# toolchain
 set(EXTERN_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Submodules)
-set(CMAKE_TOOLCHAIN_FILE ${EXTERN_PATH}/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE PATH "vcpkg toolchain file")
+include(${EXTERN_PATH}/cmake/toolchain.cmake)
 
 project(ThorVGApp)
+set(VERSION_MAJOR "1")
+set(VERSION_MINOR "2")
+set(VERSION_ALTER "2")
+set(VERSION_BUILD "1")
+set(PACKAGE_NAME "ru.xitrix.Moonlight")
+set(PSN_VERSION  "01.00")
+set(PROJECT_AUTHOR "XITRIX")
+set(PROJECT_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/img/moonlight_icon.jpg)
+set(PROJECT_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 set(CMAKE_CXX_STANDARD 17)
-
-add_definitions(
-        -DSK_TRIVIAL_ABI=[[clang::trivial_abi]]
-)
-
-
-add_subdirectory(${EXTERN_PATH})
-add_subdirectory(${EXTERN_PATH}/UIKit)
 
 add_executable(${PROJECT_NAME}
         app/main.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${PROJECT_NAME} PUBLIC
         UIKit
 )
 
-if (APPLE)
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-            MACOSX_BUNDLE TRUE
-            MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
-            # MACOSX_BUNDLE_ICON_FILE "borealis.icns"
-            MACOSX_BUNDLE_COPYRIGHT "Copyright 2024 ${PROJECT_AUTHOR}"
-            # RESOURCE "${CMAKE_SOURCE_DIR}/app/borealis.icns"
-            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
-            MACOSX_BUNDLE_GUI_IDENTIFIER "${PACKAGE_NAME}"
-            MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_BUILD}"
-            MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}"
-            MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}"
-            XCODE_ATTRIBUTE_INFOPLIST_KEY_LSApplicationCategoryType "public.app-category.games" # Not work
-            XCODE_ATTRIBUTE_INSTALL_PATH $(LOCAL_APPS_DIR)
-            XCODE_EMBED_RESOURCES_CODE_SIGN_ON_COPY ON # Not work
-            XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON # Not work
-            XCODE_EMBED_FRAMEWORKS "${IOS_FRAMEWORKS}"
-            INSTALL_RPATH "@executable_path/../Frameworks"
-            XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../Frameworks"
-    )
-
-    target_link_libraries(${PROJECT_NAME} PRIVATE "-framework Foundation" "-framework VideoToolbox" "-framework AVKit" "-framework MetalKit")
-endif ()
+setup_project()
