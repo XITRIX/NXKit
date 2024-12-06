@@ -12,31 +12,23 @@ if (APPLE)
 
     # MAC
     if (PLATFORM_DESKTOP)
-        list(APPEND google_angle_libs
-                ${EXTERN_PATH}/angle/mac/libEGL.dylib
-                ${EXTERN_PATH}/angle/mac/libGLESv2.dylib
-        )
+        find_library(SDL2 NAMES SDL2-static SDL2main)
 
         list(APPEND platform_libs
-                ${google_angle_libs}
+                SDL2-static SDL2main
                 ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskia.a
                 ${EXTERN_PATH}/skia/out/mac-arm64-angle/libwindow.a
         )
     # IOS
     elseif (PLATFORM_IOS)
-        list(APPEND FRAMEWORKS ${EXTERN_PATH}/angle/ios/MetalANGLE.framework)
+        find_library(SDL2 NAMES SDL2-static SDL2main)
 
         list(APPEND platform_libs
-                ${google_angle_libs}
+                SDL2-static SDL2main
                 ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskia.a
                 ${EXTERN_PATH}/skia/out/ios-arm64-angle/libwindow.a
         )
     endif ()
-
-    set_property(
-            SOURCE ${google_angle_libs}
-            PROPERTY MACOSX_PACKAGE_LOCATION "Frameworks"
-    )
 endif ()
 
 add_library(UIKit
@@ -45,18 +37,18 @@ add_library(UIKit
 )
 
 target_include_directories(UIKit PUBLIC
+        ${EXTERN_PATH}/SDL/include
         ${EXTERN_PATH}/skia
         include
         lib
 )
 
-find_package(SDL2 REQUIRED)
-target_link_libraries(UIKit PUBLIC
-        ${platform_libs}
-        SDL2::SDL2
-)
+if (PLATFORM_IOS)
+    target_include_directories(SDL2-static PRIVATE ${EXTERN_PATH}/angle/ios/MetalANGLE.framework/Headers)
+endif ()
 
 if (APPLE)
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-            XCODE_EMBED_FRAMEWORKS "${FRAMEWORKS}")
+    list(APPEND platform_libs "-framework Foundation" "-framework VideoToolbox" "-framework AVKit" "-framework MetalKit")
 endif ()
+
+target_link_libraries(UIKit PRIVATE ${platform_libs})

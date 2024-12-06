@@ -1,6 +1,6 @@
 #include "Application.h"
 
-#include <SDL2/SDL_syswm.h>
+#include <SDL_syswm.h>
 
 #include <include/core/SkGraphics.h>
 #include <include/core/SkSurface.h>

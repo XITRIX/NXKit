@@ -20,8 +20,22 @@ add_executable(${PROJECT_NAME}
         app/main.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
+target_link_libraries(${PROJECT_NAME} PRIVATE
         UIKit
 )
 
 setup_project()
+
+#list(APPEND google_angle_libs
+#        ${EXTERN_PATH}/angle/mac/libEGL.dylib
+#        ${EXTERN_PATH}/angle/mac/libGLESv2.dylib
+#)
+#
+#set_property(
+#        SOURCE ${google_angle_libs}
+#        PROPERTY MACOSX_PACKAGE_LOCATION "Frameworks"
+#)
+#
+#target_sources(${PROJECT_NAME} PRIVATE
+#        ${google_angle_libs}
+#)

@@ -17,6 +17,19 @@ std::unique_ptr<skwindow::WindowContext> skiaMakeWindow(SDL_Window* window) {
 #endif
 
 #ifdef PLATFORM_IOS
+#include "tools/window/ios/WindowContextFactory_ios.h"
+#import "UIKit/UIKit.h"
+
+std::unique_ptr<skwindow::WindowContext> skiaMakeWindow(SDL_Window* window) {
+    auto metalView = SDL_Metal_CreateView(window);
+
+    auto appWindow = UIApplication.sharedApplication.keyWindow;
+    skwindow::IOSWindowInfo info{};
+    info.fWindow = appWindow;
+    info.fViewController = appWindow.rootViewController;
+    return skwindow::MakeMetalForIOS(info, std::make_unique<skwindow::DisplayParams>());
+}
+
 #endif
 
 bool platformRunLoop(const std::function<bool()>& runLoop) {

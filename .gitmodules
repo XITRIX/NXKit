@@ -1,3 +1,6 @@
 [submodule "Submodules/vcpkg"]
 	path = Submodules/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "Submodules/SDL"]
+	path = Submodules/SDL
+	url = https://github.com/XITRIX/SDL.git
