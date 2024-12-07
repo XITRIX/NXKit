@@ -15,7 +15,8 @@ public:
     sk_sp<GrDirectContext> directContext() override { return context; }
 private:
     sk_sp<GrDirectContext> context;
-
+    sk_sp<SkSurface> surface;
+    
     void initContext();
 };
 

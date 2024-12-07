@@ -20,7 +20,8 @@ public:
 
 private:
     sk_sp<GrDirectContext> context;
-
+    sk_sp<SkSurface> surface;
+    
     void initContext();
 };
 

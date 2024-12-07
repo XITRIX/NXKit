@@ -44,10 +44,9 @@ void SkiaCtx_macos::initContext() {
 
 sk_sp<SkSurface> SkiaCtx_macos::getBackbufferSurface() {
     auto size = getSize();
-    if (_size.width != size.width || _size.height != size.height) {
-        _size = size;
-        initContext();
-    }
+    if (_size.width == size.width && _size.height == size.height && surface != nullptr) { return surface; }
+
+    _size = size;
 
     GrGLFramebufferInfo framebuffer_info;
     framebuffer_info.fFormat = GL_RGBA8;
@@ -61,9 +60,11 @@ sk_sp<SkSurface> SkiaCtx_macos::getBackbufferSurface() {
     SkSurfaceProps props;
 
     glViewport(0, 0, _size.width * scaleFactor, _size.height * scaleFactor);
-    return SkSurfaces::WrapBackendRenderTarget(context.get(), target,
+    surface = SkSurfaces::WrapBackendRenderTarget(context.get(), target,
                                                kBottomLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
                                                nullptr, &props);
+
+    return surface;
 }
 
 std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx() {
