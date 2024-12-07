@@ -7,6 +7,8 @@
 #include "include/core/SkSurface.h"
 #include <functional>
 
+namespace NXKit {
+
 bool platformRunLoop(std::function<bool()> loop);
 
 class SkiaCtx {
@@ -23,3 +25,5 @@ protected:
 };
 
 std::unique_ptr<SkiaCtx> MakeSkiaCtx(SDL_Window* window);
+
+}

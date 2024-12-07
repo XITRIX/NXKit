@@ -5,6 +5,8 @@
 #import "tools/window/WindowContext.h"
 #import "SkiaCtx.h"
 
+namespace NXKit {
+
 class Application {
 public:
     Application();
@@ -23,3 +25,5 @@ private:
     bool runLoop();
     void render();
 };
+
+}

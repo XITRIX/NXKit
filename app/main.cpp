@@ -2,6 +2,6 @@
 #include <SDL_main.h>
 
 int main(int argc, char *argv[]) {
-    std::make_unique<Application>();
+    std::make_unique<NXKit::Application>();
     return 0;
 }

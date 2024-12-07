@@ -19,6 +19,10 @@ if (APPLE)
                 ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskia.a
                 ${EXTERN_PATH}/skia/out/mac-arm64-angle/libwindow.a
         )
+
+        list(APPEND platform_sources
+                lib/platforms/apple/macos/SkiaCtx_macos.mm
+        )
     # IOS
     elseif (PLATFORM_IOS)
         list(APPEND platform_sources
@@ -53,7 +57,9 @@ target_include_directories(UIKit PUBLIC
         lib
 )
 
-if (PLATFORM_IOS)
+if (PLATFORM_MAC)
+    target_include_directories(SDL2-static PUBLIC ${EXTERN_PATH}/angle/mac/Headers)
+elseif (PLATFORM_IOS)
     target_include_directories(SDL2-static PUBLIC ${EXTERN_PATH}/angle/ios/MetalANGLE.framework/Headers)
 endif ()
 

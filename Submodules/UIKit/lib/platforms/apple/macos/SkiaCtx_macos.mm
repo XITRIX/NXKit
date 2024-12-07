@@ -1,4 +1,4 @@
-#include <platforms/ios/SkiaCtx_ios.h>
+#include <platforms/macos/SkiaCtx_macos.h>
 
 #include "include/core/SkColorSpace.h"
 #include <include/core/SkGraphics.h>
@@ -14,19 +14,19 @@
 #include "include/private/base/SkTemplates.h"
 
 #include <GLES3/gl3.h>
-#include <UIKit/UIKit.h>
+#include <Cocoa/Cocoa.h>
 #include <dlfcn.h>
 
 using namespace NXKit;
 
-SkiaCtx_ios::SkiaCtx_ios(SDL_Window* window): SkiaCtx_sdlBase(window) {
+SkiaCtx_macos::SkiaCtx_macos(SDL_Window* window): SkiaCtx_sdlBase(window) {
     SkGraphics::Init();
     initContext();
 }
 
-void SkiaCtx_ios::initContext() {
+void SkiaCtx_macos::initContext() {
     _size = getSize();
-    static const char kPath[] = "./Frameworks/MetalANGLE.framework/MetalANGLE";
+    static const char kPath[] = "../Frameworks/libEGL.dylib";
     std::unique_ptr<void, SkFunctionObject<dlclose>> lib(dlopen(kPath, RTLD_LAZY));
     auto interface = GrGLMakeAssembledGLESInterface(lib.get(), [](void* ctx, const char* name) {
         return (GrGLFuncPtr)dlsym(ctx ? ctx : RTLD_DEFAULT, name); });
@@ -34,11 +34,11 @@ void SkiaCtx_ios::initContext() {
     context = GrDirectContexts::MakeGL(interface);
 }
 
-float SkiaCtx_ios::getScaleFactor() {
-    return UIApplication.sharedApplication.keyWindow.traitCollection.displayScale;
-}
+//float SkiaCtx_macos::getScaleFactor() {
+//    return NSApplication.sharedApplication.keyWindow.backingScaleFactor;
+//}
 
-sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
+sk_sp<SkSurface> SkiaCtx_macos::getBackbufferSurface() {
     auto size = getSize();
     if (_size.width != size.width || _size.height != size.height) {
         _size = size;
@@ -58,12 +58,12 @@ sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
 
     glViewport(0, 0, _size.width * scaleFactor, _size.height * scaleFactor);
     return SkSurfaces::WrapBackendRenderTarget(context.get(), target,
-                                                       kBottomLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
-                                                       nullptr, &props);
+                                               kBottomLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
+                                               nullptr, &props);
 }
 
 std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx(SDL_Window* window) {
-    return std::make_unique<SkiaCtx_ios>(window);
+    return std::make_unique<SkiaCtx_macos>(window);
 }
 
 bool NXKit::platformRunLoop(std::function<bool()> loop) {

@@ -6,16 +6,13 @@
 
 namespace NXKit {
 
-class SkiaCtx_ios : public SkiaCtx_sdlBase {
+class SkiaCtx_macos: public SkiaCtx_sdlBase {
 public:
-    SkiaCtx_ios(SDL_Window *window);
+    SkiaCtx_macos(SDL_Window* window);
 
     sk_sp<SkSurface> getBackbufferSurface() override;
-
-    float getScaleFactor() override;
-
+//    float getScaleFactor() override;
     sk_sp<GrDirectContext> directContext() override { return context; }
-
 private:
     sk_sp<GrDirectContext> context;
 

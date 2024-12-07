@@ -2,7 +2,6 @@
 
 #include <SDL_syswm.h>
 
-#include <include/core/SkGraphics.h>
 #include <include/core/SkSurface.h>
 #include <include/core/SkRRect.h>
 #include <include/core/SkCanvas.h>
@@ -12,6 +11,8 @@
 
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkImageFilters.h"
+
+using namespace NXKit;
 
 Application* Application::shared = nullptr;
 
@@ -52,8 +53,6 @@ Application::Application() {
     auto context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, context);
 
-    SkGraphics::Init();
-//    skiaWindow = skiaMakeWindow(window);
     skiaCtx = MakeSkiaCtx(window);
 
     SDL_AddEventWatch(resizingEventWatcher, window);
@@ -88,18 +87,18 @@ void Application::render() {
     paint.setAntiAlias(true);
 
     // Draw a rectangle with red paint
-    SkRect rect = SkRect::MakeXYWH(10, 10, 512, 200);
+    SkRect rect = SkRect::MakeXYWH(0, 0, 200, 200);
     SkRRect rrect;
     SkVector corners[] = {{24, 36}, {36, 24}, {24, 24}, {24, 24}};
     rrect.setRectRadii(rect, corners);
-    canvas->drawRRect(rrect, paint);
+    canvas->drawRect(rect, paint);
 
     paint.setColor(SK_ColorYELLOW);
-    rect = SkRect::MakeXYWH(10, 410, 2512, 200);
+    rect = SkRect::MakeXYWH(10, 410, 4000, 200);
     canvas->drawRect(rect, paint);
 
     paint.setColor(SK_ColorBLUE);
-    rect = SkRect::MakeXYWH(410, 10, 212, 2500);
+    rect = SkRect::MakeXYWH(410, 10, 212, 4000);
     canvas->drawRect(rect, paint);
 
     // Set up a linear gradient and draw a circle
@@ -117,12 +116,12 @@ void Application::render() {
     }
 
     // Create middle overlay rectangle for background blur
-    const SkRect middle = SkRect::MakeXYWH(64, 64, 128, 128);
+    const SkRect middle = SkRect::MakeXYWH(264, 264, 528, 528);
 
     canvas->save();
 //    // Use middle rectangle as clip mask
 //    canvas->clipRect(middle, false);
-    canvas->clipRect(SkRect::MakeWH(190.5f, 110.5f), true);
+    canvas->clipRect(middle, true);
 
     SkPaint redPaint;
     redPaint.setAntiAlias(true);
