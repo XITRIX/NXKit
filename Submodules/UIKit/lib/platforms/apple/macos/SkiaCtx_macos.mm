@@ -13,6 +13,8 @@
 #include "include/gpu/ganesh/gl/GrGLInterface.h"
 #include "include/private/base/SkTemplates.h"
 
+#include "include/ports/SkFontMgr_mac_ct.h"
+
 #include <GLES3/gl3.h>
 #include <Cocoa/Cocoa.h>
 #include <dlfcn.h>
@@ -22,6 +24,8 @@ using namespace NXKit;
 SkiaCtx_macos::SkiaCtx_macos(SDL_Window* window): SkiaCtx_sdlBase(window) {
     SkGraphics::Init();
     initContext();
+
+    fontMgr = SkFontMgr_New_CoreText(nullptr);
 }
 
 void SkiaCtx_macos::initContext() {

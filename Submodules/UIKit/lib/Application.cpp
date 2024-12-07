@@ -5,12 +5,14 @@
 #include <include/core/SkSurface.h>
 #include <include/core/SkRRect.h>
 #include <include/core/SkCanvas.h>
+#include <include/core/SkTypeface.h>
 
 // SKIA METAL GPU
 #include "include/gpu/ganesh/GrBackendSurface.h"
 
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkImageFilters.h"
+#include "include/core/SkFont.h"
 
 using namespace NXKit;
 
@@ -57,12 +59,14 @@ Application::Application() {
 
     SDL_AddEventWatch(resizingEventWatcher, window);
 
+    SkFontStyle style;
+    typeface = skiaCtx->getFontMgr()->matchFamilyStyle(nullptr, style);
+//    SkTypeface::Make
+
     while(platformRunLoop([this]() { return runLoop(); }));
 }
 
-Application::~Application() {
-    skiaCtx = nullptr;
-}
+Application::~Application() {}
 
 bool Application::runLoop() {
     SDL_Event event;
@@ -100,6 +104,28 @@ void Application::render() {
     paint.setColor(SK_ColorBLUE);
     rect = SkRect::MakeXYWH(410, 10, 212, 4000);
     canvas->drawRect(rect, paint);
+
+    SkFont font(typeface);
+    font.setSubpixel(true);
+    font.setSize(49);
+    paint.setColor(SK_ColorBLACK);
+//
+    canvas->save();
+    static const char message[] = "Hello World ";
+
+    // Translate and rotate
+    canvas->translate(300, 300);
+    fRotationAngle += 0.2f;
+    if (fRotationAngle > 360) {
+        fRotationAngle -= 360;
+    }
+    canvas->rotate(fRotationAngle);
+
+    // Draw the text
+    canvas->drawString(message, 200, 20, font, paint);
+//    canvas->drawSimpleText(message, strlen(message), SkTextEncoding::kUTF8, 0, 0, font, paint);
+
+    canvas->restore();
 
     // Set up a linear gradient and draw a circle
     {

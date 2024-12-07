@@ -4,6 +4,8 @@
 #include <platforms/SkiaCtx_sdlBase.h>
 #include <include/gpu/ganesh/GrDirectContext.h>
 
+#include "include/core/SkFont.h"
+
 namespace NXKit {
 
 class SkiaCtx_ios : public SkiaCtx_sdlBase {

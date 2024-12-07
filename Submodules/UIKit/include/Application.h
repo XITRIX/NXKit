@@ -14,9 +14,10 @@ public:
 
 private:
     SDL_Window* window;
-    SDL_Renderer* renderer;
 
-//    std::unique_ptr<skwindow::WindowContext> skiaWindow;
+    sk_sp<SkTypeface> typeface;
+    float fRotationAngle = 0;
+
     std::unique_ptr<SkiaCtx> skiaCtx;
 
     static Application* shared;
