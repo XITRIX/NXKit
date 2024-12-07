@@ -7,7 +7,7 @@ add_definitions(
 # APPLE
 if (APPLE)
     list(APPEND platform_sources
-            lib/platforms/apple/SkiaInit.mm
+            lib/platforms/SkiaCtx_sdlBase.cpp
     )
 
     # MAC
@@ -21,6 +21,10 @@ if (APPLE)
         )
     # IOS
     elseif (PLATFORM_IOS)
+        list(APPEND platform_sources
+                lib/platforms/apple/ios/SkiaCtx_ios.mm
+        )
+
         find_library(SDL2 NAMES SDL2-static SDL2main)
 
         list(APPEND platform_libs
@@ -28,11 +32,17 @@ if (APPLE)
                 ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskia.a
                 ${EXTERN_PATH}/skia/out/ios-arm64-angle/libwindow.a
         )
+
+        list(APPEND platform_sources
+            lib/platforms/apple/ios/SkiaCtx_ios.mm
+        )
     endif ()
 endif ()
 
 add_library(UIKit
+        lib/platforms/SkiaCtx.cpp
         lib/Application.cpp
+        lib/NXSize.cpp
         ${platform_sources}
 )
 
@@ -44,7 +54,7 @@ target_include_directories(UIKit PUBLIC
 )
 
 if (PLATFORM_IOS)
-    target_include_directories(SDL2-static PRIVATE ${EXTERN_PATH}/angle/ios/MetalANGLE.framework/Headers)
+    target_include_directories(SDL2-static PUBLIC ${EXTERN_PATH}/angle/ios/MetalANGLE.framework/Headers)
 endif ()
 
 if (APPLE)

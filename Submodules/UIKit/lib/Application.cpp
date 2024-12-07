@@ -10,7 +10,6 @@
 // SKIA METAL GPU
 #include "include/gpu/ganesh/GrBackendSurface.h"
 
-#include "platforms/SkiaInit.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkImageFilters.h"
 
@@ -31,10 +30,31 @@ Application::Application() {
     shared = this;
 
     SDL_Init(SDL_INIT_EVERYTHING);
-    window = SDL_CreateWindow("Window", 12, 12, 1280, 720, SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
+
+    Uint32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE;
+#ifdef PLATFORM_IOS
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+    SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+
+    flags |= SDL_WINDOW_OPENGL;
+#endif
+
+    window = SDL_CreateWindow("Window", 12, 12, 1280, 720, flags);
+    auto context = SDL_GL_CreateContext(window);
+    SDL_GL_MakeCurrent(window, context);
 
     SkGraphics::Init();
-    skiaWindow = skiaMakeWindow(window);
+//    skiaWindow = skiaMakeWindow(window);
+    skiaCtx = MakeSkiaCtx(window);
 
     SDL_AddEventWatch(resizingEventWatcher, window);
 
@@ -42,7 +62,7 @@ Application::Application() {
 }
 
 Application::~Application() {
-    skiaWindow = nullptr;
+    skiaCtx = nullptr;
 }
 
 bool Application::runLoop() {
@@ -57,11 +77,11 @@ bool Application::runLoop() {
 }
 
 void Application::render() {
-    auto surface = skiaWindow->getBackbufferSurface();
+    auto surface = skiaCtx->getBackbufferSurface();
     if (!surface) return;
 
     auto canvas = surface->getCanvas();
-    canvas->clear(SK_ColorWHITE);
+    canvas->clear(SK_ColorCYAN);
 
     SkPaint paint;
     paint.setColor(SK_ColorRED);
@@ -74,6 +94,13 @@ void Application::render() {
     rrect.setRectRadii(rect, corners);
     canvas->drawRRect(rrect, paint);
 
+    paint.setColor(SK_ColorYELLOW);
+    rect = SkRect::MakeXYWH(10, 410, 2512, 200);
+    canvas->drawRect(rect, paint);
+
+    paint.setColor(SK_ColorBLUE);
+    rect = SkRect::MakeXYWH(410, 10, 212, 2500);
+    canvas->drawRect(rect, paint);
 
     // Set up a linear gradient and draw a circle
     {
@@ -160,9 +187,6 @@ void Application::render() {
 
 // -----------------------
 
-    if (auto dContext = skiaWindow->directContext()) {
-        dContext->flushAndSubmit(surface.get(), GrSyncCpu::kNo);
-    }
-
-    skiaWindow->swapBuffers();
+    skiaCtx->flushAndSubmit(surface);
+    skiaCtx->swapBuffers();
 }
