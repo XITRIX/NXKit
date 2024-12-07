@@ -7,7 +7,7 @@ namespace NXKit {
 
 class SkiaCtx_sdlBase : public SkiaCtx {
 public:
-    SkiaCtx_sdlBase(SDL_Window *window);
+    SkiaCtx_sdlBase();
 
     virtual void swapBuffers() override;
 

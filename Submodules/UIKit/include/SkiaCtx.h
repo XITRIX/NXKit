@@ -14,7 +14,7 @@ bool platformRunLoop(std::function<bool()> loop);
 
 class SkiaCtx {
 public:
-    virtual ~SkiaCtx() {}
+    virtual ~SkiaCtx() = default;
     virtual sk_sp<SkSurface> getBackbufferSurface() = 0;
     virtual sk_sp<GrDirectContext> directContext() = 0;
     virtual void flushAndSubmit(sk_sp<SkSurface> surface);
@@ -29,6 +29,6 @@ protected:
     sk_sp<SkFontMgr> fontMgr;
 };
 
-std::unique_ptr<SkiaCtx> MakeSkiaCtx(SDL_Window* window);
+std::unique_ptr<SkiaCtx> MakeSkiaCtx();
 
 }

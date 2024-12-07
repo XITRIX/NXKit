@@ -13,8 +13,6 @@ public:
     ~Application();
 
 private:
-    SDL_Window* window;
-
     sk_sp<SkTypeface> typeface;
     float fRotationAngle = 0;
 

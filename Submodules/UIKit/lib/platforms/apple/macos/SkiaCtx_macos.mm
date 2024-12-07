@@ -21,7 +21,7 @@
 
 using namespace NXKit;
 
-SkiaCtx_macos::SkiaCtx_macos(SDL_Window* window): SkiaCtx_sdlBase(window) {
+SkiaCtx_macos::SkiaCtx_macos(): SkiaCtx_sdlBase() {
     SkGraphics::Init();
     initContext();
 
@@ -66,8 +66,8 @@ sk_sp<SkSurface> SkiaCtx_macos::getBackbufferSurface() {
                                                nullptr, &props);
 }
 
-std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx(SDL_Window* window) {
-    return std::make_unique<SkiaCtx_macos>(window);
+std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx() {
+    return std::make_unique<SkiaCtx_macos>();
 }
 
 bool NXKit::platformRunLoop(std::function<bool()> loop) {

@@ -10,7 +10,7 @@ namespace NXKit {
 
 class SkiaCtx_ios : public SkiaCtx_sdlBase {
 public:
-    SkiaCtx_ios(SDL_Window *window);
+    SkiaCtx_ios();
 
     sk_sp<SkSurface> getBackbufferSurface() override;
 

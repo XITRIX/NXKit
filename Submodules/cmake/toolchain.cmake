@@ -72,11 +72,17 @@ elseif (PLATFORM_IOS)
     message("Building for iOS")
     add_definitions( -DPLATFORM_IOS )
 
+    set(USE_GLES ON)
+
     set(BUILD_SHARED_LIBS OFF)
     set(PLATFORM OS64)
     set(CMAKE_TOOLCHAIN_FILE ${EXTERN_PATH}/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE PATH "vcpkg toolchain file")
     set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE ${EXTERN_PATH}/cmake/ios.toolchain.cmake CACHE PATH "ios toolchain file")
     set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2") # iphone, ipad
+endif ()
+
+if (USE_GLES)
+    add_definitions( -DUSE_GLES )
 endif ()
 
 # Setup LibRomFS

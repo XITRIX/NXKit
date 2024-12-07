@@ -8,7 +8,7 @@ namespace NXKit {
 
 class SkiaCtx_macos: public SkiaCtx_sdlBase {
 public:
-    SkiaCtx_macos(SDL_Window* window);
+    SkiaCtx_macos();
 
     sk_sp<SkSurface> getBackbufferSurface() override;
 //    float getScaleFactor() override;
