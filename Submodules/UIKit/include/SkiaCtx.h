@@ -7,6 +7,7 @@
 #include "include/core/SkSurface.h"
 #include <functional>
 #include "include/core/SkFontMgr.h"
+#include <Geometry.h>
 
 namespace NXKit {
 

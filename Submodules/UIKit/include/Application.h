@@ -2,8 +2,9 @@
 
 #include <SDL.h>
 #include "include/gpu/ganesh/GrDirectContext.h"
-#import "tools/window/WindowContext.h"
-#import "SkiaCtx.h"
+#include "tools/window/WindowContext.h"
+#include "SkiaCtx.h"
+#include "UIView.h"
 
 namespace NXKit {
 
@@ -15,6 +16,8 @@ public:
 private:
     sk_sp<SkTypeface> typeface;
     float fRotationAngle = 0;
+
+    std::shared_ptr<UIView> keyWindow;
 
     std::unique_ptr<SkiaCtx> skiaCtx;
 

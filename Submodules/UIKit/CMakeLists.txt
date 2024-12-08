@@ -7,7 +7,10 @@ add_definitions(
 add_library(UIKit
         lib/platforms/SkiaCtx.cpp
         lib/Application.cpp
-        lib/NXSize.cpp
+        lib/Geometry.cpp
+        lib/NXLayer.cpp
+        lib/NXColor.cpp
+        lib/UIView.cpp
 )
 
 # APPLE
