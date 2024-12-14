@@ -9,15 +9,15 @@ namespace NXKit {
 
 class NXData {
 public:
-    int count() const;
-    uint8_t* data() const;
+    std::size_t count() const;
+    const std::byte* data() const;
 
-    NXData(uint8_t* bytes, int count, bool freeSource = false);
+    NXData(const std::byte* bytes, std::size_t count, bool freeSource = false);
     ~NXData();
 
    static std::optional<NXData> fromPath(const std::string& path);
 private:
-    std::vector<uint8_t> _data;
+    std::vector<std::byte> _data;
 };
 
 }

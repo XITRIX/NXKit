@@ -5,6 +5,9 @@
 #include "CALayer.h"
 #include "include/core/SkRRect.h"
 
+#include "include/effects/SkGradientShader.h"
+#include "include/effects/SkImageFilters.h"
+
 using namespace NXKit;
 
 bool CALayer::layerTreeIsDirty = true;
@@ -57,6 +60,19 @@ void CALayer::setTransform(NXTransform3D transform) {
     if (_transform == transform) return;
     onWillSet("transform");
     _transform = transform;
+}
+
+void CALayer::setAffineTransform(NXAffineTransform transform) {
+    this->setTransform(NXTransform3DMakeAffineTransform(transform));
+}
+
+NXAffineTransform CALayer::affineTransform() {
+    return NXTransform3DGetAffineTransform(_transform);
+}
+
+void CALayer::setHidden(bool hidden) {
+    _isHidden = hidden;
+    CALayer::layerTreeIsDirty = true;
 }
 
 void CALayer::setContents(std::shared_ptr<CGImage> contents) {
@@ -133,6 +149,11 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     paint.setAntiAlias(true);
     SkRect rect = SkRect::MakeXYWH(0, 0, _bounds.width(), _bounds.height());
 
+    // Opacity enable
+    if (_opacity < 1) {
+        canvas->saveLayerAlphaf(nullptr, _opacity);
+    }
+
     // Background color
     if (_backgroundColor.has_value()) {
         paint.setColor(_backgroundColor->color);
@@ -147,26 +168,32 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     // Content
     if (_contents) {
         auto contentsGravity = ContentsGravityTransformation(this);
-        canvas->drawImageRect(_contents.get()->pointee, rect, SkSamplingOptions());
-//        GPU_SetAnchor(_contents->pointee, _anchorPoint.x, _anchorPoint.y);
-//        GPU_SetRGBA(_contents->pointee, 255, 255, 255, _opacity * 255);
-//
-//        GPU_BlitTransform(
-//            _contents->pointee,
-//            NULL,
-//            renderer,
-//            contentsGravity.offset.x,
-//            contentsGravity.offset.y,
-//            0, // rotation in degrees
-//            contentsGravity.scale.width / contentsScale,
-//            contentsGravity.scale.height / contentsScale
-//        );
+        auto width = _contents->size().width * contentsGravity.scale.width / _contentsScale;
+        auto height = _contents->size().height * contentsGravity.scale.height / _contentsScale;
+        auto x = (_bounds.size.width - width) / 2.0 + contentsGravity.offset.x;
+        auto y = (_bounds.size.height - height) / 2.0 + contentsGravity.offset.y;
+
+        canvas->save();
+        canvas->translate(x, y);
+
+        canvas->drawImageRect(_contents.get()->pointee, {
+            float(0),
+            float(0),
+            float(width),
+            float(height)
+        }, SkSamplingOptions(), nullptr);
+
+        canvas->restore();
     }
 
     // Reset Anchor to Origin matrix
     canvas->restore();
     for (const auto& sublayer: _sublayers) {
         sublayer->skiaRender(canvas);
+    }
+    // Opacity disable
+    if (_opacity < 1) {
+        canvas->restore();
     }
 
     canvas->restore();
@@ -185,6 +212,27 @@ NXRect CALayer::getFrame() {
                 _position.y - anchorPointOffset.y,
                 transformedBounds.width(),
                 transformedBounds.height());
+}
+
+void CALayer::setFrame(NXRect frame) {
+    setPosition(NXPoint(frame.origin.x + (frame.width() * _anchorPoint.x),
+                     frame.origin.y + (frame.height() * _anchorPoint.y)));
+
+    auto inverseTransformOpt = affineTransform().inverted();
+    if (!inverseTransformOpt.has_value()) {
+//        assertionFailure("You tried to set the frame of a CALayer whose transform cannot be inverted. This is undefined behaviour.");
+        return;
+    }
+    auto inverseTransform = inverseTransformOpt.value();
+
+
+    // If we are shrinking the view with a transform and then setting a
+    // new frame, the layer's actual `bounds` is bigger (and vice-versa):
+    auto nonTransformedBoundSize = frame.applying(inverseTransform).size;
+
+    auto bounds = _bounds;
+    bounds.size = nonTransformedBoundSize;
+    setBounds(bounds);
 }
 
 void CALayer::onWillSet(std::string keyPath) {

@@ -51,11 +51,20 @@ public:
     void setTransform(NXTransform3D transform);
     [[nodiscard]] NXTransform3D transform() const { return _transform; }
 
+    void setAffineTransform(NXAffineTransform transform);
+    [[nodiscard]] NXAffineTransform affineTransform();
+
     void setMask(std::shared_ptr<CALayer> mask);
     [[nodiscard]] std::shared_ptr<CALayer> mask() const { return _mask; }
 
+    void setMasksToBounds(bool newValue) { _masksToBounds = newValue; }
+    [[nodiscard]] bool masksToBounds() { return _masksToBounds; }
+
     void setContents(std::shared_ptr<CGImage> contents);
     [[nodiscard]] std::shared_ptr<CGImage> contents() { return _contents; }
+
+    void setHidden(bool hidden);
+    [[nodiscard]] bool isHidden() const { return _isHidden; }
 
     NXRect getFrame();
     void setFrame(NXRect frame);
@@ -84,7 +93,10 @@ private:
     std::vector<std::shared_ptr<CALayer>> _sublayers;
     std::shared_ptr<CALayer> _mask;
 
+    bool _isHidden = false;
+
     std::shared_ptr<CGImage> _contents;
+    bool _masksToBounds = false;
 
     // Animatable
     NXPoint _anchorPoint = NXPoint(0.5, 0.5);

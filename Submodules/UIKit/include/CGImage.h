@@ -16,14 +16,14 @@ public:
     sk_sp<SkImage> pointee;
 
 //    CGImage(NXSize size);
-    CGImage(const NXData& sourceData);
+    CGImage(std::shared_ptr<NXData> sourceData);
 //    CGImage(SDL_Surface* surface);
-    CGImage(sk_sp<SkImage> image, std::optional<NXData> sourceData);
-    CGImage(sk_sp<SkImage> image): CGImage(image, std::nullopt) {}
+    CGImage(sk_sp<SkImage> image, std::shared_ptr<NXData> sourceData);
+    CGImage(sk_sp<SkImage> image): CGImage(image, nullptr) {}
     ~CGImage();
 
     [[nodiscard]] NXSize size() const;
 private:
-    std::optional<NXData> sourceData;
+    std::shared_ptr<NXData> sourceData;
 };
 }

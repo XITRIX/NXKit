@@ -158,8 +158,8 @@ function(setup_project)
     add_subdirectory(${EXTERN_PATH})
     add_subdirectory(${EXTERN_PATH}/UIKit)
 
-    add_libromfs(${PROJECT_NAME} ${PROJECT_RESOURCES})
     add_subdirectory(${EXTERN_PATH}/libromfs EXCLUDE_FROM_ALL)
+    target_link_libraries(${PROJECT_NAME} ${LIBROMFS_LIBRARY})
 
 #    target_link_libraries(${PROJECT_NAME} fmt tweeny yogacore ${PLATFORM_LIBS})
 endfunction()

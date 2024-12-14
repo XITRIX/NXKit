@@ -12,8 +12,8 @@ using namespace NXKit;
 ////    GPU_SetBlendMode(pointee, GPU_BLEND_NORMAL_FACTOR_ALPHA);
 //}
 
-CGImage::CGImage(sk_sp<SkImage> image, std::optional<NXData> sourceData) {
-    this->sourceData = std::move(sourceData);
+CGImage::CGImage(sk_sp<SkImage> image, std::shared_ptr<NXData> sourceData) {
+    this->sourceData = sourceData;
     pointee = image;
 
 //    GPU_SetSnapMode(pointee, GPU_SNAP_POSITION_AND_DIMENSIONS);
@@ -21,14 +21,14 @@ CGImage::CGImage(sk_sp<SkImage> image, std::optional<NXData> sourceData) {
 //    GPU_SetImageFilter(pointee, GPU_FILTER_LINEAR);
 }
 
-CGImage::CGImage(const NXData& sourceData) {
-    auto data = sourceData;
-    auto dataCount = data.count();
+CGImage::CGImage(std::shared_ptr<NXData> sourceData) {
+    auto data = sourceData->data();
+    auto dataCount = sourceData->count();
 
-    auto skData = SkData::MakeFromMalloc(data.data(), data.count());
+    auto skData = SkData::MakeWithoutCopy(data, dataCount);
     auto image = SkImages::DeferredFromEncodedData(skData);
 
-    new (this) CGImage(image, data);
+    new (this) CGImage(image, sourceData);
 }
 
 //CGImage::CGImage(SDL_Surface* surface) {
@@ -39,6 +39,8 @@ CGImage::CGImage(const NXData& sourceData) {
 //}
 
 CGImage::~CGImage() {
+    sourceData = nullptr;
+    pointee = nullptr;
 //    GPU_FreeTarget(pointee->target);
 //    GPU_FreeImage(pointee);
 }

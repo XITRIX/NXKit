@@ -7,6 +7,29 @@ UIView::UIView() {
     _layer->setAnchorPoint(NXPoint::zero);
 }
 
+void UIView::setFrame(NXRect frame) {
+    if (this->frame().size != frame.size) {
+//        setNeedsLayout();
+    }
+    _layer->setFrame(frame);
+//    setNeedsUpdateSafeAreaInsets();
+}
+
+void UIView::setBounds(NXRect bounds) {
+    if (this->bounds().size != bounds.size) {
+//        setNeedsLayout();
+//        setNeedsUpdateSafeAreaInsets();
+    }
+    _layer->setBounds(bounds);
+}
+
+void UIView::setCenter(NXPoint position) {
+    auto frame = this->frame();
+    frame.setMidX(position.x);
+    frame.setMidY(position.y);
+    setFrame(frame);
+}
+
 void UIView::addSubview(std::shared_ptr<UIView> view) {
     bool needToNotifyViewController = false;
 //    if (!view->_parentController.expired()) {

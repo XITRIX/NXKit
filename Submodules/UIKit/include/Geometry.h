@@ -36,6 +36,7 @@ struct NXSize {
     NXSize(NXFloat width, NXFloat height);
 
     bool operator==(const NXSize &rhs) const;
+    bool operator!=(const NXSize &rhs) const;
 
     NXSize operator+(const NXSize &first) const;
     NXSize operator-(const NXSize &first) const;
@@ -57,33 +58,46 @@ struct NXRect {
 
     NXRect();
     NXRect(NXPoint origin, NXSize size);
-    NXRect(NXFloat x, NXFloat y, NXFloat width, NXFloat height);
+    NXRect(float x, float y, float width, float height);
 
-    NXFloat width() const;
-    NXFloat height() const;
+    float width() const;
+    float height() const;
 
-    NXFloat minX() const;
-    NXFloat midX() const;
-    NXFloat maxX() const;
+    float minX() const;
+    float midX() const;
+    float maxX() const;
 
-    NXFloat minY() const;
-    NXFloat midY() const;
-    NXFloat maxY() const;
+    float minY() const;
+    float midY() const;
+    float maxY() const;
+
+    void setWidth(float newValue);
+    void setHeight(float newValue);
+
+    void setMinX(float newValue);
+    void setMidX(float newValue);
+    void setMaxX(float newValue);
+
+    void setMinY(float newValue);
+    void setMidY(float newValue);
+    void setMaxY(float newValue);
 
     bool contains(NXPoint point);
     bool intersects(const NXRect& other) const;
-    NXRect intersection(const NXRect& other) const;
     NXRect& offsetBy(const NXPoint& offset);
-    NXRect& offsetBy(const NXFloat& offsetX, const NXFloat& offsetY);
-//    NXRect& insetBy(const UIEdgeInsets& insets);
-    NXRect applying(const NXAffineTransform& t) const;
-    NXRect applying(const NXTransform3D& t) const;
+    NXRect& offsetBy(const float& offsetX, const float& offsetY);
 
-    bool operator==(const NXRect& rhs);
+    bool operator==(const NXRect& rhs) const;
+    NXRect operator+(const NXRect& rhs) const;
+    NXRect operator-(const NXRect& rhs) const;
+    NXRect operator*(const float& rhs) const;
 
-    bool valid();
+    NXRect applying(NXAffineTransform transform);
+    NXRect applying(NXTransform3D transform);
 
-    static NXRect zero;
+    NXRect intersection(NXRect other) const;
+
+    bool isNull() const;
     static NXRect null;
 };
 

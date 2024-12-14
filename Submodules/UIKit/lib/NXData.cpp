@@ -8,7 +8,7 @@
 
 namespace NXKit {
 
-NXData::NXData(uint8_t bytes[], int count, bool freeSource) {
+NXData::NXData(const std::byte bytes[], std::size_t count, bool freeSource) {
     for (int i = 0; i < count; i++)
         _data.push_back(bytes[i]);
 
@@ -16,14 +16,16 @@ NXData::NXData(uint8_t bytes[], int count, bool freeSource) {
         delete[] bytes;
 }
 
-NXData::~NXData() = default;
-
-int NXData::count() const {
-    return (int) _data.size();
+NXData::~NXData() {
+//    _data.clear();
 }
 
-uint8_t* NXData::data() const {
-    return (uint8_t*) _data.data();
+std::size_t NXData::count() const {
+    return _data.size();
+}
+
+const std::byte* NXData::data() const {
+    return _data.data();
 }
 
 std::optional<NXData> NXData::fromPath(const std::string& path) {
@@ -36,7 +38,7 @@ std::optional<NXData> NXData::fromPath(const std::string& path) {
 
    auto fileSize = int(fileReader->size(fileReader));
 
-   auto buffer = new uint8_t[fileSize];
+   auto buffer = new std::byte[fileSize];
 
    auto bytesRead = int(fileReader->read(fileReader, buffer, 1, fileSize));
 

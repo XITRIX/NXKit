@@ -94,6 +94,10 @@ bool NXSize::operator==(const NXSize& rhs) const {
     return isEqual(this->width, rhs.width) && isEqual(this->height, rhs.height);
 }
 
+bool NXSize::operator!=(const NXSize& rhs) const {
+    return !isEqual(this->width, rhs.width) || !isEqual(this->height, rhs.height);
+}
+
 NXSize NXSize::operator+(const NXSize& first) const {
     return NXSize(width + first.width, height + first.height);
 }
@@ -141,45 +145,38 @@ bool NXSize::valid() {
 // MARK: - RECT -
 NXRect::NXRect(): origin(), size() { }
 NXRect::NXRect(NXPoint origin, NXSize size): origin(origin), size(size) { }
-NXRect::NXRect(NXFloat x, NXFloat y, NXFloat width, NXFloat height): origin(x, y), size(width, height) { }
+NXRect::NXRect(float x, float y, float width, float height): origin(x, y), size(width, height) { }
 
-NXFloat NXRect::width() const { return size.width; }
-NXFloat NXRect::height() const { return size.height; }
+float NXRect::width() const { return size.width; }
+float NXRect::height() const { return size.height; }
 
-NXFloat NXRect::minX() const { return origin.x; }
-NXFloat NXRect::midX() const { return origin.x + size.width / 2; }
-NXFloat NXRect::maxX() const { return origin.x + size.width; }
+float NXRect::minX() const { return origin.x; }
+float NXRect::midX() const { return origin.x + size.width / 2; }
+float NXRect::maxX() const { return origin.x + size.width; }
 
-NXFloat NXRect::minY() const { return origin.y; }
-NXFloat NXRect::midY() const { return origin.y + size.height / 2; }
-NXFloat NXRect::maxY() const { return origin.y + size.height; }
+float NXRect::minY() const { return origin.y; }
+float NXRect::midY() const { return origin.y + size.height / 2; }
+float NXRect::maxY() const { return origin.y + size.height; }
+
+void NXRect::setWidth(float newValue) { size.width = newValue; }
+void NXRect::setHeight(float newValue) { size.height = newValue; }
+
+void NXRect::setMinX(float newValue) { origin.x = newValue; }
+void NXRect::setMidX(float newValue) { origin.x = newValue - (size.width / 2); }
+void NXRect::setMaxX(float newValue) { origin.x = newValue - size.width; }
+
+void NXRect::setMinY(float newValue) { origin.y = newValue; }
+void NXRect::setMidY(float newValue) { origin.y = newValue - (size.height / 2); }
+void NXRect::setMaxY(float newValue) { origin.y = newValue - size.height; }
 
 bool NXRect::contains(NXPoint point) {
     return
-            (point.x >= minX()) && (point.x < maxX()) &&
-            (point.y >= minY()) && (point.y < maxY());
+    (point.x >= minX()) && (point.x < maxX()) &&
+    (point.y >= minY()) && (point.y < maxY());
 }
 
 bool NXRect::intersects(const NXRect& other) const {
     return !((minX() > other.maxX() || maxX() < other.minX()) || (minY() > other.maxY() || maxY() < other.minY()));
-}
-
-NXRect NXRect::intersection(const NXRect& other) const {
-    auto largestMinX = std::max(minX(), other.minX());
-    auto largestMinY = std::max(minY(), other.minY());
-
-    auto smallestMaxX = std::min(maxX(), other.maxX());
-    auto smallestMaxY = std::min(maxY(), other.maxY());
-
-    auto width = smallestMaxX - largestMinX;
-    auto height = smallestMaxY - largestMinY;
-
-    if (width > 0 && height > 0) {
-        // The intersection rectangle has dimensions, i.e. there is an intersection:
-        return NXRect(largestMinX, largestMinY, width, height);
-    } else {
-        return NXRect::null;
-    }
 }
 
 NXRect& NXRect::offsetBy(const NXPoint& offset) {
@@ -188,28 +185,52 @@ NXRect& NXRect::offsetBy(const NXPoint& offset) {
     return *this;
 }
 
-NXRect& NXRect::offsetBy(const NXFloat& offsetX, const NXFloat& offsetY) {
+NXRect& NXRect::offsetBy(const float& offsetX, const float& offsetY) {
     origin.x += offsetX;
     origin.y += offsetY;
     return *this;
 }
 
-//NXRect& NXRect::insetBy(const UIEdgeInsets& insets) {
-//    origin.x -= insets.left;
-//    origin.y -= insets.top;
-//    size.width += insets.left + insets.right;
-//    size.height += insets.top + insets.bottom;
-//    return *this;
-//}
+bool NXRect::operator==(const NXRect& rhs) const {
+    return
+    this->origin.x == rhs.origin.x && this->origin.y == rhs.origin.y &&
+    this->size.width == rhs.size.width && this->size.height == rhs.size.height;
+}
 
-NXRect NXRect::applying(const NXAffineTransform& t) const {
+NXRect NXRect::operator+(const NXRect& rhs) const {
+    return NXRect(
+        this->origin.x + rhs.origin.x,
+        this->origin.y + rhs.origin.y,
+        this->size.width + rhs.size.width,
+        this->size.height + rhs.size.height
+    );
+}
+
+NXRect NXRect::operator-(const NXRect& rhs) const {
+    return NXRect(
+        this->origin.x - rhs.origin.x,
+        this->origin.y - rhs.origin.y,
+        this->size.width - rhs.size.width,
+        this->size.height - rhs.size.height
+    );
+}
+
+NXRect NXRect::operator*(const float& rhs) const {
+    return NXRect(
+        this->origin.x * rhs,
+        this->origin.y * rhs,
+        this->size.width * rhs,
+        this->size.height * rhs
+    );
+}
+
+NXRect NXRect::applying(NXAffineTransform t) {
     if (t.isIdentity()) { return *this; }
 
     auto newTopLeft = NXPoint(minX(), minY()).applying(t);
     auto newTopRight = NXPoint(maxX(), minY()).applying(t);
     auto newBottomLeft = NXPoint(minX(), maxY()).applying(t);
     auto newBottomRight = NXPoint(maxX(), maxY()).applying(t);
-
 
     auto newMinX = min(newTopLeft.x, newTopRight.x, newBottomLeft.x, newBottomRight.x);
     auto newMaxX = max(newTopLeft.x, newTopRight.x, newBottomLeft.x, newBottomRight.x);
@@ -219,14 +240,13 @@ NXRect NXRect::applying(const NXAffineTransform& t) const {
 
     // XXX: What happens if the point that was furthest left is now on the right (because of a rotation)?
     // i.e. Should do we return a normalised rect or one with a negative width?
-    return NXRect(
-            newMinX,
-            newMinY,
-            newMaxX - newMinX,
-            newMaxY - newMinY);
+    return NXRect(newMinX,
+                newMinY,
+                newMaxX - newMinX,
+                newMaxY - newMinY);
 }
 
-NXRect NXRect::applying(const NXTransform3D& t) const {
+NXRect NXRect::applying(NXTransform3D t) {
     if (t == NXTransform3DIdentity) { return *this; }
 
     auto topLeft = t.transformingVector(minX(), minY(), 0);
@@ -240,21 +260,29 @@ NXRect NXRect::applying(const NXTransform3D& t) const {
     auto newMinY = min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
     auto newMaxY = max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
 
-    return NXRect(newMinX,
-                newMinY,
-                newMaxX - newMinX,
-                newMaxY - newMinY);
+    return NXRect(newMinX, newMinY, newMaxX - newMinX, newMaxY - newMinY);
 }
 
-bool NXRect::operator==(const NXRect& rhs) {
-    return
-            this->origin.x == rhs.origin.x && this->origin.y == rhs.origin.y &&
-            this->size.width == rhs.size.width && this->size.height == rhs.size.height;
+NXRect NXRect::intersection(NXRect other) const {
+    auto largestMinX = fmaxf(minX(), other.minX());
+    auto largestMinY = fmaxf(minY(), other.minY());
+
+    auto smallestMaxX = fmaxf(maxX(), other.maxX());
+    auto smallestMaxY = fmaxf(maxY(), other.maxY());
+
+    auto width = smallestMaxX - largestMinX;
+    auto height = smallestMaxY - largestMinY;
+
+    if (width > 0 && height > 0) {
+        // The intersection rectangle has dimensions, i.e. there is an intersection:
+        return NXRect(largestMinX, largestMinY, width, height);
+    } else {
+        return null;
+    }
 }
 
-bool NXRect::valid() {
-    return this->origin.valid() && this->size.valid();
+bool NXRect::isNull() const {
+    return *this == null;
 }
 
-NXRect NXRect::zero = NXRect();
-NXRect NXRect::null = NXRect(std::numeric_limits<NXFloat>::infinity(), std::numeric_limits<NXFloat>::infinity(), 0, 0);
+NXRect NXRect::null = NXRect(INFINITY, INFINITY, 0, 0);

@@ -16,6 +16,8 @@ set(PROJECT_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/img/moonlight_icon.jpg)
 set(PROJECT_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 set(CMAKE_CXX_STANDARD 17)
 
+add_libromfs(${PROJECT_NAME} ${PROJECT_RESOURCES})
+
 add_executable(${PROJECT_NAME}
         app/main.cpp
         app/AppDelegate.cpp
@@ -23,7 +25,7 @@ add_executable(${PROJECT_NAME}
 
 setup_project()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${PROJECT_NAME}
         UIKit
 )
 
