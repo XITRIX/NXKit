@@ -15,7 +15,7 @@ public:
     NXData(const std::byte* bytes, std::size_t count, bool freeSource = false);
     ~NXData();
 
-   static std::optional<NXData> fromPath(const std::string& path);
+   static std::shared_ptr<NXData> fromPath(const std::string& path);
 private:
     std::vector<std::byte> _data;
 };

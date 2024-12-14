@@ -28,7 +28,7 @@ const std::byte* NXData::data() const {
     return _data.data();
 }
 
-std::optional<NXData> NXData::fromPath(const std::string& path) {
+std::shared_ptr<NXData> NXData::fromPath(const std::string& path) {
 //#ifdef USE_LIBROMFS
 //    auto file = romfs::get(path);
 //    auto fileReader = SDL_RWFromConstMem(file.data(), (int) file.size());
@@ -45,10 +45,10 @@ std::optional<NXData> NXData::fromPath(const std::string& path) {
    fileReader->close(fileReader);
 
    if (bytesRead == fileSize) {
-       return NXData(buffer, fileSize, true);
+       return make_shared<NXData>(buffer, fileSize, true);
    } else {
        delete[] buffer;
-       return std::nullopt;
+       return nullptr;
    }
 }
 

@@ -19,6 +19,8 @@ add_library(UIKit
         lib/UIApplicationMain.cpp
         lib/UIColor.cpp
         lib/UIImage.cpp
+        lib/UIImageView.cpp
+        lib/UILabel.cpp
         lib/UIView.cpp
         lib/UIWindow.cpp
         lib/NXAffineTransform.cpp

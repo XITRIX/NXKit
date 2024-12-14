@@ -15,6 +15,12 @@
 
 namespace NXKit {
 
+class CALayerDelegate {
+public:
+    virtual std::shared_ptr<CABasicAnimation> actionForKey(std::string event) = 0;
+    virtual void display(std::shared_ptr<CALayer> layer) = 0;
+};
+
 class CALayer: public enable_shared_from_this<CALayer> {
 public:
     CALayer();

@@ -1,4 +1,5 @@
 #include <UIApplicationDelegate.h>
+#include <UIImageView.h>
 #include "romfs/romfs.hpp"
 // #include <TestViewController/TestViewController.hpp>
 // #include <YogaTestViewController/YogaTestViewController.hpp>
@@ -16,30 +17,29 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
 //    auto vc = new_shared<TextViewController>();
     // window->setRootViewController(vc);
     window->makeKeyAndVisible();
-    window->layer()->setBackgroundColor(UIColor::systemBackground);
+    window->setBackgroundColor(UIColor::systemBackground);
 
-    auto sublayer = new_shared<CALayer>();
-    sublayer->setPosition({ 100, 100 });
-    sublayer->setBounds({ 0, 0, 200, 44 });
-    sublayer->setBackgroundColor(UIColor::tint);
-    sublayer->setCornerRadius(10);
-    sublayer->setAnchorPoint(NXPoint::zero);
-    sublayer->setOpacity(0.5);
-//    sublayer->setTransform(NXTransform3D::identity.rotationBy(45, 0, 0, 1));
+    auto subview = new_shared<UIView>();
+    subview->setFrame({ 100, 100, 200, 44 });
+    subview->setBackgroundColor(UIColor::tint);
+    subview->layer()->setCornerRadius(10);
+    subview->setAlpha(0.5);
+//    subview->setClipsToBounds(true);
 
-    window->layer()->addSublayer(sublayer);
+    window->addSubview(subview);
 
     auto res = romfs::get("img/star.png");
-    auto data = new_shared<NXData>(res.data(), (int) res.size());
-    auto image = new_shared<CGImage>(data);
+    auto data = new_shared<NXData>(res.data(), res.size());
+    auto image = UIImage::fromData(data, 3);
 
-    auto imageLayer = new_shared<CALayer>();
-    imageLayer->setContents(image);
-    imageLayer->setFrame({ 0, 0, 120, 120 });
-    imageLayer->setBackgroundColor(UIColor::green);
-    imageLayer->setContentsGravity(CALayerContentsGravity::topLeft);
+    auto imageView = new_shared<UIImageView>();
+    imageView->setImage(image);
+    imageView->setFrame({ 0, 0, 120, 120 });
+    imageView->setBackgroundColor(UIColor::green);
+    imageView->setContentMode(UIViewContentMode::topLeft);
+    imageView->setTransform(NXAffineTransform::identity.rotationBy(45));
 
-    sublayer->addSublayer(imageLayer);
+    subview->addSubview(imageView);
 
     return true;
 }

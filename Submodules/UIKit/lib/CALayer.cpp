@@ -133,6 +133,10 @@ void CALayer::removeFromSuperlayer() {
 }
 
 void CALayer::skiaRender(SkCanvas* canvas) {
+    // Do not render is hidden
+    if (_isHidden || _opacity < 0.001f) return;
+
+    // Initial save 1
     canvas->save();
 
     auto matrix = CATransform3DMakeTranslation(_position.x, _position.y, _zPosition)
@@ -140,6 +144,18 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     // Set Origin matrix
     canvas->concat(matrix.toSkM44());
+
+    // Masks To Bounds
+    if (_masksToBounds) {
+        SkRect rect = SkRect::MakeXYWH(0, 0, _bounds.width(), _bounds.height());
+        float radii = _cornerRadius;
+        SkVector corners[] = {{radii, radii}, {radii, radii}, {radii, radii}, {radii, radii}};
+        SkRRect rrect;
+        rrect.setRectRadii(rect, corners);
+        canvas->clipRRect(rrect, true);
+    }
+
+    // Origin matrix save 2
     canvas->save();
 
     // Set Anchor matrix
@@ -147,9 +163,8 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     SkPaint paint;
     paint.setAntiAlias(true);
-    SkRect rect = SkRect::MakeXYWH(0, 0, _bounds.width(), _bounds.height());
 
-    // Opacity enable
+    // Opacity save 3
     if (_opacity < 1) {
         canvas->saveLayerAlphaf(nullptr, _opacity);
     }
@@ -158,6 +173,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     if (_backgroundColor.has_value()) {
         paint.setColor(_backgroundColor->color);
 
+        SkRect rect = SkRect::MakeXYWH(0, 0, _bounds.width(), _bounds.height());
         SkRRect rrect;
         float radii = _cornerRadius;
         SkVector corners[] = {{radii, radii}, {radii, radii}, {radii, radii}, {radii, radii}};
@@ -165,7 +181,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         canvas->drawRRect(rrect, paint);
     }
 
-    // Content
+    // Contents
     if (_contents) {
         auto contentsGravity = ContentsGravityTransformation(this);
         auto width = _contents->size().width * contentsGravity.scale.width / _contentsScale;
@@ -173,6 +189,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         auto x = (_bounds.size.width - width) / 2.0 + contentsGravity.offset.x;
         auto y = (_bounds.size.height - height) / 2.0 + contentsGravity.offset.y;
 
+        // Contents maxrix save 4
         canvas->save();
         canvas->translate(x, y);
 
@@ -183,19 +200,23 @@ void CALayer::skiaRender(SkCanvas* canvas) {
             float(height)
         }, SkSamplingOptions(), nullptr);
 
+        // Contents maxrix save 4 // restore
         canvas->restore();
     }
 
-    // Reset Anchor to Origin matrix
-    canvas->restore();
-    for (const auto& sublayer: _sublayers) {
-        sublayer->skiaRender(canvas);
-    }
-    // Opacity disable
+    // Opacity save 3 // restore
     if (_opacity < 1) {
         canvas->restore();
     }
 
+    // Reset Anchor to Origin matrix
+    // Origin matrix save 2 // restore
+    canvas->restore();
+    for (const auto& sublayer: _sublayers) {
+        sublayer->skiaRender(canvas);
+    }
+
+    // Initial save 1 // restore
     canvas->restore();
 }
 

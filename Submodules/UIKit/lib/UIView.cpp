@@ -2,9 +2,14 @@
 
 using namespace NXKit;
 
-UIView::UIView() {
-    _layer = new_shared<CALayer>();
+std::shared_ptr<CALayer> UIView::initLayer() {
+    return new_shared<CALayer>();
+}
+
+UIView::UIView(NXRect frame) {
+    _layer = initLayer();
     _layer->setAnchorPoint(NXPoint::zero);
+    setFrame(frame);
 }
 
 void UIView::setFrame(NXRect frame) {
@@ -98,4 +103,48 @@ void UIView::removeFromSuperview() {
 //    }
     this->setSuperview(nullptr);
 //    superview->setNeedsLayout();
+}
+
+void UIView::setContentMode(UIViewContentMode mode) {
+    switch (mode) {
+        case UIViewContentMode::scaleToFill:
+            _layer->setContentsGravity(CALayerContentsGravity::resize);
+            break;
+        case UIViewContentMode::scaleAspectFit:
+            _layer->setContentsGravity(CALayerContentsGravity::resizeAspect);
+            break;
+        case UIViewContentMode::scaleAspectFill:
+            _layer->setContentsGravity(CALayerContentsGravity::resizeAspectFill);
+            break;
+        case UIViewContentMode::redraw:
+            _layer->setContentsGravity(CALayerContentsGravity::resize);
+            break;
+        case UIViewContentMode::center:
+            _layer->setContentsGravity(CALayerContentsGravity::center);
+            break;
+        case UIViewContentMode::top:
+            _layer->setContentsGravity(CALayerContentsGravity::top);
+            break;
+        case UIViewContentMode::bottom:
+            _layer->setContentsGravity(CALayerContentsGravity::bottom);
+            break;
+        case UIViewContentMode::left:
+            _layer->setContentsGravity(CALayerContentsGravity::left);
+            break;
+        case UIViewContentMode::right:
+            _layer->setContentsGravity(CALayerContentsGravity::right);
+            break;
+        case UIViewContentMode::topLeft:
+            _layer->setContentsGravity(CALayerContentsGravity::topLeft);
+            break;
+        case UIViewContentMode::topRight:
+            _layer->setContentsGravity(CALayerContentsGravity::topRight);
+            break;
+        case UIViewContentMode::bottomLeft:
+            _layer->setContentsGravity(CALayerContentsGravity::bottomLeft);
+            break;
+        case UIViewContentMode::bottomRight:
+            _layer->setContentsGravity(CALayerContentsGravity::bottomRight);
+            break;
+    }
 }
