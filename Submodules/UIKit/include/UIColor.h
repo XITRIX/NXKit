@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Geometry.h>
+
 namespace NXKit {
 
 class UIColor {
@@ -14,6 +16,8 @@ public:
     unsigned char a();
     
     bool operator==(const UIColor& rhs) const;
+
+    UIColor interpolationTo(UIColor endResult, NXFloat progress);
 
     static UIColor clear;
     static UIColor red;

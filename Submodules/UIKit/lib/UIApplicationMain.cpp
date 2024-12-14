@@ -15,6 +15,8 @@ bool applicationRunLoop() {
 //        UIRenderer::main()->render(UIApplication::shared->keyWindow.lock(), currentTime);
 
 
+    UIView::animateIfNeeded(currentTime);
+
 
     // Move to UIRenderer
     auto surface = SkiaCtx::_main->getBackbufferSurface();
@@ -29,7 +31,7 @@ bool applicationRunLoop() {
     auto keyWindow = UIApplication::shared->keyWindow.lock();
 
     keyWindow->layer()->setBounds({ NXPoint::zero, SkiaCtx::_main->getSize() } );
-    keyWindow->layer()->skiaRender(canvas);
+    keyWindow->layer()->presentationOrSelf()->skiaRender(canvas);
     canvas->restore();
 
     SkiaCtx::_main->flushAndSubmit(surface);

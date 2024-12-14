@@ -2,10 +2,11 @@
 
 #include "CALayer.h"
 #include <UIViewContentMode.h>
+#include <set>
 
 namespace NXKit {
 
-class UIView: public enable_shared_from_this<UIView> {
+class UIView: public CALayerDelegate, public enable_shared_from_this<UIView> {
 public:
     UIView(): UIView(NXRect()) {}
     UIView(NXRect frame);
@@ -52,6 +53,35 @@ public:
 
     virtual std::shared_ptr<CALayer> initLayer();
     std::shared_ptr<CALayer> layer() const { return _layer; };
+
+
+    // Animations
+    static std::set<std::shared_ptr<CALayer>> layersWithAnimations;
+    static std::shared_ptr<CABasicAnimationPrototype> currentAnimationPrototype;
+
+    static void animate(double duration,
+                        double delay = 0.0,
+                        UIViewAnimationOptions options = UIViewAnimationOptions::none,
+                        std::function<void()> animations = [](){},
+                        std::function<void(bool)> completion = [](bool res){});
+
+    static void animate(double duration,
+                        std::function<void()> animations = [](){});
+
+    static void animate(double duration,
+                        double delay,
+                        double usingSpringWithDamping,
+                        double initialSpringVelocity,
+                        UIViewAnimationOptions options = UIViewAnimationOptions::none,
+                        std::function<void()> animations = [](){},
+                        std::function<void(bool)> completion = [](bool res){});
+
+    static void animateIfNeeded(Timer currentTime);
+    static void completePendingAnimations();
+    
+    std::shared_ptr<CABasicAnimation> actionForKey(std::string event) override;
+//    virtual void draw() {}
+    virtual void display(std::shared_ptr<CALayer> layer) override;
 private:
     std::vector<std::shared_ptr<UIView>> _subviews;
     std::weak_ptr<UIView> _superview;
@@ -61,6 +91,7 @@ private:
     bool _isUserInteractionEnabled = true;
 
     void setSuperview(std::shared_ptr<UIView> superview);
+    bool anyCurrentlyRunningAnimationsAllowUserInteraction();
 };
 
 }

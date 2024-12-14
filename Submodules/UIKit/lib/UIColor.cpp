@@ -1,4 +1,6 @@
 #include "UIColor.h"
+#include <limits>
+#include <math.h>
 
 using namespace NXKit;
 
@@ -43,4 +45,33 @@ unsigned char UIColor::a() {
 
 bool UIColor::operator==(const UIColor& rhs) const {
     return this->color == rhs.color;
+}
+
+UIColor UIColor::interpolationTo(UIColor endResult, NXFloat progress) {
+    auto startR = r();
+    auto startG = g();
+    auto startB = b();
+    auto startA = a();
+
+    auto endR = endResult.r();
+    auto endG = endResult.g();
+    auto endB = endResult.b();
+    auto endA = endResult.a();
+
+    auto currentProgress = progress * 255;
+    auto maxProgress = UINT8_MAX;
+
+    auto resultR = startR + (endR - startR) * currentProgress / maxProgress;
+    auto resultG = startG + (endG - startG) * currentProgress / maxProgress;
+    auto resultB = startB + (endB - startB) * currentProgress / maxProgress;
+    auto resultA = startA + (endA - startA) * currentProgress / maxProgress;
+
+#define res(x) fmaxf(0, fminf(255, abs(x)))
+
+    return UIColor(
+        res(resultR),
+        res(resultG),
+        res(resultB),
+        res(resultA)
+    );
 }

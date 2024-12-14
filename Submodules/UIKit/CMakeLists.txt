@@ -5,6 +5,12 @@ add_definitions(
 )
 
 add_library(UIKit
+        lib/CABasicAnimation.cpp
+        lib/CABasicAnimationPrototype.cpp
+        lib/CASpringAnimation.cpp
+        lib/CASpringAnimationPrototype.cpp
+        lib/CAMediaTimingFunction.cpp
+        lib/CATransaction.cpp
         lib/ContentsGravityTransformation.cpp
         lib/platforms/SkiaCtx.cpp
         lib/Application.cpp
@@ -22,6 +28,8 @@ add_library(UIKit
         lib/UIImageView.cpp
         lib/UILabel.cpp
         lib/UIView.cpp
+        lib/UIViewAnimationGroup.cpp
+        lib/UIViewAnimationOptions.cpp
         lib/UIWindow.cpp
         lib/NXAffineTransform.cpp
         lib/NXTransform3D.cpp

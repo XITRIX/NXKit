@@ -37,9 +37,13 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     imageView->setFrame({ 0, 0, 120, 120 });
     imageView->setBackgroundColor(UIColor::green);
     imageView->setContentMode(UIViewContentMode::topLeft);
-    imageView->setTransform(NXAffineTransform::identity.rotationBy(45));
-
+    
     subview->addSubview(imageView);
+
+    UIView::animate(2, [imageView]() {
+        imageView->setTransform(NXAffineTransform::identity.rotationBy(45));
+    });
+
 
     return true;
 }

@@ -1,4 +1,6 @@
 #include <UIView.h>
+#include <DispatchQueue.h>
+#include <CASpringAnimationPrototype.h>
 
 using namespace NXKit;
 
@@ -9,6 +11,7 @@ std::shared_ptr<CALayer> UIView::initLayer() {
 UIView::UIView(NXRect frame) {
     _layer = initLayer();
     _layer->setAnchorPoint(NXPoint::zero);
+    _layer->delegate = weak_from_this();
     setFrame(frame);
 }
 
@@ -148,3 +151,87 @@ void UIView::setContentMode(UIViewContentMode mode) {
             break;
     }
 }
+
+// MARK: - Animations
+std::set<std::shared_ptr<CALayer>> UIView::layersWithAnimations;
+std::shared_ptr<CABasicAnimationPrototype> UIView::currentAnimationPrototype;
+
+bool UIView::anyCurrentlyRunningAnimationsAllowUserInteraction() {
+    if (layer()->animations.empty()) return true;
+
+    for (auto& animation: layer()->animations) {
+        auto animationGroup = animation.second->animationGroup;
+        if (animationGroup && (animationGroup->options & UIViewAnimationOptions::allowUserInteraction) == UIViewAnimationOptions::allowUserInteraction) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void UIView::animate(double duration, double delay, UIViewAnimationOptions options, std::function<void()> animations, std::function<void(bool)> completion) {
+    auto group = new_shared<UIViewAnimationGroup>(options, completion);
+    currentAnimationPrototype = new_shared<CABasicAnimationPrototype>(duration, delay, group);
+
+    animations();
+
+    if (currentAnimationPrototype && currentAnimationPrototype->animationGroup->queuedAnimations == 0) {
+        DispatchQueue::main()->async([completion]() { completion(true); });
+    }
+
+    currentAnimationPrototype = nullptr;
+}
+
+
+void UIView::animate(double duration, std::function<void()> animations) {
+    UIView::animate( duration, 0, UIViewAnimationOptions::none, animations);
+}
+
+void UIView::animate(double duration, double delay, double damping, double initialSpringVelocity, UIViewAnimationOptions options, std::function<void()> animations, std::function<void(bool)> completion) {
+    auto group = new_shared<UIViewAnimationGroup>(options, completion);
+    currentAnimationPrototype = new_shared<CASpringAnimationPrototype>( duration, delay, damping, initialSpringVelocity, group);
+
+    animations();
+
+    if (currentAnimationPrototype && currentAnimationPrototype->animationGroup->queuedAnimations == 0) {
+        completion(true);
+    }
+    currentAnimationPrototype = nullptr;
+}
+
+void UIView::animateIfNeeded(Timer currentTime) {
+    auto layersWithAnimationsCopy = layersWithAnimations;
+    for (auto& layer: layersWithAnimationsCopy) {
+        layer->animateAt(currentTime);
+    }
+}
+
+void UIView::completePendingAnimations() {
+    for (auto& layer: layersWithAnimations) {
+        timeval now;
+        gettimeofday(&now, nullptr);
+        // FIXME: incorrect logic
+        layer->animateAt(Timer(timevalInMilliseconds(now) + 1000000000));
+        //        $0.animate(at: Timer(startingAt: NSDate.distantFuture.timeIntervalSinceNow));
+    }
+}
+
+std::shared_ptr<CABasicAnimation> UIView::actionForKey(std::string event) {
+    auto prototype = UIView::currentAnimationPrototype;
+    if (!prototype) { return nullptr; }
+
+    auto keyPath = event;
+    auto beginFromCurrentState = (prototype->animationGroup->options & UIViewAnimationOptions::beginFromCurrentState) == UIViewAnimationOptions::beginFromCurrentState;
+
+    auto state = beginFromCurrentState ? (_layer->presentationOrSelf()) : _layer;
+
+    auto fromValue = state->value(keyPath);
+
+    if (fromValue.has_value()) {
+        return prototype->createAnimation(keyPath, fromValue.value());
+    }
+
+    return nullptr;
+}
+
+void UIView::display(std::shared_ptr<CALayer> layer) { }

@@ -6,12 +6,14 @@
 #include <NXTransform3D.h>
 #include <NXAffineTransform.h>
 #include <ContentsGravityTransformation.h>
+#include <CABasicAnimation.h>
 #include <CGImage.h>
 #include <UIColor.h>
 
 #include <tools/SharedBase.hpp>
 #include <optional>
 #include <vector>
+#include <map>
 
 namespace NXKit {
 
@@ -24,7 +26,10 @@ public:
 class CALayer: public enable_shared_from_this<CALayer> {
 public:
     CALayer();
+    CALayer(CALayer* layer);
     ~CALayer() {}
+
+    std::weak_ptr<CALayerDelegate> delegate;
 
     // Getter Setters
     void setContentsGravity(CALayerContentsGravity contentsGravity) { _contentsGravity = contentsGravity; }
@@ -85,10 +90,29 @@ public:
 
     void removeFromSuperlayer();
 
+    CALayer* copy();
+
+    std::shared_ptr<CAAction> actionForKey(std::string event);
+    static std::shared_ptr<CABasicAnimation> defaultActionForKey(std::string event);
+    static NXFloat defaultAnimationDuration;
+
+    std::shared_ptr<CALayer> createPresentation();
+    std::shared_ptr<CALayer> presentation() { return _presentation; }
+    std::shared_ptr<CALayer> presentationOrSelf();
+
+    // Animations
+    void add(std::shared_ptr<CABasicAnimation> animation, std::string keyPath);
+    void removeAnimation(std::string forKey);
+    void removeAllAnimations();
     void onWillSet(std::string keyPath);
+    void onDidSetAnimations(bool wasEmpty);
+    std::optional<AnimatableProperty> value(std::string forKeyPath);
+
+    void animateAt(Timer currentTime);
 
     void skiaRender(SkCanvas* canvas);
 private:
+    friend class UIView;
 
     /// Defaults to 1.0 but if the layer is associated with a view,
     /// the view sets this value to match the screen.
@@ -123,6 +147,17 @@ private:
      often enough for us to care about it.
     **/
     static bool layerTreeIsDirty;
+
+    std::shared_ptr<CALayer> _presentation;
+    std::map<std::string, std::shared_ptr<CABasicAnimation>> animations;
+
+    bool isPresentationForAnotherLayer = false;
+
+    /// We disable animation on parameters of views / layers that haven't been rendered yet.
+    /// This is both a performance optimization (avoids lots of animations at the start)
+    /// as well as a correctness fix (matches iOS behaviour). Maybe there's a better way though?
+    bool hasBeenRenderedInThisPartOfOverallLayerHierarchy = false;
+    void update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABasicAnimation> animation, float progress);
 };
 
 }
