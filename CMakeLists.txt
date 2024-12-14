@@ -18,13 +18,15 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(${PROJECT_NAME}
         app/main.cpp
+        app/AppDelegate.cpp
 )
+
+setup_project()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         UIKit
 )
 
-setup_project()
 
 #list(APPEND google_angle_libs
 #        ${EXTERN_PATH}/angle/mac/libEGL.dylib

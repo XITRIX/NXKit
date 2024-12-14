@@ -40,15 +40,15 @@ Application::Application() {
     typeface = skiaCtx->getFontMgr()->matchFamilyStyle(nullptr, style);
 
     keyWindow = new_shared<UIView>();
-    keyWindow->layer()->setPosition({ 200, 200 });
-    keyWindow->layer()->setBounds({0, 0, 150, 150});
-    keyWindow->layer()->setBackgroundColor(NXColor(255, 255, 0));
+    keyWindow->layer()->setBackgroundColor(UIColor::systemBackground);
 
-    auto sublayer = new_shared<NXLayer>();
-    sublayer->setPosition({ 220, 170 });
-    sublayer->setBounds({0, 0, 250, 190});
-    sublayer->setBackgroundColor(NXColor(0, 255, 0));
+    auto sublayer = new_shared<CALayer>();
+    sublayer->setPosition({ 100, 100 });
+    sublayer->setBounds({0, 0, 200, 44});
+    sublayer->setBackgroundColor(UIColor::tint);
     sublayer->setCornerRadius(10);
+    sublayer->setAnchorPoint(NXPoint::zero);
+//    sublayer->setTransform(NXTransform3D::identity.rotationBy(45, 0, 0, 1));
 
     keyWindow->layer()->addSublayer(sublayer);
 
@@ -73,7 +73,7 @@ void Application::render() {
     if (!surface) return;
 
     auto canvas = surface->getCanvas();
-    canvas->clear(SK_ColorCYAN);
+    canvas->clear(SK_ColorTRANSPARENT);
 
 //    SkPaint paint;
 //    paint.setColor(SK_ColorRED);
@@ -201,7 +201,12 @@ void Application::render() {
 //
 //// -----------------------
 
+    canvas->save();
+    auto scale = skiaCtx->getScaleFactor();
+    canvas->scale(scale, scale);
+    keyWindow->layer()->setBounds({ NXPoint::zero, skiaCtx->getSize() } );
     keyWindow->layer()->skiaRender(canvas);
+    canvas->restore();
 
     skiaCtx->flushAndSubmit(surface);
     skiaCtx->swapBuffers();

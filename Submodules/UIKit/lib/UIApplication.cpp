@@ -1,0 +1,297 @@
+#include <UIApplication.h>
+
+using namespace NXKit;
+
+std::shared_ptr<UIApplication> UIApplication::shared = nullptr;
+
+UIApplication::UIApplication() {
+//    // TODO: Replace with Bunbles
+//#ifdef USE_LIBROMFS
+//    Utils::resourcePath = "";
+//#elif __SWITCH__
+//    Utils::resourcePath = "romfs:/";
+//#elif __APPLE__
+//#include <TargetConditionals.h>
+//#if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+//    Utils::resourcePath = std::string(SDL_GetBasePath()) + "/assets/";
+//#endif
+//#endif
+
+//    UIFont.loadSystemFonts();
+}
+
+void UIApplication::handleEventsIfNeeded() {
+    auto e = SDL_Event();
+
+    while (SDL_PollEvent(&e)) {
+        handleSDLEvent(e);
+    }
+}
+
+void UIApplication::handleSDLEvent(SDL_Event e) {
+    switch (e.type) {
+        case SDL_QUIT: {
+            handleSDLQuit();
+            return;
+        }
+        case SDL_FINGERDOWN: {
+//            auto renderSize = UIRenderer::_main->bounds().size;
+//            auto fingerPoint = Point(renderSize.width * e.tfinger.x, renderSize.height * e.tfinger.y);
+////                printf("Touch id: %lld Begin, X:%f - Y:%f\n", e.tfinger.fingerId, fingerPoint.x, fingerPoint.y);
+//            auto touch = new_shared<UITouch>(e.tfinger.fingerId, fingerPoint, getCPUTimeUsec());
+//            auto event = std::shared_ptr<UIEvent>(new UIEvent(touch));
+//            UIEvent::activeEvents.push_back(event);
+//            sendEvent(event);
+            break;
+        }
+        case SDL_FINGERMOTION: {
+//            auto renderSize = UIRenderer::_main->bounds().size;
+//            auto fingerPoint = Point(renderSize.width * e.tfinger.x, renderSize.height * e.tfinger.y);
+////                printf("Touch id: %lld Moved, X:%f - Y:%f\n", e.tfinger.fingerId, fingerPoint.x, fingerPoint.y);
+//
+//            std::shared_ptr<UIEvent> event;
+//            std::shared_ptr<UITouch> touch;
+//
+//            for (auto& levent: UIEvent::activeEvents) {
+//                for (auto& ltouch: levent->allTouches()) {
+//                    if (ltouch->touchId() == e.tfinger.fingerId) {
+//                        event = levent;
+//                        touch = ltouch;
+//                    }
+//                }
+//            }
+//
+//            if (!event || !touch) return;
+//
+//            auto previousTimestamp = touch->timestamp();
+//            auto newTimestamp = getCPUTimeUsec();
+//
+//            touch->updateAbsoluteLocation(fingerPoint);
+//            touch->_timestamp = newTimestamp;
+//            touch->_phase = UITouchPhase::moved;
+//
+//            // SDL adds timestamps on send which could be quite different to when the event actually occurred.
+//            // It's common to get two events with an unrealistically small time between them; don't send those.
+//            if ((newTimestamp - previousTimestamp) > (5 / 1000)) {
+//                sendEvent(event);
+//            }
+
+            break;
+        }
+        case SDL_FINGERUP: {
+//                printf("Touch id: %lld Ended\n", e.tfinger.fingerId);
+
+//            std::shared_ptr<UIEvent> event;
+//            std::shared_ptr<UITouch> touch;
+//
+//            for (auto& levent: UIEvent::activeEvents) {
+//                for (auto& ltouch: levent->allTouches()) {
+//                    if (ltouch->touchId() == e.tfinger.fingerId) {
+//                        event = levent;
+//                        touch = ltouch;
+//                    }
+//                }
+//            }
+//
+//            if (!event || !touch) return;
+//
+//            touch->_timestamp = getCPUTimeUsec();
+//            touch->_phase = UITouchPhase::ended;
+//
+//            sendEvent(event);
+//            UIEvent::activeEvents.erase(std::remove(UIEvent::activeEvents.begin(), UIEvent::activeEvents.end(), event), UIEvent::activeEvents.end());
+
+            break;
+        }
+        case SDL_MOUSEBUTTONDOWN: {
+            // Simulate touch
+//            auto touchEvent = SDL_Event();
+//            touchEvent.type = SDL_FINGERDOWN;
+//
+//            auto renderSize = UIRenderer::_main->bounds().size;
+//            touchEvent.tfinger.x = float(e.button.x) / renderSize.width;
+//            touchEvent.tfinger.y = float(e.button.y) / renderSize.height;
+//            touchEvent.tfinger.fingerId = -1;
+//
+//            handleSDLEvent(touchEvent);
+            break;
+        }
+        case SDL_MOUSEMOTION: {
+            // Simulate touch
+//            auto touchEvent = SDL_Event();
+//            touchEvent.type = SDL_FINGERMOTION;
+//
+//            auto renderSize = UIRenderer::_main->bounds().size;
+//            touchEvent.tfinger.x = float(e.button.x) / renderSize.width;
+//            touchEvent.tfinger.y = float(e.button.y) / renderSize.height;
+//            touchEvent.tfinger.fingerId = -1;
+//
+//            handleSDLEvent(touchEvent);
+            break;
+        }
+        case SDL_MOUSEBUTTONUP: {
+            // Simulate touch
+//            auto touchEvent = SDL_Event();
+//            touchEvent.type = SDL_FINGERUP;
+//
+//            auto renderSize = UIRenderer::_main->bounds().size;
+//            touchEvent.tfinger.x = float(e.button.x) / renderSize.width;
+//            touchEvent.tfinger.y = float(e.button.y) / renderSize.height;
+//            touchEvent.tfinger.fingerId = -1;
+//
+//            handleSDLEvent(touchEvent);
+            break;
+        }
+        case SDL_CONTROLLERDEVICEADDED: {
+            printf("Controller added\n");
+            break;
+        }
+        case SDL_CONTROLLERBUTTONDOWN: {
+//            if (e.cbutton.button == SDL_CONTROLLER_BUTTON_START) {
+//                handleSDLQuit();
+//            }
+            break;
+        }
+        case SDL_KEYDOWN: {
+//            if (e.key.keysym.sym == SDLK_q) {
+//                handleSDLQuit();
+//            }
+//
+//            auto press = new_shared<UIPress>();
+//            auto key = UIKey();
+//            key._keyCode = (UIKeyboardHIDUsage) e.key.keysym.scancode;
+//            key._modifierFlags = OptionSet<UIKeyModifierFlags>(e.key.keysym.mod);
+//            press->_key = key;
+//            press->_phase = UIPressPhase::began;
+//            press->setForWindow(delegate->window);
+//
+//            auto event = std::shared_ptr<UIPressesEvent>(new UIPressesEvent(press));
+//            UIPressesEvent::activePressesEvents.push_back(event);
+//            sendEvent(event);
+
+            break;
+        }
+        case SDL_KEYUP: {
+//            std::shared_ptr<UIPressesEvent> event;
+//            std::shared_ptr<UIPress> press;
+//
+//            for (auto& levent: UIPressesEvent::activePressesEvents) {
+//                for (auto& lpress: levent->allPresses()) {
+//                    if (!lpress->_key.has_value()) continue;
+//
+//                    if ((int) lpress->_key->_keyCode == (int) e.key.keysym.scancode) {
+//                        event = levent;
+//                        press = lpress;
+//                    }
+//                }
+//            }
+//
+//            if (!event || !press) return;
+//
+//            press->_timestamp = getCPUTimeUsec();
+//            press->_phase = UIPressPhase::ended;
+//
+//            sendEvent(event);
+//            UIPressesEvent::activePressesEvents.erase(std::remove(UIPressesEvent::activePressesEvents.begin(), UIPressesEvent::activePressesEvents.end(), event), UIPressesEvent::activePressesEvents.end());
+
+            break;
+
+//#if DEBUG
+//                let keyModifier = SDL_Keymod(UInt32(e.key.keysym.mod))
+//                if keyModifier.contains(KMOD_LSHIFT) || keyModifier.contains(KMOD_RSHIFT) {
+//                    switch e.key.keysym.sym {
+//                    case 43, 61: // +/*, +/= keys. TODO send key events via UIEvent
+//                        break
+//                    case 45: break // -/_ key
+//                    case 118: // "V"
+//                        keyWindow?.printViewHierarchy()
+//                    default:
+//                        print(e.key.keysym.sym)
+//                    }
+//                }
+//
+//                if keyModifier.contains(KMOD_LGUI) || keyModifier.contains(KMOD_RGUI) {
+//                    if e.key.keysym.sym == 114 { // CMD-R
+//                        UIScreen.main = nil
+//                        UIScreen.main = UIScreen()
+//                    }
+//                }
+//#endif
+//
+//                let scancode = e.key.keysym.scancode
+//                if scancode == .androidHardwareBackButton || scancode == .escapeKey {
+//                    keyWindow?.deepestPresentedView().handleHardwareBackButtonPress()
+//                }
+        }
+        case SDL_APP_WILLENTERBACKGROUND: {
+            UIApplication::onWillEnterBackground();
+            break;
+        }
+        case SDL_APP_DIDENTERBACKGROUND: {
+            UIApplication::onDidEnterBackground();
+            break;
+        }
+        case SDL_APP_WILLENTERFOREGROUND: {
+            UIApplication::onWillEnterForeground();
+            break;
+        }
+        case SDL_APP_DIDENTERFOREGROUND: {
+            UIApplication::onDidEnterForeground();
+            break;
+        }
+        case SDL_WINDOWEVENT: {
+            switch (e.window.event)
+            {
+                case SDL_WINDOWEVENT_RESIZED:
+//                    UIRenderer::main()->refreshScreenResolution(e.window.data1, e.window.data2);
+                    break;
+                default:
+                    break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void UIApplication::handleSDLQuit() {
+    if (delegate) delegate->applicationWillTerminate(this);
+
+    // UIEvent::activeEvents.clear();
+    UIApplication::delegate->window = nullptr;
+    UIApplication::shared = nullptr;
+    // UIRenderer::_main = nullptr;
+
+    SDL_Quit();
+    exit(0);
+}
+
+// void UIApplication::sendEvent(std::shared_ptr<UIEvent> event) {
+//     for (auto& touch: event->allTouches()) {
+//         touch->_window = keyWindow;
+//     }
+
+//     if (!keyWindow.expired())
+//         keyWindow.lock()->sendEvent(event);
+// }
+
+void UIApplication::onWillEnterForeground() {
+    UIApplication::shared->delegate->applicationDidEnterBackground(UIApplication::shared.get());
+//    UIApplication.post(willEnterForegroundNotification)
+}
+
+void UIApplication::onDidEnterForeground() {
+    UIApplication::shared->delegate->applicationDidBecomeActive(UIApplication::shared.get());
+//    UIApplication.post(didBecomeActiveNotification)
+}
+
+void UIApplication::onWillEnterBackground() {
+    UIApplication::shared->delegate->applicationWillResignActive(UIApplication::shared.get());
+//    UIApplication.post(willResignActiveNotification)
+}
+
+void UIApplication::onDidEnterBackground() {
+    UIApplication::shared->delegate->applicationDidEnterBackground(UIApplication::shared.get());
+//    UIApplication.post(didEnterBackgroundNotification)
+}

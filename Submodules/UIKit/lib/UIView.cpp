@@ -3,7 +3,8 @@
 using namespace NXKit;
 
 UIView::UIView() {
-    _layer = new_shared<NXLayer>();
+    _layer = new_shared<CALayer>();
+    _layer->setAnchorPoint(NXPoint::zero);
 }
 
 void UIView::addSubview(std::shared_ptr<UIView> view) {

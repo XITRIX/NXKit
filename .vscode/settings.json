@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "utility": "cpp"
+        "utility": "cpp",
+        "__locale": "cpp",
+        "*.inc": "cpp"
     }
 }

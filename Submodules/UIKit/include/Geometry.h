@@ -4,6 +4,9 @@ namespace NXKit {
 
 typedef double NXFloat;
 
+struct NXAffineTransform;
+struct NXTransform3D;
+
 struct NXPoint {
     NXFloat x, y;
 
@@ -18,10 +21,12 @@ struct NXPoint {
     NXPoint operator/(const NXFloat& rhs);
     NXPoint operator*(const NXFloat& rhs);
 
-//    Point applying(const NXAffineTransform& t) const;
+    NXPoint applying(const NXAffineTransform& t) const;
 
     bool valid();
     NXFloat magnitude();
+
+    static NXPoint zero;
 };
 
 struct NXSize {
@@ -71,8 +76,8 @@ struct NXRect {
     NXRect& offsetBy(const NXPoint& offset);
     NXRect& offsetBy(const NXFloat& offsetX, const NXFloat& offsetY);
 //    NXRect& insetBy(const UIEdgeInsets& insets);
-//    NXRect applying(const NXAffineTransform& t) const;
-//    NXRect applying(const NXTransform3D& t) const;
+    NXRect applying(const NXAffineTransform& t) const;
+    NXRect applying(const NXTransform3D& t) const;
 
     bool operator==(const NXRect& rhs);
 

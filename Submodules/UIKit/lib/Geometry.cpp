@@ -1,9 +1,35 @@
 #include <Geometry.h>
 #include <algorithm>
 
+#include "NXAffineTransform.h"
+#include "NXTransform3D.h"
+
 using namespace NXKit;
 
+// MARK: - PRIVATE -
+float min(NXFloat a, NXFloat b, NXFloat c, NXFloat d) {
+    auto minValue = (a < b) ? a : b;
+    minValue = (minValue < c) ? minValue : c;
+    minValue = (minValue < d) ? minValue : d;
+    return minValue;
+}
+
+float max(NXFloat a, NXFloat b, NXFloat c, NXFloat d) {
+    auto maxValue = (a > b) ? a : b;
+    maxValue = (maxValue > c) ? maxValue : c;
+    maxValue = (maxValue > d) ? maxValue : d;
+    return maxValue;
+}
+
+float isEqual(NXFloat val1, NXFloat val2) {
+    if (isnan(val1) && isnan(val2))
+        return true;
+    return val1 == val2;
+}
+
 // MARK: - POINT -
+NXPoint NXPoint::zero = NXPoint();
+
 NXPoint::NXPoint(): x(0), y(0) { }
 NXPoint::NXPoint(NXFloat x, NXFloat y): x(x), y(y) { }
 
@@ -45,12 +71,12 @@ NXPoint NXPoint::operator*(const NXFloat& rhs) {
     return res;
 }
 
-//NXPoint NXPoint::applying(const NXAffineTransform& t) const {
-//    return NXPoint(
-//            x * t.m11 + y * t.m21 + t.tX,
-//            x * t.m12 + y * t.m22 + t.tY
-//    );
-//}
+NXPoint NXPoint::applying(const NXAffineTransform& t) const {
+    return NXPoint(
+            x * t.m11 + y * t.m21 + t.tX,
+            x * t.m12 + y * t.m22 + t.tY
+    );
+}
 
 bool NXPoint::valid() {
     return !isnan(this->x) && !isnan(this->y);
@@ -65,7 +91,7 @@ NXSize::NXSize(): NXSize(0, 0) {}
 NXSize::NXSize(NXFloat width, NXFloat height): width(width), height(height) {}
 
 bool NXSize::operator==(const NXSize& rhs) const {
-    return this->width == rhs.width && this->height == rhs.height;
+    return isEqual(this->width, rhs.width) && isEqual(this->height, rhs.height);
 }
 
 NXSize NXSize::operator+(const NXSize& first) const {
@@ -176,49 +202,49 @@ NXRect& NXRect::offsetBy(const NXFloat& offsetX, const NXFloat& offsetY) {
 //    return *this;
 //}
 
-//NXRect NXRect::applying(const NXAffineTransform& t) const {
-//    if (t.isIdentity()) { return *this; }
-//
-//    auto newTopLeft = NXPoint(minX(), minY()).applying(t);
-//    auto newTopRight = NXPoint(maxX(), minY()).applying(t);
-//    auto newBottomLeft = NXPoint(minX(), maxY()).applying(t);
-//    auto newBottomRight = NXPoint(maxX(), maxY()).applying(t);
-//
-//
-//    auto newMinX = min(newTopLeft.x, newTopRight.x, newBottomLeft.x, newBottomRight.x);
-//    auto newMaxX = max(newTopLeft.x, newTopRight.x, newBottomLeft.x, newBottomRight.x);
-//
-//    auto newMinY = min(newTopLeft.y, newTopRight.y, newBottomLeft.y, newBottomRight.y);
-//    auto newMaxY = max(newTopLeft.y, newTopRight.y, newBottomLeft.y, newBottomRight.y);
-//
-//    // XXX: What happens if the point that was furthest left is now on the right (because of a rotation)?
-//    // i.e. Should do we return a normalised rect or one with a negative width?
-//    return NXRect(
-//            newMinX,
-//            newMinY,
-//            newMaxX - newMinX,
-//            newMaxY - newMinY);
-//}
+NXRect NXRect::applying(const NXAffineTransform& t) const {
+    if (t.isIdentity()) { return *this; }
 
-//NXRect NXRect::applying(const NXTransform3D& t) const {
-//    if (t == NXTransform3DIdentity) { return *this; }
-//
-//    auto topLeft = t.transformingVector(minX(), minY(), 0);
-//    auto topRight = t.transformingVector(maxX(), minY(), 0);
-//    auto bottomLeft = t.transformingVector(minX(), maxY(), 0);
-//    auto bottomRight = t.transformingVector(maxX(), maxY(), 0);
-//
-//    auto newMinX = min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
-//    auto newMaxX = max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
-//
-//    auto newMinY = min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
-//    auto newMaxY = max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
-//
-//    return NXRect(newMinX,
-//                newMinY,
-//                newMaxX - newMinX,
-//                newMaxY - newMinY);
-//}
+    auto newTopLeft = NXPoint(minX(), minY()).applying(t);
+    auto newTopRight = NXPoint(maxX(), minY()).applying(t);
+    auto newBottomLeft = NXPoint(minX(), maxY()).applying(t);
+    auto newBottomRight = NXPoint(maxX(), maxY()).applying(t);
+
+
+    auto newMinX = min(newTopLeft.x, newTopRight.x, newBottomLeft.x, newBottomRight.x);
+    auto newMaxX = max(newTopLeft.x, newTopRight.x, newBottomLeft.x, newBottomRight.x);
+
+    auto newMinY = min(newTopLeft.y, newTopRight.y, newBottomLeft.y, newBottomRight.y);
+    auto newMaxY = max(newTopLeft.y, newTopRight.y, newBottomLeft.y, newBottomRight.y);
+
+    // XXX: What happens if the point that was furthest left is now on the right (because of a rotation)?
+    // i.e. Should do we return a normalised rect or one with a negative width?
+    return NXRect(
+            newMinX,
+            newMinY,
+            newMaxX - newMinX,
+            newMaxY - newMinY);
+}
+
+NXRect NXRect::applying(const NXTransform3D& t) const {
+    if (t == NXTransform3DIdentity) { return *this; }
+
+    auto topLeft = t.transformingVector(minX(), minY(), 0);
+    auto topRight = t.transformingVector(maxX(), minY(), 0);
+    auto bottomLeft = t.transformingVector(minX(), maxY(), 0);
+    auto bottomRight = t.transformingVector(maxX(), maxY(), 0);
+
+    auto newMinX = min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+    auto newMaxX = max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+
+    auto newMinY = min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+    auto newMaxY = max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+
+    return NXRect(newMinX,
+                newMinY,
+                newMaxX - newMinX,
+                newMaxY - newMinY);
+}
 
 bool NXRect::operator==(const NXRect& rhs) {
     return

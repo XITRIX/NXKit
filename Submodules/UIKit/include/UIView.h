@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NXLayer.h"
+#include "CALayer.h"
 
 namespace NXKit {
 
@@ -18,11 +18,11 @@ public:
     const std::vector<std::shared_ptr<UIView>>& subviews() const { return _subviews; }
     std::weak_ptr<UIView> superview() const { return _superview; }
 
-    std::shared_ptr<NXLayer> layer() const { return _layer; };
+    std::shared_ptr<CALayer> layer() const { return _layer; };
 private:
     std::vector<std::shared_ptr<UIView>> _subviews;
     std::weak_ptr<UIView> _superview;
-    std::shared_ptr<NXLayer> _layer;
+    std::shared_ptr<CALayer> _layer;
 
     void setSuperview(std::shared_ptr<UIView> superview);
 };

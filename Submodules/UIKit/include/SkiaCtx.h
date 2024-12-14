@@ -1,7 +1,5 @@
 #pragma once
 
-#include <NXSize.h>
-
 #include <SDL.h>
 #include <memory>
 #include "include/core/SkSurface.h"
@@ -25,9 +23,14 @@ public:
     virtual float getScaleFactor() { return 1; }
     virtual sk_sp<SkFontMgr> getFontMgr() { return fontMgr; }
 
+    static std::shared_ptr<SkiaCtx> main() { return _main; }
+    static std::shared_ptr<SkiaCtx> _main;
 protected:
     NXSize _size;
     sk_sp<SkFontMgr> fontMgr;
+
+private:
+    friend class UIApplication;
 };
 
 std::unique_ptr<SkiaCtx> MakeSkiaCtx();

@@ -5,12 +5,25 @@ add_definitions(
 )
 
 add_library(UIKit
+        lib/ContentsGravityTransformation.cpp
         lib/platforms/SkiaCtx.cpp
         lib/Application.cpp
+        lib/DispatchQueue.cpp
+        lib/Timer.cpp
         lib/Geometry.cpp
-        lib/NXLayer.cpp
-        lib/NXColor.cpp
+        lib/CGImage.cpp
+        lib/CADisplayLink.cpp
+        lib/CALayer.cpp
+        lib/UIApplication.cpp
+        lib/UIApplicationDelegateImpl.cpp
+        lib/UIApplicationMain.cpp
+        lib/UIColor.cpp
+        lib/UIImage.cpp
         lib/UIView.cpp
+        lib/UIWindow.cpp
+        lib/NXAffineTransform.cpp
+        lib/NXTransform3D.cpp
+        lib/NXData.cpp
 )
 
 # APPLE
@@ -55,6 +68,7 @@ endif ()
 target_include_directories(UIKit PUBLIC
         ${EXTERN_PATH}/SDL/include
         ${EXTERN_PATH}/skia
+        ${EXTERN_PATH}/libromfs/lib/include
         include
         lib
 )
