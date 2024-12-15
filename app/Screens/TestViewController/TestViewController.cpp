@@ -3,6 +3,32 @@
 
 using namespace NXKit;
 
+void animateCube(std::shared_ptr<UIView> view) {
+    UIView::animate(2.5, [view]() {
+        view->setTransform(NXAffineTransform::identity.rotationBy(45));
+        view->setBackgroundColor(UIColor::orange);
+    }, [view](bool res) {
+        UIView::animate(2.5, [view]() {
+            view->setTransform(NXAffineTransform::identity);
+            view->setBackgroundColor(UIColor::blue);
+        }, [view](bool res) {
+            animateCube(view);
+        });
+    });
+}
+
+void animateBlur(std::shared_ptr<UIBlurView> view) {
+    UIView::animate(2.5, [view]() {
+        view->setBlurValue(0);
+    }, [view](bool res) {
+        UIView::animate(2.5, [view]() {
+            view->setBlurValue(20);
+        }, [view](bool res) {
+            animateBlur(view);
+        });
+    });
+}
+
 void animateLabel(std::shared_ptr<UILabel> label) {
     UIView::animate(5, [label]() {
         label->setFrame({ 200, 100, 140, 88 });
@@ -19,6 +45,18 @@ void animateLabel(std::shared_ptr<UILabel> label) {
             animateLabel(label);
         });
     });
+
+    // Looks like transform interpolation has issues
+//    UIView::animate(5, [label]() {
+//        label->layer()->setTransform(NXTransform3D::identity.rotationBy(180, 0, 0, 1));
+//    }, [label](bool res) {
+//        UIView::animate(5, [label]() {
+//            label->layer()->setTransform(NXTransform3D::identity.rotationBy(360, 0, 0, 1));
+//        }, [label](bool res) {
+//            label->layer()->setTransform(NXTransform3D::identity);
+//            animateLabel(label);
+//        });
+//    });
 }
 
 TestViewController::TestViewController() {
@@ -48,11 +86,7 @@ void TestViewController::loadView() {
     imageView->setContentMode(UIViewContentMode::topLeft);
 
     subview->addSubview(imageView);
-
-    UIView::animate(5, [imageView]() {
-        imageView->setTransform(NXAffineTransform::identity.rotationBy(45));
-        imageView->setBackgroundColor(UIColor::orange);
-    });
+    animateCube(imageView);
 
     label = new_shared<UILabel>();
     label->setFrame({ 200, 100, 240, 88 });
@@ -60,6 +94,11 @@ void TestViewController::loadView() {
     label->setTextAlignment(NSTextAlignment::center);
     label->setBackgroundColor(UIColor::red);
     rootView->addSubview(label);
+
+    auto blur = new_shared<UIBlurView>();
+    blur->setFrame({ 80, 80, 240, 240 });
+    rootView->addSubview(blur);
+    animateBlur(blur);
 
     setView(rootView);
 }

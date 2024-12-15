@@ -4,6 +4,7 @@
 
 #pragma once
 
-#include <UIViewController.h>
-#include <UILabel.h>
+#include <UIBlurView.h>
 #include <UIImageView.h>
+#include <UILabel.h>
+#include <UIViewController.h>

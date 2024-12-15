@@ -7,6 +7,7 @@ add_definitions(
 add_library(UIKit
         lib/CABasicAnimation.cpp
         lib/CABasicAnimationPrototype.cpp
+        lib/CABlurLayer.cpp
         lib/CASpringAnimation.cpp
         lib/CASpringAnimationPrototype.cpp
         lib/CAMediaTimingFunction.cpp
@@ -24,6 +25,7 @@ add_library(UIKit
         lib/UIApplication.cpp
         lib/UIApplicationDelegateImpl.cpp
         lib/UIApplicationMain.cpp
+        lib/UIBlurView.cpp
         lib/UIColor.cpp
         lib/UIImage.cpp
         lib/UIImageView.cpp

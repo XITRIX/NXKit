@@ -27,8 +27,6 @@ public:
 
 private:
     int _numberOfLines = 1;
-    std::string _text;
-
     std::shared_ptr<CATextLayer> _textLayer() const;
 };
 
