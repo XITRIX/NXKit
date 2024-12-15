@@ -357,8 +357,7 @@ void CALayer::onWillSet(std::string keyPath) {
 
     auto animation = std::static_pointer_cast<CABasicAnimation>(actionForKey(animationKey));
     if (animation &&
-        (this->hasBeenRenderedInThisPartOfOverallLayerHierarchy
-            || animation->wasCreatedInUIAnimateBlock()) &&
+        (this->hasBeenRenderedInThisPartOfOverallLayerHierarchy || animation->wasCreatedInUIAnimateBlock()) &&
         !this->isPresentationForAnotherLayer &&
         !CATransaction::disableActions())
     {

@@ -1,31 +1,25 @@
 #include <CATextLayer.h>
 #include <modules/skunicode/include/SkUnicode_icu.h>
+#include <tools/Tools.hpp>
 
 using namespace NXKit;
 using namespace skia::textlayout;
 
 CATextLayer::CATextLayer(): CALayer() {
-    auto fontMgr = SkiaCtx::main()->getFontMgr();
-
     SkFontStyle fontStyle;
     typeface = SkiaCtx::main()->getFontMgr()->matchFamilyStyle(nullptr, fontStyle);
-
-    fontCollection = sk_make_sp<FontCollection>();
-    fontCollection->setDefaultFontManager(SkiaCtx::main()->getFontMgr());
-
     unicode = SkUnicodes::ICU::Make();
 
-    paragraphBuilder = ParagraphBuilder::make(paraStyle, fontCollection, unicode);
     updateParagraph();
 }
 
 CATextLayer::CATextLayer(CATextLayer* layer): CALayer(layer) {
-    typeface = layer->typeface;
-    paraStyle = layer->paraStyle;
-    fontCollection = layer->fontCollection;
-    unicode = layer->unicode;
+    _fontSize = layer->_fontSize;
+    _textColor = layer->_textColor;
+    _text = layer->_text;
 
-    paragraphBuilder = ParagraphBuilder::make(paraStyle, fontCollection, unicode);
+    typeface = layer->typeface;
+    unicode = layer->unicode;
     updateParagraph();
 }
 
@@ -46,12 +40,20 @@ void CATextLayer::setText(std::string text) {
 
 void CATextLayer::setTextColor(UIColor textColor) {
     if (_textColor == textColor) return;
+    onWillSet("textColor");
     _textColor = textColor;
     updateParagraph();
 }
 
+void CATextLayer::setFontSize(NXFloat fontSize) {
+    if (_fontSize == fontSize) return;
+    _fontSize = fontSize;
+    updateParagraph();
+}
+
 void CATextLayer::updateParagraph() {
-    paragraphBuilder->Reset();
+    auto fontCollection = sk_make_sp<FontCollection>();
+    fontCollection->setDefaultFontManager(SkiaCtx::main()->getFontMgr());
 
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -60,12 +62,39 @@ void CATextLayer::updateParagraph() {
     skia::textlayout::TextStyle style;
     style.setForegroundColor(paint);
     style.setTypeface(typeface);
-    style.setFontSize(17);
+    style.setFontSize(_fontSize);
 
+    ParagraphStyle paraStyle;
     paraStyle.setTextStyle(style);
     paraStyle.setTextAlign(TextAlign::kRight);
 
-    paragraphBuilder->addText(_text.c_str());
+    auto paragraphBuilder = ParagraphBuilder::make(paraStyle, fontCollection, unicode);
 
+    paragraphBuilder->addText(_text.c_str());
     paragraph = paragraphBuilder->Build();
+}
+
+std::optional<AnimatableProperty> CATextLayer::value(std::string forKeyPath) {
+    if (forKeyPath == "textColor") return _textColor;
+    return CALayer::value(forKeyPath);
+}
+
+void CATextLayer::update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABasicAnimation> animation, float progress) {
+    if (!animation->keyPath.has_value() || !animation->fromValue.has_value()) return;
+
+    auto keyPath = animation->keyPath.value();
+    auto fromValue = animation->fromValue.value();
+
+    if (keyPath == "textColor") {
+        auto start = any_optional_cast<UIColor>(fromValue);
+        if (!start.has_value()) { return; }
+
+        auto end = any_optional_cast<UIColor>(animation->toValue);
+        if (!end.has_value()) end = this->_textColor;
+        if (!end.has_value()) end = UIColor::clear;
+
+        std::static_pointer_cast<CATextLayer>(presentation)->setTextColor(start->interpolationTo(end.value(), progress));
+    }
+
+    CALayer::update(presentation, animation, progress);
 }

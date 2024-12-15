@@ -112,11 +112,17 @@ public:
     void removeAllAnimations();
     void onWillSet(std::string keyPath);
     void onDidSetAnimations(bool wasEmpty);
-    std::optional<AnimatableProperty> value(std::string forKeyPath);
+
+    // Override to add new animatable
+    virtual std::optional<AnimatableProperty> value(std::string forKeyPath);
 
     void animateAt(Timer currentTime);
 
     void skiaRender(SkCanvas* canvas);
+protected:
+    // Override to add new animatable
+    virtual void update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABasicAnimation> animation, float progress);
+
 private:
     friend class UIView;
 
@@ -164,7 +170,6 @@ private:
     /// This is both a performance optimization (avoids lots of animations at the start)
     /// as well as a correctness fix (matches iOS behaviour). Maybe there's a better way though?
     bool hasBeenRenderedInThisPartOfOverallLayerHierarchy = false;
-    void update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABasicAnimation> animation, float progress);
 };
 
 }

@@ -13,9 +13,11 @@ namespace NXKit {
 void animateLabel(std::shared_ptr<UILabel> label) {
     UIView::animate(5, [label]() {
         label->setFrame({ 200, 100, 140, 88 });
+        label->setTextColor(UIColor::cyan);
     }, [label](bool res) {
         UIView::animate(5, [label]() {
             label->setFrame({ 200, 100, 240, 88 });
+            label->setTextColor(UIColor::black);
         }, [label](bool res) {
             animateLabel(label);
         });
@@ -56,6 +58,7 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
 
     UIView::animate(5, [imageView]() {
         imageView->setTransform(NXAffineTransform::identity.rotationBy(45));
+        imageView->setBackgroundColor(UIColor::orange);
     });
 
     auto label = new_shared<UILabel>();
