@@ -10,6 +10,7 @@ add_library(UIKit
         lib/CASpringAnimation.cpp
         lib/CASpringAnimationPrototype.cpp
         lib/CAMediaTimingFunction.cpp
+        lib/CATextLayer.cpp
         lib/CATransaction.cpp
         lib/ContentsGravityTransformation.cpp
         lib/platforms/SkiaCtx.cpp
@@ -50,6 +51,11 @@ if (APPLE)
                 SDL2-static SDL2main
                 ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskia.a
                 ${EXTERN_PATH}/skia/out/mac-arm64-angle/libwindow.a
+                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libicu.a
+                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskshaper.a
+                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskunicode_core.a
+                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskunicode_icu.a
+                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskparagraph.a
         )
 
         target_sources(UIKit PRIVATE

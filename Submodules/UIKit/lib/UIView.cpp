@@ -4,12 +4,8 @@
 
 using namespace NXKit;
 
-std::shared_ptr<CALayer> UIView::initLayer() {
-    return new_shared<CALayer>();
-}
-
-UIView::UIView(NXRect frame) {
-    _layer = initLayer();
+UIView::UIView(NXRect frame, std::shared_ptr<CALayer> layer) {
+    _layer = layer;
     _layer->setAnchorPoint(NXPoint::zero);
     _layer->delegate = weak_from_this();
     setFrame(frame);
@@ -17,7 +13,7 @@ UIView::UIView(NXRect frame) {
 
 void UIView::setFrame(NXRect frame) {
     if (this->frame().size != frame.size) {
-//        setNeedsLayout();
+        setNeedsLayout();
     }
     _layer->setFrame(frame);
 //    setNeedsUpdateSafeAreaInsets();
@@ -25,7 +21,7 @@ void UIView::setFrame(NXRect frame) {
 
 void UIView::setBounds(NXRect bounds) {
     if (this->bounds().size != bounds.size) {
-//        setNeedsLayout();
+        setNeedsLayout();
 //        setNeedsUpdateSafeAreaInsets();
     }
     _layer->setBounds(bounds);
@@ -47,7 +43,7 @@ void UIView::addSubview(std::shared_ptr<UIView> view) {
 //        }
 //    }
 
-//    setNeedsLayout();
+    setNeedsLayout();
     view->removeFromSuperview();
 
 //    if (needToNotifyViewController)
@@ -79,7 +75,7 @@ void UIView::insertSubviewBelow(std::shared_ptr<UIView> view, std::shared_ptr<UI
 //        }
 //    }
 
-//    setNeedsLayout();
+    setNeedsLayout();
     view->removeFromSuperview();
 
 //    if (needToNotifyViewController)
@@ -98,14 +94,60 @@ void UIView::removeFromSuperview() {
     _layer->removeFromSuperlayer();
 
     // If it's mask - remove
-//    if (superview->_mask.get() == this) {
-//        superview->_mask = nullptr;
-//    }
-//    else {
+    if (superview->_mask.get() == this) {
+        superview->_mask = nullptr;
+    }
+    else {
         superview->_subviews.erase(std::remove(superview->_subviews.begin(), superview->_subviews.end(), shared_from_this()), superview->_subviews.end());
-//    }
+    }
     this->setSuperview(nullptr);
-//    superview->setNeedsLayout();
+    superview->setNeedsLayout();
+}
+
+void UIView::setNeedsLayout() {
+    setNeedsDisplay();
+
+    // Needs to recalculate Yoga from root
+//    auto layoutRoot = this->layoutRoot();
+//    if (layoutRoot) layoutRoot->_needsLayout = true;
+    _needsLayout = true;
+}
+
+void UIView::drawAndLayoutTreeIfNeeded() {
+    auto visibleLayer = layer()->presentationOrSelf();
+
+    if (visibleLayer->isHidden() || visibleLayer->opacity() < 0.01f) { return; }
+
+    if (visibleLayer->_needsDisplay) {
+        visibleLayer->display();
+        visibleLayer->_needsDisplay = false;
+    }
+
+    if (_needsDisplay) {
+        draw();
+        _needsDisplay = false;
+    }
+
+//    updateSafeAreaInsetsIfNeeded();
+//    updateLayoutMarginIfNeeded();
+//    layoutIfNeeded();
+
+    for (auto& subview: _subviews) {
+        subview->drawAndLayoutTreeIfNeeded();
+    }
+}
+
+void UIView::setMask(std::shared_ptr<UIView> mask) {
+    if (_mask == mask) { return; }
+    if (_mask) { _mask->removeFromSuperview(); }
+
+    _mask = mask;
+    if (mask) {
+        _layer->setMask(mask->_layer);
+        mask->setSuperview(shared_from_this());
+    } else {
+        _layer->setMask(nullptr);
+    }
 }
 
 void UIView::setContentMode(UIViewContentMode mode) {
@@ -183,8 +225,8 @@ void UIView::animate(double duration, double delay, UIViewAnimationOptions optio
 }
 
 
-void UIView::animate(double duration, std::function<void()> animations) {
-    UIView::animate( duration, 0, UIViewAnimationOptions::none, animations);
+void UIView::animate(double duration, std::function<void()> animations, std::function<void(bool)> completion) {
+    UIView::animate( duration, 0, UIViewAnimationOptions::none, animations, completion);
 }
 
 void UIView::animate(double duration, double delay, double damping, double initialSpringVelocity, UIViewAnimationOptions options, std::function<void()> animations, std::function<void(bool)> completion) {
@@ -212,7 +254,7 @@ void UIView::completePendingAnimations() {
         gettimeofday(&now, nullptr);
         // FIXME: incorrect logic
         layer->animateAt(Timer(timevalInMilliseconds(now) + 1000000000));
-        //        $0.animate(at: Timer(startingAt: NSDate.distantFuture.timeIntervalSinceNow));
+//        $0.animate(at: Timer(startingAt: NSDate.distantFuture.timeIntervalSinceNow));
     }
 }
 

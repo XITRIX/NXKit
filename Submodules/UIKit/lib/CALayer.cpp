@@ -162,6 +162,8 @@ void CALayer::removeFromSuperlayer() {
     CALayer::layerTreeIsDirty = true;
 }
 
+void CALayer::draw(SkCanvas* context) {}
+
 void CALayer::skiaRender(SkCanvas* canvas) {
     // Do not render is hidden
     if (_isHidden || _opacity < 0.001f) return;
@@ -239,6 +241,8 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         canvas->restore();
     }
 
+    draw(canvas);
+
     // Reset Anchor to Origin matrix
     // Origin matrix save 2 // restore
     canvas->restore();
@@ -286,8 +290,8 @@ void CALayer::setFrame(NXRect frame) {
     setBounds(bounds);
 }
 
-CALayer* CALayer::copy() {
-    return new CALayer(this);
+std::shared_ptr<CALayer> CALayer::copy() {
+    return new_shared<CALayer>(this);
 }
 
 std::shared_ptr<CAAction> CALayer::actionForKey(std::string event) {
@@ -302,9 +306,13 @@ std::shared_ptr<CABasicAnimation> CALayer::defaultActionForKey(std::string event
 }
 
 std::shared_ptr<CALayer> CALayer::createPresentation() {
-    auto copy = new_shared<CALayer>(this);
-    copy->isPresentationForAnotherLayer = true;
-    return copy;
+    auto _copy = copy();
+    _copy->isPresentationForAnotherLayer = true;
+    return _copy;
+}
+
+void CALayer::display() {
+    if (!delegate.expired()) delegate.lock()->display(shared_from_this());
 }
 
 // MARK: - Animations

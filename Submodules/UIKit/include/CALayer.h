@@ -27,7 +27,7 @@ class CALayer: public enable_shared_from_this<CALayer> {
 public:
     CALayer();
     CALayer(CALayer* layer);
-    ~CALayer() {}
+    virtual ~CALayer() {}
 
     std::weak_ptr<CALayerDelegate> delegate;
 
@@ -80,6 +80,8 @@ public:
     NXRect getFrame();
     void setFrame(NXRect frame);
 
+    virtual void draw(SkCanvas* context);
+
     // Layers
     [[nodiscard]] std::vector<std::shared_ptr<CALayer>> sublayers() { return _sublayers; }
 
@@ -90,7 +92,7 @@ public:
 
     void removeFromSuperlayer();
 
-    CALayer* copy();
+    virtual std::shared_ptr<CALayer> copy();
 
     std::shared_ptr<CAAction> actionForKey(std::string event);
     static std::shared_ptr<CABasicAnimation> defaultActionForKey(std::string event);
@@ -99,6 +101,10 @@ public:
     std::shared_ptr<CALayer> createPresentation();
     std::shared_ptr<CALayer> presentation() { return _presentation; }
     std::shared_ptr<CALayer> presentationOrSelf();
+
+    bool needsDisplay() { return _needsDisplay; }
+    void setNeedsDisplay() { _needsDisplay = true; }
+    void display();
 
     // Animations
     void add(std::shared_ptr<CABasicAnimation> animation, std::string keyPath);
@@ -124,6 +130,7 @@ private:
     std::shared_ptr<CALayer> _mask;
 
     bool _isHidden = false;
+    bool _needsDisplay = true;
 
     std::shared_ptr<CGImage> _contents;
     bool _masksToBounds = false;

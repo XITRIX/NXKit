@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Geometry.h>
+#include <stdint.h>
 
 namespace NXKit {
 
@@ -18,6 +19,7 @@ public:
     bool operator==(const UIColor& rhs) const;
 
     UIColor interpolationTo(UIColor endResult, NXFloat progress);
+    uint32_t raw() const { return color; }
 
     static UIColor clear;
     static UIColor red;
@@ -37,7 +39,7 @@ public:
 
 private:
     friend class CALayer;
-    int color;
+    uint32_t color;
 };
 
 }

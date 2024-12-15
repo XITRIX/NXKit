@@ -1,12 +1,26 @@
 #include <UIApplicationDelegate.h>
 #include <UIImageView.h>
+#include <UILabel.h>
 #include "romfs/romfs.hpp"
+#include <DispatchQueue.h>
 // #include <TestViewController/TestViewController.hpp>
 // #include <YogaTestViewController/YogaTestViewController.hpp>
 // #include <NavigationViewController/NavigationViewController.hpp>
 // #include <TextViewController/TextViewController.hpp>
 
 namespace NXKit {
+
+void animateLabel(std::shared_ptr<UILabel> label) {
+    UIView::animate(5, [label]() {
+        label->setFrame({ 200, 100, 140, 88 });
+    }, [label](bool res) {
+        UIView::animate(5, [label]() {
+            label->setFrame({ 200, 100, 240, 88 });
+        }, [label](bool res) {
+            animateLabel(label);
+        });
+    });
+}
 
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplication* application, std::map<std::string, std::any> launchOptions) {
     window = new_shared<UIWindow>();
@@ -40,10 +54,16 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     
     subview->addSubview(imageView);
 
-    UIView::animate(2, [imageView]() {
+    UIView::animate(5, [imageView]() {
         imageView->setTransform(NXAffineTransform::identity.rotationBy(45));
     });
 
+    auto label = new_shared<UILabel>();
+    label->setFrame({ 200, 100, 240, 88 });
+    label->setBackgroundColor(UIColor::red);
+    window->addSubview(label);
+
+    animateLabel(label);
 
     return true;
 }

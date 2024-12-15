@@ -15,10 +15,12 @@ bool applicationRunLoop() {
 //        UIRenderer::main()->render(UIApplication::shared->keyWindow.lock(), currentTime);
 
 
-    UIView::animateIfNeeded(currentTime);
-
-
     // Move to UIRenderer
+    auto keyWindow = UIApplication::shared->keyWindow.lock();
+
+    UIView::animateIfNeeded(currentTime);
+    keyWindow->drawAndLayoutTreeIfNeeded();
+
     auto surface = SkiaCtx::_main->getBackbufferSurface();
     if (!surface) return true;
 
@@ -28,7 +30,6 @@ bool applicationRunLoop() {
     canvas->save();
     auto scale = SkiaCtx::_main->getScaleFactor();
     canvas->scale(scale, scale);
-    auto keyWindow = UIApplication::shared->keyWindow.lock();
 
     keyWindow->layer()->setBounds({ NXPoint::zero, SkiaCtx::_main->getSize() } );
     keyWindow->layer()->presentationOrSelf()->skiaRender(canvas);
