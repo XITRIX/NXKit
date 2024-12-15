@@ -31,6 +31,7 @@ add_library(UIKit
         lib/UIView.cpp
         lib/UIViewAnimationGroup.cpp
         lib/UIViewAnimationOptions.cpp
+        lib/UIViewController.cpp
         lib/UIWindow.cpp
         lib/NXAffineTransform.cpp
         lib/NXTransform3D.cpp
@@ -63,16 +64,17 @@ if (APPLE)
         )
     # IOS
     elseif (PLATFORM_IOS)
-        list(APPEND platform_sources
-                lib/platforms/apple/ios/SkiaCtx_ios.mm
-        )
-
         find_library(SDL2 NAMES SDL2-static SDL2main)
 
         list(APPEND platform_libs
                 SDL2-static SDL2main
                 ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskia.a
                 ${EXTERN_PATH}/skia/out/ios-arm64-angle/libwindow.a
+                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libicu.a
+                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskshaper.a
+                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskunicode_core.a
+                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskunicode_icu.a
+                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskparagraph.a
         )
 
         target_sources(UIKit PRIVATE

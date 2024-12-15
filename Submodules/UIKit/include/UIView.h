@@ -6,6 +6,8 @@
 
 namespace NXKit {
 
+class UIWindow;
+class UIViewController;
 class UIView: public CALayerDelegate, public enable_shared_from_this<UIView> {
 public:
     UIView(): UIView(NXRect()) {}
@@ -49,7 +51,7 @@ public:
     void insertSubviewBelow(std::shared_ptr<UIView> view, std::shared_ptr<UIView> belowSubview);
     void removeFromSuperview();
 
-//    virtual std::shared_ptr<UIWindow> window();
+    virtual std::shared_ptr<UIWindow> window();
 
     const std::vector<std::shared_ptr<UIView>>& subviews() const { return _subviews; }
     std::weak_ptr<UIView> superview() const { return _superview; }
@@ -59,12 +61,12 @@ public:
     // Layout
     void setNeedsDisplay() { _needsDisplay = true; }
     void setNeedsLayout();// { setNeedsDisplay(); _needsLayout = true; }
-//
-//    void layoutIfNeeded();
-//    virtual void layoutSubviews();
-//
-//    virtual Size sizeThatFits(Size size);
-//    virtual void sizeToFit();
+
+    void layoutIfNeeded();
+    virtual void layoutSubviews();
+
+    virtual NXSize sizeThatFits(NXSize size);
+    virtual void sizeToFit();
 
     void drawAndLayoutTreeIfNeeded();
 
@@ -97,11 +99,14 @@ public:
     virtual void draw() {}
     virtual void display(std::shared_ptr<CALayer> layer) override;
 private:
+    friend class UIViewController;
+
     std::vector<std::shared_ptr<UIView>> _subviews;
     std::weak_ptr<UIView> _superview;
     std::shared_ptr<CALayer> _layer;
     std::shared_ptr<UIView> _mask;
     UIViewContentMode _contentMode;
+    std::weak_ptr<UIViewController> _parentController;
     bool _isUserInteractionEnabled = true;
 
     bool _needsLayout = true;

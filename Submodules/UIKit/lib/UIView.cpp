@@ -1,4 +1,6 @@
 #include <UIView.h>
+#include <UIViewController.h>
+#include <UIWindow.h>
 #include <DispatchQueue.h>
 #include <CASpringAnimationPrototype.h>
 
@@ -36,23 +38,28 @@ void UIView::setCenter(NXPoint position) {
 
 void UIView::addSubview(std::shared_ptr<UIView> view) {
     bool needToNotifyViewController = false;
-//    if (!view->_parentController.expired()) {
-//        auto window = this->window();
-//        if (window) {
-//            needToNotifyViewController = true;
-//        }
-//    }
+    if (!view->_parentController.expired()) {
+        auto window = this->window();
+        if (window) {
+            needToNotifyViewController = true;
+        }
+    }
 
     setNeedsLayout();
     view->removeFromSuperview();
 
-//    if (needToNotifyViewController)
-//        view->_parentController.lock()->viewWillAppear(true);
+    if (needToNotifyViewController)
+        view->_parentController.lock()->viewWillAppear(true);
 
     _layer->addSublayer(view->_layer);
     _subviews.push_back(view);
     view->setSuperview(this->shared_from_this());
 //    view->setNeedsUpdateSafeAreaInsets();
+}
+
+std::shared_ptr<UIWindow> UIView::window() {
+    if (!_superview.expired()) return _superview.lock()->window();
+    return nullptr;
 }
 
 void UIView::setSuperview(std::shared_ptr<UIView> superview) {
@@ -68,18 +75,18 @@ void UIView::insertSubviewBelow(std::shared_ptr<UIView> view, std::shared_ptr<UI
     if (itr == subviews().cend()) { return; }
 
     bool needToNotifyViewController = false;
-//    if (!view->_parentController.expired()) {
-//        auto window = this->window();
-//        if (window) {
-//            needToNotifyViewController = true;
-//        }
-//    }
+    if (!view->_parentController.expired()) {
+        auto window = this->window();
+        if (window) {
+            needToNotifyViewController = true;
+        }
+    }
 
     setNeedsLayout();
     view->removeFromSuperview();
 
-//    if (needToNotifyViewController)
-//        view->_parentController.lock()->viewWillAppear(true);
+    if (needToNotifyViewController)
+        view->_parentController.lock()->viewWillAppear(true);
 
     _layer->insertSublayerBelow(view->_layer, belowSubview->layer());
     _subviews.insert(itr, view);
@@ -102,15 +109,6 @@ void UIView::removeFromSuperview() {
     }
     this->setSuperview(nullptr);
     superview->setNeedsLayout();
-}
-
-void UIView::setNeedsLayout() {
-    setNeedsDisplay();
-
-    // Needs to recalculate Yoga from root
-//    auto layoutRoot = this->layoutRoot();
-//    if (layoutRoot) layoutRoot->_needsLayout = true;
-    _needsLayout = true;
 }
 
 void UIView::drawAndLayoutTreeIfNeeded() {
@@ -277,3 +275,49 @@ std::shared_ptr<CABasicAnimation> UIView::actionForKey(std::string event) {
 }
 
 void UIView::display(std::shared_ptr<CALayer> layer) { }
+
+// MARK: - Layout
+void UIView::setNeedsLayout() {
+    setNeedsDisplay();
+
+    // Needs to recalculate Yoga from root
+//    auto layoutRoot = this->layoutRoot();
+//    if (layoutRoot) layoutRoot->_needsLayout = true;
+    _needsLayout = true;
+}
+
+void UIView::layoutIfNeeded() {
+    if (_needsLayout) {
+        _needsLayout = false;
+        layoutSubviews();
+    }
+}
+
+void UIView::layoutSubviews() {
+    _needsLayout = false;
+    if (!_parentController.expired()) {
+        _parentController.lock()->viewWillLayoutSubviews();
+    }
+
+//    updateEdgeInsets();
+//    yoga->layoutIfNeeded();
+//    updateSafeAreaInsets();
+
+    if (!_parentController.expired()) {
+        _parentController.lock()->viewDidLayoutSubviews();
+    }
+}
+
+NXSize UIView::sizeThatFits(NXSize size) {
+    // Apple's implementation returns current view's bounds().size
+    // But in case we use Yoga's autolayout it will be better to replace it
+    // with zero Size value, to allow Yoga to work properly
+//    return NXSize();
+    return bounds().size;
+}
+
+void UIView::sizeToFit() {
+    auto bounds = this->bounds();
+    bounds.size = sizeThatFits(bounds.size);
+    setBounds(bounds);
+}

@@ -9,6 +9,14 @@
 
 namespace NXKit {
 
+enum class NSTextAlignment {
+    left,
+    right,
+    center,
+    justified,
+    natural
+};
+
 class CATextLayer: public CALayer {
 public:
     CATextLayer();
@@ -24,8 +32,14 @@ public:
     void setFontSize(NXFloat fontSize);
     [[nodiscard]] NXFloat fontSize() const { return _fontSize; }
 
+    void setFontWeight(NXFloat fontWeight);
+    [[nodiscard]] NXFloat fontWeight() const { return _fontWeight; }
+
     void setTextColor(UIColor textColor);
     [[nodiscard]] UIColor textColor() const { return _textColor; }
+
+    void setTextAlignment(NSTextAlignment textAlignment);
+    [[nodiscard]] NSTextAlignment textAlignment() const { return _textAlignment; }
 
     std::optional<AnimatableProperty> value(std::string forKeyPath) override;
 protected:
@@ -33,11 +47,13 @@ protected:
 
 private:
     NXFloat _fontSize = 17;
+    NXFloat _fontWeight = SkFontStyle::kNormal_Weight;
+    NSTextAlignment _textAlignment = NSTextAlignment::left;
     std::string _text = "Furthermore, العربية نص جميل. द क्विक ब्राउन फ़ॉक्स jumps over the lazy 🐕.";
     UIColor _textColor = UIColor::black;
 
     // Skia
-    sk_sp<SkTypeface> typeface;
+//    sk_sp<SkTypeface> typeface;
 //    skia::textlayout::ParagraphStyle paraStyle;
 //    sk_sp<skia::textlayout::FontCollection> fontCollection;
     sk_sp<SkUnicode> unicode;

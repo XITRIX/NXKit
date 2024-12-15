@@ -21,6 +21,11 @@ add_libromfs(${PROJECT_NAME} ${PROJECT_RESOURCES})
 add_executable(${PROJECT_NAME}
         app/main.cpp
         app/AppDelegate.cpp
+        app/Screens/TestViewController/TestViewController.cpp
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+        app
 )
 
 setup_project()

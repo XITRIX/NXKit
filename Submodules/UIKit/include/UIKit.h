@@ -3,3 +3,7 @@
 //
 
 #pragma once
+
+#include <UIViewController.h>
+#include <UILabel.h>
+#include <UIImageView.h>
