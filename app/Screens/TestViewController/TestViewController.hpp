@@ -7,6 +7,9 @@ public:
     TestViewController();
     void loadView() override;
     void viewDidLoad() override;
+
+    void viewDidLayoutSubviews() override;
 private:
     std::shared_ptr<NXKit::UILabel> label;
+    std::shared_ptr<NXKit::UIView> bottomBar;
 };

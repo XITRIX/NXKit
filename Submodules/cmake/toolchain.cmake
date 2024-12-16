@@ -72,6 +72,8 @@ elseif (PLATFORM_IOS)
     message("Building for iOS")
     add_definitions( -DPLATFORM_IOS )
 
+    set(DEPLOYMENT_TARGET "15.0")
+
     set(USE_GLES ON)
 
     set(BUILD_SHARED_LIBS OFF)

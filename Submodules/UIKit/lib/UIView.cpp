@@ -128,7 +128,7 @@ void UIView::drawAndLayoutTreeIfNeeded() {
 
 //    updateSafeAreaInsetsIfNeeded();
 //    updateLayoutMarginIfNeeded();
-//    layoutIfNeeded();
+    layoutIfNeeded();
 
     for (auto& subview: _subviews) {
         subview->drawAndLayoutTreeIfNeeded();
@@ -289,6 +289,9 @@ void UIView::setNeedsLayout() {
 void UIView::layoutIfNeeded() {
     if (_needsLayout) {
         _needsLayout = false;
+        for (const auto &view : subviews()) {
+            view->setNeedsLayout();
+        }
         layoutSubviews();
     }
 }

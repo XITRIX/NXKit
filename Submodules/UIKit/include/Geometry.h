@@ -58,39 +58,39 @@ struct NXRect {
 
     NXRect();
     NXRect(NXPoint origin, NXSize size);
-    NXRect(float x, float y, float width, float height);
+    NXRect(NXFloat x, NXFloat y, NXFloat width, NXFloat height);
 
-    float width() const;
-    float height() const;
+    NXFloat width() const;
+    NXFloat height() const;
 
-    float minX() const;
-    float midX() const;
-    float maxX() const;
+    NXFloat minX() const;
+    NXFloat midX() const;
+    NXFloat maxX() const;
 
-    float minY() const;
-    float midY() const;
-    float maxY() const;
+    NXFloat minY() const;
+    NXFloat midY() const;
+    NXFloat maxY() const;
 
-    void setWidth(float newValue);
-    void setHeight(float newValue);
+    void setWidth(NXFloat newValue);
+    void setHeight(NXFloat newValue);
 
-    void setMinX(float newValue);
-    void setMidX(float newValue);
-    void setMaxX(float newValue);
+    void setMinX(NXFloat newValue);
+    void setMidX(NXFloat newValue);
+    void setMaxX(NXFloat newValue);
 
-    void setMinY(float newValue);
-    void setMidY(float newValue);
-    void setMaxY(float newValue);
+    void setMinY(NXFloat newValue);
+    void setMidY(NXFloat newValue);
+    void setMaxY(NXFloat newValue);
 
     bool contains(NXPoint point);
     bool intersects(const NXRect& other) const;
     NXRect& offsetBy(const NXPoint& offset);
-    NXRect& offsetBy(const float& offsetX, const float& offsetY);
+    NXRect& offsetBy(const NXFloat& offsetX, const NXFloat& offsetY);
 
     bool operator==(const NXRect& rhs) const;
     NXRect operator+(const NXRect& rhs) const;
     NXRect operator-(const NXRect& rhs) const;
-    NXRect operator*(const float& rhs) const;
+    NXRect operator*(const NXFloat& rhs) const;
 
     NXRect applying(NXAffineTransform transform);
     NXRect applying(NXTransform3D transform);

@@ -7,21 +7,21 @@
 using namespace NXKit;
 
 // MARK: - PRIVATE -
-float min(NXFloat a, NXFloat b, NXFloat c, NXFloat d) {
+NXFloat min(NXFloat a, NXFloat b, NXFloat c, NXFloat d) {
     auto minValue = (a < b) ? a : b;
     minValue = (minValue < c) ? minValue : c;
     minValue = (minValue < d) ? minValue : d;
     return minValue;
 }
 
-float max(NXFloat a, NXFloat b, NXFloat c, NXFloat d) {
+NXFloat max(NXFloat a, NXFloat b, NXFloat c, NXFloat d) {
     auto maxValue = (a > b) ? a : b;
     maxValue = (maxValue > c) ? maxValue : c;
     maxValue = (maxValue > d) ? maxValue : d;
     return maxValue;
 }
 
-float isEqual(NXFloat val1, NXFloat val2) {
+NXFloat isEqual(NXFloat val1, NXFloat val2) {
     if (isnan(val1) && isnan(val2))
         return true;
     return val1 == val2;
@@ -145,29 +145,29 @@ bool NXSize::valid() {
 // MARK: - RECT -
 NXRect::NXRect(): origin(), size() { }
 NXRect::NXRect(NXPoint origin, NXSize size): origin(origin), size(size) { }
-NXRect::NXRect(float x, float y, float width, float height): origin(x, y), size(width, height) { }
+NXRect::NXRect(NXFloat x, NXFloat y, NXFloat width, NXFloat height): origin(x, y), size(width, height) { }
 
-float NXRect::width() const { return size.width; }
-float NXRect::height() const { return size.height; }
+NXFloat NXRect::width() const { return size.width; }
+NXFloat NXRect::height() const { return size.height; }
 
-float NXRect::minX() const { return origin.x; }
-float NXRect::midX() const { return origin.x + size.width / 2; }
-float NXRect::maxX() const { return origin.x + size.width; }
+NXFloat NXRect::minX() const { return origin.x; }
+NXFloat NXRect::midX() const { return origin.x + size.width / 2; }
+NXFloat NXRect::maxX() const { return origin.x + size.width; }
 
-float NXRect::minY() const { return origin.y; }
-float NXRect::midY() const { return origin.y + size.height / 2; }
-float NXRect::maxY() const { return origin.y + size.height; }
+NXFloat NXRect::minY() const { return origin.y; }
+NXFloat NXRect::midY() const { return origin.y + size.height / 2; }
+NXFloat NXRect::maxY() const { return origin.y + size.height; }
 
-void NXRect::setWidth(float newValue) { size.width = newValue; }
-void NXRect::setHeight(float newValue) { size.height = newValue; }
+void NXRect::setWidth(NXFloat newValue) { size.width = newValue; }
+void NXRect::setHeight(NXFloat newValue) { size.height = newValue; }
 
-void NXRect::setMinX(float newValue) { origin.x = newValue; }
-void NXRect::setMidX(float newValue) { origin.x = newValue - (size.width / 2); }
-void NXRect::setMaxX(float newValue) { origin.x = newValue - size.width; }
+void NXRect::setMinX(NXFloat newValue) { origin.x = newValue; }
+void NXRect::setMidX(NXFloat newValue) { origin.x = newValue - (size.width / 2); }
+void NXRect::setMaxX(NXFloat newValue) { origin.x = newValue - size.width; }
 
-void NXRect::setMinY(float newValue) { origin.y = newValue; }
-void NXRect::setMidY(float newValue) { origin.y = newValue - (size.height / 2); }
-void NXRect::setMaxY(float newValue) { origin.y = newValue - size.height; }
+void NXRect::setMinY(NXFloat newValue) { origin.y = newValue; }
+void NXRect::setMidY(NXFloat newValue) { origin.y = newValue - (size.height / 2); }
+void NXRect::setMaxY(NXFloat newValue) { origin.y = newValue - size.height; }
 
 bool NXRect::contains(NXPoint point) {
     return
@@ -185,7 +185,7 @@ NXRect& NXRect::offsetBy(const NXPoint& offset) {
     return *this;
 }
 
-NXRect& NXRect::offsetBy(const float& offsetX, const float& offsetY) {
+NXRect& NXRect::offsetBy(const NXFloat& offsetX, const NXFloat& offsetY) {
     origin.x += offsetX;
     origin.y += offsetY;
     return *this;
@@ -215,7 +215,7 @@ NXRect NXRect::operator-(const NXRect& rhs) const {
     );
 }
 
-NXRect NXRect::operator*(const float& rhs) const {
+NXRect NXRect::operator*(const NXFloat& rhs) const {
     return NXRect(
         this->origin.x * rhs,
         this->origin.y * rhs,

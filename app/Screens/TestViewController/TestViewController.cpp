@@ -100,10 +100,22 @@ void TestViewController::loadView() {
     rootView->addSubview(blur);
     animateBlur(blur);
 
+    bottomBar = new_shared<UIView>();
+    bottomBar->setBackgroundColor(UIColor::gray);
+    rootView->addSubview(bottomBar);
+
     setView(rootView);
 }
 
 void TestViewController::viewDidLoad() {
     UIViewController::viewDidLoad();
     animateLabel(label);
+}
+
+void TestViewController::viewDidLayoutSubviews() {
+    UIViewController::viewDidLayoutSubviews();
+
+    auto frame = view()->frame();
+    NXFloat bottomBarHeight = 48 + 35; //83;
+    bottomBar->setFrame({ 0, frame.size.height - bottomBarHeight, frame.size.width, bottomBarHeight });
 }

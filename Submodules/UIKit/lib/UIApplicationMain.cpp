@@ -31,7 +31,7 @@ bool applicationRunLoop() {
     auto scale = SkiaCtx::_main->getScaleFactor();
     canvas->scale(scale, scale);
 
-    keyWindow->layer()->setBounds({ NXPoint::zero, SkiaCtx::_main->getSize() } );
+    keyWindow->setFrame({ NXPoint::zero, SkiaCtx::_main->getSize() } );
     keyWindow->layer()->presentationOrSelf()->skiaRender(canvas);
     canvas->restore();
 
