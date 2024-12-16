@@ -38,6 +38,15 @@ void SkiaCtx_ios::initContext() {
     context = GrDirectContexts::MakeGL(interface);
 }
 
+NXSize SkiaCtx_ios::getSize() {
+    auto window = UIApplication.sharedApplication.keyWindow;
+    auto layer = window.layer.presentationLayer;
+    if (layer == NULL) layer = window.layer;
+    NXSize size = { layer.bounds.size.width, layer.bounds.size.height };
+//    printf("Size: %f | %f\n", layer.bounds.size.width, layer.bounds.size.height);
+    return size;
+}
+
 float SkiaCtx_ios::getScaleFactor() {
     return UIApplication.sharedApplication.keyWindow.traitCollection.displayScale;
 }

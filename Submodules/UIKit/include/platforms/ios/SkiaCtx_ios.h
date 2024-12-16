@@ -15,6 +15,7 @@ public:
     sk_sp<SkSurface> getBackbufferSurface() override;
 
     float getScaleFactor() override;
+    NXSize getSize() override;
 
     sk_sp<GrDirectContext> directContext() override { return context; }
 
