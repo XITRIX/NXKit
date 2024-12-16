@@ -104,6 +104,12 @@ void TestViewController::loadView() {
     bottomBar->setBackgroundColor(UIColor::gray);
     rootView->addSubview(bottomBar);
 
+    label2 = new_shared<UILabel>();
+    label2->setText("Test text\nTry to fit me!!!");
+    label2->setBackgroundColor(UIColor::cyan);
+    label2->setFrame({ 100, 200, 0, 0 });
+    rootView->addSubview(label2);
+
     setView(rootView);
 }
 
@@ -114,6 +120,8 @@ void TestViewController::viewDidLoad() {
 
 void TestViewController::viewDidLayoutSubviews() {
     UIViewController::viewDidLayoutSubviews();
+
+    label2->sizeToFit();
 
     auto frame = view()->frame();
     NXFloat bottomBarHeight = 48 + 35; //83;

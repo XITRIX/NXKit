@@ -16,7 +16,7 @@ public:
     std::shared_ptr<UIImage> image() { return _image; }
 
     // void sizeToFit() override;
-    // Size sizeThatFits(Size size) override;
+    NXSize sizeThatFits(NXSize size) override;
     // bool applyXMLAttribute(std::string name, std::string value) override;
 
 private:

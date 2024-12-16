@@ -25,6 +25,8 @@ public:
     void setFontWeight(NXFloat fontWeight) { _textLayer()->setFontWeight(fontWeight); }
     [[nodiscard]] NXFloat fontWeight() const { return _textLayer()->fontWeight(); }
 
+    NXSize sizeThatFits(NXSize size) override;
+
 private:
     int _numberOfLines = 1;
     std::shared_ptr<CATextLayer> _textLayer() const;

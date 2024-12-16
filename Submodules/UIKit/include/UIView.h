@@ -66,7 +66,7 @@ public:
     virtual void layoutSubviews();
 
     virtual NXSize sizeThatFits(NXSize size);
-    virtual void sizeToFit();
+    void sizeToFit();
 
     void drawAndLayoutTreeIfNeeded();
 

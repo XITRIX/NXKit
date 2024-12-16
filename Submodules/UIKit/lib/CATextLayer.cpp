@@ -154,3 +154,11 @@ void CATextLayer::update(std::shared_ptr<CALayer> presentation, std::shared_ptr<
 
     CALayer::update(presentation, animation, progress);
 }
+
+NXSize CATextLayer::sizeThatFits(NXSize size) {
+    paragraph->layout(size.width);
+    auto height = paragraph->getHeight();
+    auto width = paragraph->getMaxIntrinsicWidth();
+    auto rWidth = std::ceil(width);
+    return { rWidth, height };
+}

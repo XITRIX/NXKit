@@ -42,6 +42,8 @@ public:
     [[nodiscard]] NSTextAlignment textAlignment() const { return _textAlignment; }
 
     std::optional<AnimatableProperty> value(std::string forKeyPath) override;
+
+    NXSize sizeThatFits(NXSize size);
 protected:
     void update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABasicAnimation> animation, float progress) override;
 

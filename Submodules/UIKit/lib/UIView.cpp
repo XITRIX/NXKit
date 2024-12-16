@@ -320,7 +320,13 @@ NXSize UIView::sizeThatFits(NXSize size) {
 }
 
 void UIView::sizeToFit() {
-    auto bounds = this->bounds();
+    NXRect bounds;
+    if (!superview().expired()) {
+        bounds = this->superview().lock()->bounds();
+    } else {
+        bounds = this->bounds();
+    }
+    
     bounds.size = sizeThatFits(bounds.size);
     setBounds(bounds);
 }

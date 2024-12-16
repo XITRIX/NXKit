@@ -41,10 +41,10 @@ void UIImageView::updateTextureFromImage() {
 //     UIView::sizeToFit();
 // }
 
-// Size UIImageView::sizeThatFits(Size size) {
-//     if (!_image) return Size();
-//     return _image->size();
-// }
+ NXSize UIImageView::sizeThatFits(NXSize size) {
+     if (!_image) return UIView::sizeThatFits(size);
+     return _image->size();
+ }
 
 // bool UIImageView::applyXMLAttribute(std::string name, std::string value) {
 //     if (UIView::applyXMLAttribute(name, value)) return true;
