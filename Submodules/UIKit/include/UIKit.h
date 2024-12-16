@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <DispatchQueue.h>
 #include <UIBlurView.h>
 #include <UIImageView.h>
 #include <UILabel.h>

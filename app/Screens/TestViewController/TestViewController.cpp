@@ -59,6 +59,18 @@ void animateLabel(std::shared_ptr<UILabel> label) {
 //    });
 }
 
+void switchLabelText(std::shared_ptr<UILabel> label) {
+    label->setText("Text number 1");
+    label->sizeToFit();
+    DispatchQueue::main()->asyncAfter(2, [label]() {
+        label->setText("Text number 2\nHere is more text to test sizeToFit");
+        label->sizeToFit();
+        DispatchQueue::main()->asyncAfter(2, [label]() {
+            switchLabelText(label);
+        });
+    });
+}
+
 TestViewController::TestViewController() {
 
 }
@@ -109,6 +121,8 @@ void TestViewController::loadView() {
     label2->setBackgroundColor(UIColor::cyan);
     label2->setFrame({ 100, 200, 0, 0 });
     rootView->addSubview(label2);
+
+    switchLabelText(label2);
 
     setView(rootView);
 }

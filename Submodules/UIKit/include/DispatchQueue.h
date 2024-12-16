@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Timer.h>
 #include <queue>
 #include <string>
 #include <functional>
@@ -12,6 +13,11 @@
 
 namespace NXKit {
 
+struct DispatchQueueTask {
+    std::function<void()> func;
+    Timer delay;
+};
+
 class DispatchQueue {
 public:
     DispatchQueue(const std::string& tag);
@@ -22,12 +28,13 @@ public:
 
     std::string tag() const { return _tag; }
     void async(const std::function<void()>& task);
+    void asyncAfter(double seconds, const std::function<void()>& task);
 
     bool isActive() { return _task_loop_active; }
 private:
     static std::shared_ptr<DispatchQueue> _main;
     static std::shared_ptr<DispatchQueue> _global;
-    std::queue<std::function<void()>> _queue;
+    std::queue<DispatchQueueTask> _queue;
     std::string _tag;
 
     pthread_t _task_loop_thread = nullptr;

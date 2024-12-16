@@ -41,7 +41,12 @@ DispatchQueue::~DispatchQueue() {
 
 void DispatchQueue::async(const std::function<void()>& task) {
     std::lock_guard<std::mutex> guard(_m_async_mutex);
-    _queue.push(task);
+    _queue.push({ task });
+}
+
+void DispatchQueue::asyncAfter(double seconds, const std::function<void()>& task) {
+    std::lock_guard<std::mutex> guard(_m_async_mutex);
+    _queue.push({ task, Timer(seconds * 1000) });
 }
 
 void DispatchQueue::performAll() {
@@ -51,16 +56,23 @@ void DispatchQueue::performAll() {
             link->func();
     }
 
-    std::queue<std::function<void()>> copy;
+    std::queue<DispatchQueueTask> copy;
     {
         std::lock_guard<std::mutex> guard(_m_async_mutex);
         std::swap( _queue, copy );
     }
-    
+
+    Timer now;
     while (!copy.empty()) {
         auto task = copy.front();
         copy.pop();
-        task();
+
+        // If task is delayed, put it back into queue
+        if (now - task.delay < 0) {
+            _queue.push(task);
+        } else {
+            task.func();
+        }
     }
 }
 
