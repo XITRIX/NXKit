@@ -4,12 +4,12 @@
 
 using namespace NXKit;
 
-//std::shared_ptr<UIResponder> UIViewController::next() {
-//    if (!_view->_superview.expired()) {
-//        return _view->_superview.lock();
-//    }
-//    return nullptr;
-//}
+std::shared_ptr<UIResponder> UIViewController::next() {
+    if (!_view->_superview.expired()) {
+        return _view->_superview.lock();
+    }
+    return nullptr;
+}
 
 std::shared_ptr<UIView> UIViewController::view() {
     loadViewIfNeeded();

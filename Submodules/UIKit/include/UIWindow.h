@@ -17,15 +17,15 @@ public:
     std::shared_ptr<UIViewController> rootViewController() { return _rootViewController; }
 
     void makeKeyAndVisible();
-//    void sendEvent(const std::shared_ptr<UIEvent>& event);
+    void sendEvent(const std::shared_ptr<UIEvent>& event);
 
     void layoutSubviews() override;
 //    void updateFocus();
 
-//    virtual void pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
-//    virtual void pressesChanged(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
-//    virtual void pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
-//    virtual void pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
+    virtual void pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
+    virtual void pressesChanged(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
+    virtual void pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
+    virtual void pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
 
 private:
     std::shared_ptr<UIViewController> _rootViewController;
@@ -35,8 +35,8 @@ private:
     void addPresentedViewController(const std::shared_ptr<UIViewController>& controller);
     void removePresentedViewController(const std::shared_ptr<UIViewController>& controller);
 
-//    void sendTouchEvent(std::shared_ptr<UIEvent> event);
-//    void sendPressEvent(const std::shared_ptr<UIPressesEvent>& event);
+    void sendTouchEvent(std::shared_ptr<UIEvent> event);
+    void sendPressEvent(const std::shared_ptr<UIPressesEvent>& event);
 
 //    std::shared_ptr<UIFocusSystem> _focusSystem;
 };

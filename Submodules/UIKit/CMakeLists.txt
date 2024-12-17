@@ -27,9 +27,16 @@ add_library(UIKit
         lib/UIApplicationMain.cpp
         lib/UIBlurView.cpp
         lib/UIColor.cpp
+        lib/UIEvent.cpp
+        lib/UIGestureRecognizer.cpp
         lib/UIImage.cpp
         lib/UIImageView.cpp
+        lib/UIKey.cpp
         lib/UILabel.cpp
+        lib/UIPress.cpp
+        lib/UIPressesEvent.cpp
+        lib/UIResponder.cpp
+        lib/UITouch.cpp
         lib/UIView.cpp
         lib/UIViewAnimationGroup.cpp
         lib/UIViewAnimationOptions.cpp

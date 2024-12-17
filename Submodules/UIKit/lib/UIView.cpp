@@ -3,6 +3,7 @@
 #include <UIWindow.h>
 #include <DispatchQueue.h>
 #include <CASpringAnimationPrototype.h>
+#include <UIGestureRecognizer.h>
 
 using namespace NXKit;
 
@@ -11,6 +12,12 @@ UIView::UIView(NXRect frame, std::shared_ptr<CALayer> layer) {
     _layer->setAnchorPoint(NXPoint::zero);
     _layer->delegate = weak_from_this();
     setFrame(frame);
+}
+
+std::shared_ptr<UIResponder> UIView::next() {
+    if (!_parentController.expired()) return _parentController.lock();
+    if (!_superview.expired()) return _superview.lock();
+    return nullptr;
 }
 
 void UIView::setFrame(NXRect frame) {
@@ -34,6 +41,11 @@ void UIView::setCenter(NXPoint position) {
     frame.setMidX(position.x);
     frame.setMidY(position.y);
     setFrame(frame);
+}
+
+void UIView::addGestureRecognizer(std::shared_ptr<UIGestureRecognizer> gestureRecognizer) {
+    gestureRecognizer->_view = weak_from_this();
+    _gestureRecognizers.push_back(gestureRecognizer);
 }
 
 void UIView::addSubview(std::shared_ptr<UIView> view) {
@@ -198,6 +210,61 @@ void UIView::setContentMode(UIViewContentMode mode) {
             _layer->setContentsGravity(CALayerContentsGravity::bottomRight);
             break;
     }
+}
+
+// MARK: - Touch
+NXPoint UIView::convertFromView(NXPoint point, std::shared_ptr<UIView> fromView) {
+    if (!fromView) return point;
+    return fromView->convertToView(point, shared_from_this());
+}
+
+NXPoint UIView::convertToView(NXPoint point, std::shared_ptr<UIView> toView) {
+    NXPoint selfAbsoluteOrigin;
+    NXPoint otherAbsoluteOrigin;
+
+    std::shared_ptr<UIView> current = shared_from_this();
+    while (current) {
+        if (current == toView) {
+            return point + selfAbsoluteOrigin;
+        }
+        selfAbsoluteOrigin += current->frame().origin;
+        selfAbsoluteOrigin -= current->bounds().origin;
+        current = current->_superview.lock();
+    }
+
+    current = toView;
+    while (current) {
+        otherAbsoluteOrigin += current->frame().origin;
+        otherAbsoluteOrigin -= current->bounds().origin;
+        current = current->_superview.lock();
+    }
+
+    NXPoint originDifference = otherAbsoluteOrigin - selfAbsoluteOrigin;
+    return point - originDifference;
+}
+
+std::shared_ptr<UIView> UIView::hitTest(NXPoint point, UIEvent* withEvent) {
+    if (isHidden() || !_isUserInteractionEnabled || alpha() == 0 || !anyCurrentlyRunningAnimationsAllowUserInteraction())
+        return nullptr;
+
+    if (!this->point(point, withEvent))
+        return nullptr;
+
+    auto subviews = _subviews;
+    for (int i = (int) subviews.size() - 1; i >= 0; i--) {
+        NXPoint convertedPoint = shared_from_this()->convertToView(point, subviews[i]);
+        std::shared_ptr<UIView> test = subviews[i]->hitTest(convertedPoint, withEvent);
+        if (test) return test;
+    }
+
+    if (backgroundColor() == std::nullopt || backgroundColor() == UIColor::clear)
+        return nullptr;
+
+    return shared_from_this();
+}
+
+bool UIView::point(NXPoint insidePoint, UIEvent* withEvent) {
+    return bounds().contains(insidePoint);
 }
 
 // MARK: - Animations

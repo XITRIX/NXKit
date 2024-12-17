@@ -10,6 +10,8 @@
 #include <optional>
 #include <functional>
 
+#include "OptionSet.hpp"
+
 namespace NXKit {
 
 template< typename T >

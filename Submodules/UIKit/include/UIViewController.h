@@ -4,7 +4,7 @@
 
 namespace NXKit {
 
-class UIViewController: public enable_shared_from_this<UIViewController> {
+class UIViewController: public UIResponder, public enable_shared_from_this<UIViewController> {
 public:
     std::map<std::string, std::shared_ptr<UIView>> idStorage;
 
@@ -13,7 +13,7 @@ public:
     bool viewIsLoaded();
     void loadViewIfNeeded();
 
-//    std::shared_ptr<UIResponder> next() override;
+    std::shared_ptr<UIResponder> next() override;
 
     // Most of these methods are designed to be overriden in `UIViewController` subclasses
     virtual void loadView();

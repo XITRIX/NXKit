@@ -2,15 +2,20 @@
 
 #include "CALayer.h"
 #include <UIViewContentMode.h>
+#include <UIResponder.h>
+#include <UIEvent.h>
 #include <set>
 
 namespace NXKit {
 
 class UIWindow;
 class UIViewController;
-class UIView: public CALayerDelegate, public enable_shared_from_this<UIView> {
+class UIGestureRecognizer;
+class UIView: public UIResponder, public CALayerDelegate, public enable_shared_from_this<UIView> {
 public:
     UIView(NXRect frame = NXRect(), std::shared_ptr<CALayer> layer = new_shared<CALayer>());
+
+    std::shared_ptr<UIResponder> next() override;
 
     void setFrame(NXRect frame);
     [[nodiscard]] NXRect frame() const { return _layer->getFrame(); }
@@ -45,6 +50,9 @@ public:
     void setMask(std::shared_ptr<UIView> mask);
     [[nodiscard]] std::shared_ptr<UIView> mask() const { return _mask; }
 
+    void addGestureRecognizer(std::shared_ptr<UIGestureRecognizer> gestureRecognizer);
+    [[nodiscard]] std::vector<std::shared_ptr<UIGestureRecognizer>>* gestureRecognizers()  { return &_gestureRecognizers; }
+
     virtual void addSubview(std::shared_ptr<UIView> view);
     void insertSubviewAt(std::shared_ptr<UIView> view, int index);
     void insertSubviewBelow(std::shared_ptr<UIView> view, std::shared_ptr<UIView> belowSubview);
@@ -67,7 +75,14 @@ public:
     virtual NXSize sizeThatFits(NXSize size);
     void sizeToFit();
 
+    // Render
     void drawAndLayoutTreeIfNeeded();
+
+    // Touch
+    NXPoint convertToView(NXPoint point, std::shared_ptr<UIView> toView);
+    NXPoint convertFromView(NXPoint point, std::shared_ptr<UIView> fromView);
+    virtual std::shared_ptr<UIView> hitTest(NXPoint point, UIEvent* withEvent);
+    virtual bool point(NXPoint insidePoint, UIEvent* withEvent);
 
     // Animations
     static std::set<std::shared_ptr<CALayer>> layersWithAnimations;
@@ -100,6 +115,7 @@ public:
 private:
     friend class UIViewController;
 
+    std::vector<std::shared_ptr<UIGestureRecognizer>> _gestureRecognizers;
     std::vector<std::shared_ptr<UIView>> _subviews;
     std::weak_ptr<UIView> _superview;
     std::shared_ptr<CALayer> _layer;
