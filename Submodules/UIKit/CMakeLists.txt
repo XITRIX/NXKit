@@ -36,6 +36,7 @@ add_library(UIKit
         lib/UIPress.cpp
         lib/UIPressesEvent.cpp
         lib/UIResponder.cpp
+        lib/UITapGestureRecognizer.cpp
         lib/UITouch.cpp
         lib/UIView.cpp
         lib/UIViewAnimationGroup.cpp

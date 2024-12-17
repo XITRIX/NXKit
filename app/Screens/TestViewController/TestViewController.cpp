@@ -87,7 +87,7 @@ void TestViewController::loadView() {
     subview->setBackgroundColor(UIColor::tint);
     subview->layer()->setCornerRadius(10);
     subview->setAlpha(0.5);
-//    subview->setClipsToBounds(true);
+    //    subview->setClipsToBounds(true);
 
     rootView->addSubview(subview);
 
@@ -128,6 +128,25 @@ void TestViewController::loadView() {
     rootView->addSubview(label2);
 
     switchLabelText(label2);
+
+    auto button = new_shared<UILabel>();
+    button->setText("Press me!");
+    button->setFontWeight(600);
+    button->setTextAlignment(NSTextAlignment::center);
+    button->setFrame({ 100, 300, 200, 60 });
+    button->layer()->setCornerRadius(12);
+    button->setBackgroundColor(UIColor::tint);
+    rootView->addSubview(button);
+
+    auto tapGesture = new_shared<UITapGestureRecognizer>();
+    tapGesture->onStateChanged = [button](UIGestureRecognizerState status) {
+        if (status == NXKit::UIGestureRecognizerState::ended) {
+            static bool toggle = false;
+            toggle = !toggle;
+            button->setText(toggle ? "You did it!!!!" : "Another text, keep trying!!!!!");
+        }
+    };
+    button->addGestureRecognizer(tapGesture);
 
     setView(rootView);
 }

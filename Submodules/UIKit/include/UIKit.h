@@ -9,3 +9,4 @@
 #include <UIImageView.h>
 #include <UILabel.h>
 #include <UIViewController.h>
+#include <UITapGestureRecognizer.h>
