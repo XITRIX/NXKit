@@ -68,6 +68,7 @@ void UILabel::draw() {
     paragraph->paint(&canvas, 0, 0);
 
     layer()->setContents(new_shared<CGImage>(bitmap.asImage()));
+    layer()->setContentsScale(scale);
 }
 
 void UILabel::updateParagraph() {

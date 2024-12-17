@@ -124,11 +124,15 @@ NXTransform3D NXTransform3D::interpolateTo(const NXTransform3D& matrix, const NX
     getPartsFromMatrix(currentM, &angle, &translation, &scale);
     getPartsFromMatrix(newM, &dAngle, &dTranslation, &dScale);
 //
+    auto from = angle;
     angle = angle + (dAngle - angle) * progress;
     scale = scale + (dScale - scale) * progress;// (scale - NXPoint(1, 1)) * progress + NXPoint(1, 1);
     translation = translation + (dTranslation - translation) * progress;
+//    printf("Angle: from - %f | to - %f | %f - %f\n", from, dAngle, angle, progress);
 
-    return NXTransform3D::translationBy(translation.x, translation.y, 0) * NXTransform3D::scaleBy(scale.x, scale.y, 1) * NXTransform3D::rotationBy(angle, 0, 0, 1);
+    auto affineResult = NXAffineTransform::translationBy(translation.x, translation.y) * NXAffineTransform::scaleBy(scale.x, scale.y) * NXAffineTransform::rotationBy(angle);
+    return NXTransform3DMakeAffineTransform(affineResult);
+//    return NXTransform3D::translationBy(translation.x, translation.y, 0) * NXTransform3D::scaleBy(scale.x, scale.y, 1) * NXTransform3D::rotationBy(angle, 0, 0, 1);
 }
 
 Vector3 NXTransform3D::transformingVector(NXFloat x, NXFloat y, NXFloat z) const {
@@ -172,6 +176,7 @@ NXTransform3D CATransform3DMakeScale(NXFloat tx, NXFloat ty, NXFloat tz) {
             0,     0,     0,    1);
 }
 
+// TODO: NOT WORKING!!!!!!!
 NXTransform3D CATransform3DMakeRotation(NXFloat angle, NXFloat x, NXFloat y, NXFloat z) {
     NXFloat p, radians, c, s, c_, zc_, yc_, xzc_, xyc_, yzc_, xs, ys, zs;
 

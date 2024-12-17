@@ -4,15 +4,19 @@
 using namespace NXKit;
 
 void animateCube(std::shared_ptr<UIView> view) {
-    UIView::animate(2.5, [view]() {
-        view->setTransform(NXAffineTransform::identity.rotationBy(45));
+    UIView::animate(2.5, 0, 0.5, 2, UIViewAnimationOptions::none, [view]() {
+        view->setTransform(NXAffineTransform::identity.rotationBy(55));
         view->setBackgroundColor(UIColor::orange);
     }, [view](bool res) {
-        UIView::animate(2.5, [view]() {
-            view->setTransform(NXAffineTransform::identity);
-            view->setBackgroundColor(UIColor::blue);
-        }, [view](bool res) {
-            animateCube(view);
+        DispatchQueue::main()->asyncAfter(1, [view]() {
+            UIView::animate(2.5, [view]() {
+                view->setTransform(NXAffineTransform::identity.rotationBy(10));
+                view->setBackgroundColor(UIColor::blue);
+            }, [view](bool res) {
+                DispatchQueue::main()->asyncAfter(1, [view]() {
+                    animateCube(view);
+                });
+            });
         });
     });
 }
@@ -105,7 +109,7 @@ void TestViewController::loadView() {
     label->setText("Привет\nебать,\nэто\nкириллица,\nнахуй!!!!");
     label->setTextAlignment(NSTextAlignment::center);
     label->setBackgroundColor(UIColor::red);
-//    label->setContentMode(NXKit::UIViewContentMode::redraw);
+    label->setContentMode(NXKit::UIViewContentMode::center);
     rootView->addSubview(label);
 
     auto blur = new_shared<UIBlurView>();
@@ -131,6 +135,9 @@ void TestViewController::loadView() {
 void TestViewController::viewDidLoad() {
     UIViewController::viewDidLoad();
     animateLabel(label);
+
+    auto testMatrix = CATransform3DMakeRotation(45, 0, 0, 1);
+    printf("");
 }
 
 void TestViewController::viewDidLayoutSubviews() {
