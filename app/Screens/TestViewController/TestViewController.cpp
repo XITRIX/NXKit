@@ -105,6 +105,7 @@ void TestViewController::loadView() {
     label->setText("Привет\nебать,\nэто\nкириллица,\nнахуй!!!!");
     label->setTextAlignment(NSTextAlignment::center);
     label->setBackgroundColor(UIColor::red);
+    label->setContentMode(NXKit::UIViewContentMode::redraw);
     rootView->addSubview(label);
 
     auto blur = new_shared<UIBlurView>();

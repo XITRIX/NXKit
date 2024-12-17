@@ -116,6 +116,12 @@ void UIView::drawAndLayoutTreeIfNeeded() {
 
     if (visibleLayer->isHidden() || visibleLayer->opacity() < 0.01f) { return; }
 
+    if (_contentMode == UIViewContentMode::redraw) {
+        if (visibleLayer->contents() && visibleLayer->contents()->size() != visibleLayer->bounds().size) {
+            setNeedsDisplay();
+        }
+    }
+
     if (visibleLayer->_needsDisplay) {
         visibleLayer->display();
         visibleLayer->_needsDisplay = false;
@@ -149,6 +155,8 @@ void UIView::setMask(std::shared_ptr<UIView> mask) {
 }
 
 void UIView::setContentMode(UIViewContentMode mode) {
+    if (_contentMode == mode) return;
+    _contentMode = mode;
     switch (mode) {
         case UIViewContentMode::scaleToFill:
             _layer->setContentsGravity(CALayerContentsGravity::resize);

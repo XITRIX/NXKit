@@ -10,8 +10,7 @@ class UIWindow;
 class UIViewController;
 class UIView: public CALayerDelegate, public enable_shared_from_this<UIView> {
 public:
-    UIView(): UIView(NXRect()) {}
-    UIView(NXRect frame, std::shared_ptr<CALayer> layer = new_shared<CALayer>());
+    UIView(NXRect frame = NXRect(), std::shared_ptr<CALayer> layer = new_shared<CALayer>());
 
     void setFrame(NXRect frame);
     [[nodiscard]] NXRect frame() const { return _layer->getFrame(); }

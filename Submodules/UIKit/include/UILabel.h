@@ -10,26 +10,37 @@ class UILabel: public UIView {
 public:
     UILabel();
 
-    void setText(std::string text) { _textLayer()->setText(text); }
-    [[nodiscard]] std::string text() const { return _textLayer()->text(); }
+    void draw() override;
 
-    void setTextColor(UIColor textColor) { _textLayer()->setTextColor(textColor); }
-    [[nodiscard]] UIColor textColor() const { return _textLayer()->textColor(); }
+    void setText(std::string text);
+    [[nodiscard]] std::string text() const { return _text; }
 
-    void setFontSize(NXFloat fontSize) { _textLayer()->setFontSize(fontSize); }
-    [[nodiscard]] NXFloat fontSize() const { return _textLayer()->fontSize(); }
+    void setTextColor(UIColor textColor);
+    [[nodiscard]] UIColor textColor() const { return _textColor; }
 
-    void setTextAlignment(NSTextAlignment textAlignment) { _textLayer()->setTextAlignment(textAlignment); }
-    [[nodiscard]] NSTextAlignment textAlignment() const { return _textLayer()->textAlignment(); }
+    void setFontSize(NXFloat fontSize);
+    [[nodiscard]] NXFloat fontSize() const { return _fontSize; }
 
-    void setFontWeight(NXFloat fontWeight) { _textLayer()->setFontWeight(fontWeight); }
-    [[nodiscard]] NXFloat fontWeight() const { return _textLayer()->fontWeight(); }
+    void setTextAlignment(NSTextAlignment textAlignment);
+    [[nodiscard]] NSTextAlignment textAlignment() const { return _textAlignment; }
+
+    void setFontWeight(NXFloat fontWeight);
+    [[nodiscard]] NXFloat fontWeight() const { return _fontWeight; }
 
     NXSize sizeThatFits(NXSize size) override;
 
 private:
     int _numberOfLines = 1;
-    std::shared_ptr<CATextLayer> _textLayer() const;
+    NXFloat _fontSize = 17;
+    NXFloat _fontWeight = SkFontStyle::kNormal_Weight;
+    NSTextAlignment _textAlignment = NSTextAlignment::left;
+    std::string _text = "Furthermore, العربية نص جميل. द क्विक ब्राउन फ़ॉक्स jumps over the lazy 🐕.";
+    UIColor _textColor = UIColor::black;
+
+    sk_sp<SkUnicode> unicode;
+    std::unique_ptr<skia::textlayout::Paragraph> paragraph;
+
+    void updateParagraph();
 };
 
 }
