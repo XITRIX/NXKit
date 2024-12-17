@@ -53,7 +53,12 @@ void UILabel::draw() {
 
     SkBitmap bitmap;
     auto scale = SkiaCtx::main()->getScaleFactor();
-    auto size = layer()->presentationOrSelf()->bounds().size;
+    NXSize size;
+    if (contentMode() == UIViewContentMode::redraw) {
+        size = layer()->presentationOrSelf()->bounds().size;
+    } else {
+        size = bounds().size;
+    }
     auto bitmapSize = size * scale;
     bitmap.allocPixels(SkImageInfo::MakeN32Premul(bitmapSize.width, bitmapSize.height));
     SkCanvas canvas(bitmap);

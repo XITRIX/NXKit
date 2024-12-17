@@ -1,4 +1,5 @@
 #include <UIApplication.h>
+#include <SDL.h>
 
 using namespace NXKit;
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SDL.h>
-//#include <SDL_gpu.h>
 #include <optional>
 #include <memory>
 #include <NXData.h>

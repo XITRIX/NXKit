@@ -1,4 +1,5 @@
 #include <platforms/SkiaCtx_sdlBase.h>
+#include <SDL.h>
 
 using namespace NXKit;
 
