@@ -10,3 +10,4 @@
 #include <UILabel.h>
 #include <UIViewController.h>
 #include <UITapGestureRecognizer.h>
+#include <UIPanGestureRecognizer.h>

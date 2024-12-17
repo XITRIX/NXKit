@@ -148,6 +148,38 @@ void TestViewController::loadView() {
     };
     button->addGestureRecognizer(tapGesture);
 
+    auto dragMeView = new_shared<UILabel>();
+    dragMeView->setText("Drag me!");
+    dragMeView->setFontWeight(600);
+    dragMeView->setTextAlignment(NSTextAlignment::center);
+    dragMeView->setFrame({ 100, 400, 200, 200 });
+    dragMeView->layer()->setCornerRadius(12);
+    dragMeView->setBackgroundColor(UIColor::orange);
+    rootView->addSubview(dragMeView);
+
+    auto panGesture = new_shared<UIPanGestureRecognizer>();
+    panGesture->onStateChanged = [this, dragMeView, panGesture](UIGestureRecognizerState status) {
+        static NXPoint initial;
+        switch (status) {
+            case UIGestureRecognizerState::began: {
+                initial = dragMeView->frame().origin;
+                break;
+            }
+            case UIGestureRecognizerState::changed: {
+                auto translation = panGesture->translationInView(view());
+
+                auto frame = dragMeView->frame();
+                frame.origin.x = initial.x + translation.x;
+                frame.origin.y = initial.y + translation.y;
+                dragMeView->setFrame(frame);
+                break;
+            }
+            default:
+                break;
+        }
+    };
+    dragMeView->addGestureRecognizer(panGesture);
+
     setView(rootView);
 }
 

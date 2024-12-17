@@ -33,6 +33,7 @@ add_library(UIKit
         lib/UIImageView.cpp
         lib/UIKey.cpp
         lib/UILabel.cpp
+        lib/UIPanGestureRecognizer.cpp
         lib/UIPress.cpp
         lib/UIPressesEvent.cpp
         lib/UIResponder.cpp
