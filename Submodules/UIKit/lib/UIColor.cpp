@@ -4,14 +4,6 @@
 
 using namespace NXKit;
 
-#define UIColorThemed(lightColor, darkColor)                               \
-UIColor([](auto collection) {\
-if (collection->userInterfaceStyle() == UIUserInterfaceStyle::dark) \
-    return darkColor;                                               \
-else                                                                \
-    return lightColor;\
-})
-
 // Transparent
 UIColor UIColor::clear = UIColor(0, 0, 0, 0);
 

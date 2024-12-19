@@ -115,7 +115,7 @@ void TestViewController::loadView() {
 //    animateBlur(blur);
 
     bottomBar = new_shared<UIView>();
-    bottomBar->setBackgroundColor(UIColor::gray);
+    bottomBar->setBackgroundColor(UIColor::secondarySystemBackground);
     rootView->addSubview(bottomBar);
 
     label2 = new_shared<UILabel>();
@@ -155,7 +155,7 @@ void TestViewController::loadView() {
     blur->setFrame({ 80, 200, 240, 240 });
     rootView->addSubview(blur);
     blur->layer()->setCornerRadius(12);
-    blur->setBackgroundTintColor(0x60DDDDDD);
+    blur->setBackgroundTintColor(UIColorThemed(UIColor(0x60DDDDDD), UIColor(0x60404040)));
 
     blur->addSubview(dragMeViewLabel);
 

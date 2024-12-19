@@ -8,6 +8,14 @@
 
 namespace NXKit {
 
+#define UIColorThemed(lightColor, darkColor)                               \
+UIColor([](auto collection) {\
+if (collection->userInterfaceStyle() == UIUserInterfaceStyle::dark) \
+    return darkColor;                                               \
+else                                                                \
+    return lightColor;\
+})
+
 class UIColor {
 public:
     UIColor();

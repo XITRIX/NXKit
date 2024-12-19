@@ -28,6 +28,7 @@ public:
     [[nodiscard]] NXFloat fontWeight() const { return _fontWeight; }
 
     NXSize sizeThatFits(NXSize size) override;
+    void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 
 private:
     int _numberOfLines = 1;
@@ -35,7 +36,7 @@ private:
     NXFloat _fontWeight = SkFontStyle::kNormal_Weight;
     NSTextAlignment _textAlignment = NSTextAlignment::left;
     std::string _text = "Furthermore, العربية نص جميل. द क्विक ब्राउन फ़ॉक्स jumps over the lazy 🐕.";
-    UIColor _textColor = UIColor::black;
+    UIColor _textColor = UIColor::label;
 
     sk_sp<SkUnicode> unicode;
     std::unique_ptr<skia::textlayout::Paragraph> paragraph;
