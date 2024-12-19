@@ -4,7 +4,7 @@
 
 namespace NXKit {
 
-class UIViewController: public UIResponder, public enable_shared_from_this<UIViewController> {
+class UIViewController: public UIResponder, public UITraitEnvironment, public enable_shared_from_this<UIViewController> {
 public:
     std::map<std::string, std::shared_ptr<UIView>> idStorage;
 
@@ -44,6 +44,9 @@ public:
 
     void present(std::shared_ptr<UIViewController> otherViewController, bool animated, std::function<void()> completion = [](){});
     void dismiss(bool animated, std::function<void()> completion = [](){});
+
+
+    void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 
     // Focus
 //    virtual std::shared_ptr<UIFocusEnvironment> parentFocusEnvironment() override;

@@ -6,12 +6,12 @@ using namespace NXKit;
 void animateCube(std::shared_ptr<UIView> view) {
     UIView::animate(2.5, 0, 0.5, 2, UIViewAnimationOptions::none, [view]() {
         view->setTransform(NXAffineTransform::identity.rotationBy(55));
-        view->setBackgroundColor(UIColor::orange);
+        view->setBackgroundColor(UIColor::systemOrange);
     }, [view](bool res) {
         DispatchQueue::main()->asyncAfter(1, [view]() {
             UIView::animate(2.5, [view]() {
                 view->setTransform(NXAffineTransform::identity.rotationBy(10));
-                view->setBackgroundColor(UIColor::blue);
+                view->setBackgroundColor(UIColor::systemBlue);
             }, [view](bool res) {
                 DispatchQueue::main()->asyncAfter(1, [view]() {
                     animateCube(view);
@@ -36,14 +36,14 @@ void animateBlur(std::shared_ptr<UIBlurView> view) {
 void animateLabel(std::shared_ptr<UILabel> label) {
     UIView::animate(5, [label]() {
         label->setFrame({ 200, 100, 140, 88 });
-        label->setTextColor(UIColor::cyan);
-        label->setBackgroundColor(UIColor::green);
+        label->setTextColor(UIColor::systemCyan);
+        label->setBackgroundColor(UIColor::systemGreen);
         label->setFontWeight(100);
     }, [label](bool res) {
         UIView::animate(5, [label]() {
             label->setFrame({ 200, 100, 240, 88 });
             label->setTextColor(UIColor::black);
-            label->setBackgroundColor(UIColor::red);
+            label->setBackgroundColor(UIColor::systemRed);
             label->setFontWeight(1000);
         }, [label](bool res) {
             animateLabel(label);
@@ -98,7 +98,7 @@ void TestViewController::loadView() {
     auto imageView = new_shared<UIImageView>();
     imageView->setImage(image);
     imageView->setFrame({ 0, 0, 120, 120 });
-    imageView->setBackgroundColor(UIColor::green);
+    imageView->setBackgroundColor(UIColor::systemGreen);
     imageView->setContentMode(UIViewContentMode::topLeft);
 
     subview->addSubview(imageView);
@@ -108,14 +108,11 @@ void TestViewController::loadView() {
     label->setFrame({ 200, 100, 240, 88 });
     label->setText("Привет\nебать,\nэто\nкириллица,\nнахуй!!!!");
     label->setTextAlignment(NSTextAlignment::center);
-    label->setBackgroundColor(UIColor::red);
+    label->setBackgroundColor(UIColor::systemRed);
     label->setContentMode(NXKit::UIViewContentMode::center);
     rootView->addSubview(label);
 
-    auto blur = new_shared<UIBlurView>();
-    blur->setFrame({ 80, 80, 240, 240 });
-    rootView->addSubview(blur);
-    animateBlur(blur);
+//    animateBlur(blur);
 
     bottomBar = new_shared<UIView>();
     bottomBar->setBackgroundColor(UIColor::gray);
@@ -123,7 +120,7 @@ void TestViewController::loadView() {
 
     label2 = new_shared<UILabel>();
     label2->setText("Test text\nTry to fit me!!!");
-    label2->setBackgroundColor(UIColor::cyan);
+    label2->setBackgroundColor(UIColor::systemCyan);
     label2->setFrame({ 100, 200, 0, 0 });
     rootView->addSubview(label2);
 
@@ -148,37 +145,44 @@ void TestViewController::loadView() {
     };
     button->addGestureRecognizer(tapGesture);
 
-    auto dragMeView = new_shared<UILabel>();
-    dragMeView->setText("Drag me!");
-    dragMeView->setFontWeight(600);
-    dragMeView->setTextAlignment(NSTextAlignment::center);
-    dragMeView->setFrame({ 100, 400, 200, 200 });
-    dragMeView->layer()->setCornerRadius(12);
-    dragMeView->setBackgroundColor(UIColor::orange);
-    rootView->addSubview(dragMeView);
+    dragMeViewLabel = new_shared<UILabel>();
+    dragMeViewLabel->setText("Drag me!");
+    dragMeViewLabel->setFontWeight(600);
+    dragMeViewLabel->setTextAlignment(NSTextAlignment::center);
+//    dragMeViewLabel->setFrame({ 80, 110, 44, 100 });
+
+    auto blur = new_shared<UIBlurView>();
+    blur->setFrame({ 80, 200, 240, 240 });
+    rootView->addSubview(blur);
+    blur->layer()->setCornerRadius(12);
+
+    blur->addSubview(dragMeViewLabel);
 
     auto panGesture = new_shared<UIPanGestureRecognizer>();
-    panGesture->onStateChanged = [this, dragMeView, panGesture](UIGestureRecognizerState status) {
+    panGesture->onStateChanged = [this, panGesture](UIGestureRecognizerState status) {
         static NXPoint initial;
+        auto _view = panGesture->view().lock();
+        if (!_view) return;
+
         switch (status) {
             case UIGestureRecognizerState::began: {
-                initial = dragMeView->frame().origin;
+                initial = _view->frame().origin;
                 break;
             }
             case UIGestureRecognizerState::changed: {
                 auto translation = panGesture->translationInView(view());
 
-                auto frame = dragMeView->frame();
+                auto frame = _view->frame();
                 frame.origin.x = initial.x + translation.x;
                 frame.origin.y = initial.y + translation.y;
-                dragMeView->setFrame(frame);
+                _view->setFrame(frame);
                 break;
             }
             default:
                 break;
         }
     };
-    dragMeView->addGestureRecognizer(panGesture);
+    blur->addGestureRecognizer(panGesture);
 
     setView(rootView);
 }
@@ -193,6 +197,10 @@ void TestViewController::viewDidLoad() {
 
 void TestViewController::viewDidLayoutSubviews() {
     UIViewController::viewDidLayoutSubviews();
+
+    auto bounds = dragMeViewLabel->superview().lock()->bounds();
+    dragMeViewLabel->sizeToFit();
+    dragMeViewLabel->setCenter({ bounds.midX(), bounds.midY() });
 
     label2->sizeToFit();
 

@@ -6,8 +6,8 @@
 #include <UIView.h>
 #include <CATransaction.h>
 #include <tools/Tools.hpp>
-#include "include/core/SkRRect.h"
 
+#include "include/core/SkRRect.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkImageFilters.h"
 
@@ -203,7 +203,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     // Background color
     if (_backgroundColor.has_value()) {
-        paint.setColor(_backgroundColor->color);
+        paint.setColor(_backgroundColor->raw());
 
         SkRect rect = SkRect::MakeXYWH(0, 0, _bounds.width(), _bounds.height());
         SkRRect rrect;

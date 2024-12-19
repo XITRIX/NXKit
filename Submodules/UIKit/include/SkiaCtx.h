@@ -5,6 +5,7 @@
 #include "include/core/SkSurface.h"
 #include <functional>
 #include "include/core/SkFontMgr.h"
+#include <UITraitCollection.h>
 #include <Geometry.h>
 
 namespace NXKit {
@@ -22,6 +23,8 @@ public:
 
     virtual float getScaleFactor() { return 1; }
     virtual sk_sp<SkFontMgr> getFontMgr() { return fontMgr; }
+
+    virtual UIUserInterfaceStyle getThemeMode() { return UIUserInterfaceStyle::light; }
 
     static std::shared_ptr<SkiaCtx> main() { return _main; }
     static std::shared_ptr<SkiaCtx> _main;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CALayer.h"
+#include <UITraitEnvironment.h>
 #include <UIViewContentMode.h>
 #include <UIResponder.h>
 #include <UIEvent.h>
@@ -11,7 +12,7 @@ namespace NXKit {
 class UIWindow;
 class UIViewController;
 class UIGestureRecognizer;
-class UIView: public UIResponder, public CALayerDelegate, public enable_shared_from_this<UIView> {
+class UIView: public UIResponder, public UITraitEnvironment, public CALayerDelegate, public enable_shared_from_this<UIView> {
 public:
     UIView(NXRect frame = NXRect(), std::shared_ptr<CALayer> layer = new_shared<CALayer>());
 
@@ -64,6 +65,8 @@ public:
     std::weak_ptr<UIView> superview() const { return _superview; }
 
     std::shared_ptr<CALayer> layer() const { return _layer; };
+
+    void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 
     // Layout
     void setNeedsDisplay() { _needsDisplay = true; }

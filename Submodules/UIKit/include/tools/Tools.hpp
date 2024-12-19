@@ -11,6 +11,7 @@
 #include <functional>
 
 #include "OptionSet.hpp"
+#include "SharedBase.hpp"
 
 namespace NXKit {
 

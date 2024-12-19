@@ -39,6 +39,8 @@ add_library(UIKit
         lib/UIResponder.cpp
         lib/UITapGestureRecognizer.cpp
         lib/UITouch.cpp
+        lib/UITraitCollection.cpp
+        lib/UITraitEnvironment.cpp
         lib/UIView.cpp
         lib/UIViewAnimationGroup.cpp
         lib/UIViewAnimationOptions.cpp

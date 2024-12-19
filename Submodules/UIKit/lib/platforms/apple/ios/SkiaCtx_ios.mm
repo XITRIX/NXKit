@@ -51,6 +51,15 @@ float SkiaCtx_ios::getScaleFactor() {
     return UIApplication.sharedApplication.keyWindow.traitCollection.displayScale;
 }
 
+NXKit::UIUserInterfaceStyle SkiaCtx_ios::getThemeMode() {
+    auto window = UIApplication.sharedApplication.keyWindow;
+    if (window.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark) {
+        return NXKit::UIUserInterfaceStyle::dark;
+    } else {
+        return NXKit::UIUserInterfaceStyle::light;
+    }
+}
+
 sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
     auto size = getSize();
     if (_size.width == size.width && _size.height == size.height && surface != nullptr) { return surface; }

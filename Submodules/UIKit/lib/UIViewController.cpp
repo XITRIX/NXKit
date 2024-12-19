@@ -155,6 +155,18 @@ void UIViewController::dismiss(bool animated, std::function<void()> completion) 
     });
 }
 
+void UIViewController::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
+    UITraitEnvironment::traitCollectionDidChange(previousTraitCollection);
+    if (_view) {
+        _view->_traitCollection = _traitCollection;
+        _view->traitCollectionDidChange(previousTraitCollection);
+    }
+    for (auto child : _children) {
+        child->_traitCollection = _traitCollection;
+        child->UITraitEnvironment::traitCollectionDidChange(previousTraitCollection);
+    }
+}
+
 //std::shared_ptr<UIFocusEnvironment> UIViewController::parentFocusEnvironment() {
 //    return std::dynamic_pointer_cast<UIFocusEnvironment>(next());
 //}

@@ -18,6 +18,19 @@ bool applicationRunLoop() {
     // Move to UIRenderer
     auto keyWindow = UIApplication::shared->keyWindow.lock();
 
+    auto scale = SkiaCtx::_main->getScaleFactor();
+
+    if (keyWindow->_traitCollection == nullptr
+        || keyWindow->_traitCollection->_userInterfaceStyle != SkiaCtx::main()->getThemeMode()
+        || keyWindow->_traitCollection->_displayScale != scale)
+    {
+        auto oldCollection = keyWindow->_traitCollection;
+        keyWindow->_traitCollection = new_shared<UITraitCollection>();
+        keyWindow->_traitCollection->_displayScale = scale;
+        keyWindow->_traitCollection->_userInterfaceStyle = SkiaCtx::main()->getThemeMode();
+        keyWindow->traitCollectionDidChange(oldCollection);
+    }
+
     UIView::animateIfNeeded(currentTime);
     keyWindow->drawAndLayoutTreeIfNeeded();
 
@@ -28,7 +41,6 @@ bool applicationRunLoop() {
     canvas->clear(SK_ColorTRANSPARENT);
 
     canvas->save();
-    auto scale = SkiaCtx::_main->getScaleFactor();
     canvas->scale(scale, scale);
 
     UIView::animate(0.3, [keyWindow]() {

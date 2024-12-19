@@ -179,3 +179,11 @@ void UIWindow::pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std
     UIView::pressesCancelled(pressees, event);
 //    focusSystem()->sendEvent(event);
 }
+
+void UIWindow::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
+    UITraitEnvironment::traitCollectionDidChange(previousTraitCollection);
+    if (!rootViewController()) return;
+
+    rootViewController()->_traitCollection = _traitCollection;
+    rootViewController()->traitCollectionDidChange(previousTraitCollection);
+}

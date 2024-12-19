@@ -1,13 +1,18 @@
 #pragma once
 
+#include <UITraitCollection.h>
 #include <Geometry.h>
 #include <stdint.h>
+#include <functional>
+#include <optional>
 
 namespace NXKit {
 
 class UIColor {
 public:
     UIColor();
+    UIColor(std::function<UIColor(std::shared_ptr<UITraitCollection>)> dynamicProvider);
+    UIColor(int rawValue);
     UIColor(unsigned char red, unsigned char green, unsigned char blue);
     UIColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
 
@@ -19,27 +24,60 @@ public:
     bool operator==(const UIColor& rhs) const;
 
     UIColor interpolationTo(UIColor endResult, NXFloat progress);
-    uint32_t raw() const { return color; }
+    uint32_t raw() const;
 
+    // Transparent
     static UIColor clear;
-    static UIColor red;
-    static UIColor green;
-    static UIColor blue;
-    static UIColor orange;
-    static UIColor cyan;
-    static UIColor white;
-    static UIColor black;
-    static UIColor gray;
 
+    // Fixed
+    static UIColor black;
+    static UIColor darkGray;
+    static UIColor gray;
+    static UIColor lightGray;
+    static UIColor white;
+    static UIColor red;
+    static UIColor orange;
+    static UIColor yellow;
+    static UIColor green;
+    static UIColor cyan;
+    static UIColor blue;
+    static UIColor purple;
+    static UIColor magenta;
+    static UIColor brown;
+
+    // Adaptable
+    static UIColor systemRed;
+    static UIColor systemOrange;
+    static UIColor systemYellow;
+    static UIColor systemGreen;
+    static UIColor systemMint;
+    static UIColor systemTeal;
+    static UIColor systemCyan;
+    static UIColor systemBlue;
+    static UIColor systemIndigo;
+    static UIColor systemPurple;
+    static UIColor systemPink;
+    static UIColor systemBrown;
+
+    // Label
+    static UIColor label;
+    static UIColor secondaryLabel;
+    static UIColor tertiaryLabel;
+    static UIColor quaternaryLabel;
+
+    // Separator
     static UIColor separator;
+    
+    // Standard content background
     static UIColor systemBackground;
     static UIColor secondarySystemBackground;
     static UIColor tetriarySystemBackground;
+
     static UIColor tint;
 
 private:
-    friend class CALayer;
-    uint32_t color;
+    std::optional<std::function<UIColor(std::shared_ptr<UITraitCollection>)>> dynamicProvider;
+    uint32_t color = 0xFF600060;
 };
 
 }

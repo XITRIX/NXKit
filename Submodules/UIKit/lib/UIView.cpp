@@ -43,6 +43,11 @@ void UIView::setCenter(NXPoint position) {
     setFrame(frame);
 }
 
+NXPoint UIView::center() const {
+    auto frame = this->frame();
+    return { frame.midX(), frame.midY() };
+}
+
 void UIView::addGestureRecognizer(std::shared_ptr<UIGestureRecognizer> gestureRecognizer) {
     gestureRecognizer->_view = weak_from_this();
     _gestureRecognizers.push_back(gestureRecognizer);
@@ -128,21 +133,29 @@ void UIView::drawAndLayoutTreeIfNeeded() {
 
     if (visibleLayer->isHidden() || visibleLayer->opacity() < 0.01f) { return; }
 
+    UITraitCollection::setCurrent(traitCollection());
+
     if (_contentMode == UIViewContentMode::redraw) {
         if (visibleLayer->contents() && visibleLayer->contents()->size() != visibleLayer->bounds().size) {
             setNeedsDisplay();
         }
     }
 
+    UITraitCollection::setCurrent(traitCollection());
+
     if (visibleLayer->_needsDisplay) {
         visibleLayer->display();
         visibleLayer->_needsDisplay = false;
     }
 
+    UITraitCollection::setCurrent(traitCollection());
+
     if (_needsDisplay) {
         draw();
         _needsDisplay = false;
     }
+
+    UITraitCollection::setCurrent(traitCollection());
 
 //    updateSafeAreaInsetsIfNeeded();
 //    updateLayoutMarginIfNeeded();
@@ -244,7 +257,7 @@ NXPoint UIView::convertToView(NXPoint point, std::shared_ptr<UIView> toView) {
 }
 
 std::shared_ptr<UIView> UIView::hitTest(NXPoint point, UIEvent* withEvent) {
-    if (isHidden() || !_isUserInteractionEnabled || alpha() == 0 || !anyCurrentlyRunningAnimationsAllowUserInteraction())
+    if (isHidden() || !_isUserInteractionEnabled || alpha() < 0.01 || !anyCurrentlyRunningAnimationsAllowUserInteraction())
         return nullptr;
 
     if (!this->point(point, withEvent))
@@ -256,9 +269,6 @@ std::shared_ptr<UIView> UIView::hitTest(NXPoint point, UIEvent* withEvent) {
         std::shared_ptr<UIView> test = subviews[i]->hitTest(convertedPoint, withEvent);
         if (test) return test;
     }
-
-    if (backgroundColor() == std::nullopt || backgroundColor() == UIColor::clear)
-        return nullptr;
 
     return shared_from_this();
 }
@@ -350,6 +360,17 @@ std::shared_ptr<CABasicAnimation> UIView::actionForKey(std::string event) {
 }
 
 void UIView::display(std::shared_ptr<CALayer> layer) { }
+
+void UIView::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
+    UITraitEnvironment::traitCollectionDidChange(previousTraitCollection);
+    for (auto subview : _subviews) {
+        // If subview has controller, it's controller will update related traitCollection
+        if (!subview->_parentController.expired()) continue;
+
+        subview->_traitCollection = _traitCollection;
+        subview->traitCollectionDidChange(previousTraitCollection);
+    }
+}
 
 // MARK: - Layout
 void UIView::setNeedsLayout() {

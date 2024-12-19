@@ -27,6 +27,7 @@ public:
     virtual void pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
     virtual void pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
 
+    void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 private:
     std::shared_ptr<UIViewController> _rootViewController;
     std::vector<std::shared_ptr<UIViewController>> _presentedViewControllers;
