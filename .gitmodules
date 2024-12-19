@@ -4,3 +4,6 @@
 [submodule "Submodules/SDL"]
 	path = Submodules/SDL
 	url = https://github.com/XITRIX/SDL.git
+[submodule "Submodules/yoga"]
+	path = Submodules/yoga
+	url = https://github.com/facebook/yoga.git
