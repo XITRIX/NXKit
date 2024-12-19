@@ -46,5 +46,6 @@ CGImage::~CGImage() {
 }
 
 NXSize CGImage::size() const {
+    if (!pointee) return NXSize();
     return NXSize(pointee->width(), pointee->height());
 }

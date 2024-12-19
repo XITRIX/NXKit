@@ -214,7 +214,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     }
 
     // Contents
-    if (_contents) {
+    if (_contents && _bounds.size.valid() && _bounds.size != NXSize()) {
         auto contentsGravity = ContentsGravityTransformation(this);
         auto width = _contents->size().width * contentsGravity.scale.width / _contentsScale;
         auto height = _contents->size().height * contentsGravity.scale.height / _contentsScale;

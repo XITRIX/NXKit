@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CALayer.h"
+#include <YGLayout.h>
 #include <UITraitEnvironment.h>
 #include <UIViewContentMode.h>
 #include <UIResponder.h>
@@ -15,6 +16,8 @@ class UIGestureRecognizer;
 class UIView: public UIResponder, public UITraitEnvironment, public CALayerDelegate, public enable_shared_from_this<UIView> {
 public:
     UIView(NXRect frame = NXRect(), std::shared_ptr<CALayer> layer = new_shared<CALayer>());
+
+    std::string tag;
 
     std::shared_ptr<UIResponder> next() override;
 
@@ -78,6 +81,11 @@ public:
     virtual NXSize sizeThatFits(NXSize size);
     void sizeToFit();
 
+    // FlexLayout
+    std::shared_ptr<YGLayout> yoga() const { return _yoga; }
+    void configureLayout(std::function<void(std::shared_ptr<YGLayout>)> block);
+    void setAutolayoutEnabled(bool enabled) { _yoga->setEnabled(enabled); }
+
     // Render
     void drawAndLayoutTreeIfNeeded();
 
@@ -117,7 +125,9 @@ public:
     virtual void display(std::shared_ptr<CALayer> layer) override;
 private:
     friend class UIViewController;
+    friend class YGLayout;
 
+    std::shared_ptr<YGLayout> _yoga;
     std::vector<std::shared_ptr<UIGestureRecognizer>> _gestureRecognizers;
     std::vector<std::shared_ptr<UIView>> _subviews;
     std::weak_ptr<UIView> _superview;
@@ -132,6 +142,8 @@ private:
 
     void setSuperview(std::shared_ptr<UIView> superview);
     bool anyCurrentlyRunningAnimationsAllowUserInteraction();
+
+    std::shared_ptr<UIView> layoutRoot();
 };
 
 }

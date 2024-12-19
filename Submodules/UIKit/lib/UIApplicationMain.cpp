@@ -43,9 +43,9 @@ bool applicationRunLoop() {
     canvas->save();
     canvas->scale(scale, scale);
 
-    UIView::animate(0.3, [keyWindow]() {
+//    UIView::animate(0.3, [keyWindow]() {
         keyWindow->setFrame({ NXPoint::zero, SkiaCtx::_main->getSize() } );
-    });
+//    });
 
     keyWindow->layer()->presentationOrSelf()->skiaRender(canvas);
     canvas->restore();

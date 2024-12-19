@@ -8,6 +8,9 @@
 using namespace NXKit;
 
 UIView::UIView(NXRect frame, std::shared_ptr<CALayer> layer) {
+    _yoga = new_shared<YGLayout>(shared_from_this());
+//    yoga->setEnabled(true);
+
     _layer = layer;
     _layer->setAnchorPoint(NXPoint::zero);
     _layer->delegate = weak_from_this();
@@ -373,12 +376,20 @@ void UIView::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previou
 }
 
 // MARK: - Layout
+std::shared_ptr<UIView> UIView::layoutRoot() {
+    auto view = shared_from_this();
+    while (view && !view->_yoga->isRoot()) {
+        view = view->superview().lock();
+    }
+    return view;
+}
+
 void UIView::setNeedsLayout() {
     setNeedsDisplay();
 
     // Needs to recalculate Yoga from root
-//    auto layoutRoot = this->layoutRoot();
-//    if (layoutRoot) layoutRoot->_needsLayout = true;
+    auto layoutRoot = this->layoutRoot();
+    if (layoutRoot) layoutRoot->_needsLayout = true;
     _needsLayout = true;
 }
 
@@ -399,7 +410,8 @@ void UIView::layoutSubviews() {
     }
 
 //    updateEdgeInsets();
-//    yoga->layoutIfNeeded();
+    _yoga->layoutIfNeeded();
+//    yoga->applyLayoutPreservingOrigin(true);
 //    updateSafeAreaInsets();
 
     if (!_parentController.expired()) {
@@ -411,8 +423,8 @@ NXSize UIView::sizeThatFits(NXSize size) {
     // Apple's implementation returns current view's bounds().size
     // But in case we use Yoga's autolayout it will be better to replace it
     // with zero Size value, to allow Yoga to work properly
-//    return NXSize();
-    return bounds().size;
+    return NXSize();
+//    return bounds().size;
 }
 
 void UIView::sizeToFit() {
@@ -425,4 +437,10 @@ void UIView::sizeToFit() {
     
     bounds.size = sizeThatFits(bounds.size);
     setBounds(bounds);
+}
+
+// MARK: - Yoga layout
+void UIView::configureLayout(std::function<void(std::shared_ptr<YGLayout>)> block) {
+    _yoga->setEnabled(true);
+    block(_yoga);
 }

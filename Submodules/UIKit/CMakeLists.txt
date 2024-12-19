@@ -22,6 +22,7 @@ add_library(UIKit
         lib/CGImage.cpp
         lib/CADisplayLink.cpp
         lib/CALayer.cpp
+        lib/YGLayout.cpp
         lib/UIApplication.cpp
         lib/UIApplicationDelegateImpl.cpp
         lib/UIApplicationMain.cpp
@@ -50,6 +51,9 @@ add_library(UIKit
         lib/NXTransform3D.cpp
         lib/NXData.cpp
 )
+
+list(APPEND platform_libs yogacore )
+target_include_directories(UIKit PUBLIC ${EXTERN_PATH}/yoga)
 
 # APPLE
 if (APPLE)
