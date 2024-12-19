@@ -40,7 +40,7 @@ void CABlurLayer::draw(SkCanvas* context) {
     context->saveLayer(slr);
     context->restore();
     
-    context->drawColor(0x40FFFFFF);
+    context->drawColor(_backgroundTintColor.raw());
     context->restore();
 }
 

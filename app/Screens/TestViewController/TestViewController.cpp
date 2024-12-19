@@ -155,6 +155,7 @@ void TestViewController::loadView() {
     blur->setFrame({ 80, 200, 240, 240 });
     rootView->addSubview(blur);
     blur->layer()->setCornerRadius(12);
+    blur->setBackgroundTintColor(0x60DDDDDD);
 
     blur->addSubview(dragMeViewLabel);
 
