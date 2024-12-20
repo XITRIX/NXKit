@@ -208,4 +208,24 @@ bool YGLayout::isRoot() {
     return false;
 }
 
+bool YGLayout::isDirty() {
+    return YGNodeIsDirty(_node);
+}
+
+void YGLayout::markDirty() {
+    if (isDirty() || !isLeaf()) {
+        return;
+    }
+
+    // Yoga is not happy if we try to mark a node as "dirty" before we have set
+    // the measure function. Since we already know that this is a leaf,
+    // this *should* be fine. Forgive me Hack Gods.
+    const YGNodeRef node = _node;
+    if (!YGNodeHasMeasureFunc(_node)) {
+        YGNodeSetMeasureFunc(_node, YGMeasureView);
+    }
+
+    YGNodeMarkDirty(_node);
+}
+
 }

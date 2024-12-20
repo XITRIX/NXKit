@@ -391,6 +391,7 @@ void UIView::setNeedsLayout() {
     auto layoutRoot = this->layoutRoot();
     if (layoutRoot) layoutRoot->_needsLayout = true;
     _needsLayout = true;
+    _yoga->markDirty();
 }
 
 void UIView::layoutIfNeeded() {

@@ -195,7 +195,9 @@ public:
 
     bool isLeaf();
     bool isRoot();
+
     bool isDirty();
+    void markDirty();
 
 private:
     YGNodeRef _node = nullptr;
