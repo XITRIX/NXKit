@@ -46,7 +46,8 @@ void UIPanGestureRecognizer::touchesBegan(std::vector<std::shared_ptr<UITouch>> 
         initialTouchPoint = trackingTouch->locationIn(nullptr);
         touchesMovedTimestamp = trackingTouch->timestamp();
         previousTouchesMovedTimestamp = trackingTouch->timestamp();
-        onStateChanged(UIGestureRecognizerState::possible);
+        _state = UIGestureRecognizerState::possible;
+        onStateChanged(shared_from_this());
     }
 }
 
@@ -67,7 +68,8 @@ void UIPanGestureRecognizer::touchesMoved(std::vector<std::shared_ptr<UITouch>> 
         } else if (state() == UIGestureRecognizerState::changed) {
             previousTouchesMovedTimestamp = touchesMovedTimestamp;
             touchesMovedTimestamp = trackingTouch->timestamp();
-            onStateChanged(UIGestureRecognizerState::changed);
+            _state = UIGestureRecognizerState::changed;
+            onStateChanged(shared_from_this());
         }
     }
 }

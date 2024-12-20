@@ -4,7 +4,7 @@
 
 namespace NXKit {
 
-UIGestureRecognizer::UIGestureRecognizer(std::function<void(UIGestureRecognizerState)> onStateChanged):
+UIGestureRecognizer::UIGestureRecognizer(std::function<void(std::shared_ptr<UIGestureRecognizer>)> onStateChanged):
 onStateChanged(onStateChanged)
 { }
 
@@ -22,7 +22,7 @@ void UIGestureRecognizer::setEnabled(bool enabled) {
 void UIGestureRecognizer::setState(UIGestureRecognizerState state) {
     if (this->_state == state) return;
     this->_state = state;
-    onStateChanged(state);
+    onStateChanged(shared_from_this());
     switch (state) {
         case UIGestureRecognizerState::began:
             cancelOtherGestureRecognizersThatShouldNotRecognizeSimultaneously();
@@ -65,7 +65,7 @@ void UIGestureRecognizer::_touchesBegan(std::vector<std::shared_ptr<UITouch>> to
     if (touches.back()->_hasBeenCancelledByAGestureRecognizer) return;
 
     if (firstTouch && _state == UIGestureRecognizerState::possible)
-        onStateChanged(_state);
+        onStateChanged(shared_from_this());
 }
 
 void UIGestureRecognizer::_touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {

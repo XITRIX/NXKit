@@ -32,9 +32,9 @@ public:
 class UIGestureRecognizer: public enable_shared_from_this<UIGestureRecognizer> {
 public:
     std::weak_ptr<UIGestureRecognizerDelegate> delegate;
-    std::function<void(UIGestureRecognizerState)> onStateChanged = [](auto state){};
+    std::function<void(std::shared_ptr<UIGestureRecognizer>)> onStateChanged = [](auto self){};
 
-    UIGestureRecognizer(std::function<void(UIGestureRecognizerState)> onStateChanged = [](auto) {});
+    UIGestureRecognizer(std::function<void(std::shared_ptr<UIGestureRecognizer>)> onStateChanged = [](auto) {});
     virtual ~UIGestureRecognizer();
 
     bool isEnabled() { return _isEnabled; }
@@ -55,11 +55,13 @@ public:
     virtual void pressesEnded(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event);
     virtual void pressesCancelled(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event);
 
+protected:
+    UIGestureRecognizerState _state = UIGestureRecognizerState::possible;
+    
 private:
     bool _isEnabled = true;
     std::weak_ptr<UIView> _view;
     std::vector<std::shared_ptr<UITouch>> _allTouches;
-    UIGestureRecognizerState _state = UIGestureRecognizerState::possible;
 
     void _touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event);
     void _touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event);

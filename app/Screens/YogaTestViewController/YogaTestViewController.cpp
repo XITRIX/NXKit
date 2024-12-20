@@ -9,6 +9,7 @@ YogaTestViewController::YogaTestViewController() {
 void YogaTestViewController::loadView() {
     auto rootView = new_shared<UIView>();
 
+    //MARK: - HEADER!
     auto header = new_shared<UIView>();
     header->setBackgroundColor(UIColor::systemRed);
 //    header->setFrame({ 20, 20, 300, 40 });
@@ -18,6 +19,53 @@ void YogaTestViewController::loadView() {
     });
     rootView->addSubview(header);
 
+
+
+    //MARK: - Content!
+    auto contentBox = new_shared<UIView>();
+    auto contentContent1 = new_shared<UIView>();
+    contentContent1->setBackgroundColor(UIColor::systemTeal);
+    auto contentContent2 = new_shared<UIView>();
+    contentContent2->setBackgroundColor(UIColor::systemMint);
+
+    contentContent1->configureLayout([](auto layout) {
+        layout->setSize({ 200, 100 });
+    });
+    contentContent2->configureLayout([](auto layout) {
+        layout->setSize({ 200, 100 });
+    });
+    contentBox->configureLayout([](std::shared_ptr<YGLayout> layout) {
+        layout->setSize({ 200, 200 });
+        layout->setFlexDirection(YGFlexDirectionColumn);
+        layout->setJustifyContent(YGJustifySpaceBetween);
+    });
+
+    contentBox->addSubview(contentContent1);
+    contentBox->addSubview(contentContent2);
+    rootView->addSubview(contentBox);
+
+    auto tap = new_shared<UITapGestureRecognizer>();
+    tap->onStateChanged = [](auto tap) {
+        if (tap->state() != UIGestureRecognizerState::ended) return;
+        std::shared_ptr<UIView> view = tap->view().lock();
+
+        static bool toggle = false;
+        toggle = !toggle;
+
+        UIView::animate(2, [view]() {
+            view->configureLayout([](std::shared_ptr<YGLayout> layout) {
+                layout->setFlexDirection(toggle ? YGFlexDirection::YGFlexDirectionColumnReverse : YGFlexDirection::YGFlexDirectionColumn);
+            });
+            view->setNeedsLayout();
+            view->layoutIfNeeded();
+        });
+    };
+    contentBox->addGestureRecognizer(tap);
+    contentBox->tag = "Content box";
+
+
+
+    //MARK: - Footer!
     auto footer = new_shared<UIView>();
     footer->setBackgroundColor(UIColor::systemBlue);
 //    footer->setFrame({ 20, 420, 300, 40 });
@@ -30,7 +78,9 @@ void YogaTestViewController::loadView() {
     rootView->configureLayout([](std::shared_ptr<YGLayout> layout) {
         layout->setFlexDirection(YGFlexDirectionColumn);
         layout->setJustifyContent(YGJustifySpaceBetween);
+        layout->setAlignContent(YGAlign::YGAlignCenter);
     });
+
 
     auto dragMeViewLabel = new_shared<UILabel>();
     dragMeViewLabel->setText("Drag me!");
@@ -48,12 +98,13 @@ void YogaTestViewController::loadView() {
     blur->addSubview(dragMeViewLabel);
 
     auto panGesture = new_shared<UIPanGestureRecognizer>();
-    panGesture->onStateChanged = [this, panGesture](UIGestureRecognizerState status) {
+    panGesture->onStateChanged = [this](auto gesture) {
+        auto panGesture = std::static_pointer_cast<UIPanGestureRecognizer>(gesture);
         static NXPoint initial;
         auto _view = panGesture->view().lock();
         if (!_view) return;
 
-        switch (status) {
+        switch (panGesture->state()) {
             case UIGestureRecognizerState::began: {
                 initial = _view->frame().origin;
                 break;

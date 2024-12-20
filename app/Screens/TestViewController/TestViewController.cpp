@@ -136,10 +136,11 @@ void TestViewController::loadView() {
     rootView->addSubview(button);
 
     auto tapGesture = new_shared<UITapGestureRecognizer>();
-    tapGesture->onStateChanged = [button](UIGestureRecognizerState status) {
-        if (status == NXKit::UIGestureRecognizerState::ended) {
+    tapGesture->onStateChanged = [](auto gesture) {
+        if (gesture->state() == NXKit::UIGestureRecognizerState::ended) {
             static bool toggle = false;
             toggle = !toggle;
+            auto button = std::static_pointer_cast<UILabel>(gesture->view().lock());
             button->setText(toggle ? "You did it!!!!" : "Another text, keep trying!!!!!");
         }
     };
@@ -160,12 +161,13 @@ void TestViewController::loadView() {
     blur->addSubview(dragMeViewLabel);
 
     auto panGesture = new_shared<UIPanGestureRecognizer>();
-    panGesture->onStateChanged = [this, panGesture](UIGestureRecognizerState status) {
+    panGesture->onStateChanged = [this](auto gesture) {
+        auto panGesture = std::static_pointer_cast<UIPanGestureRecognizer>(gesture);
         static NXPoint initial;
         auto _view = panGesture->view().lock();
         if (!_view) return;
 
-        switch (status) {
+        switch (panGesture->state()) {
             case UIGestureRecognizerState::began: {
                 initial = _view->frame().origin;
                 break;
