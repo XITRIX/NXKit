@@ -34,6 +34,13 @@ bool applicationRunLoop() {
     UIView::animateIfNeeded(currentTime);
     keyWindow->drawAndLayoutTreeIfNeeded();
 
+    if (!CALayer::layerTreeIsDirty) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        return true;
+    }
+
+    CALayer::layerTreeIsDirty = false;
+
     auto surface = SkiaCtx::_main->getBackbufferSurface();
     if (!surface) return true;
 

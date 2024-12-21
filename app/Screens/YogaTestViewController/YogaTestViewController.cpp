@@ -52,7 +52,7 @@ void YogaTestViewController::loadView() {
         static bool toggle = false;
         toggle = !toggle;
 
-        UIView::animate(2, [view]() {
+        UIView::animate(0.3, 0, UIViewAnimationOptions::beginFromCurrentState, [view]() {
             view->configureLayout([](std::shared_ptr<YGLayout> layout) {
                 layout->setFlexDirection(toggle ? YGFlexDirection::YGFlexDirectionColumnReverse : YGFlexDirection::YGFlexDirectionColumn);
             });
@@ -87,6 +87,7 @@ void YogaTestViewController::loadView() {
     dragMeViewLabel->setFontWeight(600);
     dragMeViewLabel->setTextAlignment(NSTextAlignment::center);
     dragMeViewLabel->setAutolayoutEnabled(true);
+//    dragMeViewLabel->setHidden(true);
 //    dragMeViewLabel->setFrame({ 80, 110, 44, 100 });
 
     auto blur = new_shared<UIBlurView>();

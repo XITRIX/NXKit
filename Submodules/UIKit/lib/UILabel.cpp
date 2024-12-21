@@ -12,30 +12,35 @@ UILabel::UILabel(): UIView() {
 void UILabel::setText(std::string text) {
     if (_text == text) return;
     _text = text;
+    setNeedsDisplay();
     setNeedsLayout();
 }
 
 void UILabel::setTextColor(UIColor textColor) {
     if (_textColor == textColor) return;
     _textColor = textColor;
+    setNeedsDisplay();
     setNeedsLayout();
 }
 
 void UILabel::setFontSize(NXFloat fontSize) {
     if (_fontSize == fontSize) return;
     _fontSize = fontSize;
+    setNeedsDisplay();
     setNeedsLayout();
 }
 
 void UILabel::setTextAlignment(NSTextAlignment textAlignment) {
     if (_textAlignment == textAlignment) return;
     _textAlignment = textAlignment;
+    setNeedsDisplay();
     setNeedsLayout();
 }
 
 void UILabel::setFontWeight(NXFloat fontWeight) {
     if (_fontWeight == fontWeight) return;
     _fontWeight = fontWeight;
+    setNeedsDisplay();
     setNeedsLayout();
 }
 

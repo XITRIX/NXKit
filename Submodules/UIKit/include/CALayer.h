@@ -125,6 +125,7 @@ protected:
 
 private:
     friend class UIView;
+    friend bool applicationRunLoop();
 
     /// Defaults to 1.0 but if the layer is associated with a view,
     /// the view sets this value to match the screen.

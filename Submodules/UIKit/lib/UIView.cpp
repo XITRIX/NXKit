@@ -9,7 +9,7 @@ using namespace NXKit;
 
 UIView::UIView(NXRect frame, std::shared_ptr<CALayer> layer) {
     _yoga = new_shared<YGLayout>(shared_from_this());
-//    yoga->setEnabled(true);
+//    _yoga->setEnabled(true);
 
     _layer = layer;
     _layer->setAnchorPoint(NXPoint::zero);
@@ -25,6 +25,7 @@ std::shared_ptr<UIResponder> UIView::next() {
 
 void UIView::setFrame(NXRect frame) {
     if (this->frame().size != frame.size) {
+        setNeedsDisplay();
         setNeedsLayout();
     }
     _layer->setFrame(frame);
@@ -33,6 +34,7 @@ void UIView::setFrame(NXRect frame) {
 
 void UIView::setBounds(NXRect bounds) {
     if (this->bounds().size != bounds.size) {
+        setNeedsDisplay();
         setNeedsLayout();
 //        setNeedsUpdateSafeAreaInsets();
     }
@@ -163,6 +165,7 @@ void UIView::drawAndLayoutTreeIfNeeded() {
 //    updateSafeAreaInsetsIfNeeded();
 //    updateLayoutMarginIfNeeded();
     layoutIfNeeded();
+    _yoga->layoutIfNeeded();
 
     for (auto& subview: _subviews) {
         subview->drawAndLayoutTreeIfNeeded();
@@ -378,14 +381,18 @@ void UIView::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previou
 // MARK: - Layout
 std::shared_ptr<UIView> UIView::layoutRoot() {
     auto view = shared_from_this();
-    while (view && !view->_yoga->isRoot()) {
+    while (true) {
+        if (view->_yoga->isRoot() || view->superview().expired()) return view;
         view = view->superview().lock();
     }
-    return view;
+//    while (view && !view->_yoga->isRoot()) {
+//        view = view->superview().lock();
+//    }
+//    return view;
 }
 
 void UIView::setNeedsLayout() {
-    setNeedsDisplay();
+//    setNeedsDisplay();
 
     // Needs to recalculate Yoga from root
     auto layoutRoot = this->layoutRoot();
@@ -396,6 +403,9 @@ void UIView::setNeedsLayout() {
 void UIView::layoutIfNeeded() {
     if (_needsLayout) {
         _needsLayout = false;
+
+        layoutRoot()->layoutIfNeeded();
+
         for (const auto &view : subviews()) {
             view->setNeedsLayout();
         }
