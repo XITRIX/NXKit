@@ -7,3 +7,6 @@
 [submodule "Submodules/yoga"]
 	path = Submodules/yoga
 	url = https://github.com/facebook/yoga.git
+[submodule "Submodules/skia"]
+	path = Submodules/skia
+	url = https://github.com/google/skia.git
