@@ -11,6 +11,7 @@
 #include <UIViewController.h>
 #include <UITapGestureRecognizer.h>
 #include <UIPanGestureRecognizer.h>
+#include <tools/Logger.hpp>
 #include <yoga/Yoga.h>
 
 using namespace NXKit::yoga::literals;

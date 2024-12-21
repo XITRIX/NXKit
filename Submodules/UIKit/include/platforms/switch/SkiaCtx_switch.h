@@ -7,14 +7,16 @@
 
 namespace NXKit {
 
-class SkiaCtx_switch: public SkiaCtx_sdlBase {
+class SkiaCtx_switch: public SkiaCtx {
 public:
     SkiaCtx_switch();
+    ~SkiaCtx_switch();
 
     sk_sp<SkSurface> getBackbufferSurface() override;
 //    float getScaleFactor() override;
     sk_sp<GrDirectContext> directContext() override { return context; }
 
+    UIUserInterfaceStyle getThemeMode() override { return UIUserInterfaceStyle::light; }
 
     virtual void swapBuffers() override;
 

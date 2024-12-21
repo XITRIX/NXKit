@@ -5,6 +5,7 @@ add_definitions(
 )
 
 add_library(UIKit
+        lib/tools/Logger.cpp
         lib/CABasicAnimation.cpp
         lib/CABasicAnimationPrototype.cpp
         lib/CABlurLayer.cpp
@@ -99,9 +100,10 @@ if (APPLE)
         )
     endif ()
 elseif (PLATFORM_SWITCH)
-        target_sources(UIKit PRIVATE
+        target_sources(UIKit PUBLIC
                 lib/platforms/SkiaCtx_sdlBase.cpp
                 lib/platforms/switch/SkiaCtx_switch.cpp
+                lib/platforms/switch/switch_wrapper.c
         )
 
         find_package(PkgConfig REQUIRED)
@@ -151,4 +153,4 @@ if (APPLE)
     list(APPEND platform_libs "-framework Foundation" "-framework VideoToolbox" "-framework AVKit" "-framework MetalKit" "-framework CoreText")
 endif ()
 
-target_link_libraries(UIKit PUBLIC ${platform_libs})
+target_link_libraries(UIKit PUBLIC fmt ${platform_libs})

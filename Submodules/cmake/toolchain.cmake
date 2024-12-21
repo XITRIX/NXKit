@@ -180,6 +180,7 @@ function(setup_project)
     # Include Submodules
     add_subdirectory(${EXTERN_PATH})
     add_subdirectory(${EXTERN_PATH}/yoga)
+    add_subdirectory(${EXTERN_PATH}/fmt)
     add_subdirectory(${EXTERN_PATH}/UIKit)
 
     add_subdirectory(${EXTERN_PATH}/libromfs EXCLUDE_FROM_ALL)

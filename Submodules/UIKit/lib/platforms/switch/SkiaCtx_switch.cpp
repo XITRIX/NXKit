@@ -26,118 +26,21 @@
 #include <EGL/eglext.h>
 #include <GL/gl.h>
 
+#include <tools/Logger.hpp>
+
+extern "C" {
+extern void userAppInit();
+extern void userAppExit();
+}
+
 using namespace NXKit;
 
-static EGLDisplay s_display;
-static EGLContext s_context;
-static EGLSurface s_surface;
-
-static bool initEgl(NWindow* win)
-{
-    // Connect to the EGL default display
-    s_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if (!s_display)
-    {
-        // LTRACEF("Could not connect to display! error: %d", eglGetError());
-        goto _fail0;
-    }
-
-    // Initialize the EGL display connection
-    eglInitialize(s_display, nullptr, nullptr);
-
-    // Select OpenGL (Core) as the desired graphics API
-    if (eglBindAPI(EGL_OPENGL_API) == EGL_FALSE)
-    {
-        // LTRACEF("Could not set API! error: %d", eglGetError());
-        goto _fail1;
-    }
-
-    // Get an appropriate EGL framebuffer configuration
-    EGLConfig config;
-    EGLint numConfigs;
-    static const EGLint framebufferAttributeList[] =
-    {
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
-        EGL_RED_SIZE,     8,
-        EGL_GREEN_SIZE,   8,
-        EGL_BLUE_SIZE,    8,
-        EGL_ALPHA_SIZE,   8,
-        EGL_DEPTH_SIZE,   24,
-        EGL_STENCIL_SIZE, 8,
-        EGL_NONE
-    };
-    eglChooseConfig(s_display, framebufferAttributeList, &config, 1, &numConfigs);
-    if (numConfigs == 0)
-    {
-        // LTRACEF("No config found! error: %d", eglGetError());
-        goto _fail1;
-    }
-
-    // Create an EGL window surface
-    s_surface = eglCreateWindowSurface(s_display, config, win, nullptr);
-    if (!s_surface)
-    {
-        // LTRACEF("Surface creation failed! error: %d", eglGetError());
-        goto _fail1;
-    }
-
-    // Create an EGL rendering context
-    static const EGLint contextAttributeList[] =
-    {
-        EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
-        EGL_CONTEXT_MAJOR_VERSION_KHR, 4,
-        EGL_CONTEXT_MINOR_VERSION_KHR, 3,
-        EGL_NONE
-    };
-    s_context = eglCreateContext(s_display, config, EGL_NO_CONTEXT, contextAttributeList);
-    if (!s_context)
-    {
-        // LTRACEF("Context creation failed! error: %d", eglGetError());
-        goto _fail2;
-    }
-
-    // Connect the context to the surface
-    eglMakeCurrent(s_display, s_surface, s_surface, s_context);
-    return true;
-
-_fail2:
-    eglDestroySurface(s_display, s_surface);
-    s_surface = nullptr;
-_fail1:
-    eglTerminate(s_display);
-    s_display = nullptr;
-_fail0:
-    return false;
-}
-
-static void deinitEgl()
-{
-    if (s_display)
-    {
-        eglMakeCurrent(s_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-        if (s_context)
-        {
-            eglDestroyContext(s_display, s_context);
-            s_context = nullptr;
-        }
-        if (s_surface)
-        {
-            eglDestroySurface(s_display, s_surface);
-            s_surface = nullptr;
-        }
-        eglTerminate(s_display);
-        s_display = nullptr;
-    }
-}
-
 SkiaCtx_switch::SkiaCtx_switch() {
-    if (!initEgl(nwindowGetDefault()))
-        exit(1);
-
-
     SDL_Init(SDL_INIT_EVERYTHING);
-    // Uint32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE;
 
+    printf("SDL inited\n");
+
+    Uint32 flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL;
     // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     // SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
@@ -145,21 +48,56 @@ SkiaCtx_switch::SkiaCtx_switch() {
     // SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
     // SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
     // SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    
-    // flags |= SDL_WINDOW_OPENGL;
-    // window = SDL_CreateWindow("Window", 12, 12, 1280, 720, flags);
-    // auto context = SDL_GL_CreateContext(window);
-    // SDL_GL_MakeCurrent(window, context);
+
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+    SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+
+    window = SDL_CreateWindow("Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, flags);
+
+    if (!window) {
+        printf("SDL window failed to create with error: %s\n", SDL_GetError());
+    }
+
+    auto context = SDL_GL_CreateContext(window);
+    SDL_GL_MakeCurrent(window, context);
+
+    printf("SDL window created\n");
 
     SkGraphics::Init();
+
+    printf("SKIA inited\n");
+
+    auto eglCtx = eglGetCurrentContext();
+    if (!eglCtx) {
+        printf("EGL context is empty\n");
+    }
+
     initContext();
+
+    printf("SKIA context created\n");
 
     // fontMgr = SkFontMgr_New_Custom_Empty();
 }
 
+SkiaCtx_switch::~SkiaCtx_switch() {
+}
+
 void SkiaCtx_switch::initContext() {
     auto interface = GrGLInterfaces::MakeEGL();
-    auto ctx = GrDirectContexts::MakeGL(interface);
+    context = GrDirectContexts::MakeGL(interface);
+
+    // GrGLint buffer;
+    // interface->fFunctions.fGetIntegerv(GL_FRAMEBUFFER_BINDING, &buffer);
 }
 
 //float SkiaCtx_switch::getScaleFactor() {
@@ -175,15 +113,13 @@ sk_sp<SkSurface> SkiaCtx_switch::getBackbufferSurface() {
     GrGLFramebufferInfo framebuffer_info;
     framebuffer_info.fFormat = GL_RGBA8;
     framebuffer_info.fFBOID = 0;
-    auto scaleFactor = getScaleFactor();
-    GrBackendRenderTarget target = GrBackendRenderTargets::MakeGL(size.width * scaleFactor,
-                                                                  size.height * scaleFactor,
+    GrBackendRenderTarget target = GrBackendRenderTargets::MakeGL(size.width, size.height,
                                                                   0, 8,
                                                                   framebuffer_info);
 
     SkSurfaceProps props;
 
-    glViewport(0, 0, _size.width * scaleFactor, _size.height * scaleFactor);
+    glViewport(0, 0, _size.width, _size.height);
     surface = SkSurfaces::WrapBackendRenderTarget(context.get(), target,
                                                kBottomLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
                                                nullptr, &props);
@@ -200,11 +136,13 @@ bool NXKit::platformRunLoop(std::function<bool()> loop) {
 }
 
 void SkiaCtx_switch::swapBuffers() {
-    eglSwapBuffers(s_display, s_surface);
+    SDL_GL_SwapWindow(window);
 }
 
 NXSize SkiaCtx_switch::getSize() {
-    return { 1280, 720 };
+    int w, h;
+    SDL_GetWindowSize(window, &w, &h);
+    return { (NXFloat)w, (NXFloat)h };
 }
 
 float SkiaCtx_switch::getScaleFactor() {

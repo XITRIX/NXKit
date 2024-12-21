@@ -34,7 +34,11 @@ SkiaCtx_sdlBase::SkiaCtx_sdlBase()
     flags |= SDL_WINDOW_OPENGL;
 #endif
 
-    window = SDL_CreateWindow("Window", 12, 12, 1280, 720, flags);
+    window = SDL_CreateWindow("Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, flags);
+    if (!window) {
+        SDL_GetError();
+    }
+
     auto context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, context);
 }

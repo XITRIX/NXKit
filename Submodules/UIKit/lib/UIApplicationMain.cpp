@@ -54,6 +54,7 @@ bool applicationRunLoop() {
         keyWindow->setFrame({ NXPoint::zero, SkiaCtx::_main->getSize() } );
 //    });
 
+    UITraitCollection::setCurrent(keyWindow->traitCollection());
     keyWindow->layer()->presentationOrSelf()->skiaRender(canvas);
     canvas->restore();
 
