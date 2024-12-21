@@ -98,6 +98,39 @@ if (APPLE)
                 lib/platforms/apple/ios/SkiaCtx_ios.mm
         )
     endif ()
+elseif (PLATFORM_SWITCH)
+        target_sources(UIKit PRIVATE
+                lib/platforms/SkiaCtx_sdlBase.cpp
+                lib/platforms/switch/SkiaCtx_switch.cpp
+        )
+
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(SDL2 REQUIRED sdl2)
+        message(STATUS "SDL2 Path: \"${SDL2_INCLUDE_DIRS}\"")
+        target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARIES})
+        target_include_directories(${PROJECT_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
+
+        # GPU
+        target_link_libraries(UIKit PUBLIC EGL glapi GLESv2 drm_nouveau nx)
+
+
+        target_link_libraries(UIKit PUBLIC 
+                ${EXTERN_PATH}/skia/out/horizon/libskia.a
+                ${EXTERN_PATH}/skia/out/horizon/libskparagraph.a
+                ${EXTERN_PATH}/skia/out/horizon/libskshaper.a
+                ${EXTERN_PATH}/skia/out/horizon/libskunicode_core.a
+                ${EXTERN_PATH}/skia/out/horizon/libskunicode_icu.a
+                ${EXTERN_PATH}/skia/out/horizon/libicu.a
+                ${EXTERN_PATH}/skia/out/horizon/libskcms.a
+                freetype
+                expat
+                jpeg
+                png
+                bz2
+                z
+
+
+        )
 endif ()
 
 target_include_directories(UIKit PUBLIC
@@ -118,4 +151,4 @@ if (APPLE)
     list(APPEND platform_libs "-framework Foundation" "-framework VideoToolbox" "-framework AVKit" "-framework MetalKit" "-framework CoreText")
 endif ()
 
-target_link_libraries(UIKit PRIVATE ${platform_libs})
+target_link_libraries(UIKit PUBLIC ${platform_libs})

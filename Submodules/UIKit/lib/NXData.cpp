@@ -1,5 +1,5 @@
 #include <NXData.h>
-//#include <Tools/Tools.hpp>
+#include <tools/Tools.hpp>
 #include <SDL2/SDL.h>
 
 //#ifdef USE_LIBROMFS
@@ -45,7 +45,7 @@ std::shared_ptr<NXData> NXData::fromPath(const std::string& path) {
    fileReader->close(fileReader);
 
    if (bytesRead == fileSize) {
-       return make_shared<NXData>(buffer, fileSize, true);
+       return new_shared<NXData>(buffer, fileSize, true);
    } else {
        delete[] buffer;
        return nullptr;

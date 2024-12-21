@@ -2,6 +2,8 @@
 #include <UITouch.h>
 #include <UIPress.h>
 
+#include <algorithm>
+
 namespace NXKit {
 
 UIGestureRecognizer::UIGestureRecognizer(std::function<void(std::shared_ptr<UIGestureRecognizer>)> onStateChanged):

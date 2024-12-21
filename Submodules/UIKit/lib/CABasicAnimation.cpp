@@ -1,4 +1,5 @@
 #include <CABasicAnimation.h>
+#include <cmath>
 
 using namespace NXKit;
 

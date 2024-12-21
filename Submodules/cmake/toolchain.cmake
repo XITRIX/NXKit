@@ -69,7 +69,7 @@ if (PLATFORM_DESKTOP)
 
     set(CMAKE_TOOLCHAIN_FILE ${EXTERN_PATH}/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE PATH "vcpkg toolchain file")
 elseif (PLATFORM_IOS)
-    message("Building for iOS")
+    message(STATUS "building for iOS")
     add_definitions( -DPLATFORM_IOS )
 
     set(DEPLOYMENT_TARGET "15.0")
@@ -81,6 +81,20 @@ elseif (PLATFORM_IOS)
     set(CMAKE_TOOLCHAIN_FILE ${EXTERN_PATH}/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE PATH "vcpkg toolchain file")
     set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE ${EXTERN_PATH}/cmake/ios.toolchain.cmake CACHE PATH "ios toolchain file")
     set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2") # iphone, ipad
+elseif (PLATFORM_SWITCH)
+    message(STATUS "building for SWITCH")
+    set(USE_GLES ON)
+    if (NOT DEFINED ENV{DEVKITPRO})
+        message(FATAL_ERROR "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
+    endif ()
+    add_definitions( -DPLATFORM_SWITCH )
+    set(DEVKITPRO $ENV{DEVKITPRO} CACHE BOOL "DEVKITPRO")
+    set(__SWITCH__ ON)
+    set(USE_SYSTEM_SDL ON)
+    set(CMAKE_C_FLAGS "-I${DEVKITPRO}/libnx/include -I${DEVKITPRO}/portlibs/switch/include -D__SWITCH__")
+    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
+    include(${DEVKITPRO}/cmake/Switch.cmake REQUIRED)
+    # message("${DEVKITPRO}/portlibs/switch/include")
 endif ()
 
 if (USE_GLES)
@@ -154,6 +168,13 @@ function(setup_project)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 XCODE_EMBED_FRAMEWORKS ${EXTERN_PATH}/angle/ios/MetalANGLE.framework
         )
+    elseif (PLATFORM_SWITCH)
+        add_custom_target(${PROJECT_NAME}.nro DEPENDS ${PROJECT_NAME}
+            COMMAND ${NX_NACPTOOL_EXE} --create "${PROJECT_NAME}" "${PROJECT_AUTHOR}" "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}" ${PROJECT_NAME}.nacp --titleid=${PROJECT_TITLEID}
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_RESOURCES} ${CMAKE_BINARY_DIR}/resources
+#            COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/resources/font
+            COMMAND ${NX_ELF2NRO_EXE} ${PROJECT_NAME}.elf ${PROJECT_NAME}.nro --icon=${PROJECT_ICON} --nacp=${PROJECT_NAME}.nacp
+    )
     endif ()
 
     # Include Submodules

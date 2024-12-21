@@ -1,5 +1,6 @@
 #include <Geometry.h>
 #include <algorithm>
+#include <math.h>
 
 #include "NXAffineTransform.h"
 #include "NXTransform3D.h"

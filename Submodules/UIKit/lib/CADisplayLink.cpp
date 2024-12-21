@@ -1,5 +1,6 @@
 #include <CADisplayLink.h>
 #include <utility>
+#include <algorithm>
 
 namespace NXKit {
     std::vector<CADisplayLink*> CADisplayLink::activeLinks;

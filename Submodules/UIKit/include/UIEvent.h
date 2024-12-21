@@ -2,6 +2,8 @@
 
 #include <Timer.h>
 #include <set>
+#include <memory>
+#include <vector>
 
 namespace NXKit {
 
