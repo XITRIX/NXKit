@@ -1,8 +1,10 @@
 #pragma once
 
+#include "src/gpu/ganesh/gl/builders/GrGLProgramBuilder.h"
+
 namespace NXKit {
 
-typedef double NXFloat;
+typedef float NXFloat;
 
 struct NXAffineTransform;
 struct NXTransform3D;
@@ -23,8 +25,8 @@ struct NXPoint {
 
     NXPoint applying(const NXAffineTransform& t) const;
 
-    bool valid();
-    NXFloat magnitude();
+    bool valid() const;
+    NXFloat magnitude() const;
 
     static NXPoint zero;
 };
@@ -48,7 +50,7 @@ struct NXSize {
     NXSize &operator*=(const NXFloat &rhs);
     NXSize &operator/=(const NXFloat &rhs);
 
-    bool valid();
+    bool valid() const;
 //    NXSize inset(UIEdgeInsets inset) const;
 };
 
@@ -82,7 +84,7 @@ struct NXRect {
     void setMidY(NXFloat newValue);
     void setMaxY(NXFloat newValue);
 
-    bool contains(NXPoint point);
+    bool contains(NXPoint point) const;
     bool intersects(const NXRect& other) const;
     NXRect& offsetBy(const NXPoint& offset);
     NXRect& offsetBy(const NXFloat& offsetX, const NXFloat& offsetY);

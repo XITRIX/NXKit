@@ -3,6 +3,7 @@
 #include <SkiaCtx.h>
 #include <platforms/SkiaCtx_sdlBase.h>
 #include <include/gpu/ganesh/GrDirectContext.h>
+#import <SDL.h>
 
 namespace NXKit {
 
@@ -18,6 +19,7 @@ private:
     sk_sp<SkSurface> surface;
     
     void initContext();
+    static int resizingEventWatcher(void* data, SDL_Event* event);
 };
 
 }

@@ -31,13 +31,13 @@ void CATextLayer::draw(SkCanvas* context) {
     paragraph->paint(context, 0, 0);
 }
 
-void CATextLayer::setText(std::string text) {
+void CATextLayer::setText(const std::string& text) {
     if (_text == text) return;
     _text = text;
     updateParagraph();
 }
 
-void CATextLayer::setTextColor(UIColor textColor) {
+void CATextLayer::setTextColor(const UIColor& textColor) {
     if (_textColor == textColor) return;
     onWillSet("textColor");
     _textColor = textColor;

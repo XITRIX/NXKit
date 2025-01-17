@@ -16,24 +16,24 @@ double timevalInSeconds(timeval time) {
 }
 
 Timer::Timer(double startingAtInMilliseconds) {
-    auto startTime = timeval();
-    gettimeofday(&startTime, nullptr);
+    auto _startTime = timeval();
+    gettimeofday(&_startTime, nullptr);
 
     auto seconds = floor(startingAtInMilliseconds / 1000.0);
     auto milliseconds = truncatingRemainderFor(startingAtInMilliseconds, 1000.0);
-    startTime.tv_sec += seconds;
-    startTime.tv_usec += milliseconds * 1000;
+    _startTime.tv_sec += (long) seconds;
+    _startTime.tv_usec += int(milliseconds * 1000);
 
-    this->startTime = startTime;
+    startTime = _startTime;
 }
 
-double Timer::getElapsedTimeInMilliseconds() {
+double Timer::getElapsedTimeInMilliseconds() const {
     timeval currentTime = {0, 0};
     gettimeofday(&currentTime, nullptr);
     return std::fmax(0.001, timevalInMilliseconds(currentTime) - timevalInMilliseconds(startTime));
 }
 
-double Timer::getElapsedTimeInSeconds() {
+double Timer::getElapsedTimeInSeconds() const {
     timeval currentTime = {0, 0};
     gettimeofday(&currentTime, nullptr);
     return std::fmax(0.000001, timevalInSeconds(currentTime) - timevalInSeconds(startTime));

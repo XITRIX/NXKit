@@ -14,7 +14,7 @@ void CATransaction::commit() {
 
 bool CATransaction::disableActions() {
     if (transactionStack.empty()) return false;
-    return transactionStack.back().disableActions();
+    return transactionStack.back().disableActions_;
 }
 
 void CATransaction::setDisableActions(bool newValue) {

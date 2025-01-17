@@ -5,13 +5,15 @@
 #include <CASpringAnimationPrototype.h>
 #include <UIGestureRecognizer.h>
 
+#include <utility>
+
 using namespace NXKit;
 
 UIView::UIView(NXRect frame, std::shared_ptr<CALayer> layer) {
     _yoga = new_shared<YGLayout>(shared_from_this());
 //    _yoga->setEnabled(true);
 
-    _layer = layer;
+    _layer = std::move(layer);
     _layer->setAnchorPoint(NXPoint::zero);
     _layer->delegate = weak_from_this();
     setFrame(frame);
@@ -53,7 +55,7 @@ NXPoint UIView::center() const {
     return { frame.midX(), frame.midY() };
 }
 
-void UIView::addGestureRecognizer(std::shared_ptr<UIGestureRecognizer> gestureRecognizer) {
+void UIView::addGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& gestureRecognizer) {
     gestureRecognizer->_view = weak_from_this();
     _gestureRecognizers.push_back(gestureRecognizer);
 }
@@ -84,7 +86,7 @@ std::shared_ptr<UIWindow> UIView::window() {
     return nullptr;
 }
 
-void UIView::setSuperview(std::shared_ptr<UIView> superview) {
+void UIView::setSuperview(const std::shared_ptr<UIView>& superview) {
     _superview = superview;
 }
 
@@ -92,7 +94,7 @@ void UIView::insertSubviewAt(std::shared_ptr<UIView> view, int index) {
     // TODO: Need to implement
 }
 
-void UIView::insertSubviewBelow(std::shared_ptr<UIView> view, std::shared_ptr<UIView> belowSubview) {
+void UIView::insertSubviewBelow(const std::shared_ptr<UIView>& view, const std::shared_ptr<UIView>& belowSubview) {
     auto itr = std::find(subviews().cbegin(), subviews().cend(), belowSubview);
     if (itr == subviews().cend()) { return; }
 
@@ -172,7 +174,7 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     }
 }
 
-void UIView::setMask(std::shared_ptr<UIView> mask) {
+void UIView::setMask(const std::shared_ptr<UIView>& mask) {
     if (_mask == mask) { return; }
     if (_mask) { _mask->removeFromSuperview(); }
 
@@ -232,30 +234,36 @@ void UIView::setContentMode(UIViewContentMode mode) {
 }
 
 // MARK: - Touch
-NXPoint UIView::convertFromView(NXPoint point, std::shared_ptr<UIView> fromView) {
+NXPoint UIView::convertFromView(NXPoint point, const std::shared_ptr<UIView>& fromView) {
     if (!fromView) return point;
     return fromView->convertToView(point, shared_from_this());
 }
 
-NXPoint UIView::convertToView(NXPoint point, std::shared_ptr<UIView> toView) {
+NXPoint UIView::convertToView(NXPoint point, const std::shared_ptr<UIView>& toView) const {
     NXPoint selfAbsoluteOrigin;
     NXPoint otherAbsoluteOrigin;
 
-    std::shared_ptr<UIView> current = shared_from_this();
+    const UIView* current = this;
     while (current) {
-        if (current == toView) {
+        if (current == toView.get()) {
             return point + selfAbsoluteOrigin;
         }
         selfAbsoluteOrigin += current->frame().origin;
         selfAbsoluteOrigin -= current->bounds().origin;
-        current = current->_superview.lock();
+        auto superview = current->_superview.lock();
+        if (!superview) break;
+
+        current = superview.get();
     }
 
-    current = toView;
+    current = toView.get();
     while (current) {
         otherAbsoluteOrigin += current->frame().origin;
         otherAbsoluteOrigin -= current->bounds().origin;
-        current = current->_superview.lock();
+        auto superview = current->_superview.lock();
+        if (!superview) break;
+
+        current = superview.get();
     }
 
     NXPoint originDifference = otherAbsoluteOrigin - selfAbsoluteOrigin;
@@ -287,7 +295,7 @@ bool UIView::point(NXPoint insidePoint, UIEvent* withEvent) {
 std::set<std::shared_ptr<CALayer>> UIView::layersWithAnimations;
 std::shared_ptr<CABasicAnimationPrototype> UIView::currentAnimationPrototype;
 
-bool UIView::anyCurrentlyRunningAnimationsAllowUserInteraction() {
+bool UIView::anyCurrentlyRunningAnimationsAllowUserInteraction() const {
     if (layer()->animations.empty()) return true;
 
     for (auto& animation: layer()->animations) {
@@ -300,7 +308,7 @@ bool UIView::anyCurrentlyRunningAnimationsAllowUserInteraction() {
     return false;
 }
 
-void UIView::animate(double duration, double delay, UIViewAnimationOptions options, std::function<void()> animations, std::function<void(bool)> completion) {
+void UIView::animate(double duration, double delay, UIViewAnimationOptions options, const std::function<void()>& animations, std::function<void(bool)> completion) {
     auto group = new_shared<UIViewAnimationGroup>(options, completion);
     currentAnimationPrototype = new_shared<CABasicAnimationPrototype>(duration, delay, group);
 
@@ -314,11 +322,11 @@ void UIView::animate(double duration, double delay, UIViewAnimationOptions optio
 }
 
 
-void UIView::animate(double duration, std::function<void()> animations, std::function<void(bool)> completion) {
-    UIView::animate( duration, 0, UIViewAnimationOptions::none, animations, completion);
+void UIView::animate(double duration, const std::function<void()>& animations, std::function<void(bool)> completion) {
+    UIView::animate( duration, 0, UIViewAnimationOptions::none, animations, std::move(completion));
 }
 
-void UIView::animate(double duration, double delay, double damping, double initialSpringVelocity, UIViewAnimationOptions options, std::function<void()> animations, std::function<void(bool)> completion) {
+void UIView::animate(double duration, double delay, double damping, double initialSpringVelocity, UIViewAnimationOptions options, const std::function<void()>& animations, std::function<void(bool)> completion) {
     auto group = new_shared<UIViewAnimationGroup>(options, completion);
     currentAnimationPrototype = new_shared<CASpringAnimationPrototype>( duration, delay, damping, initialSpringVelocity, group);
 
@@ -351,7 +359,7 @@ std::shared_ptr<CABasicAnimation> UIView::actionForKey(std::string event) {
     auto prototype = UIView::currentAnimationPrototype;
     if (!prototype) { return nullptr; }
 
-    auto keyPath = event;
+    const auto& keyPath = event;
     auto beginFromCurrentState = (prototype->animationGroup->options & UIViewAnimationOptions::beginFromCurrentState) == UIViewAnimationOptions::beginFromCurrentState;
 
     auto state = beginFromCurrentState ? (_layer->presentationOrSelf()) : _layer;
@@ -369,7 +377,7 @@ void UIView::display(std::shared_ptr<CALayer> layer) { }
 
 void UIView::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
     UITraitEnvironment::traitCollectionDidChange(previousTraitCollection);
-    for (auto subview : _subviews) {
+    for (const auto& subview : _subviews) {
         // If subview has controller, it's controller will update related traitCollection
         if (!subview->_parentController.expired()) continue;
 
@@ -450,7 +458,7 @@ void UIView::sizeToFit() {
 }
 
 // MARK: - Yoga layout
-void UIView::configureLayout(std::function<void(std::shared_ptr<YGLayout>)> block) {
+void UIView::configureLayout(const std::function<void(std::shared_ptr<YGLayout>)>& block) {
     _yoga->setEnabled(true);
     block(_yoga);
 }

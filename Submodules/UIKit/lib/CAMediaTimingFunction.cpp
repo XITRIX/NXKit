@@ -1,6 +1,7 @@
 #include <CAMediaTimingFunction.h>
 #include <tools/SharedBase.hpp>
 #include <cmath>
+#include <utility>
 
 namespace NXKit {
 
@@ -32,7 +33,7 @@ double CAMediaTimingFunction::easeOutElastic(double x) {
       : pow(2, -10 * x) * sin((x * 10 - 0.75) * c4) + 1;
 }
 
-CAMediaTimingFunction::CAMediaTimingFunction(std::string name) {
+CAMediaTimingFunction::CAMediaTimingFunction(const std::string& name) {
     if (name == kCAMediaTimingFunctionDefault)
         timing = CAMediaTimingFunction::easeOutCubic;
     else if (name == kCAMediaTimingFunctionLinear)
@@ -53,7 +54,7 @@ CAMediaTimingFunction::CAMediaTimingFunction(std::string name) {
 }
 
 CAMediaTimingFunction::CAMediaTimingFunction(std::function<double(double)> timing) {
-    this->timing = timing;
+    this->timing = std::move(timing);
 }
 
 std::shared_ptr<CAMediaTimingFunction> CAMediaTimingFunction::timingFunctionFrom(UIViewAnimationOptions options) {
@@ -74,7 +75,7 @@ std::shared_ptr<CAMediaTimingFunction> CAMediaTimingFunction::timingFunctionFrom
     return new_shared<CAMediaTimingFunction>(kCAMediaTimingFunctionDefault);
 }
 float CAMediaTimingFunction::at(float x) {
-    return timing(x);
+    return (float) timing(x);
 }
 
 }

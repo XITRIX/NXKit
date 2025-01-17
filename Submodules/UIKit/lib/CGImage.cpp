@@ -1,4 +1,6 @@
 #include "CGImage.h"
+
+#include <utility>
 #include "include/core/SkData.h"
 
 using namespace NXKit;
@@ -13,15 +15,15 @@ using namespace NXKit;
 //}
 
 CGImage::CGImage(sk_sp<SkImage> image, std::shared_ptr<NXData> sourceData) {
-    this->sourceData = sourceData;
-    pointee = image;
+    this->sourceData = std::move(sourceData);
+    pointee = std::move(image);
 
 //    GPU_SetSnapMode(pointee, GPU_SNAP_POSITION_AND_DIMENSIONS);
 //    GPU_SetBlendMode(pointee, GPU_BLEND_NORMAL_FACTOR_ALPHA);
 //    GPU_SetImageFilter(pointee, GPU_FILTER_LINEAR);
 }
 
-CGImage::CGImage(std::shared_ptr<NXData> sourceData) {
+CGImage::CGImage(const std::shared_ptr<NXData>& sourceData) {
     auto data = sourceData->data();
     auto dataCount = sourceData->count();
 
@@ -46,6 +48,6 @@ CGImage::~CGImage() {
 }
 
 NXSize CGImage::size() const {
-    if (!pointee) return NXSize();
-    return NXSize(pointee->width(), pointee->height());
+    if (!pointee) return {};
+    return {(NXFloat) pointee->width(), (NXFloat) pointee->height()};
 }

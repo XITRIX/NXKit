@@ -15,6 +15,7 @@
 
 #include "include/gpu/ganesh/gl/egl/GrGLMakeEGLInterface.h"
 #include "include/ports/SkFontMgr_empty.h"
+#include "tools/trace/SkDebugfTracer.h"
 
 #include <GLES3/gl3.h>
 
@@ -75,6 +76,10 @@ SkiaCtx_switch::SkiaCtx_switch() {
 
     SkGraphics::Init();
 
+    SkEventTracer* eventTracer = nullptr;
+    eventTracer = new SkDebugfTracer();
+    SkEventTracer::SetInstance(eventTracer);
+
     printf("SKIA inited\n");
 
     auto eglCtx = eglGetCurrentContext();
@@ -86,7 +91,7 @@ SkiaCtx_switch::SkiaCtx_switch() {
 
     printf("SKIA context created\n");
 
-    // fontMgr = SkFontMgr_New_Custom_Empty();
+    fontMgr = SkFontMgr_New_Custom_Empty();
 }
 
 SkiaCtx_switch::~SkiaCtx_switch() {

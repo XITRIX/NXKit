@@ -42,8 +42,8 @@ public:
     bool viewRespectsSystemMinimumLayoutMargins() { return _viewRespectsSystemMinimumLayoutMargins; }
     void setViewRespectsSystemMinimumLayoutMargins(bool viewRespectsSystemMinimumLayoutMargins);
 
-    void present(std::shared_ptr<UIViewController> otherViewController, bool animated, std::function<void()> completion = [](){});
-    void dismiss(bool animated, std::function<void()> completion = [](){});
+    void present(const std::shared_ptr<UIViewController>& otherViewController, bool animated, const std::function<void()>& completion = [](){});
+    void dismiss(bool animated, const std::function<void()>& completion = [](){});
 
 
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;

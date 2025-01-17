@@ -14,7 +14,7 @@ public:
     sk_sp<SkImage> pointee;
 
 //    CGImage(NXSize size);
-    CGImage(std::shared_ptr<NXData> sourceData);
+    CGImage(const std::shared_ptr<NXData>& sourceData);
 //    CGImage(SDL_Surface* surface);
     CGImage(sk_sp<SkImage> image, std::shared_ptr<NXData> sourceData);
     CGImage(sk_sp<SkImage> image): CGImage(image, nullptr) {}

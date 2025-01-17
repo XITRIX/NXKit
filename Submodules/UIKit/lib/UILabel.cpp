@@ -9,14 +9,14 @@ UILabel::UILabel(): UIView() {
     unicode = SkUnicodes::ICU::Make();
 }
 
-void UILabel::setText(std::string text) {
+void UILabel::setText(const std::string& text) {
     if (_text == text) return;
     _text = text;
     setNeedsDisplay();
     setNeedsLayout();
 }
 
-void UILabel::setTextColor(UIColor textColor) {
+void UILabel::setTextColor(const UIColor& textColor) {
     if (_textColor == textColor) return;
     _textColor = textColor;
     setNeedsDisplay();
@@ -70,7 +70,7 @@ void UILabel::draw() {
         size = bounds().size;
     }
     auto bitmapSize = size * scale;
-    bitmap.allocPixels(SkImageInfo::MakeN32Premul(bitmapSize.width, bitmapSize.height));
+    bitmap.allocPixels(SkImageInfo::MakeN32Premul((int) bitmapSize.width, (int) bitmapSize.height));
     SkCanvas canvas(bitmap);
 
     canvas.scale(scale, scale);
@@ -96,7 +96,7 @@ void UILabel::updateParagraph() {
     style.setForegroundColor(paint);
     style.setTypeface(typeface);
     style.setFontSize(_fontSize);
-    style.setFontStyle(SkFontStyle(_fontWeight, SkFontStyle::kNormal_Width,
+    style.setFontStyle(SkFontStyle((int) _fontWeight, SkFontStyle::kNormal_Width,
                                     SkFontStyle::kUpright_Slant));
 
     ParagraphStyle paraStyle;

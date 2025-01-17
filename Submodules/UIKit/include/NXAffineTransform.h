@@ -24,8 +24,8 @@ public:
     static NXAffineTransform scale(NXFloat factor);
     static NXAffineTransform rotationBy(NXFloat angle);
 
-    std::optional<NXAffineTransform> inverted() const;
-    bool isIdentity() const;
+    [[nodiscard]] std::optional<NXAffineTransform> inverted() const;
+    [[nodiscard]] bool isIdentity() const;
 
     static const NXAffineTransform identity;
 

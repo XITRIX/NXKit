@@ -1,6 +1,8 @@
 #include <CASpringAnimationPrototype.h>
 #include <CASpringAnimation.h>
 
+#include <utility>
+
 namespace NXKit {
 
 CASpringAnimationPrototype::CASpringAnimationPrototype(double duration,
@@ -8,7 +10,7 @@ CASpringAnimationPrototype::CASpringAnimationPrototype(double duration,
                                                        double damping,
                                                        double initialSpringVelocity,
                                                        std::shared_ptr<UIViewAnimationGroup> animationGroup) :
-    CABasicAnimationPrototype(duration, delay, animationGroup),
+    CABasicAnimationPrototype(duration, delay, std::move(animationGroup)),
     damping(damping),
     initialSpringVelocity(initialSpringVelocity)
 { }

@@ -12,10 +12,10 @@ public:
 
     void draw() override;
 
-    void setText(std::string text);
+    void setText(const std::string& text);
     [[nodiscard]] std::string text() const { return _text; }
 
-    void setTextColor(UIColor textColor);
+    void setTextColor(const UIColor& textColor);
     [[nodiscard]] UIColor textColor() const { return _textColor; }
 
     void setFontSize(NXFloat fontSize);

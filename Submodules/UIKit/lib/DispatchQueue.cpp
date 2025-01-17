@@ -6,7 +6,6 @@
 //
 
 #include <DispatchQueue.h>
-#include <chrono>
 #include <thread>
  #include <tools/SharedBase.hpp>
  #include <CADisplayLink.h>

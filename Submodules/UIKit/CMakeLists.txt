@@ -51,6 +51,8 @@ add_library(UIKit
         lib/NXAffineTransform.cpp
         lib/NXTransform3D.cpp
         lib/NXData.cpp
+        lib/SkTools/EventTracingPriv.cpp
+        lib/SkTools/SkDebugfTracer.cpp
 )
 
 list(APPEND platform_libs yogacore )

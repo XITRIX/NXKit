@@ -20,17 +20,17 @@ struct DispatchQueueTask {
 
 class DispatchQueue {
 public:
-    DispatchQueue(const std::string& tag);
+    explicit DispatchQueue(const std::string& tag);
     ~DispatchQueue();
 
     static std::shared_ptr<DispatchQueue> main();
     static std::shared_ptr<DispatchQueue> global();
 
-    std::string tag() const { return _tag; }
+    [[nodiscard]] std::string tag() const { return _tag; }
     void async(const std::function<void()>& task);
     void asyncAfter(double seconds, const std::function<void()>& task);
 
-    bool isActive() { return _task_loop_active; }
+    [[nodiscard]] bool isActive() const { return _task_loop_active; }
 private:
     static std::shared_ptr<DispatchQueue> _main;
     static std::shared_ptr<DispatchQueue> _global;

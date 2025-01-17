@@ -26,7 +26,7 @@ public:
     void draw(SkCanvas* context) override;
     std::shared_ptr<CALayer> copy() override;
 
-    void setText(std::string text);
+    void setText(const std::string& text);
     [[nodiscard]] std::string text() const { return _text; }
 
     void setFontSize(NXFloat fontSize);
@@ -35,7 +35,7 @@ public:
     void setFontWeight(NXFloat fontWeight);
     [[nodiscard]] NXFloat fontWeight() const { return _fontWeight; }
 
-    void setTextColor(UIColor textColor);
+    void setTextColor(const UIColor& textColor);
     [[nodiscard]] UIColor textColor() const { return _textColor; }
 
     void setTextAlignment(NSTextAlignment textAlignment);

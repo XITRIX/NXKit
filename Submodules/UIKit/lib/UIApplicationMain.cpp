@@ -15,6 +15,7 @@ bool applicationRunLoop() {
 //        UIRenderer::main()->render(UIApplication::shared->keyWindow.lock(), currentTime);
 
 
+//    printf("Run loop!!!\n");
     // Move to UIRenderer
     auto keyWindow = UIApplication::shared->keyWindow.lock();
 
@@ -34,12 +35,16 @@ bool applicationRunLoop() {
     UIView::animateIfNeeded(currentTime);
     keyWindow->drawAndLayoutTreeIfNeeded();
 
-    if (!CALayer::layerTreeIsDirty) {
+    static NXSize lastSize;
+    NXSize size = SkiaCtx::_main->getSize();
+
+    if (!CALayer::layerTreeIsDirty && lastSize == size) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         return true;
     }
 
     CALayer::layerTreeIsDirty = false;
+    lastSize = size;
 
     auto surface = SkiaCtx::_main->getBackbufferSurface();
     if (!surface) return true;
@@ -68,9 +73,12 @@ void setupRenderAndRunLoop() {
 
 }
 
-int UIApplicationMain(std::shared_ptr<UIApplicationDelegate> appDelegate) {
+int UIApplicationMain(const std::shared_ptr<UIApplicationDelegate>& appDelegate) {
+    printf("UIApplication starting\n");
     UIApplication::shared = new_shared<UIApplication>();
+    printf("UIApplication inited\n");
     SkiaCtx::_main = MakeSkiaCtx();
+    printf("Skia Context created\n");
 
     UIApplication::shared->delegate = appDelegate;
 
@@ -85,6 +93,6 @@ int UIApplicationMain(std::shared_ptr<UIApplicationDelegate> appDelegate) {
     SkiaCtx::_main = nullptr;
     
     return 0;
-};
+}
 
 }

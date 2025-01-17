@@ -10,10 +10,11 @@ double timevalInSeconds(timeval time);
 struct Timer {
     timeval startTime;
 
-    Timer(double startingAt = 0);
+    Timer(): Timer(0) {}
+    explicit Timer(double startingAt);
 
-    double getElapsedTimeInMilliseconds();
-    double getElapsedTimeInSeconds();
+    [[nodiscard]] double getElapsedTimeInMilliseconds() const;
+    [[nodiscard]] double getElapsedTimeInSeconds() const;
 
     double operator-(const Timer& rhs) const;
 

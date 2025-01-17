@@ -53,7 +53,7 @@ public:
     void setZPosition(NXFloat position);
     [[nodiscard]] NXFloat zPosition() { return _zPosition; }
 
-    void setBackgroundColor(std::optional<UIColor> backgroundColor);
+    void setBackgroundColor(const std::optional<UIColor>& backgroundColor);
     [[nodiscard]] std::optional<UIColor> backgroundColor() const { return _backgroundColor; }
 
     void setCornerRadius(NXFloat cornerRadius);
@@ -65,7 +65,7 @@ public:
     void setAffineTransform(NXAffineTransform transform);
     [[nodiscard]] NXAffineTransform affineTransform();
 
-    void setMask(std::shared_ptr<CALayer> mask);
+    void setMask(const std::shared_ptr<CALayer>& mask);
     [[nodiscard]] std::shared_ptr<CALayer> mask() const { return _mask; }
 
     void setMasksToBounds(bool newValue) { _masksToBounds = newValue; }
@@ -94,8 +94,8 @@ public:
 
     virtual std::shared_ptr<CALayer> copy();
 
-    std::shared_ptr<CAAction> actionForKey(std::string event);
-    static std::shared_ptr<CABasicAnimation> defaultActionForKey(std::string event);
+    std::shared_ptr<CAAction> actionForKey(std::string event) const;
+    static std::shared_ptr<CABasicAnimation> defaultActionForKey(const std::string& event);
     static NXFloat defaultAnimationDuration;
 
     std::shared_ptr<CALayer> createPresentation();
@@ -107,10 +107,10 @@ public:
     void display();
 
     // Animations
-    void add(std::shared_ptr<CABasicAnimation> animation, std::string keyPath);
-    void removeAnimation(std::string forKey);
+    void add(const std::shared_ptr<CABasicAnimation>& animation, const std::string& keyPath);
+    void removeAnimation(const std::string& forKey);
     void removeAllAnimations();
-    void onWillSet(std::string keyPath);
+    void onWillSet(const std::string& keyPath);
     void onDidSetAnimations(bool wasEmpty);
 
     // Override to add new animatable

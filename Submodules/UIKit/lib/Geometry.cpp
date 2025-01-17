@@ -1,6 +1,5 @@
 #include <Geometry.h>
-#include <algorithm>
-#include <math.h>
+#include <cmath>
 
 #include "NXAffineTransform.h"
 #include "NXTransform3D.h"
@@ -22,8 +21,8 @@ NXFloat max(NXFloat a, NXFloat b, NXFloat c, NXFloat d) {
     return maxValue;
 }
 
-NXFloat isEqual(NXFloat val1, NXFloat val2) {
-    if (isnan(val1) && isnan(val2))
+bool isEqual(NXFloat val1, NXFloat val2) {
+    if (std::isnan(val1) && std::isnan(val2))
         return true;
     return val1 == val2;
 }
@@ -39,11 +38,11 @@ bool NXPoint::operator==(const NXPoint& rhs) const {
 }
 
 NXPoint NXPoint::operator+(const NXPoint& first) const {
-    return NXPoint(x + first.x, y + first.y);
+    return {x + first.x, y + first.y};
 }
 
 NXPoint NXPoint::operator-(const NXPoint& first) const {
-    return NXPoint(x - first.x, y - first.y);
+    return {x - first.x, y - first.y};
 }
 
 NXPoint& NXPoint::operator+=(const NXPoint& rhs) {
@@ -73,17 +72,17 @@ NXPoint NXPoint::operator*(const NXFloat& rhs) {
 }
 
 NXPoint NXPoint::applying(const NXAffineTransform& t) const {
-    return NXPoint(
+    return {
             x * t.m11 + y * t.m21 + t.tX,
             x * t.m12 + y * t.m22 + t.tY
-    );
+    };
 }
 
-bool NXPoint::valid() {
-    return !isnan(this->x) && !isnan(this->y);
+bool NXPoint::valid() const {
+    return !std::isnan(this->x) && !std::isnan(this->y);
 }
 
-NXFloat NXPoint::magnitude() {
+NXFloat NXPoint::magnitude() const {
     return sqrt(x * x + y * y);
 }
 
@@ -100,11 +99,11 @@ bool NXSize::operator!=(const NXSize& rhs) const {
 }
 
 NXSize NXSize::operator+(const NXSize& first) const {
-    return NXSize(width + first.width, height + first.height);
+    return {width + first.width, height + first.height};
 }
 
 NXSize NXSize::operator-(const NXSize& first) const {
-    return NXSize(width - first.width, height - first.height);
+    return {width - first.width, height - first.height};
 }
 
 NXSize& NXSize::operator+=(const NXSize& rhs) {
@@ -120,11 +119,11 @@ NXSize& NXSize::operator-=(const NXSize& rhs) {
 }
 
 NXSize NXSize::operator*(const NXFloat& first) const {
-    return NXSize(width * first, height * first);
+    return {width * first, height * first};
 }
 
 NXSize NXSize::operator/(const NXFloat& first) const {
-    return NXSize(width / first, height / first);
+    return {width / first, height / first};
 }
 
 NXSize& NXSize::operator*=(const NXFloat& rhs) {
@@ -139,8 +138,8 @@ NXSize& NXSize::operator/=(const NXFloat& rhs) {
     return *this;
 }
 
-bool NXSize::valid() {
-    return !isnan(this->width) && !isnan(this->height);
+bool NXSize::valid() const {
+    return !std::isnan(this->width) && !std::isnan(this->height);
 }
 
 // MARK: - RECT -
@@ -170,7 +169,7 @@ void NXRect::setMinY(NXFloat newValue) { origin.y = newValue; }
 void NXRect::setMidY(NXFloat newValue) { origin.y = newValue - (size.height / 2); }
 void NXRect::setMaxY(NXFloat newValue) { origin.y = newValue - size.height; }
 
-bool NXRect::contains(NXPoint point) {
+bool NXRect::contains(NXPoint point) const {
     return
     (point.x >= minX()) && (point.x < maxX()) &&
     (point.y >= minY()) && (point.y < maxY());
@@ -199,30 +198,30 @@ bool NXRect::operator==(const NXRect& rhs) const {
 }
 
 NXRect NXRect::operator+(const NXRect& rhs) const {
-    return NXRect(
+    return {
         this->origin.x + rhs.origin.x,
         this->origin.y + rhs.origin.y,
         this->size.width + rhs.size.width,
         this->size.height + rhs.size.height
-    );
+    };
 }
 
 NXRect NXRect::operator-(const NXRect& rhs) const {
-    return NXRect(
+    return {
         this->origin.x - rhs.origin.x,
         this->origin.y - rhs.origin.y,
         this->size.width - rhs.size.width,
         this->size.height - rhs.size.height
-    );
+    };
 }
 
 NXRect NXRect::operator*(const NXFloat& rhs) const {
-    return NXRect(
+    return {
         this->origin.x * rhs,
         this->origin.y * rhs,
         this->size.width * rhs,
         this->size.height * rhs
-    );
+    };
 }
 
 NXRect NXRect::applying(NXAffineTransform t) {
@@ -241,10 +240,12 @@ NXRect NXRect::applying(NXAffineTransform t) {
 
     // XXX: What happens if the point that was furthest left is now on the right (because of a rotation)?
     // i.e. Should do we return a normalised rect or one with a negative width?
-    return NXRect(newMinX,
-                newMinY,
-                newMaxX - newMinX,
-                newMaxY - newMinY);
+    return {
+            newMinX,
+            newMinY,
+            newMaxX - newMinX,
+            newMaxY - newMinY
+    };
 }
 
 NXRect NXRect::applying(NXTransform3D t) {
@@ -261,7 +262,7 @@ NXRect NXRect::applying(NXTransform3D t) {
     auto newMinY = min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
     auto newMaxY = max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
 
-    return NXRect(newMinX, newMinY, newMaxX - newMinX, newMaxY - newMinY);
+    return {newMinX, newMinY, newMaxX - newMinX, newMaxY - newMinY};
 }
 
 NXRect NXRect::intersection(NXRect other) const {
@@ -276,7 +277,7 @@ NXRect NXRect::intersection(NXRect other) const {
 
     if (width > 0 && height > 0) {
         // The intersection rectangle has dimensions, i.e. there is an intersection:
-        return NXRect(largestMinX, largestMinY, width, height);
+        return {largestMinX, largestMinY, width, height};
     } else {
         return null;
     }

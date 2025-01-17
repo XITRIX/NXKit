@@ -1,5 +1,7 @@
 #include <CASpringAnimation.h>
 
+#include <utility>
+
 namespace NXKit {
 
 CASpringAnimation::CASpringAnimation(CASpringAnimation* animation):
@@ -8,10 +10,10 @@ CASpringAnimation::CASpringAnimation(CASpringAnimation* animation):
     initialSpringVelocity(animation->initialSpringVelocity)
 { }
 
-CASpringAnimation::CASpringAnimation(std::shared_ptr<CASpringAnimationPrototype> prototype,
+CASpringAnimation::CASpringAnimation(const std::shared_ptr<CASpringAnimationPrototype>& prototype,
                                      std::string keyPath,
                                      AnimatableProperty fromValue):
-    CABasicAnimation(prototype, keyPath, fromValue, new_shared<CAMediaTimingFunction>(CAMediaTimingFunction::easeOutElastic)),
+    CABasicAnimation(prototype, std::move(keyPath), std::move(fromValue), new_shared<CAMediaTimingFunction>(CAMediaTimingFunction::easeOutElastic)),
     damping(prototype->damping),
     initialSpringVelocity(prototype->initialSpringVelocity)
 { }

@@ -21,8 +21,8 @@ const std::string kCAMediaTimingFunctionEaseOutElastic = "easeOutElastic";
 
 class CAMediaTimingFunction {
 public:
-    CAMediaTimingFunction(std::string name);
-    CAMediaTimingFunction(std::function<double(double)> timing);
+    explicit CAMediaTimingFunction(const std::string& name);
+    explicit CAMediaTimingFunction(std::function<double(double)> timing);
 
     static double linear(double x);
     static double easeInCubic(double x);

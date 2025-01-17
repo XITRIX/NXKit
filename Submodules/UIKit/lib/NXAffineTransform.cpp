@@ -7,28 +7,34 @@ using namespace NXKit;
 
 const NXAffineTransform NXAffineTransform::identity = NXAffineTransform(1, 0, 0, 1, 0, 0);
 
-NXAffineTransform::NXAffineTransform() {}
+NXAffineTransform::NXAffineTransform(): m11(1), m12(0), m21(0), m22(1), tX(0), tY(0) {}
 
 NXAffineTransform::NXAffineTransform(NXFloat m11, NXFloat m12, NXFloat m21, NXFloat m22, NXFloat tX, NXFloat tY):
         m11(m11), m12(m12), m21(m21), m22(m22), tX(tX), tY(tY)
 { }
 
 NXAffineTransform NXAffineTransform::translationBy(NXFloat x, NXFloat y) {
-    return NXAffineTransform(1, 0,
-                             0, 1,
-                             x, y);
+    return {
+            1, 0,
+            0, 1,
+            x, y
+    };
 }
 
 NXAffineTransform NXAffineTransform::scaleBy(NXFloat x, NXFloat y) {
-    return NXAffineTransform(x, 0,
-                             0, y,
-                             0, 0);
+    return {
+            x, 0,
+            0, y,
+            0, 0
+    };
 }
 
 NXAffineTransform NXAffineTransform::scale(NXFloat f) {
-    return NXAffineTransform(f, 0,
-                             0, f,
-                             0, 0);
+    return {
+            f, 0,
+            0, f,
+            0, 0
+    };
 }
 
 NXAffineTransform NXAffineTransform::rotationBy(NXFloat angle) {
@@ -36,9 +42,11 @@ NXAffineTransform NXAffineTransform::rotationBy(NXFloat angle) {
     NXFloat c = cosf(radians);
     NXFloat s = sinf(radians);
 
-    return NXAffineTransform(c,  s,
-                             -s, c,
-                             0,  0);
+    return {
+            c, s,
+            -s, c,
+            0, 0
+    };
 }
 
 std::optional<NXAffineTransform> NXAffineTransform::inverted() const {

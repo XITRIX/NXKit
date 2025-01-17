@@ -21,11 +21,26 @@
 
 using namespace NXKit;
 
+namespace NXKit {
+extern bool applicationRunLoop();
+}
+
+int SkiaCtx_macos::resizingEventWatcher(void* data, SDL_Event* event) {
+    if (event->type == SDL_WINDOWEVENT &&
+        event->window.event == SDL_WINDOWEVENT_RESIZED) {
+
+        applicationRunLoop();
+//        ((SkiaCtx_macos*) data)->render();
+    }
+    return 0;
+}
+
 SkiaCtx_macos::SkiaCtx_macos(): SkiaCtx_sdlBase() {
     SkGraphics::Init();
     initContext();
 
     fontMgr = SkFontMgr_New_CoreText(nullptr);
+    SDL_AddEventWatch(resizingEventWatcher, this);
 }
 
 void SkiaCtx_macos::initContext() {

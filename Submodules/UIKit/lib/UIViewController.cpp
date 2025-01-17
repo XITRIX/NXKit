@@ -96,7 +96,7 @@ void UIViewController::setViewRespectsSystemMinimumLayoutMargins(bool viewRespec
 //    view()->setNeedsUpdateLayoutMargins();
 }
 
-void UIViewController::present(std::shared_ptr<UIViewController> otherViewController, bool animated, std::function<void()> completion) {
+void UIViewController::present(const std::shared_ptr<UIViewController>& otherViewController, bool animated, const std::function<void()>& completion) {
     if (!parent().expired()) {
         return parent().lock()->present(otherViewController, animated, completion);
     }
@@ -126,7 +126,7 @@ void UIViewController::present(std::shared_ptr<UIViewController> otherViewContro
     completion();
 }
 
-void UIViewController::dismiss(bool animated, std::function<void()> completion) {
+void UIViewController::dismiss(bool animated, const std::function<void()>& completion) {
     if (!parent().expired()) {
         return parent().lock()->dismiss(animated, completion);
     }

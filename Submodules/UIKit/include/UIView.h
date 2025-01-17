@@ -51,15 +51,15 @@ public:
     void setContentMode(UIViewContentMode mode);
     [[nodiscard]] UIViewContentMode contentMode() const { return _contentMode; }
 
-    void setMask(std::shared_ptr<UIView> mask);
+    void setMask(const std::shared_ptr<UIView>& mask);
     [[nodiscard]] std::shared_ptr<UIView> mask() const { return _mask; }
 
-    void addGestureRecognizer(std::shared_ptr<UIGestureRecognizer> gestureRecognizer);
+    void addGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& gestureRecognizer);
     [[nodiscard]] std::vector<std::shared_ptr<UIGestureRecognizer>>* gestureRecognizers()  { return &_gestureRecognizers; }
 
     virtual void addSubview(std::shared_ptr<UIView> view);
     void insertSubviewAt(std::shared_ptr<UIView> view, int index);
-    void insertSubviewBelow(std::shared_ptr<UIView> view, std::shared_ptr<UIView> belowSubview);
+    void insertSubviewBelow(const std::shared_ptr<UIView>& view, const std::shared_ptr<UIView>& belowSubview);
     void removeFromSuperview();
 
     virtual std::shared_ptr<UIWindow> window();
@@ -83,15 +83,15 @@ public:
 
     // FlexLayout
     std::shared_ptr<YGLayout> yoga() const { return _yoga; }
-    void configureLayout(std::function<void(std::shared_ptr<YGLayout>)> block);
+    void configureLayout(const std::function<void(std::shared_ptr<YGLayout>)>& block);
     void setAutolayoutEnabled(bool enabled) { _yoga->setEnabled(enabled); }
 
     // Render
     void drawAndLayoutTreeIfNeeded();
 
     // Touch
-    NXPoint convertToView(NXPoint point, std::shared_ptr<UIView> toView);
-    NXPoint convertFromView(NXPoint point, std::shared_ptr<UIView> fromView);
+    NXPoint convertToView(NXPoint point, const std::shared_ptr<UIView>& toView) const;
+    NXPoint convertFromView(NXPoint point, const std::shared_ptr<UIView>& fromView);
     virtual std::shared_ptr<UIView> hitTest(NXPoint point, UIEvent* withEvent);
     virtual bool point(NXPoint insidePoint, UIEvent* withEvent);
 
@@ -102,11 +102,11 @@ public:
     static void animate(double duration,
                         double delay = 0.0,
                         UIViewAnimationOptions options = UIViewAnimationOptions::none,
-                        std::function<void()> animations = [](){},
+                        const std::function<void()>& animations = [](){},
                         std::function<void(bool)> completion = [](bool res){});
 
     static void animate(double duration,
-                        std::function<void()> animations,
+                        const std::function<void()>& animations,
                         std::function<void(bool)> completion = [](bool res){});
 
     static void animate(double duration,
@@ -114,7 +114,7 @@ public:
                         double usingSpringWithDamping,
                         double initialSpringVelocity,
                         UIViewAnimationOptions options = UIViewAnimationOptions::none,
-                        std::function<void()> animations = [](){},
+                        const std::function<void()>& animations = [](){},
                         std::function<void(bool)> completion = [](bool res){});
 
     static void animateIfNeeded(Timer currentTime);
@@ -133,15 +133,15 @@ private:
     std::weak_ptr<UIView> _superview;
     std::shared_ptr<CALayer> _layer;
     std::shared_ptr<UIView> _mask;
-    UIViewContentMode _contentMode;
+    UIViewContentMode _contentMode = UIViewContentMode::scaleToFill;
     std::weak_ptr<UIViewController> _parentController;
     bool _isUserInteractionEnabled = true;
 
     bool _needsLayout = true;
     bool _needsDisplay = true;
 
-    void setSuperview(std::shared_ptr<UIView> superview);
-    bool anyCurrentlyRunningAnimationsAllowUserInteraction();
+    void setSuperview(const std::shared_ptr<UIView>& superview);
+    bool anyCurrentlyRunningAnimationsAllowUserInteraction() const;
 
     std::shared_ptr<UIView> layoutRoot();
 };

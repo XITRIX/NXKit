@@ -51,22 +51,22 @@ bool NXTransform3D::operator==(const NXTransform3D& rhs) const {
 
 NXTransform3D NXTransform3D::operator+(const NXTransform3D& b) const {
     NXTransform3D a = *this;
-    return NXTransform3D(
+    return {
             a.m11 + b.m11, a.m12 + b.m12, a.m13 + b.m13, a.m14 + b.m14,
             a.m21 + b.m21, a.m22 + b.m22, a.m23 + b.m23, a.m24 + b.m24,
             a.m31 + b.m31, a.m32 + b.m32, a.m33 + b.m33, a.m34 + b.m34,
             a.m41 + b.m41, a.m42 + b.m42, a.m43 + b.m43, a.m44 + b.m44
-    );
+    };
 }
 
 NXTransform3D NXTransform3D::operator-(const NXTransform3D& b) const {
     NXTransform3D a = *this;
-    return NXTransform3D(
+    return {
             a.m11 - b.m11, a.m12 - b.m12, a.m13 - b.m13, a.m14 - b.m14,
             a.m21 - b.m21, a.m22 - b.m22, a.m23 - b.m23, a.m24 - b.m24,
             a.m31 - b.m31, a.m32 - b.m32, a.m33 - b.m33, a.m34 - b.m34,
             a.m41 - b.m41, a.m42 - b.m42, a.m43 - b.m43, a.m44 - b.m44
-    );
+    };
 }
 
 NXTransform3D NXTransform3D::operator*(const NXTransform3D& first) const {
@@ -75,12 +75,12 @@ NXTransform3D NXTransform3D::operator*(const NXTransform3D& first) const {
 
 NXTransform3D NXTransform3D::operator*(const NXFloat& b) const {
     NXTransform3D a = *this;
-    return NXTransform3D(
+    return {
             a.m11 * b, a.m12 * b, a.m13 * b, a.m14 * b,
             a.m21 * b, a.m22 * b, a.m23 * b, a.m24 * b,
             a.m31 * b, a.m32 * b, a.m33 * b, a.m34 * b,
             a.m41 * b, a.m42 * b, a.m43 * b, a.m44 * b
-    );
+    };
 }
 
 void getPartsFromMatrix(const NXAffineTransform& matrix, NXFloat* angle, NXPoint* translation, NXPoint* scale) {
@@ -124,7 +124,7 @@ NXTransform3D NXTransform3D::interpolateTo(const NXTransform3D& matrix, const NX
     getPartsFromMatrix(currentM, &angle, &translation, &scale);
     getPartsFromMatrix(newM, &dAngle, &dTranslation, &dScale);
 //
-    auto from = angle;
+//    auto from = angle;
     angle = angle + (dAngle - angle) * progress;
     scale = scale + (dScale - scale) * progress;// (scale - NXPoint(1, 1)) * progress + NXPoint(1, 1);
     translation = translation + (dTranslation - translation) * progress;
@@ -153,27 +153,27 @@ bool NXTransform3DEqualToTransform(const NXTransform3D& a, const NXTransform3D& 
 }
 
 NXTransform3D NXTransform3DMakeAffineTransform(NXAffineTransform m) {
-    return NXTransform3D(
+    return {
             m.m11, m.m12, 0,    0,
             m.m21, m.m22, 0,    0,
             0,     0,     1,    0,
-            m.tX,  m.tY,  0,    1);
+            m.tX,  m.tY,  0,    1};
 }
 
 NXTransform3D CATransform3DMakeTranslation(NXFloat tx, NXFloat ty, NXFloat tz) {
-    return NXTransform3D(
+    return {
             1,     0,     0,    0,
             0,     1,     0,    0,
             0,     0,     1,    0,
-            tx,    ty,    tz,   1);
+            tx,    ty,    tz,   1};
 }
 
 NXTransform3D CATransform3DMakeScale(NXFloat tx, NXFloat ty, NXFloat tz) {
-    return NXTransform3D(
+    return {
             tx,     0,     0,    0,
             0,    ty,     0,    0,
             0,     0,    tz,    0,
-            0,     0,     0,    1);
+            0,     0,     0,    1};
 }
 
 // TODO: NOT WORKING!!!!!!!
@@ -195,11 +195,11 @@ NXTransform3D CATransform3DMakeRotation(NXFloat angle, NXFloat x, NXFloat y, NXF
     ys = y*s;
     zs = z*s;
 
-    return NXTransform3D(
+    return {
             x*x*c_ + c, xyc_ + zs, xzc_ - ys, 0,
             xyc_ - zs, y*yc_ + c, yzc_ + xs, 0,
             xzc_ + ys, yzc_ - xs, z*zc_ + c, 0,
-            0, 0, 0, 1);
+            0, 0, 0, 1};
 }
 
 NXTransform3D CATransform3DConcat(const NXTransform3D& a, const NXTransform3D& b) {
@@ -232,10 +232,11 @@ NXTransform3D CATransform3DConcat(const NXTransform3D& a, const NXTransform3D& b
 }
 
 NXAffineTransform NXTransform3DGetAffineTransform(NXTransform3D t) {
-    return NXAffineTransform(
+    return {
             t.m11, t.m12,
             t.m21, t.m22,
-            t.m41, t.m42);
+            t.m41, t.m42
+    };
 }
 
 NXTransform3D NXTransform3D::translationBy(NXFloat x, NXFloat y, NXFloat z) const {
@@ -255,10 +256,10 @@ NXTransform3D NXTransform3D::rotationBy(NXFloat angle, NXFloat x, NXFloat y, NXF
 }
 
 SkM44 NXTransform3D::toSkM44() const {
-   return SkM44(m11, m21, m31, m41,
-                m12, m22, m32, m42,
-                m13, m23, m33, m43,
-                m14, m24, m34, m44);
+   return {m11, m21, m31, m41,
+           m12, m22, m32, m42,
+           m13, m23, m33, m43,
+           m14, m24, m34, m44};
 }
 
 }

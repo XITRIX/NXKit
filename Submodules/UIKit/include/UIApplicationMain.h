@@ -5,6 +5,6 @@
 namespace NXKit {
 
 class UIApplicationDelegate;
-int UIApplicationMain(std::shared_ptr<UIApplicationDelegate> appDelegate = new_shared<UIApplicationDelegate>());
+int UIApplicationMain(const std::shared_ptr<UIApplicationDelegate>& appDelegate = new_shared<UIApplicationDelegate>());
 
 }

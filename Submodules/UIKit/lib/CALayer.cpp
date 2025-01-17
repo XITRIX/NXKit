@@ -6,6 +6,7 @@
 #include <UIView.h>
 #include <CATransaction.h>
 #include <tools/Tools.hpp>
+#include <utility>
 
 #include "include/core/SkRRect.h"
 #include "include/effects/SkGradientShader.h"
@@ -50,7 +51,7 @@ void CALayer::setAnchorPoint(NXKit::NXPoint anchorPoint) {
     _anchorPoint = anchorPoint;
 }
 
-void CALayer::setBackgroundColor(std::optional<UIColor> backgroundColor) {
+void CALayer::setBackgroundColor(const std::optional<UIColor>& backgroundColor) {
     if (_backgroundColor == backgroundColor) return;
     onWillSet("backgroundColor");
     _backgroundColor = backgroundColor;
@@ -106,11 +107,11 @@ void CALayer::setHidden(bool hidden) {
 }
 
 void CALayer::setContents(std::shared_ptr<CGImage> contents) {
-    _contents = contents;
+    _contents = std::move(contents);
     CALayer::layerTreeIsDirty = true;
 }
 
-void CALayer::setMask(std::shared_ptr<CALayer> mask) {
+void CALayer::setMask(const std::shared_ptr<CALayer>& mask) {
     if (this->_mask) {
         this->_mask->_superlayer.reset();
     }
@@ -201,6 +202,8 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         canvas->saveLayerAlphaf(nullptr, _opacity);
     }
 
+    printf("Draw1\n");
+
     // Background color
     if (_backgroundColor.has_value()) {
         paint.setColor(_backgroundColor->raw());
@@ -218,14 +221,14 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         auto contentsGravity = ContentsGravityTransformation(this);
         auto width = _contents->size().width * contentsGravity.scale.width / _contentsScale;
         auto height = _contents->size().height * contentsGravity.scale.height / _contentsScale;
-        auto x = (_bounds.size.width - width) / 2.0 + contentsGravity.offset.x;
-        auto y = (_bounds.size.height - height) / 2.0 + contentsGravity.offset.y;
+        auto x = (_bounds.size.width - width) / 2.0f + contentsGravity.offset.x;
+        auto y = (_bounds.size.height - height) / 2.0f + contentsGravity.offset.y;
 
         // Contents maxrix save 4
         canvas->save();
         canvas->translate(x, y);
 
-        canvas->drawImageRect(_contents.get()->pointee, {
+        canvas->drawImageRect(_contents->pointee, {
             float(0),
             float(0),
             float(width),
@@ -252,6 +255,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     // Initial save 1 // restore
     canvas->restore();
+    printf("End!\n");
 }
 
 NXRect CALayer::getFrame() {
@@ -263,10 +267,12 @@ NXRect CALayer::getFrame() {
             transformedBounds.height() * _anchorPoint.y
     );
 
-    return NXRect(_position.x - anchorPointOffset.x,
-                _position.y - anchorPointOffset.y,
-                transformedBounds.width(),
-                transformedBounds.height());
+    return {
+            _position.x - anchorPointOffset.x,
+            _position.y - anchorPointOffset.y,
+            transformedBounds.width(),
+            transformedBounds.height()
+    };
 }
 
 void CALayer::setFrame(NXRect frame) {
@@ -294,12 +300,12 @@ std::shared_ptr<CALayer> CALayer::copy() {
     return new_shared<CALayer>(this);
 }
 
-std::shared_ptr<CAAction> CALayer::actionForKey(std::string event) {
+std::shared_ptr<CAAction> CALayer::actionForKey(std::string event) const {
     if (!delegate.expired()) return delegate.lock()->actionForKey(event);
     return CALayer::defaultActionForKey(event);
 }
 
-std::shared_ptr<CABasicAnimation> CALayer::defaultActionForKey(std::string event) {
+std::shared_ptr<CABasicAnimation> CALayer::defaultActionForKey(const std::string& event) {
     auto animation = new_shared<CABasicAnimation>(event);
     animation->duration = CATransaction::animationDuration();
     return animation;
@@ -316,7 +322,7 @@ void CALayer::display() {
 }
 
 // MARK: - Animations
-void CALayer::add(std::shared_ptr<CABasicAnimation> animation, std::string keyPath) {
+void CALayer::add(const std::shared_ptr<CABasicAnimation>& animation, const std::string& keyPath) {
     auto copy = new_shared<CABasicAnimation>(animation.get());
     copy->creationTime = Timer();
 
@@ -345,15 +351,15 @@ void CALayer::removeAllAnimations() {
     onDidSetAnimations(isEmpty);
 }
 
-void CALayer::removeAnimation(std::string forKey) {
+void CALayer::removeAnimation(const std::string& forKey) {
     auto isEmpty = animations.empty();
     animations.erase(forKey);
     onDidSetAnimations(isEmpty);
 }
 
-void CALayer::onWillSet(std::string keyPath) {
+void CALayer::onWillSet(const std::string& keyPath) {
     CALayer::layerTreeIsDirty = true;
-    auto animationKey = keyPath;
+    const auto& animationKey = keyPath;
 
     auto animation = std::static_pointer_cast<CABasicAnimation>(actionForKey(animationKey));
     if (animation &&

@@ -11,7 +11,7 @@ public:
     std::optional<double> initialSpringVelocity;
 
     CASpringAnimation(CASpringAnimation* animation);
-    CASpringAnimation(std::shared_ptr<CASpringAnimationPrototype> prototype,
+    CASpringAnimation(const std::shared_ptr<CASpringAnimationPrototype>& prototype,
                       std::string keyPath,
                       AnimatableProperty fromValue);
 };
