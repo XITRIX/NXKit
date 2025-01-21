@@ -202,8 +202,6 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         canvas->saveLayerAlphaf(nullptr, _opacity);
     }
 
-    printf("Draw1\n");
-
     // Background color
     if (_backgroundColor.has_value()) {
         paint.setColor(_backgroundColor->raw());

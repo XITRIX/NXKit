@@ -87,8 +87,9 @@ void YogaTestViewController::loadView() {
     dragMeViewLabel->setFontWeight(600);
     dragMeViewLabel->setTextAlignment(NSTextAlignment::center);
     dragMeViewLabel->setAutolayoutEnabled(true);
-//    dragMeViewLabel->setHidden(true);
-//    dragMeViewLabel->setFrame({ 80, 110, 44, 100 });
+    dragMeViewLabel->setBackgroundColor(UIColor::systemGreen);
+    // dragMeViewLabel->setHidden(true);
+    // dragMeViewLabel->setFrame({ 80, 110, 44, 100 });
 
     auto blur = new_shared<UIBlurView>();
     blur->setFrame({ 80, 200, 240, 240 });

@@ -2,6 +2,8 @@
 
 #include "include/core/SkColorSpace.h"
 #include <include/core/SkGraphics.h>
+#include <include/core/SkData.h>
+#include <include/core/SkTypeface.h>
 #include "include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "include/gpu/ganesh/gl/GrGLInterface.h"
 #include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
@@ -14,7 +16,7 @@
 #include "include/private/base/SkTemplates.h"
 
 #include "include/gpu/ganesh/gl/egl/GrGLMakeEGLInterface.h"
-#include "include/ports/SkFontMgr_empty.h"
+#include "include/ports/SkFontMgr_data.h"
 #include "tools/trace/SkDebugfTracer.h"
 
 #include <GLES3/gl3.h>
@@ -76,9 +78,9 @@ SkiaCtx_switch::SkiaCtx_switch() {
 
     SkGraphics::Init();
 
-    SkEventTracer* eventTracer = nullptr;
-    eventTracer = new SkDebugfTracer();
-    SkEventTracer::SetInstance(eventTracer);
+    // SkEventTracer* eventTracer = nullptr;
+    // eventTracer = new SkDebugfTracer();
+    // SkEventTracer::SetInstance(eventTracer);
 
     printf("SKIA inited\n");
 
@@ -91,7 +93,12 @@ SkiaCtx_switch::SkiaCtx_switch() {
 
     printf("SKIA context created\n");
 
-    fontMgr = SkFontMgr_New_Custom_Empty();
+    PlFontData font;
+    Result res = plGetSharedFontByType(&font, PlSharedFontType_Standard);
+
+    auto data = SkData::MakeWithoutCopy(font.address, font.size);
+
+    fontMgr = SkFontMgr_New_Custom_Data(SkSpan(&data, 1));
 }
 
 SkiaCtx_switch::~SkiaCtx_switch() {
