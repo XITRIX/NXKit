@@ -117,7 +117,7 @@ void UIViewController::present(const std::shared_ptr<UIViewController>& otherVie
     otherViewController->view()->setFrame(view()->window()->bounds());
     otherViewController->viewWillAppear(animated);
     otherViewController->makeViewAppear(animated, shared_from_this(), [otherViewController]() {
-//        otherViewController->view()->window()->updateFocus();
+        otherViewController->view()->window()->updateFocus();
     });
     otherViewController->viewDidAppear(animated);
 
@@ -149,7 +149,7 @@ void UIViewController::dismiss(bool animated, const std::function<void()>& compl
         view()->removeFromSuperview();
         viewDidDisappear(animated);
         completion();
-//        window->updateFocus();
+        window->updateFocus();
         _presentingViewController.reset();
         window->removePresentedViewController(shared_from_this());
     });
@@ -167,9 +167,9 @@ void UIViewController::traitCollectionDidChange(std::shared_ptr<UITraitCollectio
     }
 }
 
-//std::shared_ptr<UIFocusEnvironment> UIViewController::parentFocusEnvironment() {
-//    return std::dynamic_pointer_cast<UIFocusEnvironment>(next());
-//}
+std::shared_ptr<UIFocusEnvironment> UIViewController::parentFocusEnvironment() {
+    return std::dynamic_pointer_cast<UIFocusEnvironment>(next());
+}
 
 void UIViewController::makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion) {
     auto window = presentingViewController->view()->window();

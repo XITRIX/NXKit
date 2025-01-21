@@ -6,6 +6,7 @@
 
 #include <DispatchQueue.h>
 #include <UIBlurView.h>
+#include <UIControl.h>
 #include <UIImageView.h>
 #include <UILabel.h>
 #include <UIViewController.h>

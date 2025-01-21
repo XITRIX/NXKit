@@ -9,8 +9,8 @@ namespace NXKit {
 
 class NXData {
 public:
-    std::size_t count() const;
-    const std::byte* data() const;
+    [[nodiscard]] std::size_t count() const;
+    [[nodiscard]] const std::byte* data() const;
 
     NXData(const std::byte* bytes, std::size_t count, bool freeSource = false);
     ~NXData();

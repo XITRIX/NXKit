@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UIView.h"
+#include <UIFocusSystem.h>
 
 namespace NXKit {
 
@@ -11,7 +12,7 @@ public:
     ~UIWindow();
 
     std::shared_ptr<UIWindow> window() override;
-//    std::shared_ptr<UIFocusSystem> focusSystem() { return _focusSystem; }
+    std::shared_ptr<UIFocusSystem> focusSystem() { return _focusSystem; }
 
     void setRootViewController(std::shared_ptr<UIViewController> controller);
     std::shared_ptr<UIViewController> rootViewController() { return _rootViewController; }
@@ -20,12 +21,12 @@ public:
     void sendEvent(const std::shared_ptr<UIEvent>& event);
 
     void layoutSubviews() override;
-//    void updateFocus();
+    void updateFocus();
 
-    virtual void pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
-    virtual void pressesChanged(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
-    virtual void pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
-    virtual void pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
+    void pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
+    void pressesChanged(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
+    void pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
+    void pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
 
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 private:
@@ -39,7 +40,7 @@ private:
     void sendTouchEvent(std::shared_ptr<UIEvent> event);
     void sendPressEvent(const std::shared_ptr<UIPressesEvent>& event);
 
-//    std::shared_ptr<UIFocusSystem> _focusSystem;
+    std::shared_ptr<UIFocusSystem> _focusSystem;
 };
 
 }

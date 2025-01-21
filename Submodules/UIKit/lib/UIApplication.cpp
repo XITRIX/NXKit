@@ -25,6 +25,8 @@ UIApplication::UIApplication() {
 //    UIFont.loadSystemFonts();
 }
 
+std::map<SDL_JoystickID, SDL_GameController*> controllers;
+
 void UIApplication::handleEventsIfNeeded() {
     auto e = SDL_Event();
 
@@ -150,12 +152,42 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
         }
         case SDL_CONTROLLERDEVICEADDED: {
             printf("Controller added\n");
+
+            SDL_GameController* controller = SDL_GameControllerOpen(e.cdevice.which);
+            if (controller)
+            {
+                SDL_JoystickID jid = SDL_JoystickGetDeviceInstanceID(e.cdevice.which);
+                controllers.emplace( jid, controller );
+            }
+
+            break;
+        }
+        case SDL_CONTROLLERDEVICEREMOVED: {
+            printf("Controller removed\n");
+            auto controller = controllers[e.cdevice.which];
+
+            SDL_GameControllerClose(controller);
+            SDL_JoystickID jid = SDL_JoystickGetDeviceInstanceID(e.cdevice.which);
+            controllers.erase(jid);
             break;
         }
         case SDL_CONTROLLERBUTTONDOWN: {
+            printf("Controller button pressed\n");
             if (e.cbutton.button == SDL_CONTROLLER_BUTTON_START) {
                 handleSDLQuit();
             }
+            break;
+        }
+        case SDL_CONTROLLERBUTTONUP: {
+            printf("Controller button released\n");
+            break;
+        }
+        case SDL_JOYBUTTONDOWN: {
+            printf("Joystick button pressed\n");
+            break;
+        }
+        case SDL_JOYBUTTONUP: {
+            printf("Joystick button released\n");
             break;
         }
         case SDL_KEYDOWN: {

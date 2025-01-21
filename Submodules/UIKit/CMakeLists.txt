@@ -29,7 +29,12 @@ add_library(UIKit
         lib/UIApplicationMain.cpp
         lib/UIBlurView.cpp
         lib/UIColor.cpp
+        lib/UIControl.cpp
+        lib/UIControlGestureRecognizer.cpp
         lib/UIEvent.cpp
+        lib/UIFocus.cpp
+        lib/UIFocusAnimationCoordinator.cpp
+        lib/UIFocusSystem.cpp
         lib/UIGestureRecognizer.cpp
         lib/UIImage.cpp
         lib/UIImageView.cpp

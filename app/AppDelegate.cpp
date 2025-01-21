@@ -20,9 +20,6 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     window->makeKeyAndVisible();
     window->setBackgroundColor(UIColor::systemBackground);
 
-
-
-
     return true;
 }
 

@@ -253,7 +253,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     // Initial save 1 // restore
     canvas->restore();
-    printf("End!\n");
+//    printf("End!\n");
 }
 
 NXRect CALayer::getFrame() {

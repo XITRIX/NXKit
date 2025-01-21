@@ -19,8 +19,8 @@ std::vector<std::weak_ptr<UIGestureRecognizer>> getRecognizerHierachyFromView(st
 }
 
 UIWindow::UIWindow() {
-//    _focusSystem = new_shared<UIFocusSystem>();
-//    _focusSystem->_rootWindow = weak_from_base<UIWindow>();
+    _focusSystem = new_shared<UIFocusSystem>();
+    _focusSystem->_rootWindow = weak_from_base<UIWindow>();
 
     setBackgroundColor(UIColor::systemBackground);
 //    yoga->setEnabled(false);
@@ -55,13 +55,13 @@ void UIWindow::makeKeyAndVisible() {
         viewController->viewWillAppear(false);
         addSubview(viewController->view());
         viewController->viewDidAppear(false);
-//        updateFocus();
+        updateFocus();
     }
 }
 
-//void UIWindow::updateFocus() {
-//    _focusSystem->updateFocus();
-//}
+void UIWindow::updateFocus() {
+    _focusSystem->updateFocus();
+}
 
 void UIWindow::sendEvent(const std::shared_ptr<UIEvent>& event) {
     if (auto pevent = std::dynamic_pointer_cast<UIPressesEvent>(event)) {
@@ -162,22 +162,22 @@ void UIWindow::removePresentedViewController(const std::shared_ptr<UIViewControl
 
 void UIWindow::pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
     UIView::pressesBegan(pressees, event);
-//    focusSystem()->sendEvent(event);
+    focusSystem()->sendEvent(event);
 }
 
 void UIWindow::pressesChanged(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
     UIView::pressesChanged(pressees, event);
-//    focusSystem()->sendEvent(event);
+    focusSystem()->sendEvent(event);
 }
 
 void UIWindow::pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
     UIView::pressesEnded(pressees, event);
-//    focusSystem()->sendEvent(event);
+    focusSystem()->sendEvent(event);
 }
 
 void UIWindow::pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
     UIView::pressesCancelled(pressees, event);
-//    focusSystem()->sendEvent(event);
+    focusSystem()->sendEvent(event);
 }
 
 void UIWindow::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {

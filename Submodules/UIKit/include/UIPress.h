@@ -4,7 +4,7 @@
 #include <UIKey.h>
 #include <UIGestureRecognizer.h>
 #include <Timer.h>
-#include <time.h>
+#include <ctime>
 #include <optional>
 
 namespace NXKit {
@@ -17,13 +17,13 @@ class UIResponder;
 class UIWindow;
 class UIPress {
 public:
-    UIPress(Timer timestamp = Timer());
+    explicit UIPress(Timer timestamp = Timer());
 
-    Timer timestamp() const { return _timestamp; }
-    UIPressPhase phase() const { return _phase; }
+    [[nodiscard]] Timer timestamp() const { return _timestamp; }
+    [[nodiscard]] UIPressPhase phase() const { return _phase; }
 
-    std::weak_ptr<UIWindow> window() const { return _window; }
-    std::weak_ptr<UIResponder> responder() const { return _responder; }
+    [[nodiscard]] std::weak_ptr<UIWindow> window() const { return _window; }
+    [[nodiscard]] std::weak_ptr<UIResponder> responder() const { return _responder; }
 
     std::vector<std::weak_ptr<UIGestureRecognizer>> gestureRecognizers() { return _gestureRecognizers; };
     std::optional<UIKey> key() { return _key; }
@@ -41,7 +41,7 @@ private:
 
     void setForWindow(std::shared_ptr<UIWindow> window);
     void runPressActionOnRecognizerHierachy(std::function<void(std::shared_ptr<UIGestureRecognizer>)> action);
-    bool hasBeenCancelledByAGestureRecognizer() const { return _hasBeenCancelledByAGestureRecognizer; }
+    [[nodiscard]] bool hasBeenCancelledByAGestureRecognizer() const { return _hasBeenCancelledByAGestureRecognizer; }
 
     friend class UIApplication;
     friend class UIGestureRecognizer;

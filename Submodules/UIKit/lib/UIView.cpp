@@ -291,6 +291,98 @@ bool UIView::point(NXPoint insidePoint, UIEvent* withEvent) {
     return bounds().contains(insidePoint);
 }
 
+// MARK: - Focus
+std::shared_ptr<UIFocusEnvironment> UIView::parentFocusEnvironment() {
+    return std::dynamic_pointer_cast<UIFocusEnvironment>(next());
+}
+
+bool UIView::isFocused() {
+    auto currentFocus = window()->focusSystem()->focusedItem();
+    if (currentFocus.expired()) return false;
+
+    return currentFocus.lock() == shared_from_base<UIFocusItem>();
+}
+
+std::shared_ptr<UIFocusItem> UIView::searchForFocus() {
+    if (canBecomeFocused()) { return shared_from_this(); }
+
+    if (!preferredFocusEnvironments().empty()) {
+        auto res = std::dynamic_pointer_cast<UIFocusItem>(preferredFocusEnvironments().front());
+        auto view = std::dynamic_pointer_cast<UIView>(res);
+        if (view) return view->searchForFocus();
+    }
+
+    for (auto& child: subviews()) {
+        auto res = child->searchForFocus();
+        if (res) return res;
+    }
+
+    return nullptr;
+}
+
+std::shared_ptr<UIFocusItem> UIView::getNextFocusItem(std::shared_ptr<UIView> current, UIFocusHeading focusHeading) {
+    auto itr = std::find(subviews().cbegin(), subviews().cend(), current);
+
+    if (itr == subviews().cend()) {
+        if (superview().expired()) return nullptr;
+        return superview().lock()->getNextFocusItem(shared_from_this(), focusHeading);
+    }
+
+    auto index = itr - subviews().cbegin();
+
+    // UIFocusHeading - previous
+    if (focusHeading == UIFocusHeading::previous) {
+        while (--index >= 0) {
+            auto focus = subviews()[index]->searchForFocus();
+            if (focus) { return focus; }
+        }
+    }
+
+    // UIFocusHeading - next
+    if (focusHeading == UIFocusHeading::next) {
+        while (++index < subviews().size()) {
+            auto focus = subviews()[index]->searchForFocus();
+            if (focus) { return focus; }
+        }
+    }
+
+    // UIFocusHeading - up / down
+    if (_yoga->flexDirection() == YGFlexDirectionColumn) {
+        if (focusHeading == UIFocusHeading::up) {
+            while (--index >= 0) {
+                auto focus = subviews()[index]->searchForFocus();
+                if (focus) { return focus; }
+            }
+        }
+
+        if (focusHeading == UIFocusHeading::down) {
+            while (++index < subviews().size()) {
+                auto focus = subviews()[index]->searchForFocus();
+                if (focus) { return focus; }
+            }
+        }
+    }
+
+    // UIFocusHeading - left / right
+    if (_yoga->flexDirection() == YGFlexDirectionRow) {
+        if (focusHeading == UIFocusHeading::left) {
+            while (--index >= 0) {
+                auto focus = subviews()[index]->searchForFocus();
+                if (focus) { return focus; }
+            }
+        }
+
+        if (focusHeading == UIFocusHeading::right) {
+            while (++index < subviews().size()) {
+                auto focus = subviews()[index]->searchForFocus();
+                if (focus) { return focus; }
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 // MARK: - Animations
 std::set<std::shared_ptr<CALayer>> UIView::layersWithAnimations;
 std::shared_ptr<CABasicAnimationPrototype> UIView::currentAnimationPrototype;

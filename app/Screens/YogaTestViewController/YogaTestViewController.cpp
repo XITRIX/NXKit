@@ -63,7 +63,57 @@ void YogaTestViewController::loadView() {
     contentBox->addGestureRecognizer(tap);
     contentBox->tag = "Content box";
 
+    auto buttonsBox = new_shared<UIView>();
 
+    auto buttonLabel = new_shared<UILabel>();
+    auto control = new_shared<UIControl>();
+
+    control->addSubview(buttonLabel);
+    control->layer()->setCornerRadius(10);
+    buttonLabel->setText("Button!");
+    buttonLabel->setFontWeight(800);
+    buttonLabel->setTextAlignment(NSTextAlignment::center);
+    buttonLabel->setAutolayoutEnabled(true);
+
+    control->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        layout->setJustifyContent(YGJustify::YGJustifyCenter);
+        layout->setAlignContent(YGAlign::YGAlignCenter);
+//        layout->setPositionType(YGPositionType::YGPositionTypeAbsolute);
+//        layout->setPosition({230, 80});
+        layout->setSize({ 200, 44 });
+    });
+
+    buttonsBox->addSubview(control);
+
+    auto buttonLabel2 = new_shared<UILabel>();
+    auto control2 = new_shared<UIControl>();
+
+    control2->addSubview(buttonLabel2);
+    control2->layer()->setCornerRadius(10);
+    buttonLabel2->setText("Button!");
+    buttonLabel2->setFontWeight(800);
+    buttonLabel2->setTextAlignment(NSTextAlignment::center);
+    buttonLabel2->setAutolayoutEnabled(true);
+
+    control2->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        layout->setJustifyContent(YGJustify::YGJustifyCenter);
+        layout->setAlignContent(YGAlign::YGAlignCenter);
+//        layout->setPositionType(YGPositionType::YGPositionTypeAbsolute);
+//        layout->setPosition({530, 80});
+        layout->setSize({ 200, 44 });
+    });
+
+    buttonsBox->addSubview(control2);
+
+    buttonsBox->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        layout->setFlexDirection(YGFlexDirectionRow);
+//        layout->setJustifyContent(YGJustify::YGJustifyCenter);
+//        layout->setAlignContent(YGAlign::YGAlignCenter);
+        layout->setPositionType(YGPositionType::YGPositionTypeAbsolute);
+        layout->setPosition({130, 80});
+        layout->setAllGap(8);
+    });
+    rootView->addSubview(buttonsBox);
 
     //MARK: - Footer!
     auto footer = new_shared<UIView>();

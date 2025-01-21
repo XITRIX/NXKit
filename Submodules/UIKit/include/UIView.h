@@ -5,6 +5,7 @@
 #include <UITraitEnvironment.h>
 #include <UIViewContentMode.h>
 #include <UIResponder.h>
+#include <UIFocus.h>
 #include <UIEvent.h>
 #include <set>
 
@@ -13,7 +14,7 @@ namespace NXKit {
 class UIWindow;
 class UIViewController;
 class UIGestureRecognizer;
-class UIView: public UIResponder, public UITraitEnvironment, public CALayerDelegate, public enable_shared_from_this<UIView> {
+class UIView: public UIResponder, public UITraitEnvironment, public CALayerDelegate, public UIFocusItem, public enable_shared_from_this<UIView> {
 public:
     UIView(NXRect frame = NXRect(), std::shared_ptr<CALayer> layer = new_shared<CALayer>());
 
@@ -95,6 +96,11 @@ public:
     virtual std::shared_ptr<UIView> hitTest(NXPoint point, UIEvent* withEvent);
     virtual bool point(NXPoint insidePoint, UIEvent* withEvent);
 
+    // Focus
+    std::shared_ptr<UIFocusEnvironment> parentFocusEnvironment() override;
+    virtual std::shared_ptr<UIFocusItem> getNextFocusItem(std::shared_ptr<UIView> current, UIFocusHeading focusHeading);
+    bool isFocused() override;
+
     // Animations
     static std::set<std::shared_ptr<CALayer>> layersWithAnimations;
     static std::shared_ptr<CABasicAnimationPrototype> currentAnimationPrototype;
@@ -125,6 +131,7 @@ public:
     virtual void display(std::shared_ptr<CALayer> layer) override;
 private:
     friend class UIViewController;
+    friend class UIFocusSystem;
     friend class YGLayout;
 
     std::shared_ptr<YGLayout> _yoga;
@@ -142,6 +149,8 @@ private:
 
     void setSuperview(const std::shared_ptr<UIView>& superview);
     bool anyCurrentlyRunningAnimationsAllowUserInteraction() const;
+
+    std::shared_ptr<UIFocusItem> searchForFocus();
 
     std::shared_ptr<UIView> layoutRoot();
 };
