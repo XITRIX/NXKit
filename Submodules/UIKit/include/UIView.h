@@ -16,7 +16,7 @@ class UIViewController;
 class UIGestureRecognizer;
 class UIView: public UIResponder, public UITraitEnvironment, public CALayerDelegate, public UIFocusItem, public enable_shared_from_this<UIView> {
 public:
-    UIView(NXRect frame = NXRect(), std::shared_ptr<CALayer> layer = new_shared<CALayer>());
+    explicit UIView(NXRect frame = NXRect(), std::shared_ptr<CALayer> layer = new_shared<CALayer>());
 
     std::string tag;
 

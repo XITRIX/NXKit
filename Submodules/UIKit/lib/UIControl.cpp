@@ -24,7 +24,7 @@ void UIControl::didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationC
     if (context.nextFocusedItem().lock() == shared_from_this()) {
         coordinator->addCoordinatedAnimations([this]() {
             setBackgroundColor(UIColor::systemCyan);
-            setTransform(NXAffineTransform::scale(1.0f));
+            setTransform(NXAffineTransform::scale(1.2f));
         });
     } else {
         coordinator->addCoordinatedAnimations([this]() {

@@ -14,7 +14,6 @@ UIView::UIView(NXRect frame, std::shared_ptr<CALayer> layer) {
 //    _yoga->setEnabled(true);
 
     _layer = std::move(layer);
-    _layer->setAnchorPoint(NXPoint::zero);
     _layer->delegate = weak_from_this();
     setFrame(frame);
 }

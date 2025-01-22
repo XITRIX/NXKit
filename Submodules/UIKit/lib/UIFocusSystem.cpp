@@ -13,12 +13,9 @@
 
 namespace NXKit {
 
-UIFocusSystem::UIFocusSystem() { }
+UIFocusSystem::UIFocusSystem() = default;
 
-void UIFocusSystem::sendEvent(std::shared_ptr<UIEvent> event) {
-
-
-
+void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
     UIFocusUpdateContext context;
     context._previouslyFocusedItem = _focusedItem;
     context._focusHeading = makeFocusHeadingFromEvent(event);
@@ -80,7 +77,7 @@ std::shared_ptr<UIFocusItem> UIFocusSystem::findItemToFocus() {
     return vc->view();
 }
 
-void UIFocusSystem::applyFocusToItem(std::shared_ptr<UIFocusItem> item, UIFocusUpdateContext context) {
+void UIFocusSystem::applyFocusToItem(const std::shared_ptr<UIFocusItem>& item, UIFocusUpdateContext context) {
     UIFocusAnimationCoordinator coordinator;
     _focusedItem = item;
 
@@ -89,37 +86,36 @@ void UIFocusSystem::applyFocusToItem(std::shared_ptr<UIFocusItem> item, UIFocusU
 
     UIFocusAnimationContext animationContext;
     UIView::animate(animationContext.duration(), 0, curveEaseOut, [context, coordinator, animationContext]() {
-        for (auto animation: coordinator._coordinatedAnimations) { animation(); }
-        for (auto animation: coordinator._coordinatedFocusingAnimations) { animation(animationContext); }
-        for (auto animation: coordinator._coordinatedUnfocusingAnimations) { animation(animationContext); }
+        for (const auto& animation: coordinator._coordinatedAnimations) { animation(); }
+        for (const auto& animation: coordinator._coordinatedFocusingAnimations) { animation(animationContext); }
+        for (const auto& animation: coordinator._coordinatedUnfocusingAnimations) { animation(animationContext); }
     }, [coordinator](bool res) {
-        for (auto completion: coordinator._coordinatedAnimationCompletions) { completion(); }
+        for (const auto& completion: coordinator._coordinatedAnimationCompletions) { completion(); }
     });
 }
 
-UIFocusHeading UIFocusSystem::makeFocusHeadingFromEvent(std::shared_ptr<UIEvent> event) {
+UIFocusHeading UIFocusSystem::makeFocusHeadingFromEvent(const std::shared_ptr<UIEvent>& event) {
     auto pevent = std::dynamic_pointer_cast<UIPressesEvent>(event);
     if (pevent == nullptr) return UIFocusHeading::none;
 
-    for (auto press: pevent->allPresses()) {
-        if (!press->key().has_value()) continue;
+    for (const auto& press: pevent->allPresses()) {
         if (press->phase() != UIPressPhase::began) continue;
 
-        auto keyCode = press->key().value().keyCode();
+        auto type = press->type();
 
-        if (keyCode == UIKeyboardHIDUsage::keyboardRightArrow) {
+        if (type == UIPressType::rightArrow) {
             return UIFocusHeading::right;
         }
 
-        if (keyCode == UIKeyboardHIDUsage::keyboardUpArrow) {
+        if (type == UIPressType::upArrow) {
             return UIFocusHeading::up;
         }
 
-        if (keyCode == UIKeyboardHIDUsage::keyboardLeftArrow) {
+        if (type == UIPressType::leftArrow) {
             return UIFocusHeading::left;
         }
 
-        if (keyCode == UIKeyboardHIDUsage::keyboardDownArrow) {
+        if (type == UIPressType::downArrow) {
             return UIFocusHeading::down;
         }
     }

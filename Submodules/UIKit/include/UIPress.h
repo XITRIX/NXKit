@@ -13,6 +13,17 @@ enum class UIPressPhase {
     began, changed, stationary, ended
 };
 
+enum class UIPressType {
+    none,
+    upArrow,
+    downArrow,
+    leftArrow,
+    rightArrow,
+    select,
+    menu,
+    playPause,
+};
+
 class UIResponder;
 class UIWindow;
 class UIPress {
@@ -21,6 +32,7 @@ public:
 
     [[nodiscard]] Timer timestamp() const { return _timestamp; }
     [[nodiscard]] UIPressPhase phase() const { return _phase; }
+    [[nodiscard]] UIPressType type() const { return _type; }
 
     [[nodiscard]] std::weak_ptr<UIWindow> window() const { return _window; }
     [[nodiscard]] std::weak_ptr<UIResponder> responder() const { return _responder; }
@@ -33,6 +45,7 @@ private:
     std::weak_ptr<UIWindow> _window;
 
     UIPressPhase _phase = UIPressPhase::began;
+    UIPressType _type = UIPressType::none;
     Timer _timestamp;
 
     std::vector<std::weak_ptr<UIGestureRecognizer>> _gestureRecognizers;

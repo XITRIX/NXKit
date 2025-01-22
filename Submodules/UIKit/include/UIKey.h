@@ -15,19 +15,8 @@ enum class UIKeyModifierFlags {
     numericPad = 1 << 5,
 };
 
-enum class UIPressType {
-    none,
-    upArrow,
-    downArrow,
-    leftArrow,
-    rightArrow,
-    select,
-    menu,
-};
-
 struct UIKey {
 public:
-    UIPressType type();
     std::string characters() { return _characters; }
     OptionSet<UIKeyModifierFlags> modifierFlags() { return _modifierFlags; }
     UIKeyboardHIDUsage keyCode() { return _keyCode; }

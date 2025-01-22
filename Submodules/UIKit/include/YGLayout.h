@@ -186,7 +186,7 @@ public:
         setHeight(YGValue{static_cast<float>(size.height), YGUnitPoint});
     }
 
-    YGLayout(std::shared_ptr<UIView> view);
+    YGLayout(const std::shared_ptr<UIView>& view);
     ~YGLayout();
 
     void layoutIfNeeded();
@@ -205,12 +205,12 @@ private:
 
     bool isUIView;
     
-    static void YGAttachNodesFromViewHierachy(std::shared_ptr<UIView> view);
+    static void YGAttachNodesFromViewHierachy(const std::shared_ptr<UIView>& view);
     static void YGRemoveAllChildren(const YGNodeRef node);
     static YGSize YGMeasureView(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode);
     static float YGSanitizeMeasurement(float constrainedSize, float measuredSize, YGMeasureMode measureMode);
     static bool YGNodeHasExactSameChildren(const YGNodeRef node, std::vector<std::shared_ptr<UIView>> subviews);
-    static void YGApplyLayoutToViewHierarchy(std::shared_ptr<UIView>view, bool preserveOrigin);
+    static void YGApplyLayoutToViewHierarchy(const std::shared_ptr<UIView>&view, bool preserveOrigin);
     static float YGRoundPixelValue(float value);
 
     friend class UIView;

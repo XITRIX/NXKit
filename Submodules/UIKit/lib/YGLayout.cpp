@@ -14,7 +14,7 @@ YGSize YGLayout::YGMeasureView(YGNodeConstRef node, float width, YGMeasureMode w
     const float constrainedWidth = (widthMode == YGMeasureModeUndefined) ? MAXFLOAT : width;
     const float constrainedHeight = (heightMode == YGMeasureModeUndefined) ? MAXFLOAT: height;
 
-    UIView* view = (UIView*) YGNodeGetContext(node);
+    auto* view = (UIView*) YGNodeGetContext(node);
     NXSize sizeThatFits = NXSize();
 
     // The default implementation of sizeThatFits: returns the existing size of
@@ -23,7 +23,7 @@ YGSize YGLayout::YGMeasureView(YGNodeConstRef node, float width, YGMeasureMode w
     // UIKit returns the existing size.
     //
     // See https://github.com/facebook/yoga/issues/606 for more information.
-    if (!view->_yoga->isUIView || view->subviews().size() > 0) {
+    if (!view->_yoga->isUIView || !view->subviews().empty()) {
       sizeThatFits = view->sizeThatFits(NXSize(
                                             constrainedWidth,
                                             constrainedHeight
@@ -50,7 +50,7 @@ float YGLayout::YGSanitizeMeasurement(float constrainedSize, float measuredSize,
     return result;
 }
 
-void YGLayout::YGAttachNodesFromViewHierachy(std::shared_ptr<UIView> view)
+void YGLayout::YGAttachNodesFromViewHierachy(const std::shared_ptr<UIView>& view)
 {
   auto yoga = view->_yoga;
   const YGNodeRef node = yoga->_node;
@@ -60,7 +60,7 @@ void YGLayout::YGAttachNodesFromViewHierachy(std::shared_ptr<UIView> view)
     YGRemoveAllChildren(node);
     YGNodeSetMeasureFunc(node, YGMeasureView);
   } else {
-    YGNodeSetMeasureFunc(node, NULL);
+    YGNodeSetMeasureFunc(node, nullptr);
 
     std::vector<std::shared_ptr<UIView>> subviewsToInclude;
     for (auto& subview: view->subviews()) {
@@ -97,14 +97,14 @@ bool YGLayout::YGNodeHasExactSameChildren(const YGNodeRef node, std::vector<std:
 }
 
 void YGLayout::YGRemoveAllChildren(const YGNodeRef node) {
-    if (node == NULL) {
+    if (node == nullptr) {
         return;
     }
 
     YGNodeRemoveAllChildren(node);
 }
 
-YGLayout::YGLayout(std::shared_ptr<UIView> view):
+YGLayout::YGLayout(const std::shared_ptr<UIView>& view):
     _view(view), _node(YGNodeNew())
 {
     YGNodeSetContext(_node, view.get());
@@ -129,7 +129,7 @@ void YGLayout::applyLayoutPreservingOrigin(bool preserveOrigin) {
     YGApplyLayoutToViewHierarchy(_view.lock(), preserveOrigin);
 }
 
-void YGLayout::YGApplyLayoutToViewHierarchy(std::shared_ptr<UIView>view, bool preserveOrigin) {
+void YGLayout::YGApplyLayoutToViewHierarchy(const std::shared_ptr<UIView>&view, bool preserveOrigin) {
     auto yoga = view->_yoga;
 
     // We don't need it cause if it is not included in layout
@@ -148,7 +148,8 @@ void YGLayout::YGApplyLayoutToViewHierarchy(std::shared_ptr<UIView>view, bool pr
     };
 
     const NXPoint origin = preserveOrigin ? view->frame().origin : NXPoint();
-    view->setFrame( NXRect(
+
+    auto frame = NXRect(
       NXPoint (
         YGRoundPixelValue(topLeft.x + origin.x),
         YGRoundPixelValue(topLeft.y + origin.y)
@@ -157,11 +158,19 @@ void YGLayout::YGApplyLayoutToViewHierarchy(std::shared_ptr<UIView>view, bool pr
         YGRoundPixelValue(bottomRight.x) - YGRoundPixelValue(topLeft.x),
         YGRoundPixelValue(bottomRight.y) - YGRoundPixelValue(topLeft.y)
       )
-    ));
+    );
+
+    // Apply measurements ignoring transformation matrix
+    view->layer()->setPosition(NXPoint(frame.origin.x + (frame.width() * view->layer()->anchorPoint().x),
+                      frame.origin.y + (frame.height() * view->layer()->anchorPoint().y)));
+
+    auto bounds = view->layer()->bounds();
+    bounds.size = frame.size;
+    view->layer()->setBounds(bounds);
 
     if (!yoga->isLeaf()) {
-        for (int i = 0; i < view->subviews().size(); i++) {
-            YGApplyLayoutToViewHierarchy(view->subviews()[i], false);
+        for (const auto & i : view->subviews()) {
+            YGApplyLayoutToViewHierarchy(i, false);
         }
     }
 }
@@ -181,10 +190,10 @@ NXSize YGLayout::calculateLayoutWithSize(NXSize size) {
         size.height,
         YGNodeStyleGetDirection(node));
 
-    return NXSize(
+    return {
         YGNodeLayoutGetWidth(node),
         YGNodeLayoutGetHeight(node)
-    );
+    };
 }
 
 bool YGLayout::isLeaf() {

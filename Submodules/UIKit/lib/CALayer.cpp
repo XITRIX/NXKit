@@ -237,19 +237,20 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         canvas->restore();
     }
 
+    draw(canvas);
+
+    for (const auto& sublayer: _sublayers) {
+        sublayer->presentationOrSelf()->skiaRender(canvas);
+    }
+
     // Opacity save 3 // restore
     if (_opacity < 1) {
         canvas->restore();
     }
 
-    draw(canvas);
-
     // Reset Anchor to Origin matrix
     // Origin matrix save 2 // restore
     canvas->restore();
-    for (const auto& sublayer: _sublayers) {
-        sublayer->presentationOrSelf()->skiaRender(canvas);
-    }
 
     // Initial save 1 // restore
     canvas->restore();

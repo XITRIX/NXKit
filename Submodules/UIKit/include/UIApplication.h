@@ -19,7 +19,7 @@ public:
     void handleEventsIfNeeded();
     void handleSDLQuit();
 
-    void sendEvent(std::shared_ptr<UIEvent> event);
+    void sendEvent(const std::shared_ptr<UIEvent>& event) const;
 
 // TODO: Need to remove
 //    static GPU_Target* currentRenderer;

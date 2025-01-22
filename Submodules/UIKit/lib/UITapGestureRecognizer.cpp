@@ -37,7 +37,7 @@ void UITapGestureRecognizer::pressesBegan(std::vector<std::shared_ptr<UIPress>> 
     UIGestureRecognizer::pressesBegan(presses, event);
     if (presses.empty()) return;
 
-    if (presses[0]->key()->type() == UIPressType::select) {
+    if (presses[0]->type() == UIPressType::select) {
         setState(UIGestureRecognizerState::began);
     }
 }
@@ -47,7 +47,7 @@ void UITapGestureRecognizer::pressesEnded(std::vector<std::shared_ptr<UIPress>> 
 
     if (presses.empty()) return;
 
-    if (presses[0]->key()->type() == UIPressType::select) {
+    if (presses[0]->type() == UIPressType::select) {
         setState(UIGestureRecognizerState::ended);
     }
 }

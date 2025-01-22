@@ -176,10 +176,85 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             if (e.cbutton.button == SDL_CONTROLLER_BUTTON_START) {
                 handleSDLQuit();
             }
+
+            auto press = new_shared<UIPress>();
+            press->_phase = UIPressPhase::began;
+            press->setForWindow(delegate->window);
+
+            switch (e.cbutton.button) {
+                case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                    press->_type = UIPressType::rightArrow;
+                    break;
+                case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                    press->_type = UIPressType::upArrow;
+                    break;
+                case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                    press->_type = UIPressType::leftArrow;
+                    break;
+                case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                    press->_type = UIPressType::downArrow;
+                    break;
+                case SDL_CONTROLLER_BUTTON_A:
+                    press->_type = UIPressType::select;
+                    break;
+                default:
+                    // Skip buttons which not match any of this types
+                    return;
+            }
+
+            auto event = std::shared_ptr<UIPressesEvent>(new UIPressesEvent(press));
+            UIPressesEvent::activePressesEvents.push_back(event);
+            sendEvent(event);
+
             break;
         }
         case SDL_CONTROLLERBUTTONUP: {
             printf("Controller button released\n");
+
+            std::shared_ptr<UIPressesEvent> event;
+            std::shared_ptr<UIPress> press;
+
+            UIPressType type = UIPressType::none;
+            switch (e.cbutton.button) {
+                case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                    type = UIPressType::rightArrow;
+                    break;
+                case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                    type = UIPressType::upArrow;
+                    break;
+                case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                    type = UIPressType::leftArrow;
+                    break;
+                case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                    type = UIPressType::downArrow;
+                    break;
+                case SDL_CONTROLLER_BUTTON_A:
+                    type = UIPressType::select;
+                    break;
+                default:
+                    // Skip buttons which not match any of this types
+                    return;
+            }
+
+            for (auto& levent: UIPressesEvent::activePressesEvents) {
+                for (auto& lpress: levent->allPresses()) {
+                    if (!lpress->_key.has_value()) continue;
+
+                    if (lpress->type() == type) {
+                        event = levent;
+                        press = lpress;
+                    }
+                }
+            }
+
+            if (!event || !press) return;
+
+            press->_timestamp = Timer();
+            press->_phase = UIPressPhase::ended;
+
+            sendEvent(event);
+            UIPressesEvent::activePressesEvents.erase(std::remove(UIPressesEvent::activePressesEvents.begin(), UIPressesEvent::activePressesEvents.end(), event), UIPressesEvent::activePressesEvents.end());
+
             break;
         }
         case SDL_JOYBUTTONDOWN: {
@@ -202,6 +277,25 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             press->_key = key;
             press->_phase = UIPressPhase::began;
             press->setForWindow(delegate->window);
+
+            switch (key._keyCode) {
+                case UIKeyboardHIDUsage::keyboardRightArrow:
+                    press->_type = UIPressType::rightArrow;
+                    break;
+                case UIKeyboardHIDUsage::keyboardUpArrow:
+                    press->_type = UIPressType::upArrow;
+                    break;
+                case UIKeyboardHIDUsage::keyboardLeftArrow:
+                    press->_type = UIPressType::leftArrow;
+                    break;
+                case UIKeyboardHIDUsage::keyboardDownArrow:
+                    press->_type = UIPressType::downArrow;
+                    break;
+                case UIKeyboardHIDUsage::keyboardReturnOrEnter:
+                    press->_type = UIPressType::select;
+                    break;
+                default: break;
+            }
 
             auto event = std::shared_ptr<UIPressesEvent>(new UIPressesEvent(press));
             UIPressesEvent::activePressesEvents.push_back(event);
@@ -305,7 +399,7 @@ void UIApplication::handleSDLQuit() {
     exit(0);
 }
 
- void UIApplication::sendEvent(std::shared_ptr<UIEvent> event) {
+ void UIApplication::sendEvent(const std::shared_ptr<UIEvent>& event) const {
      for (auto& touch: event->allTouches()) {
          touch->_window = keyWindow;
      }
