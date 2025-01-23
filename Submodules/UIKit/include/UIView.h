@@ -123,8 +123,9 @@ public:
                         const std::function<void()>& animations = [](){},
                         std::function<void(bool)> completion = [](bool res){});
 
-    static void animateIfNeeded(Timer currentTime);
     static void completePendingAnimations();
+
+    static void performWithoutAnimation(const std::function<void()>& actionsWithoutAnimation);
     
     std::shared_ptr<CABasicAnimation> actionForKey(std::string event) override;
     virtual void draw() {}
@@ -133,6 +134,7 @@ private:
     friend class UIViewController;
     friend class UIFocusSystem;
     friend class YGLayout;
+    friend bool applicationRunLoop();
 
     std::shared_ptr<YGLayout> _yoga;
     std::vector<std::shared_ptr<UIGestureRecognizer>> _gestureRecognizers;
@@ -143,9 +145,12 @@ private:
     UIViewContentMode _contentMode = UIViewContentMode::scaleToFill;
     std::weak_ptr<UIViewController> _parentController;
     bool _isUserInteractionEnabled = true;
+    static int _performWithoutAnimationTick;
 
     bool _needsLayout = true;
     bool _needsDisplay = true;
+
+    static void animateIfNeeded(Timer currentTime);
 
     void setSuperview(const std::shared_ptr<UIView>& superview);
     bool anyCurrentlyRunningAnimationsAllowUserInteraction() const;

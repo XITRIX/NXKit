@@ -29,8 +29,8 @@ CALayer::CALayer(CALayer* layer) {
     _backgroundColor = layer->_backgroundColor;
     _isHidden = layer->_isHidden;
     _cornerRadius = layer->_cornerRadius;
-//    borderWidth = layer->borderWidth;
-//    borderColor = layer->borderColor;
+    _borderWidth = layer->_borderWidth;
+    _borderColor = layer->_borderColor;
 //    shadowColor = layer->shadowColor;
 //    shadowPath = layer->shadowPath;
 //    shadowOffset = layer->shadowOffset;
@@ -55,6 +55,18 @@ void CALayer::setBackgroundColor(const std::optional<UIColor>& backgroundColor) 
     if (_backgroundColor == backgroundColor) return;
     onWillSet("backgroundColor");
     _backgroundColor = backgroundColor;
+}
+
+void CALayer::setBorderColor(const std::optional<UIColor>& borderColor) {
+    if (_borderColor == borderColor) return;
+    onWillSet("borderColor");
+    _borderColor = borderColor;
+}
+
+void CALayer::setBorderWidth(NXFloat borderWidth) {
+    if (_borderWidth == borderWidth) return;
+    onWillSet("borderWidth");
+    _borderWidth = borderWidth;
 }
 
 void CALayer::setOpacity(NXFloat opacity) {
@@ -233,7 +245,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
             float(height)
         }, SkSamplingOptions(), nullptr);
 
-        // Contents maxrix save 4 // restore
+        // Contents matrix save 4 // restore
         canvas->restore();
     }
 
@@ -241,6 +253,20 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     for (const auto& sublayer: _sublayers) {
         sublayer->presentationOrSelf()->skiaRender(canvas);
+    }
+
+    // Border
+    if (_borderColor.has_value() && _borderWidth > 0) {
+        paint.setColor(_borderColor->raw());
+        paint.setStyle(SkPaint::Style::kStroke_Style);
+        paint.setStrokeWidth(_borderWidth);
+
+        SkRect rect = SkRect::MakeXYWH(0, 0, _bounds.width(), _bounds.height());
+        SkRRect rrect;
+        float radii = _cornerRadius;
+        SkVector corners[] = {{radii, radii}, {radii, radii}, {radii, radii}, {radii, radii}};
+        rrect.setRectRadii(rect, corners);
+        canvas->drawRRect(rrect, paint);
     }
 
     // Opacity save 3 // restore
@@ -382,6 +408,8 @@ void CALayer::onDidSetAnimations(bool wasEmpty) {
 
 std::optional<AnimatableProperty> CALayer::value(std::string forKeyPath) {
     if (forKeyPath == "backgroundColor") return _backgroundColor;
+    if (forKeyPath == "borderColor") return _borderColor;
+    if (forKeyPath == "borderWidth") return _borderWidth;
     if (forKeyPath == "opacity") return _opacity;
     if (forKeyPath == "bounds") return _bounds;
     if (forKeyPath == "transform") return _transform;
@@ -412,6 +440,7 @@ void CALayer::animateAt(Timer currentTime) {
     }
 
     this->_presentation = animations.empty() ? nullptr : presentation;
+    CALayer::layerTreeIsDirty = true;
 }
 
 // Writing into `presentation->_...` cause we don't need onWillSet to be triggered
@@ -424,12 +453,33 @@ void CALayer::update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABa
     if (keyPath == "backgroundColor") {
         auto start = any_optional_cast<std::optional<UIColor>>(fromValue);
         if (!start.has_value()) { return; }
+        if (!start.value().has_value()) { return; }
 
         auto end = any_optional_cast<std::optional<UIColor>>(animation->toValue);
         if (!end.has_value()) end = this->_backgroundColor;
         if (!end.has_value()) end = UIColor::clear;
 
         presentation->setBackgroundColor(start.value()->interpolationTo(end.value().value(), progress));
+    }
+    if (keyPath == "borderColor") {
+        auto start = any_optional_cast<std::optional<UIColor>>(fromValue);
+        if (!start.has_value()) { return; }
+        if (!start.value().has_value()) { return; }
+
+        auto end = any_optional_cast<std::optional<UIColor>>(animation->toValue);
+        if (!end.has_value()) end = this->_borderColor;
+        if (!end.has_value()) end = UIColor::clear;
+
+        presentation->setBorderColor(start.value()->interpolationTo(end.value().value(), progress));
+    }
+    if (keyPath == "borderWidth") {
+        auto start = any_optional_cast<float>(fromValue);
+        if (!start.has_value()) { return; }
+
+        auto end = any_optional_cast<float>(animation->toValue);
+        if (!end.has_value()) end = this->_borderWidth;
+
+        presentation->setBorderWidth(start.value() + (end.value() - start.value()) * progress);
     }
     if (keyPath == "position") {
         auto start = any_optional_cast<NXPoint>(fromValue);

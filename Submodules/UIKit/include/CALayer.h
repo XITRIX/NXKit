@@ -56,6 +56,12 @@ public:
     void setBackgroundColor(const std::optional<UIColor>& backgroundColor);
     [[nodiscard]] std::optional<UIColor> backgroundColor() const { return _backgroundColor; }
 
+    void setBorderColor(const std::optional<UIColor>& borderColor);
+    [[nodiscard]] std::optional<UIColor> borderColor() const { return _borderColor; }
+
+    void setBorderWidth(NXFloat borderWidth);
+    [[nodiscard]] NXFloat borderWidth() const { return _borderWidth; }
+
     void setCornerRadius(NXFloat cornerRadius);
     [[nodiscard]] NXFloat cornerRadius() const { return _cornerRadius; }
 
@@ -150,6 +156,8 @@ private:
     NXRect _bounds;
     NXFloat _cornerRadius = 0;
     std::optional<UIColor> _backgroundColor;
+    NXFloat _borderWidth = 0;
+    std::optional<UIColor> _borderColor;
     NXTransform3D _transform = NXTransform3D::identity;
 
     /**

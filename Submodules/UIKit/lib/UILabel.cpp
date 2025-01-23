@@ -44,6 +44,12 @@ void UILabel::setFontWeight(NXFloat fontWeight) {
     setNeedsLayout();
 }
 
+void UILabel::setBaseScaleMultiplier(NXFloat baseScaleMultiplier) {
+    if (_baseScaleMultiplier == baseScaleMultiplier) return;
+    _baseScaleMultiplier = baseScaleMultiplier;
+    setNeedsDisplay();
+}
+
 NXSize UILabel::sizeThatFits(NXSize size) {
     updateParagraph();
     paragraph->layout(size.width);
@@ -62,7 +68,7 @@ void UILabel::draw() {
     updateParagraph();
 
     SkBitmap bitmap;
-    auto scale = SkiaCtx::main()->getScaleFactor();
+    auto scale = SkiaCtx::main()->getScaleFactor() * _baseScaleMultiplier;
     NXSize size;
     if (contentMode() == UIViewContentMode::redraw) {
         size = layer()->presentationOrSelf()->bounds().size;
@@ -96,6 +102,7 @@ void UILabel::updateParagraph() {
     style.setForegroundColor(paint);
     style.setTypeface(typeface);
     style.setFontSize(_fontSize);
+//    style.setHeight(_fontSize);
     style.setFontStyle(SkFontStyle((int) _fontWeight, SkFontStyle::kNormal_Width,
                                     SkFontStyle::kUpright_Slant));
 

@@ -429,6 +429,14 @@ void UIView::animate(double duration, double delay, double damping, double initi
     currentAnimationPrototype = nullptr;
 }
 
+int UIView::_performWithoutAnimationTick = 0;
+
+void UIView::performWithoutAnimation(const std::function<void()>& actionsWithoutAnimation) {
+    _performWithoutAnimationTick++;
+    actionsWithoutAnimation();
+    _performWithoutAnimationTick--;
+}
+
 void UIView::animateIfNeeded(Timer currentTime) {
     auto layersWithAnimationsCopy = layersWithAnimations;
     for (auto& layer: layersWithAnimationsCopy) {
@@ -448,7 +456,7 @@ void UIView::completePendingAnimations() {
 
 std::shared_ptr<CABasicAnimation> UIView::actionForKey(std::string event) {
     auto prototype = UIView::currentAnimationPrototype;
-    if (!prototype) { return nullptr; }
+    if (!prototype || _performWithoutAnimationTick > 0) { return nullptr; }
 
     const auto& keyPath = event;
     auto beginFromCurrentState = (prototype->animationGroup->options & UIViewAnimationOptions::beginFromCurrentState) == UIViewAnimationOptions::beginFromCurrentState;

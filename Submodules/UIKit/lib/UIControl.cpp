@@ -23,13 +23,22 @@ void UIControl::didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationC
 
     if (context.nextFocusedItem().lock() == shared_from_this()) {
         coordinator->addCoordinatedAnimations([this]() {
-            setBackgroundColor(UIColor::systemCyan);
-            setTransform(NXAffineTransform::scale(1.2f));
+//            setBackgroundColor(UIColor::systemCyan);
+            setTransform(NXAffineTransform::scale(1.1f));
+            layer()->setBorderColor(UIColor::systemBlue);
+
+            UIView::performWithoutAnimation([this]() {
+                layer()->setBorderWidth(3);
+            });
         });
     } else {
         coordinator->addCoordinatedAnimations([this]() {
-            setBackgroundColor(UIColor::clear);
+//            setBackgroundColor(UIColor::clear);
             setTransform(NXAffineTransform::identity);
+            layer()->setBorderColor(UIColor::systemBlue);
+            UIView::performWithoutAnimation([this]() {
+                layer()->setBorderWidth(0);
+            });
         });
     }
 }

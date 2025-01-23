@@ -27,10 +27,14 @@ public:
     void setFontWeight(NXFloat fontWeight);
     [[nodiscard]] NXFloat fontWeight() const { return _fontWeight; }
 
+    void setBaseScaleMultiplier(NXFloat baseScaleMultiplier);
+    [[nodiscard]] NXFloat baseScaleMultiplier() const { return _baseScaleMultiplier; }
+
     NXSize sizeThatFits(NXSize size) override;
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 
 private:
+    NXFloat _baseScaleMultiplier = 1;
     int _numberOfLines = 1;
     NXFloat _fontSize = 17;
     NXFloat _fontWeight = SkFontStyle::kNormal_Weight;
