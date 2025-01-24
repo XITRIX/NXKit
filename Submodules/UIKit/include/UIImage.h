@@ -8,14 +8,14 @@ namespace NXKit {
 
 class UIImage {
 public:
-    UIImage(std::shared_ptr<CGImage> cgImage, NXFloat scale);
+    UIImage(const std::shared_ptr<CGImage>& cgImage, NXFloat scale);
 
-    static std::shared_ptr<UIImage> fromPath(std::string path);
-    static std::shared_ptr<UIImage> fromData(std::shared_ptr<NXData> data, NXFloat scale = SkiaCtx::main()->getScaleFactor());
+    static std::shared_ptr<UIImage> fromPath(const std::string& path);
+    static std::shared_ptr<UIImage> fromData(const std::shared_ptr<NXData>& data, NXFloat scale = SkiaCtx::main()->getScaleFactor());
 
     std::shared_ptr<CGImage> cgImage() { return _cgImage; }
-    NXSize size() const { return _size; }
-    NXFloat scale() const { return _scale; }
+    [[nodiscard]] NXSize size() const { return _size / _scale; }
+    [[nodiscard]] NXFloat scale() const { return _scale; }
 
 private:
     std::shared_ptr<CGImage> _cgImage;

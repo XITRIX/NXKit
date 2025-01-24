@@ -46,6 +46,10 @@ public:
     void setBackgroundColor(std::optional<UIColor> backbroundColor) { _layer->setBackgroundColor(backbroundColor); }
     [[nodiscard]] std::optional<UIColor> backgroundColor() const { return _layer->backgroundColor(); }
 
+    void setTintColor(std::optional<UIColor> tintColor);
+    UIColor tintColor() const;
+    virtual void tintColorDidChange();
+
     void setUserInteractionEnabled(bool isUserInteractionEnabled) { _isUserInteractionEnabled = isUserInteractionEnabled; }
     [[nodiscard]] bool isUserInteractionEnabled() const { return _isUserInteractionEnabled; }
 
@@ -58,7 +62,7 @@ public:
     void addGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& gestureRecognizer);
     [[nodiscard]] std::vector<std::shared_ptr<UIGestureRecognizer>>* gestureRecognizers()  { return &_gestureRecognizers; }
 
-    virtual void addSubview(std::shared_ptr<UIView> view);
+    void addSubview(std::shared_ptr<UIView> view);
     void insertSubviewAt(std::shared_ptr<UIView> view, int index);
     void insertSubviewBelow(const std::shared_ptr<UIView>& view, const std::shared_ptr<UIView>& belowSubview);
     void removeFromSuperview();
@@ -128,6 +132,8 @@ public:
     static void performWithoutAnimation(const std::function<void()>& actionsWithoutAnimation);
     
     std::shared_ptr<CABasicAnimation> actionForKey(std::string event) override;
+    void updateCurrentEnvironment() override;
+
     virtual void draw() {}
     virtual void display(std::shared_ptr<CALayer> layer) override;
 private:
@@ -146,6 +152,8 @@ private:
     std::weak_ptr<UIViewController> _parentController;
     bool _isUserInteractionEnabled = true;
     static int _performWithoutAnimationTick;
+
+    std::optional<UIColor> _tintColor;
 
     bool _needsLayout = true;
     bool _needsDisplay = true;

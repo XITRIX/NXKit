@@ -87,6 +87,9 @@ std::shared_ptr<UIWindow> UIView::window() {
 
 void UIView::setSuperview(const std::shared_ptr<UIView>& superview) {
     _superview = superview;
+
+    if (!_tintColor.has_value())
+        tintColorDidChange();
 }
 
 void UIView::insertSubviewAt(std::shared_ptr<UIView> view, int index) {
@@ -139,7 +142,10 @@ void UIView::drawAndLayoutTreeIfNeeded() {
 
     if (visibleLayer->isHidden() || visibleLayer->opacity() < 0.01f) { return; }
 
+    auto tint = tintColor();
+
     UITraitCollection::setCurrent(traitCollection());
+    UIColor::_currentTint = tint;
 
     if (_contentMode == UIViewContentMode::redraw) {
         if (visibleLayer->contents() && visibleLayer->contents()->size() != visibleLayer->bounds().size) {
@@ -148,6 +154,7 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     }
 
     UITraitCollection::setCurrent(traitCollection());
+    UIColor::_currentTint = tint;
 
     if (visibleLayer->_needsDisplay) {
         visibleLayer->display();
@@ -155,6 +162,7 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     }
 
     UITraitCollection::setCurrent(traitCollection());
+    UIColor::_currentTint = tint;
 
     if (_needsDisplay) {
         draw();
@@ -162,6 +170,7 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     }
 
     UITraitCollection::setCurrent(traitCollection());
+    UIColor::_currentTint = tint;
 
 //    updateSafeAreaInsetsIfNeeded();
 //    updateLayoutMarginIfNeeded();
@@ -229,6 +238,26 @@ void UIView::setContentMode(UIViewContentMode mode) {
         case UIViewContentMode::bottomRight:
             _layer->setContentsGravity(CALayerContentsGravity::bottomRight);
             break;
+    }
+}
+
+void UIView::setTintColor(std::optional<UIColor> tintColor) {
+    if (_tintColor == tintColor) return;
+    _tintColor = std::move(tintColor);
+    tintColorDidChange();
+}
+
+UIColor UIView::tintColor() const {
+    if (_tintColor.has_value()) return _tintColor.value();
+    if (!superview().expired()) return superview().lock()->tintColor();
+    return UIColor::systemBlue;
+}
+
+void UIView::tintColorDidChange() {
+    setNeedsDisplay();
+    for (const auto& child : subviews()) {
+        if (!child->_tintColor.has_value())
+            child->tintColorDidChange();
     }
 }
 
@@ -470,6 +499,11 @@ std::shared_ptr<CABasicAnimation> UIView::actionForKey(std::string event) {
     }
 
     return nullptr;
+}
+
+void UIView::updateCurrentEnvironment() {
+    UITraitCollection::setCurrent(traitCollection());
+    UIColor::_currentTint = tintColor();
 }
 
 void UIView::display(std::shared_ptr<CALayer> layer) { }

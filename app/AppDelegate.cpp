@@ -18,7 +18,8 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
 //    auto vc = new_shared<TextViewController>();
     window->setRootViewController(vc);
     window->makeKeyAndVisible();
-    window->setBackgroundColor(UIColor::systemBackground);
+//    window->setBackgroundColor(UIColor::systemBackground);
+    window->setBackgroundColor(UIColor::secondarySystemBackground);
 
     return true;
 }

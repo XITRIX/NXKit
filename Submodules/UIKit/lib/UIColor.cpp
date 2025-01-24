@@ -1,8 +1,10 @@
 #include "UIColor.h"
 #include <limits>
-#include <math.h>
+#include <cmath>
 
 using namespace NXKit;
+
+UIColor UIColor::_currentTint = UIColor::systemBlue;
 
 // Transparent
 UIColor UIColor::clear = UIColor(0, 0, 0, 0);
@@ -37,21 +39,47 @@ UIColor UIColor::systemPurple = UIColorThemed(UIColor(175, 82, 222), UIColor(191
 UIColor UIColor::systemPink = UIColorThemed(UIColor(255, 45, 85), UIColor(255, 55, 95));
 UIColor UIColor::systemBrown = UIColorThemed(UIColor(162, 132, 94), UIColor(172, 142, 104));
 
+// Adoptable gray
+UIColor UIColor::systemGray = UIColor(142, 142, 147);
+UIColor UIColor::systemGray2 = UIColorThemed(UIColor(174, 174, 178), UIColor(99, 99, 102));
+UIColor UIColor::systemGray3 = UIColorThemed(UIColor(199, 199, 204), UIColor(72, 72, 74));
+UIColor UIColor::systemGray4 = UIColorThemed(UIColor(209, 209, 214), UIColor(58, 58, 60));
+UIColor UIColor::systemGray5 = UIColorThemed(UIColor(229, 229, 234), UIColor(44, 44, 46));
+UIColor UIColor::systemGray6 = UIColorThemed(UIColor(242, 242, 247), UIColor(28, 28, 30));
+
 // Label
 UIColor UIColor::label = UIColorThemed(UIColor(0, 0, 0), UIColor(255, 255, 255));
 UIColor UIColor::secondaryLabel = UIColorThemed(UIColor(0x993c3c43), UIColor(0x99ebebf5));
 UIColor UIColor::tertiaryLabel = UIColorThemed(UIColor(0x4c3c3c43), UIColor(0x4cebebf5));
 UIColor UIColor::quaternaryLabel = UIColorThemed(UIColor(0x2d3c3c43), UIColor(0x28ebebf5));
 
+// Text
+UIColor UIColor::placeholderText = UIColorThemed(UIColor(0x3c3c434c), UIColor(0xebebf54c));
+
+// Fill
+UIColor UIColor::systemFill = UIColorThemed(UIColor(0x78788033), UIColor(0x7878805c));
+UIColor UIColor::secondarySystemFill = UIColorThemed(UIColor(0x78788029), UIColor(0x78788052));
+UIColor UIColor::tertiarySystemFill = UIColorThemed(UIColor(0x7676801f), UIColor(0x7676803d));
+UIColor UIColor::quaternarySystemFill = UIColorThemed(UIColor(0x74748014), UIColor(0x7676802e));
+
 // Standard content background
 UIColor UIColor::systemBackground = UIColorThemed(UIColor(255, 255, 255), UIColor(0, 0, 0));
 UIColor UIColor::secondarySystemBackground = UIColorThemed(UIColor(242, 242, 242), UIColor(28, 28, 30));
-UIColor UIColor::tetriarySystemBackground = UIColorThemed(UIColor(255, 255, 255), UIColor(44, 44, 46));
+UIColor UIColor::tertiarySystemBackground = UIColorThemed(UIColor(255, 255, 255), UIColor(44, 44, 46));
+
+// Grouped content background
+UIColor UIColor::systemGroupedBackground = UIColorThemed(UIColor(242, 242, 242), UIColor(0, 0, 0));
+UIColor UIColor::secondarySystemGroupedBackground = UIColorThemed(UIColor(255, 255, 255), UIColor(28, 28, 30));
+UIColor UIColor::tertiarySystemGroupedBackground = UIColorThemed(UIColor(242, 242, 242), UIColor(44, 44, 46));
 
 // Separator
 UIColor UIColor::separator = UIColorThemed(UIColor(0x4a3c3c43), UIColor(0x99545458));
+UIColor UIColor::opaqueSeparator = UIColorThemed(UIColor(198, 198, 200), UIColor(56, 56, 58));
 
-UIColor UIColor::tint = systemBlue;
+// Tint
+UIColor UIColor::tint = UIColor([](auto) {
+    return UIColor::_currentTint;
+});
 
 UIColor::UIColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
     color = (a & 0xff) << 24 | (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
@@ -61,8 +89,9 @@ UIColor::UIColor(): UIColor(0, 0, 0) {}
 
 UIColor::UIColor(int rawValue): color(rawValue) {}
 
+UIColor::UIColor(UIColor const &color): color(color.color), dynamicProvider(color.dynamicProvider) {}
 
-UIColor::UIColor(std::function<UIColor(std::shared_ptr<UITraitCollection>)> dynamicProvider) {
+UIColor::UIColor(const std::function<UIColor(std::shared_ptr<UITraitCollection>)>& dynamicProvider) {
     this->dynamicProvider = dynamicProvider;
 }
 
@@ -74,19 +103,19 @@ uint32_t UIColor::raw() const {
     return dynamicProvider.value()(UITraitCollection::current()).raw();
 }
 
-unsigned char UIColor::r() {
+unsigned char UIColor::r() const {
     return static_cast<unsigned char>((raw() >> 16) & 0xff);
 }
 
-unsigned char UIColor::g() {
+unsigned char UIColor::g() const {
     return static_cast<unsigned char>((raw() >> 8) & 0xff);
 }
 
-unsigned char UIColor::b() {
+unsigned char UIColor::b() const {
     return static_cast<unsigned char>(raw() & 0xff);
 }
 
-unsigned char UIColor::a() {
+unsigned char UIColor::a() const {
     return static_cast<unsigned char>((raw() >> 24) & 0xff);
 }
 
@@ -94,7 +123,16 @@ bool UIColor::operator==(const UIColor& rhs) const {
     return this->raw() == rhs.raw();
 }
 
-UIColor UIColor::interpolationTo(UIColor endResult, NXFloat progress) {
+UIColor UIColor::withAlphaComponent(NXFloat alpha) {
+    UIColor copy(*this);
+    alpha = std::max(0.0f, std::min(alpha, 1.0f));
+
+    return UIColor([copy, alpha](auto) {
+        return UIColor(copy.r(), copy.g(), copy.b(), (unsigned char) (255 * alpha));
+    });
+}
+
+UIColor UIColor::interpolationTo(const UIColor& endResult, NXFloat progress) const {
     auto startR = r();
     auto startG = g();
     auto startB = b();

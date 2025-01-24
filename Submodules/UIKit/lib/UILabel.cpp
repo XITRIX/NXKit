@@ -81,7 +81,11 @@ void UILabel::draw() {
 
     canvas.scale(scale, scale);
     paragraph->layout(size.width);
-    paragraph->paint(&canvas, 0, 0);
+
+    auto height = paragraph->getHeight();
+    auto yOffset = (size.height - height) / 2;
+
+    paragraph->paint(&canvas, 0, yOffset);
 
     layer()->setContents(new_shared<CGImage>(bitmap.asImage()));
     layer()->setContentsScale(scale);

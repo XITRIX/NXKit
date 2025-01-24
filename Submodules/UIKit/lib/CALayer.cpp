@@ -214,6 +214,9 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         canvas->saveLayerAlphaf(nullptr, _opacity);
     }
 
+    // Update current Tint environment
+    if (!delegate.expired()) delegate.lock()->updateCurrentEnvironment();
+
     // Background color
     if (_backgroundColor.has_value()) {
         paint.setColor(_backgroundColor->raw());

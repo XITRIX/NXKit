@@ -23,6 +23,8 @@ UIWindow::UIWindow() {
     _focusSystem->_rootWindow = weak_from_base<UIWindow>();
 
     setBackgroundColor(UIColor::systemBackground);
+    setTintColor(UIColor::systemBlue);
+
 //    yoga->setEnabled(false);
 }
 

@@ -2,7 +2,7 @@
 
 #include <UITraitCollection.h>
 #include <Geometry.h>
-#include <stdint.h>
+#include <cstdint>
 #include <functional>
 #include <optional>
 
@@ -19,20 +19,23 @@ else                                                                \
 class UIColor {
 public:
     UIColor();
-    UIColor(std::function<UIColor(std::shared_ptr<UITraitCollection>)> dynamicProvider);
-    UIColor(int rawValue);
+    UIColor(UIColor const &color);
+    explicit UIColor(const std::function<UIColor(std::shared_ptr<UITraitCollection>)>& dynamicProvider);
+    explicit UIColor(int rawValue);
     UIColor(unsigned char red, unsigned char green, unsigned char blue);
     UIColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
 
-    unsigned char r();
-    unsigned char g();
-    unsigned char b();
-    unsigned char a();
+    [[nodiscard]] unsigned char r() const;
+    [[nodiscard]] unsigned char g() const;
+    [[nodiscard]] unsigned char b() const;
+    [[nodiscard]] unsigned char a() const;
     
     bool operator==(const UIColor& rhs) const;
 
-    UIColor interpolationTo(UIColor endResult, NXFloat progress);
-    uint32_t raw() const;
+    UIColor withAlphaComponent(NXFloat alpha);
+
+    [[nodiscard]] UIColor interpolationTo(const UIColor& endResult, NXFloat progress) const;
+    [[nodiscard]] uint32_t raw() const;
 
     // Transparent
     static UIColor clear;
@@ -53,6 +56,38 @@ public:
     static UIColor magenta;
     static UIColor brown;
 
+    // Label
+    static UIColor label;
+    static UIColor secondaryLabel;
+    static UIColor tertiaryLabel;
+    static UIColor quaternaryLabel;
+
+    // Text
+    static UIColor placeholderText;
+
+    // Fill
+    static UIColor systemFill;
+    static UIColor secondarySystemFill;
+    static UIColor tertiarySystemFill;
+    static UIColor quaternarySystemFill;
+
+    // Separator
+    static UIColor separator;
+    static UIColor opaqueSeparator;
+    
+    // Standard content background
+    static UIColor systemBackground;
+    static UIColor secondarySystemBackground;
+    static UIColor tertiarySystemBackground;
+
+    // Grouped content background
+    static UIColor systemGroupedBackground;
+    static UIColor secondarySystemGroupedBackground;
+    static UIColor tertiarySystemGroupedBackground;
+
+    // Tint
+    static UIColor tint;
+
     // Adaptable
     static UIColor systemRed;
     static UIColor systemOrange;
@@ -67,23 +102,18 @@ public:
     static UIColor systemPink;
     static UIColor systemBrown;
 
-    // Label
-    static UIColor label;
-    static UIColor secondaryLabel;
-    static UIColor tertiaryLabel;
-    static UIColor quaternaryLabel;
-
-    // Separator
-    static UIColor separator;
-    
-    // Standard content background
-    static UIColor systemBackground;
-    static UIColor secondarySystemBackground;
-    static UIColor tetriarySystemBackground;
-
-    static UIColor tint;
+    // Adoptable gray
+    static UIColor systemGray;
+    static UIColor systemGray2;
+    static UIColor systemGray3;
+    static UIColor systemGray4;
+    static UIColor systemGray5;
+    static UIColor systemGray6;
 
 private:
+    friend class UIView;
+
+    static UIColor _currentTint;
     std::optional<std::function<UIColor(std::shared_ptr<UITraitCollection>)>> dynamicProvider;
     uint32_t color = 0xFF600060;
 };

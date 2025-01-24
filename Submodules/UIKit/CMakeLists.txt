@@ -28,6 +28,7 @@ add_library(UIKit
         lib/UIApplicationDelegateImpl.cpp
         lib/UIApplicationMain.cpp
         lib/UIBlurView.cpp
+        lib/UIButton.cpp
         lib/UIColor.cpp
         lib/UIControl.cpp
         lib/UIControlGestureRecognizer.cpp

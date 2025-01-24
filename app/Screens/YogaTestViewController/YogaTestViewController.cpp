@@ -1,4 +1,5 @@
 #include <Screens/YogaTestViewController/YogaTestViewController.hpp>
+#include "romfs/romfs.hpp"
 
 using namespace NXKit;
 
@@ -8,6 +9,7 @@ YogaTestViewController::YogaTestViewController() {
 
 void YogaTestViewController::loadView() {
     auto rootView = new_shared<UIView>();
+//    rootView->setBackgroundColor(UIColor::secondarySystemBackground);
 
     //MARK: - HEADER!
     auto header = new_shared<UIView>();
@@ -65,43 +67,21 @@ void YogaTestViewController::loadView() {
 
     auto buttonsBox = new_shared<UIView>();
 
-    auto buttonLabel = new_shared<UILabel>();
-    auto control = new_shared<UIControl>();
+    auto res = romfs::get("img/star.png");
+    auto data = new_shared<NXData>(res.data(), res.size());
+    auto image = UIImage::fromData(data, 3);
 
-    control->addSubview(buttonLabel);
+    auto control = new_shared<UIButton>(UIButtonStyle::tinted);
     control->layer()->setCornerRadius(10);
-    buttonLabel->setText("Button!");
-    buttonLabel->setFontWeight(800);
-    buttonLabel->setTextAlignment(NSTextAlignment::center);
-    buttonLabel->setAutolayoutEnabled(true);
-
-    control->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
-        layout->setJustifyContent(YGJustify::YGJustifyCenter);
-        layout->setAlignContent(YGAlign::YGAlignCenter);
-//        layout->setPositionType(YGPositionType::YGPositionTypeAbsolute);
-//        layout->setPosition({230, 80});
-        layout->setSize({ 200, 44 });
-    });
+    control->titleLabel()->setText("Buttogn!");
+    control->setImage(image);
+    control->setTintColor(UIColor::systemOrange);
 
     buttonsBox->addSubview(control);
 
-    auto buttonLabel2 = new_shared<UILabel>();
-    auto control2 = new_shared<UIControl>();
-
-    control2->addSubview(buttonLabel2);
+    auto control2 = new_shared<UIButton>(UIButtonStyle::tinted);
     control2->layer()->setCornerRadius(10);
-    buttonLabel2->setText("Button!");
-    buttonLabel2->setFontWeight(800);
-    buttonLabel2->setTextAlignment(NSTextAlignment::center);
-    buttonLabel2->setAutolayoutEnabled(true);
-
-    control2->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
-        layout->setJustifyContent(YGJustify::YGJustifyCenter);
-        layout->setAlignContent(YGAlign::YGAlignCenter);
-//        layout->setPositionType(YGPositionType::YGPositionTypeAbsolute);
-//        layout->setPosition({530, 80});
-        layout->setSize({ 200, 44 });
-    });
+    control2->titleLabel()->setText("Button!");
 
     buttonsBox->addSubview(control2);
 
@@ -110,7 +90,7 @@ void YogaTestViewController::loadView() {
 //        layout->setJustifyContent(YGJustify::YGJustifyCenter);
 //        layout->setAlignContent(YGAlign::YGAlignCenter);
         layout->setPositionType(YGPositionType::YGPositionTypeAbsolute);
-        layout->setPosition({130, 80});
+        layout->setPosition({30, 80});
         layout->setAllGap(8);
     });
     rootView->addSubview(buttonsBox);
