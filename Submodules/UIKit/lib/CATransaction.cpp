@@ -5,7 +5,7 @@ namespace NXKit {
 std::vector<CATransaction> CATransaction::transactionStack;
 
 void CATransaction::begin() {
-    transactionStack.push_back(CATransaction());
+    transactionStack.emplace_back();
 }
 
 void CATransaction::commit() {

@@ -10,6 +10,6 @@ public:
 
     void viewDidLayoutSubviews() override;
 private:
-    std::shared_ptr<NXKit::UILabel> dragMeViewLabel;
+//    std::shared_ptr<NXKit::UILabel> dragMeViewLabel;
 };
 

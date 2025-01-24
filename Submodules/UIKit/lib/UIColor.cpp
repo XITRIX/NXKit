@@ -57,10 +57,10 @@ UIColor UIColor::quaternaryLabel = UIColorThemed(UIColor(0x2d3c3c43), UIColor(0x
 UIColor UIColor::placeholderText = UIColorThemed(UIColor(0x3c3c434c), UIColor(0xebebf54c));
 
 // Fill
-UIColor UIColor::systemFill = UIColorThemed(UIColor(0x78788033), UIColor(0x7878805c));
-UIColor UIColor::secondarySystemFill = UIColorThemed(UIColor(0x78788029), UIColor(0x78788052));
-UIColor UIColor::tertiarySystemFill = UIColorThemed(UIColor(0x7676801f), UIColor(0x7676803d));
-UIColor UIColor::quaternarySystemFill = UIColorThemed(UIColor(0x74748014), UIColor(0x7676802e));
+UIColor UIColor::systemFill = UIColorThemed(UIColor(0x33787880), UIColor(0x5c787880));
+UIColor UIColor::secondarySystemFill = UIColorThemed(UIColor(0x29787880), UIColor(0x52787880));
+UIColor UIColor::tertiarySystemFill = UIColorThemed(UIColor(0x1f767680), UIColor(0x3d767680));
+UIColor UIColor::quaternarySystemFill = UIColorThemed(UIColor(0x14747480), UIColor(0x2e767680));
 
 // Standard content background
 UIColor UIColor::systemBackground = UIColorThemed(UIColor(255, 255, 255), UIColor(0, 0, 0));

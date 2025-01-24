@@ -174,6 +174,7 @@ private:
      often enough for us to care about it.
     **/
     static bool layerTreeIsDirty;
+    static void setLayerTreeIsDirty();
 
     std::shared_ptr<CALayer> _presentation;
     std::map<std::string, std::shared_ptr<CABasicAnimation>> animations;

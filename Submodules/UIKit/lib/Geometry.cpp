@@ -34,7 +34,7 @@ NXPoint::NXPoint(): x(0), y(0) { }
 NXPoint::NXPoint(NXFloat x, NXFloat y): x(x), y(y) { }
 
 bool NXPoint::operator==(const NXPoint& rhs) const {
-    return this->x == rhs.x && this->y == rhs.y;
+    return isEqual(this->x, rhs.x) && isEqual(this->y, rhs.y);
 }
 
 bool NXPoint::operator!=(const NXPoint& rhs) const {
@@ -226,9 +226,7 @@ NXRect& NXRect::offsetBy(const NXFloat& offsetX, const NXFloat& offsetY) {
 }
 
 bool NXRect::operator==(const NXRect& rhs) const {
-    return
-    this->origin.x == rhs.origin.x && this->origin.y == rhs.origin.y &&
-    this->size.width == rhs.size.width && this->size.height == rhs.size.height;
+    return this->origin == rhs.origin && this->size == rhs.size;
 }
 
 NXRect NXRect::operator+(const NXRect& rhs) const {

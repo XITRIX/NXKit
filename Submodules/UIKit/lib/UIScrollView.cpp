@@ -86,7 +86,7 @@ NXPoint UIScrollView::visibleContentOffset() {
 }
 
 NXSize UIScrollView::contentSize() {
-    if (subviews().size() == 0) return NXSize();
+    if (subviews().empty()) return {};
     return subviews().front()->bounds().size;
 }
 
@@ -311,8 +311,8 @@ void UIScrollView::hideScrollIndicators() {
 void UIScrollView::startDeceleratingIfNecessary() {
     // Only animate if instantaneous velocity is large enough
     // Otherwise we could animate after scrolling quickly, pausing for a few seconds, then letting go
-    // TODO: Need to check velocity, it's too weak
-    auto velocity = NXPoint(-weightedAverageVelocity.x * 10, -weightedAverageVelocity.y * 10);
+    // TODO: Need to check velocity, it's too powerful
+    auto velocity = NXPoint(-weightedAverageVelocity.x / 50, -weightedAverageVelocity.y / 50);
     if (!shouldBounceVertically()) {
         velocity.y = 0;
     }
@@ -321,7 +321,7 @@ void UIScrollView::startDeceleratingIfNecessary() {
     }
 
     auto decelerationRate = _decelerationRate.rawValue();
-    auto threshold = 0.5f / layer()->contentsScale();
+    auto threshold = 0.5f / traitCollection()->displayScale();// layer()->contentsScale();
 
     auto parameters = DecelerationTimingParameters(contentOffset(),velocity, decelerationRate, threshold);
 
@@ -385,13 +385,13 @@ void UIScrollView::startDeceleratingIfNecessary() {
 void UIScrollView::bounceWithVelocity(NXPoint velocity) {
     auto restOffset = getBoundsCheckedContentOffset(contentOffset());
     auto displacement = contentOffset() - restOffset;
-    auto threshold = 0.5f / layer()->contentsScale();
+    auto threshold = 0.5f / traitCollection()->displayScale(); //layer()->contentsScale();
     auto spring = Spring(1, 100, 1);
 
     auto parameters = SpringTimingParameters(spring, displacement,velocity, threshold);
 
     auto duration = parameters.duration();
-    _timerAnimation = std::make_shared<TimerAnimation>(duration, [this, duration, restOffset, parameters](auto, float time){
+    _timerAnimation = std::make_shared<TimerAnimation>(duration, [this, restOffset, parameters](auto, float time){
         setContentOffset(restOffset + parameters.valueAt(time), false);
     }, [this](bool) {
         _isDecelerating = false;
@@ -428,7 +428,7 @@ void UIScrollView::cancelDecelerationAnimations() {
 
 void UIScrollView::layoutSubviews() {
     UIView::layoutSubviews();
-    setContentOffset(getBoundsCheckedContentOffset(contentOffset()), false);
+//    setContentOffset(getBoundsCheckedContentOffset(contentOffset()), false);
 }
 
 }

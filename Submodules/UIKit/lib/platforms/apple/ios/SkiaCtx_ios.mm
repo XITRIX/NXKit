@@ -42,7 +42,7 @@ NXSize SkiaCtx_ios::getSize() {
     auto window = UIApplication.sharedApplication.keyWindow;
     auto layer = window.layer.presentationLayer;
     if (layer == NULL) layer = window.layer;
-    NXSize size = { layer.bounds.size.width, layer.bounds.size.height };
+    NXSize size = { static_cast<NXFloat>(layer.bounds.size.width), static_cast<NXFloat>(layer.bounds.size.height) };
 //    printf("Size: %f | %f\n", layer.bounds.size.width, layer.bounds.size.height);
     return size;
 }

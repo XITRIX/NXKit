@@ -15,6 +15,10 @@
 using namespace NXKit;
 
 bool CALayer::layerTreeIsDirty = true;
+void CALayer::setLayerTreeIsDirty() {
+    layerTreeIsDirty = true;
+}
+
 NXFloat CALayer::defaultAnimationDuration = 0.3f;
 
 CALayer::CALayer() = default;
@@ -115,12 +119,12 @@ NXAffineTransform CALayer::affineTransform() {
 
 void CALayer::setHidden(bool hidden) {
     _isHidden = hidden;
-    CALayer::layerTreeIsDirty = true;
+    CALayer::setLayerTreeIsDirty();
 }
 
 void CALayer::setContents(std::shared_ptr<CGImage> contents) {
     _contents = std::move(contents);
-    CALayer::layerTreeIsDirty = true;
+    CALayer::setLayerTreeIsDirty();
 }
 
 void CALayer::setMask(const std::shared_ptr<CALayer>& mask) {
@@ -136,14 +140,14 @@ void CALayer::addSublayer(const std::shared_ptr<CALayer>& layer) {
     layer->removeFromSuperlayer();
     _sublayers.push_back(layer);
     layer->_superlayer = this->shared_from_this();
-    CALayer::layerTreeIsDirty = true;
+    CALayer::setLayerTreeIsDirty();
 }
 
 void CALayer::insertSublayerAt(const std::shared_ptr<CALayer>& layer, int index) {
     layer->removeFromSuperlayer();
     _sublayers.insert(_sublayers.begin() + index, layer);
     layer->_superlayer = this->shared_from_this();
-    CALayer::layerTreeIsDirty = true;
+    CALayer::setLayerTreeIsDirty();
 }
 
 void CALayer::insertSublayerAbove(const std::shared_ptr<CALayer>& layer, const std::shared_ptr<CALayer>& sibling) {
@@ -157,7 +161,7 @@ void CALayer::insertSublayerBelow(const std::shared_ptr<CALayer>& layer, const s
     layer->removeFromSuperlayer();
     _sublayers.insert(itr, layer);
     layer->_superlayer = this->shared_from_this();
-    CALayer::layerTreeIsDirty = true;
+    CALayer::setLayerTreeIsDirty();
 }
 
 void CALayer::removeFromSuperlayer() {
@@ -172,7 +176,7 @@ void CALayer::removeFromSuperlayer() {
 
     // Find and remove this from superlayer
     super->_sublayers.erase(std::remove(super->_sublayers.begin(), super->_sublayers.end(), shared_from_this()), super->_sublayers.end());
-    CALayer::layerTreeIsDirty = true;
+    CALayer::setLayerTreeIsDirty();
 }
 
 void CALayer::draw(SkCanvas* context) {}
@@ -190,6 +194,12 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     // Set Origin matrix
     canvas->concat(matrix.toSkM44());
 
+    // Origin matrix save 2
+    canvas->save();
+
+    // Set Anchor matrix
+    canvas->concat(CATransform3DMakeTranslation(-_bounds.width() * _anchorPoint.x, -_bounds.height() * _anchorPoint.y, 0).toSkM44());
+
     // Masks To Bounds
     if (_masksToBounds) {
         SkRect rect = SkRect::MakeXYWH(0, 0, _bounds.width(), _bounds.height());
@@ -197,14 +207,9 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         SkVector corners[] = {{radii, radii}, {radii, radii}, {radii, radii}, {radii, radii}};
         SkRRect rrect;
         rrect.setRectRadii(rect, corners);
+        canvas->save();
         canvas->clipRRect(rrect, true);
     }
-
-    // Origin matrix save 2
-    canvas->save();
-
-    // Set Anchor matrix
-    canvas->concat(CATransform3DMakeTranslation(-_bounds.width() * _anchorPoint.x, -_bounds.height() * _anchorPoint.y, 0).toSkM44());
 
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -261,6 +266,8 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     draw(canvas);
 
+    canvas->concat(CATransform3DMakeTranslation(-_bounds.origin.x, -_bounds.origin.y, 0).toSkM44());
+
     for (const auto& sublayer: _sublayers) {
         sublayer->presentationOrSelf()->skiaRender(canvas);
     }
@@ -287,6 +294,10 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     // Reset Anchor to Origin matrix
     // Origin matrix save 2 // restore
     canvas->restore();
+
+    if (_masksToBounds) {
+        canvas->restore();
+    }
 
     // Initial save 1 // restore
     canvas->restore();
@@ -393,7 +404,7 @@ void CALayer::removeAnimation(const std::string& forKey) {
 }
 
 void CALayer::onWillSet(const std::string& keyPath) {
-    CALayer::layerTreeIsDirty = true;
+    CALayer::setLayerTreeIsDirty();
     const auto& animationKey = keyPath;
 
     auto animation = std::static_pointer_cast<CABasicAnimation>(actionForKey(animationKey));
@@ -450,7 +461,7 @@ void CALayer::animateAt(Timer currentTime) {
     }
 
     this->_presentation = animations.empty() ? nullptr : presentation;
-    CALayer::layerTreeIsDirty = true;
+    CALayer::setLayerTreeIsDirty();
 }
 
 // Writing into `presentation->_...` cause we don't need onWillSet to be triggered

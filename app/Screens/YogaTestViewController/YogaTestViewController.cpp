@@ -163,6 +163,34 @@ void YogaTestViewController::loadView() {
         layout->setSize({ 200, 200 });
     });
 
+    auto scroll = new_shared<UIScrollView>();
+    rootView->addSubview(scroll);
+
+    auto res1 = romfs::get("img/star.png");
+    auto data1 = new_shared<NXData>(res1.data(), res1.size());
+    auto image1 = UIImage::fromData(data1, 3);
+
+    auto imageView = new_shared<UIImageView>();
+    imageView->setAutolayoutEnabled(true);
+    imageView->setImage(image1);
+//    imageView->setBackgroundColor(UIColor::systemOrange);
+    imageView->configureLayout([](std::shared_ptr<YGLayout> layout) {
+        layout->setPositionType(YGPositionTypeAbsolute);
+        layout->setPosition({ 0, 0 });
+        layout->setSize({ 200, 200 });
+    });
+
+    scroll->addSubview(imageView);
+    scroll->setBackgroundColor(UIColor::tertiarySystemFill);
+    scroll->setBounceHorizontally(true);
+    scroll->setBounceVertically(true);
+
+    scroll->configureLayout([](std::shared_ptr<YGLayout> layout) {
+        layout->setPositionType(YGPositionType::YGPositionTypeAbsolute);
+        layout->setPosition({200, 200});
+        layout->setSize({ 100, 100 });
+    });
+
     setView(rootView);
 }
 
