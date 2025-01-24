@@ -34,10 +34,10 @@ public:
     virtual void didMoveToParent(std::shared_ptr<UIViewController> parent);
     void removeFromParent();
 
-//    UIEdgeInsets additionalSafeAreaInsets() { return _additionalSafeAreaInsets; }
-//    void setAdditionalSafeAreaInsets(UIEdgeInsets additionalSafeAreaInsets);
+    UIEdgeInsets additionalSafeAreaInsets() { return _additionalSafeAreaInsets; }
+    void setAdditionalSafeAreaInsets(UIEdgeInsets additionalSafeAreaInsets);
 
-//    UIEdgeInsets systemMinimumLayoutMargins() { return _systemMinimumLayoutMargins; }
+    UIEdgeInsets systemMinimumLayoutMargins() { return _systemMinimumLayoutMargins; }
 
     bool viewRespectsSystemMinimumLayoutMargins() { return _viewRespectsSystemMinimumLayoutMargins; }
     void setViewRespectsSystemMinimumLayoutMargins(bool viewRespectsSystemMinimumLayoutMargins);
@@ -59,8 +59,8 @@ private:
     std::shared_ptr<UIView> _view;
     std::weak_ptr<UIViewController> _parent;
     std::vector<std::shared_ptr<UIViewController>> _children;
-//    UIEdgeInsets _additionalSafeAreaInsets;
-//    UIEdgeInsets _systemMinimumLayoutMargins = UIEdgeInsets(0, 16, 0, 16);
+    UIEdgeInsets _additionalSafeAreaInsets;
+    UIEdgeInsets _systemMinimumLayoutMargins = UIEdgeInsets(0, 16, 0, 16);
     bool _viewRespectsSystemMinimumLayoutMargins = true;
     float _animationTime = 0.5;
 

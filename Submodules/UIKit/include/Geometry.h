@@ -16,17 +16,19 @@ struct NXPoint {
     NXPoint(NXFloat x, NXFloat y);
 
     bool operator==(const NXPoint& rhs) const;
+    bool operator!=(const NXPoint& rhs) const;
     NXPoint operator+(const NXPoint& first) const;
     NXPoint operator-(const NXPoint& first) const;
     NXPoint& operator+=(const NXPoint& rhs);
     NXPoint& operator-=(const NXPoint& rhs);
-    NXPoint operator/(const NXFloat& rhs);
-    NXPoint operator*(const NXFloat& rhs);
+    NXPoint operator/(const NXFloat& rhs) const;
+    NXPoint operator*(const NXFloat& rhs) const;
 
-    NXPoint applying(const NXAffineTransform& t) const;
+    [[nodiscard]] NXPoint applying(const NXAffineTransform& t) const;
+    [[nodiscard]] NXFloat distanceToSegment(NXPoint v, NXPoint w) const;
 
-    bool valid() const;
-    NXFloat magnitude() const;
+    [[nodiscard]] bool valid() const;
+    [[nodiscard]] NXFloat magnitude() const;
 
     static NXPoint zero;
 };
@@ -50,7 +52,7 @@ struct NXSize {
     NXSize &operator*=(const NXFloat &rhs);
     NXSize &operator/=(const NXFloat &rhs);
 
-    bool valid() const;
+    [[nodiscard]] bool valid() const;
 //    NXSize inset(UIEdgeInsets inset) const;
 };
 
@@ -62,16 +64,16 @@ struct NXRect {
     NXRect(NXPoint origin, NXSize size);
     NXRect(NXFloat x, NXFloat y, NXFloat width, NXFloat height);
 
-    NXFloat width() const;
-    NXFloat height() const;
+    [[nodiscard]] NXFloat width() const;
+    [[nodiscard]] NXFloat height() const;
 
-    NXFloat minX() const;
-    NXFloat midX() const;
-    NXFloat maxX() const;
+    [[nodiscard]] NXFloat minX() const;
+    [[nodiscard]] NXFloat midX() const;
+    [[nodiscard]] NXFloat maxX() const;
 
-    NXFloat minY() const;
-    NXFloat midY() const;
-    NXFloat maxY() const;
+    [[nodiscard]] NXFloat minY() const;
+    [[nodiscard]] NXFloat midY() const;
+    [[nodiscard]] NXFloat maxY() const;
 
     void setWidth(NXFloat newValue);
     void setHeight(NXFloat newValue);
@@ -84,8 +86,8 @@ struct NXRect {
     void setMidY(NXFloat newValue);
     void setMaxY(NXFloat newValue);
 
-    bool contains(NXPoint point) const;
-    bool intersects(const NXRect& other) const;
+    [[nodiscard]] bool contains(NXPoint point) const;
+    [[nodiscard]] bool intersects(const NXRect& other) const;
     NXRect& offsetBy(const NXPoint& offset);
     NXRect& offsetBy(const NXFloat& offsetX, const NXFloat& offsetY);
 
@@ -97,10 +99,15 @@ struct NXRect {
     NXRect applying(NXAffineTransform transform);
     NXRect applying(NXTransform3D transform);
 
-    NXRect intersection(NXRect other) const;
+    [[nodiscard]] NXRect intersection(NXRect other) const;
 
-    bool isNull() const;
+    [[nodiscard]] bool isNull() const;
     static NXRect null;
+};
+
+struct Geometry {
+    static NXFloat rubberBandClamp(NXFloat x, NXFloat coeff, NXFloat dim);
+    static NXFloat rubberBandClamp(NXFloat x, NXFloat coeff, NXFloat dim, NXFloat limitStart, NXFloat limitEnd);
 };
 
 }

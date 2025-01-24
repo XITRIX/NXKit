@@ -32,6 +32,7 @@ add_library(UIKit
         lib/UIColor.cpp
         lib/UIControl.cpp
         lib/UIControlGestureRecognizer.cpp
+        lib/UIEdgeInsets.cpp
         lib/UIEvent.cpp
         lib/UIFocus.cpp
         lib/UIFocusAnimationCoordinator.cpp
@@ -45,6 +46,7 @@ add_library(UIKit
         lib/UIPress.cpp
         lib/UIPressesEvent.cpp
         lib/UIResponder.cpp
+        lib/UIScrollView.cpp
         lib/UITapGestureRecognizer.cpp
         lib/UITouch.cpp
         lib/UITraitCollection.cpp
@@ -57,6 +59,10 @@ add_library(UIKit
         lib/NXAffineTransform.cpp
         lib/NXTransform3D.cpp
         lib/NXData.cpp
+        lib/UIScrollViewExtensions/DecelerationTimingParameters.cpp
+        lib/UIScrollViewExtensions/RubberBand.cpp
+        lib/UIScrollViewExtensions/SpringTimingParameters.cpp
+        lib/UIScrollViewExtensions/TimerAnimation.cpp
         lib/SkTools/EventTracingPriv.cpp
         lib/SkTools/SkDebugfTracer.cpp
 )

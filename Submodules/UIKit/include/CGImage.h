@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <memory>
+#include <utility>
 #include <NXData.h>
 #include <Geometry.h>
 
@@ -14,10 +15,10 @@ public:
     sk_sp<SkImage> pointee;
 
 //    CGImage(NXSize size);
-    CGImage(const std::shared_ptr<NXData>& sourceData);
+    explicit CGImage(const std::shared_ptr<NXData>& sourceData);
 //    CGImage(SDL_Surface* surface);
-    CGImage(sk_sp<SkImage> image, std::shared_ptr<NXData> sourceData);
-    CGImage(sk_sp<SkImage> image): CGImage(image, nullptr) {}
+    explicit CGImage(sk_sp<SkImage> image, std::shared_ptr<NXData> sourceData);
+    explicit CGImage(sk_sp<SkImage> image): CGImage(std::move(image), nullptr) {}
     ~CGImage();
 
     [[nodiscard]] NXSize size() const;

@@ -241,12 +241,19 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         canvas->save();
         canvas->translate(x, y);
 
+        SkPaint imgPaint;
+        imgPaint.setAntiAlias(true);
+
+        if (_isContentsTemplate) {
+            imgPaint.setColorFilter(SkColorFilters::Blend(UIColor::tint.raw(), SkBlendMode::kSrcIn));
+        }
+
         canvas->drawImageRect(_contents->pointee, {
             float(0),
             float(0),
             float(width),
             float(height)
-        }, SkSamplingOptions(), nullptr);
+        }, SkSamplingOptions(), &imgPaint);
 
         // Contents matrix save 4 // restore
         canvas->restore();

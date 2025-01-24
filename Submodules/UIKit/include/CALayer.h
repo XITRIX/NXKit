@@ -75,6 +75,9 @@ public:
     void setMask(const std::shared_ptr<CALayer>& mask);
     [[nodiscard]] std::shared_ptr<CALayer> mask() const { return _mask; }
 
+    void setContentsTemplateMode(bool newValue) { _isContentsTemplate = newValue; }
+    [[nodiscard]] bool isContentsTemplateMode() { return _isContentsTemplate; }
+
     void setMasksToBounds(bool newValue) { _masksToBounds = newValue; }
     [[nodiscard]] bool masksToBounds() { return _masksToBounds; }
 
@@ -146,6 +149,7 @@ private:
     bool _isHidden = false;
     bool _needsDisplay = true;
 
+    bool _isContentsTemplate = false;
     std::shared_ptr<CGImage> _contents;
     bool _masksToBounds = false;
 

@@ -10,9 +10,10 @@
 #include <UIControl.h>
 #include <UIImageView.h>
 #include <UILabel.h>
-#include <UIViewController.h>
-#include <UITapGestureRecognizer.h>
 #include <UIPanGestureRecognizer.h>
+#include <UIScrollView.h>
+#include <UITapGestureRecognizer.h>
+#include <UIViewController.h>
 #include <tools/Logger.hpp>
 #include <yoga/Yoga.h>
 

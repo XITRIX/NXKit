@@ -67,11 +67,12 @@ void YogaTestViewController::loadView() {
 
     auto buttonsBox = new_shared<UIView>();
 
-    auto res = romfs::get("img/star.png");
+    auto res = romfs::get("img/icons8-star-90.png");
     auto data = new_shared<NXData>(res.data(), res.size());
     auto image = UIImage::fromData(data, 3);
+    image->setRenderModeAsTemplate(true);
 
-    auto control = new_shared<UIButton>(UIButtonStyle::tinted);
+    auto control = new_shared<UIButton>(UIButtonStyle::filled);
     control->layer()->setCornerRadius(10);
     control->titleLabel()->setText("Buttogn!");
     control->setImage(image);
@@ -82,6 +83,7 @@ void YogaTestViewController::loadView() {
     auto control2 = new_shared<UIButton>(UIButtonStyle::tinted);
     control2->layer()->setCornerRadius(10);
     control2->titleLabel()->setText("Button!");
+    control2->setTintColor(UIColor::systemRed);
 
     buttonsBox->addSubview(control2);
 

@@ -68,18 +68,22 @@ void UIButton::applyStyle(UIButtonStyle style) {
         case UIButtonStyle::plain:
             setBackgroundColor(UIColor::clear);
             _titleLabel->setTextColor(UIColor::tint);
+            _imageView->setTintColor(UIColor::tint);
             break;
         case UIButtonStyle::gray:
             setBackgroundColor(UIColor::systemGray);
             _titleLabel->setTextColor(UIColor::tint);
+            _imageView->setTintColor(UIColor::tint);
             break;
         case UIButtonStyle::tinted:
             setBackgroundColor(UIColor::tint.withAlphaComponent(0.2f));
             _titleLabel->setTextColor(UIColor::tint);
+            _imageView->setTintColor(UIColor::tint);
             break;
         case UIButtonStyle::filled:
             setBackgroundColor(UIColor::tint);
             _titleLabel->setTextColor(UIColor::white);
+            _imageView->setTintColor(UIColor::white);
             break;
     }
 }

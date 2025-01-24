@@ -2,6 +2,7 @@
 
 #include "CALayer.h"
 #include <YGLayout.h>
+#include <UIEdgeInsets.h>
 #include <UITraitEnvironment.h>
 #include <UIViewContentMode.h>
 #include <UIResponder.h>
@@ -34,7 +35,7 @@ public:
     void setAlpha(NXFloat alpha) { _layer->setOpacity(alpha); }
     [[nodiscard]] NXFloat alpha() const { return _layer->opacity(); }
 
-    void setHidden(bool hidden) { _layer->setHidden(hidden); }
+    void setHidden(bool hidden);
     [[nodiscard]] bool isHidden() const { return _layer->isHidden(); }
 
     void setClipsToBounds(bool clipsToBounds) { _layer->setMasksToBounds(clipsToBounds); }
@@ -43,7 +44,7 @@ public:
     void setTransform(NXAffineTransform transform) { _layer->setAffineTransform(transform); }
     [[nodiscard]] NXAffineTransform transform() const { return _layer->affineTransform(); }
 
-    void setBackgroundColor(std::optional<UIColor> backbroundColor) { _layer->setBackgroundColor(backbroundColor); }
+    void setBackgroundColor(const std::optional<UIColor>& backbroundColor) { _layer->setBackgroundColor(backbroundColor); }
     [[nodiscard]] std::optional<UIColor> backgroundColor() const { return _layer->backgroundColor(); }
 
     void setTintColor(std::optional<UIColor> tintColor);
@@ -62,8 +63,8 @@ public:
     void addGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& gestureRecognizer);
     [[nodiscard]] std::vector<std::shared_ptr<UIGestureRecognizer>>* gestureRecognizers()  { return &_gestureRecognizers; }
 
-    void addSubview(std::shared_ptr<UIView> view);
-    void insertSubviewAt(std::shared_ptr<UIView> view, int index);
+    void addSubview(const std::shared_ptr<UIView>& view);
+    void insertSubviewAt(const std::shared_ptr<UIView>& view, int index);
     void insertSubviewBelow(const std::shared_ptr<UIView>& view, const std::shared_ptr<UIView>& belowSubview);
     void removeFromSuperview();
 
@@ -77,6 +78,20 @@ public:
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 
     // Layout
+    UIEdgeInsets layoutMargins();
+    void setLayoutMargins(UIEdgeInsets layoutMargins);
+
+    UIEdgeInsets safeAreaInsets() { return _safeAreaInsets; }
+
+    virtual void safeAreaInsetsDidChange() {}
+    virtual void layoutMarginsDidChange() {}
+
+    bool insetsLayoutMarginsFromSafeArea() const { return _insetsLayoutMarginsFromSafeArea; }
+    void setInsetsLayoutMarginsFromSafeArea(bool insetsLayoutMarginsFromSafeArea);
+
+    bool preservesSuperviewLayoutMargins() const { return _preservesSuperviewLayoutMargins; }
+    void setPreservesSuperviewLayoutMargins(bool preservesSuperviewLayoutMargins);
+
     void setNeedsDisplay() { _needsDisplay = true; }
     void setNeedsLayout();// { setNeedsDisplay(); _needsLayout = true; }
 
@@ -135,7 +150,7 @@ public:
     void updateCurrentEnvironment() override;
 
     virtual void draw() {}
-    virtual void display(std::shared_ptr<CALayer> layer) override;
+    void display(std::shared_ptr<CALayer> layer) override;
 private:
     friend class UIViewController;
     friend class UIFocusSystem;
@@ -155,8 +170,25 @@ private:
 
     std::optional<UIColor> _tintColor;
 
+    UIEdgeInsets _layoutMargins;
+    UIEdgeInsets _calculatedLayoutMargins;
+    UIEdgeInsets _safeAreaInsets;
+    bool _insetsLayoutMarginsFromSafeArea = true;
+    bool _preservesSuperviewLayoutMargins = false;
+
+    void setSafeAreaInsets(UIEdgeInsets safeAreaInsets);
+    void updateSafeAreaInsetsInChilds();
+    void updateSafeAreaInsetsIfNeeded();
+    void updateSafeAreaInsets();
+    void updateLayoutMarginIfNeeded();
+    void updateLayoutMargin();
+    void setNeedsUpdateSafeAreaInsets() { _needsUpdateSafeAreaInsets = true; }
+    void setNeedsUpdateLayoutMargins() { _needsUpdateLayoutMargins = true; }
+
     bool _needsLayout = true;
     bool _needsDisplay = true;
+    bool _needsUpdateSafeAreaInsets = true;
+    bool _needsUpdateLayoutMargins = true;
 
     static void animateIfNeeded(Timer currentTime);
 

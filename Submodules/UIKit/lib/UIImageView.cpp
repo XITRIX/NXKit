@@ -25,6 +25,8 @@ void UIImageView::setImage(std::shared_ptr<UIImage> image) {
 
 void UIImageView::updateTextureFromImage() {
     if (_image) {
+//        _image->cgImage()
+        layer()->setContentsTemplateMode(_image->_isTemplate);
         layer()->setContents(_image->cgImage());
         layer()->setContentsScale(_image->scale());
 

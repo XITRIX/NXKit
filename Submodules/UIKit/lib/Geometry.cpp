@@ -37,6 +37,10 @@ bool NXPoint::operator==(const NXPoint& rhs) const {
     return this->x == rhs.x && this->y == rhs.y;
 }
 
+bool NXPoint::operator!=(const NXPoint& rhs) const {
+    return !(*this == rhs);
+}
+
 NXPoint NXPoint::operator+(const NXPoint& first) const {
     return {x + first.x, y + first.y};
 }
@@ -57,14 +61,14 @@ NXPoint& NXPoint::operator-=(const NXPoint& rhs) {
     return *this;
 }
 
-NXPoint NXPoint::operator/(const NXFloat& rhs) {
+NXPoint NXPoint::operator/(const NXFloat& rhs) const {
     auto res = *this;
     res.x /= rhs;
     res.y /= rhs;
     return res;
 }
 
-NXPoint NXPoint::operator*(const NXFloat& rhs) {
+NXPoint NXPoint::operator*(const NXFloat& rhs) const {
     auto res = *this;
     res.x *= rhs;
     res.y *= rhs;
@@ -76,6 +80,36 @@ NXPoint NXPoint::applying(const NXAffineTransform& t) const {
             x * t.m11 + y * t.m21 + t.tX,
             x * t.m12 + y * t.m22 + t.tY
     };
+}
+
+float NXPoint::distanceToSegment(NXPoint v, NXPoint w) const {
+    auto pv_dx = x - v.x;
+    auto pv_dy = y - v.y;
+    auto wv_dx = w.x - v.x;
+    auto wv_dy = w.y - v.y;
+
+    auto dot = pv_dx * wv_dx + pv_dy * wv_dy;
+    auto len_sq = wv_dx * wv_dx + wv_dy * wv_dy;
+    auto param = dot / len_sq;
+
+    float int_x, int_y; /* intersection of normal to vw that goes through p */
+
+    if (param < 0 || (v.x == w.x && v.y == w.y)) {
+        int_x = v.x;
+        int_y = v.y;
+    } else if (param > 1) {
+        int_x = w.x;
+        int_y = w.y;
+    } else {
+        int_x = v.x + param * wv_dx;
+        int_y = v.y + param * wv_dy;
+    }
+
+    /* Components of normal */
+    auto dx = x - int_x;
+    auto dy = y - int_y;
+
+    return sqrt(dx * dx + dy * dy);
 }
 
 bool NXPoint::valid() const {
@@ -288,3 +322,15 @@ bool NXRect::isNull() const {
 }
 
 NXRect NXRect::null = NXRect(INFINITY, INFINITY, 0, 0);
+
+NXFloat Geometry::rubberBandClamp(NXFloat x, NXFloat coeff, NXFloat dim) {
+    return (1.0f - (1.0f / ((x * coeff / dim) + 1.0f))) * dim;
+}
+
+NXFloat Geometry::rubberBandClamp(NXFloat x, NXFloat coeff, NXFloat dim, NXFloat limitStart, NXFloat limitEnd) {
+    auto clampedX = fminf(fmaxf(x, limitStart), limitEnd);
+    auto diff = abs(x - clampedX);
+    float sign = clampedX > x ? -1 : 1;
+
+    return clampedX + sign * rubberBandClamp(diff, coeff, dim);
+}
