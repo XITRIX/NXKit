@@ -2,6 +2,8 @@
 
 namespace NXKit {
 
+using namespace yoga::literals;
+
 UIButton::UIButton(UIButtonStyle style) {
     _titleLabel = new_shared<UILabel>();
     _imageView = new_shared<UIImageView>();
@@ -25,7 +27,9 @@ UIButton::UIButton(UIButtonStyle style) {
 //        layout->setAlignContent(YGAlignFlexEnd);
         layout->setJustifyContent(YGJustifyCenter);
         layout->setAllGap(8);
-        layout->setSize({ 250, 50 });
+        layout->setHeight(50_pt);
+        layout->setPaddingHorizontal(8_pt);
+//        layout->setSize({ 250, 50 });
     });
 
     applyStyle(style);
@@ -49,19 +53,21 @@ void UIButton::baseScaleMultiplierDidChange() {
     _titleLabel->setBaseScaleMultiplier(baseScaleMultiplier());
 }
 
-void UIButton::willGainFocus() {
-    setTransform(NXAffineTransform::scale(1.02f));
-    _titleLabel->setBaseScaleMultiplier(1.02f);
-//    setBackgroundColor(UIColor::white);
-//    _titleLabel->setTextColor(UIColor::black);
-}
-
-void UIButton::willLoseFocus() {
-    setTransform(NXAffineTransform::identity);
-    _titleLabel->setBaseScaleMultiplier(1);
-//    setBackgroundColor(UIColor::white.withAlphaComponent(0));
-//    _titleLabel->setTextColor(UIColor::label);
-}
+//void UIButton::willGainFocus() {
+//    setTransform(NXAffineTransform::scale(1.04f));
+//    _titleLabel->setBaseScaleMultiplier(1.04f);
+//    layer()->setShadowColor(UIColor::black);
+//    layer()->setShadowOpacity(0.2);
+//    layer()->setShadowOffset({0, 8});
+//    layer()->setShadowRadius(18);
+//}
+//
+//void UIButton::willLoseFocus() {
+//    setTransform(NXAffineTransform::identity);
+//    _titleLabel->setBaseScaleMultiplier(1);
+//    layer()->setShadowOpacity(0);
+//    layer()->setShadowRadius(0);
+//}
 
 void UIButton::applyStyle(UIButtonStyle style) {
     switch (style) {

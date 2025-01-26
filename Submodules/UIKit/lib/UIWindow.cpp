@@ -128,10 +128,12 @@ void UIWindow::sendPressEvent(const std::shared_ptr<UIPressesEvent>& event) {
         switch (press->phase()) {
             case UIPressPhase::began: {
                 press->responder().lock()->pressesBegan({ press }, event);
+                focusSystem()->sendEvent(event);
                 break;
             }
             case UIPressPhase::ended: {
                 press->responder().lock()->pressesEnded({ press }, event);
+                focusSystem()->sendEvent(event);
                 break;
             }
             default:
@@ -164,22 +166,20 @@ void UIWindow::removePresentedViewController(const std::shared_ptr<UIViewControl
 
 void UIWindow::pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
     UIView::pressesBegan(pressees, event);
-    focusSystem()->sendEvent(event);
 }
 
 void UIWindow::pressesChanged(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
     UIView::pressesChanged(pressees, event);
-    focusSystem()->sendEvent(event);
+//    focusSystem()->sendEvent(event);
 }
 
 void UIWindow::pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
     UIView::pressesEnded(pressees, event);
-    focusSystem()->sendEvent(event);
 }
 
 void UIWindow::pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
     UIView::pressesCancelled(pressees, event);
-    focusSystem()->sendEvent(event);
+//    focusSystem()->sendEvent(event);
 }
 
 void UIWindow::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {

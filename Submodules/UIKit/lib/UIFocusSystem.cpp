@@ -16,9 +16,33 @@ namespace NXKit {
 UIFocusSystem::UIFocusSystem() = default;
 
 void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
+    auto pevent = std::dynamic_pointer_cast<UIPressesEvent>(event);
+    if (pevent == nullptr) return;
+
+    std::shared_ptr<UIPress> press;
+    for (const auto& _press: pevent->allPresses()) {
+        if (_press->type() == UIPressType::select) {
+            press = _press;
+        }
+    }
+
+    if (press != nullptr && !focusedItem().expired()) {
+        auto focusedView = std::static_pointer_cast<UIView>(focusedItem().lock());
+        if (focusedView) {
+            if (press->phase() == UIPressPhase::began) {
+                focusedView->pressesBegan(pevent->allPresses(), pevent);
+                _selectedFocusedItem = focusedView;
+            } else if (press->phase() == UIPressPhase::ended) {
+                focusedView->pressesEnded(pevent->allPresses(), pevent);
+                _selectedFocusedItem.reset();
+            }
+        }
+        return;
+    }
+
     UIFocusUpdateContext context;
     context._previouslyFocusedItem = _focusedItem;
-    context._focusHeading = makeFocusHeadingFromEvent(event);
+    context._focusHeading = makeFocusHeadingFromEvent(pevent);
 
     if (context._focusHeading == UIFocusHeading::none) return;
 
@@ -94,11 +118,10 @@ void UIFocusSystem::applyFocusToItem(const std::shared_ptr<UIFocusItem>& item, U
     });
 }
 
-UIFocusHeading UIFocusSystem::makeFocusHeadingFromEvent(const std::shared_ptr<UIEvent>& event) {
-    auto pevent = std::dynamic_pointer_cast<UIPressesEvent>(event);
-    if (pevent == nullptr) return UIFocusHeading::none;
+UIFocusHeading UIFocusSystem::makeFocusHeadingFromEvent(const std::shared_ptr<UIPressesEvent>& event) {
+    if (event == nullptr) return UIFocusHeading::none;
 
-    for (const auto& press: pevent->allPresses()) {
+    for (const auto& press: event->allPresses()) {
         if (press->phase() != UIPressPhase::began) continue;
 
         auto type = press->type();

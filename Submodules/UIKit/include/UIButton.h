@@ -33,8 +33,8 @@ public:
     std::shared_ptr<UIImageView> imageView() { return _imageView; }
 
     void baseScaleMultiplierDidChange() override;
-    void willGainFocus() override;
-    void willLoseFocus() override;
+//    void willGainFocus() override;
+//    void willLoseFocus() override;
 
     void applyStyle(UIButtonStyle style);
 

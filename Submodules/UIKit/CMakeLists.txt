@@ -24,6 +24,7 @@ add_library(UIKit
         lib/CADisplayLink.cpp
         lib/CALayer.cpp
         lib/YGLayout.cpp
+        lib/UIAction.cpp
         lib/UIApplication.cpp
         lib/UIApplicationDelegateImpl.cpp
         lib/UIApplicationMain.cpp

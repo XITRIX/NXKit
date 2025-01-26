@@ -52,8 +52,8 @@ private:
     bool _hasBeenCancelledByAGestureRecognizer = false;
     std::optional<UIKey> _key;
 
-    void setForWindow(std::shared_ptr<UIWindow> window);
-    void runPressActionOnRecognizerHierachy(std::function<void(std::shared_ptr<UIGestureRecognizer>)> action);
+    void setForWindow(const std::shared_ptr<UIWindow>& window);
+    void runPressActionOnRecognizerHierachy(const std::function<void(std::shared_ptr<UIGestureRecognizer>)>& action);
     [[nodiscard]] bool hasBeenCancelledByAGestureRecognizer() const { return _hasBeenCancelledByAGestureRecognizer; }
 
     friend class UIApplication;

@@ -8,7 +8,7 @@ UIPress::UIPress(Timer timestamp):
     _timestamp(timestamp)
 { }
 
-void UIPress::setForWindow(std::shared_ptr<UIWindow> window) {
+void UIPress::setForWindow(const std::shared_ptr<UIWindow>& window) {
     _window = window;
 
     if (!window || !window->rootViewController()) {
@@ -33,8 +33,8 @@ void UIPress::setForWindow(std::shared_ptr<UIWindow> window) {
     _responder = vc->view();
 }
 
-void UIPress::runPressActionOnRecognizerHierachy(std::function<void(std::shared_ptr<UIGestureRecognizer>)> action) {
-    for (auto recognizer: _gestureRecognizers) {
+void UIPress::runPressActionOnRecognizerHierachy(const std::function<void(std::shared_ptr<UIGestureRecognizer>)>& action) {
+    for (const auto& recognizer: _gestureRecognizers) {
         if (_hasBeenCancelledByAGestureRecognizer) return;
         if (recognizer.expired() || !recognizer.lock()->isEnabled()) continue;
         action(recognizer.lock());

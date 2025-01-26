@@ -63,6 +63,18 @@ public:
     void setBorderWidth(NXFloat borderWidth);
     [[nodiscard]] NXFloat borderWidth() const { return _borderWidth; }
 
+    void setShadowColor(const std::optional<UIColor>& shadowColor);
+    [[nodiscard]] std::optional<UIColor> shadowColor() const { return _shadowColor; }
+
+    void setShadowOffset(NXPoint shadowOffset);
+    [[nodiscard]] NXPoint shadowOffset() const { return _shadowOffset; }
+
+    void setShadowRadius(NXFloat shadowRadius);
+    [[nodiscard]] NXFloat shadowRadius() const { return _shadowRadius; }
+
+    void setShadowOpacity(NXFloat shadowOpacity);
+    [[nodiscard]] NXFloat shadowOpacity() const { return _shadowOpacity; }
+
     void setCornerRadius(NXFloat cornerRadius);
     [[nodiscard]] NXFloat cornerRadius() const { return _cornerRadius; }
 
@@ -164,6 +176,11 @@ private:
     NXFloat _borderWidth = 0;
     std::optional<UIColor> _borderColor;
     NXTransform3D _transform = NXTransform3D::identity;
+    std::optional<UIColor> _shadowColor;
+//    _shadowPath ??
+    NXPoint _shadowOffset;
+    NXFloat _shadowRadius;
+    NXFloat _shadowOpacity = 1;
 
     /**
      Indicates whether a layer somewhere has changed since the last render pass.

@@ -7,6 +7,7 @@
 
 #include <UIControl.h>
 #include <UIControlGestureRecognizer.h>
+#include <UIPress.h>
 
 namespace NXKit {
 
@@ -18,6 +19,29 @@ bool UIControl::canBecomeFocused() {
     return !isHidden() && alpha() > 0 && isUserInteractionEnabled();
 }
 
+void UIControl::pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
+    UIView::pressesBegan(pressees, event);
+
+    if (std::any_of(pressees.begin(), pressees.end(), [&](const std::shared_ptr<UIPress>& item) {
+        return item->type() == UIPressType::select;
+    })) {
+        setHighlighted(true);
+    }
+}
+
+void UIControl::pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
+    UIView::pressesEnded(pressees, event);
+
+    if (std::any_of(pressees.begin(), pressees.end(), [&](const std::shared_ptr<UIPress>& item) {
+        return item->type() == UIPressType::select;
+    })) {
+        if (isHighlighted()) {
+            setHighlighted(false);
+            performPrimaryAction();
+        }
+    }
+}
+
 void UIControl::didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationCoordinator* coordinator) {
     UIView::didUpdateFocusIn(context, coordinator);
 
@@ -27,30 +51,33 @@ void UIControl::didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationC
         });
     } else {
         coordinator->addCoordinatedAnimations([this]() {
+            _state[uint8_t (UIControlState::highlighted)] = false; // need to be revised
             willLoseFocus();
         });
     }
 }
 
 void UIControl::willGainFocus() {
-//            setBackgroundColor(UIColor::systemCyan);
-    setTransform(NXAffineTransform::scale(1.02f));
-    setBaseScaleMultiplier(1.1f);
-    layer()->setBorderColor(UIColor::systemBlue);
+    setTransform(NXAffineTransform::scale(1.06f));
+    layer()->setShadowColor(UIColor::black);
+    layer()->setShadowOpacity(0.4);
+    layer()->setShadowOffset({0, 6});
+    layer()->setShadowRadius(18);
+    layer()->setZPosition(1);
 
-    UIView::performWithoutAnimation([this]() {
-        layer()->setBorderWidth(3);
-    });
+//    UIView::performWithoutAnimation([this]() {
+//        layer()->setBorderWidth(3);
+//    });
 }
 
 void UIControl::willLoseFocus() {
-//            setBackgroundColor(UIColor::clear);
     setTransform(NXAffineTransform::identity);
-    setBaseScaleMultiplier(1);
-    layer()->setBorderColor(tintColor());
-    UIView::performWithoutAnimation([this]() {
-        layer()->setBorderWidth(0);
-    });
+    layer()->setShadowOpacity(0);
+    layer()->setShadowRadius(0);
+    layer()->setZPosition(0);
+//    UIView::performWithoutAnimation([this]() {
+//        layer()->setBorderWidth(0);
+//    });
 }
 
 bool UIControl::isEnabled() const {
@@ -74,6 +101,18 @@ bool UIControl::isHighlighted() const {
 }
 
 void UIControl::setHighlighted(bool highlighted) {
+    UIView::animate(0.2, [&]() {
+        if (highlighted) {
+            setTransform(NXAffineTransform::scale(1.02f));
+            layer()->setShadowOffset({0, 3});
+            layer()->setShadowRadius(4);
+        } else {
+            setTransform(NXAffineTransform::scale(1.06f));
+            layer()->setShadowOffset({0, 6});
+            layer()->setShadowRadius(18);
+        }
+    });
+
     _state[uint8_t (UIControlState::highlighted)] = highlighted;
 }
 
@@ -81,6 +120,11 @@ void UIControl::setBaseScaleMultiplier(NXFloat baseScaleMultiplier) {
     if (_baseScaleMultiplier == baseScaleMultiplier) return;
     _baseScaleMultiplier = baseScaleMultiplier;
     baseScaleMultiplierDidChange();
+}
+
+void UIControl::performPrimaryAction() {
+    if (primaryAction.has_value())
+        primaryAction->_handler();
 }
 }
 

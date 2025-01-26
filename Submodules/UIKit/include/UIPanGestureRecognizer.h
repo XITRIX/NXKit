@@ -12,10 +12,10 @@ public:
     void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
     void touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
 
-    NXPoint translationInView(std::shared_ptr<UIView> view);
-    void setTranslation(NXPoint translation, std::shared_ptr<UIView> inView);
+    NXPoint translationInView(const std::shared_ptr<UIView>& view);
+    void setTranslation(NXPoint translation, const std::shared_ptr<UIView>& inView);
 
-    NXPoint velocityIn(std::shared_ptr<UIView> view);
+    NXPoint velocityIn(const std::shared_ptr<UIView>& view);
 
 private:
     std::shared_ptr<UITouch> trackingTouch;
@@ -23,7 +23,7 @@ private:
     Timer touchesMovedTimestamp;
     Timer previousTouchesMovedTimestamp;
 
-    NXPoint velocityIn(std::shared_ptr<UIView> view, float timeDiffSeconds);
+    NXPoint velocityIn(const std::shared_ptr<UIView>& view, float timeDiffSeconds);
 };
 
 }

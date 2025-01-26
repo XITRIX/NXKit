@@ -29,6 +29,7 @@ bool applicationRunLoop() {
         keyWindow->_traitCollection->_displayScale = scale;
         keyWindow->_traitCollection->_userInterfaceStyle = SkiaCtx::main()->getThemeMode();
         keyWindow->traitCollectionDidChange(oldCollection);
+        CALayer::layerTreeIsDirty = true;
     }
 
     UIView::animateIfNeeded(currentTime);
@@ -38,7 +39,7 @@ bool applicationRunLoop() {
     NXSize size = SkiaCtx::_main->getSize();
 
     if (!CALayer::layerTreeIsDirty && lastSize == size) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(7));
         return true;
     }
 

@@ -14,11 +14,13 @@ namespace NXKit {
 
 class UIView;
 class UIWindow;
+class UIPressesEvent;
 class UIFocusSystem {
 public:
     UIFocusSystem();
     std::weak_ptr<UIFocusItem> focusedItem() { return _focusedItem; }
 private:
+    std::weak_ptr<UIFocusItem> _selectedFocusedItem;
     std::weak_ptr<UIFocusItem> _focusedItem;
     std::weak_ptr<UIWindow> _rootWindow;
 
@@ -28,7 +30,7 @@ private:
     std::shared_ptr<UIFocusItem> findItemToFocus();
     void applyFocusToItem(const std::shared_ptr<UIFocusItem>& item, UIFocusUpdateContext context);
 
-    static UIFocusHeading makeFocusHeadingFromEvent(const std::shared_ptr<UIEvent>& event);
+    static UIFocusHeading makeFocusHeadingFromEvent(const std::shared_ptr<UIPressesEvent>& event);
 
     friend class UIWindow;
 };

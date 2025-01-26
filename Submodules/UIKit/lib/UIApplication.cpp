@@ -238,8 +238,6 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
 
             for (auto& levent: UIPressesEvent::activePressesEvents) {
                 for (auto& lpress: levent->allPresses()) {
-                    if (!lpress->_key.has_value()) continue;
-
                     if (lpress->type() == type) {
                         event = levent;
                         press = lpress;

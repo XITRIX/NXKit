@@ -2,11 +2,13 @@
 #include <UITouch.h>
 #include <UIWindow.h>
 
+#include <utility>
+
 namespace NXKit {
 
 #define THRESHOLD 10
 
-NXPoint UIPanGestureRecognizer::translationInView(std::shared_ptr<UIView> view) {
+NXPoint UIPanGestureRecognizer::translationInView(const std::shared_ptr<UIView>& view) {
     if (!trackingTouch) return NXPoint();
 
     auto positionInTargetView = trackingTouch->locationIn(view);
@@ -17,14 +19,14 @@ NXPoint UIPanGestureRecognizer::translationInView(std::shared_ptr<UIView> view) 
     return positionInTargetView - initialPositionInTargetView;
 }
 
-void UIPanGestureRecognizer::setTranslation(NXPoint translation, std::shared_ptr<UIView> inView) {
+void UIPanGestureRecognizer::setTranslation(NXPoint translation, const std::shared_ptr<UIView>& inView) {
     if (!trackingTouch) return;
 
     auto positionInTargetView = trackingTouch->locationIn(nullptr);
     initialTouchPoint = positionInTargetView - translation;
 }
 
-NXPoint UIPanGestureRecognizer::velocityIn(std::shared_ptr<UIView> view, float timeDiffSeconds) {
+NXPoint UIPanGestureRecognizer::velocityIn(const std::shared_ptr<UIView>& view, float timeDiffSeconds) {
     if (!trackingTouch || timeDiffSeconds == 0) return NXPoint();
 
     NXPoint curPos = trackingTouch->locationIn(view);
@@ -33,10 +35,10 @@ NXPoint UIPanGestureRecognizer::velocityIn(std::shared_ptr<UIView> view, float t
     return (curPos - prevPos) / (float)timeDiffSeconds;
 }
 
-NXPoint UIPanGestureRecognizer::velocityIn(std::shared_ptr<UIView> view) {
+NXPoint UIPanGestureRecognizer::velocityIn(const std::shared_ptr<UIView>& view) {
     float timeDiffSeconds = touchesMovedTimestamp - previousTouchesMovedTimestamp;
     timeDiffSeconds /= 100000.0f;
-    return velocityIn(view, timeDiffSeconds);
+    return velocityIn(std::move(view), timeDiffSeconds);
 }
 
 void UIPanGestureRecognizer::touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {

@@ -9,6 +9,8 @@
 #include <utility>
 
 #include "include/core/SkRRect.h"
+#include "include/core/SkBlurTypes.h"
+#include "include/core/SkMaskFilter.h"
 #include "include/effects/SkGradientShader.h"
 #include "include/effects/SkImageFilters.h"
 
@@ -35,11 +37,11 @@ CALayer::CALayer(CALayer* layer) {
     _cornerRadius = layer->_cornerRadius;
     _borderWidth = layer->_borderWidth;
     _borderColor = layer->_borderColor;
-//    shadowColor = layer->shadowColor;
-//    shadowPath = layer->shadowPath;
-//    shadowOffset = layer->shadowOffset;
-//    shadowRadius = layer->shadowRadius;
-//    shadowOpacity = layer->shadowOpacity;
+    _shadowColor = layer->_shadowColor;
+//    _shadowPath = layer->_shadowPath;
+    _shadowOffset = layer->_shadowOffset;
+    _shadowRadius = layer->_shadowRadius;
+    _shadowOpacity = layer->_shadowOpacity;
     _mask = layer->_mask;
     _masksToBounds = layer->_masksToBounds;
     _contents = layer->_contents; // XXX: we should make a copy here
@@ -71,6 +73,30 @@ void CALayer::setBorderWidth(NXFloat borderWidth) {
     if (_borderWidth == borderWidth) return;
     onWillSet("borderWidth");
     _borderWidth = borderWidth;
+}
+
+void CALayer::setShadowColor(const std::optional<UIColor>& shadowColor) {
+    if (_shadowColor == shadowColor) return;
+    onWillSet("shadowColor");
+    _shadowColor = shadowColor;
+}
+
+void CALayer::setShadowOffset(NXPoint shadowOffset) {
+    if (_shadowOffset == shadowOffset) return;
+    onWillSet("shadowOffset");
+    _shadowOffset = shadowOffset;
+}
+
+void CALayer::setShadowRadius(NXFloat shadowRadius) {
+    if (_shadowRadius == shadowRadius) return;
+    onWillSet("shadowRadius");
+    _shadowRadius = shadowRadius;
+}
+
+void CALayer::setShadowOpacity(NXFloat shadowOpacity) {
+    if (_shadowOpacity == shadowOpacity) return;
+    onWillSet("shadowOpacity");
+    _shadowOpacity = shadowOpacity;
 }
 
 void CALayer::setOpacity(NXFloat opacity) {
@@ -222,6 +248,22 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     // Update current Tint environment
     if (!delegate.expired()) delegate.lock()->updateCurrentEnvironment();
 
+    // Shadow
+    if (_shadowColor.has_value() && _shadowColor->a() > 0 && _shadowOpacity > 0) {
+        const SkScalar sigma = _shadowRadius;
+        SkPaint shadowPaint;
+        shadowPaint.setAntiAlias(true);
+        shadowPaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, sigma, 0));
+        shadowPaint.setColor(_shadowColor.value().withAlphaComponent((NXFloat(_shadowColor.value().a()) / 255.0f) * _shadowOpacity).raw());
+
+        SkRect rect = SkRect::MakeXYWH(_shadowOffset.x, _shadowOffset.y, _bounds.width(), _bounds.height());
+        SkRRect rrect;
+        float radii = _cornerRadius;
+        SkVector corners[] = {{radii, radii}, {radii, radii}, {radii, radii}, {radii, radii}};
+        rrect.setRectRadii(rect, corners);
+        canvas->drawRRect(rrect, shadowPaint);
+    }
+
     // Background color
     if (_backgroundColor.has_value()) {
         paint.setColor(_backgroundColor->raw());
@@ -268,7 +310,15 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     canvas->concat(CATransform3DMakeTranslation(-_bounds.origin.x, -_bounds.origin.y, 0).toSkM44());
 
-    for (const auto& sublayer: _sublayers) {
+    struct {
+        bool operator()(const std::shared_ptr<CALayer>& a, const std::shared_ptr<CALayer>& b) const { return a->_zPosition < b->_zPosition; }
+    } sortByZPos;
+
+    auto sortedSublayers = _sublayers;
+
+    // Could be resource consuming, better to change approach
+    std::sort(sortedSublayers.begin(), sortedSublayers.end(), sortByZPos);
+    for (const auto& sublayer: sortedSublayers) {
         sublayer->presentationOrSelf()->skiaRender(canvas);
     }
 
@@ -431,6 +481,10 @@ std::optional<AnimatableProperty> CALayer::value(std::string forKeyPath) {
     if (forKeyPath == "backgroundColor") return _backgroundColor;
     if (forKeyPath == "borderColor") return _borderColor;
     if (forKeyPath == "borderWidth") return _borderWidth;
+    if (forKeyPath == "shadowColor") return _shadowColor;
+    if (forKeyPath == "shadowOffset") return _shadowOffset;
+    if (forKeyPath == "shadowRadius") return _shadowRadius;
+    if (forKeyPath == "shadowOpacity") return _shadowOpacity;
     if (forKeyPath == "opacity") return _opacity;
     if (forKeyPath == "bounds") return _bounds;
     if (forKeyPath == "transform") return _transform;
@@ -501,6 +555,44 @@ void CALayer::update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABa
         if (!end.has_value()) end = this->_borderWidth;
 
         presentation->setBorderWidth(start.value() + (end.value() - start.value()) * progress);
+    }
+    if (keyPath == "shadowColor") {
+        auto start = any_optional_cast<std::optional<UIColor>>(fromValue);
+        if (!start.has_value()) { return; }
+        if (!start.value().has_value()) { return; }
+
+        auto end = any_optional_cast<std::optional<UIColor>>(animation->toValue);
+        if (!end.has_value()) end = this->_shadowColor;
+        if (!end.has_value()) end = UIColor::clear;
+
+        presentation->setShadowColor(start.value()->interpolationTo(end.value().value(), progress));
+    }
+    if (keyPath == "shadowOffset") {
+        auto start = any_optional_cast<NXPoint>(fromValue);
+        if (!start.has_value()) { return; }
+
+        auto end = any_optional_cast<NXPoint>(animation->toValue);
+        if (!end.has_value()) end = this->_shadowOffset;
+
+        presentation->setShadowOffset(start.value() + (end.value() - start.value()) * progress);
+    }
+    if (keyPath == "shadowRadius") {
+        auto start = any_optional_cast<float>(fromValue);
+        if (!start.has_value()) { return; }
+
+        auto end = any_optional_cast<float>(animation->toValue);
+        if (!end.has_value()) end = this->_shadowRadius;
+
+        presentation->setShadowRadius(start.value() + (end.value() - start.value()) * progress);
+    }
+    if (keyPath == "shadowOpacity") {
+        auto start = any_optional_cast<float>(fromValue);
+        if (!start.has_value()) { return; }
+
+        auto end = any_optional_cast<float>(animation->toValue);
+        if (!end.has_value()) end = this->_shadowOpacity;
+
+        presentation->setShadowOpacity(start.value() + (end.value() - start.value()) * progress);
     }
     if (keyPath == "position") {
         auto start = any_optional_cast<NXPoint>(fromValue);

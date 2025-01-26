@@ -46,12 +46,12 @@ void YogaTestViewController::loadView() {
     contentBox->addSubview(contentContent2);
     rootView->addSubview(contentBox);
 
+    static bool toggle = false;
     auto tap = new_shared<UITapGestureRecognizer>();
     tap->onStateChanged = [](auto tap) {
         if (tap->state() != UIGestureRecognizerState::ended) return;
         std::shared_ptr<UIView> view = tap->view().lock();
 
-        static bool toggle = false;
         toggle = !toggle;
 
         UIView::animate(0.3, 0, UIViewAnimationOptions::beginFromCurrentState, [view]() {
@@ -77,13 +77,17 @@ void YogaTestViewController::loadView() {
     control->titleLabel()->setText("Buttogn!");
     control->setImage(image);
     control->setTintColor(UIColor::systemOrange);
+    control->yoga()->setWidth(10_pt);
+    control->yoga()->setFlexGrow(1);
 
     buttonsBox->addSubview(control);
 
-    auto control2 = new_shared<UIButton>(UIButtonStyle::tinted);
+    auto control2 = new_shared<UIButton>(UIButtonStyle::filled);
     control2->layer()->setCornerRadius(10);
     control2->titleLabel()->setText("Button!");
     control2->setTintColor(UIColor::systemRed);
+    control2->yoga()->setWidth(10_pt);
+    control2->yoga()->setFlexGrow(1);
 
     buttonsBox->addSubview(control2);
 
@@ -91,11 +95,47 @@ void YogaTestViewController::loadView() {
         layout->setFlexDirection(YGFlexDirectionRow);
 //        layout->setJustifyContent(YGJustify::YGJustifyCenter);
 //        layout->setAlignContent(YGAlign::YGAlignCenter);
-        layout->setPositionType(YGPositionType::YGPositionTypeAbsolute);
-        layout->setPosition({30, 80});
+//        layout->setPositionType(YGPositionType::YGPositionTypeAbsolute);
+//        layout->setPosition({30, 80});
         layout->setAllGap(8);
     });
-    rootView->addSubview(buttonsBox);
+
+    auto control3 = new_shared<UIButton>(UIButtonStyle::filled);
+    control3->layer()->setCornerRadius(10);
+    control3->titleLabel()->setText("Swap boxes!");
+    control3->setTintColor(UIColor::systemGreen);
+    control3->primaryAction = UIAction("", [&, contentBox]() {
+        printf("Action3 triggered");
+
+        toggle = !toggle;
+
+        UIView::animate(0.3, 0, UIViewAnimationOptions::beginFromCurrentState, [contentBox]() {
+            contentBox->configureLayout([](std::shared_ptr<YGLayout> layout) {
+                layout->setFlexDirection(toggle ? YGFlexDirection::YGFlexDirectionColumnReverse : YGFlexDirection::YGFlexDirectionColumn);
+            });
+            contentBox->setNeedsLayout();
+            contentBox->layoutIfNeeded();
+        });
+    });
+
+
+//    buttonsBox->setBackgroundColor(UIColor::systemPink);
+    auto buttonsBox2 = new_shared<UIView>();
+    buttonsBox2->addSubview(buttonsBox);
+    buttonsBox2->addSubview(control3);
+
+    buttonsBox2->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        layout->setFlexDirection(YGFlexDirectionColumn);
+//        layout->setJustifyContent(YGJustify::YGJustifyCenter);
+        layout->setAlignContent(YGAlign::YGAlignStretch);
+        layout->setPositionType(YGPositionType::YGPositionTypeAbsolute);
+        layout->setPosition({30, 80});
+        layout->setWidth(400_pt);
+//        layout->setSize({400, 80});
+        layout->setAllGap(8);
+    });
+
+    rootView->addSubview(buttonsBox2);
 
     //MARK: - Footer!
     auto footer = new_shared<UIView>();
@@ -128,6 +168,11 @@ void YogaTestViewController::loadView() {
     rootView->addSubview(blur);
     blur->layer()->setCornerRadius(12);
     blur->setBackgroundTintColor(UIColorThemed(UIColor(0x60DDDDDD), UIColor(0x60404040)));
+
+    blur->layer()->setShadowOffset({4, 4});
+    blur->layer()->setShadowColor(UIColor::black.withAlphaComponent(0.15f));
+//    blur->layer()->setShadowOpacity(0.2);
+    blur->layer()->setShadowRadius(16);
 
     blur->addSubview(dragMeViewLabel);
 
@@ -171,6 +216,7 @@ void YogaTestViewController::loadView() {
     auto image1 = UIImage::fromData(data1, 3);
 
     auto imageView = new_shared<UIImageView>();
+    imageView->setContentMode(UIViewContentMode::center);
     imageView->setAutolayoutEnabled(true);
     imageView->setImage(image1);
 //    imageView->setBackgroundColor(UIColor::systemOrange);
