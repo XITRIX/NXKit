@@ -84,12 +84,11 @@ if (APPLE)
         list(APPEND platform_libs
                 SDL2-static SDL2main
                 ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskia.a
-                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libwindow.a
-                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libicu.a
+                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskparagraph.a
                 ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskshaper.a
                 ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskunicode_core.a
                 ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskunicode_icu.a
-                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskparagraph.a
+                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libicu.a
         )
 
         target_sources(UIKit PRIVATE
@@ -102,12 +101,11 @@ if (APPLE)
         list(APPEND platform_libs
                 SDL2-static SDL2main
                 ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskia.a
-                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libwindow.a
-                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libicu.a
+                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskparagraph.a
                 ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskshaper.a
                 ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskunicode_core.a
                 ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskunicode_icu.a
-                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskparagraph.a
+                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libicu.a
         )
 
         target_sources(UIKit PRIVATE

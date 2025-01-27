@@ -1,6 +1,7 @@
 #include <Geometry.h>
 #include <cmath>
 
+#include <UIEdgeInsets.h>
 #include "NXAffineTransform.h"
 #include "NXTransform3D.h"
 
@@ -213,16 +214,27 @@ bool NXRect::intersects(const NXRect& other) const {
     return !((minX() > other.maxX() || maxX() < other.minX()) || (minY() > other.maxY() || maxY() < other.minY()));
 }
 
-NXRect& NXRect::offsetBy(const NXPoint& offset) {
-    origin.x += offset.x;
-    origin.y += offset.y;
-    return *this;
+NXRect NXRect::offsetBy(const NXPoint& offset) const {
+    auto res = *this;
+    res.origin.x += offset.x;
+    res.origin.y += offset.y;
+    return res;
 }
 
-NXRect& NXRect::offsetBy(const NXFloat& offsetX, const NXFloat& offsetY) {
-    origin.x += offsetX;
-    origin.y += offsetY;
-    return *this;
+NXRect NXRect::offsetBy(const NXFloat& offsetX, const NXFloat& offsetY) const {
+    auto res = *this;
+    res.origin.x += offsetX;
+    res.origin.y += offsetY;
+    return res;
+}
+
+NXRect NXRect::insetBy(const UIEdgeInsets& insets) const {
+    return {
+        this->origin.x - insets.left,
+        this->origin.y - insets.top,
+        this->size.width +  insets.left + insets.right,
+        this->size.height + insets.top + insets.bottom
+    };
 }
 
 bool NXRect::operator==(const NXRect& rhs) const {
@@ -256,7 +268,7 @@ NXRect NXRect::operator*(const NXFloat& rhs) const {
     };
 }
 
-NXRect NXRect::applying(NXAffineTransform t) {
+NXRect NXRect::applying(NXAffineTransform t) const {
     if (t.isIdentity()) { return *this; }
 
     auto newTopLeft = NXPoint(minX(), minY()).applying(t);
@@ -280,7 +292,7 @@ NXRect NXRect::applying(NXAffineTransform t) {
     };
 }
 
-NXRect NXRect::applying(NXTransform3D t) {
+NXRect NXRect::applying(NXTransform3D t) const {
     if (t == NXTransform3DIdentity) { return *this; }
 
     auto topLeft = t.transformingVector(minX(), minY(), 0);

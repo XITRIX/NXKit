@@ -194,11 +194,12 @@ void CALayer::removeFromSuperlayer() {
     auto super = _superlayer.lock();
     if (super == nullptr) return;
 
-    // If it's mask - remove
-    if (super->_mask.get() == this) {
-        super->_mask = nullptr;
-        return;
-    }
+    // Should not be removed from mask on this step, they are not related
+//    // If it's mask - remove
+//    if (super->_mask.get() == this) {
+//        super->_mask = nullptr;
+//        return;
+//    }
 
     // Find and remove this from superlayer
     super->_sublayers.erase(std::remove(super->_sublayers.begin(), super->_sublayers.end(), shared_from_this()), super->_sublayers.end());

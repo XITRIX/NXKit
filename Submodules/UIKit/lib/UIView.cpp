@@ -637,6 +637,17 @@ void UIView::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previou
 }
 
 // MARK: - Layout
+bool UIView::isDescendantOf(const std::shared_ptr<UIView>& view) {
+    if (view == nullptr) return false;
+    auto parent = this;
+    while (parent != nullptr) {
+        if (parent == view.get()) return true;
+        if (superview().expired()) return false;
+        parent = superview().lock().get();
+    }
+    return false;
+}
+
 std::shared_ptr<UIView> UIView::layoutRoot() {
     auto view = shared_from_this();
     while (true) {

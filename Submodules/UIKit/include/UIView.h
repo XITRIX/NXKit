@@ -44,6 +44,9 @@ public:
     void setTransform(NXAffineTransform transform) { _layer->setAffineTransform(transform); }
     [[nodiscard]] NXAffineTransform transform() const { return _layer->affineTransform(); }
 
+    void setTransform3D(NXTransform3D transform) { _layer->setTransform(transform); }
+    NXTransform3D transform3D() const { return _layer->transform(); }
+
     void setBackgroundColor(const std::optional<UIColor>& backbroundColor) { _layer->setBackgroundColor(backbroundColor); }
     [[nodiscard]] std::optional<UIColor> backgroundColor() const { return _layer->backgroundColor(); }
 
@@ -94,6 +97,8 @@ public:
 
     void setNeedsDisplay() { _needsDisplay = true; }
     void setNeedsLayout();// { setNeedsDisplay(); _needsLayout = true; }
+
+    bool isDescendantOf(const std::shared_ptr<UIView>& view);
 
     void layoutIfNeeded();
     virtual void layoutSubviews();

@@ -6,23 +6,36 @@
 //
 
 #include <UIControlGestureRecognizer.h>
+#include <UITouch.h>
 
 namespace NXKit {
 
-UIControlGestureRecognizer::UIControlGestureRecognizer(UIControl* control) :
+UIControlGestureRecognizer::UIControlGestureRecognizer(std::weak_ptr<UIControl> control) :
         control(control)
 { }
 
 void UIControlGestureRecognizer::touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
+    setState(UIGestureRecognizerState::began);
 
+    auto touch = std::vector<std::shared_ptr<UITouch>>(touches.begin(), touches.end()).front();
+    control.lock()->setHighlighted(true);
 }
 
 void UIControlGestureRecognizer::touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
-
+    std::shared_ptr<UITouch> touch = std::vector<std::shared_ptr<UITouch>>(touches.begin(), touches.end()).front();
+    auto position = touch->locationIn(control.lock());
+    const NXFloat inset = 48;
+    auto viewBounds = control.lock()->bounds();
+    auto intersects = viewBounds.insetBy({ inset, inset, inset, inset }).contains(position);
+    control.lock()->setHighlighted(intersects);
 }
 
 void UIControlGestureRecognizer::touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
-
+    setState(UIGestureRecognizerState::ended);
+    if (control.lock()->isHighlighted()) {
+        control.lock()->setHighlighted(false);
+        control.lock()->performPrimaryAction();
+    }
 }
 
 void UIControlGestureRecognizer::touchesCancelled(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
@@ -30,7 +43,7 @@ void UIControlGestureRecognizer::touchesCancelled(std::vector<std::shared_ptr<UI
 }
 
 void UIControlGestureRecognizer::pressesBegan(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) {
-    setState(UIGestureRecognizerState::began);
+//    setState(UIGestureRecognizerState::began);
 }
 
 void UIControlGestureRecognizer::pressesChanged(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) {
@@ -38,7 +51,7 @@ void UIControlGestureRecognizer::pressesChanged(std::vector<std::shared_ptr<UIPr
 }
 
 void UIControlGestureRecognizer::pressesEnded(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) {
-    setState(UIGestureRecognizerState::ended);
+//    setState(UIGestureRecognizerState::ended);
 }
 
 void UIControlGestureRecognizer::pressesCancelled(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) {

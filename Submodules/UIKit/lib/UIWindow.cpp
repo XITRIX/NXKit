@@ -75,6 +75,9 @@ void UIWindow::sendEvent(const std::shared_ptr<UIEvent>& event) {
 
 void UIWindow::sendTouchEvent(std::shared_ptr<UIEvent> event) {
     for (auto& touch: event->allTouches()) {
+        _inputType = UIWindowInputType::touch;
+        _focusSystem->setActive(false);
+
         auto wHitView = touch->view();
         if (wHitView.expired()) wHitView = hitTest(touch->locationIn(nullptr), nullptr);
         if (wHitView.expired()) continue;
@@ -122,6 +125,9 @@ void UIWindow::sendTouchEvent(std::shared_ptr<UIEvent> event) {
 }
 
 void UIWindow::sendPressEvent(const std::shared_ptr<UIPressesEvent>& event) {
+    _inputType = UIWindowInputType::focus;
+    _focusSystem->setActive(true);
+
     for (auto& press: event->allPresses()) {
         if (press->responder().expired()) continue;
 

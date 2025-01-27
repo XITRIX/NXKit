@@ -8,6 +8,7 @@ typedef float NXFloat;
 
 struct NXAffineTransform;
 struct NXTransform3D;
+struct UIEdgeInsets;
 
 struct NXPoint {
     NXFloat x, y;
@@ -88,16 +89,17 @@ struct NXRect {
 
     [[nodiscard]] bool contains(NXPoint point) const;
     [[nodiscard]] bool intersects(const NXRect& other) const;
-    NXRect& offsetBy(const NXPoint& offset);
-    NXRect& offsetBy(const NXFloat& offsetX, const NXFloat& offsetY);
+    [[nodiscard]] NXRect offsetBy(const NXPoint& offset) const;
+    [[nodiscard]] NXRect offsetBy(const NXFloat& offsetX, const NXFloat& offsetY) const;
+    [[nodiscard]] NXRect insetBy(const UIEdgeInsets& insets) const;
 
     bool operator==(const NXRect& rhs) const;
     NXRect operator+(const NXRect& rhs) const;
     NXRect operator-(const NXRect& rhs) const;
     NXRect operator*(const NXFloat& rhs) const;
 
-    NXRect applying(NXAffineTransform transform);
-    NXRect applying(NXTransform3D transform);
+    [[nodiscard]] NXRect applying(NXAffineTransform transform) const;
+    [[nodiscard]] NXRect applying(NXTransform3D transform) const;
 
     [[nodiscard]] NXRect intersection(NXRect other) const;
 

@@ -12,7 +12,7 @@
 namespace NXKit {
 
 UIControl::UIControl() {
-    addGestureRecognizer(new_shared<UIControlGestureRecognizer>(this));
+    addGestureRecognizer(new_shared<UIControlGestureRecognizer>(weak_from_base<UIControl>()));
 }
 
 bool UIControl::canBecomeFocused() {
@@ -101,17 +101,23 @@ bool UIControl::isHighlighted() const {
 }
 
 void UIControl::setHighlighted(bool highlighted) {
-    UIView::animate(0.2, [&]() {
-        if (highlighted) {
-            setTransform(NXAffineTransform::scale(1.02f));
-            layer()->setShadowOffset({0, 3});
-            layer()->setShadowRadius(4);
-        } else {
-            setTransform(NXAffineTransform::scale(1.06f));
-            layer()->setShadowOffset({0, 6});
-            layer()->setShadowRadius(18);
-        }
-    });
+    if (UIView::isFocused()) {
+        UIView::animate(0.2, [&]() {
+            if (highlighted) {
+                setTransform(NXAffineTransform::scale(1.02f));
+                layer()->setShadowOffset({0, 3});
+                layer()->setShadowRadius(4);
+            } else {
+                setTransform(NXAffineTransform::scale(1.06f));
+                layer()->setShadowOffset({0, 6});
+                layer()->setShadowRadius(18);
+            }
+        });
+    } else {
+        UIView::animate(0.2, 0, UIViewAnimationOptions::allowUserInteraction, [&]() {
+            setAlpha(highlighted ? 0.8 : 1);
+        });
+    }
 
     _state[uint8_t (UIControlState::highlighted)] = highlighted;
 }

@@ -273,7 +273,7 @@ void UIScrollView::onPanGestureStateChanged() {
             break;
         }
         case UIGestureRecognizerState::began: {
-            printf("Began\n");
+//            printf("Began\n");
             _initialContentOffset = contentOffset();
             break;
         }

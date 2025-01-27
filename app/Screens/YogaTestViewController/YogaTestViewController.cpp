@@ -105,7 +105,6 @@ void YogaTestViewController::loadView() {
     control3->titleLabel()->setText("Swap boxes!");
     control3->setTintColor(UIColor::systemGreen);
     control3->primaryAction = UIAction("", [&, contentBox]() {
-        printf("Action3 triggered");
 
         toggle = !toggle;
 

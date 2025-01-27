@@ -5,6 +5,11 @@
 
 namespace NXKit {
 
+enum class UIWindowInputType {
+    touch,
+    focus
+};
+
 class UIViewController;
 class UIWindow: public UIView {
 public:
@@ -29,6 +34,8 @@ public:
     void pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
 
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
+
+    UIWindowInputType currentUserInputType() { return _inputType; }
 private:
     std::shared_ptr<UIViewController> _rootViewController;
     std::vector<std::shared_ptr<UIViewController>> _presentedViewControllers;
@@ -41,6 +48,7 @@ private:
     void sendPressEvent(const std::shared_ptr<UIPressesEvent>& event);
 
     std::shared_ptr<UIFocusSystem> _focusSystem;
+    UIWindowInputType _inputType = UIWindowInputType::touch;
 };
 
 }

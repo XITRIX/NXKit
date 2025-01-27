@@ -26,7 +26,7 @@ protected:
     UIColor _backgroundTintColor;
 
 private:
-    NXFloat _blurValue = 10;
+    NXFloat _blurValue = 24; // 10;
 };
 
 }

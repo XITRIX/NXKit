@@ -18,8 +18,13 @@ class UIPressesEvent;
 class UIFocusSystem {
 public:
     UIFocusSystem();
-    std::weak_ptr<UIFocusItem> focusedItem() { return _focusedItem; }
+
+    // Return nullptr if FocusSystem is not active
+    std::weak_ptr<UIFocusItem> focusedItem() { return _isActive ? _focusedItem : std::weak_ptr<UIFocusItem>(); }
 private:
+    void setActive(bool active);
+    bool _isActive;
+
     std::weak_ptr<UIFocusItem> _selectedFocusedItem;
     std::weak_ptr<UIFocusItem> _focusedItem;
     std::weak_ptr<UIWindow> _rootWindow;

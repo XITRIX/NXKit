@@ -15,6 +15,13 @@ namespace NXKit {
 
 UIFocusSystem::UIFocusSystem() = default;
 
+void UIFocusSystem::setActive(bool active) {
+    if (_isActive != active) {
+        _isActive = active;
+        updateFocus();
+    }
+}
+
 void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
     auto pevent = std::dynamic_pointer_cast<UIPressesEvent>(event);
     if (pevent == nullptr) return;
@@ -87,7 +94,7 @@ void UIFocusSystem::updateFocus() {
 
     UIFocusUpdateContext context;
     context._previouslyFocusedItem = _focusedItem;
-    context._nextFocusedItem = item;
+    context._nextFocusedItem = _isActive ? item : std::weak_ptr<UIFocusItem>();
     context._focusHeading = UIFocusHeading::none;
 
     applyFocusToItem(item, context);
