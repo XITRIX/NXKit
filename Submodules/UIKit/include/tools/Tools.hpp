@@ -12,6 +12,7 @@
 
 #include "OptionSet.hpp"
 #include "SharedBase.hpp"
+#include <tools/Fatal.h>
 
 namespace NXKit {
 
@@ -26,5 +27,8 @@ std::optional<T> any_optional_cast(std::optional<std::any> obj) {
         return std::nullopt;
     }
 }
+
+bool startsWith(const std::string& data, const std::string& prefix);
+bool endsWith(const std::string& data, const std::string& suffix);
 
 }

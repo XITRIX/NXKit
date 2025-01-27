@@ -23,7 +23,7 @@ public:
     virtual void applicationWillResignActive(UIApplication* application) {}
     virtual void applicationDidEnterBackground(UIApplication* application) {}
 
-    // virtual void applicationNeedsXIBRegistration(UIApplication* application);
+     virtual void applicationNeedsXIBRegistration(UIApplication* application);
 };
 
 }

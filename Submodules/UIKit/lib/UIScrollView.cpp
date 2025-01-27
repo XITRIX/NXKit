@@ -15,10 +15,6 @@
 
 namespace NXKit {
 
-std::shared_ptr<UIScrollView> UIScrollView::init() {
-    return new_shared<UIScrollView>();
-}
-
 UIScrollView::UIScrollView(NXRect frame): UIView(frame) {
     _panGestureRecognizer = new_shared<UIPanGestureRecognizer>();
     _panGestureRecognizer->onStateChanged = [this](auto){ onPanGestureStateChanged(); };

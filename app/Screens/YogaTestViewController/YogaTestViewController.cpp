@@ -169,7 +169,7 @@ void YogaTestViewController::loadView() {
     blur->setBackgroundTintColor(UIColorThemed(UIColor(0x60DDDDDD), UIColor(0x60404040)));
 
     blur->layer()->setShadowOffset({4, 4});
-    blur->layer()->setShadowColor(UIColor::black.withAlphaComponent(0.15f));
+    blur->layer()->setShadowColor(UIColor::black.withAlphaComponent(0.05f));
 //    blur->layer()->setShadowOpacity(0.2);
     blur->layer()->setShadowRadius(16);
 

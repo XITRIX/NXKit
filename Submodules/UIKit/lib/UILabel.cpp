@@ -1,4 +1,5 @@
 #include <UILabel.h>
+#include <tools/IBTools.h>
 #include <include/core/SkBitmap.h>
 #include <modules/skunicode/include/SkUnicode_icu.h>
 
@@ -134,4 +135,22 @@ void UILabel::updateParagraph() {
 
     paragraphBuilder->addText(_text.c_str());
     paragraph = paragraphBuilder->Build();
+}
+
+bool UILabel::applyXMLAttribute(std::string name, std::string value) {
+    if (UIView::applyXMLAttribute(name, value)) return true;
+
+    REGISTER_XIB_ATTRIBUTE(text, valueToString, setText)
+    REGISTER_XIB_ATTRIBUTE(textColor, valueToColor, setTextColor)
+    REGISTER_XIB_ATTRIBUTE(fontSize, valueToFloat, setFontSize)
+    REGISTER_XIB_ATTRIBUTE(textAlignment, valueToTextAlignment, setTextAlignment)
+
+//    if (name == "font") {
+//        auto fontPath = valueToPath(value);
+//        if (!fontPath.has_value()) return false;
+//        setFont(new_shared<UIFont>(fontPath.value(), this->font()->pointSize));
+//        return true;
+//    }
+
+    return false;
 }

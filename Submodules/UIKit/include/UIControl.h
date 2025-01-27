@@ -49,6 +49,7 @@ enum class UIControlState: uint8_t {
 
 class UIControl: public UIView {
 public:
+    static std::shared_ptr<UIView> init() { return new_shared<UIControl>(); }
     UIControl();
 
     bool canBecomeFocused() override;
@@ -57,7 +58,6 @@ public:
     void pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
     void pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
 
-    static std::shared_ptr<UIView> init() { return new_shared<UIControl>(); }
 
     bool isEnabled() const;
     virtual void setEnabled(bool enabled);

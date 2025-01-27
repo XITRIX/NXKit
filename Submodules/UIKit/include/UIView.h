@@ -8,15 +8,39 @@
 #include <UIResponder.h>
 #include <UIFocus.h>
 #include <UIEvent.h>
+#include <UINib.h>
 #include <set>
+#include <tinyxml2.h>
 
 namespace NXKit {
+
+#define REGISTER_XIB_ATTRIBUTE(strname, parcer, setter) \
+if (name == #strname) { \
+auto strname = parcer(value); \
+if (!strname.has_value()) return false; \
+setter(strname.value()); \
+return true;\
+}
+
+#define REGISTER_XIB_EDGE_ATTRIBUTE(strname, parcer, setter) \
+REGISTER_XIB_ATTRIBUTE(strname, parcer, setter) \
+REGISTER_XIB_ATTRIBUTE(strname##Left, parcer, setter##Left) \
+REGISTER_XIB_ATTRIBUTE(strname##Top, parcer, setter##Top) \
+REGISTER_XIB_ATTRIBUTE(strname##Right, parcer, setter##Right) \
+REGISTER_XIB_ATTRIBUTE(strname##Bottom, parcer, setter##Bottom) \
+REGISTER_XIB_ATTRIBUTE(strname##Start, parcer, setter##Start) \
+REGISTER_XIB_ATTRIBUTE(strname##End, parcer, setter##End) \
+REGISTER_XIB_ATTRIBUTE(strname##Horizontal, parcer, setter##Horizontal) \
+REGISTER_XIB_ATTRIBUTE(strname##Vertical, parcer, setter##Vertical)
 
 class UIWindow;
 class UIViewController;
 class UIGestureRecognizer;
 class UIView: public UIResponder, public UITraitEnvironment, public CALayerDelegate, public UIFocusItem, public enable_shared_from_this<UIView> {
 public:
+    std::map<std::string, std::shared_ptr<UIView>> idStorage;
+
+    static std::shared_ptr<UIView> init() { return new_shared<UIView>(); }
     explicit UIView(NXRect frame = NXRect(), std::shared_ptr<CALayer> layer = new_shared<CALayer>());
 
     std::string tag;
@@ -156,10 +180,13 @@ public:
 
     virtual void draw() {}
     void display(std::shared_ptr<CALayer> layer) override;
+
+    virtual bool applyXMLAttribute(std::string name, std::string value);
 private:
     friend class UIViewController;
     friend class UIFocusSystem;
     friend class YGLayout;
+    friend class UINib;
     friend bool applicationRunLoop();
 
     std::shared_ptr<YGLayout> _yoga;
@@ -203,6 +230,9 @@ private:
     std::shared_ptr<UIFocusItem> searchForFocus();
 
     std::shared_ptr<UIView> layoutRoot();
+
+    static std::shared_ptr<UIView> instantiateFromXib(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* idStorage = nullptr);
+    virtual void applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* idStorage);
 };
 
 }

@@ -23,13 +23,13 @@ public:
     std::weak_ptr<UIFocusItem> focusedItem() { return _isActive ? _focusedItem : std::weak_ptr<UIFocusItem>(); }
 private:
     void setActive(bool active);
-    bool _isActive = false;
+    bool _isActive = true;
 
     std::weak_ptr<UIFocusItem> _selectedFocusedItem;
     std::weak_ptr<UIFocusItem> _focusedItem;
     std::weak_ptr<UIWindow> _rootWindow;
 
-    void updateFocus(bool resetFocusView = false);
+    void updateFocus();
     void sendEvent(const std::shared_ptr<UIEvent>& event);
 
     std::shared_ptr<UIFocusItem> findItemToFocus();

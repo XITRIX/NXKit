@@ -8,6 +8,7 @@ namespace NXKit {
 
 class UILabel: public UIView {
 public:
+    static std::shared_ptr<UIView> init() { return new_shared<UILabel>(); }
     UILabel();
 
     void draw() override;
@@ -33,6 +34,7 @@ public:
     NXSize sizeThatFits(NXSize size) override;
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 
+    bool applyXMLAttribute(std::string name, std::string value) override;
 private:
     NXFloat _baseScaleMultiplier = 1;
     int _numberOfLines = 1;

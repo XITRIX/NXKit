@@ -10,3 +10,6 @@
 [submodule "Submodules/skia"]
 	path = Submodules/skia
 	url = https://github.com/google/skia.git
+[submodule "Submodules/tinyxml2"]
+	path = Submodules/tinyxml2
+	url = https://github.com/leethomason/tinyxml2.git

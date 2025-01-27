@@ -1,13 +1,12 @@
 #include <UIImageView.h>
+#include <tools/IBTools.h>
+
+#include <utility>
 
 using namespace NXKit;
 
-std::shared_ptr<UIImageView> UIImageView::init() {
-    return new_shared<UIImageView>();
-}
-
 UIImageView::UIImageView(std::shared_ptr<UIImage> image): UIImageView(NXRect()) {
-    _image = image;
+    _image = std::move(image);
     updateTextureFromImage();
 }
 
@@ -15,7 +14,7 @@ UIImageView::UIImageView(NXRect frame): UIView(frame) {
     setUserInteractionEnabled(false);
 }
 
-void UIImageView::setImage(std::shared_ptr<UIImage> image) {
+void UIImageView::setImage(const std::shared_ptr<UIImage>& image) {
     if (image == _image) { return; }
     _image = image;
 
@@ -48,10 +47,10 @@ void UIImageView::updateTextureFromImage() {
      return _image->size();
  }
 
-// bool UIImageView::applyXMLAttribute(std::string name, std::string value) {
-//     if (UIView::applyXMLAttribute(name, value)) return true;
+ bool UIImageView::applyXMLAttribute(std::string name, std::string value) {
+     if (UIView::applyXMLAttribute(name, value)) return true;
 
-//     REGISTER_XIB_ATTRIBUTE(image, valueToImage, setImage)
+     REGISTER_XIB_ATTRIBUTE(image, valueToImage, setImage)
 
-//     return false;
-// }
+     return false;
+ }

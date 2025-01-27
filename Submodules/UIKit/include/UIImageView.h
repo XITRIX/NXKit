@@ -7,17 +7,17 @@ namespace NXKit {
 
 class UIImageView: public UIView {
 public:
-    static std::shared_ptr<UIImageView> init();
+    static std::shared_ptr<UIView> init() { return new_shared<UIImageView>(); }
 
-    UIImageView(std::shared_ptr<UIImage> image = nullptr);
-    UIImageView(NXRect frame);
+    explicit UIImageView(std::shared_ptr<UIImage> image = nullptr);
+    explicit UIImageView(NXRect frame);
 
-    void setImage(std::shared_ptr<UIImage> image);
+    void setImage(const std::shared_ptr<UIImage>& image);
     std::shared_ptr<UIImage> image() { return _image; }
 
     // void sizeToFit() override;
     NXSize sizeThatFits(NXSize size) override;
-    // bool applyXMLAttribute(std::string name, std::string value) override;
+    bool applyXMLAttribute(std::string name, std::string value) override;
 
 private:
     std::shared_ptr<UIImage> _image;

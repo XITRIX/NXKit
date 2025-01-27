@@ -31,7 +31,7 @@ enum class UIScrollViewContentInsetAdjustmentBehavior {
 
 class UIScrollView: public UIView {
 public:
-    static std::shared_ptr<UIScrollView> init();
+    static std::shared_ptr<UIView> init() { return new_shared<UIScrollView>(); }
 
     std::weak_ptr<UIScrollViewDelegate> delegate;
 

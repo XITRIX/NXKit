@@ -4,10 +4,84 @@
 #include <DispatchQueue.h>
 #include <CASpringAnimationPrototype.h>
 #include <UIGestureRecognizer.h>
+#include <UINib.h>
+#include <tools/IBTools.h>
 
 #include <utility>
 
 using namespace NXKit;
+
+std::shared_ptr<UIView> UIView::instantiateFromXib(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* idStorage) {
+    auto name = element->Name();
+    auto view = UINib::xibViewsRegister[name]();
+    view->applyXMLAttributes(element, idStorage);
+
+    for (tinyxml2::XMLElement* child = element->FirstChildElement(); child != nullptr; child = child->NextSiblingElement()) {
+        auto subview = instantiateFromXib(child, idStorage);
+        view->addSubview(subview);
+    }
+
+    return view;
+}
+
+void UIView::applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* idStorage) {
+    if (!element)
+        return;
+
+    for (const tinyxml2::XMLAttribute* attribute = element->FirstAttribute(); attribute != nullptr; attribute = attribute->Next())
+    {
+        std::string name  = attribute->Name();
+        std::string value = std::string(attribute->Value());
+
+        if (name == "id") {
+            tag = value;
+            if (!idStorage) continue;
+            idStorage->insert(std::pair<std::string, std::shared_ptr<UIView>>(value, shared_from_this()));
+            continue;
+        }
+
+        if (!this->applyXMLAttribute(name, value)) {
+            printf("Error XML attribute parsing Name: %s with Value%s\n", name.c_str(), value.c_str());
+            //            this->printXMLAttributeErrorMessage(element, name, value);
+        }
+    }
+}
+
+bool UIView::applyXMLAttribute(std::string name, std::string value) {
+    REGISTER_XIB_ATTRIBUTE(contentMode, valueToContentMode, setContentMode)
+    REGISTER_XIB_ATTRIBUTE(clipsToBounds, valueToBool, setClipsToBounds)
+    REGISTER_XIB_ATTRIBUTE(positionType, valueToPositionType, _yoga->setPositionType)
+//    REGISTER_XIB_ATTRIBUTE(isTransparentTouch, valueToBool, setTransparentTouch)
+    REGISTER_XIB_ATTRIBUTE(preservesSuperviewLayoutMargins, valueToBool, setPreservesSuperviewLayoutMargins)
+
+    REGISTER_XIB_ATTRIBUTE(cornerRadius, valueToFloat, layer()->setCornerRadius)
+    REGISTER_XIB_ATTRIBUTE(backgroundColor, valueToColor, setBackgroundColor)
+    REGISTER_XIB_ATTRIBUTE(alpha, valueToFloat, setAlpha)
+
+    REGISTER_XIB_ATTRIBUTE(width, valueToMetric, _yoga->setWidth)
+    REGISTER_XIB_ATTRIBUTE(height, valueToMetric, _yoga->setHeight)
+    REGISTER_XIB_ATTRIBUTE(direction, valueToDirection, _yoga->setDirection)
+    REGISTER_XIB_ATTRIBUTE(flexDirection, valueToFlexDirection, _yoga->setFlexDirection)
+    REGISTER_XIB_ATTRIBUTE(grow, valueToFloat, _yoga->setFlexGrow)
+    REGISTER_XIB_ATTRIBUTE(shrink, valueToFloat, _yoga->setFlexShrink)
+    REGISTER_XIB_ATTRIBUTE(wrap, valueToWrap, _yoga->setFlexWrap)
+    REGISTER_XIB_ATTRIBUTE(justifyContent, valueToJustify, _yoga->setJustifyContent)
+    REGISTER_XIB_ATTRIBUTE(alignItems, valueToAlign, _yoga->setAlignItems)
+    REGISTER_XIB_ATTRIBUTE(alignSelf, valueToAlign, _yoga->setAlignSelf)
+    REGISTER_XIB_ATTRIBUTE(alignContent, valueToAlign, _yoga->setAlignContent)
+    REGISTER_XIB_ATTRIBUTE(aspectRatio, valueToFloat, _yoga->setAspectRatio)
+    REGISTER_XIB_ATTRIBUTE(gap, valueToFloat, _yoga->setAllGap)
+
+    REGISTER_XIB_EDGE_ATTRIBUTE(padding, valueToMetric, _yoga->setPadding)
+    REGISTER_XIB_EDGE_ATTRIBUTE(margin, valueToMetric, _yoga->setMargin)
+
+//    REGISTER_XIB_ATTRIBUTE(topEdgeRespects, valueToEdgeRespects, setTopEdgeRespects)
+//    REGISTER_XIB_ATTRIBUTE(leftEdgeRespects, valueToEdgeRespects, setLeftEdgeRespects)
+//    REGISTER_XIB_ATTRIBUTE(rightEdgeRespects, valueToEdgeRespects, setRightEdgeRespects)
+//    REGISTER_XIB_ATTRIBUTE(bottomEdgeRespects, valueToEdgeRespects, setBottomEdgeRespects)
+
+    return false;
+}
 
 UIView::UIView(NXRect frame, std::shared_ptr<CALayer> layer) {
     _yoga = new_shared<YGLayout>(shared_from_this());

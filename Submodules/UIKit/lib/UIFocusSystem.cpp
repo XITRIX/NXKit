@@ -18,7 +18,14 @@ UIFocusSystem::UIFocusSystem() = default;
 void UIFocusSystem::setActive(bool active) {
     if (_isActive != active) {
         _isActive = active;
-        updateFocus();
+//        updateFocus();
+
+        UIFocusUpdateContext context;
+        context._previouslyFocusedItem = _focusedItem;
+        context._nextFocusedItem = _isActive ? _focusedItem : std::weak_ptr<UIFocusItem>();
+        context._focusHeading = UIFocusHeading::none;
+
+        applyFocusToItem(_focusedItem.lock(), context);
     }
 }
 
@@ -94,8 +101,8 @@ void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
     applyFocusToItem(nextItem.lock(), context);
 }
 
-void UIFocusSystem::updateFocus(bool resetFocusView) {
-    auto item = resetFocusView ? _rootWindow.lock()->searchForFocus() : _focusedItem.lock();
+void UIFocusSystem::updateFocus() {
+    auto item = _rootWindow.lock()->searchForFocus();
 
     UIFocusUpdateContext context;
     context._previouslyFocusedItem = _focusedItem;

@@ -14,7 +14,7 @@ class UIViewController;
 class UIWindow: public UIView {
 public:
     UIWindow();
-    ~UIWindow();
+    ~UIWindow() override;
 
     std::shared_ptr<UIWindow> window() override;
     std::shared_ptr<UIFocusSystem> focusSystem() { return _focusSystem; }
@@ -48,7 +48,7 @@ private:
     void sendPressEvent(const std::shared_ptr<UIPressesEvent>& event);
 
     std::shared_ptr<UIFocusSystem> _focusSystem;
-    UIWindowInputType _inputType = UIWindowInputType::touch;
+    UIWindowInputType _inputType = UIWindowInputType::focus;
 };
 
 }

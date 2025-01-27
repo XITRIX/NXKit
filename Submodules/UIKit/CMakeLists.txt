@@ -6,6 +6,9 @@ add_definitions(
 
 add_library(UIKit
         lib/tools/Logger.cpp
+        lib/tools/IBTools.cpp
+        lib/tools/Fatal.cpp
+        lib/tools/Tools.cpp
         lib/CABasicAnimation.cpp
         lib/CABasicAnimationPrototype.cpp
         lib/CABlurLayer.cpp
@@ -43,6 +46,7 @@ add_library(UIKit
         lib/UIImageView.cpp
         lib/UIKey.cpp
         lib/UILabel.cpp
+        lib/UINib.cpp
         lib/UIPanGestureRecognizer.cpp
         lib/UIPress.cpp
         lib/UIPressesEvent.cpp
@@ -68,8 +72,9 @@ add_library(UIKit
         lib/SkTools/SkDebugfTracer.cpp
 )
 
-list(APPEND platform_libs yogacore )
+list(APPEND platform_libs yogacore tinyxml2)
 target_include_directories(UIKit PUBLIC ${EXTERN_PATH}/yoga)
+target_include_directories(UIKit PUBLIC ${EXTERN_PATH}/tinyxml2)
 
 # APPLE
 if (APPLE)
