@@ -24,7 +24,12 @@ void UIFocusSystem::setActive(bool active) {
 
 void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
     auto pevent = std::dynamic_pointer_cast<UIPressesEvent>(event);
-    if (pevent == nullptr) return;
+    if (pevent == nullptr) return setActive(false);
+
+    if (!_isActive) {
+        setActive(true);
+        return;
+    }
 
     std::shared_ptr<UIPress> press;
     for (const auto& _press: pevent->allPresses()) {
@@ -89,8 +94,8 @@ void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
     applyFocusToItem(nextItem.lock(), context);
 }
 
-void UIFocusSystem::updateFocus() {
-    auto item = _rootWindow.lock()->searchForFocus();
+void UIFocusSystem::updateFocus(bool resetFocusView) {
+    auto item = resetFocusView ? _rootWindow.lock()->searchForFocus() : _focusedItem.lock();
 
     UIFocusUpdateContext context;
     context._previouslyFocusedItem = _focusedItem;

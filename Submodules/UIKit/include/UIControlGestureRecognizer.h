@@ -29,6 +29,7 @@ public:
 
 private:
     std::weak_ptr<UIControl> control;
+    std::shared_ptr<UITouch> _touchToTrack;
 
     friend class UIControl;
 };

@@ -66,6 +66,8 @@ void UIWindow::updateFocus() {
 }
 
 void UIWindow::sendEvent(const std::shared_ptr<UIEvent>& event) {
+    focusSystem()->sendEvent(event);
+
     if (auto pevent = std::dynamic_pointer_cast<UIPressesEvent>(event)) {
         sendPressEvent(pevent);
     } else {
@@ -76,7 +78,7 @@ void UIWindow::sendEvent(const std::shared_ptr<UIEvent>& event) {
 void UIWindow::sendTouchEvent(std::shared_ptr<UIEvent> event) {
     for (auto& touch: event->allTouches()) {
         _inputType = UIWindowInputType::touch;
-        _focusSystem->setActive(false);
+//        _focusSystem->setActive(false);
 
         auto wHitView = touch->view();
         if (wHitView.expired()) wHitView = hitTest(touch->locationIn(nullptr), nullptr);
@@ -126,7 +128,7 @@ void UIWindow::sendTouchEvent(std::shared_ptr<UIEvent> event) {
 
 void UIWindow::sendPressEvent(const std::shared_ptr<UIPressesEvent>& event) {
     _inputType = UIWindowInputType::focus;
-    _focusSystem->setActive(true);
+//    _focusSystem->setActive(true);
 
     for (auto& press: event->allPresses()) {
         if (press->responder().expired()) continue;
@@ -134,12 +136,10 @@ void UIWindow::sendPressEvent(const std::shared_ptr<UIPressesEvent>& event) {
         switch (press->phase()) {
             case UIPressPhase::began: {
                 press->responder().lock()->pressesBegan({ press }, event);
-                focusSystem()->sendEvent(event);
                 break;
             }
             case UIPressPhase::ended: {
                 press->responder().lock()->pressesEnded({ press }, event);
-                focusSystem()->sendEvent(event);
                 break;
             }
             default:

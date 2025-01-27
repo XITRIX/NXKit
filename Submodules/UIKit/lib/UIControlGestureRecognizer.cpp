@@ -17,12 +17,16 @@ UIControlGestureRecognizer::UIControlGestureRecognizer(std::weak_ptr<UIControl> 
 void UIControlGestureRecognizer::touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     setState(UIGestureRecognizerState::began);
 
-    auto touch = std::vector<std::shared_ptr<UITouch>>(touches.begin(), touches.end()).front();
-    control.lock()->setHighlighted(true);
+    if (_touchToTrack == nullptr) {
+        _touchToTrack = std::vector<std::shared_ptr<UITouch>>(touches.begin(), touches.end()).front();
+        control.lock()->setHighlighted(true);
+    }
 }
 
 void UIControlGestureRecognizer::touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     std::shared_ptr<UITouch> touch = std::vector<std::shared_ptr<UITouch>>(touches.begin(), touches.end()).front();
+    if (_touchToTrack != touch) return;
+
     auto position = touch->locationIn(control.lock());
     const NXFloat inset = 48;
     auto viewBounds = control.lock()->bounds();
@@ -31,6 +35,10 @@ void UIControlGestureRecognizer::touchesMoved(std::vector<std::shared_ptr<UITouc
 }
 
 void UIControlGestureRecognizer::touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
+    std::shared_ptr<UITouch> touch = std::vector<std::shared_ptr<UITouch>>(touches.begin(), touches.end()).front();
+    if (_touchToTrack != touch) return;
+    _touchToTrack = nullptr;
+
     setState(UIGestureRecognizerState::ended);
     if (control.lock()->isHighlighted()) {
         control.lock()->setHighlighted(false);

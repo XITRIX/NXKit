@@ -8,6 +8,7 @@
 #include <UIControl.h>
 #include <UIControlGestureRecognizer.h>
 #include <UIPress.h>
+#include <UIWindow.h>
 
 namespace NXKit {
 
@@ -129,8 +130,12 @@ void UIControl::setBaseScaleMultiplier(NXFloat baseScaleMultiplier) {
 }
 
 void UIControl::performPrimaryAction() {
-    if (primaryAction.has_value())
+    if (canBecomeFocused())
+        window()->focusSystem()->_focusedItem = shared_from_this();
+
+    if (primaryAction.has_value()) {
         primaryAction->_handler();
+    }
 }
 }
 
