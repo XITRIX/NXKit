@@ -10,7 +10,8 @@ class UIImage {
 public:
     UIImage(const std::shared_ptr<CGImage>& cgImage, NXFloat scale);
 
-    static std::shared_ptr<UIImage> fromPath(const std::string& path);
+    static std::shared_ptr<UIImage> fromPath(const std::string& path, NXFloat scale = SkiaCtx::main()->getScaleFactor());
+    static std::shared_ptr<UIImage> fromRes(const std::string& path, NXFloat scale = SkiaCtx::main()->getScaleFactor());
     static std::shared_ptr<UIImage> fromData(const std::shared_ptr<NXData>& data, NXFloat scale = SkiaCtx::main()->getScaleFactor());
 
     [[nodiscard]] std::shared_ptr<CGImage> cgImage() const { return _cgImage; }

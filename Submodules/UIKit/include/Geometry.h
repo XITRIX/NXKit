@@ -94,6 +94,7 @@ struct NXRect {
     [[nodiscard]] NXRect insetBy(const UIEdgeInsets& insets) const;
 
     bool operator==(const NXRect& rhs) const;
+    bool operator!=(const NXRect& rhs) const;
     NXRect operator+(const NXRect& rhs) const;
     NXRect operator-(const NXRect& rhs) const;
     NXRect operator*(const NXFloat& rhs) const;

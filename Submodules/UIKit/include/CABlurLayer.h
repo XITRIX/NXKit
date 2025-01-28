@@ -7,8 +7,8 @@ namespace NXKit {
 class CABlurLayer: public CALayer {
 public:
     CABlurLayer();
-    CABlurLayer(CABlurLayer* layer);
-    virtual ~CABlurLayer() = default;
+    explicit CABlurLayer(CABlurLayer* layer);
+    ~CABlurLayer() override = default;
 
     void draw(SkCanvas* context) override;
     std::shared_ptr<CALayer> copy() override;
@@ -16,7 +16,7 @@ public:
     void setBlurValue(NXFloat blurValue);
     [[nodiscard]] NXFloat blurValue() const { return _blurValue; }
 
-    void setBackgroundTintColor(UIColor backgroundTintColor) { _backgroundTintColor = backgroundTintColor; }
+    void setBackgroundTintColor(const UIColor& backgroundTintColor) { _backgroundTintColor = backgroundTintColor; }
     [[nodiscard]] UIColor backgroundTintColor() const { return _backgroundTintColor; }
 
     std::optional<AnimatableProperty> value(std::string forKeyPath) override;
@@ -26,7 +26,7 @@ protected:
     UIColor _backgroundTintColor;
 
 private:
-    NXFloat _blurValue = 24; // 10;
+    NXFloat _blurValue = 16; // 10;
 };
 
 }

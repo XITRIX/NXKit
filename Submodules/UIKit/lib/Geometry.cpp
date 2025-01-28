@@ -241,6 +241,10 @@ bool NXRect::operator==(const NXRect& rhs) const {
     return this->origin == rhs.origin && this->size == rhs.size;
 }
 
+bool NXRect::operator!=(const NXRect& rhs) const {
+    return (*this == rhs);
+}
+
 NXRect NXRect::operator+(const NXRect& rhs) const {
     return {
         this->origin.x + rhs.origin.x,

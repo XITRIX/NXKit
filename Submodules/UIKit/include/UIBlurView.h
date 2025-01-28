@@ -12,7 +12,7 @@ public:
     void setBlurValue(NXFloat blurValue) { _blurLayer()->setBlurValue(blurValue); }
     [[nodiscard]] NXFloat blurValue() const { return _blurLayer()->blurValue(); }
 
-    void setBackgroundTintColor(UIColor backgroundTintColor) { _blurLayer()->setBackgroundTintColor(backgroundTintColor); }
+    void setBackgroundTintColor(const UIColor& backgroundTintColor) { _blurLayer()->setBackgroundTintColor(backgroundTintColor); }
     [[nodiscard]] UIColor backgroundTintColor() const { return _blurLayer()->backgroundTintColor(); }
 
 private:

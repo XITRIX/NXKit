@@ -1,0 +1,44 @@
+<UIView
+    width="100%"
+    height="100%"
+    justifyContent="center"
+    alignItems="center"
+    gap="16">
+
+    <UIView
+        width="80"
+        height="80">
+        <UIView
+                positionType="absolute"
+            left="-20"
+            width="80"
+            height="80"
+            cornerRadius="40"
+            backgroundColor="#FF000080"/>
+        <UIView
+                positionType="absolute"
+            left="20"
+            width="80"
+            height="80"
+            cornerRadius="40"
+            backgroundColor="#00FF0080"/>
+        <UIView
+            positionType="absolute"
+            top="-20"
+            width="80"
+            height="80"
+            cornerRadius="40"
+            backgroundColor="#0000FF80"/>
+    </UIView>
+
+    <UIButton
+            tintColor="#00FF00"
+            cornerRadius="10"
+            style="filled"
+            text="Test text"/>
+    <UILabel
+        id="text"
+        backgroundColor="#00FF0080"
+        text="Test text"/>
+
+</UIView>

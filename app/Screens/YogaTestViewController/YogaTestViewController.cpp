@@ -67,9 +67,7 @@ void YogaTestViewController::loadView() {
 
     auto buttonsBox = new_shared<UIView>();
 
-    auto res = romfs::get("img/icons8-star-90.png");
-    auto data = new_shared<NXData>(res.data(), res.size());
-    auto image = UIImage::fromData(data, 3);
+    auto image = UIImage::fromRes("img/icons8-star-90.png", 3);
     image->setRenderModeAsTemplate(true);
 
     auto control = new_shared<UIButton>(UIButtonStyle::filled);
@@ -210,9 +208,7 @@ void YogaTestViewController::loadView() {
     auto scroll = new_shared<UIScrollView>();
     rootView->addSubview(scroll);
 
-    auto res1 = romfs::get("img/star.png");
-    auto data1 = new_shared<NXData>(res1.data(), res1.size());
-    auto image1 = UIImage::fromData(data1, 3);
+    auto image1 = UIImage::fromRes("img/star.png", 3);
 
     auto imageView = new_shared<UIImageView>();
     imageView->setContentMode(UIViewContentMode::center);

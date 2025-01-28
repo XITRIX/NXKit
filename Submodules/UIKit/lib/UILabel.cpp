@@ -15,6 +15,7 @@ void UILabel::setText(const std::string& text) {
     _text = text;
     setNeedsDisplay();
     setNeedsLayout();
+    printf("Test set %s\n", text.c_str());
 }
 
 void UILabel::setTextColor(const UIColor& textColor) {
@@ -88,6 +89,7 @@ void UILabel::draw() {
 
     paragraph->paint(&canvas, 0, yOffset);
 
+    printf("UILabel draw\n");
     layer()->setContents(new_shared<CGImage>(bitmap.asImage()));
     layer()->setContentsScale(scale);
 }

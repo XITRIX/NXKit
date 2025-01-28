@@ -15,7 +15,7 @@ namespace NXKit {
 
 class UIControlGestureRecognizer: public UIGestureRecognizer {
 public:
-    explicit UIControlGestureRecognizer(std::weak_ptr<UIControl> control);
+    explicit UIControlGestureRecognizer(const std::weak_ptr<UIControl>& control);
 
     void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
     void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;

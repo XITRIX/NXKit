@@ -289,4 +289,20 @@ std::optional<NSTextAlignment> valueToTextAlignment(const std::string& value) {
 //    return std::nullopt;
 //}
 
+std::optional<UIButtonStyle> valueToButtonStyle(const std::string& value) {
+    if (value == "plain") {
+        return UIButtonStyle::plain;
+    }
+    if (value == "gray") {
+        return UIButtonStyle::gray;
+    }
+    if (value == "tinted") {
+        return UIButtonStyle::tinted;
+    }
+    if (value == "filled") {
+        return UIButtonStyle::filled;
+    }
+    return std::nullopt;
+}
+
 }

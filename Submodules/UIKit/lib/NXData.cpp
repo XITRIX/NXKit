@@ -8,6 +8,8 @@
 
 namespace NXKit {
 
+std::function<std::shared_ptr<NXData>(std::string)> NXData::resourceProvider;
+
 NXData::NXData(const std::byte bytes[], std::size_t count, bool freeSource) {
     for (int i = 0; i < count; i++)
         _data.push_back(bytes[i]);
@@ -50,6 +52,10 @@ std::shared_ptr<NXData> NXData::fromPath(const std::string& path) {
        delete[] buffer;
        return nullptr;
    }
+}
+
+std::shared_ptr<NXData> NXData::fromRes(const std::string& path) {
+    return resourceProvider(path);
 }
 
 }

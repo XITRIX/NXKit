@@ -161,12 +161,22 @@ void YGLayout::YGApplyLayoutToViewHierarchy(const std::shared_ptr<UIView>&view, 
     );
 
     // Apply measurements ignoring transformation matrix
-    view->layer()->setPosition(NXPoint(frame.origin.x + (frame.width() * view->layer()->anchorPoint().x),
-                      frame.origin.y + (frame.height() * view->layer()->anchorPoint().y)));
+    auto position = NXPoint(frame.origin.x + (frame.width() * view->layer()->anchorPoint().x),
+                            frame.origin.y + (frame.height() * view->layer()->anchorPoint().y));
+
+    if (view->layer()->position() != position) {
+        view->layer()->setPosition(position);
+        view->setNeedsDisplay();
+    }
 
     auto bounds = view->layer()->bounds();
     bounds.size = frame.size;
-    view->layer()->setBounds(bounds);
+
+    // Probably required to not reset it if bounds not changed
+//    if (view->layer()->bounds() != bounds) {
+        view->layer()->setBounds(bounds);
+//        view->setNeedsDisplay();
+//    }
 
     if (!yoga->isLeaf()) {
         for (const auto & i : view->subviews()) {

@@ -1,4 +1,5 @@
 #include <UIButton.h>
+#include <tools/IBTools.h>
 
 namespace NXKit {
 
@@ -87,10 +88,19 @@ void UIButton::applyStyle(UIButtonStyle style) {
             _imageView->setTintColor(UIColor::tint);
             break;
         case UIButtonStyle::filled:
-            setBackgroundColor(UIColor::tint);
+            setBackgroundColor(UIColor::tint.withAlphaComponent(1));
             _titleLabel->setTextColor(UIColor::white);
             _imageView->setTintColor(UIColor::white);
             break;
     }
+}
+
+bool UIButton::applyXMLAttribute(std::string name, std::string value) {
+    if (UIControl::applyXMLAttribute(name, value)) return true;
+
+    REGISTER_XIB_ATTRIBUTE(text, valueToString, setText)
+    REGISTER_XIB_ATTRIBUTE(style, valueToButtonStyle, applyStyle)
+
+    return false;
 }
 }

@@ -19,7 +19,8 @@ enum class UIButtonStyle {
 
 class UIButton: public UIControl {
 public:
-    UIButton(UIButtonStyle style = UIButtonStyle::plain);
+    static std::shared_ptr<UIView> init() { return new_shared<UIButton>(); }
+    explicit UIButton(UIButtonStyle style = UIButtonStyle::plain);
 
     void tintColorDidChange() override;
 
@@ -37,6 +38,7 @@ public:
 //    void willLoseFocus() override;
 
     void applyStyle(UIButtonStyle style);
+    bool applyXMLAttribute(std::string name, std::string value) override;
 
 private:
     std::shared_ptr<UILabel> _titleLabel;

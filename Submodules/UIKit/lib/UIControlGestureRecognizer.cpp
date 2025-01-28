@@ -10,7 +10,7 @@
 
 namespace NXKit {
 
-UIControlGestureRecognizer::UIControlGestureRecognizer(std::weak_ptr<UIControl> control) :
+UIControlGestureRecognizer::UIControlGestureRecognizer(const std::weak_ptr<UIControl>& control) :
         control(control)
 { }
 

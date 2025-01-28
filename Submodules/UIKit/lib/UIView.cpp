@@ -14,6 +14,7 @@ using namespace NXKit;
 std::shared_ptr<UIView> UIView::instantiateFromXib(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* idStorage) {
     auto name = element->Name();
     auto view = UINib::xibViewsRegister[name]();
+    view->setAutolayoutEnabled(true);
     view->applyXMLAttributes(element, idStorage);
 
     for (tinyxml2::XMLElement* child = element->FirstChildElement(); child != nullptr; child = child->NextSiblingElement()) {
@@ -56,8 +57,13 @@ bool UIView::applyXMLAttribute(std::string name, std::string value) {
 
     REGISTER_XIB_ATTRIBUTE(cornerRadius, valueToFloat, layer()->setCornerRadius)
     REGISTER_XIB_ATTRIBUTE(backgroundColor, valueToColor, setBackgroundColor)
+    REGISTER_XIB_ATTRIBUTE(tintColor, valueToColor, setTintColor)
     REGISTER_XIB_ATTRIBUTE(alpha, valueToFloat, setAlpha)
 
+    REGISTER_XIB_ATTRIBUTE(left, valueToMetric, _yoga->setLeft)
+    REGISTER_XIB_ATTRIBUTE(top, valueToMetric, _yoga->setTop)
+    REGISTER_XIB_ATTRIBUTE(right, valueToMetric, _yoga->setRight)
+    REGISTER_XIB_ATTRIBUTE(bottom, valueToMetric, _yoga->setBottom)
     REGISTER_XIB_ATTRIBUTE(width, valueToMetric, _yoga->setWidth)
     REGISTER_XIB_ATTRIBUTE(height, valueToMetric, _yoga->setHeight)
     REGISTER_XIB_ATTRIBUTE(direction, valueToDirection, _yoga->setDirection)
@@ -268,7 +274,7 @@ void UIView::addSubview(const std::shared_ptr<UIView>& view) {
     _layer->addSublayer(view->_layer);
     _subviews.push_back(view);
     view->setSuperview(this->shared_from_this());
-//    view->setNeedsUpdateSafeAreaInsets();
+    view->setNeedsUpdateSafeAreaInsets();
 }
 
 std::shared_ptr<UIWindow> UIView::window() {
@@ -308,7 +314,7 @@ void UIView::insertSubviewBelow(const std::shared_ptr<UIView>& view, const std::
     _layer->insertSublayerBelow(view->_layer, belowSubview->layer());
     _subviews.insert(itr, view);
     view->setSuperview(this->shared_from_this());
-//    view->setNeedsUpdateSafeAreaInsets();
+    view->setNeedsUpdateSafeAreaInsets();
 }
 
 void UIView::removeFromSuperview() {
@@ -363,8 +369,8 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     UITraitCollection::setCurrent(traitCollection());
     UIColor::_currentTint = tint;
 
-//    updateSafeAreaInsetsIfNeeded();
-//    updateLayoutMarginIfNeeded();
+    updateSafeAreaInsetsIfNeeded();
+    updateLayoutMarginIfNeeded();
     layoutIfNeeded();
     _yoga->layoutIfNeeded();
 

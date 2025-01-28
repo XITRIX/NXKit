@@ -25,6 +25,12 @@ std::shared_ptr<UINib> UINib::fromPath(const std::string& path) {
     return fromData(data);
 }
 
+std::shared_ptr<UINib> UINib::fromRes(std::string path) {
+    auto data = NXData::fromRes(path);
+    if (data == nullptr) return nullptr;
+    return fromData(data);
+}
+
 std::shared_ptr<UINib> UINib::fromString(std::string rawData) {
     auto res = new_shared<UINib>();
     res->_rawXml = std::move(rawData);

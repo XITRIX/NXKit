@@ -18,6 +18,11 @@ namespace NXKit {
 
 #define REGISTER_NIB(n) UINib::registerXIB(#n, n::init);
 
+#define IBOutlet(type, name)                                    \
+std::shared_ptr<type> name() {                                  \
+    return std::static_pointer_cast<type>(idStorage[#name]);    \
+}
+
 class UIView;
 typedef std::function<std::shared_ptr<UIView>()> XIBViewCreator;
 
@@ -25,6 +30,7 @@ class UINib {
 public:
     static std::shared_ptr<UINib> fromPath(const std::string& path);
     static std::shared_ptr<UINib> fromString(std::string rawData);
+    static std::shared_ptr<UINib> fromRes(std::string path);
     static std::shared_ptr<UINib> fromData(const std::shared_ptr<NXData>& data);
 
     static void registerXIB(const std::string& name, XIBViewCreator creator);
