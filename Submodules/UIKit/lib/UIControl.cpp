@@ -60,6 +60,7 @@ void UIControl::didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationC
 
 void UIControl::willGainFocus() {
     setTransform(NXAffineTransform::scale(1.06f));
+    setBaseScaleMultiplier(1.06f);
     layer()->setShadowColor(UIColor::black);
     layer()->setShadowOpacity(0.4);
     layer()->setShadowOffset({0, 6});
@@ -73,6 +74,7 @@ void UIControl::willGainFocus() {
 
 void UIControl::willLoseFocus() {
     setTransform(NXAffineTransform::identity);
+    setBaseScaleMultiplier(1);
     layer()->setShadowOpacity(0);
     layer()->setShadowRadius(0);
     layer()->setZPosition(0);
@@ -106,10 +108,12 @@ void UIControl::setHighlighted(bool highlighted) {
         UIView::animate(0.2, [&]() {
             if (highlighted) {
                 setTransform(NXAffineTransform::scale(1.02f));
+                setBaseScaleMultiplier(1.02f);
                 layer()->setShadowOffset({0, 3});
                 layer()->setShadowRadius(4);
             } else {
                 setTransform(NXAffineTransform::scale(1.06f));
+                setBaseScaleMultiplier(1.06f);
                 layer()->setShadowOffset({0, 6});
                 layer()->setShadowRadius(18);
             }

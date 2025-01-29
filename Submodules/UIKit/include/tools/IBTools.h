@@ -35,6 +35,8 @@ std::optional<YGWrap> valueToWrap(const std::string& value);
 //std::optional<std::string> valueToPath(std::string value);
 std::shared_ptr<NXData> valueToRes(const std::string& value);
 std::optional<std::shared_ptr<UIImage>> valueToImage(const std::string& value);
+std::optional<std::shared_ptr<UIImage>> valuePathToImage(const std::string& value);
+std::optional<std::shared_ptr<UIImage>> valueResToImage(const std::string& value);
 std::optional<UIViewContentMode> valueToContentMode(const std::string& value);
 std::optional<YGPositionType> valueToPositionType(const std::string& value);
 std::optional<NSTextAlignment> valueToTextAlignment(const std::string& value);

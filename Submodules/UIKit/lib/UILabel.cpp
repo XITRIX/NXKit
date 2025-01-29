@@ -139,7 +139,7 @@ void UILabel::updateParagraph() {
     paragraph = paragraphBuilder->Build();
 }
 
-bool UILabel::applyXMLAttribute(std::string name, std::string value) {
+bool UILabel::applyXMLAttribute(const std::string& name, const std::string& value) {
     if (UIView::applyXMLAttribute(name, value)) return true;
 
     REGISTER_XIB_ATTRIBUTE(text, valueToString, setText)

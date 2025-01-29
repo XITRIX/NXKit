@@ -34,14 +34,14 @@ public:
     NXSize sizeThatFits(NXSize size) override;
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 
-    bool applyXMLAttribute(std::string name, std::string value) override;
+    bool applyXMLAttribute(const std::string& name, const std::string& value) override;
 private:
     NXFloat _baseScaleMultiplier = 1;
     int _numberOfLines = 1;
     NXFloat _fontSize = 17;
     NXFloat _fontWeight = SkFontStyle::kNormal_Weight;
     NSTextAlignment _textAlignment = NSTextAlignment::left;
-    std::string _text = "Furthermore, العربية نص جميل. द क्विक ब्राउन फ़ॉक्स jumps over the lazy 🐕.";
+    std::string _text = "";
     UIColor _textColor = UIColor::label;
 
     sk_sp<SkUnicode> unicode;

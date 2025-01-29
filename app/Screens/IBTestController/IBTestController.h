@@ -14,4 +14,5 @@ public:
 
 private:
     IBOutlet(UILabel, text)
+    IBOutlet(UIButton, button)
 };

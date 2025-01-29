@@ -71,7 +71,7 @@ public:
     void setTransform3D(NXTransform3D transform) { _layer->setTransform(transform); }
     NXTransform3D transform3D() const { return _layer->transform(); }
 
-    void setBackgroundColor(const std::optional<UIColor>& backbroundColor) { _layer->setBackgroundColor(backbroundColor); }
+    void setBackgroundColor(const std::optional<UIColor>& backgroundColor) { _layer->setBackgroundColor(backgroundColor); }
     [[nodiscard]] std::optional<UIColor> backgroundColor() const { return _layer->backgroundColor(); }
 
     void setTintColor(std::optional<UIColor> tintColor);
@@ -181,7 +181,7 @@ public:
     virtual void draw() {}
     void display(std::shared_ptr<CALayer> layer) override;
 
-    virtual bool applyXMLAttribute(std::string name, std::string value);
+    virtual bool applyXMLAttribute(const std::string& name, const std::string& value);
 private:
     friend class UIViewController;
     friend class UIFocusSystem;
@@ -232,7 +232,7 @@ private:
     std::shared_ptr<UIView> layoutRoot();
 
     static std::shared_ptr<UIView> instantiateFromXib(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* idStorage = nullptr);
-    virtual void applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* idStorage);
+    virtual void applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* parsingIdStorage);
 };
 
 }

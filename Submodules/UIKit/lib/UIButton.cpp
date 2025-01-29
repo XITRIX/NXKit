@@ -9,6 +9,7 @@ UIButton::UIButton(UIButtonStyle style) {
     _titleLabel = new_shared<UILabel>();
     _imageView = new_shared<UIImageView>();
 
+    _titleLabel->setHidden(true);
     _titleLabel->setFontSize(17);
     _titleLabel->setFontWeight(600);
 
@@ -54,40 +55,25 @@ void UIButton::baseScaleMultiplierDidChange() {
     _titleLabel->setBaseScaleMultiplier(baseScaleMultiplier());
 }
 
-//void UIButton::willGainFocus() {
-//    setTransform(NXAffineTransform::scale(1.04f));
-//    _titleLabel->setBaseScaleMultiplier(1.04f);
-//    layer()->setShadowColor(UIColor::black);
-//    layer()->setShadowOpacity(0.2);
-//    layer()->setShadowOffset({0, 8});
-//    layer()->setShadowRadius(18);
-//}
-//
-//void UIButton::willLoseFocus() {
-//    setTransform(NXAffineTransform::identity);
-//    _titleLabel->setBaseScaleMultiplier(1);
-//    layer()->setShadowOpacity(0);
-//    layer()->setShadowRadius(0);
-//}
-
 void UIButton::applyStyle(UIButtonStyle style) {
     switch (style) {
         case UIButtonStyle::plain:
             setBackgroundColor(UIColor::clear);
             _titleLabel->setTextColor(UIColor::tint);
-            _imageView->setTintColor(UIColor::tint);
+            _imageView->setTintColor(std::nullopt);
             break;
         case UIButtonStyle::gray:
             setBackgroundColor(UIColor::systemGray);
             _titleLabel->setTextColor(UIColor::tint);
-            _imageView->setTintColor(UIColor::tint);
+            _imageView->setTintColor(std::nullopt);
             break;
         case UIButtonStyle::tinted:
             setBackgroundColor(UIColor::tint.withAlphaComponent(0.2f));
             _titleLabel->setTextColor(UIColor::tint);
-            _imageView->setTintColor(UIColor::tint);
+            _imageView->setTintColor(std::nullopt);
             break;
         case UIButtonStyle::filled:
+            // Check why it not work without `withAlphaComponent` part
             setBackgroundColor(UIColor::tint.withAlphaComponent(1));
             _titleLabel->setTextColor(UIColor::white);
             _imageView->setTintColor(UIColor::white);
@@ -95,11 +81,13 @@ void UIButton::applyStyle(UIButtonStyle style) {
     }
 }
 
-bool UIButton::applyXMLAttribute(std::string name, std::string value) {
+bool UIButton::applyXMLAttribute(const std::string& name, const std::string& value) {
     if (UIControl::applyXMLAttribute(name, value)) return true;
 
     REGISTER_XIB_ATTRIBUTE(text, valueToString, setText)
     REGISTER_XIB_ATTRIBUTE(style, valueToButtonStyle, applyStyle)
+    REGISTER_XIB_ATTRIBUTE(imagePath, valuePathToImage, setImage)
+    REGISTER_XIB_ATTRIBUTE(image, valueResToImage, setImage)
 
     return false;
 }

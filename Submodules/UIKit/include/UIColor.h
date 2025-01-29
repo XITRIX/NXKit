@@ -31,6 +31,7 @@ public:
     [[nodiscard]] unsigned char a() const;
     
     bool operator==(const UIColor& rhs) const;
+    bool operator!=(const UIColor& rhs) const;
 
     UIColor withAlphaComponent(NXFloat alpha);
 

@@ -89,7 +89,7 @@ UIColor::UIColor(): UIColor(0, 0, 0) {}
 
 UIColor::UIColor(int rawValue): color(rawValue) {}
 
-UIColor::UIColor(UIColor const &color): color(color.color), dynamicProvider(color.dynamicProvider) {}
+UIColor::UIColor(UIColor const &color) = default;
 
 UIColor::UIColor(const std::function<UIColor(std::shared_ptr<UITraitCollection>)>& dynamicProvider) {
     this->dynamicProvider = dynamicProvider;
@@ -123,12 +123,16 @@ bool UIColor::operator==(const UIColor& rhs) const {
     return this->raw() == rhs.raw();
 }
 
+bool UIColor::operator!=(const UIColor& rhs) const {
+    return !(*this == rhs);
+}
+
 UIColor UIColor::withAlphaComponent(NXFloat alpha) {
     UIColor copy(*this);
-    alpha = std::max(0.0f, std::min(alpha, 1.0f));
+    auto mixMaxAlpha = std::max(0.0f, std::min(alpha, 1.0f));
 
-    return UIColor([copy, alpha](auto) {
-        return UIColor(copy.r(), copy.g(), copy.b(), (unsigned char) (255 * alpha));
+    return UIColor([copy, mixMaxAlpha](auto) {
+        return UIColor(copy.r(), copy.g(), copy.b(), (unsigned char) (255 * mixMaxAlpha));
     });
 }
 

@@ -38,7 +38,7 @@ public:
 //    void willLoseFocus() override;
 
     void applyStyle(UIButtonStyle style);
-    bool applyXMLAttribute(std::string name, std::string value) override;
+    bool applyXMLAttribute(const std::string& name, const std::string& value) override;
 
 private:
     std::shared_ptr<UILabel> _titleLabel;

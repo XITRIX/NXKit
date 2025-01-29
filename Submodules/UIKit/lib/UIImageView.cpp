@@ -47,10 +47,11 @@ void UIImageView::updateTextureFromImage() {
      return _image->size();
  }
 
- bool UIImageView::applyXMLAttribute(std::string name, std::string value) {
+ bool UIImageView::applyXMLAttribute(const std::string& name, const std::string& value) {
      if (UIView::applyXMLAttribute(name, value)) return true;
 
-     REGISTER_XIB_ATTRIBUTE(image, valueToImage, setImage)
+     REGISTER_XIB_ATTRIBUTE(imagePath, valuePathToImage, setImage)
+     REGISTER_XIB_ATTRIBUTE(image, valueResToImage, setImage)
 
      return false;
  }

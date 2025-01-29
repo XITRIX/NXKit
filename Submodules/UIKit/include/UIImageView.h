@@ -17,7 +17,7 @@ public:
 
     // void sizeToFit() override;
     NXSize sizeThatFits(NXSize size) override;
-    bool applyXMLAttribute(std::string name, std::string value) override;
+    bool applyXMLAttribute(const std::string& name, const std::string& value) override;
 
 private:
     std::shared_ptr<UIImage> _image;

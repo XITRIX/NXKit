@@ -25,7 +25,7 @@ std::shared_ptr<UIView> UIView::instantiateFromXib(tinyxml2::XMLElement* element
     return view;
 }
 
-void UIView::applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* idStorage) {
+void UIView::applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* parsingIdStorage) {
     if (!element)
         return;
 
@@ -36,8 +36,8 @@ void UIView::applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::str
 
         if (name == "id") {
             tag = value;
-            if (!idStorage) continue;
-            idStorage->insert(std::pair<std::string, std::shared_ptr<UIView>>(value, shared_from_this()));
+            if (!parsingIdStorage) continue;
+            parsingIdStorage->insert(std::pair<std::string, std::shared_ptr<UIView>>(value, shared_from_this()));
             continue;
         }
 
@@ -48,7 +48,7 @@ void UIView::applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::str
     }
 }
 
-bool UIView::applyXMLAttribute(std::string name, std::string value) {
+bool UIView::applyXMLAttribute(const std::string& name, const std::string& value) {
     REGISTER_XIB_ATTRIBUTE(contentMode, valueToContentMode, setContentMode)
     REGISTER_XIB_ATTRIBUTE(clipsToBounds, valueToBool, setClipsToBounds)
     REGISTER_XIB_ATTRIBUTE(positionType, valueToPositionType, _yoga->setPositionType)
@@ -342,6 +342,7 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     auto tint = tintColor();
 
     UITraitCollection::setCurrent(traitCollection());
+    auto oldTint = UIColor::_currentTint;
     UIColor::_currentTint = tint;
 
     if (_contentMode == UIViewContentMode::redraw) {
@@ -377,6 +378,8 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     for (auto& subview: _subviews) {
         subview->drawAndLayoutTreeIfNeeded();
     }
+
+    UIColor::_currentTint = oldTint;
 }
 
 void UIView::setMask(const std::shared_ptr<UIView>& mask) {
@@ -445,7 +448,7 @@ void UIView::setTintColor(std::optional<UIColor> tintColor) {
 }
 
 UIColor UIView::tintColor() const {
-    if (_tintColor.has_value()) return _tintColor.value();
+    if (_tintColor.has_value() && _tintColor != UIColor::tint) return _tintColor.value();
     if (!superview().expired()) return superview().lock()->tintColor();
     return UIColor::systemBlue;
 }

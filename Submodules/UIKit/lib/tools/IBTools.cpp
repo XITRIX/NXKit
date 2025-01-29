@@ -13,6 +13,7 @@
 namespace NXKit {
 
 std::optional<std::string> valueToString(std::string value) {
+    printf("IBString: %s\n", value.c_str());
     return value;
 }
 
@@ -197,10 +198,20 @@ std::shared_ptr<NXData> valueToRes(const std::string& value) {
     return nullptr;
 }
 
-std::optional<std::shared_ptr<UIImage>> valueToImage(const std::string& value) {
+std::optional<std::shared_ptr<UIImage>> valuePathToImage(const std::string& value) {
     if (startsWith(value, "@image/")) {
         std::string resPath = value.substr(7); // length of "@image/"
         auto image = UIImage::fromPath(resPath);
+        if (!image) return std::nullopt;
+        return image;
+    }
+    return std::nullopt;
+}
+
+std::optional<std::shared_ptr<UIImage>> valueResToImage(const std::string& value) {
+    if (startsWith(value, "@image/")) {
+        std::string resPath = value.substr(7); // length of "@image/"
+        auto image = UIImage::fromRes(resPath);
         if (!image) return std::nullopt;
         return image;
     }

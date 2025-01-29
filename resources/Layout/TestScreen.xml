@@ -24,21 +24,44 @@
             backgroundColor="#00FF0080"/>
         <UIView
             positionType="absolute"
-            top="-20"
+            top="-30"
             width="80"
             height="80"
             cornerRadius="40"
             backgroundColor="#0000FF80"/>
     </UIView>
 
-    <UIButton
-            tintColor="#00FF00"
-            cornerRadius="10"
-            style="filled"
-            text="Test text"/>
+    <UIView
+            flexDirection="row"
+            gap="8">
+        <UIButton
+                id="button"
+                tintColor="#00FF00"
+                cornerRadius="10"
+                style="filled"
+                text="Test text"/>
+        <UIButton
+                tintColor="#009090"
+                cornerRadius="10"
+                style="filled"
+                text="Test text 2"/>
+    </UIView>
     <UILabel
         id="text"
         backgroundColor="#00FF0080"
-        text="Test text"/>
+        textAlignment="center"
+        text="Test text blablablablba\nnew
+line haahhahahha ffefijaej a \n
+aidjaw naodo awo awd wd wdad"/>
+    <UIImageView
+            width="44"
+            height="44"
+            image="@image/img/play.png"/>
+    <UIButton
+            width="44"
+            height="44"
+            style="plain"
+            cornerRadius="22"
+            image="@image/img/play.png"/>
 
 </UIView>
