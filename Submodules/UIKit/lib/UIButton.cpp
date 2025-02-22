@@ -14,7 +14,7 @@ UIButton::UIButton(UIButtonStyle style) {
     _titleLabel->setFontWeight(600);
 
     _imageView->setHidden(true);
-    _imageView->setContentMode(UIViewContentMode::center);
+    _imageView->setContentMode(UIViewContentMode::scaleAspectFit);
 
     addSubview(_imageView);
     addSubview(_titleLabel);

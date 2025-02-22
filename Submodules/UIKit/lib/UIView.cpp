@@ -758,9 +758,9 @@ void UIView::layoutIfNeeded() {
 
         layoutRoot()->layoutIfNeeded();
 
-        for (const auto &view : subviews()) {
-            view->setNeedsLayout();
-        }
+//        for (const auto &view : subviews()) {
+//            view->setNeedsLayout();
+//        }
         layoutSubviews();
     }
 }

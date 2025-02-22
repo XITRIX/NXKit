@@ -5,6 +5,7 @@
 #include <Screens/TestViewController/TestViewController.hpp>
 #include <Screens/IBTestController/IBTestController.h>
  #include <Screens/YogaTestViewController/YogaTestViewController.hpp>
+#include <Screens/NXTextScreen/NXTestScreen.h>
 // #include <NavigationViewController/NavigationViewController.hpp>
 // #include <TextViewController/TextViewController.hpp>
 #include <romfs/romfs.hpp>
@@ -16,7 +17,8 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     window = new_shared<UIWindow>();
 
 //    auto vc = new_shared<TestViewController>();
-    auto vc = new_shared<IBTestController>();
+//    auto vc = new_shared<IBTestController>();
+    auto vc = new_shared<NXNavigationController>();
 //    auto vc = new_shared<YogaTestViewController>();
     // auto vc = new_shared<NavigationViewController>();
 //    auto vc = new_shared<TextViewController>();

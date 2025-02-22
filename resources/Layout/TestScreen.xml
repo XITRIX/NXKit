@@ -56,11 +56,12 @@ aidjaw naodo awo awd wd wdad"/>
     <UIImageView
             width="44"
             height="44"
+            contentMode="scaleAspectFit"
             image="@image/img/play.png"/>
     <UIButton
-            width="44"
             height="44"
-            style="plain"
+            style="filled"
+            text="Play"
             cornerRadius="22"
             image="@image/img/play.png"/>
 
