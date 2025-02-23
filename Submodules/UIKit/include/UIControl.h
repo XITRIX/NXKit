@@ -69,6 +69,7 @@ public:
 
     virtual void willGainFocus();
     virtual void willLoseFocus();
+    virtual void focusFailedToMove(UIFocusHeading heading);
     virtual void willChangeFocusHighlight(bool highlighted);
 
     virtual void willChangeHighlight(bool highlighted);

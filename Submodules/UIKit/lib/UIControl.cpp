@@ -47,9 +47,14 @@ void UIControl::didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationC
     UIView::didUpdateFocusIn(context, coordinator);
 
     if (context.nextFocusedItem().lock() == shared_from_this()) {
-        coordinator->addCoordinatedAnimations([this]() {
-            willGainFocus();
-        });
+        // If previous and next focus items are the same, means that navigation failed
+        if (context.previouslyFocusedItem().lock() == context.nextFocusedItem().lock()) {
+            focusFailedToMove(context.focusHeading());
+        } else {
+            coordinator->addCoordinatedAnimations([this]() {
+                willGainFocus();
+            });
+        }
     } else {
         coordinator->addCoordinatedAnimations([this]() {
             _state[uint8_t (UIControlState::highlighted)] = false; // need to be revised
@@ -74,6 +79,10 @@ void UIControl::willLoseFocus() {
     layer()->setShadowOpacity(0);
     layer()->setShadowRadius(0);
     layer()->setZPosition(0);
+}
+
+void UIControl::focusFailedToMove(UIFocusHeading heading) {
+
 }
 
 void UIControl::willChangeFocusHighlight(bool highlighted) {

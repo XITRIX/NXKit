@@ -77,6 +77,33 @@ public:
         setBackgroundColor(std::nullopt);
     }
 
+    void focusFailedToMove(UIFocusHeading heading) override {
+        NXFloat x = 0;
+        NXFloat y = 0;
+        NXFloat power = 10;
+
+        switch (heading) {
+            case UIFocusHeading::up:
+                y = -1;
+                break;
+            case UIFocusHeading::down:
+                y = 1;
+                break;
+            case UIFocusHeading::left:
+                x = -1;
+                break;
+            case UIFocusHeading::right:
+                x = 1;
+                break;
+            default: break;
+        }
+
+        setTransform(NXAffineTransform::translationBy(x * power, y * power));
+        UIView::animate(0.3, 0, 0.4, 3, UIViewAnimationOptions::allowUserInteraction, [this]() {
+            setTransform(NXAffineTransform::identity);
+        });
+    }
+
     void setSelected(bool selected) override {
         UIControl::setSelected(selected);
         if (selected) {

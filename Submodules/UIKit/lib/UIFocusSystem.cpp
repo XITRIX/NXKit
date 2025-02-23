@@ -95,7 +95,9 @@ void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
         }
     }
 
-    if (nextItem.expired()) return;
+    if (nextItem.expired()) {
+        nextItem = _focusedItem;
+    }
 
     context._nextFocusedItem = nextItem;
     applyFocusToItem(nextItem.lock(), context);
@@ -124,8 +126,12 @@ void UIFocusSystem::applyFocusToItem(const std::shared_ptr<UIFocusItem>& item, U
     UIFocusAnimationCoordinator coordinator;
     _focusedItem = item;
 
-    if (!context.previouslyFocusedItem().expired()) { context.previouslyFocusedItem().lock()->didUpdateFocusIn(context, &coordinator); }
-    if (!context.nextFocusedItem().expired()) { context.nextFocusedItem().lock()->didUpdateFocusIn(context, &coordinator); }
+    if (context.previouslyFocusedItem().lock() == context.nextFocusedItem().lock()) {
+        if (!context.previouslyFocusedItem().expired()) { context.previouslyFocusedItem().lock()->didUpdateFocusIn(context, &coordinator); }
+    } else {
+        if (!context.previouslyFocusedItem().expired()) { context.previouslyFocusedItem().lock()->didUpdateFocusIn(context, &coordinator); }
+        if (!context.nextFocusedItem().expired()) { context.nextFocusedItem().lock()->didUpdateFocusIn(context, &coordinator); }
+    }
 
     UIFocusAnimationContext animationContext;
     UIView::animate(animationContext.duration(), 0, curveEaseOut, [context, coordinator, animationContext]() {

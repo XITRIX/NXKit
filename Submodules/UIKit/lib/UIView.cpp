@@ -395,7 +395,6 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     updateSafeAreaInsetsIfNeeded();
     updateLayoutMarginIfNeeded();
     layoutIfNeeded();
-    _yoga->layoutIfNeeded();
 
     for (auto& subview: _subviews) {
         subview->drawAndLayoutTreeIfNeeded();

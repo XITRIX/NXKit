@@ -232,4 +232,12 @@ bool YGLayout::isRoot() {
     return false;
 }
 
+bool YGLayout::isDirty() {
+    if (_isEnabled) {
+        return YGNodeIsDirty(_node);
+    }
+
+    return false;
+}
+
 }
