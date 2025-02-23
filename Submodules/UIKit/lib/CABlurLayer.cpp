@@ -10,7 +10,7 @@ CABlurLayer::CABlurLayer(): CALayer() {
 }
 
 CABlurLayer::CABlurLayer(CABlurLayer* layer): CALayer(layer) {
-    _blurValue = layer->_blurValue;
+    _blurRadius = layer->_blurRadius;
 }
 
 std::shared_ptr<CALayer> CABlurLayer::copy() {
@@ -24,7 +24,7 @@ void CABlurLayer::draw(SkCanvas* context) {
     blurPaint.setStyle(SkPaint::kFill_Style);
 //    blurPaint.setStrokeWidth(10);
     
-    sk_sp<SkImageFilter> newBlurFilter = SkImageFilters::Blur(_blurValue, _blurValue, SkTileMode::kClamp, nullptr);
+    sk_sp<SkImageFilter> newBlurFilter = SkImageFilters::Blur(_blurRadius, _blurRadius, SkTileMode::kClamp, nullptr);
     blurPaint.setImageFilter(std::move(newBlurFilter));
 //
     context->save();
@@ -44,14 +44,14 @@ void CABlurLayer::draw(SkCanvas* context) {
     context->restore();
 }
 
-void CABlurLayer::setBlurValue(NXFloat blurValue) {
-    if (_blurValue == blurValue) return;
-    onWillSet("blurValue");
-    _blurValue = blurValue;
+void CABlurLayer::setBlurRadius(NXFloat blurRadius) {
+    if (_blurRadius == blurRadius) return;
+    onWillSet("blurRadius");
+    _blurRadius = blurRadius;
 }
 
 std::optional<AnimatableProperty> CABlurLayer::value(std::string forKeyPath) {
-    if (forKeyPath == "blurValue") return _blurValue;
+    if (forKeyPath == "blurRadius") return _blurRadius;
     return CALayer::value(forKeyPath);
 }
 
@@ -61,14 +61,14 @@ void CABlurLayer::update(std::shared_ptr<CALayer> presentation, std::shared_ptr<
     auto keyPath = animation->keyPath.value();
     auto fromValue = animation->fromValue.value();
 
-    if (keyPath == "blurValue") {
+    if (keyPath == "blurRadius") {
         auto start = any_optional_cast<NXFloat>(fromValue);
         if (!start.has_value()) { return; }
 
         auto end = any_optional_cast<NXFloat>(animation->toValue);
-        if (!end.has_value()) end = this->_blurValue;
+        if (!end.has_value()) end = this->_blurRadius;
 
-        std::static_pointer_cast<CABlurLayer>(presentation)->setBlurValue(start.value() + (end.value() - start.value()) * progress);
+        std::static_pointer_cast<CABlurLayer>(presentation)->setBlurRadius(start.value() + (end.value() - start.value()) * progress);
     }
 
     CALayer::update(presentation, animation, progress);

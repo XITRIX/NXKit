@@ -43,12 +43,11 @@ NXSize SkiaCtx_ios::getSize() {
     auto layer = window.layer.presentationLayer;
     if (layer == NULL) layer = window.layer;
     NXSize size = { static_cast<NXFloat>(layer.bounds.size.width), static_cast<NXFloat>(layer.bounds.size.height) };
-//    printf("Size: %f | %f\n", layer.bounds.size.width, layer.bounds.size.height);
-    return size;
+    return size * _extraScaleFactor;
 }
 
 float SkiaCtx_ios::getScaleFactor() {
-    return UIApplication.sharedApplication.keyWindow.traitCollection.displayScale;
+    return UIApplication.sharedApplication.keyWindow.traitCollection.displayScale / _extraScaleFactor;
 }
 
 NXKit::UIUserInterfaceStyle SkiaCtx_ios::getThemeMode() {
@@ -61,7 +60,7 @@ NXKit::UIUserInterfaceStyle SkiaCtx_ios::getThemeMode() {
 }
 
 sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
-    auto size = getSize();
+    auto size = getSize() / _extraScaleFactor;
     if (_size.width == size.width && _size.height == size.height && surface != nullptr) { return surface; }
 
     _size = size;
@@ -69,15 +68,15 @@ sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
     GrGLFramebufferInfo framebuffer_info;
     framebuffer_info.fFormat = GL_RGBA8;
     framebuffer_info.fFBOID = 0;
-    auto scaleFactor = getScaleFactor();
-    GrBackendRenderTarget target = GrBackendRenderTargets::MakeGL(size.width * scaleFactor,
-                                                                  size.height * scaleFactor,
+    auto pureScaleFactor = getScaleFactor() * _extraScaleFactor;
+    GrBackendRenderTarget target = GrBackendRenderTargets::MakeGL(size.width * pureScaleFactor,
+                                                                  size.height * pureScaleFactor,
                                                                   0, 8,
                                                                   framebuffer_info);
 
     SkSurfaceProps props;
 
-    glViewport(0, 0, _size.width * scaleFactor, _size.height * scaleFactor);
+    glViewport(0, 0, _size.width * pureScaleFactor, _size.height * pureScaleFactor);
     surface = SkSurfaces::WrapBackendRenderTarget(context.get(), target,
                                                        kBottomLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
                                                        nullptr, &props);

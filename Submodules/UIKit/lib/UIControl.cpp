@@ -60,16 +60,12 @@ void UIControl::didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationC
 
 void UIControl::willGainFocus() {
     setTransform(NXAffineTransform::scale(1.06f));
-    setBaseScaleMultiplier(1.06f);
+    setBaseScaleMultiplier(1.1f);
     layer()->setShadowColor(UIColor::black);
     layer()->setShadowOpacity(0.4);
     layer()->setShadowOffset({0, 6});
     layer()->setShadowRadius(18);
     layer()->setZPosition(1);
-
-//    UIView::performWithoutAnimation([this]() {
-//        layer()->setBorderWidth(3);
-//    });
 }
 
 void UIControl::willLoseFocus() {
@@ -78,9 +74,24 @@ void UIControl::willLoseFocus() {
     layer()->setShadowOpacity(0);
     layer()->setShadowRadius(0);
     layer()->setZPosition(0);
-//    UIView::performWithoutAnimation([this]() {
-//        layer()->setBorderWidth(0);
-//    });
+}
+
+void UIControl::willChangeFocusHighlight(bool highlighted) {
+    if (highlighted) {
+        setTransform(NXAffineTransform::scale(1.02f));
+        setBaseScaleMultiplier(1.0f);
+        layer()->setShadowOffset({0, 3});
+        layer()->setShadowRadius(4);
+    } else {
+        setTransform(NXAffineTransform::scale(1.06f));
+        setBaseScaleMultiplier(1.1f);
+        layer()->setShadowOffset({0, 6});
+        layer()->setShadowRadius(18);
+    }
+}
+
+void UIControl::willChangeHighlight(bool highlighted) {
+    setAlpha(highlighted ? 0.8 : 1);
 }
 
 bool UIControl::isEnabled() const {
@@ -103,24 +114,18 @@ bool UIControl::isHighlighted() const {
     return _state[uint8_t (UIControlState::highlighted)];
 }
 
+std::shared_ptr<UIView> UIControl::hitTest(NXPoint point, UIEvent *withEvent) {
+    return UIView::hitTest(point, withEvent);
+}
+
 void UIControl::setHighlighted(bool highlighted) {
     if (UIView::isFocused()) {
         UIView::animate(0.2, [&]() {
-            if (highlighted) {
-                setTransform(NXAffineTransform::scale(1.02f));
-                setBaseScaleMultiplier(1.02f);
-                layer()->setShadowOffset({0, 3});
-                layer()->setShadowRadius(4);
-            } else {
-                setTransform(NXAffineTransform::scale(1.06f));
-                setBaseScaleMultiplier(1.06f);
-                layer()->setShadowOffset({0, 6});
-                layer()->setShadowRadius(18);
-            }
+            willChangeFocusHighlight(highlighted);
         });
     } else {
         UIView::animate(0.2, 0, UIViewAnimationOptions::allowUserInteraction, [&]() {
-            setAlpha(highlighted ? 0.8 : 1);
+            willChangeHighlight(highlighted);
         });
     }
 

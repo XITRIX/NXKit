@@ -16,7 +16,7 @@ public:
 //    float getScaleFactor() override;
     sk_sp<GrDirectContext> directContext() override { return context; }
 
-    UIUserInterfaceStyle getThemeMode() override { return UIUserInterfaceStyle::light; }
+    UIUserInterfaceStyle getThemeMode() override;
 
     virtual void swapBuffers() override;
 

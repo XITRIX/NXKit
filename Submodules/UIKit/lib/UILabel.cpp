@@ -46,9 +46,9 @@ void UILabel::setFontWeight(NXFloat fontWeight) {
     setNeedsLayout();
 }
 
-void UILabel::setBaseScaleMultiplier(NXFloat baseScaleMultiplier) {
-    if (_baseScaleMultiplier == baseScaleMultiplier) return;
-    _baseScaleMultiplier = baseScaleMultiplier;
+void UILabel::setScaleModifier(NXFloat scaleModifier) {
+    if (layer()->scaleModifier() == scaleModifier) return;
+    layer()->setScaleModifier(scaleModifier);
     setNeedsDisplay();
 }
 
@@ -57,7 +57,9 @@ NXSize UILabel::sizeThatFits(NXSize size) {
     paragraph->layout(size.width);
     auto height = paragraph->getHeight();
     auto width = paragraph->getMaxIntrinsicWidth();
-    auto rWidth = std::ceil(width);
+
+    // Adds extra 1, because of extra content scale could be not enough to fit text line
+    auto rWidth = std::ceil(width) + 1;
     return { rWidth, height };
 }
 
@@ -70,11 +72,13 @@ void UILabel::draw() {
     updateParagraph();
 
     SkBitmap bitmap;
-    auto scale = SkiaCtx::main()->getScaleFactor() * _baseScaleMultiplier;
+    NXFloat scale;
     NXSize size;
     if (contentMode() == UIViewContentMode::redraw) {
+        scale = traitCollection()->displayScale() * layer()->presentationOrSelf()->scaleModifier();
         size = layer()->presentationOrSelf()->bounds().size;
     } else {
+        scale = traitCollection()->displayScale() * layer()->scaleModifier();
         size = bounds().size;
     }
     auto bitmapSize = size * scale;
@@ -89,7 +93,6 @@ void UILabel::draw() {
 
     paragraph->paint(&canvas, 0, yOffset);
 
-    printf("UILabel draw\n");
     layer()->setContents(new_shared<CGImage>(bitmap.asImage()));
     layer()->setContentsScale(scale);
 }

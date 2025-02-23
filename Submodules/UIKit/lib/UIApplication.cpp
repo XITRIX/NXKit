@@ -111,6 +111,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
 
             break;
         }
+#ifndef PLATFORM_IOS
         case SDL_MOUSEBUTTONDOWN: {
             // Simulate touch
             auto touchEvent = SDL_Event();
@@ -150,6 +151,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             handleSDLEvent(touchEvent);
             break;
         }
+#endif
         case SDL_CONTROLLERDEVICEADDED: {
             printf("Controller added\n");
 

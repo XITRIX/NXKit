@@ -22,6 +22,7 @@ public:
     virtual std::shared_ptr<CABasicAnimation> actionForKey(std::string event) = 0;
     virtual void display(std::shared_ptr<CALayer> layer) = 0;
     virtual void updateCurrentEnvironment() = 0;
+    virtual bool isHierarchyRoot() { return false; }
 };
 
 class CALayer: public enable_shared_from_this<CALayer> {
@@ -36,8 +37,11 @@ public:
     void setContentsGravity(CALayerContentsGravity contentsGravity) { _contentsGravity = contentsGravity; }
     [[nodiscard]] CALayerContentsGravity contentsGravity() const { return _contentsGravity; }
 
-    void setContentsScale(NXFloat contentsScale) { _contentsScale = contentsScale; }
+    void setContentsScale(NXFloat contentsScale);
     [[nodiscard]] NXFloat contentsScale() const { return _contentsScale; }
+
+    void setScaleModifier(NXFloat scaleModifier);
+    [[nodiscard]] NXFloat scaleModifier() const { return _scaleModifier; }
 
     void setAnchorPoint(NXPoint anchorPoint);
     [[nodiscard]] NXPoint anchorPoint() const { return _anchorPoint; }
@@ -149,9 +153,12 @@ private:
     friend class UIView;
     friend bool applicationRunLoop();
 
+    void setLayerTreeDirtyIfNeeded() const;
+
     /// Defaults to 1.0 but if the layer is associated with a view,
     /// the view sets this value to match the screen.
     NXFloat _contentsScale = 1.0f;
+    NXFloat _scaleModifier = 1.0f;
     CALayerContentsGravity _contentsGravity = CALayerContentsGravity::resize;
 
     std::weak_ptr<CALayer> _superlayer;
@@ -202,6 +209,11 @@ private:
     /// This is both a performance optimization (avoids lots of animations at the start)
     /// as well as a correctness fix (matches iOS behaviour). Maybe there's a better way though?
     bool hasBeenRenderedInThisPartOfOverallLayerHierarchy = false;
+
+    /// Prohibit layers from making layout dirty if they are not in visible hierarchy
+    void updateIsPartOfPresentedHierarchy(bool value);
+    bool isPartOfPresentedHierarchy() const;
+    bool _isPartOfPresentedHierarchy = false;
 };
 
 }

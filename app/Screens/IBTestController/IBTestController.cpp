@@ -4,6 +4,10 @@
 
 #include "IBTestController.h"
 
+IBTestController::IBTestController() {
+    setTitle("IB Test VC");
+}
+
 void IBTestController::loadView() {
     auto nib = UINib::fromRes("Layout/TestScreen.xml");
     setView(nib->instantiate(&idStorage));

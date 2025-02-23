@@ -13,5 +13,4 @@ private:
     std::shared_ptr<NXKit::UILabel> dragMeViewLabel;
     std::shared_ptr<NXKit::UILabel> label;
     std::shared_ptr<NXKit::UILabel> label2;
-    std::shared_ptr<NXKit::UIView> bottomBar;
 };

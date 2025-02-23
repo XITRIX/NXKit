@@ -9,6 +9,7 @@ using namespace NXKit;
 
 class IBTestController: public UIViewController {
 public:
+    IBTestController();
     void loadView() override;
     void viewDidLoad() override;
 

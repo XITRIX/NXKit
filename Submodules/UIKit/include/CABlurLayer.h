@@ -13,8 +13,8 @@ public:
     void draw(SkCanvas* context) override;
     std::shared_ptr<CALayer> copy() override;
 
-    void setBlurValue(NXFloat blurValue);
-    [[nodiscard]] NXFloat blurValue() const { return _blurValue; }
+    void setBlurRadius(NXFloat blurRadius);
+    [[nodiscard]] NXFloat blurRadius() const { return _blurRadius; }
 
     void setBackgroundTintColor(const UIColor& backgroundTintColor) { _backgroundTintColor = backgroundTintColor; }
     [[nodiscard]] UIColor backgroundTintColor() const { return _backgroundTintColor; }
@@ -23,10 +23,10 @@ public:
     
 protected:
     void update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABasicAnimation> animation, float progress) override;
-    UIColor _backgroundTintColor;
+    UIColor _backgroundTintColor = UIColor::clear;
 
 private:
-    NXFloat _blurValue = 16; // 10;
+    NXFloat _blurRadius = 16; // 10;
 };
 
 }

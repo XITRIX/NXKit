@@ -18,6 +18,7 @@ public:
     void setTitle(std::string title) { _title = std::move(title); }
 
 //    uint identifier() { return _id; }
+    void perform() { _handler(); }
 private:
     friend class UIControl;
 

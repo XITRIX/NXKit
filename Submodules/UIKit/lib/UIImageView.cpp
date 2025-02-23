@@ -34,7 +34,7 @@ void UIImageView::updateTextureFromImage() {
         setBounds(bounds);
     } else {
         layer()->setContents(nullptr);
-        layer()->setContentsScale(SkiaCtx::main()->getScaleFactor());
+        layer()->setContentsScale(UITraitCollection::current()->displayScale());
     }
 }
 

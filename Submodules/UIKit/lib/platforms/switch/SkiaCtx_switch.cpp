@@ -116,6 +116,17 @@ void SkiaCtx_switch::initContext() {
 //    return NSApplication.sharedApplication.keyWindow.backingScaleFactor;
 //}
 
+
+UIUserInterfaceStyle SkiaCtx_switch::getThemeMode() {
+    ColorSetId colorSetId;
+    setsysGetColorSetId(&colorSetId);
+
+    if (colorSetId == ColorSetId_Dark)
+        return UIUserInterfaceStyle::dark;
+    else
+        return UIUserInterfaceStyle::light;
+}
+
 sk_sp<SkSurface> SkiaCtx_switch::getBackbufferSurface() {
     auto size = getSize();
     if (_size.width == size.width && _size.height == size.height && surface != nullptr) { return surface; }

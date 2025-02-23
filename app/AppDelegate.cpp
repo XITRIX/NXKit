@@ -5,7 +5,8 @@
 #include <Screens/TestViewController/TestViewController.hpp>
 #include <Screens/IBTestController/IBTestController.h>
  #include <Screens/YogaTestViewController/YogaTestViewController.hpp>
-#include <Screens/NXTextScreen/NXTestScreen.h>
+#include <Screens/NXTextScreen/NXNavigationController.h>
+#include <Screens/NXTextScreen/NXTabBarController.h>
 // #include <NavigationViewController/NavigationViewController.hpp>
 // #include <TextViewController/TextViewController.hpp>
 #include <romfs/romfs.hpp>
@@ -16,13 +17,16 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     DEFAULT_ROMFS_REGISTRATION
     window = new_shared<UIWindow>();
 
-//    auto vc = new_shared<TestViewController>();
-//    auto vc = new_shared<IBTestController>();
-    auto vc = new_shared<NXNavigationController>();
+    auto vc1 = new_shared<TestViewController>();
+    auto vc = new_shared<IBTestController>();
+    std::vector<std::shared_ptr<UIViewController>> vcs = { vc, vc1 };
+
+    auto tbvc = new_shared<NXTabBarController>( vcs );
+    auto nvc = new_shared<NXNavigationController>(tbvc);
 //    auto vc = new_shared<YogaTestViewController>();
     // auto vc = new_shared<NavigationViewController>();
 //    auto vc = new_shared<TextViewController>();
-    window->setRootViewController(vc);
+    window->setRootViewController(nvc);
     window->makeKeyAndVisible();
 //    window->setBackgroundColor(UIColor::systemBackground);
     window->setBackgroundColor(UIColor::secondarySystemBackground);

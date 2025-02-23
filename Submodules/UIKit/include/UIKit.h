@@ -5,6 +5,7 @@
 #pragma once
 
 #include <DispatchQueue.h>
+#include <IndexPath.h>
 #include <UIBlurView.h>
 #include <UIButton.h>
 #include <UIControl.h>

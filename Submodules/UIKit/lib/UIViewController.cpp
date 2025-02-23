@@ -20,6 +20,12 @@ void UIViewController::setView(std::shared_ptr<UIView> view) {
     if (_view) _view->_parentController.reset();
     _view = std::move(view);
     _view->_parentController = weak_from_this();
+
+    if (traitCollection() != nullptr) {
+        _view->_traitCollection = traitCollection();
+        _view->UITraitEnvironment::traitCollectionDidChange(nullptr);
+    }
+
     viewDidLoad();
 }
 
@@ -64,6 +70,9 @@ void UIViewController::viewDidDisappear(bool animated) {
 void UIViewController::addChild(const std::shared_ptr<UIViewController>& child) {
     _children.push_back(child);
     child->willMoveToParent(weak_from_this().lock());
+
+    child->_traitCollection = _traitCollection;
+    child->traitCollectionDidChange(nullptr);
 }
 
 void UIViewController::willMoveToParent(const std::shared_ptr<UIViewController>& parent) {
@@ -78,17 +87,17 @@ void UIViewController::didMoveToParent(std::shared_ptr<UIViewController> parent)
 
 void UIViewController::removeFromParent() {
     if (auto spt = _parent.lock()) {
-        spt->_children.erase(std::remove(spt->_children.begin(), spt->_children.end(), shared_from_this()));
+        spt->_children.erase(std::remove(spt->_children.begin(), spt->_children.end(), shared_from_this()), spt->_children.end());
         this->_parent.reset();
         viewDidDisappear(true);
     }
 }
 
-//void UIViewController::setAdditionalSafeAreaInsets(UIEdgeInsets additionalSafeAreaInsets) {
-//    if (_additionalSafeAreaInsets == additionalSafeAreaInsets) return;
-//    _additionalSafeAreaInsets = additionalSafeAreaInsets;
-//    view()->setNeedsUpdateSafeAreaInsets();
-//}
+void UIViewController::setAdditionalSafeAreaInsets(UIEdgeInsets additionalSafeAreaInsets) {
+    if (_additionalSafeAreaInsets == additionalSafeAreaInsets) return;
+    _additionalSafeAreaInsets = additionalSafeAreaInsets;
+    view()->setNeedsUpdateSafeAreaInsets();
+}
 
 void UIViewController::setViewRespectsSystemMinimumLayoutMargins(bool viewRespectsSystemMinimumLayoutMargins) {
     if (_viewRespectsSystemMinimumLayoutMargins == viewRespectsSystemMinimumLayoutMargins) return;
@@ -163,7 +172,7 @@ void UIViewController::traitCollectionDidChange(std::shared_ptr<UITraitCollectio
     }
     for (auto child : _children) {
         child->_traitCollection = _traitCollection;
-        child->UITraitEnvironment::traitCollectionDidChange(previousTraitCollection);
+        child->traitCollectionDidChange(previousTraitCollection);
     }
 }
 

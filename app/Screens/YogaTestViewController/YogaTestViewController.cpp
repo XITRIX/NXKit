@@ -4,7 +4,7 @@
 using namespace NXKit;
 
 YogaTestViewController::YogaTestViewController() {
-    
+    setTitle("Yoga test VC");
 }
 
 void YogaTestViewController::loadView() {

@@ -9,8 +9,8 @@ class UIBlurView: public UIView {
 public:
     UIBlurView();
 
-    void setBlurValue(NXFloat blurValue) { _blurLayer()->setBlurValue(blurValue); }
-    [[nodiscard]] NXFloat blurValue() const { return _blurLayer()->blurValue(); }
+    void setBlurRadius(NXFloat blurValue) { _blurLayer()->setBlurRadius(blurValue); }
+    [[nodiscard]] NXFloat blurRadius() const { return _blurLayer()->blurRadius(); }
 
     void setBackgroundTintColor(const UIColor& backgroundTintColor) { _blurLayer()->setBackgroundTintColor(backgroundTintColor); }
     [[nodiscard]] UIColor backgroundTintColor() const { return _blurLayer()->backgroundTintColor(); }

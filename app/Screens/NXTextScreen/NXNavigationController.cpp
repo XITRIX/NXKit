@@ -2,9 +2,11 @@
 // Created by Даниил Виноградов on 22.02.2025.
 //
 
-#include "NXTestScreen.h"
+#include "NXNavigationController.h"
 
-class NXNavigationBar: public UIView {
+#include <utility>
+
+class NXNavigationBar: public UIBlurView {
 public:
     NXNavigationBar() {
         auto headerContent = new_shared<UIView>();
@@ -68,7 +70,7 @@ private:
     std::shared_ptr<UILabel> _titleLabel;
 };
 
-class NXFooterBar: public UIView {
+class NXFooterBar: public UIBlurView {
 public:
     NXFooterBar() {
         auto headerContent = new_shared<UIView>();
@@ -78,7 +80,7 @@ public:
         _titleLabel = new_shared<UILabel>();
 
         _imageView->setContentMode(UIViewContentMode::center);
-        _imageView->setImage(UIImage::fromRes("img/sys/battery_back_light.png", 1));
+        _imageView->setImage(UIImage::fromRes("img/sys/battery_back_dark.png", 1));
 
         _titleLabel->setFontSize(21.5);
 
@@ -131,6 +133,10 @@ private:
     std::shared_ptr<UILabel> _titleLabel;
 };
 
+NXNavigationController::NXNavigationController(const std::shared_ptr<UIViewController>& rootViewController) {
+    _viewControllers.push_back(rootViewController);
+}
+
 void NXNavigationController::loadView() {
     auto view = new_shared<UIView>();
     view->setBackgroundColor(UIColor::systemBackground);
@@ -156,5 +162,42 @@ void NXNavigationController::loadView() {
 }
 
 void NXNavigationController::viewDidLoad() {
+    UIViewController::viewDidLoad();
+    updatePresentedViewController(false);
+}
 
+void NXNavigationController::viewDidLayoutSubviews() {
+    UIViewController::viewDidLayoutSubviews();
+    setAdditionalSafeAreaInsets({88, 0, 73, 0});
+}
+
+void NXNavigationController::setViewControllers(std::vector<std::shared_ptr<UIViewController>> viewControllers, bool animated) {
+    _viewControllers = std::move(viewControllers);
+    updatePresentedViewController(animated);
+}
+
+std::shared_ptr<UIViewController> NXNavigationController::topViewController() {
+    if (_viewControllers.empty()) return nullptr;
+    return _viewControllers.back();
+}
+
+void NXNavigationController::updatePresentedViewController(bool animated) {
+    if (presentedViewController != nullptr) {
+        presentedViewController->willMoveToParent(nullptr);
+        presentedViewController->view()->removeFromSuperview();
+        presentedViewController->removeFromParent();
+    }
+
+    presentedViewController = topViewController();
+    if (presentedViewController == nullptr) return;
+
+    addChild(presentedViewController);
+    view()->insertSubviewAt(presentedViewController->view(), 0);
+    presentedViewController->didMoveToParent(shared_from_this());
+
+    presentedViewController->view()->configureLayout([](std::shared_ptr<YGLayout> layout) {
+        layout->setWidth(100_percent);
+        layout->setHeight(100_percent);
+        layout->setPositionType(YGPositionTypeAbsolute);
+    });
 }

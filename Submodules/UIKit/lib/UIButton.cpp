@@ -12,6 +12,7 @@ UIButton::UIButton(UIButtonStyle style) {
     _titleLabel->setHidden(true);
     _titleLabel->setFontSize(17);
     _titleLabel->setFontWeight(600);
+//    _titleLabel->setContentMode(UIViewContentMode::redraw);
 
     _imageView->setHidden(true);
     _imageView->setContentMode(UIViewContentMode::scaleAspectFit);
@@ -52,7 +53,7 @@ void UIButton::setImage(const std::shared_ptr<UIImage>& image) {
 }
 
 void UIButton::baseScaleMultiplierDidChange() {
-    _titleLabel->setBaseScaleMultiplier(baseScaleMultiplier());
+    _titleLabel->setScaleModifier(baseScaleMultiplier());
 }
 
 void UIButton::applyStyle(UIButtonStyle style) {

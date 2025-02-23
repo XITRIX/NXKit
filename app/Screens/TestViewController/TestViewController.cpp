@@ -23,10 +23,10 @@ void animateCube(std::shared_ptr<UIView> view) {
 
 void animateBlur(std::shared_ptr<UIBlurView> view) {
     UIView::animate(2.5, [view]() {
-        view->setBlurValue(0);
+        view->setBlurRadius(0);
     }, [view](bool res) {
         UIView::animate(2.5, [view]() {
-            view->setBlurValue(20);
+            view->setBlurRadius(20);
         }, [view](bool res) {
             animateBlur(view);
         });
@@ -76,7 +76,7 @@ void switchLabelText(std::shared_ptr<UILabel> label) {
 }
 
 TestViewController::TestViewController() {
-
+    setTitle("Test VC");
 }
 
 void TestViewController::loadView() {
@@ -114,14 +114,10 @@ void TestViewController::loadView() {
 
 //    animateBlur(blur);
 
-    bottomBar = new_shared<UIView>();
-    bottomBar->setBackgroundColor(UIColor::secondarySystemBackground);
-    rootView->addSubview(bottomBar);
-
     label2 = new_shared<UILabel>();
     label2->setText("Test text\nTry to fit me!!!");
     label2->setBackgroundColor(UIColor::systemCyan);
-    label2->setFrame({ 100, 200, 0, 0 });
+    label2->setFrame({ 150, 200, 0, 0 });
     rootView->addSubview(label2);
 
     switchLabelText(label2);
@@ -206,8 +202,4 @@ void TestViewController::viewDidLayoutSubviews() {
     dragMeViewLabel->setCenter({ bounds.midX(), bounds.midY() });
 
     label2->sizeToFit();
-
-    auto frame = view()->frame();
-    NXFloat bottomBarHeight = 48 + 35; //83;
-    bottomBar->setFrame({ 0, frame.size.height - bottomBarHeight, frame.size.width, bottomBarHeight });
 }

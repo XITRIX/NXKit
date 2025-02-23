@@ -7,6 +7,7 @@
 
 #include <YGLayout.h>
 #include <UIView.h>
+#include <UIViewController.h>
 
 namespace NXKit {
 
@@ -182,6 +183,10 @@ void YGLayout::YGApplyLayoutToViewHierarchy(const std::shared_ptr<UIView>&view, 
         for (const auto & i : view->subviews()) {
             YGApplyLayoutToViewHierarchy(i, false);
         }
+    }
+
+    if (!view->_parentController.expired()) {
+        view->_parentController.lock()->viewDidLayoutSubviews();
     }
 }
 

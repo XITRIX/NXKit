@@ -29,7 +29,7 @@ bool applicationRunLoop() {
         keyWindow->_traitCollection->_displayScale = scale;
         keyWindow->_traitCollection->_userInterfaceStyle = SkiaCtx::main()->getThemeMode();
         keyWindow->traitCollectionDidChange(oldCollection);
-        CALayer::layerTreeIsDirty = true;
+        CALayer::setLayerTreeIsDirty();
     }
 
     UIView::animateIfNeeded(currentTime);
@@ -76,6 +76,10 @@ void setupRenderAndRunLoop() {
 int UIApplicationMain(const std::shared_ptr<UIApplicationDelegate>& appDelegate) {
     UIApplication::shared = new_shared<UIApplication>();
     SkiaCtx::_main = MakeSkiaCtx();
+
+#ifdef PLATFORM_IOS
+    SkiaCtx::_main->setExtraScaleFactor(1.3f);
+#endif
 
     UIApplication::shared->delegate = appDelegate;
 

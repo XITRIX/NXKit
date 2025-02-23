@@ -16,6 +16,8 @@ public:
     UIWindow();
     ~UIWindow() override;
 
+    bool isHierarchyRoot() override { return true; }
+
     std::shared_ptr<UIWindow> window() override;
     std::shared_ptr<UIFocusSystem> focusSystem() { return _focusSystem; }
 

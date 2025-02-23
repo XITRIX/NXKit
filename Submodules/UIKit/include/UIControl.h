@@ -58,7 +58,6 @@ public:
     void pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
     void pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) override;
 
-
     bool isEnabled() const;
     virtual void setEnabled(bool enabled);
 
@@ -70,6 +69,10 @@ public:
 
     virtual void willGainFocus();
     virtual void willLoseFocus();
+    virtual void willChangeFocusHighlight(bool highlighted);
+
+    virtual void willChangeHighlight(bool highlighted);
+    std::shared_ptr<UIView> hitTest(NXPoint point, UIEvent *withEvent) override;
 
     void setBaseScaleMultiplier(NXFloat baseScaleMultiplier);
     [[nodiscard]] NXFloat baseScaleMultiplier() const { return _baseScaleMultiplier; }

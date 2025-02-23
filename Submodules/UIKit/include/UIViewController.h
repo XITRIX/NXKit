@@ -2,6 +2,8 @@
 
 #include <UIView.h>
 
+#include <utility>
+
 namespace NXKit {
 
 class UIViewController: public UIResponder, public UITraitEnvironment, public UIFocusEnvironment, public enable_shared_from_this<UIViewController> {
@@ -29,6 +31,9 @@ public:
     std::vector<std::shared_ptr<UIViewController>> children() { return _children; }
     std::weak_ptr<UIViewController> parent() { return _parent; }
 
+    std::string title() { return _title; }
+    void setTitle(std::string title) { _title = std::move(title); }
+
     void addChild(const std::shared_ptr<UIViewController>& child);
     virtual void willMoveToParent(const std::shared_ptr<UIViewController>& parent);
     virtual void didMoveToParent(std::shared_ptr<UIViewController> parent);
@@ -39,7 +44,7 @@ public:
 
     UIEdgeInsets systemMinimumLayoutMargins() { return _systemMinimumLayoutMargins; }
 
-    bool viewRespectsSystemMinimumLayoutMargins() { return _viewRespectsSystemMinimumLayoutMargins; }
+    bool viewRespectsSystemMinimumLayoutMargins() const { return _viewRespectsSystemMinimumLayoutMargins; }
     void setViewRespectsSystemMinimumLayoutMargins(bool viewRespectsSystemMinimumLayoutMargins);
 
     void present(const std::shared_ptr<UIViewController>& otherViewController, bool animated, const std::function<void()>& completion = [](){});
@@ -49,7 +54,7 @@ public:
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 
     // Focus
-    virtual std::shared_ptr<UIFocusEnvironment> parentFocusEnvironment() override;
+    std::shared_ptr<UIFocusEnvironment> parentFocusEnvironment() override;
 
 protected:
     virtual void makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion = [](){});
@@ -63,6 +68,7 @@ private:
     UIEdgeInsets _systemMinimumLayoutMargins = UIEdgeInsets(0, 16, 0, 16);
     bool _viewRespectsSystemMinimumLayoutMargins = true;
     float _animationTime = 0.5;
+    std::string _title = "";
 
     std::shared_ptr<UIViewController> _presentedViewController;
     std::weak_ptr<UIViewController> _presentingViewController;

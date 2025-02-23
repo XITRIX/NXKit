@@ -28,15 +28,13 @@ public:
     void setFontWeight(NXFloat fontWeight);
     [[nodiscard]] NXFloat fontWeight() const { return _fontWeight; }
 
-    void setBaseScaleMultiplier(NXFloat baseScaleMultiplier);
-    [[nodiscard]] NXFloat baseScaleMultiplier() const { return _baseScaleMultiplier; }
+    void setScaleModifier(NXFloat scaleModifier);
 
     NXSize sizeThatFits(NXSize size) override;
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 
     bool applyXMLAttribute(const std::string& name, const std::string& value) override;
 private:
-    NXFloat _baseScaleMultiplier = 1;
     int _numberOfLines = 1;
     NXFloat _fontSize = 17;
     NXFloat _fontWeight = SkFontStyle::kNormal_Weight;

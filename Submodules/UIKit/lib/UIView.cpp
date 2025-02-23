@@ -274,6 +274,7 @@ void UIView::addSubview(const std::shared_ptr<UIView>& view) {
     _layer->addSublayer(view->_layer);
     _subviews.push_back(view);
     view->setSuperview(this->shared_from_this());
+
     view->setNeedsUpdateSafeAreaInsets();
 }
 
@@ -285,12 +286,32 @@ std::shared_ptr<UIWindow> UIView::window() {
 void UIView::setSuperview(const std::shared_ptr<UIView>& superview) {
     _superview = superview;
 
+    if (superview)
+        traitCollectionDidChange(superview->traitCollection());
+
     if (!_tintColor.has_value())
         tintColorDidChange();
 }
 
 void UIView::insertSubviewAt(const std::shared_ptr<UIView>& view, int index) {
-    // TODO: Need to implement
+    bool needToNotifyViewController = false;
+    if (!view->_parentController.expired()) {
+        auto window = this->window();
+        if (window) {
+            needToNotifyViewController = true;
+        }
+    }
+
+    setNeedsLayout();
+    view->removeFromSuperview();
+
+    if (needToNotifyViewController)
+        view->_parentController.lock()->viewWillAppear(true);
+
+    _layer->insertSublayerAt(view->_layer, index);
+    _subviews.insert(_subviews.begin() + index, view);
+    view->setSuperview(this->shared_from_this());
+    view->setNeedsUpdateSafeAreaInsets();
 }
 
 void UIView::insertSubviewBelow(const std::shared_ptr<UIView>& view, const std::shared_ptr<UIView>& belowSubview) {
@@ -346,7 +367,8 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     UIColor::_currentTint = tint;
 
     if (_contentMode == UIViewContentMode::redraw) {
-        if (visibleLayer->contents() && visibleLayer->contents()->size() != visibleLayer->bounds().size) {
+        if (visibleLayer->contents() && ((visibleLayer->contents()->size() / visibleLayer->contentsScale()) != visibleLayer->bounds().size || visibleLayer->scaleModifier() != layer()->scaleModifier()))
+        {
             setNeedsDisplay();
         }
     }

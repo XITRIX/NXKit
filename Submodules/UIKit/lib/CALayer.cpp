@@ -21,6 +21,22 @@ void CALayer::setLayerTreeIsDirty() {
     layerTreeIsDirty = true;
 }
 
+bool CALayer::isPartOfPresentedHierarchy() const {
+    return _isPartOfPresentedHierarchy || (!delegate.expired() && delegate.lock()->isHierarchyRoot());
+}
+
+void CALayer::setLayerTreeDirtyIfNeeded() const {
+    if (isPartOfPresentedHierarchy())
+        CALayer::setLayerTreeIsDirty();
+}
+
+void CALayer::updateIsPartOfPresentedHierarchy(bool value) {
+    _isPartOfPresentedHierarchy = value;
+    for (auto sublayer : _sublayers) {
+        sublayer->updateIsPartOfPresentedHierarchy(isPartOfPresentedHierarchy());
+    }
+}
+
 NXFloat CALayer::defaultAnimationDuration = 0.3f;
 
 CALayer::CALayer() = default;
@@ -49,6 +65,18 @@ CALayer::CALayer(CALayer* layer) {
     _superlayer = layer->_superlayer;
     _sublayers = layer->_sublayers;
     _contentsGravity = layer->_contentsGravity;
+}
+
+void CALayer::setContentsScale(NXFloat contentsScale) {
+    if (_contentsScale == contentsScale) return;
+    onWillSet("contentsScale");
+    _contentsScale = contentsScale;
+}
+
+void CALayer::setScaleModifier(NXFloat scaleModifier) {
+    if (_scaleModifier == scaleModifier) return;
+    onWillSet("scaleModifier");
+    _scaleModifier = scaleModifier;
 }
 
 void CALayer::setAnchorPoint(NXKit::NXPoint anchorPoint) {
@@ -145,12 +173,12 @@ NXAffineTransform CALayer::affineTransform() {
 
 void CALayer::setHidden(bool hidden) {
     _isHidden = hidden;
-    CALayer::setLayerTreeIsDirty();
+    setLayerTreeDirtyIfNeeded();
 }
 
 void CALayer::setContents(std::shared_ptr<CGImage> contents) {
     _contents = std::move(contents);
-    CALayer::setLayerTreeIsDirty();
+    setLayerTreeDirtyIfNeeded();
 }
 
 void CALayer::setMask(const std::shared_ptr<CALayer>& mask) {
@@ -166,14 +194,16 @@ void CALayer::addSublayer(const std::shared_ptr<CALayer>& layer) {
     layer->removeFromSuperlayer();
     _sublayers.push_back(layer);
     layer->_superlayer = this->shared_from_this();
-    CALayer::setLayerTreeIsDirty();
+    layer->updateIsPartOfPresentedHierarchy(isPartOfPresentedHierarchy());
+    setLayerTreeDirtyIfNeeded();
 }
 
 void CALayer::insertSublayerAt(const std::shared_ptr<CALayer>& layer, int index) {
     layer->removeFromSuperlayer();
     _sublayers.insert(_sublayers.begin() + index, layer);
     layer->_superlayer = this->shared_from_this();
-    CALayer::setLayerTreeIsDirty();
+    layer->updateIsPartOfPresentedHierarchy(isPartOfPresentedHierarchy());
+    setLayerTreeDirtyIfNeeded();
 }
 
 void CALayer::insertSublayerAbove(const std::shared_ptr<CALayer>& layer, const std::shared_ptr<CALayer>& sibling) {
@@ -187,7 +217,8 @@ void CALayer::insertSublayerBelow(const std::shared_ptr<CALayer>& layer, const s
     layer->removeFromSuperlayer();
     _sublayers.insert(itr, layer);
     layer->_superlayer = this->shared_from_this();
-    CALayer::setLayerTreeIsDirty();
+    layer->updateIsPartOfPresentedHierarchy(isPartOfPresentedHierarchy());
+    setLayerTreeDirtyIfNeeded();
 }
 
 void CALayer::removeFromSuperlayer() {
@@ -203,7 +234,8 @@ void CALayer::removeFromSuperlayer() {
 
     // Find and remove this from superlayer
     super->_sublayers.erase(std::remove(super->_sublayers.begin(), super->_sublayers.end(), shared_from_this()), super->_sublayers.end());
-    CALayer::setLayerTreeIsDirty();
+    updateIsPartOfPresentedHierarchy(false);
+    setLayerTreeDirtyIfNeeded();
 }
 
 void CALayer::draw(SkCanvas* context) {}
@@ -455,7 +487,7 @@ void CALayer::removeAnimation(const std::string& forKey) {
 }
 
 void CALayer::onWillSet(const std::string& keyPath) {
-    CALayer::setLayerTreeIsDirty();
+    setLayerTreeDirtyIfNeeded();
     const auto& animationKey = keyPath;
 
     auto animation = std::static_pointer_cast<CABasicAnimation>(actionForKey(animationKey));
@@ -491,6 +523,8 @@ std::optional<AnimatableProperty> CALayer::value(std::string forKeyPath) {
     if (forKeyPath == "transform") return _transform;
     if (forKeyPath == "position") return _position;
     if (forKeyPath == "anchorPoint") return _anchorPoint;
+    if (forKeyPath == "contentsScale") return _contentsScale;
+    if (forKeyPath == "scaleModifier") return _scaleModifier;
     if (forKeyPath == "cornerRadius") return _cornerRadius;
     return std::nullopt;
 }
@@ -516,7 +550,7 @@ void CALayer::animateAt(Timer currentTime) {
     }
 
     this->_presentation = animations.empty() ? nullptr : presentation;
-    CALayer::setLayerTreeIsDirty();
+    setLayerTreeDirtyIfNeeded();
 }
 
 // Writing into `presentation->_...` cause we don't need onWillSet to be triggered
@@ -534,6 +568,7 @@ void CALayer::update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABa
         auto end = any_optional_cast<std::optional<UIColor>>(animation->toValue);
         if (!end.has_value()) end = this->_backgroundColor;
         if (!end.has_value()) end = UIColor::clear;
+        if (!end.value().has_value()) end = UIColor::clear;
 
         presentation->setBackgroundColor(start.value()->interpolationTo(end.value().value(), progress));
     }
@@ -545,6 +580,7 @@ void CALayer::update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABa
         auto end = any_optional_cast<std::optional<UIColor>>(animation->toValue);
         if (!end.has_value()) end = this->_borderColor;
         if (!end.has_value()) end = UIColor::clear;
+        if (!end.value().has_value()) end = UIColor::clear;
 
         presentation->setBorderColor(start.value()->interpolationTo(end.value().value(), progress));
     }
@@ -565,6 +601,7 @@ void CALayer::update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABa
         auto end = any_optional_cast<std::optional<UIColor>>(animation->toValue);
         if (!end.has_value()) end = this->_shadowColor;
         if (!end.has_value()) end = UIColor::clear;
+        if (!end.value().has_value()) end = UIColor::clear;
 
         presentation->setShadowColor(start.value()->interpolationTo(end.value().value(), progress));
     }
@@ -603,6 +640,24 @@ void CALayer::update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABa
         if (!end.has_value()) end = this->_position;
 
         presentation->setPosition(start.value() + (end.value() - start.value()) * progress);
+    }
+    if (keyPath == "contentsScale") {
+        auto start = any_optional_cast<float>(fromValue);
+        if (!start.has_value()) { return; }
+
+        auto end = any_optional_cast<float>(animation->toValue);
+        if (!end.has_value()) end = this->_contentsScale;
+
+        presentation->setContentsScale(start.value() + (end.value() - start.value()) * progress);
+    }
+    if (keyPath == "scaleModifier") {
+        auto start = any_optional_cast<float>(fromValue);
+        if (!start.has_value()) { return; }
+
+        auto end = any_optional_cast<float>(animation->toValue);
+        if (!end.has_value()) end = this->_scaleModifier;
+
+        presentation->setScaleModifier(start.value() + (end.value() - start.value()) * progress);
     }
     if (keyPath == "anchorPoint") {
         auto start = any_optional_cast<NXPoint>(fromValue);

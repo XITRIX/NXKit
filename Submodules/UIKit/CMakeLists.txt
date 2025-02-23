@@ -23,6 +23,7 @@ add_library(UIKit
         lib/DispatchQueue.cpp
         lib/Timer.cpp
         lib/Geometry.cpp
+        lib/IndexPath.cpp
         lib/CGImage.cpp
         lib/CADisplayLink.cpp
         lib/CALayer.cpp
