@@ -57,6 +57,15 @@ void SkiaCtx_macos::initContext() {
 //    return NSApplication.sharedApplication.keyWindow.backingScaleFactor;
 //}
 
+UIUserInterfaceStyle SkiaCtx_macos::getThemeMode() {
+    auto isDark= [[NSUserDefaults.standardUserDefaults stringForKey: @"AppleInterfaceStyle"]  isEqual: @"Dark"];
+    if (isDark) {
+        return NXKit::UIUserInterfaceStyle::dark;
+    } else {
+        return NXKit::UIUserInterfaceStyle::light;
+    }
+}
+
 sk_sp<SkSurface> SkiaCtx_macos::getBackbufferSurface() {
     auto size = getSize();
     if (_size.width == size.width && _size.height == size.height && surface != nullptr) { return surface; }

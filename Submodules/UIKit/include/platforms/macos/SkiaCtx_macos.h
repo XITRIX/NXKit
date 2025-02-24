@@ -14,6 +14,7 @@ public:
     sk_sp<SkSurface> getBackbufferSurface() override;
 //    float getScaleFactor() override;
     sk_sp<GrDirectContext> directContext() override { return context; }
+    UIUserInterfaceStyle getThemeMode() override;
 private:
     sk_sp<GrDirectContext> context;
     sk_sp<SkSurface> surface;
