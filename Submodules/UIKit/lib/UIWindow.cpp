@@ -4,6 +4,7 @@
 #include <UITouch.h>
 #include <UIPress.h>
 #include <UIPressesEvent.h>
+#include <SkiaCtx.h>
 
 using namespace NXKit;
 
@@ -149,7 +150,7 @@ void UIWindow::sendPressEvent(const std::shared_ptr<UIPressesEvent>& event) {
 }
 
 void UIWindow::layoutSubviews() {
-//    setSafeAreaInsets(Platform::getPlatfromSafeArea());
+    setSafeAreaInsets(SkiaCtx::main()->deviceSafeAreaInsets());
 
     UIView::layoutSubviews();
 

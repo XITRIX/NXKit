@@ -6,6 +6,7 @@
 #include <functional>
 #include "include/core/SkFontMgr.h"
 #include <UITraitCollection.h>
+#include <UIEdgeInsets.h>
 #include <Geometry.h>
 
 namespace NXKit {
@@ -24,6 +25,8 @@ public:
     virtual float getScaleFactor() { return 1; }
     virtual float getExtraScaleFactor() { return 1; }
     virtual sk_sp<SkFontMgr> getFontMgr() { return fontMgr; }
+
+    virtual UIEdgeInsets deviceSafeAreaInsets() { return {}; }
 
     virtual UIUserInterfaceStyle getThemeMode() { return UIUserInterfaceStyle::light; }
 

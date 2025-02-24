@@ -185,6 +185,7 @@ public:
 private:
     friend class UIViewController;
     friend class UIFocusSystem;
+    friend class UIWindow;
     friend class YGLayout;
     friend class UINib;
     friend bool applicationRunLoop();

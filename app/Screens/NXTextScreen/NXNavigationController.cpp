@@ -38,6 +38,7 @@ public:
             layout->setAllGap(12);
             layout->setMarginTop(14_pt);
             layout->setMarginHorizontal(30_pt);
+            layout->setHeight(88_pt);
             layout->setFlexGrow(1);
 //        layout->setSize({ 250, 50 });
         });
@@ -57,8 +58,7 @@ public:
 //        layout->setAlignContent(YGAlignFlexEnd);
             layout->setAlignItems(YGAlignStretch);
 //            layout->setJustifyContent(YGJustifyFlexStart);
-            layout->setMarginHorizontal(30_pt);
-            layout->setHeight(88_pt);
+            layout->setPaddingHorizontal(30_pt);
         });
     }
 
@@ -102,6 +102,7 @@ public:
             layout->setAllGap(30);
             layout->setPaddingHorizontal(30_pt);
             layout->setFlexGrow(1);
+            layout->setHeight(73_pt);
 //        layout->setSize({ 250, 50 });
         });
 
@@ -120,8 +121,7 @@ public:
 //        layout->setAlignContent(YGAlignFlexEnd);
             layout->setAlignItems(YGAlignStretch);
 //            layout->setJustifyContent(YGJustifyFlexStart);
-            layout->setMarginHorizontal(30_pt);
-            layout->setHeight(73_pt);
+            layout->setPaddingHorizontal(30_pt);
         });
     }
 
@@ -144,13 +144,15 @@ void NXNavigationController::loadView() {
     auto header = new_shared<NXNavigationBar>();
     header->setAutolayoutEnabled(true);
     header->setTitle("Системные настройки");
+    _navigationBar = header;
 
     auto footer = new_shared<NXFooterBar>();
     footer->setAutolayoutEnabled(true);
     footer->setTitle("16:21:53");
+    _toolBar = footer;
 
-    view->addSubview(header);
-    view->addSubview(footer);
+    view->addSubview(_navigationBar);
+    view->addSubview(_toolBar);
 
     view->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
         layout->setFlexDirection(YGFlexDirectionColumn);
@@ -168,6 +170,8 @@ void NXNavigationController::viewDidLoad() {
 
 void NXNavigationController::viewDidLayoutSubviews() {
     UIViewController::viewDidLayoutSubviews();
+    _navigationBar->yoga()->setPaddingTop(YGValue { view()->superview().lock()->safeAreaInsets().top, YGUnitPoint });
+    _toolBar->yoga()->setPaddingBottom(YGValue { view()->superview().lock()->safeAreaInsets().bottom, YGUnitPoint });
     setAdditionalSafeAreaInsets({88, 0, 73, 0});
 }
 

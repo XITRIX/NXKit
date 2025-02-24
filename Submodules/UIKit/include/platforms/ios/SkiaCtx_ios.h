@@ -18,6 +18,7 @@ public:
     NXSize getSize() override;
 
     sk_sp<GrDirectContext> directContext() override { return context; }
+    UIEdgeInsets deviceSafeAreaInsets() override;
 
     NXKit::UIUserInterfaceStyle getThemeMode() override;
 

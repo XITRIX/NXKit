@@ -59,6 +59,11 @@ NXKit::UIUserInterfaceStyle SkiaCtx_ios::getThemeMode() {
     }
 }
 
+NXKit::UIEdgeInsets SkiaCtx_ios::deviceSafeAreaInsets() {
+    auto safeArea = UIApplication.sharedApplication.keyWindow.safeAreaInsets;
+    return { (NXFloat)safeArea.top, (NXFloat)safeArea.left, (NXFloat)safeArea.bottom, (NXFloat)safeArea.right };
+}
+
 sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
     auto size = getSize() / _extraScaleFactor;
     if (_size.width == size.width && _size.height == size.height && surface != nullptr) { return surface; }

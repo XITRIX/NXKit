@@ -21,6 +21,8 @@ public:
 
     std::shared_ptr<UIViewController> topViewController();
 private:
+    std::shared_ptr<UIView> _navigationBar;
+    std::shared_ptr<UIView> _toolBar;
     std::shared_ptr<UIViewController> presentedViewController;
     std::vector<std::shared_ptr<UIViewController>> _viewControllers;
     void updatePresentedViewController(bool animated);

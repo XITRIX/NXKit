@@ -4,6 +4,7 @@
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Submodules/SDL" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Submodules/skia" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Submodules/tinyxml2" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Submodules/vcpkg" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Submodules/yoga" vcs="Git" />
   </component>
