@@ -16,9 +16,13 @@ Main goal is to create a UI framework that tries to mimic [Apple's UIKit](https:
   - Responder chain (touch propagation)
   - Focus system (basic gamepad input support)
   - UITraitCollection (dark mode)
-
+ 
+<img width="936" alt="image" src="https://github.com/user-attachments/assets/0c32631c-6d6d-4785-836c-430e8345a0fb" />
+<details>
+<summary>More screenshots</summary>
 <img width="936" alt="image" src="https://github.com/user-attachments/assets/13877bc2-c8f4-4449-ac66-fee2c3377a57" />
-
+</details>
+  
 ## TODO:
 - UIViewController presentation
 - Interface Builder
