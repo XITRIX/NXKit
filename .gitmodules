@@ -9,7 +9,7 @@
 	url = https://github.com/facebook/yoga.git
 [submodule "Submodules/skia"]
 	path = Submodules/skia
-	url = https://github.com/google/skia.git
+	url = https://github.com/XITRIX/skia-switch.git
 [submodule "Submodules/tinyxml2"]
 	path = Submodules/tinyxml2
 	url = https://github.com/leethomason/tinyxml2.git
