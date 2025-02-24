@@ -4,5 +4,4 @@
 
 int main(int argc, char *argv[]) {
     return NXKit::UIApplicationMain();
-    return 0;
 }

@@ -85,7 +85,7 @@ int UIApplicationMain(const std::shared_ptr<UIApplicationDelegate>& appDelegate)
 
     appDelegate->applicationNeedsXIBRegistration(UIApplication::shared.get());
     if (!appDelegate->applicationDidFinishLaunchingWithOptions(UIApplication::shared.get(), {})) {
-        return 1;
+        return -1;
     }
 
     while(platformRunLoop([]() { return applicationRunLoop(); }));

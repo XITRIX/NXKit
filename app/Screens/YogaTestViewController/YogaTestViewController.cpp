@@ -72,7 +72,7 @@ void YogaTestViewController::loadView() {
 
     auto control = new_shared<UIButton>(UIButtonStyle::filled);
     control->layer()->setCornerRadius(10);
-    control->titleLabel()->setText("Buttogn!");
+    control->setText("Buttogn!");
     control->setImage(image);
     control->setTintColor(UIColor::systemOrange);
     control->yoga()->setWidth(10_pt);
@@ -82,7 +82,7 @@ void YogaTestViewController::loadView() {
 
     auto control2 = new_shared<UIButton>(UIButtonStyle::filled);
     control2->layer()->setCornerRadius(10);
-    control2->titleLabel()->setText("Button!");
+    control2->setText("Button!");
     control2->setTintColor(UIColor::systemRed);
     control2->yoga()->setWidth(10_pt);
     control2->yoga()->setFlexGrow(1);
@@ -100,7 +100,7 @@ void YogaTestViewController::loadView() {
 
     auto control3 = new_shared<UIButton>(UIButtonStyle::filled);
     control3->layer()->setCornerRadius(10);
-    control3->titleLabel()->setText("Swap boxes!");
+    control3->setText("Swap boxes!");
     control3->setTintColor(UIColor::systemGreen);
     control3->primaryAction = UIAction("", [&, contentBox]() {
 
@@ -189,6 +189,7 @@ void YogaTestViewController::loadView() {
                 auto translation = panGesture->translationInView(view());
 
                 _view->yoga()->setPosition({ initial.x + translation.x, initial.y + translation.y });
+                _view->setNeedsLayout();
                 break;
             }
             default:

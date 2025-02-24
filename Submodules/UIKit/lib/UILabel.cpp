@@ -65,7 +65,7 @@ NXSize UILabel::sizeThatFits(NXSize size) {
 
 void UILabel::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
     UIView::traitCollectionDidChange(previousTraitCollection);
-    setNeedsLayout();
+    setNeedsDisplay();
 }
 
 void UILabel::draw() {
