@@ -10,8 +10,8 @@ namespace NXKit {
 
 #define DEFAULT_ROMFS_REGISTRATION                          \
 NXData::resourceProvider = [](const std::string& path) {    \
-auto res = romfs::get(path);                                \
-return new_shared<NXData>(res.data(), res.size());          \
+    auto res = romfs::get(path);                            \
+    return new_shared<NXData>(res.data(), res.size());      \
 };
 
 class NXData {

@@ -22,9 +22,14 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     auto vc2 = new_shared<YogaTestViewController>();
 //    auto vc3 = new_shared<NavigationViewController>();
 //    auto vc4 = new_shared<TextViewController>();
-    std::vector<std::shared_ptr<UIViewController>> vcs = { vc, vc1, vc2 };
+    std::vector<std::shared_ptr<UIViewController>> vcs1 = { vc, vc1 };
+    std::vector<std::shared_ptr<UIViewController>> vcs2 = { vc2 };
+    std::vector<std::vector<std::shared_ptr<UIViewController>>> vcs;
 
-    auto tbvc = new_shared<NXTabBarController>( vcs );
+    vcs.push_back(vcs1);
+    vcs.push_back(vcs2);
+
+    auto tbvc = new_shared<NXTabBarController>(vcs);
     auto nvc = new_shared<NXNavigationController>(tbvc);
     window->setRootViewController(nvc);
     window->makeKeyAndVisible();

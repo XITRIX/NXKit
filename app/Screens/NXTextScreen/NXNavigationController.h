@@ -9,7 +9,7 @@ using namespace NXKit;
 
 class NXNavigationController: public UIViewController {
 public:
-    NXNavigationController(const std::shared_ptr<UIViewController>& rootViewController);
+    explicit NXNavigationController(const std::shared_ptr<UIViewController>& rootViewController);
 
     void loadView() override;
     void viewDidLoad() override;

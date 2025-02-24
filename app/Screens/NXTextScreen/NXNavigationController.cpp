@@ -36,7 +36,7 @@ public:
             layout->setAlignItems(YGAlignCenter);
             layout->setJustifyContent(YGJustifyFlexStart);
             layout->setAllGap(12);
-            layout->setMarginTop(14_pt);
+            layout->setPaddingTop(14_pt);
             layout->setMarginHorizontal(30_pt);
             layout->setHeight(88_pt);
             layout->setFlexGrow(1);
