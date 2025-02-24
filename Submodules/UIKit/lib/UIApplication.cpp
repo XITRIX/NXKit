@@ -196,9 +196,15 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
                 case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
                     press->_type = UIPressType::downArrow;
                     break;
+#if defined(PLATFORM_SWITCH) // TODO: Add other cases when B can handle "select" action (Japanese localization i.e.)
+                    case SDL_CONTROLLER_BUTTON_B:
+                    press->_type = UIPressType::select;
+                    break;
+#else
                 case SDL_CONTROLLER_BUTTON_A:
                     press->_type = UIPressType::select;
                     break;
+#endif
                 default:
                     // Skip buttons which not match any of this types
                     return;
@@ -230,9 +236,15 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
                 case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
                     type = UIPressType::downArrow;
                     break;
+#if defined(PLATFORM_SWITCH) // TODO: Add other cases when B can handle "select" action (Japanese localization i.e.)
+                case SDL_CONTROLLER_BUTTON_B:
+                    type = UIPressType::select;
+                    break;
+#else
                 case SDL_CONTROLLER_BUTTON_A:
                     type = UIPressType::select;
                     break;
+#endif
                 default:
                     // Skip buttons which not match any of this types
                     return;
