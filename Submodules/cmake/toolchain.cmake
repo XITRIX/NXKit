@@ -1,5 +1,7 @@
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 
+set(EXTERN_PATH ${UIKIT_PATH}/Submodules)
+
 # Include Submodules
 function(check_libromfs_generator)
     if (NOT DEFINED LIBROMFS_PREBUILT_GENERATOR OR NOT EXISTS "${LIBROMFS_PREBUILT_GENERATOR}")
@@ -178,11 +180,11 @@ function(setup_project)
     endif ()
 
     # Include Submodules
+    add_subdirectory(${UIKIT_PATH})
     add_subdirectory(${EXTERN_PATH})
     add_subdirectory(${EXTERN_PATH}/yoga)
     add_subdirectory(${EXTERN_PATH}/tinyxml2)
     add_subdirectory(${EXTERN_PATH}/fmt)
-    add_subdirectory(${EXTERN_PATH}/UIKit)
 
     add_subdirectory(${EXTERN_PATH}/libromfs EXCLUDE_FROM_ALL)
     target_link_libraries(${PROJECT_NAME} ${LIBROMFS_LIBRARY})
