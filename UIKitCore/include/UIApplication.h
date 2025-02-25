@@ -7,6 +7,10 @@
 
 namespace NXKit {
 
+struct UIGamepadKey;
+enum class UIPressType;
+enum class UIGamepadInputType;
+
 class UIApplication {
 public:
     static std::shared_ptr<UIApplication> shared;
@@ -31,6 +35,10 @@ private:
     static void onDidEnterBackground();
 
     void handleSDLEvent(SDL_Event e);
+
+    static UIGamepadKey mapControllerButtonEventToUIGamepadKey(SDL_ControllerButtonEvent event);
+    static std::optional<UIGamepadKey> mapControllerAxisEventToUIGamepadKey(SDL_ControllerAxisEvent event);
+    static UIPressType mapGamepadInputToUIPressType(UIGamepadInputType key);
 };
 
 }

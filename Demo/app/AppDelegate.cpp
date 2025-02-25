@@ -35,6 +35,8 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     window->makeKeyAndVisible();
 //    window->setBackgroundColor(UIColor::systemBackground);
     window->setBackgroundColor(UIColor::secondarySystemBackground);
+    window->setTintColor(UIColorThemed(UIColor::systemBlue, UIColor::systemTeal, "_tint"));
+//    window->setTintColor(UIColorThemed(UIColor::systemTeal, UIColor::systemTeal));
 
     return true;
 }

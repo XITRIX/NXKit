@@ -22,11 +22,52 @@ public:
     UIKeyboardHIDUsage keyCode() { return _keyCode; }
 
 private:
+    friend class UIApplication;
+
     std::string _characters;
     OptionSet<UIKeyModifierFlags> _modifierFlags;
     UIKeyboardHIDUsage _keyCode;
+};
 
+enum class UIGamepadInputType {
+    up,
+    down,
+    left,
+    right,
+    buttonA,
+    buttonB,
+    buttonX,
+    buttonY,
+    buttonStart,
+    buttonOptions,
+    buttonGuide,
+    leftShoulder,
+    rightShoulder,
+    leftTrigger,
+    rightTrigger,
+    leftThumbstickButton,
+    leftThumbstickAxisLeft,
+    leftThumbstickAxisRight,
+    leftThumbstickAxisUp,
+    leftThumbstickAxisDown,
+    rightThumbstickButton,
+    rightThumbstickAxisLeft,
+    rightThumbstickAxisRight,
+    rightThumbstickAxisUp,
+    rightThumbstickAxisDown
+};
+
+struct UIGamepadKey {
+public:
+    [[nodiscard]] bool isPressed() const { return _value >= isPressedThreshold; }
+    [[nodiscard]] float value() const { return _value; }
+    UIGamepadInputType inputType() { return _inputType; }
+private:
     friend class UIApplication;
+
+    float _value = 0;
+    float isPressedThreshold = 0.5f;
+    UIGamepadInputType _inputType;
 };
 
 }

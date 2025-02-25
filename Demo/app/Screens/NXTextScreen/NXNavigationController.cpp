@@ -6,6 +6,8 @@
 
 #include <utility>
 
+using namespace NXKit;
+
 class NXNavigationBar: public UIBlurView {
 public:
     NXNavigationBar() {

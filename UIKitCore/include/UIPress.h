@@ -39,6 +39,7 @@ public:
 
     std::vector<std::weak_ptr<UIGestureRecognizer>> gestureRecognizers() { return _gestureRecognizers; };
     std::optional<UIKey> key() { return _key; }
+    std::optional<UIGamepadKey> gamepadKey() { return _gamepadKey; }
 
 private:
     std::weak_ptr<UIResponder> _responder;
@@ -51,6 +52,7 @@ private:
     std::vector<std::weak_ptr<UIGestureRecognizer>> _gestureRecognizers;
     bool _hasBeenCancelledByAGestureRecognizer = false;
     std::optional<UIKey> _key;
+    std::optional<UIGamepadKey> _gamepadKey;
 
     void setForWindow(const std::shared_ptr<UIWindow>& window);
     void runPressActionOnRecognizerHierachy(const std::function<void(std::shared_ptr<UIGestureRecognizer>)>& action);

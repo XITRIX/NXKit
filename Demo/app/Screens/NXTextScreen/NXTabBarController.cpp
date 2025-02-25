@@ -4,157 +4,62 @@
 
 #include "NXTabBarController.h"
 
-#include <utility>
+using namespace NXKit;
 
-class NXSeparatorView: public UIView {
-public:
-    NXSeparatorView() {
-        setAutolayoutEnabled(true);
-        setBackgroundColor(UIColor::separator);
+NXTabBarButton::NXTabBarButton() {
+    _rectView = new_shared<UIView>();
+    _titleLabel = new_shared<UILabel>();
 
-        configureLayout([](const std::shared_ptr<YGLayout>& layout) {
-            layout->setHeight(1_pt);
-            layout->setMarginVertical(14.5_pt);
-        });
-    }
-};
+    _rectView->setAlpha(0);
+    _rectView->setBackgroundColor(UIColor::tint);
 
-class NXControl: public UIControl {
-    void didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationCoordinator* coordinator) override {
-        UIControl::didUpdateFocusIn(context, coordinator);
-
-        if (context.nextFocusedItem().lock() == shared_from_this()) {
-            willGainFocus();
-            primaryAction->perform();
-        } else {
-            willLoseFocus();
-        }
-    }
-
-    void willGainFocus() override {
-        layer()->setShadowColor(UIColor::black);
-        layer()->setShadowOpacity(0.4);
-        layer()->setShadowOffset({0, 6});
-        layer()->setShadowRadius(8);
-        layer()->setZPosition(1);
-        layer()->setBorderColor(UIColor::tint);
-        setBackgroundColor(UIColor::secondarySystemBackground);
-    }
-
-    void willLoseFocus() override {
-        layer()->setShadowOpacity(0);
-        layer()->setShadowRadius(0);
-        layer()->setZPosition(0);
-        layer()->setBorderColor(std::nullopt);
-        setBackgroundColor(std::nullopt);
-    }
-
-    void focusFailedToMove(UIFocusHeading heading) override {
-        NXFloat x = 0;
-        NXFloat y = 0;
-        NXFloat power = 10;
-
-        switch (heading) {
-            case UIFocusHeading::up:
-                y = -1;
-                break;
-            case UIFocusHeading::down:
-                y = 1;
-                break;
-            case UIFocusHeading::left:
-                x = -1;
-                break;
-            case UIFocusHeading::right:
-                x = 1;
-                break;
-            default: break;
-        }
-
-        setTransform(NXAffineTransform::translationBy(x * power, y * power));
-        UIView::animate(0.3, 0, 0.4, 3, UIViewAnimationOptions::allowUserInteraction, [this]() {
-            setTransform(NXAffineTransform::identity);
-        });
-    }
-
-    void willChangeFocusHighlight(bool highlighted) override {
-
-    }
-
-    void willChangeHighlight(bool highlighted) override {
-        setAlpha(highlighted ? 0.8 : 1);
-
-        if (highlighted) {
-            setBackgroundColor(UIColor::tint.withAlphaComponent(0.2f));
-        } else {
-            setBackgroundColor(UIColor::clear);
-        }
-    }
-};
-
-class NXTabBarButton: public NXControl {
-public:
-    NXTabBarButton() {
-        _rectView = new_shared<UIView>();
-        _titleLabel = new_shared<UILabel>();
-
-        _rectView->setAlpha(0);
-        _rectView->setBackgroundColor(UIColor::tint);
-
-        _titleLabel->setHidden(true);
-        _titleLabel->setFontSize(22);
+    _titleLabel->setHidden(true);
+    _titleLabel->setFontSize(22);
 //        _titleLabel->setFontWeight(600);
 
-        addSubview(_rectView);
-        addSubview(_titleLabel);
+    addSubview(_rectView);
+    addSubview(_titleLabel);
 
-        _rectView->setAutolayoutEnabled(true);
-        _titleLabel->setAutolayoutEnabled(true);
+    _rectView->setAutolayoutEnabled(true);
+    _titleLabel->setAutolayoutEnabled(true);
 
-        _rectView->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
-            layout->setWidth(4_pt);
-            layout->setMarginVertical(9_pt);
-        });
+    _rectView->configureLayout([](const std::shared_ptr<YGLayout> &layout) {
+        layout->setWidth(4_pt);
+        layout->setMarginVertical(9_pt);
+    });
 
-        configureLayout([](const std::shared_ptr<YGLayout>& layout) {
-            layout->setFlexDirection(YGFlexDirectionRow);
-            layout->setJustifyContent(YGJustifyFlexStart);
-            layout->setAlignItems(YGAlignStretch);
-            layout->setAllGap(8);
-            layout->setHeight(70_pt);
-            layout->setPaddingHorizontal(8_pt);
-        });
+    configureLayout([](const std::shared_ptr<YGLayout> &layout) {
+        layout->setFlexDirection(YGFlexDirectionRow);
+        layout->setJustifyContent(YGJustifyFlexStart);
+        layout->setAlignItems(YGAlignStretch);
+        layout->setAllGap(8);
+        layout->setHeight(70_pt);
+        layout->setPaddingHorizontal(8_pt);
+    });
 
-        layer()->setCornerRadius(4);
-        layer()->setBorderWidth(4);
+    layer()->setCornerRadius(4);
+    layer()->setBorderWidth(4);
 
-        std::for_each(subviews().begin(), subviews().end(), [](auto item) {
-            item->setUserInteractionEnabled(false);
-        });
+    std::for_each(subviews().begin(), subviews().end(), [](auto item) {
+        item->setUserInteractionEnabled(false);
+    });
+}
+
+void NXTabBarButton::setSelected(bool selected) {
+    UIControl::setSelected(selected);
+    if (selected) {
+        _titleLabel->setTextColor(UIColor::tint);
+        _rectView->setAlpha(1);
+    } else {
+        _titleLabel->setTextColor(UIColor::label);
+        _rectView->setAlpha(0);
     }
+}
 
-    void setSelected(bool selected) override {
-        UIControl::setSelected(selected);
-        if (selected) {
-            _titleLabel->setTextColor(UIColor::tint);
-            _rectView->setAlpha(1);
-        } else {
-            _titleLabel->setTextColor(UIColor::label);
-            _rectView->setAlpha(0);
-        }
-    }
-
-    std::string text() { return _titleLabel->text(); }
-    void setText(const std::string& text) {
-        _titleLabel->setText(text);
-        _titleLabel->setHidden(text.empty());
-    }
-
-    std::shared_ptr<UILabel> titleLabel() { return _titleLabel; }
-
-private:
-    std::shared_ptr<UILabel> _titleLabel;
-    std::shared_ptr<UIView> _rectView;
-};
+void NXTabBarButton::setText(const std::string& text) {
+    _titleLabel->setText(text);
+    _titleLabel->setHidden(text.empty());
+}
 
 NXTabBar::NXTabBar() {
     _container = new_shared<UIView>();
@@ -276,7 +181,7 @@ void NXTabBarController::updateTabSelection() {
     view()->insertSubviewAt(_presentedViewController->view(), 1);
     _presentedViewController->didMoveToParent(shared_from_this());
 
-    _presentedViewController->view()->configureLayout([](std::shared_ptr<YGLayout> layout) {
+    _presentedViewController->view()->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
 //        layout->setPositionType(YGPositionTypeAbsolute);
         layout->setFlexGrow(1);
     });

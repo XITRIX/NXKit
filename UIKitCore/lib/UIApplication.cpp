@@ -27,6 +27,174 @@ UIApplication::UIApplication() {
 
 std::map<SDL_JoystickID, SDL_GameController*> controllers;
 
+UIGamepadKey UIApplication::mapControllerButtonEventToUIGamepadKey(SDL_ControllerButtonEvent event) {
+    UIGamepadKey key;
+    key._value = event.state == SDL_PRESSED ? 1 : 0;
+
+    switch (event.button) {
+        case SDL_CONTROLLER_BUTTON_DPAD_UP: {
+            key._inputType = UIGamepadInputType::up;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_DPAD_DOWN: {
+            key._inputType = UIGamepadInputType::down;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: {
+            key._inputType = UIGamepadInputType::right;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_DPAD_LEFT: {
+            key._inputType = UIGamepadInputType::left;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_A: {
+            key._inputType = UIGamepadInputType::buttonA;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_B: {
+            key._inputType = UIGamepadInputType::buttonB;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_X: {
+            key._inputType = UIGamepadInputType::buttonX;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_Y: {
+            key._inputType = UIGamepadInputType::buttonY;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_START: {
+            key._inputType = UIGamepadInputType::buttonStart;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_BACK: {
+            key._inputType = UIGamepadInputType::buttonOptions;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_GUIDE: {
+            key._inputType = UIGamepadInputType::buttonGuide;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_LEFTSHOULDER: {
+            key._inputType = UIGamepadInputType::leftShoulder;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: {
+            key._inputType = UIGamepadInputType::rightShoulder;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_LEFTSTICK: {
+            key._inputType = UIGamepadInputType::leftThumbstickButton;
+            break;
+        }
+        case SDL_CONTROLLER_BUTTON_RIGHTSTICK: {
+            key._inputType = UIGamepadInputType::rightThumbstickButton;
+            break;
+        }
+        default: break;
+    }
+
+    return key;
+}
+
+std::optional<UIGamepadKey> UIApplication::mapControllerAxisEventToUIGamepadKey(SDL_ControllerAxisEvent event) {
+    UIGamepadKey key;
+    key._value = float(event.value) / 32767.0f;
+
+    switch (event.axis) {
+        case SDL_CONTROLLER_AXIS_LEFTX: {
+            if (key._value < 0) {
+                key._inputType = UIGamepadInputType::leftThumbstickAxisLeft;
+                break;
+            }
+            if (key._value > 0) {
+                key._inputType = UIGamepadInputType::leftThumbstickAxisRight;
+                break;
+            }
+            return std::nullopt;
+        }
+        case SDL_CONTROLLER_AXIS_LEFTY: {
+            if (key._value < 0) {
+                key._inputType = UIGamepadInputType::leftThumbstickAxisUp;
+                break;
+            }
+            if (key._value > 0) {
+                key._inputType = UIGamepadInputType::leftThumbstickAxisDown;
+                break;
+            }
+            return std::nullopt;
+        }
+        case SDL_CONTROLLER_AXIS_RIGHTX: {
+            if (key._value < 0) {
+                key._inputType = UIGamepadInputType::rightThumbstickAxisLeft;
+                break;
+            }
+            if (key._value > 0) {
+                key._inputType = UIGamepadInputType::rightThumbstickAxisRight;
+                break;
+            }
+            return std::nullopt;
+        }
+        case SDL_CONTROLLER_AXIS_RIGHTY: {
+            if (key._value < 0) {
+                key._inputType = UIGamepadInputType::rightThumbstickAxisUp;
+                break;
+            }
+            if (key._value > 0) {
+                key._inputType = UIGamepadInputType::rightThumbstickAxisDown;
+                break;
+            }
+            return std::nullopt;
+        }
+        case SDL_CONTROLLER_AXIS_TRIGGERLEFT: {
+            key._inputType = UIGamepadInputType::leftTrigger;
+            break;
+        }
+        case SDL_CONTROLLER_AXIS_TRIGGERRIGHT: {
+            key._inputType = UIGamepadInputType::rightTrigger;
+            break;
+        }
+    }
+
+    key._value = abs(key._value);
+    return key;
+}
+
+UIPressType UIApplication::mapGamepadInputToUIPressType(UIGamepadInputType key) {
+    switch (key) {
+        case UIGamepadInputType::up:
+        case UIGamepadInputType::leftThumbstickAxisUp:
+        case UIGamepadInputType::rightThumbstickAxisUp:
+            return UIPressType::upArrow;
+
+        case UIGamepadInputType::down:
+        case UIGamepadInputType::leftThumbstickAxisDown:
+        case UIGamepadInputType::rightThumbstickAxisDown:
+            return UIPressType::downArrow;
+
+        case UIGamepadInputType::left:
+        case UIGamepadInputType::leftThumbstickAxisLeft:
+        case UIGamepadInputType::rightThumbstickAxisLeft:
+            return UIPressType::leftArrow;
+
+        case UIGamepadInputType::right:
+        case UIGamepadInputType::leftThumbstickAxisRight:
+        case UIGamepadInputType::rightThumbstickAxisRight:
+            return UIPressType::rightArrow;
+
+#if defined(PLATFORM_SWITCH) // TODO: Add other cases when B can handle "select" action (Japanese localization i.e.)
+        case UIGamepadInputType::buttonB:
+            return UIPressType::select;
+#else
+        case UIGamepadInputType::buttonA:
+            return UIPressType::select;
+#endif
+
+        default: return UIPressType::none;
+    }
+}
+
 void UIApplication::handleEventsIfNeeded() {
     auto e = SDL_Event();
 
@@ -182,33 +350,8 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             auto press = new_shared<UIPress>();
             press->_phase = UIPressPhase::began;
             press->setForWindow(delegate->window);
-
-            switch (e.cbutton.button) {
-                case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-                    press->_type = UIPressType::rightArrow;
-                    break;
-                case SDL_CONTROLLER_BUTTON_DPAD_UP:
-                    press->_type = UIPressType::upArrow;
-                    break;
-                case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-                    press->_type = UIPressType::leftArrow;
-                    break;
-                case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-                    press->_type = UIPressType::downArrow;
-                    break;
-#if defined(PLATFORM_SWITCH) // TODO: Add other cases when B can handle "select" action (Japanese localization i.e.)
-                    case SDL_CONTROLLER_BUTTON_B:
-                    press->_type = UIPressType::select;
-                    break;
-#else
-                case SDL_CONTROLLER_BUTTON_A:
-                    press->_type = UIPressType::select;
-                    break;
-#endif
-                default:
-                    // Skip buttons which not match any of this types
-                    return;
-            }
+            press->_gamepadKey = mapControllerButtonEventToUIGamepadKey(e.cbutton);
+            press->_type = mapGamepadInputToUIPressType(press->_gamepadKey->inputType());
 
             auto event = std::shared_ptr<UIPressesEvent>(new UIPressesEvent(press));
             UIPressesEvent::activePressesEvents.push_back(event);
@@ -222,42 +365,28 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             std::shared_ptr<UIPressesEvent> event;
             std::shared_ptr<UIPress> press;
 
-            UIPressType type = UIPressType::none;
-            switch (e.cbutton.button) {
-                case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-                    type = UIPressType::rightArrow;
-                    break;
-                case SDL_CONTROLLER_BUTTON_DPAD_UP:
-                    type = UIPressType::upArrow;
-                    break;
-                case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-                    type = UIPressType::leftArrow;
-                    break;
-                case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-                    type = UIPressType::downArrow;
-                    break;
-#if defined(PLATFORM_SWITCH) // TODO: Add other cases when B can handle "select" action (Japanese localization i.e.)
-                case SDL_CONTROLLER_BUTTON_B:
-                    type = UIPressType::select;
-                    break;
-#else
-                case SDL_CONTROLLER_BUTTON_A:
-                    type = UIPressType::select;
-                    break;
-#endif
-                default:
-                    // Skip buttons which not match any of this types
-                    return;
-            }
+            UIGamepadKey gamepadKey = mapControllerButtonEventToUIGamepadKey(e.cbutton);
+            UIPressType type = mapGamepadInputToUIPressType(gamepadKey.inputType());
 
             for (auto& levent: UIPressesEvent::activePressesEvents) {
                 for (auto& lpress: levent->allPresses()) {
-                    if (lpress->type() == type) {
-                        event = levent;
-                        press = lpress;
+                    if (type != UIPressType::none) {
+                        if (lpress->type() == type) {
+                            event = levent;
+                            press = lpress;
+                            goto FOUND;
+                        }
+                    } else if (lpress->gamepadKey().has_value()) {
+                        if (lpress->gamepadKey().value().inputType() == gamepadKey.inputType()) {
+                            lpress->_gamepadKey = gamepadKey;
+                            event = levent;
+                            press = lpress;
+                            goto FOUND;
+                        }
                     }
                 }
             }
+            FOUND:
 
             if (!event || !press) return;
 
@@ -266,6 +395,39 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
 
             sendEvent(event);
             UIPressesEvent::activePressesEvents.erase(std::remove(UIPressesEvent::activePressesEvents.begin(), UIPressesEvent::activePressesEvents.end(), event), UIPressesEvent::activePressesEvents.end());
+
+            break;
+        }
+        case SDL_CONTROLLERAXISMOTION: {
+            printf("Controller axis moved\n");
+
+            static std::map<UIGamepadInputType, std::shared_ptr<UIPress>> _pressesMap;
+
+            auto gamepadKey = mapControllerAxisEventToUIGamepadKey(e.caxis);
+            if (!gamepadKey.has_value()) return;
+
+            std::shared_ptr<UIPress> press;
+            if (_pressesMap.find(gamepadKey->_inputType) == _pressesMap.end()) {
+                press = new_shared<UIPress>();
+                press->setForWindow(delegate->window);
+                _pressesMap[gamepadKey->_inputType] = press;
+                goto UPDATE_AND_SEND;
+            } else {
+                press = _pressesMap[gamepadKey->_inputType];
+            }
+
+            // Ignore to send the same isPressed value
+            if (press->gamepadKey()->isPressed() == gamepadKey->isPressed()) return;
+
+            UPDATE_AND_SEND:
+
+            press->_phase = gamepadKey->isPressed() ? UIPressPhase::began : UIPressPhase::ended;
+            press->_gamepadKey = gamepadKey;
+            press->_type = mapGamepadInputToUIPressType(gamepadKey->inputType());
+
+            auto event = std::shared_ptr<UIPressesEvent>(new UIPressesEvent(press));
+            UIPressesEvent::activePressesEvents.push_back(event);
+            sendEvent(event);
 
             break;
         }

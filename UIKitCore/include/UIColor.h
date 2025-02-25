@@ -8,22 +8,22 @@
 
 namespace NXKit {
 
-#define UIColorThemed(lightColor, darkColor)                               \
+#define UIColorThemed(lightColor, darkColor, id)                               \
 UIColor([](auto collection) {\
 if (collection->userInterfaceStyle() == UIUserInterfaceStyle::dark) \
     return darkColor;                                               \
 else                                                                \
     return lightColor;\
-})
+}, id)
 
 class UIColor {
 public:
     UIColor();
     UIColor(UIColor const &color);
-    explicit UIColor(const std::function<UIColor(std::shared_ptr<UITraitCollection>)>& dynamicProvider);
-    explicit UIColor(int rawValue);
-    UIColor(unsigned char red, unsigned char green, unsigned char blue);
-    UIColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
+    explicit UIColor(const std::function<UIColor(std::shared_ptr<UITraitCollection>)>& dynamicProvider, std::string id = "");
+    explicit UIColor(int rawValue, std::string id = "");
+    UIColor(unsigned char red, unsigned char green, unsigned char blue, std::string id = "");
+    UIColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, std::string id = "");
 
     [[nodiscard]] unsigned char r() const;
     [[nodiscard]] unsigned char g() const;
@@ -115,6 +115,7 @@ private:
     friend class UIView;
 
     static UIColor _currentTint;
+    std::string _id;
     std::optional<std::function<UIColor(std::shared_ptr<UITraitCollection>)>> dynamicProvider;
     uint32_t color = 0xFF600060;
 };
