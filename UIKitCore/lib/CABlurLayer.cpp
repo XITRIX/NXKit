@@ -26,7 +26,7 @@ void CABlurLayer::draw(SkCanvas* context) {
     
     sk_sp<SkImageFilter> newBlurFilter = SkImageFilters::Blur(_blurRadius, _blurRadius, SkTileMode::kClamp, nullptr);
     blurPaint.setImageFilter(std::move(newBlurFilter));
-//
+
     context->save();
 
     SkRect rect = SkRect::MakeXYWH(0, 0, bounds().width(), bounds().height());

@@ -1,12 +1,7 @@
-#include <UIApplicationDelegate.h>
-#include <UIImageView.h>
-#include <UILabel.h>
-#include <DispatchQueue.h>
+#include <NXKit.h>
 #include <Screens/TestViewController/TestViewController.hpp>
 #include <Screens/IBTestController/IBTestController.h>
 #include <Screens/YogaTestViewController/YogaTestViewController.hpp>
-#include <Screens/NXTextScreen/NXNavigationController.h>
-#include <Screens/NXTextScreen/NXTabBarController.h>
 // #include <NavigationViewController/NavigationViewController.hpp>
 // #include <TextViewController/TextViewController.hpp>
 #include <romfs/romfs.hpp>

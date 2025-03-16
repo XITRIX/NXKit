@@ -110,14 +110,14 @@ void UIView::setFrame(NXRect frame) {
         setNeedsLayout();
     }
     _layer->setFrame(frame);
-//    setNeedsUpdateSafeAreaInsets();
+    setNeedsUpdateSafeAreaInsets();
 }
 
 void UIView::setBounds(NXRect bounds) {
     if (this->bounds().size != bounds.size) {
         setNeedsDisplay();
         setNeedsLayout();
-//        setNeedsUpdateSafeAreaInsets();
+        setNeedsUpdateSafeAreaInsets();
     }
     _layer->setBounds(bounds);
 }
@@ -795,7 +795,7 @@ void UIView::layoutSubviews() {
 //    updateEdgeInsets();
     _yoga->layoutIfNeeded();
 //    yoga->applyLayoutPreservingOrigin(true);
-//    updateSafeAreaInsets();
+    updateSafeAreaInsets();
 
     if (!_parentController.expired()) {
         _parentController.lock()->viewDidLayoutSubviews();
