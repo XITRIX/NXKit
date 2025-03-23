@@ -5,13 +5,12 @@
 #include "include/core/SkSurface.h"
 #include <functional>
 #include "include/core/SkFontMgr.h"
+#include "Timer.h"
 #include <UITraitCollection.h>
 #include <UIEdgeInsets.h>
 #include <Geometry.h>
 
 namespace NXKit {
-
-bool platformRunLoop(std::function<bool()> loop);
 
 class SkiaCtx {
 public:
@@ -26,11 +25,17 @@ public:
     virtual float getExtraScaleFactor() { return 1; }
     virtual sk_sp<SkFontMgr> getFontMgr() { return fontMgr; }
 
+    virtual int screenFrameRate() { return 60; }
+    virtual void setTargetFrameRate(int frameRate) { targetFrameRate = frameRate; }
+
     virtual UIEdgeInsets deviceSafeAreaInsets() { return {}; }
 
     virtual UIUserInterfaceStyle getThemeMode() { return UIUserInterfaceStyle::light; }
 
     void setExtraScaleFactor(NXFloat extraScaleFactor) { _extraScaleFactor = extraScaleFactor; }
+
+    virtual bool platformRunLoop(std::function<bool()> loop) = 0;
+    virtual void sleepForNextFrame();
     
     static std::shared_ptr<SkiaCtx> main() { return _main; }
     static std::shared_ptr<SkiaCtx> _main;
@@ -38,9 +43,10 @@ protected:
     NXSize _size;
     NXFloat _extraScaleFactor = 1;
     sk_sp<SkFontMgr> fontMgr;
-
+    Timer currentRunLoopStartTimer;
 
 private:
+    int targetFrameRate = -1;
     friend class UIApplication;
 };
 

@@ -63,8 +63,11 @@ bool applicationRunLoop() {
     keyWindow->layer()->presentationOrSelf()->skiaRender(canvas);
     canvas->restore();
 
+    // TODO: Get target frame rate from UI context
+    SkiaCtx::_main->setTargetFrameRate(-1);
     SkiaCtx::_main->flushAndSubmit(surface);
     SkiaCtx::_main->swapBuffers();
+    SkiaCtx::_main->sleepForNextFrame();
 
     return true;
 }
@@ -88,7 +91,7 @@ int UIApplicationMain(const std::shared_ptr<UIApplicationDelegate>& appDelegate)
         return -1;
     }
 
-    while(platformRunLoop([]() { return applicationRunLoop(); }));
+    while(SkiaCtx::_main->platformRunLoop([]() { return applicationRunLoop(); }));
 
     UIApplication::shared = nullptr;
     SkiaCtx::_main = nullptr;

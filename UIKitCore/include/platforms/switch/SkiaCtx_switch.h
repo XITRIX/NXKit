@@ -23,6 +23,8 @@ public:
     virtual NXSize getSize() override;
 
     virtual float getScaleFactor() override;
+
+    bool platformRunLoop(std::function<bool ()> loop) override;
     
 private:
     SDL_Window *window = nullptr;

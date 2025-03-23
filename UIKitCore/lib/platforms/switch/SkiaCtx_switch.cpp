@@ -154,7 +154,8 @@ std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx() {
     return std::make_unique<SkiaCtx_switch>();
 }
 
-bool NXKit::platformRunLoop(std::function<bool()> loop) {
+bool SkiaCtx_switch::platformRunLoop(std::function<bool()> loop) {
+    currentRunLoopStartTimer = Timer();
     return loop();
 }
 

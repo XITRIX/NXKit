@@ -52,7 +52,7 @@ Application::Application() {
 
     keyWindow->layer()->addSublayer(sublayer);
 
-    while(platformRunLoop([this]() { return runLoop(); }));
+    while(skiaCtx->platformRunLoop([this]() { return runLoop(); }));
 }
 
 Application::~Application() {}

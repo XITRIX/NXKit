@@ -91,12 +91,13 @@ sk_sp<SkSurface> SkiaCtx_macos::getBackbufferSurface() {
     return surface;
 }
 
-std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx() {
-    return std::make_unique<SkiaCtx_macos>();
-}
-
-bool NXKit::platformRunLoop(std::function<bool()> loop) {
+bool SkiaCtx_macos::platformRunLoop(std::function<bool()> loop) {
     @autoreleasepool {
+        currentRunLoopStartTimer = Timer();
         return loop();
     }
+}
+
+std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx() {
+    return std::make_unique<SkiaCtx_macos>();
 }

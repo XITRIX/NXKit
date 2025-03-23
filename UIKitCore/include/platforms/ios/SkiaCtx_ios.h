@@ -21,6 +21,10 @@ public:
     UIEdgeInsets deviceSafeAreaInsets() override;
 
     NXKit::UIUserInterfaceStyle getThemeMode() override;
+//    void setTargetFrameRate(int frameRate) override;
+
+    bool platformRunLoop(std::function<bool ()> loop) override;
+//    void sleepForNextFrame() override {}
 
 private:
     sk_sp<GrDirectContext> context;
