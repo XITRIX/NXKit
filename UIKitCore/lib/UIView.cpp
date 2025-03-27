@@ -694,6 +694,31 @@ void UIView::animateIfNeeded(Timer currentTime) {
     }
 }
 
+int UIView::maximumAnimationFrameRate() {
+    for (const auto& event : UIEvent::activeEvents) {
+        if (!event->_allTouches.empty())
+            return 120;
+    }
+
+    int targetFrameRate = 30;
+    auto layersWithAnimationsCopy = layersWithAnimations;
+    for (auto& layer: layersWithAnimationsCopy) {
+        for (auto& animation: layer->animations) {
+            auto animationGroup = animation.second->animationGroup;
+            if (!animationGroup) continue;
+
+            if ((animationGroup->options & UIViewAnimationOptions::preferredFramesPerSecond30) == UIViewAnimationOptions::preferredFramesPerSecond30) {
+                targetFrameRate = std::max(targetFrameRate, 30);
+            } else if ((animationGroup->options & UIViewAnimationOptions::preferredFramesPerSecond120) == UIViewAnimationOptions::preferredFramesPerSecond120) {
+                targetFrameRate = std::max(targetFrameRate, 120);
+            } else {
+                targetFrameRate = std::max(targetFrameRate, 60);
+            }
+        }
+    }
+    return targetFrameRate;
+}
+
 void UIView::completePendingAnimations() {
     for (auto& layer: layersWithAnimations) {
         timeval now;

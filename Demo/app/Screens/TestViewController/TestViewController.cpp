@@ -4,13 +4,13 @@
 using namespace NXKit;
 
 void animateCube(std::shared_ptr<UIView> view) {
-    UIView::animate(2.5, 0, 0.5, 2, UIViewAnimationOptions::none, [view]() {
-        view->setTransform(NXAffineTransform::identity.rotationBy(55));
+    UIView::animate(2.5, 0, 0.5, 2, UIViewAnimationOptions::preferredFramesPerSecond30, [view]() {
+        view->setTransform(NXAffineTransform::rotationBy(55));
         view->setBackgroundColor(UIColor::systemOrange);
     }, [view](bool res) {
         DispatchQueue::main()->asyncAfter(1, [view]() {
-            UIView::animate(2.5, [view]() {
-                view->setTransform(NXAffineTransform::identity.rotationBy(10));
+            UIView::animate(2.5, 0, UIViewAnimationOptions::preferredFramesPerSecond30, [view]() {
+                view->setTransform(NXAffineTransform::rotationBy(10));
                 view->setBackgroundColor(UIColor::systemBlue);
             }, [view](bool res) {
                 DispatchQueue::main()->asyncAfter(1, [view]() {
@@ -22,10 +22,10 @@ void animateCube(std::shared_ptr<UIView> view) {
 }
 
 void animateBlur(std::shared_ptr<UIBlurView> view) {
-    UIView::animate(2.5, [view]() {
+    UIView::animate(2.5, 0, UIViewAnimationOptions::preferredFramesPerSecond30, [view]() {
         view->setBlurRadius(0);
     }, [view](bool res) {
-        UIView::animate(2.5, [view]() {
+        UIView::animate(2.5, 0, UIViewAnimationOptions::preferredFramesPerSecond30, [view]() {
             view->setBlurRadius(20);
         }, [view](bool res) {
             animateBlur(view);
@@ -34,13 +34,13 @@ void animateBlur(std::shared_ptr<UIBlurView> view) {
 }
 
 void animateLabel(std::shared_ptr<UILabel> label) {
-    UIView::animate(5, [label]() {
+    UIView::animate(5, 0, UIViewAnimationOptions::preferredFramesPerSecond30, [label]() {
         label->setFrame({ 200, 100, 140, 88 });
         label->setTextColor(UIColor::systemCyan);
         label->setBackgroundColor(UIColor::systemGreen);
         label->setFontWeight(100);
     }, [label](bool res) {
-        UIView::animate(5, [label]() {
+        UIView::animate(5, 0, UIViewAnimationOptions::preferredFramesPerSecond30, [label]() {
             label->setFrame({ 200, 100, 240, 88 });
             label->setTextColor(UIColor::black);
             label->setBackgroundColor(UIColor::systemRed);

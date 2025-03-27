@@ -11,7 +11,10 @@ enum UIViewAnimationOptions {
     curveEaseInOut = 1 << 4,
     curveLinear = 1 << 5,
     curveEaseOutElastic = 1 << 6,
-    customEaseOut = 1 << 9
+    customEaseOut = 1 << 9,
+    preferredFramesPerSecond30 = 1 << 12,
+    preferredFramesPerSecond60 = 1 << 13,
+    preferredFramesPerSecond120 = 1 << 14,
 };
 
 }

@@ -22,8 +22,9 @@ private:
     std::set<std::shared_ptr<UITouch>> _allTouches;
     Timer _timestamp = Timer();
 
+    friend class UIApplicationMain;
     friend class UIApplication;
-    friend class UIWindow;
+    friend class UIView;
 };
 
 }

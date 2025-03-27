@@ -224,6 +224,7 @@ private:
     bool _needsUpdateLayoutMargins = true;
 
     static void animateIfNeeded(Timer currentTime);
+    static int maximumAnimationFrameRate();
 
     void setSuperview(const std::shared_ptr<UIView>& superview);
     bool anyCurrentlyRunningAnimationsAllowUserInteraction() const;

@@ -53,7 +53,7 @@ bool UIGestureRecognizer::recognitionCondition() {
 }
 
 void UIGestureRecognizer::_touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
-    bool firstTouch = _allTouches.size() == 0;
+    bool firstTouch = _allTouches.empty();
 
     for (auto touch : touches)
         addTouch(touch);

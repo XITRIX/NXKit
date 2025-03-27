@@ -32,6 +32,7 @@ bool applicationRunLoop() {
         CALayer::setLayerTreeIsDirty();
     }
 
+    int maximumAnimationFrameRate = UIView::maximumAnimationFrameRate();
     UIView::animateIfNeeded(currentTime);
     keyWindow->drawAndLayoutTreeIfNeeded();
 
@@ -39,7 +40,8 @@ bool applicationRunLoop() {
     NXSize size = SkiaCtx::_main->getSize();
 
     if (!CALayer::layerTreeIsDirty && lastSize == size) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
+//        std::this_thread::sleep_for(std::chrono::milliseconds(7));
+        SkiaCtx::_main->sleepForNextFrame();
         return true;
     }
 
@@ -64,7 +66,7 @@ bool applicationRunLoop() {
     canvas->restore();
 
     // TODO: Get target frame rate from UI context
-    SkiaCtx::_main->setTargetFrameRate(-1);
+    SkiaCtx::_main->setTargetFrameRate(maximumAnimationFrameRate);
     SkiaCtx::_main->flushAndSubmit(surface);
     SkiaCtx::_main->swapBuffers();
     SkiaCtx::_main->sleepForNextFrame();
