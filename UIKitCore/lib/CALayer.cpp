@@ -38,6 +38,7 @@ void CALayer::updateIsPartOfPresentedHierarchy(bool value) {
 }
 
 NXFloat CALayer::defaultAnimationDuration = 0.3f;
+int CALayer::maxFramerateRequired = 0;
 
 CALayer::CALayer() = default;
 
@@ -508,6 +509,10 @@ void CALayer::onDidSetAnimations(bool wasEmpty) {
         _presentation = nullptr;
         UIView::layersWithAnimations.erase(shared_from_this());
     }
+}
+
+void CALayer::requestFramerate(const int framerate) {
+    maxFramerateRequired = std::max(maxFramerateRequired, framerate);
 }
 
 std::optional<AnimatableProperty> CALayer::value(std::string forKeyPath) {

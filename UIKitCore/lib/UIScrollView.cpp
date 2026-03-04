@@ -389,6 +389,7 @@ void UIScrollView::bounceWithVelocity(NXPoint velocity) {
     auto duration = parameters.duration();
     _timerAnimation = std::make_shared<TimerAnimation>(duration, [this, restOffset, parameters](auto, float time){
         setContentOffset(restOffset + parameters.valueAt(time), false);
+        CALayer::requestFramerate(120);
     }, [this](bool) {
         _isDecelerating = false;
     });

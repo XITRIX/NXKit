@@ -32,12 +32,12 @@ if (APPLE)
 
         list(APPEND platform_libs
                 SDL2-static SDL2main
-                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskia.a
-                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskparagraph.a
-                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskshaper.a
-                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskunicode_core.a
-                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libskunicode_icu.a
-                ${EXTERN_PATH}/skia/out/ios-arm64-angle/libicu.a
+                ${EXTERN_PATH}/skia/out/ios-arm64/libskia.a
+                ${EXTERN_PATH}/skia/out/ios-arm64/libskparagraph.a
+                ${EXTERN_PATH}/skia/out/ios-arm64/libskshaper.a
+                ${EXTERN_PATH}/skia/out/ios-arm64/libskunicode_core.a
+                ${EXTERN_PATH}/skia/out/ios-arm64/libskunicode_icu.a
+                ${EXTERN_PATH}/skia/out/ios-arm64/libicu.a
         )
     endif ()
 elseif (PLATFORM_SWITCH)

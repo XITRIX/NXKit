@@ -716,6 +716,8 @@ int UIView::maximumAnimationFrameRate() {
             }
         }
     }
+
+    targetFrameRate = std::max(targetFrameRate, CALayer::maxFramerateRequired);
     return targetFrameRate;
 }
 

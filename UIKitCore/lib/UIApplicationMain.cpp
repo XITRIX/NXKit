@@ -33,6 +33,8 @@ bool applicationRunLoop() {
     }
 
     int maximumAnimationFrameRate = UIView::maximumAnimationFrameRate();
+    CALayer::maxFramerateRequired = 0; // reset value
+
     UIView::animateIfNeeded(currentTime);
     keyWindow->drawAndLayoutTreeIfNeeded();
 

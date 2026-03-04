@@ -139,6 +139,8 @@ public:
     void onWillSet(const std::string& keyPath);
     void onDidSetAnimations(bool wasEmpty);
 
+    static void requestFramerate(int framerate);
+
     // Override to add new animatable
     virtual std::optional<AnimatableProperty> value(std::string forKeyPath);
 
@@ -199,6 +201,8 @@ private:
     **/
     static bool layerTreeIsDirty;
     static void setLayerTreeIsDirty();
+
+    static int maxFramerateRequired;
 
     std::shared_ptr<CALayer> _presentation;
     std::map<std::string, std::shared_ptr<CABasicAnimation>> animations;
