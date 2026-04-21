@@ -5,8 +5,6 @@
 
 using namespace NXKit;
 
-UIColor UIColor::_currentTint = UIColor::systemBlue;
-
 // Transparent
 UIColor UIColor::clear = UIColor(0, 0, 0, 0);
 
@@ -78,6 +76,7 @@ UIColor UIColor::separator = UIColorThemed(UIColor(0x4a3c3c43), UIColor(0x995454
 UIColor UIColor::opaqueSeparator = UIColorThemed(UIColor(198, 198, 200), UIColor(56, 56, 58), "opaqueSeparator");
 
 // Tint
+UIColor UIColor::_currentTint = UIColor::systemBlue;
 UIColor UIColor::tint = UIColor([](auto) {
     return UIColor::_currentTint;
 }, "tint");
