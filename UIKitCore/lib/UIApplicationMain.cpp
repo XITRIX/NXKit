@@ -17,6 +17,8 @@ bool applicationRunLoop() {
 
     // Move to UIRenderer
     auto keyWindow = UIApplication::shared->keyWindow.lock();
+    NXSize size = SkiaCtx::_main->getSize();
+    keyWindow->setFrame({ NXPoint::zero, size });
 
     auto scale = SkiaCtx::_main->getScaleFactor();
 
@@ -39,7 +41,6 @@ bool applicationRunLoop() {
     keyWindow->drawAndLayoutTreeIfNeeded();
 
     static NXSize lastSize;
-    NXSize size = SkiaCtx::_main->getSize();
 
     if (!CALayer::layerTreeIsDirty && lastSize == size) {
 //        std::this_thread::sleep_for(std::chrono::milliseconds(7));
@@ -58,10 +59,6 @@ bool applicationRunLoop() {
 
     canvas->save();
     canvas->scale(scale, scale);
-
-//    UIView::animate(0.3, [keyWindow]() {
-        keyWindow->setFrame({ NXPoint::zero, SkiaCtx::_main->getSize() } );
-//    });
 
     UITraitCollection::setCurrent(keyWindow->traitCollection());
     keyWindow->layer()->presentationOrSelf()->skiaRender(canvas);

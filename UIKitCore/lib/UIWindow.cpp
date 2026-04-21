@@ -152,8 +152,6 @@ void UIWindow::sendPressEvent(const std::shared_ptr<UIPressesEvent>& event) {
 void UIWindow::layoutSubviews() {
     setSafeAreaInsets(SkiaCtx::main()->deviceSafeAreaInsets());
 
-    UIView::layoutSubviews();
-
     if (_rootViewController) {
         _rootViewController->view()->setFrame(this->bounds());
     }
@@ -161,6 +159,8 @@ void UIWindow::layoutSubviews() {
     for(auto& vc: _presentedViewControllers) {
         vc->view()->setFrame(this->bounds());
     }
+
+    UIView::layoutSubviews();
 }
 
 void UIWindow::addPresentedViewController(const std::shared_ptr<UIViewController>& controller) {

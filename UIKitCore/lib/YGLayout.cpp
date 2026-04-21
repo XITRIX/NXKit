@@ -184,10 +184,6 @@ void YGLayout::YGApplyLayoutToViewHierarchy(const std::shared_ptr<UIView>&view, 
             YGApplyLayoutToViewHierarchy(i, false);
         }
     }
-
-    if (!view->_parentController.expired()) {
-        view->_parentController.lock()->viewDidLayoutSubviews();
-    }
 }
 
 float YGLayout::YGRoundPixelValue(float value) {
@@ -209,6 +205,13 @@ NXSize YGLayout::calculateLayoutWithSize(NXSize size) {
         YGNodeLayoutGetWidth(node),
         YGNodeLayoutGetHeight(node)
     };
+}
+
+void YGLayout::invalidateLayout() {
+    auto view = _view.lock();
+    if (!view) return;
+
+    view->setNeedsLayout();
 }
 
 bool YGLayout::isLeaf() {

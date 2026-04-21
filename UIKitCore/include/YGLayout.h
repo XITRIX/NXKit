@@ -23,7 +23,11 @@ type lowercased_name()                                          \
                                                                 \
 void set##capitalized_name(type lowercased_name)                \
 {                                                               \
+  if (this->lowercased_name() == lowercased_name) {             \
+    return;                                                     \
+  }                                                             \
     YGNodeStyleSet##capitalized_name(_node, lowercased_name);   \
+  invalidateLayout();                                           \
 }
 
 #define YG_VALUE_PROPERTY(lowercased_name, capitalized_name)                       \
@@ -40,6 +44,9 @@ YGValue lowercased_name()                                                       
                                                                                    \
 void set##capitalized_name(YGValue lowercased_name)                                \
 {                                                                                  \
+  if (this->lowercased_name() == lowercased_name) {                                \
+    return;                                                                        \
+  }                                                                                \
   switch (lowercased_name.unit) {                                                  \
     case YGUnitPoint:                                                              \
       YGNodeStyleSet##capitalized_name(_node, lowercased_name.value);              \
@@ -53,6 +60,7 @@ void set##capitalized_name(YGValue lowercased_name)                             
     default:                                                                       \
       assert(false && "Not implemented");                                          \
   }                                                                                \
+  invalidateLayout();                                                              \
 }
 
 #define YG_EDGE_PROPERTY_GETTER(type, lowercased_name, capitalized_name, property, edge) \
@@ -64,7 +72,11 @@ type lowercased_name()                                                          
 #define YG_EDGE_PROPERTY_SETTER(lowercased_name, capitalized_name, property, edge) \
 void set##capitalized_name(float lowercased_name)                                  \
 {                                                                                  \
+  if (this->lowercased_name() == lowercased_name) {                                \
+    return;                                                                        \
+  }                                                                                \
     YGNodeStyleSet##property(_node, edge, lowercased_name);                        \
+  invalidateLayout();                                                              \
 }
 
 #define YG_EDGE_PROPERTY(lowercased_name, capitalized_name, property, edge)         \
@@ -74,6 +86,9 @@ YG_EDGE_PROPERTY_SETTER(lowercased_name, capitalized_name, property, edge)
 #define YG_VALUE_EDGE_PROPERTY_SETTER(objc_lowercased_name, objc_capitalized_name, c_name, edge) \
 void set##objc_capitalized_name(YGValue objc_lowercased_name)                                    \
 {                                                                                                \
+  if (this->objc_lowercased_name() == objc_lowercased_name) {                                    \
+    return;                                                                                      \
+  }                                                                                              \
   switch (objc_lowercased_name.unit) {                                                           \
     case YGUnitUndefined:                                                                        \
       YGNodeStyleSet##c_name(_node, edge, objc_lowercased_name.value);                           \
@@ -87,6 +102,7 @@ void set##objc_capitalized_name(YGValue objc_lowercased_name)                   
     default:                                                                                     \
       assert(false && "Not implemented");                                                        \
   }                                                                                              \
+  invalidateLayout();                                                                            \
 }
 
 #define YG_VALUE_EDGE_PROPERTY(lowercased_name, capitalized_name, property, edge)   \
@@ -110,10 +126,14 @@ type lowercased_name()                                                          
     return YGNodeStyleGet##property(_node, gutter);                                        \
 }
 
-#define YG_VALUE_GUTTER_PROPERTY_SETTER(objc_lowercased_name, objc_capitalized_name, c_name, gutter) \
-void set##objc_capitalized_name(float objc_lowercased_name)                                    \
-{                                                                                                \
-    YGNodeStyleSet##c_name(_node, gutter, objc_lowercased_name);                                 \
+#define YG_VALUE_GUTTER_PROPERTY_SETTER(objc_lowercased_name, objc_capitalized_name, c_name, gutter)  \
+void set##objc_capitalized_name(float objc_lowercased_name)                                           \
+{                                                                                                     \
+  if (this->objc_lowercased_name() == YGValue { objc_lowercased_name, YGUnitPoint }) {                \
+    return;                                                                                           \
+  }                                                                                                   \
+    YGNodeStyleSet##c_name(_node, gutter, objc_lowercased_name);                                      \
+  invalidateLayout();                                                                                 \
 }
 
 #define YG_VALUE_GUTTER_PROPERTY(lowercased_name, capitalized_name, property, gutter)   \
@@ -125,11 +145,17 @@ class YGLayout {
 public:
     bool isEnabled() { return _isEnabled; }
     void setEnabled(bool enabled) {
+    if (_isEnabled == enabled) return;
         _isEnabled = enabled;
+    invalidateLayout();
     }
 
     bool isIncludedInLayout() { return _isIncludedInLayout; }
-    void setIncludedInLayout(bool isIncludedInLayout) { _isIncludedInLayout = isIncludedInLayout; }
+  void setIncludedInLayout(bool isIncludedInLayout) {
+    if (_isIncludedInLayout == isIncludedInLayout) return;
+    _isIncludedInLayout = isIncludedInLayout;
+    invalidateLayout();
+  }
 
     YG_PROPERTY(YGDirection, direction, Direction)
     YG_PROPERTY(YGFlexDirection, flexDirection, FlexDirection)
@@ -212,6 +238,7 @@ private:
     static bool YGNodeHasExactSameChildren(const YGNodeRef node, std::vector<std::shared_ptr<UIView>> subviews);
     static void YGApplyLayoutToViewHierarchy(const std::shared_ptr<UIView>&view, bool preserveOrigin);
     static float YGRoundPixelValue(float value);
+    void invalidateLayout();
 
     friend class UIView;
 };
