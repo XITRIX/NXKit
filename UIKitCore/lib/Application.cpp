@@ -12,7 +12,7 @@
 // SKIA METAL GPU
 #include "include/gpu/ganesh/GrBackendSurface.h"
 
-#include "include/effects/SkGradientShader.h"
+#include "include/effects/SkGradient.h"
 #include "include/effects/SkImageFilters.h"
 #include "include/core/SkFont.h"
 
