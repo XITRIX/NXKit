@@ -246,9 +246,9 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             touch->_timestamp = newTimestamp;
             touch->_phase = UITouchPhase::moved;
 
-            // SDL adds timestamps on send which could be quite different to when the event actually occurred.
-            // It's common to get two events with an unrealistically small time between them; don't send those.
-            if ((newTimestamp - previousTimestamp) > (5 / 1000)) {
+            // Timer::operator- returns milliseconds.
+            // SDL can emit back-to-back motion events with unrealistically tiny deltas, so drop samples below 5 ms.
+            if ((newTimestamp - previousTimestamp) > 5.0) {
                 sendEvent(event);
             }
 

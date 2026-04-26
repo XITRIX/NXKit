@@ -1,0 +1,15 @@
+#pragma once
+
+#include <UIKit.h>
+
+class TestScrollController: public NXKit::UIViewController {
+public:
+    TestScrollController();
+    void loadView() override;
+//    void viewDidLoad() override;
+
+    void viewDidLayoutSubviews() override;
+private:
+    std::shared_ptr<NXKit::UIScrollView> scrollView;
+    std::shared_ptr<NXKit::UILabel> label;
+};

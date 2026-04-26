@@ -6,6 +6,8 @@
 
 namespace NXKit {
 
+class UIWindow;
+
 class UIPanGestureRecognizer: public UIGestureRecognizer {
 public:
     void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
@@ -19,11 +21,22 @@ public:
 
 private:
     std::shared_ptr<UITouch> trackingTouch;
+    std::weak_ptr<UIWindow> trackingWindow;
     NXPoint initialTouchPoint;
-    Timer touchesMovedTimestamp;
-    Timer previousTouchesMovedTimestamp;
+
+    bool hasProcessedMovementSample = false;
+    bool hasVelocitySample = false;
+    NXPoint lastProcessedLocation;
+    Timer lastProcessedTimestamp;
+    NXPoint lastVelocitySampleStartLocation;
+    NXPoint lastVelocitySampleEndLocation;
+    float lastVelocitySampleDurationSeconds = 0;
 
     NXPoint velocityIn(const std::shared_ptr<UIView>& view, float timeDiffSeconds);
+    void resetVelocityTracking();
+    void beginVelocityTracking(const std::shared_ptr<UITouch>& touch);
+    void recordVelocitySample();
+    NXPoint convertTrackedPointToView(NXPoint point, const std::shared_ptr<UIView>& view) const;
 };
 
 }

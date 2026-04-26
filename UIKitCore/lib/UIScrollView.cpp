@@ -12,6 +12,7 @@
 #include <CATransaction.h>
 #include <UIScrollViewExtensions/SpringTimingParameters.h>
 #include <UIScrollViewExtensions/RubberBand.h>
+#include <algorithm>
 
 namespace NXKit {
 
@@ -70,9 +71,9 @@ void UIScrollView::setBounceVertically(bool bounceVertically) {
     setNeedsLayout();
 }
 
-void UIScrollView::layoutMarginsDidChange() {
-    auto delta = _lastLayoutMargins - layoutMargins();
-    _lastLayoutMargins = layoutMargins();
+void UIScrollView::safeAreaInsetsDidChange() {
+    auto delta = _lastSafeAreaInsets - safeAreaInsets();
+    _lastSafeAreaInsets = safeAreaInsets();
     auto target = getBoundsCheckedContentOffset(contentOffset() + NXPoint(delta.left, delta.top));
     setContentOffset(target, false);
 }
@@ -86,34 +87,41 @@ NXSize UIScrollView::contentSize() {
     return subviews().front()->bounds().size;
 }
 
-NXPoint UIScrollView::getBoundsCheckedContentOffset(NXPoint newContentOffset) {
-    auto contentNXSize = this->contentSize();
-    auto contentHeight = contentNXSize.height;// fmaxf(contentNXSize.height, bounds().height());
-    auto contentWidth = contentNXSize.width;// fmaxf(contentNXSize.width, bounds().width());
+UIEdgeInsets UIScrollView::effectiveContentInsets() {
+    auto allInsets = _contentInset;
+    auto automaticInsets = safeAreaInsets();
 
-    auto allInsects = _contentInset;// + layoutMargins();
-
-    bool contentWidthGreaterThenScrollBounds = contentWidth > bounds().width() -_contentInset.left - _contentInset.right;
-    bool contentHeightGreaterThenScrollBounds = contentHeight > bounds().height() - _contentInset.top - _contentInset.bottom;
+    const bool contentWidthGreaterThanScrollBounds = contentSize().width > bounds().width() - _contentInset.left - _contentInset.right;
+    const bool contentHeightGreaterThanScrollBounds = contentSize().height > bounds().height() - _contentInset.top - _contentInset.bottom;
 
     switch (_contentInsetAdjustmentBehavior) {
         case UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes: {
-            if (contentWidthGreaterThenScrollBounds || _bounceHorizontally) {
-                allInsects += UIEdgeInsets(0, layoutMargins().left, 0, layoutMargins().right);
+            if (contentWidthGreaterThanScrollBounds || _bounceHorizontally) {
+                allInsets += UIEdgeInsets(0, automaticInsets.left, 0, automaticInsets.right);
             }
-            if (contentHeightGreaterThenScrollBounds || _bounceVertically) {
-                allInsects += UIEdgeInsets(layoutMargins().top, 0, layoutMargins().bottom, 0);
+            if (contentHeightGreaterThanScrollBounds || _bounceVertically) {
+                allInsets += UIEdgeInsets(automaticInsets.top, 0, automaticInsets.bottom, 0);
             }
             break;
         }
         case UIScrollViewContentInsetAdjustmentBehavior::always: {
-            allInsects += layoutMargins();
+            allInsets += automaticInsets;
             break;
         }
         case UIScrollViewContentInsetAdjustmentBehavior::never: {
             break;
         }
     }
+
+    return allInsets;
+}
+
+NXPoint UIScrollView::getBoundsCheckedContentOffset(NXPoint newContentOffset) {
+    auto contentNXSize = this->contentSize();
+    auto contentHeight = contentNXSize.height;// fmaxf(contentNXSize.height, bounds().height());
+    auto contentWidth = contentNXSize.width;// fmaxf(contentNXSize.width, bounds().width());
+
+    auto allInsects = effectiveContentInsets();
 
     bool contentWidthGreaterThenScrollSafeArea = contentWidth > bounds().width() -allInsects.left - allInsects.right;
     bool contentHeightGreaterThenScrollSafeArea = contentHeight > bounds().height() - allInsects.top - allInsects.bottom;
@@ -139,29 +147,7 @@ NXRect UIScrollView::contentOffsetBounds() {
     auto contentHeight = contentNXSize.height;// fmaxf(contentNXSize.height, bounds().height());
     auto contentWidth = contentNXSize.width;// fmaxf(contentNXSize.width, bounds().width());
 
-    auto allInsects = _contentInset;// + layoutMargins();
-
-    bool contentWidthGreaterThenScrollBounds = contentWidth > bounds().width() -_contentInset.left - _contentInset.right;
-    bool contentHeightGreaterThenScrollBounds = contentHeight > bounds().height() - _contentInset.top - _contentInset.bottom;
-
-    switch (_contentInsetAdjustmentBehavior) {
-        case UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes: {
-            if (contentWidthGreaterThenScrollBounds || _bounceHorizontally) {
-                allInsects += UIEdgeInsets(0, layoutMargins().left, 0, layoutMargins().right);
-            }
-            if (contentHeightGreaterThenScrollBounds || _bounceVertically) {
-                allInsects += UIEdgeInsets(layoutMargins().top, 0, layoutMargins().bottom, 0);
-            }
-            break;
-        }
-        case UIScrollViewContentInsetAdjustmentBehavior::always: {
-            allInsects += layoutMargins();
-            break;
-        }
-        case UIScrollViewContentInsetAdjustmentBehavior::never: {
-            break;
-        }
-    }
+    auto allInsects = effectiveContentInsets();
 
     bool contentWidthGreaterThenScrollSafeArea = contentWidth > bounds().width() -allInsects.left - allInsects.right;
     bool contentHeightGreaterThenScrollSafeArea = contentHeight > bounds().height() - allInsects.top - allInsects.bottom;
@@ -187,52 +173,11 @@ NXRect UIScrollView::contentOffsetBounds() {
 }
 
 bool UIScrollView::shouldBounceHorizontally() {
-    auto contentNXSize = this->contentSize();
-    bool contentWidthGreaterThenScrollBounds = contentNXSize.width > bounds().width() -_contentInset.left - _contentInset.right;
-
-    auto allInsects = _contentInset;// + layoutMargins();
-    switch (_contentInsetAdjustmentBehavior) {
-        case UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes: {
-            if (contentWidthGreaterThenScrollBounds || _bounceHorizontally) {
-                allInsects += UIEdgeInsets(0, layoutMargins().left, 0, layoutMargins().right);
-            }
-            break;
-        }
-        case UIScrollViewContentInsetAdjustmentBehavior::always: {
-            allInsects += layoutMargins();
-            break;
-        }
-        case UIScrollViewContentInsetAdjustmentBehavior::never: {
-            break;
-        }
-    }
-
-    bool contentWidthGreaterThenScrollSafeArea = contentNXSize.width > bounds().width() -allInsects.left - allInsects.right;
-    return contentWidthGreaterThenScrollSafeArea && _bounceHorizontally;
+    return _bounceHorizontally;
 }
 
 bool UIScrollView::shouldBounceVertically() {
-    auto contentNXSize = this->contentSize();
-    bool contentHeightGreaterThenScrollBounds = contentNXSize.height > bounds().height() - _contentInset.top - _contentInset.bottom;
-
-    auto allInsects = _contentInset;// + layoutMargins();
-    switch (_contentInsetAdjustmentBehavior) {
-        case UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes: {
-            if (contentHeightGreaterThenScrollBounds || _bounceVertically) {
-                allInsects += UIEdgeInsets(layoutMargins().top, 0, layoutMargins().bottom, 0);
-            }
-            break;
-        }
-        case UIScrollViewContentInsetAdjustmentBehavior::always: {
-            allInsects += layoutMargins();
-            break;
-        }
-        case UIScrollViewContentInsetAdjustmentBehavior::never: {
-            break;
-        }
-    }
-    bool contentHeightGreaterThenScrollSafeArea = contentNXSize.height > bounds().height() - allInsects.top - allInsects.bottom;
-    return contentHeightGreaterThenScrollSafeArea && _bounceVertically;
+    return _bounceVertically;
 }
 
 void UIScrollView::onPan() {
@@ -307,8 +252,11 @@ void UIScrollView::hideScrollIndicators() {
 void UIScrollView::startDeceleratingIfNecessary() {
     // Only animate if instantaneous velocity is large enough
     // Otherwise we could animate after scrolling quickly, pausing for a few seconds, then letting go
-    // TODO: Need to check velocity, it's too powerful
-    auto velocity = NXPoint(-weightedAverageVelocity.x / 50, -weightedAverageVelocity.y / 50);
+    auto velocity = weightedAverageVelocity * -1.0f;
+    constexpr NXFloat maximumDecelerationVelocity = 12000.0f;
+    velocity.x = std::clamp(velocity.x, -maximumDecelerationVelocity, maximumDecelerationVelocity);
+    velocity.y = std::clamp(velocity.y, -maximumDecelerationVelocity, maximumDecelerationVelocity);
+
     if (!shouldBounceVertically()) {
         velocity.y = 0;
     }
@@ -425,7 +373,7 @@ void UIScrollView::cancelDecelerationAnimations() {
 
 void UIScrollView::layoutSubviews() {
     UIView::layoutSubviews();
-//    setContentOffset(getBoundsCheckedContentOffset(contentOffset()), false);
+    setContentOffset(getBoundsCheckedContentOffset(contentOffset()), false);
 }
 
 }

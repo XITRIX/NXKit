@@ -3,6 +3,7 @@
 //
 
 #include <UIScrollViewExtensions/TimerAnimation.h>
+#include <CALayer.h>
 #include <utility>
 
 namespace NXKit {
@@ -28,6 +29,11 @@ void TimerAnimation::invalidate() {
 
 void TimerAnimation::handleFrame() {
     if (!_running) return;
+
+    // Touch-driven scrolling already gets a 120 Hz boost from active input.
+    // Deceleration runs after the touch ends, so request it explicitly here.
+    CALayer::requestFramerate(120);
+
     auto elapsed = (Timer() - firstFrameTimestamp) / 1000;
     if (elapsed >= duration) {
         animations(1, duration);

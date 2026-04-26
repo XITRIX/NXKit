@@ -2,7 +2,7 @@
 #include <Screens/TestViewController/TestViewController.hpp>
 #include <Screens/IBTestController/IBTestController.h>
 #include <Screens/YogaTestViewController/YogaTestViewController.hpp>
-// #include <NavigationViewController/NavigationViewController.hpp>
+#include <Screens/TestScrollController/TestScrollController.hpp>
 // #include <TextViewController/TextViewController.hpp>
 #include <romfs/romfs.hpp>
 
@@ -15,10 +15,10 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     auto vc = new_shared<IBTestController>();
     auto vc1 = new_shared<TestViewController>();
     auto vc2 = new_shared<YogaTestViewController>();
-//    auto vc3 = new_shared<NavigationViewController>();
+   auto vc3 = new_shared<TestScrollController>();
 //    auto vc4 = new_shared<TextViewController>();
     std::vector<std::shared_ptr<UIViewController>> vcs1 = { vc, vc1 };
-    std::vector<std::shared_ptr<UIViewController>> vcs2 = { vc2 };
+    std::vector<std::shared_ptr<UIViewController>> vcs2 = { vc2, vc3 };
     std::vector<std::vector<std::shared_ptr<UIViewController>>> vcs;
 
     vcs.push_back(vcs1);

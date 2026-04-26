@@ -41,7 +41,7 @@ public:
 //    bool applyXMLAttribute(std::string name, std::string value) override;
     void layoutSubviews() override;
 
-    void layoutMarginsDidChange() override;
+    void safeAreaInsetsDidChange() override;
 
     NXPoint contentOffset() { return bounds().origin; }
     void setContentOffset(NXPoint offset, bool animated);
@@ -80,9 +80,11 @@ private:
     UIScrollViewContentInsetAdjustmentBehavior _contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes;
 
     std::shared_ptr<TimerAnimation> _timerAnimation;
-    UIEdgeInsets _lastLayoutMargins;
+    UIEdgeInsets _lastSafeAreaInsets;
     UIEdgeInsets _contentInset;
 //    Size _contentSize;
+
+    UIEdgeInsets effectiveContentInsets();
 
     void onPan();
     void onPanGestureStateChanged();
