@@ -22,6 +22,7 @@ public:
 
     void handleEventsIfNeeded();
     void handleSDLQuit();
+    bool isQuitRequested() const { return quitRequested; }
 
     void sendEvent(const std::shared_ptr<UIEvent>& event) const;
 
@@ -39,6 +40,8 @@ private:
     static UIGamepadKey mapControllerButtonEventToUIGamepadKey(SDL_ControllerButtonEvent event);
     static std::optional<UIGamepadKey> mapControllerAxisEventToUIGamepadKey(SDL_ControllerAxisEvent event);
     static UIPressType mapGamepadInputToUIPressType(UIGamepadInputType key);
+
+    bool quitRequested = false;
 };
 
 }

@@ -20,21 +20,11 @@ using namespace NXKit;
 
 Application* Application::shared = nullptr;
 
-int Application::resizingEventWatcher(void* data, SDL_Event* event) {
-    if (event->type == SDL_WINDOWEVENT &&
-        event->window.event == SDL_WINDOWEVENT_RESIZED) {
-        ((Application*) data)->render();
-    }
-    return 0;
-}
-
 Application::Application() {
     shared = this;
 
 
     skiaCtx = MakeSkiaCtx();
-
-    SDL_AddEventWatch(resizingEventWatcher, this);
 
     SkFontStyle style;
     typeface = skiaCtx->getFontMgr()->matchFamilyStyle(nullptr, style);

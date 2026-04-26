@@ -40,8 +40,14 @@ ninja -C out/horizon skia skparagraph
 
 ### iOS:
 ```shell
-bin/gn gen out/ios-arm64-angle --args='is_official_build=false target_cpu="arm64" skia_use_gl=true skia_use_metal=true is_trivial_abi=true skia_use_angle=true target_os="ios"'
-ninja -C out/ios-arm64-angle skia skparagraph
+bin/gn gen out/ios-arm64 --args='is_official_build=false target_cpu="arm64" skia_use_gl=true skia_use_metal=true is_trivial_abi=true target_os="ios"'
+ninja -C out/ios-arm64 skia skparagraph
+```
+
+### macOS:
+```shell
+bin/gn gen out/mac-arm64 --args='is_official_build=false target_cpu="arm64" skia_use_gl=true skia_use_metal=true is_trivial_abi=true'
+ninja -C out/mac-arm64 skia skparagraph
 ```
 
 To build project:

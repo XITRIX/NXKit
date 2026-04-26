@@ -108,6 +108,13 @@ check_libromfs_generator()
 
 function(setup_project)
     if (APPLE)
+        if (PLATFORM_IOS)
+            set(SDL_OPENGL OFF CACHE BOOL "Disable SDL OpenGL support on iOS" FORCE)
+            set(SDL_OPENGLES OFF CACHE BOOL "Disable SDL OpenGL ES support on iOS" FORCE)
+        elseif (PLATFORM_MAC)
+            set(SDL_OPENGL ON CACHE BOOL "Keep SDL's Cocoa OpenGL support enabled on macOS" FORCE)
+            set(SDL_OPENGLES OFF CACHE BOOL "Disable SDL OpenGL ES support on macOS" FORCE)
+        endif ()
         add_subdirectory(${EXTERN_PATH}/SDL)
 
         set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -131,25 +138,7 @@ function(setup_project)
         )
     endif ()
 
-    if (PLATFORM_MAC)
-        list(APPEND google_angle_libs
-                ${EXTERN_PATH}/angle/mac/libEGL.dylib
-                ${EXTERN_PATH}/angle/mac/libGLESv2.dylib
-        )
-
-        list(APPEND platform_libs
-                ${google_angle_libs}
-        )
-
-        set_property(
-                SOURCE ${google_angle_libs}
-                PROPERTY MACOSX_PACKAGE_LOCATION "Frameworks"
-        )
-
-        target_sources(${PROJECT_NAME} PRIVATE
-                ${google_angle_libs}
-        )
-    elseif (PLATFORM_IOS)
+    if (PLATFORM_IOS)
         ios_bundle("${CMAKE_CURRENT_SOURCE_DIR}/app/platforms/ios/iphoneos/Splash.storyboard"
                 "${CMAKE_CURRENT_SOURCE_DIR}/app/platforms/ios/Images.xcassets"
                 "${CMAKE_CURRENT_SOURCE_DIR}/app/platforms/ios/iOSBundleInfo.plist.in")
@@ -164,12 +153,9 @@ function(setup_project)
                 XCODE_ATTRIBUTE_INFOPLIST_KEY_GCRequiresControllerUserInteraction YES
                 XCODE_ATTRIBUTE_INFOPLIST_KEY_LSApplicationCategoryType "public.app-category.games"
                 XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks"
-                XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS "${EXTERN_PATH}/angle/ios/"
+                XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphoneos"
+                XCODE_ATTRIBUTE_SDKROOT "iphoneos"
                 XCODE_ATTRIBUTE_INSTALL_PATH $(LOCAL_APPS_DIR))
-
-        set_target_properties(${PROJECT_NAME} PROPERTIES
-                XCODE_EMBED_FRAMEWORKS ${EXTERN_PATH}/angle/ios/MetalANGLE.framework
-        )
     elseif (PLATFORM_SWITCH)
         add_custom_target(${PROJECT_NAME}.nro DEPENDS ${PROJECT_NAME}
             COMMAND ${NX_NACPTOOL_EXE} --create "${PROJECT_NAME}" "${PROJECT_AUTHOR}" "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}" ${PROJECT_NAME}.nacp --titleid=${PROJECT_TITLEID}

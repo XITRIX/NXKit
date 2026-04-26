@@ -9,24 +9,27 @@
 namespace NXKit {
 
 bool applicationRunLoop() {
-    auto currentTime = Timer();
+    const auto currentTime = Timer();
     UIApplication::shared->handleEventsIfNeeded();
+    if (UIApplication::shared->isQuitRequested()) {
+        return false;
+    }
     DispatchQueue::main()->performAll(); // TODO: May be need to be after rendering loop
 //        UIRenderer::main()->render(UIApplication::shared->keyWindow.lock(), currentTime);
 
 
     // Move to UIRenderer
-    auto keyWindow = UIApplication::shared->keyWindow.lock();
+    const auto keyWindow = UIApplication::shared->keyWindow.lock();
     NXSize size = SkiaCtx::_main->getSize();
     keyWindow->setFrame({ NXPoint::zero, size });
 
-    auto scale = SkiaCtx::_main->getScaleFactor();
+    const auto scale = SkiaCtx::_main->getScaleFactor();
 
     if (keyWindow->_traitCollection == nullptr
         || keyWindow->_traitCollection->_userInterfaceStyle != SkiaCtx::main()->getThemeMode()
         || keyWindow->_traitCollection->_displayScale != scale)
     {
-        auto oldCollection = keyWindow->_traitCollection;
+        const auto oldCollection = keyWindow->_traitCollection;
         keyWindow->_traitCollection = new_shared<UITraitCollection>();
         keyWindow->_traitCollection->_displayScale = scale;
         keyWindow->_traitCollection->_userInterfaceStyle = SkiaCtx::main()->getThemeMode();
@@ -34,7 +37,7 @@ bool applicationRunLoop() {
         CALayer::setLayerTreeIsDirty();
     }
 
-    int maximumAnimationFrameRate = UIView::maximumAnimationFrameRate();
+    const int maximumAnimationFrameRate = UIView::maximumAnimationFrameRate();
     CALayer::maxFramerateRequired = 0; // reset value
 
     UIView::animateIfNeeded(currentTime);
@@ -48,13 +51,17 @@ bool applicationRunLoop() {
         return true;
     }
 
+    const auto surface = SkiaCtx::_main->getBackbufferSurface();
+    if (!surface) {
+        CALayer::layerTreeIsDirty = true;
+        SkiaCtx::_main->sleepForNextFrame();
+        return true;
+    }
+
     CALayer::layerTreeIsDirty = false;
     lastSize = size;
 
-    auto surface = SkiaCtx::_main->getBackbufferSurface();
-    if (!surface) return true;
-
-    auto canvas = surface->getCanvas();
+    const auto canvas = surface->getCanvas();
     canvas->clear(SK_ColorTRANSPARENT);
 
     canvas->save();
@@ -92,8 +99,21 @@ int UIApplicationMain(const std::shared_ptr<UIApplicationDelegate>& appDelegate)
         return -1;
     }
 
-    while(SkiaCtx::_main->platformRunLoop([]() { return applicationRunLoop(); }));
+    while(SkiaCtx::_main->platformRunLoop([]() { return applicationRunLoop(); })) {}
 
+    appDelegate->applicationWillTerminate(UIApplication::shared.get());
+    auto animatedLayers = UIView::layersWithAnimations;
+    for (const auto& layer : animatedLayers) {
+        layer->removeAllAnimations();
+    }
+
+    if (auto window = appDelegate->window) {
+        window->setRootViewController(nullptr);
+    }
+
+    appDelegate->window = nullptr;
+    UIApplication::shared->delegate = nullptr;
+    UIApplication::shared->keyWindow.reset();
     UIApplication::shared = nullptr;
     SkiaCtx::_main = nullptr;
     

@@ -16,28 +16,36 @@ if (APPLE)
     # MAC
     if (PLATFORM_DESKTOP)
         find_library(SDL2 NAMES SDL2-static SDL2main)
+        set(SKIA_MAC_OUT_DIR ${EXTERN_PATH}/skia/out/mac-arm64)
+        if (NOT EXISTS "${SKIA_MAC_OUT_DIR}/libskia.a")
+            set(SKIA_MAC_OUT_DIR ${EXTERN_PATH}/skia/out/mac-arm64-angle)
+        endif ()
 
         list(APPEND platform_libs
                 SDL2-static SDL2main
-                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskia.a
-                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskparagraph.a
-                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskshaper.a
-                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskunicode_core.a
-                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libskunicode_icu.a
-                ${EXTERN_PATH}/skia/out/mac-arm64-angle/libicu.a
+                ${SKIA_MAC_OUT_DIR}/libskia.a
+                ${SKIA_MAC_OUT_DIR}/libskparagraph.a
+                ${SKIA_MAC_OUT_DIR}/libskshaper.a
+                ${SKIA_MAC_OUT_DIR}/libskunicode_core.a
+                ${SKIA_MAC_OUT_DIR}/libskunicode_icu.a
+                ${SKIA_MAC_OUT_DIR}/libicu.a
         )
     # IOS
     elseif (PLATFORM_IOS)
         find_library(SDL2 NAMES SDL2-static SDL2main)
+        set(SKIA_IOS_OUT_DIR ${EXTERN_PATH}/skia/out/ios-arm64)
+        if (NOT EXISTS "${SKIA_IOS_OUT_DIR}/libskia.a")
+            set(SKIA_IOS_OUT_DIR ${EXTERN_PATH}/skia/out/ios-arm64-angle)
+        endif ()
 
         list(APPEND platform_libs
                 SDL2-static SDL2main
-                ${EXTERN_PATH}/skia/out/ios-arm64/libskia.a
-                ${EXTERN_PATH}/skia/out/ios-arm64/libskparagraph.a
-                ${EXTERN_PATH}/skia/out/ios-arm64/libskshaper.a
-                ${EXTERN_PATH}/skia/out/ios-arm64/libskunicode_core.a
-                ${EXTERN_PATH}/skia/out/ios-arm64/libskunicode_icu.a
-                ${EXTERN_PATH}/skia/out/ios-arm64/libicu.a
+                ${SKIA_IOS_OUT_DIR}/libskia.a
+                ${SKIA_IOS_OUT_DIR}/libskparagraph.a
+                ${SKIA_IOS_OUT_DIR}/libskshaper.a
+                ${SKIA_IOS_OUT_DIR}/libskunicode_core.a
+                ${SKIA_IOS_OUT_DIR}/libskunicode_icu.a
+                ${SKIA_IOS_OUT_DIR}/libicu.a
         )
     endif ()
 elseif (PLATFORM_SWITCH)
@@ -73,14 +81,15 @@ target_include_directories(UIKit PUBLIC
         ${EXTERN_PATH}/libromfs/lib/include
 )
 
-if (PLATFORM_MAC)
-    target_include_directories(SDL2-static PUBLIC ${EXTERN_PATH}/angle/mac/Headers)
-elseif (PLATFORM_IOS)
-    target_include_directories(SDL2-static PUBLIC ${EXTERN_PATH}/angle/ios/MetalANGLE.framework/Headers)
-endif ()
-
 if (APPLE)
-    list(APPEND platform_libs "-framework Foundation" "-framework VideoToolbox" "-framework AVKit" "-framework MetalKit" "-framework CoreText")
+    list(APPEND platform_libs
+            "-framework Foundation"
+            "-framework VideoToolbox"
+            "-framework AVKit"
+            "-framework Metal"
+            "-framework MetalKit"
+            "-framework QuartzCore"
+            "-framework CoreText")
 endif ()
 
 target_link_libraries(UIKit PUBLIC fmt ${platform_libs})

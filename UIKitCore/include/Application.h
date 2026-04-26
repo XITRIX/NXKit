@@ -22,7 +22,6 @@ private:
     std::unique_ptr<SkiaCtx> skiaCtx;
 
     static Application* shared;
-    static int resizingEventWatcher(void* data, SDL_Event* event);
 
     bool runLoop();
     void render();

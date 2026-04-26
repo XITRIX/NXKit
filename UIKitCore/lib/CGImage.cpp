@@ -16,6 +16,9 @@ using namespace NXKit;
 
 CGImage::CGImage(sk_sp<SkImage> image, std::shared_ptr<NXData> sourceData) {
     this->sourceData = std::move(sourceData);
+    if (image && image->isTextureBacked()) {
+        image = image->makeRasterImage();
+    }
     pointee = std::move(image);
 
 //    GPU_SetSnapMode(pointee, GPU_SNAP_POSITION_AND_DIMENSIONS);
@@ -29,6 +32,9 @@ CGImage::CGImage(const std::shared_ptr<NXData>& sourceData) {
 
     auto skData = SkData::MakeWithoutCopy(data, dataCount);
     auto image = SkImages::DeferredFromEncodedData(skData);
+    if (image) {
+        image = image->makeRasterImage();
+    }
 
     new (this) CGImage(image, sourceData);
 }

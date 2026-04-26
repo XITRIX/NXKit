@@ -9,7 +9,9 @@ SkiaCtx_sdlBase::SkiaCtx_sdlBase()
     SDL_Init(SDL_INIT_EVERYTHING);
     Uint32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE;
 
-#ifdef __SWITCH__
+#if defined(PLATFORM_MAC) || defined(PLATFORM_IOS)
+    flags |= SDL_WINDOW_METAL;
+#elif defined(__SWITCH__)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
@@ -40,12 +42,39 @@ SkiaCtx_sdlBase::SkiaCtx_sdlBase()
         SDL_GetError();
     }
 
-    auto context = SDL_GL_CreateContext(window);
-    SDL_GL_MakeCurrent(window, context);
+#if defined(PLATFORM_MAC) || defined(PLATFORM_IOS)
+    metalView = SDL_Metal_CreateView(window);
+#else
+    glContext = SDL_GL_CreateContext(window);
+    SDL_GL_MakeCurrent(window, glContext);
+#endif
+}
+
+SkiaCtx_sdlBase::~SkiaCtx_sdlBase() {
+#if defined(PLATFORM_MAC) || defined(PLATFORM_IOS)
+    if (metalView) {
+        SDL_Metal_DestroyView(metalView);
+        metalView = nullptr;
+    }
+#endif
+
+    if (glContext) {
+        SDL_GL_DeleteContext(glContext);
+        glContext = nullptr;
+    }
+
+    if (window) {
+        SDL_DestroyWindow(window);
+        window = nullptr;
+    }
+
+    SDL_Quit();
 }
 
 void SkiaCtx_sdlBase::swapBuffers() {
-    SDL_GL_SwapWindow(window);
+    if (window && glContext) {
+        SDL_GL_SwapWindow(window);
+    }
 }
 
 NXSize SkiaCtx_sdlBase::getSize() {
@@ -57,7 +86,16 @@ NXSize SkiaCtx_sdlBase::getSize() {
 float SkiaCtx_sdlBase::getScaleFactor() {
     int w, h, dw, dh;
     SDL_GetWindowSize(window, &w, &h);
+#if defined(PLATFORM_MAC) || defined(PLATFORM_IOS)
+    SDL_Metal_GetDrawableSize(window, &dw, &dh);
+#else
     SDL_GL_GetDrawableSize(window, &dw, &dh);
+#endif
+
+    if (w <= 0 || h <= 0) {
+        return 1;
+    }
+
     return (float)dw / (float)w;
 }
 
@@ -105,3 +143,13 @@ int SkiaCtx_sdlBase::screenFrameRate() {
 
     return mode.refresh_rate;
 }
+
+#if defined(PLATFORM_MAC) || defined(PLATFORM_IOS)
+void* SkiaCtx_sdlBase::metalLayer() const {
+    if (!metalView) {
+        return nullptr;
+    }
+
+    return SDL_Metal_GetLayer(metalView);
+}
+#endif
