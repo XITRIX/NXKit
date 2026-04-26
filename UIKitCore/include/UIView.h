@@ -90,7 +90,7 @@ public:
     void addGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& gestureRecognizer);
     [[nodiscard]] std::vector<std::shared_ptr<UIGestureRecognizer>>* gestureRecognizers()  { return &_gestureRecognizers; }
 
-    void addSubview(const std::shared_ptr<UIView>& view);
+    virtual void addSubview(const std::shared_ptr<UIView>& view);
     void insertSubviewAt(const std::shared_ptr<UIView>& view, int index);
     void insertSubviewBelow(const std::shared_ptr<UIView>& view, const std::shared_ptr<UIView>& belowSubview);
     void removeFromSuperview();

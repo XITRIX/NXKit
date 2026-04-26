@@ -143,15 +143,15 @@ YG_VALUE_GUTTER_PROPERTY_SETTER(lowercased_name, capitalized_name, property, gut
 class UIView;
 class YGLayout {
 public:
-    bool isEnabled() { return _isEnabled; }
-    void setEnabled(bool enabled) {
+    [[nodiscard]] bool isEnabled() const { return _isEnabled; }
+    void setEnabled(const bool enabled) {
     if (_isEnabled == enabled) return;
         _isEnabled = enabled;
     invalidateLayout();
     }
 
-    bool isIncludedInLayout() { return _isIncludedInLayout; }
-  void setIncludedInLayout(bool isIncludedInLayout) {
+    [[nodiscard]] bool isIncludedInLayout() const { return _isIncludedInLayout; }
+  void setIncludedInLayout(const bool isIncludedInLayout) {
     if (_isIncludedInLayout == isIncludedInLayout) return;
     _isIncludedInLayout = isIncludedInLayout;
     invalidateLayout();
@@ -243,24 +243,24 @@ private:
     friend class UIView;
 };
 
-namespace yoga {
-namespace literals {
 
-inline YGValue operator"" _pt(long double value) {
+namespace yoga::literals {
+
+inline YGValue operator""_pt(long double value) {
   return YGValue{static_cast<float>(value), YGUnitPoint};
 }
-inline YGValue operator"" _pt(unsigned long long value) {
-  return operator"" _pt(static_cast<long double>(value));
+inline YGValue operator""_pt(unsigned long long value) {
+  return operator""_pt(static_cast<long double>(value));
 }
 
-inline YGValue operator"" _percent(long double value) {
+inline YGValue operator""_percent(long double value) {
   return YGValue{static_cast<float>(value), YGUnitPercent};
 }
-inline YGValue operator"" _percent(unsigned long long value) {
-  return operator"" _percent(static_cast<long double>(value));
+inline YGValue operator""_percent(unsigned long long value) {
+  return operator""_percent(static_cast<long double>(value));
 }
 
-} // namespace literals
-} // namespace yoga
+} // namespace yoga::literals
+
 
 }

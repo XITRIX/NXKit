@@ -16,7 +16,7 @@
 
 namespace NXKit {
 
-UIScrollView::UIScrollView(NXRect frame): UIView(frame) {
+UIScrollView::UIScrollView(const NXRect frame): UIView(frame) {
     _panGestureRecognizer = new_shared<UIPanGestureRecognizer>();
     _panGestureRecognizer->onStateChanged = [this](auto){ onPanGestureStateChanged(); };
     addGestureRecognizer(_panGestureRecognizer);
@@ -29,10 +29,10 @@ UIScrollView::UIScrollView(NXRect frame): UIView(frame) {
 //    }
 }
 
-//void UIScrollView::addSubview(std::shared_ptr<UIView> view) {
-//    UIView::addSubview(view);
-//    view->yoga->setPositionType(YGPositionTypeAbsolute);
-//}
+void UIScrollView::addSubview(const std::shared_ptr<UIView> &view) {
+    UIView::addSubview(view);
+    // view->yoga->setPositionType(YGPositionTypeAbsolute);
+}
 
 void UIScrollView::setContentOffset(NXPoint offset, bool animated) {
     if (offset == contentOffset()) return;
@@ -72,17 +72,17 @@ void UIScrollView::setBounceVertically(bool bounceVertically) {
 }
 
 void UIScrollView::safeAreaInsetsDidChange() {
-    auto delta = _lastSafeAreaInsets - safeAreaInsets();
+    const auto delta = _lastSafeAreaInsets - safeAreaInsets();
     _lastSafeAreaInsets = safeAreaInsets();
-    auto target = getBoundsCheckedContentOffset(contentOffset() + NXPoint(delta.left, delta.top));
+    const auto target = getBoundsCheckedContentOffset(contentOffset() + NXPoint(delta.left, delta.top));
     setContentOffset(target, false);
 }
 
-NXPoint UIScrollView::visibleContentOffset() {
+NXPoint UIScrollView::visibleContentOffset() const {
     return (layer()->presentationOrSelf())->bounds().origin;
 }
 
-NXSize UIScrollView::contentSize() {
+NXSize UIScrollView::contentSize() const {
     if (subviews().empty()) return {};
     return subviews().front()->bounds().size;
 }
@@ -172,25 +172,25 @@ NXRect UIScrollView::contentOffsetBounds() {
     return resBounds;
 }
 
-bool UIScrollView::shouldBounceHorizontally() {
+bool UIScrollView::shouldBounceHorizontally() const {
     return _bounceHorizontally;
 }
 
-bool UIScrollView::shouldBounceVertically() {
+bool UIScrollView::shouldBounceVertically() const {
     return _bounceVertically;
 }
 
 void UIScrollView::onPan() {
-    auto translation = _panGestureRecognizer->translationInView(shared_from_this());
+    const auto translation = _panGestureRecognizer->translationInView(shared_from_this());
 //    _panGestureRecognizer->setTranslation(NXPoint(), shared_from_this());
 
-    auto panGestureVelocity = _panGestureRecognizer->velocityIn(shared_from_this());
+    const auto panGestureVelocity = _panGestureRecognizer->velocityIn(shared_from_this());
     weightedAverageVelocity = weightedAverageVelocity * 0.2 + panGestureVelocity * 0.8;
 
-    auto offset = contentOffsetBounds();
-    auto rubberBand = RubberBand(0.55f, frame().size, contentOffsetBounds());
+    // auto offset = contentOffsetBounds();
+    const auto rubberBand = RubberBand(0.55f, frame().size, contentOffsetBounds());
 
-    NXPoint clamped = getBoundsCheckedContentOffset(_initialContentOffset - translation);
+    const NXPoint clamped = getBoundsCheckedContentOffset(_initialContentOffset - translation);
     NXPoint target = rubberBand.clamp(_initialContentOffset - translation);
 
     if (!shouldBounceHorizontally()) {
@@ -281,7 +281,7 @@ void UIScrollView::startDeceleratingIfNecessary() {
     }
 
     _isDecelerating = true;
-    _timerAnimation = std::make_shared<TimerAnimation>(duration, [this, parameters](float, double time) {
+    _timerAnimation = std::make_shared<TimerAnimation>(duration, [this, parameters](float, const double time) {
         setContentOffset(parameters.valueAt(time), false);
     }, [this, parameters, duration, isClipped](bool) {
         _isDecelerating = isClipped;

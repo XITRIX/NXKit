@@ -37,7 +37,7 @@ public:
 
     UIScrollView(NXRect frame = NXRect());
 
-//    virtual void addSubview(std::shared_ptr<UIView> view) override;
+    void addSubview(const std::shared_ptr<UIView> &view) override;
 //    bool applyXMLAttribute(std::string name, std::string value) override;
     void layoutSubviews() override;
 
@@ -61,7 +61,7 @@ public:
     UIScrollViewContentInsetAdjustmentBehavior contentInsetAdjustmentBehavior() { return _contentInsetAdjustmentBehavior; }
     void setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior contentInsetAdjustmentBehavior);
 
-    NXSize contentSize();
+    NXSize contentSize() const;
 //    void setContentSize(Size size) { _contentSize = size; }
 
 private:
@@ -74,8 +74,8 @@ private:
     bool _bounceHorizontally = false;
     bool _bounceVertically = false;
 
-    bool shouldBounceHorizontally();
-    bool shouldBounceVertically();
+    bool shouldBounceHorizontally() const;
+    bool shouldBounceVertically() const;
 
     UIScrollViewContentInsetAdjustmentBehavior _contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes;
 
@@ -89,7 +89,7 @@ private:
     void onPan();
     void onPanGestureStateChanged();
 
-    NXPoint visibleContentOffset();
+    NXPoint visibleContentOffset() const;
     NXPoint getBoundsCheckedContentOffset(NXPoint newContentOffset);
 
     NXRect contentOffsetBounds();

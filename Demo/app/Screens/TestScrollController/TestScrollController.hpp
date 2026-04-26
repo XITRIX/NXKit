@@ -8,8 +8,9 @@ public:
     void loadView() override;
 //    void viewDidLoad() override;
 
-    void viewDidLayoutSubviews() override;
+    void viewSafeAreaInsetsDidChange() override;
 private:
-    std::shared_ptr<NXKit::UIScrollView> scrollView;
+std::shared_ptr<NXKit::UIScrollView> scrollView;
     std::shared_ptr<NXKit::UILabel> label;
+    std::shared_ptr<NXKit::UIView> labelContainer;
 };

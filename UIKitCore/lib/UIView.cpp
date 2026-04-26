@@ -168,6 +168,9 @@ void UIView::setSafeAreaInsets(UIEdgeInsets safeAreaInsets) {
     setNeedsUpdateLayoutMargins();
     updateSafeAreaInsetsInChilds();
     safeAreaInsetsDidChange();
+    if (auto parentController = _parentController.lock()) {
+        parentController->viewSafeAreaInsetsDidChange();
+    }
     setNeedsLayout();
 }
 
@@ -248,6 +251,9 @@ void UIView::updateLayoutMargin() {
     if (_calculatedLayoutMargins != margins) {
         _calculatedLayoutMargins = margins;
         layoutMarginsDidChange();
+        if (auto parentController = _parentController.lock()) {
+            parentController->viewLayoutMarginsDidChange();
+        }
     }
 }
 

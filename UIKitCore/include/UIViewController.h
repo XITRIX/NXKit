@@ -25,6 +25,8 @@ public:
     virtual void viewWillDisappear(bool animated);
     virtual void viewDidDisappear(bool animated);
 
+    virtual void viewSafeAreaInsetsDidChange() {}
+    virtual void viewLayoutMarginsDidChange() {}
     virtual void viewWillLayoutSubviews() {}
     virtual void viewDidLayoutSubviews() {}
 
