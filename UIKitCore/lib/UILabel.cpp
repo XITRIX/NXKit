@@ -2,9 +2,66 @@
 #include <tools/IBTools.h>
 #include <include/core/SkBitmap.h>
 #include <modules/skunicode/include/SkUnicode_icu.h>
+#include <cmath>
+#include <limits>
+#include <vector>
 
 using namespace NXKit;
 using namespace skia::textlayout;
+
+namespace {
+
+struct ParagraphVisualBounds {
+    NXFloat width = 0;
+    NXFloat top = 0;
+    NXFloat height = 0;
+};
+
+ParagraphVisualBounds measureParagraph(const std::unique_ptr<Paragraph>& paragraph, NXFloat width) {
+    paragraph->layout(width);
+
+    ParagraphVisualBounds result;
+    result.width = paragraph->getLongestLine();
+
+    std::vector<LineMetrics> lines;
+    paragraph->getLineMetrics(lines);
+    if (lines.empty()) {
+        result.height = paragraph->getHeight();
+        return result;
+    }
+
+    NXFloat top = std::numeric_limits<NXFloat>::infinity();
+    NXFloat bottom = -std::numeric_limits<NXFloat>::infinity();
+
+    for (const auto& line : lines) {
+        NXFloat lineTop = static_cast<NXFloat>(line.fBaseline - line.fAscent);
+        NXFloat lineBottom = static_cast<NXFloat>(line.fBaseline + line.fDescent);
+
+        for (const auto& [_, styleMetrics] : line.fLineMetrics) {
+            const auto& fontMetrics = styleMetrics.font_metrics;
+            if (fontMetrics.hasBounds()) {
+                lineTop = std::min(lineTop, static_cast<NXFloat>(line.fBaseline + fontMetrics.fTop));
+                lineBottom = std::max(lineBottom, static_cast<NXFloat>(line.fBaseline + fontMetrics.fBottom));
+            } else {
+                lineTop = std::min(lineTop, static_cast<NXFloat>(line.fBaseline + fontMetrics.fAscent));
+                lineBottom = std::max(lineBottom, static_cast<NXFloat>(line.fBaseline + fontMetrics.fDescent));
+            }
+        }
+
+        top = std::min(top, lineTop);
+        bottom = std::max(bottom, lineBottom);
+    }
+
+    result.top = std::floor(top);
+    result.height = std::max<NXFloat>(0, std::ceil(bottom) - result.top);
+    return result;
+}
+
+int scaledBitmapDimension(NXFloat logicalDimension, NXFloat scale) {
+    return std::max(1, static_cast<int>(std::ceil(std::max<NXFloat>(0, logicalDimension) * scale)));
+}
+
+}
 
 UILabel::UILabel(): UIView() {
     unicode = SkUnicodes::ICU::Make();
@@ -54,13 +111,11 @@ void UILabel::setScaleModifier(NXFloat scaleModifier) {
 
 NXSize UILabel::sizeThatFits(NXSize size) {
     updateParagraph();
-    paragraph->layout(size.width);
-    auto height = paragraph->getHeight();
-    auto width = paragraph->getMaxIntrinsicWidth();
+    auto metrics = measureParagraph(paragraph, size.width);
 
     // Adds extra 1, because of extra content scale could be not enough to fit text line
-    auto rWidth = std::ceil(width) + 1;
-    return { rWidth, height };
+    auto rWidth = std::ceil(metrics.width) + 1;
+    return { rWidth, metrics.height };
 }
 
 void UILabel::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
@@ -81,15 +136,14 @@ void UILabel::draw() {
         scale = traitCollection()->displayScale() * layer()->scaleModifier();
         size = bounds().size;
     }
-    auto bitmapSize = size * scale;
-    bitmap.allocPixels(SkImageInfo::MakeN32Premul((int) bitmapSize.width, (int) bitmapSize.height));
+    bitmap.allocPixels(SkImageInfo::MakeN32Premul(scaledBitmapDimension(size.width, scale),
+                                                  scaledBitmapDimension(size.height, scale)));
+    bitmap.eraseColor(SK_ColorTRANSPARENT);
     SkCanvas canvas(bitmap);
 
     canvas.scale(scale, scale);
-    paragraph->layout(size.width);
-
-    auto height = paragraph->getHeight();
-    auto yOffset = (size.height - height) / 2;
+    auto metrics = measureParagraph(paragraph, size.width);
+    auto yOffset = (size.height - metrics.height) / 2 - metrics.top;
 
     paragraph->paint(&canvas, 0, yOffset);
 
