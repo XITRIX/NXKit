@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SDL_video.h"
+#include <SDL3/SDL_video.h>
 #include <memory>
 #include "include/core/SkSurface.h"
 #include <functional>

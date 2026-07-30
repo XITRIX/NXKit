@@ -38,6 +38,8 @@ function(ios_bundle iosStoryBoard assets plist)
 
     set(IOS_ASSETS ${assets})
     set_target_properties(${PROJECT_NAME} PROPERTIES
+            MACOSX_BUNDLE_GUI_IDENTIFIER "${IOS_GUI_IDENTIFIER}"
+            XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${IOS_GUI_IDENTIFIER}"
             XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "${IOS_CODE_SIGN_IDENTITY}"
             XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED YES
             XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "${IOS_CODE_SIGNING_ENABLED}"
@@ -92,7 +94,6 @@ elseif (PLATFORM_SWITCH)
     add_definitions( -DPLATFORM_SWITCH )
     set(DEVKITPRO $ENV{DEVKITPRO} CACHE BOOL "DEVKITPRO")
     set(__SWITCH__ ON)
-    set(USE_SYSTEM_SDL ON)
     set(CMAKE_C_FLAGS "-I${DEVKITPRO}/libnx/include -I${DEVKITPRO}/portlibs/switch/include -D__SWITCH__")
     set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
     include(${DEVKITPRO}/cmake/Switch.cmake REQUIRED)
@@ -107,16 +108,32 @@ endif ()
 check_libromfs_generator()
 
 function(setup_project)
-    if (APPLE)
+    if (APPLE OR PLATFORM_SWITCH)
+        set(SDL_SHARED OFF CACHE BOOL "Build SDL as a static library" FORCE)
+        set(SDL_STATIC ON CACHE BOOL "Build SDL as a static library" FORCE)
+        set(SDL_TEST_LIBRARY OFF CACHE BOOL "Disable the SDL test library" FORCE)
+        set(SDL_TESTS OFF CACHE BOOL "Disable SDL tests" FORCE)
+        set(SDL_EXAMPLES OFF CACHE BOOL "Disable SDL examples" FORCE)
+        set(SDL_INSTALL OFF CACHE BOOL "Disable SDL install targets" FORCE)
         if (PLATFORM_IOS)
             set(SDL_OPENGL OFF CACHE BOOL "Disable SDL OpenGL support on iOS" FORCE)
             set(SDL_OPENGLES OFF CACHE BOOL "Disable SDL OpenGL ES support on iOS" FORCE)
+            # SDL's system iconv probe can succeed against the macOS host while
+            # cross-compiling, then leave unresolved iconv symbols in the iOS app.
+            # SDL's built-in converter is portable and avoids that host/SDK mismatch.
+            set(SDL_SYSTEM_ICONV OFF CACHE BOOL "Use SDL's built-in iconv on iOS" FORCE)
+            set(SDL_LIBICONV OFF CACHE BOOL "Disable external libiconv on iOS" FORCE)
         elseif (PLATFORM_MAC)
             set(SDL_OPENGL ON CACHE BOOL "Keep SDL's Cocoa OpenGL support enabled on macOS" FORCE)
             set(SDL_OPENGLES OFF CACHE BOOL "Disable SDL OpenGL ES support on macOS" FORCE)
+        elseif (PLATFORM_SWITCH)
+            set(SDL_OPENGL OFF CACHE BOOL "Disable desktop OpenGL support on Switch" FORCE)
+            set(SDL_OPENGLES ON CACHE BOOL "Enable SDL OpenGL ES support on Switch" FORCE)
         endif ()
-        add_subdirectory(${EXTERN_PATH}/SDL)
+        add_subdirectory(${EXTERN_PATH}/SDL EXCLUDE_FROM_ALL)
+    endif ()
 
+    if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 MACOSX_BUNDLE TRUE
                 MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
@@ -168,7 +185,9 @@ function(setup_project)
     # Include Submodules
     add_subdirectory(${UIKIT_PATH})
     add_subdirectory(${EXTERN_PATH})
-    add_subdirectory(${EXTERN_PATH}/yoga)
+    # Only include Yoga's library target. Its top-level project unconditionally
+    # enables tests and downloads GoogleTest, which is not part of the app build.
+    add_subdirectory(${EXTERN_PATH}/yoga/yoga)
     add_subdirectory(${EXTERN_PATH}/tinyxml2)
     add_subdirectory(${EXTERN_PATH}/fmt)
 

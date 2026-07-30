@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL_events.h>
+#include <SDL3/SDL_events.h>
 
 #include <UIApplicationDelegate.h>
 #include <UIWindow.h>
@@ -16,10 +16,12 @@ public:
     static std::shared_ptr<UIApplication> shared;
 
     UIApplication();
+    ~UIApplication();
 
     std::shared_ptr<UIApplicationDelegate> delegate;
     std::weak_ptr<UIWindow> keyWindow;
 
+    void startHandlingLifecycleEvents();
     void handleEventsIfNeeded();
     void handleSDLQuit();
     bool isQuitRequested() const { return quitRequested; }
@@ -35,12 +37,14 @@ private:
     static void onWillEnterBackground();
     static void onDidEnterBackground();
 
+    static bool SDLCALL handleSDLLifecycleEvent(void* userdata, SDL_Event* event);
     void handleSDLEvent(SDL_Event e);
 
-    static UIGamepadKey mapControllerButtonEventToUIGamepadKey(SDL_ControllerButtonEvent event);
-    static std::optional<UIGamepadKey> mapControllerAxisEventToUIGamepadKey(SDL_ControllerAxisEvent event);
+    static UIGamepadKey mapGamepadButtonEventToUIGamepadKey(SDL_GamepadButtonEvent event);
+    static std::optional<UIGamepadKey> mapGamepadAxisEventToUIGamepadKey(SDL_GamepadAxisEvent event);
     static UIPressType mapGamepadInputToUIPressType(UIGamepadInputType key);
 
+    bool lifecycleEventWatchInstalled = false;
     bool quitRequested = false;
 };
 

@@ -1,7 +1,5 @@
 #include "Application.h"
 
-#include <SDL_syswm.h>
-
 #include <include/core/SkSurface.h>
 #include <include/core/SkRRect.h>
 #include <include/core/SkCanvas.h>
@@ -50,7 +48,7 @@ Application::~Application() {}
 bool Application::runLoop() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
+        if (event.type == SDL_EVENT_QUIT) {
             return false;
         }
     }

@@ -13,7 +13,7 @@
 
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
-#include <SDL_metal.h>
+#include <SDL3/SDL_metal.h>
 #include <UIKit/UIKit.h>
 #include <algorithm>
 #include <cmath>
@@ -30,13 +30,16 @@ namespace {
 #define NX_OBJC_BRIDGE_RETAIN(type, value) ((type)(value))
 #endif
 
-UIWindow *currentWindow() {
-    auto app = UIApplication.sharedApplication;
-    auto uiWindow = app.keyWindow;
-    if (uiWindow == nil && app.windows.count > 0) {
-        uiWindow = app.windows.firstObject;
+UIWindow *currentWindow(SDL_Window *window) {
+    if (window == nullptr) {
+        return nil;
     }
-    return uiWindow;
+
+    auto properties = SDL_GetWindowProperties(window);
+    return NX_OBJC_BRIDGE(
+        UIWindow *,
+        SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_UIKIT_WINDOW_POINTER, nullptr)
+    );
 }
 
 CGSize currentViewSize(UIWindow *uiWindow) {
@@ -127,7 +130,7 @@ void SkiaCtx_ios::destroyContext() {
 }
 
 NXSize SkiaCtx_ios::getSize() {
-    auto size = currentViewSize(currentWindow());
+    auto size = currentViewSize(currentWindow(window));
     if (CGSizeEqualToSize(size, CGSizeZero)) {
         return SkiaCtx_sdlBase::getSize() * _extraScaleFactor;
     }
@@ -141,16 +144,16 @@ NXSize SkiaCtx_ios::getSize() {
 float SkiaCtx_ios::getScaleFactor() {
     int drawableWidth = 0;
     int drawableHeight = 0;
-    SDL_Metal_GetDrawableSize(window, &drawableWidth, &drawableHeight);
+    SDL_GetWindowSizeInPixels(window, &drawableWidth, &drawableHeight);
 
-    auto size = currentViewSize(currentWindow());
+    auto size = currentViewSize(currentWindow(window));
     if (drawableWidth > 0 && drawableHeight > 0 && size.width > 0.0 && size.height > 0.0) {
         auto horizontalScale = static_cast<float>(drawableWidth / size.width);
         auto verticalScale = static_cast<float>(drawableHeight / size.height);
         return std::max(horizontalScale, verticalScale) / _extraScaleFactor;
     }
 
-    auto uiWindow = currentWindow();
+    auto uiWindow = currentWindow(window);
     if (uiWindow != nil) {
         return uiWindow.screen.nativeScale / _extraScaleFactor;
     }
@@ -159,7 +162,7 @@ float SkiaCtx_ios::getScaleFactor() {
 }
 
 NXKit::UIUserInterfaceStyle SkiaCtx_ios::getThemeMode() {
-    auto uiWindow = currentWindow();
+    auto uiWindow = currentWindow(window);
     if (uiWindow.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark) {
         return NXKit::UIUserInterfaceStyle::dark;
     } else {
@@ -168,7 +171,7 @@ NXKit::UIUserInterfaceStyle SkiaCtx_ios::getThemeMode() {
 }
 
 NXKit::UIEdgeInsets SkiaCtx_ios::deviceSafeAreaInsets() {
-    auto safeArea = currentWindow().safeAreaInsets;
+    auto safeArea = currentWindow(window).safeAreaInsets;
     return { (NXFloat)safeArea.top, (NXFloat)safeArea.left, (NXFloat)safeArea.bottom, (NXFloat)safeArea.right };
 }
 
@@ -186,11 +189,11 @@ sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
 
     int drawableWidth = 0;
     int drawableHeight = 0;
-    SDL_Metal_GetDrawableSize(window, &drawableWidth, &drawableHeight);
+    SDL_GetWindowSizeInPixels(window, &drawableWidth, &drawableHeight);
     if (drawableWidth <= 0 || drawableHeight <= 0) {
         auto contentScale = layer.contentsScale;
         if (contentScale <= 0.0) {
-            auto uiWindow = currentWindow();
+            auto uiWindow = currentWindow(window);
             if (uiWindow != nil) {
                 contentScale = uiWindow.screen.nativeScale;
             }
@@ -206,7 +209,7 @@ sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
         return nullptr;
     }
 
-    auto logicalSize = currentViewSize(currentWindow());
+    auto logicalSize = currentViewSize(currentWindow(window));
     if (CGSizeEqualToSize(logicalSize, CGSizeZero)) {
         logicalSize = CGSizeMake(drawableWidth, drawableHeight);
     }

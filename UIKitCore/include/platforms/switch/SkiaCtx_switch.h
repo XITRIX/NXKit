@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <SkiaCtx.h>
 #include <platforms/SkiaCtx_sdlBase.h>
 #include <include/gpu/ganesh/GrDirectContext.h>

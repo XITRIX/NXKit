@@ -1,4 +1,4 @@
-add_library(UIKit
+add_library(XITRIXUIKit
         lib/tools/Logger.cpp
         lib/tools/IBTools.cpp
         lib/tools/Fatal.cpp
@@ -67,27 +67,29 @@ add_library(UIKit
         lib/SkTools/SkDebugfTracer.cpp
 )
 
-target_include_directories(UIKit PUBLIC
+add_library(Xitrix::UIKit ALIAS XITRIXUIKit)
+
+target_include_directories(XITRIXUIKit PUBLIC
         include
         lib
 )
 
 
 if (APPLE)
-    target_sources(UIKit PRIVATE
+    target_sources(XITRIXUIKit PRIVATE
             lib/platforms/SkiaCtx_sdlBase.cpp
     )
     if (PLATFORM_DESKTOP)
-        target_sources(UIKit PRIVATE
+        target_sources(XITRIXUIKit PRIVATE
                 lib/platforms/apple/macos/SkiaCtx_macos.mm
         )
     elseif (PLATFORM_IOS)
-        target_sources(UIKit PRIVATE
+        target_sources(XITRIXUIKit PRIVATE
                 lib/platforms/apple/ios/SkiaCtx_ios.mm
         )
     endif ()
 elseif (PLATFORM_SWITCH)
-    target_sources(UIKit PUBLIC
+    target_sources(XITRIXUIKit PUBLIC
             lib/platforms/SkiaCtx_sdlBase.cpp
             lib/platforms/switch/SkiaCtx_switch.cpp
             lib/platforms/switch/switch_wrapper.c

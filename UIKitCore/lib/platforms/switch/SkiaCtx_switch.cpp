@@ -39,17 +39,19 @@ extern void userAppExit();
 using namespace NXKit;
 
 SkiaCtx_switch::SkiaCtx_switch() {
-    SDL_Init(SDL_INIT_EVERYTHING);
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
+        printf("SDL failed to initialize: %s\n", SDL_GetError());
+        return;
+    }
 
     printf("SDL inited\n");
 
-    Uint32 flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL;
+    SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_OPENGL;
     // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     // SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     // SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
     // SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-    // SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
     // SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 
@@ -58,14 +60,13 @@ SkiaCtx_switch::SkiaCtx_switch() {
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-    SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 
-    window = SDL_CreateWindow("Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, flags);
+    window = SDL_CreateWindow("Window", 1280, 720, flags);
 
     if (!window) {
         printf("SDL window failed to create with error: %s\n", SDL_GetError());
@@ -172,4 +173,3 @@ NXSize SkiaCtx_switch::getSize() {
 float SkiaCtx_switch::getScaleFactor() {
     return 1;
 }
-

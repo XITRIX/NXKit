@@ -12,4 +12,4 @@ target_include_directories(NXKit PUBLIC
         lib
 )
 
-target_link_libraries(NXKit PUBLIC UIKit)
+target_link_libraries(NXKit PUBLIC XITRIXUIKit)

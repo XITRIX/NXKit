@@ -93,6 +93,7 @@ int UIApplicationMain(const std::shared_ptr<UIApplicationDelegate>& appDelegate)
 #endif
 
     UIApplication::shared->delegate = appDelegate;
+    UIApplication::shared->startHandlingLifecycleEvents();
 
     appDelegate->applicationNeedsXIBRegistration(UIApplication::shared.get());
     if (!appDelegate->applicationDidFinishLaunchingWithOptions(UIApplication::shared.get(), {})) {

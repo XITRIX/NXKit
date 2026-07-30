@@ -5,6 +5,8 @@ Main goal is to create a UI framework that tries to mimic [Apple's UIKit](https:
 
 ## Current state:
 - [Skia](https://github.com/google/skia) powered renderer
+- SDL 3.4 platform integration, including the UIScene lifecycle on iOS and the
+  devkitPro libnx backend on Nintendo Switch
 - Platforms supported:
   - iOS
   - macOS
@@ -30,6 +32,12 @@ Main goal is to create a UI framework that tries to mimic [Apple's UIKit](https:
 
 # Build
 
+Initialize the dependencies first:
+
+```shell
+git submodule update --init --recursive
+```
+
 First Skia need to be compiled:
 
 ### Switch:
@@ -40,7 +48,7 @@ ninja -C out/horizon skia skparagraph
 
 ### iOS:
 ```shell
-bin/gn gen out/ios-arm64 --args='is_official_build=false target_cpu="arm64" skia_use_gl=true skia_use_metal=true is_trivial_abi=true target_os="ios"'
+bin/gn gen out/ios-arm64 --args='is_official_build=false target_cpu="arm64" skia_use_gl=true skia_use_metal=true is_trivial_abi=true target_os="ios" ios_min_target="15.0"'
 ninja -C out/ios-arm64 skia skparagraph
 ```
 
@@ -54,13 +62,19 @@ To build project:
 
 ### Switch:
 ```shell
-cmake -B build/switch -DPLATFORM_SWITCH=ON
-make -C build/switch ThorVGApp.nro -j$(nproc)
-nxlink build/switch/ThorVGApp.nro
+cmake -S Demo -B Demo/build/switch -DPLATFORM_SWITCH=ON
+cmake --build Demo/build/switch --target ThorVGApp.nro -j
+nxlink Demo/build/switch/ThorVGApp.nro
 ```
 
 ### iOS:
 ```shell
-cmake -B build/ios -GXcode -DPLATFORM_IOS=ON
-open xCode project
+cmake -S Demo -B Demo/build/ios -G Xcode -DPLATFORM_IOS=ON
+open Demo/build/ios/ThorVGApp.xcodeproj
+```
+
+### macOS:
+```shell
+cmake -S Demo -B Demo/build/macos -DPLATFORM_DESKTOP=ON
+cmake --build Demo/build/macos --target ThorVGApp -j
 ```

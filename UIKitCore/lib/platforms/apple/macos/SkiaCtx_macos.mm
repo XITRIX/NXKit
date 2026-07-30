@@ -14,7 +14,7 @@
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
 #include <Cocoa/Cocoa.h>
-#include <SDL_metal.h>
+#include <SDL3/SDL_metal.h>
 
 using namespace NXKit;
 
@@ -145,7 +145,7 @@ sk_sp<SkSurface> SkiaCtx_macos::getBackbufferSurface() {
 
     int drawableWidth = 0;
     int drawableHeight = 0;
-    SDL_Metal_GetDrawableSize(window, &drawableWidth, &drawableHeight);
+    SDL_GetWindowSizeInPixels(window, &drawableWidth, &drawableHeight);
     if (drawableWidth <= 0 || drawableHeight <= 0) {
         return nullptr;
     }

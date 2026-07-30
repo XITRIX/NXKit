@@ -1,13 +1,19 @@
 #include <platforms/SkiaCtx_sdlBase.h>
-#include <SDL.h>
+#include <SDL3/SDL.h>
+#include <cmath>
 #include <thread>
 
 using namespace NXKit;
 
 SkiaCtx_sdlBase::SkiaCtx_sdlBase()
 {
-    SDL_Init(SDL_INIT_EVERYTHING);
-    Uint32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE;
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "SDL initialization failed: %s",
+                     SDL_GetError());
+        return;
+    }
+    SDL_WindowFlags flags = SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_RESIZABLE;
 
 #if defined(PLATFORM_MAC) || defined(PLATFORM_IOS)
     flags |= SDL_WINDOW_METAL;
@@ -17,7 +23,6 @@ SkiaCtx_sdlBase::SkiaCtx_sdlBase()
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-    SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     
     flags |= SDL_WINDOW_OPENGL;
@@ -27,7 +32,6 @@ SkiaCtx_sdlBase::SkiaCtx_sdlBase()
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-    SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -37,9 +41,12 @@ SkiaCtx_sdlBase::SkiaCtx_sdlBase()
     flags |= SDL_WINDOW_OPENGL;
 #endif
 
-    window = SDL_CreateWindow("Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 720, flags);
+    window = SDL_CreateWindow("Window", 1280, 720, flags);
     if (!window) {
-        SDL_GetError();
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "SDL window creation failed: %s",
+                     SDL_GetError());
+        return;
     }
 
 #if defined(PLATFORM_MAC) || defined(PLATFORM_IOS)
@@ -59,7 +66,7 @@ SkiaCtx_sdlBase::~SkiaCtx_sdlBase() {
 #endif
 
     if (glContext) {
-        SDL_GL_DeleteContext(glContext);
+        SDL_GL_DestroyContext(glContext);
         glContext = nullptr;
     }
 
@@ -86,11 +93,7 @@ NXSize SkiaCtx_sdlBase::getSize() {
 float SkiaCtx_sdlBase::getScaleFactor() {
     int w, h, dw, dh;
     SDL_GetWindowSize(window, &w, &h);
-#if defined(PLATFORM_MAC) || defined(PLATFORM_IOS)
-    SDL_Metal_GetDrawableSize(window, &dw, &dh);
-#else
-    SDL_GL_GetDrawableSize(window, &dw, &dh);
-#endif
+    SDL_GetWindowSizeInPixels(window, &dw, &dh);
 
     if (w <= 0 || h <= 0) {
         return 1;
@@ -100,48 +103,38 @@ float SkiaCtx_sdlBase::getScaleFactor() {
 }
 
 int SkiaCtx_sdlBase::screenFrameRate() {
-    int displayIndex = SDL_GetWindowDisplayIndex(window);
-    if (displayIndex < 0) {
+    SDL_DisplayID displayID = SDL_GetDisplayForWindow(window);
+    if (displayID == 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                      "Failed to get current display: %s",
                      SDL_GetError());
-
-        // Assume display 0 if it fails
-        displayIndex = 0;
+        return 60;
     }
 
-    SDL_DisplayMode mode;
-    if ((SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN) {
-        // Use the window display mode for full-screen exclusive mode
-        if (SDL_GetWindowDisplayMode(window, &mode) != 0) {
-            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                         "SDL_GetWindowDisplayMode() failed: %s",
-                         SDL_GetError());
-
-            // Assume 60 Hz
-            return 60;
-        }
+    const SDL_DisplayMode* mode = nullptr;
+    if ((SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) != 0) {
+        mode = SDL_GetWindowFullscreenMode(window);
     }
-    else {
-        // Use the current display mode for windowed and borderless
-        if (SDL_GetCurrentDisplayMode(displayIndex, &mode) != 0) {
-            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                         "SDL_GetCurrentDisplayMode() failed: %s",
-                         SDL_GetError());
 
-            // Assume 60 Hz
-            return 60;
-        }
+    // Borderless fullscreen and windowed modes both use the display's current mode.
+    if (!mode) {
+        mode = SDL_GetCurrentDisplayMode(displayID);
+    }
+    if (!mode) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "Could not get the current SDL display mode: %s",
+                     SDL_GetError());
+        return 60;
     }
 
     // May be zero if undefined
-    if (mode.refresh_rate == 0) {
+    if (mode->refresh_rate <= 0.0f) {
         SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                     "Refresh rate unknown; assuming 60 Hz");
-        mode.refresh_rate = 60;
+        return 60;
     }
 
-    return mode.refresh_rate;
+    return static_cast<int>(std::lround(mode->refresh_rate));
 }
 
 #if defined(PLATFORM_MAC) || defined(PLATFORM_IOS)

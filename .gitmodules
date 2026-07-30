@@ -3,7 +3,7 @@
 	url = https://github.com/microsoft/vcpkg.git
 [submodule "Submodules/SDL"]
 	path = Submodules/SDL
-	url = https://github.com/XITRIX/SDL.git
+	url = https://github.com/devkitPro/SDL.git
 [submodule "Submodules/yoga"]
 	path = Submodules/yoga
 	url = https://github.com/facebook/yoga.git

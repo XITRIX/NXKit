@@ -6,7 +6,7 @@
 #include <include/gpu/ganesh/mtl/GrMtlTypes.h>
 #include <mutex>
 #include <thread>
-#import <SDL.h>
+#import <SDL3/SDL.h>
 
 namespace NXKit {
 

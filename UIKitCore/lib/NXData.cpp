@@ -1,6 +1,8 @@
 #include <NXData.h>
 #include <tools/Tools.hpp>
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+
+#include <limits>
 
 //#ifdef USE_LIBROMFS
 #include <romfs/romfs.hpp>
@@ -33,25 +35,32 @@ const std::byte* NXData::data() const {
 std::shared_ptr<NXData> NXData::fromPath(const std::string& path) {
 //#ifdef USE_LIBROMFS
 //    auto file = romfs::get(path);
-//    auto fileReader = SDL_RWFromConstMem(file.data(), (int) file.size());
+//    auto fileReader = SDL_IOFromConstMem(file.data(), file.size());
 //#else
-   auto fileReader = SDL_RWFromFile(path.c_str(), "r");
+    auto fileReader = SDL_IOFromFile(path.c_str(), "rb");
 //#endif
+    if (!fileReader) {
+        return nullptr;
+    }
 
-   auto fileSize = int(fileReader->size(fileReader));
+    const Sint64 fileSize = SDL_GetIOSize(fileReader);
+    if (fileSize < 0
+        || static_cast<Uint64>(fileSize) > std::numeric_limits<std::size_t>::max()) {
+        SDL_CloseIO(fileReader);
+        return nullptr;
+    }
 
-   auto buffer = new std::byte[fileSize];
+    const auto byteCount = static_cast<std::size_t>(fileSize);
+    auto buffer = new std::byte[byteCount];
+    const auto bytesRead = SDL_ReadIO(fileReader, buffer, byteCount);
+    SDL_CloseIO(fileReader);
 
-   auto bytesRead = int(fileReader->read(fileReader, buffer, 1, fileSize));
+    if (bytesRead == byteCount) {
+        return new_shared<NXData>(buffer, byteCount, true);
+    }
 
-   fileReader->close(fileReader);
-
-   if (bytesRead == fileSize) {
-       return new_shared<NXData>(buffer, fileSize, true);
-   } else {
-       delete[] buffer;
-       return nullptr;
-   }
+    delete[] buffer;
+    return nullptr;
 }
 
 std::shared_ptr<NXData> NXData::fromRes(const std::string& path) {

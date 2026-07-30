@@ -35,6 +35,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 setup_project()
 
 target_link_libraries(${PROJECT_NAME}
-        UIKit
+        XITRIXUIKit
         NXKit
 )
