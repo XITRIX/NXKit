@@ -23,6 +23,7 @@
 // #include <borealis/core/event.hpp>
 #include <mutex>
 #include <string>
+#include <ctime>
 
 namespace NXKit
 {
@@ -86,7 +87,13 @@ class Logger
         if (sceRtcGetCurrentClockLocalTime)
             sceRtcGetCurrentClockLocalTime(&lt);
 #else
-        std::tm time_tm = fmt::localtime(std::chrono::system_clock::to_time_t(now));
+        std::time_t local_time = std::chrono::system_clock::to_time_t(now);
+        std::tm time_tm{};
+#ifdef _WIN32
+        localtime_s(&time_tm, &local_time);
+#else
+        localtime_r(&local_time, &time_tm);
+#endif
 #endif
         std::string log = fmt::format(format, std::forward<Args>(args)...);
 

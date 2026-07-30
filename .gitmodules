@@ -13,3 +13,6 @@
 [submodule "Submodules/tinyxml2"]
 	path = Submodules/tinyxml2
 	url = https://github.com/leethomason/tinyxml2.git
+[submodule "Submodules/fmt"]
+	path = Submodules/fmt
+	url = https://github.com/fmtlib/fmt
