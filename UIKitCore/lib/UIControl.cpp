@@ -31,15 +31,36 @@ void UIControl::pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::s
 }
 
 void UIControl::pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event) {
-    UIView::pressesEnded(pressees, event);
+    auto unhandledPresses = pressees;
+    for (const auto& press : pressees) {
+        if (!press || press->isHandled()) {
+            unhandledPresses.erase(press);
+            continue;
+        }
+        if (performRegisteredAction(press)) {
+            if (isHighlighted()) {
+                setHighlighted(false);
+            }
+            unhandledPresses.erase(press);
+            continue;
+        }
+        if (press->type() != UIPressType::select) {
+            continue;
+        }
 
-    if (std::any_of(pressees.begin(), pressees.end(), [&](const std::shared_ptr<UIPress>& item) {
-        return item->type() == UIPressType::select;
-    })) {
+        const bool shouldPerform = isHighlighted() && primaryAction.has_value();
         if (isHighlighted()) {
             setHighlighted(false);
+        }
+        if (shouldPerform) {
+            press->_isHandled = true;
+            unhandledPresses.erase(press);
             performPrimaryAction();
         }
+    }
+
+    if (!unhandledPresses.empty()) {
+        UIView::pressesEnded(std::move(unhandledPresses), std::move(event));
     }
 }
 
@@ -151,9 +172,8 @@ void UIControl::performPrimaryAction() {
     if (canBecomeFocused())
         window()->focusSystem()->_focusedItem = shared_from_this();
 
-    if (primaryAction.has_value()) {
+    if (primaryAction.has_value() && isActionDispatchAllowed()) {
         primaryAction->_handler();
     }
 }
 }
-

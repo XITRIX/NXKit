@@ -17,9 +17,9 @@ enum class UIKeyModifierFlags {
 
 struct UIKey {
 public:
-    std::string characters() { return _characters; }
-    OptionSet<UIKeyModifierFlags> modifierFlags() { return _modifierFlags; }
-    UIKeyboardHIDUsage keyCode() { return _keyCode; }
+    [[nodiscard]] const std::string& characters() const { return _characters; }
+    [[nodiscard]] OptionSet<UIKeyModifierFlags> modifierFlags() const { return _modifierFlags; }
+    [[nodiscard]] UIKeyboardHIDUsage keyCode() const { return _keyCode; }
 
 private:
     friend class UIApplication;
@@ -61,7 +61,7 @@ struct UIGamepadKey {
 public:
     [[nodiscard]] bool isPressed() const { return _value >= isPressedThreshold; }
     [[nodiscard]] float value() const { return _value; }
-    UIGamepadInputType inputType() { return _inputType; }
+    [[nodiscard]] UIGamepadInputType inputType() const { return _inputType; }
 private:
     friend class UIApplication;
 
@@ -71,4 +71,3 @@ private:
 };
 
 }
-

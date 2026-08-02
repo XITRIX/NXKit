@@ -181,6 +181,22 @@ void UIViewController::dismiss(bool animated, const std::function<void()>& compl
     });
 }
 
+void UIViewController::show(
+    const std::shared_ptr<UIViewController>& viewController,
+    const std::shared_ptr<UIResponder>& sender
+) {
+    if (!viewController) {
+        throw std::invalid_argument("UIViewController::show requires a non-null view controller");
+    }
+
+    if (const auto parentViewController = parent().lock()) {
+        parentViewController->show(viewController, sender ? sender : shared_from_this());
+        return;
+    }
+
+    present(viewController, true);
+}
+
 void UIViewController::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
     UITraitEnvironment::traitCollectionDidChange(previousTraitCollection);
     if (_view) {

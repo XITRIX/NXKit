@@ -7,6 +7,8 @@
 #include <UIKit.h>
 
 #include <NXControl.h>
+#include <NXNavigationItem.h>
 #include <NXNavigationController.h>
+#include <NXResponderAction.h>
 #include <NXSeparatorView.h>
 #include <NXTabBarController.h>

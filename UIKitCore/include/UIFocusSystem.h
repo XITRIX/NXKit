@@ -21,6 +21,10 @@ public:
 
     // Return nullptr if FocusSystem is not active
     std::weak_ptr<UIFocusItem> focusedItem() { return _isActive ? _focusedItem : std::weak_ptr<UIFocusItem>(); }
+
+    // Requests an explicit focus update within this system's window. A view
+    // environment resolves to its first eligible descendant.
+    bool requestFocusUpdate(const std::shared_ptr<UIFocusEnvironment>& environment);
 private:
     void setActive(bool active);
     bool _isActive = true;

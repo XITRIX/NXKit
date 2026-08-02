@@ -1,11 +1,31 @@
 #include <NXTabBarController.h>
+#include <NXNavigationController.h>
+#include <UIApplication.h>
+#include <UIApplicationDelegate.h>
+#include <UIControl.h>
+#include <UIPress.h>
+#include <UIWindow.h>
 
+#include <SDL3/SDL.h>
+
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
 
 using namespace NXKit;
+
+namespace NXKit {
+
+bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(
+    UIApplication*,
+    std::map<std::string, std::any>
+) {
+    return true;
+}
+
+} // namespace NXKit
 
 namespace {
 
@@ -55,6 +75,104 @@ public:
         ++didSelectCount;
     }
 };
+
+class BackConsumingControl final : public UIControl {
+public:
+    bool consumesBack = false;
+    int consumedBackCount = 0;
+    int focusGainCount = 0;
+    int focusLossCount = 0;
+    int focusMovementFailureCount = 0;
+
+    void willGainFocus() override {
+        ++focusGainCount;
+        UIControl::willGainFocus();
+    }
+
+    void willLoseFocus() override {
+        ++focusLossCount;
+        UIControl::willLoseFocus();
+    }
+
+    void focusFailedToMove(UIFocusHeading heading) override {
+        ++focusMovementFailureCount;
+        UIControl::focusFailedToMove(heading);
+    }
+
+    void pressesEnded(
+        std::set<std::shared_ptr<UIPress>> presses,
+        std::shared_ptr<UIPressesEvent> event
+    ) override {
+        const bool isBackPress = std::any_of(
+            presses.begin(),
+            presses.end(),
+            [](const std::shared_ptr<UIPress>& press) {
+                return press && press->type() == UIPressType::menu;
+            }
+        );
+        if (consumesBack && isBackPress) {
+            ++consumedBackCount;
+            return;
+        }
+        UIControl::pressesEnded(std::move(presses), std::move(event));
+    }
+};
+
+class FocusableViewController final : public UIViewController {
+public:
+    std::shared_ptr<BackConsumingControl> control;
+
+    void loadView() override {
+        auto rootView = new_shared<UIView>();
+        control = new_shared<BackConsumingControl>();
+        rootView->addSubview(control);
+        setView(rootView);
+    }
+};
+
+class TraitConfiguredWindow final : public UIWindow {
+public:
+    void installTraitCollection(const std::shared_ptr<UITraitCollection>& traits) {
+        const auto previousTraits = _traitCollection;
+        _traitCollection = traits;
+        traitCollectionDidChange(previousTraits);
+    }
+};
+
+bool hierarchyHasTraitCollection(const std::shared_ptr<UIView>& view) {
+    if (!view || !view->traitCollection()) {
+        return false;
+    }
+    return std::all_of(
+        view->subviews().begin(),
+        view->subviews().end(),
+        [](const std::shared_ptr<UIView>& subview) {
+            return hierarchyHasTraitCollection(subview);
+        }
+    );
+}
+
+bool sendKeyPress(
+    const std::shared_ptr<UIApplication>& application,
+    SDL_Keycode keycode,
+    SDL_Scancode scancode
+) {
+    SDL_Event keyDown {};
+    keyDown.type = SDL_EVENT_KEY_DOWN;
+    keyDown.key.key = keycode;
+    keyDown.key.scancode = scancode;
+    keyDown.key.down = true;
+
+    SDL_Event keyUp = keyDown;
+    keyUp.type = SDL_EVENT_KEY_UP;
+    keyUp.key.down = false;
+
+    if (!SDL_PushEvent(&keyDown) || !SDL_PushEvent(&keyUp)) {
+        return false;
+    }
+    application->handleEventsIfNeeded();
+    return true;
+}
 
 } // namespace
 
@@ -171,6 +289,131 @@ int main() {
     expect(second->parent().expired(), "clearing tabs detaches the selected controller");
     expect(third->parent().expired(), "clearing tabs detaches unselected controllers");
     expect(!controller->tabBar()->selectedIndexPath(), "clearing tabs clears the visual selection");
+
+    auto focusableController = new_shared<FocusableViewController>();
+    focusableController->setTitle("Focusable");
+    auto otherFocusableController = new_shared<FocusableViewController>();
+    otherFocusableController->setTitle("Other");
+    auto focusTabController = new_shared<NXTabBarController>(
+        NXTabBarController::ViewControllerSection {
+            focusableController,
+            otherFocusableController,
+        }
+    );
+    auto focusNavigationController = new_shared<NXNavigationController>(
+        focusTabController
+    );
+    auto focusWindow = new_shared<TraitConfiguredWindow>();
+    focusWindow->installTraitCollection(UITraitCollection::current());
+    focusWindow->setFrame(NXRect(0, 0, 1280, 720));
+    focusWindow->setRootViewController(focusNavigationController);
+    focusNavigationController->view()->setFrame(focusWindow->bounds());
+    focusWindow->addSubview(focusNavigationController->view());
+    focusWindow->updateFocus();
+    focusNavigationController->defaultActionsWidget()->refresh();
+
+    auto focusedView = std::dynamic_pointer_cast<UIView>(
+        focusWindow->focusSystem()->focusedItem().lock()
+    );
+    expect(
+        focusedView && focusedView->isDescendantOf(focusTabController->tabBar()),
+        "tab-bar focus starts on a tab item"
+    );
+
+    auto application = std::make_shared<UIApplication>();
+    auto applicationDelegate = std::make_shared<UIApplicationDelegate>();
+    applicationDelegate->window = focusWindow;
+    application->delegate = applicationDelegate;
+    application->keyWindow = focusWindow;
+    UIApplication::shared = application;
+
+    const bool eventSubsystemReady = SDL_InitSubSystem(SDL_INIT_EVENTS);
+    expect(eventSubsystemReady, "SDL's event subsystem is available for tab focus routing");
+    if (eventSubsystemReady) {
+        expect(
+            sendKeyPress(application, SDLK_RETURN, SDL_SCANCODE_RETURN),
+            "the A/select key press is queued"
+        );
+        focusNavigationController->defaultActionsWidget()->refresh();
+        expect(
+            hierarchyHasTraitCollection(focusNavigationController->defaultActionsWidget()),
+            "a focus-triggered action-legend rebuild inherits the window traits"
+        );
+        expect(
+            focusWindow->focusSystem()->focusedItem().lock() == focusableController->control,
+            "a tab item's A action moves focus into its presented controller"
+        );
+
+        const auto focusGainCount = focusableController->control->focusGainCount;
+        const auto focusLossCount = focusableController->control->focusLossCount;
+        const auto focusMovementFailureCount =
+            focusableController->control->focusMovementFailureCount;
+        focusWindow->sendEvent(new_shared<UIEvent>());
+        expect(
+            focusWindow->focusSystem()->focusedItem().expired(),
+            "touch input deactivates visible controller focus"
+        );
+        expect(
+            focusableController->control->focusLossCount == focusLossCount + 1,
+            "touch input runs the focused control's loss animation"
+        );
+        expect(
+            sendKeyPress(application, SDLK_RETURN, SDL_SCANCODE_RETURN),
+            "controller input can reactivate the retained focused item"
+        );
+        expect(
+            focusWindow->focusSystem()->focusedItem().lock() == focusableController->control,
+            "controller input restores the retained focused item"
+        );
+        expect(
+            focusableController->control->focusGainCount == focusGainCount + 1,
+            "reactivation runs the retained control's gain animation again"
+        );
+        expect(
+            focusableController->control->focusMovementFailureCount
+                == focusMovementFailureCount,
+            "reactivation is not reported as a failed same-item focus move"
+        );
+
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "the B/menu key press is queued"
+        );
+        focusNavigationController->defaultActionsWidget()->refresh();
+        focusedView = std::dynamic_pointer_cast<UIView>(
+            focusWindow->focusSystem()->focusedItem().lock()
+        );
+        expect(
+            focusedView && focusedView->isDescendantOf(focusTabController->tabBar()),
+            "an unhandled B action returns focus to the selected tab item"
+        );
+
+        expect(
+            sendKeyPress(application, SDLK_RETURN, SDL_SCANCODE_RETURN),
+            "A can enter the presented controller again"
+        );
+        focusNavigationController->defaultActionsWidget()->refresh();
+        focusableController->control->consumesBack = true;
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "the child-handled B/menu key press is queued"
+        );
+        focusNavigationController->defaultActionsWidget()->refresh();
+        expect(
+            focusWindow->focusSystem()->focusedItem().lock() == focusableController->control,
+            "a child responder can consume B before it reaches the tab controller"
+        );
+        expect(
+            focusableController->control->consumedBackCount == 1,
+            "the child responder receives the B action once"
+        );
+        SDL_QuitSubSystem(SDL_INIT_EVENTS);
+    }
+
+    focusWindow.reset();
+    applicationDelegate.reset();
+    application.reset();
+    UIApplication::shared.reset();
 
     if (failures == 0) {
         std::cout << "NXTabBarController tests passed\n";

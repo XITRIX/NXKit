@@ -11,22 +11,98 @@
 #include <UIWindow.h>
 #include <UIViewController.h>
 
+#include <functional>
+#include <unordered_set>
+
 namespace NXKit {
 
 UIFocusSystem::UIFocusSystem() = default;
 
-void UIFocusSystem::setActive(bool active) {
-    if (_isActive != active) {
-        _isActive = active;
-//        updateFocus();
-
-        UIFocusUpdateContext context;
-        context._previouslyFocusedItem = _focusedItem;
-        context._nextFocusedItem = _isActive ? _focusedItem : std::weak_ptr<UIFocusItem>();
-        context._focusHeading = UIFocusHeading::none;
-
-        applyFocusToItem(_focusedItem.lock(), context);
+bool UIFocusSystem::requestFocusUpdate(
+    const std::shared_ptr<UIFocusEnvironment>& environment
+) {
+    if (!environment) {
+        return false;
     }
+
+    std::unordered_set<const UIFocusEnvironment*> visited;
+    std::function<std::shared_ptr<UIFocusItem>(
+        const std::shared_ptr<UIFocusEnvironment>&
+    )> resolveItem;
+    resolveItem = [&visited, &resolveItem](
+        const std::shared_ptr<UIFocusEnvironment>& candidate
+    ) -> std::shared_ptr<UIFocusItem> {
+        if (!candidate || !visited.insert(candidate.get()).second) {
+            return nullptr;
+        }
+        if (const auto view = std::dynamic_pointer_cast<UIView>(candidate)) {
+            return view->searchForFocus();
+        }
+        if (const auto item = std::dynamic_pointer_cast<UIFocusItem>(candidate);
+            item && item->canBecomeFocused()) {
+            return item;
+        }
+        for (const auto& preferred : candidate->preferredFocusEnvironments()) {
+            if (const auto item = resolveItem(preferred)) {
+                return item;
+            }
+        }
+        if (const auto viewController =
+                std::dynamic_pointer_cast<UIViewController>(candidate)) {
+            return viewController->view()->searchForFocus();
+        }
+        return nullptr;
+    };
+
+    const auto item = resolveItem(environment);
+
+    if (!item || !item->canBecomeFocused()) {
+        return false;
+    }
+
+    const auto rootWindow = _rootWindow.lock();
+    const auto itemView = std::dynamic_pointer_cast<UIView>(item);
+    if (!rootWindow || !itemView || itemView->window() != rootWindow) {
+        return false;
+    }
+
+    UIFocusUpdateContext context;
+    context._previouslyFocusedItem = _isActive
+        ? _focusedItem
+        : std::weak_ptr<UIFocusItem> {};
+    context._nextFocusedItem = item;
+    context._focusHeading = UIFocusHeading::none;
+
+    if (const auto previous = context.previouslyFocusedItem().lock();
+        previous && !previous->shouldUpdateFocusIn(context)) {
+        return false;
+    }
+    if (!item->shouldUpdateFocusIn(context)) {
+        return false;
+    }
+
+    _isActive = true;
+    applyFocusToItem(item, context);
+    return true;
+}
+
+void UIFocusSystem::setActive(bool active) {
+    if (_isActive == active) {
+        return;
+    }
+
+    const auto retainedItem = _focusedItem.lock();
+    UIFocusUpdateContext context;
+    context._previouslyFocusedItem = active
+        ? std::weak_ptr<UIFocusItem> {}
+        : retainedItem;
+    context._nextFocusedItem = active
+        ? retainedItem
+        : std::weak_ptr<UIFocusItem> {};
+    context._focusHeading = UIFocusHeading::none;
+
+    _isActive = active;
+    applyFocusToItem(retainedItem, context);
 }
 
 void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {

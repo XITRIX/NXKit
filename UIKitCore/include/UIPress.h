@@ -38,8 +38,9 @@ public:
     [[nodiscard]] std::weak_ptr<UIResponder> responder() const { return _responder; }
 
     std::vector<std::weak_ptr<UIGestureRecognizer>> gestureRecognizers() { return _gestureRecognizers; };
-    std::optional<UIKey> key() { return _key; }
-    std::optional<UIGamepadKey> gamepadKey() { return _gamepadKey; }
+    [[nodiscard]] std::optional<UIKey> key() const { return _key; }
+    [[nodiscard]] std::optional<UIGamepadKey> gamepadKey() const { return _gamepadKey; }
+    [[nodiscard]] bool isHandled() const { return _isHandled; }
 
 private:
     std::weak_ptr<UIResponder> _responder;
@@ -51,6 +52,7 @@ private:
 
     std::vector<std::weak_ptr<UIGestureRecognizer>> _gestureRecognizers;
     bool _hasBeenCancelledByAGestureRecognizer = false;
+    bool _isHandled = false;
     std::optional<UIKey> _key;
     std::optional<UIGamepadKey> _gamepadKey;
 
@@ -60,8 +62,9 @@ private:
 
     friend class UIApplication;
     friend class UIGestureRecognizer;
+    friend class UIResponder;
+    friend class UIControl;
     friend class UIWindow;
 };
 
 }
-

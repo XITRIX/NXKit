@@ -46,9 +46,12 @@ public:
     void setSelectionFollowsFocus(bool selectionFollowsFocus) { _selectionFollowsFocus = selectionFollowsFocus; }
 
 private:
+    friend class NXTabBar;
+
     std::shared_ptr<UILabel> _titleLabel;
     std::shared_ptr<UIView> _rectView;
     bool _selectionFollowsFocus = true;
+    std::function<void()> _selectionAction;
 };
 
 class NXTabBar : public UIScrollView {
@@ -83,6 +86,7 @@ private:
     std::vector<std::vector<std::shared_ptr<NXTabBarButton>>> _buttons;
     bool _selectionFollowsFocus = true;
     std::function<bool(const IndexPath&)> _selectionHandler;
+    std::function<void(const IndexPath&)> _primaryActionHandler;
 };
 
 class NXTabBarController : public UIViewController {
@@ -123,7 +127,6 @@ public:
     void viewDidAppear(bool animated) override;
     void viewWillDisappear(bool animated) override;
     void viewDidDisappear(bool animated) override;
-
 private:
     [[nodiscard]] bool contains(const IndexPath& indexPath) const;
     [[nodiscard]] std::optional<IndexPath> firstIndexPath() const;
@@ -139,6 +142,8 @@ private:
         const std::vector<std::shared_ptr<UIViewController>>& previousViewControllers
     );
     bool handleUserSelection(const IndexPath& indexPath);
+    bool focusPresentedViewController();
+    bool focusSelectedTab();
     void restoreTabBarSelection();
     std::shared_ptr<UIViewController> _presentedViewController;
     ViewControllerSections _viewControllers;

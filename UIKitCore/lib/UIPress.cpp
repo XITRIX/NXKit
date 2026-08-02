@@ -16,21 +16,21 @@ void UIPress::setForWindow(const std::shared_ptr<UIWindow>& window) {
         return;
     }
 
-//    auto weakFocus = window->focusSystem()->focusedItem();
-//    if (!weakFocus.expired()) {
-//        auto focus = std::dynamic_pointer_cast<UIResponder>(weakFocus.lock());
-//        if (focus) {
-//            _responder = focus;
-//            return;
-//        }
-//    }
-
-    auto vc = window->rootViewController();
-    while (!vc->children().empty()) {
-        vc = vc->children().front();
+    if (const auto focusedItem = window->focusSystem()->focusedItem().lock()) {
+        if (const auto focusedResponder =
+                std::dynamic_pointer_cast<UIResponder>(focusedItem)) {
+            _responder = focusedResponder;
+            return;
+        }
     }
 
-    _responder = vc->view();
+    // A container's first child is not necessarily its visible child. In
+    // particular, tab and navigation controllers keep inactive controllers
+    // contained, so walking children().front() can select a detached view and
+    // terminate the responder chain before the container sees the press.
+    // Starting at the root view is a safe fallback: its next responder is the
+    // root controller, which can handle or forward the press to its container.
+    _responder = window->rootViewController()->view();
 }
 
 void UIPress::runPressActionOnRecognizerHierachy(const std::function<void(std::shared_ptr<UIGestureRecognizer>)>& action) {
@@ -42,4 +42,3 @@ void UIPress::runPressActionOnRecognizerHierachy(const std::function<void(std::s
 }
 
 }
-

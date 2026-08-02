@@ -52,6 +52,11 @@ public:
     void present(const std::shared_ptr<UIViewController>& otherViewController, bool animated, const std::function<void()>& completion = [](){});
     void dismiss(bool animated, const std::function<void()>& completion = [](){});
 
+    virtual void show(
+        const std::shared_ptr<UIViewController>& viewController,
+        const std::shared_ptr<UIResponder>& sender = nullptr
+    );
+
 
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
 

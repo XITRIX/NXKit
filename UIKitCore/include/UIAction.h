@@ -14,11 +14,11 @@ class UIAction {
 public:
     explicit UIAction(std::string title = "", std::function<void()> handler = []() {});
 
-    std::string title() { return _title; }
+    [[nodiscard]] const std::string& title() const { return _title; }
     void setTitle(std::string title) { _title = std::move(title); }
 
 //    uint identifier() { return _id; }
-    void perform() { _handler(); }
+    void perform() const { _handler(); }
 private:
     friend class UIControl;
 

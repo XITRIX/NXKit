@@ -282,10 +282,13 @@ std::shared_ptr<UIWindow> UIView::window() {
 }
 
 void UIView::setSuperview(const std::shared_ptr<UIView>& superview) {
+    const auto previousTraitCollection = _traitCollection;
     _superview = superview;
 
-    if (superview)
-        traitCollectionDidChange(superview->traitCollection());
+    if (superview) {
+        _traitCollection = superview->traitCollection();
+        traitCollectionDidChange(previousTraitCollection);
+    }
 
     if (!_tintColor.has_value())
         tintColorDidChange();
@@ -318,6 +321,14 @@ void UIView::removeFromSuperview() {
     auto superview = this->_superview.lock();
     if (!superview) return;
 
+    // Yoga retains its own parent/child tree between layout passes. Detach the
+    // node immediately when the UIView hierarchy changes so that a view can be
+    // reparented before the next layout without still belonging to its former
+    // Yoga owner.
+    if (const auto yogaOwner = YGNodeGetOwner(_yoga->_node)) {
+        YGNodeRemoveChild(yogaOwner, _yoga->_node);
+    }
+
     if (superview->_mask.get() == this) {
         superview->_layer->setMask(nullptr);
         superview->_mask = nullptr;
@@ -334,9 +345,14 @@ void UIView::drawAndLayoutTreeIfNeeded() {
 
     if (visibleLayer->isHidden() || visibleLayer->opacity() < 0.01f) { return; }
 
+    const auto previousTraitCollection = UITraitCollection::current();
+    const auto currentTraitCollection = traitCollection();
+    if (currentTraitCollection) {
+        UITraitCollection::setCurrent(currentTraitCollection);
+    }
+
     auto tint = tintColor();
 
-    UITraitCollection::setCurrent(traitCollection());
     auto oldTint = UIColor::_currentTint;
     UIColor::_currentTint = tint;
 
@@ -347,7 +363,9 @@ void UIView::drawAndLayoutTreeIfNeeded() {
         }
     }
 
-    UITraitCollection::setCurrent(traitCollection());
+    if (currentTraitCollection) {
+        UITraitCollection::setCurrent(currentTraitCollection);
+    }
     UIColor::_currentTint = tint;
 
     if (visibleLayer->_needsDisplay) {
@@ -355,7 +373,9 @@ void UIView::drawAndLayoutTreeIfNeeded() {
         visibleLayer->_needsDisplay = false;
     }
 
-    UITraitCollection::setCurrent(traitCollection());
+    if (currentTraitCollection) {
+        UITraitCollection::setCurrent(currentTraitCollection);
+    }
     UIColor::_currentTint = tint;
 
     if (_needsDisplay) {
@@ -363,7 +383,9 @@ void UIView::drawAndLayoutTreeIfNeeded() {
         _needsDisplay = false;
     }
 
-    UITraitCollection::setCurrent(traitCollection());
+    if (currentTraitCollection) {
+        UITraitCollection::setCurrent(currentTraitCollection);
+    }
     UIColor::_currentTint = tint;
 
     updateSafeAreaInsetsIfNeeded();
@@ -378,6 +400,7 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     }
 
     UIColor::_currentTint = oldTint;
+    UITraitCollection::setCurrent(previousTraitCollection);
 }
 
 void UIView::setMask(const std::shared_ptr<UIView>& mask) {
@@ -741,7 +764,9 @@ std::shared_ptr<CABasicAnimation> UIView::actionForKey(std::string event) {
 }
 
 void UIView::updateCurrentEnvironment() {
-    UITraitCollection::setCurrent(traitCollection());
+    if (const auto currentTraitCollection = traitCollection()) {
+        UITraitCollection::setCurrent(currentTraitCollection);
+    }
     UIColor::_currentTint = tintColor();
 }
 

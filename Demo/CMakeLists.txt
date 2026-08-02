@@ -26,6 +26,7 @@ add_executable(${PROJECT_NAME}
         app/Screens/YogaTestViewController/YogaTestViewController.cpp
         app/Screens/IBTestController/IBTestController.cpp
         app/Screens/TestScrollController/TestScrollController.cpp
+        app/Screens/NavigationTestViewController/NavigationTestViewController.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

@@ -199,9 +199,13 @@ UIPressType UIApplication::mapGamepadInputToUIPressType(UIGamepadInputType key) 
 #if defined(PLATFORM_SWITCH) // TODO: Add other cases when B can handle "select" action (Japanese localization i.e.)
         case UIGamepadInputType::buttonB:
             return UIPressType::select;
+        case UIGamepadInputType::buttonA:
+            return UIPressType::menu;
 #else
         case UIGamepadInputType::buttonA:
             return UIPressType::select;
+        case UIGamepadInputType::buttonB:
+            return UIPressType::menu;
 #endif
 
         default: return UIPressType::none;
@@ -256,13 +260,13 @@ bool SDLCALL UIApplication::handleSDLLifecycleEvent(void* userdata, SDL_Event* e
 }
 
 void UIApplication::handleSDLEvent(SDL_Event e) {
-    auto screenSize = SkiaCtx::main()->getSize();
     switch (e.type) {
         case SDL_EVENT_QUIT: {
             handleSDLQuit();
             return;
         }
         case SDL_EVENT_FINGER_DOWN: {
+            const auto screenSize = SkiaCtx::main()->getSize();
             auto renderSize = screenSize;
             auto fingerPoint = NXPoint(renderSize.width * e.tfinger.x, renderSize.height * e.tfinger.y);
 //                printf("Touch id: %llu Begin, X:%f - Y:%f\n", e.tfinger.fingerID, fingerPoint.x, fingerPoint.y);
@@ -273,6 +277,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             break;
         }
         case SDL_EVENT_FINGER_MOTION: {
+            const auto screenSize = SkiaCtx::main()->getSize();
             auto renderSize = screenSize;
             auto fingerPoint = NXPoint(renderSize.width * e.tfinger.x, renderSize.height * e.tfinger.y);
 //                printf("Touch id: %llu Moved, X:%f - Y:%f\n", e.tfinger.fingerID, fingerPoint.x, fingerPoint.y);
@@ -334,6 +339,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
         }
 #ifndef PLATFORM_IOS
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+            const auto screenSize = SkiaCtx::main()->getSize();
             // Simulate touch
             auto touchEvent = SDL_Event();
             touchEvent.type = SDL_EVENT_FINGER_DOWN;
@@ -347,6 +353,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             break;
         }
         case SDL_EVENT_MOUSE_MOTION: {
+            const auto screenSize = SkiaCtx::main()->getSize();
             // Simulate touch
             auto touchEvent = SDL_Event();
             touchEvent.type = SDL_EVENT_FINGER_MOTION;
@@ -360,6 +367,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             break;
         }
         case SDL_EVENT_MOUSE_BUTTON_UP: {
+            const auto screenSize = SkiaCtx::main()->getSize();
             // Simulate touch
             auto touchEvent = SDL_Event();
             touchEvent.type = SDL_EVENT_FINGER_UP;
@@ -399,9 +407,6 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
         }
         case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
             printf("Gamepad button pressed\n");
-            if (e.gbutton.button == SDL_GAMEPAD_BUTTON_START) {
-                handleSDLQuit();
-            }
 
             auto press = new_shared<UIPress>();
             press->_phase = UIPressPhase::began;
@@ -523,6 +528,9 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
                     break;
                 case UIKeyboardHIDUsage::keyboardReturnOrEnter:
                     press->_type = UIPressType::select;
+                    break;
+                case UIKeyboardHIDUsage::keyboardEscape:
+                    press->_type = UIPressType::menu;
                     break;
                 default: break;
             }

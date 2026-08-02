@@ -1,4 +1,5 @@
 #include <NXTabBarController.h>
+#include <NXResponderAction.h>
 
 #include <NXSeparatorView.h>
 #include <UIWindow.h>
@@ -59,7 +60,9 @@ void NXTabBarButton::didUpdateFocusIn(
     const auto next = context.nextFocusedItem().lock();
     const auto previous = context.previouslyFocusedItem().lock();
     if (_selectionFollowsFocus && next.get() == this && previous != next) {
-        performPrimaryAction();
+        if (_selectionAction) {
+            _selectionAction();
+        }
     }
 }
 
@@ -142,13 +145,25 @@ void NXTabBar::setItems(Items items) {
             button->setAutolayoutEnabled(true);
             button->setSelectionFollowsFocus(_selectionFollowsFocus);
             button->setText(_items[section][item]);
+            button->_selectionAction = [weakSelf, section, item]() {
+                if (const auto self = weakSelf.lock()) {
+                    self->activateItemAt(
+                        IndexPath(static_cast<int>(item), static_cast<int>(section))
+                    );
+                }
+            };
             button->primaryAction = UIAction(
                 "",
                 [weakSelf, section, item]() {
                     if (const auto self = weakSelf.lock()) {
-                        self->activateItemAt(
-                            IndexPath(static_cast<int>(item), static_cast<int>(section))
+                        const IndexPath indexPath(
+                            static_cast<int>(item),
+                            static_cast<int>(section)
                         );
+                        if (self->activateItemAt(indexPath)
+                            && self->_primaryActionHandler) {
+                            self->_primaryActionHandler(indexPath);
+                        }
                     }
                 }
             );
@@ -445,6 +460,21 @@ void NXTabBarController::loadView() {
         }
         return false;
     };
+    _tabBar->_primaryActionHandler = [weakSelf](const IndexPath&) {
+        if (const auto self = weakSelf.lock()) {
+            self->focusPresentedViewController();
+        }
+    };
+
+    NXResponderAction {
+        .button = NXActionButton::b,
+        .isEnabled = true,
+        .action = UIAction("Back", [weakSelf]() {
+            if (const auto self = weakSelf.lock()) {
+                self->focusSelectedTab();
+            }
+        }),
+    }.registerOn(shared_from_base<NXTabBarController>());
 
     _contentView = new_shared<UIView>();
     _contentView->setAutolayoutEnabled(true);
@@ -573,6 +603,28 @@ bool NXTabBarController::handleUserSelection(const IndexPath& indexPath) {
         strongDelegate->tabBarControllerDidSelect(self, candidate);
     }
     return true;
+}
+
+bool NXTabBarController::focusPresentedViewController() {
+    if (!_presentedViewController) {
+        return false;
+    }
+    const auto window = view()->window();
+    return window && window->focusSystem()->requestFocusUpdate(
+        _presentedViewController
+    );
+}
+
+bool NXTabBarController::focusSelectedTab() {
+    if (!_tabBar || !_selectedIndexPath || !_tabBar->contains(*_selectedIndexPath)) {
+        return false;
+    }
+    const auto section = static_cast<size_t>(_selectedIndexPath->section());
+    const auto item = static_cast<size_t>(_selectedIndexPath->item());
+    const auto button = _tabBar->_buttons[section][item];
+    const auto window = view()->window();
+    return button && window
+        && window->focusSystem()->requestFocusUpdate(button);
 }
 
 void NXTabBarController::restoreTabBarSelection() {
