@@ -3,7 +3,7 @@
 This document tracks NXKit against the portable, application-facing core of Apple's UIKit. It is both a compatibility audit and an implementation roadmap.
 
 - Last audited: **2026-08-02**
-- NXKit revision: **working tree after `a955d2ca1e9b62eb0fa8073d84f6538deb707938`**
+- NXKit revision: **working tree after `8a12b2d9b8f6b14d547127d7517a7c6eb15bbbd8`**
 - UIKit-cross-platform reference: **[`ed2c290`](https://github.com/flowkey/UIKit-cross-platform/commit/ed2c290025f2dfd714ed945153069ca54e55a23e)**
 
 ## How to maintain this document
@@ -37,7 +37,7 @@ Apple's [views and controls](https://developer.apple.com/documentation/uikit/vie
 | `CGAffineTransform`, `CATransform3D` | Partial | `NXAffineTransform` and `NXTransform3D` support common transforms and animation. Expand conversion, concatenation, inversion, decomposition, and numerical tests. |
 | Safe object ownership | Stub/unsafe | UIKit-style objects depend on the custom `new_shared` ownership path. Stack allocation or `std::make_shared` can create competing owners. Replace `SharedBase.hpp` with standard ownership before declaring the object model dependable. |
 | Main-thread UI confinement | Partial | A main `DispatchQueue` exists, but UI objects have no enforcement or assertions comparable to `@MainActor`. Add a UI-thread contract and debug checks. |
-| `UIApplicationMain`, `UIApplication`, `UIApplicationDelegate` | Partial | Launch, quit, foreground/background callbacks, SDL event handling, and one global application exist. Complete lifecycle ordering, activation semantics, error handling, and reproducible tests. |
+| `UIApplicationMain`, `UIApplication`, `UIApplicationDelegate` | Partial | Launch, quit, foreground/background callbacks, SDL event handling, and one global application exist. Switch teardown restores nxlink-redirected descriptors before socket shutdown, explicitly drains and destroys Graphite/Dawn, and terminates the EGL display for same-process homebrew-launcher handoff; hardware verification is pending. Complete lifecycle ordering, activation semantics, error handling, and reproducible tests. |
 | `UIWindow` and root controller | Partial | Root-controller installation, key visibility, event dispatch, safe area, traits, and focus exist. Clarify key-window semantics, multiple-window support without adopting `UIScene`, resizing, and teardown. |
 | `UIResponder` and responder chain | Partial | Touch and press forwarding exists. Add `canPerformAction`-style routing where portable, first-responder management, loop protection, and chain tests. |
 | `UIEvent`, `UITouch`, presses and keys | Partial | Touch and gamepad/press events exist. The SDL3 Switch backend now preserves finger identity across polls and emits balanced down/motion/up events; the full Switch Demo `.nro` build verifies backend integration, but hardware touch behavior still needs manual confirmation. Complete timestamps, phases, multi-touch identity, cancellation, modifier/key semantics, mouse input, and deterministic tests. |

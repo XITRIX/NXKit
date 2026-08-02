@@ -65,6 +65,7 @@ struct SkiaCtx_switch::GraphiteState {
     wgpu::Texture backbufferTexture;
     std::unique_ptr<skgpu::graphite::Context> context;
     std::unique_ptr<skgpu::graphite::Recorder> recorder;
+    EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 };
 
 SkiaCtx_switch::SkiaCtx_switch() {
@@ -115,12 +116,48 @@ SkiaCtx_switch::~SkiaCtx_switch() {
             graphite->swapchain.Unconfigure();
         }
         graphite->backbufferTexture = nullptr;
+
+        // Sphaira's hbloader launches the next NRO in this process. Explicitly
+        // finish and release every Graphite/Dawn resource because dropping the
+        // wrapper handles alone can leave EGL/Mesa mappings owned by this NRO.
+        if (graphite->context) {
+            graphite->context->submit(skgpu::graphite::SyncToCpu::kYes);
+        }
+        if (graphite->recorder) {
+            graphite->recorder->freeGpuResources();
+        }
+        if (graphite->context) {
+            graphite->context->freeGpuResources();
+            graphite->context->submit(skgpu::graphite::SyncToCpu::kYes);
+        }
         graphite->recorder.reset();
         graphite->context.reset();
         graphite->swapchain = nullptr;
+
+        if (graphite->device) {
+            graphite->device.Destroy();
+            if (graphite->webgpuInstance) {
+                graphite->webgpuInstance.ProcessEvents();
+            }
+        }
         graphite->device = nullptr;
+        graphite->adapter = nullptr;
         graphite->webgpuInstance = nullptr;
         graphite->instance.reset();
+
+        // Dawn intentionally does not call eglTerminate because a desktop
+        // process may share its display with other clients. NXKit is the sole
+        // EGL client on Switch, and the display must be torn down before the
+        // same process is handed back to the homebrew launcher.
+        if (graphite->eglDisplay != EGL_NO_DISPLAY) {
+            eglMakeCurrent(graphite->eglDisplay,
+                           EGL_NO_SURFACE,
+                           EGL_NO_SURFACE,
+                           EGL_NO_CONTEXT);
+            eglTerminate(graphite->eglDisplay);
+            graphite->eglDisplay = EGL_NO_DISPLAY;
+        }
+        eglReleaseThread();
         graphite.reset();
     }
 
@@ -158,7 +195,12 @@ bool SkiaCtx_switch::initContext() {
 
     dawn::native::opengl::RequestAdapterOptionsGetGLProc glOptions;
     glOptions.getProc = reinterpret_cast<dawn::native::opengl::EGLGetProcProc>(eglGetProcAddress);
-    glOptions.display = EGL_NO_DISPLAY;
+    graphite->eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (graphite->eglDisplay == EGL_NO_DISPLAY) {
+        SkDebugf("Switch EGL display creation failed.\n");
+        return false;
+    }
+    glOptions.display = graphite->eglDisplay;
 
     wgpu::RequestAdapterOptions adapterOptions{};
     adapterOptions.nextInChain = &glOptions;

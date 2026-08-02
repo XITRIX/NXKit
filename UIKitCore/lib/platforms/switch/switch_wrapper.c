@@ -18,9 +18,57 @@
 
 #include <stdio.h>
 #include <switch.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 static int nxlink_sock = -1;
+static int nxlink_saved_stdout = -1;
+static int nxlink_saved_stderr = -1;
+static bool socket_initialized = false;
+
+static void closeFdIfOpen(int *fd)
+{
+    if (*fd >= 0)
+    {
+        close(*fd);
+        *fd = -1;
+    }
+}
+
+static int duplicateStdio(int fd)
+{
+    // Keep saved descriptors above stderr so nxlink cannot overwrite them
+    // when one of the inherited standard descriptors was initially closed.
+    return fcntl(fd, F_DUPFD, STDERR_FILENO + 1);
+}
+
+static void restoreNxlinkStdio(void)
+{
+    if (nxlink_sock < 0)
+        return;
+
+    fflush(stdout);
+    fflush(stderr);
+
+    if (nxlink_saved_stdout >= 0)
+        dup2(nxlink_saved_stdout, STDOUT_FILENO);
+    else
+        close(STDOUT_FILENO);
+
+    if (nxlink_saved_stderr >= 0)
+        dup2(nxlink_saved_stderr, STDERR_FILENO);
+    else
+        close(STDERR_FILENO);
+
+    closeFdIfOpen(&nxlink_saved_stdout);
+    closeFdIfOpen(&nxlink_saved_stderr);
+
+    // nxlink may have obtained a standard descriptor when that descriptor
+    // was initially closed. It was already released above in that case.
+    if (nxlink_sock != STDOUT_FILENO && nxlink_sock != STDERR_FILENO)
+        close(nxlink_sock);
+    nxlink_sock = -1;
+}
 
 // Referenced by the C++ renderer so this translation unit is extracted from
 // XITRIXUIKit's static archive. That also makes the strong userAppInit and
@@ -41,17 +89,24 @@ void userAppInit()
     {
         cfg.num_bsd_sessions = 12; // default is 3
         cfg.sb_efficiency    = 8; // default is 4
-        socketInitialize(&cfg);
+        socket_initialized = R_SUCCEEDED(socketInitialize(&cfg));
     }
     else
     {
         cfg.num_bsd_sessions = 2;
         cfg.sb_efficiency    = 1;
-        socketInitialize(&cfg);
+        socket_initialized = R_SUCCEEDED(socketInitialize(&cfg));
     }
 
 // #ifdef DEBUG
+    nxlink_saved_stdout = duplicateStdio(STDOUT_FILENO);
+    nxlink_saved_stderr = duplicateStdio(STDERR_FILENO);
     nxlink_sock = nxlinkStdio();
+    if (nxlink_sock < 0)
+    {
+        closeFdIfOpen(&nxlink_saved_stdout);
+        closeFdIfOpen(&nxlink_saved_stderr);
+    }
 // #endif
 
     romfsInit();
@@ -86,10 +141,17 @@ void userAppExit()
     hidsysExit();
     romfsExit();
 
-    if (nxlink_sock != -1)
-        close(nxlink_sock);
+    // Sphaira's embedded hbloader reuses the same process and heap for the
+    // next NRO. Close nxlink's stdout/stderr socket duplicates before the BSD
+    // transfer memory is released so the launcher cannot reuse those pages
+    // while they are still owned by the previous BSD client.
+    restoreNxlinkStdio();
 
-    socketExit();
+    if (socket_initialized)
+    {
+        socketExit();
+        socket_initialized = false;
+    }
 
     appletUnlockExit();
 }
