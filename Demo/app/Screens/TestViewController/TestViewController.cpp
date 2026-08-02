@@ -144,17 +144,17 @@ void TestViewController::loadView() {
 
     dragMeViewLabel = new_shared<UILabel>();
     dragMeViewLabel->setText("Drag me!");
-    dragMeViewLabel->setFontWeight(600);
+    dragMeViewLabel->setFontSize(64);
+    dragMeViewLabel->setFontWeight(900);
     dragMeViewLabel->setTextAlignment(NSTextAlignment::center);
-//    dragMeViewLabel->setFrame({ 80, 110, 44, 100 });
 
     auto blur = new_shared<UIBlurView>();
-    blur->setFrame({ 80, 200, 240, 240 });
+    blur->setFrame({ 40, 100, 340, 140 });
     rootView->addSubview(blur);
     blur->layer()->setCornerRadius(12);
     blur->setBackgroundTintColor(UIColorThemed(UIColor(0x60DDDDDD), UIColor(0x60404040), ""));
 
-    blur->addSubview(dragMeViewLabel);
+    blur->setMask(dragMeViewLabel);
 
     auto panGesture = new_shared<UIPanGestureRecognizer>();
     panGesture->onStateChanged = [this](auto gesture) {

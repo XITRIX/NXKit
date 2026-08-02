@@ -178,6 +178,9 @@ void UIView::updateSafeAreaInsetsInChilds() {
     for (auto& subview: _subviews) {
         subview->setNeedsUpdateSafeAreaInsets();
     }
+    if (_mask) {
+        _mask->setNeedsUpdateSafeAreaInsets();
+    }
 }
 
 void UIView::updateSafeAreaInsetsIfNeeded() {
@@ -348,13 +351,11 @@ void UIView::removeFromSuperview() {
     auto superview = this->_superview.lock();
     if (!superview) return;
 
-    _layer->removeFromSuperlayer();
-
-    // If it's mask - remove
     if (superview->_mask.get() == this) {
+        superview->_layer->setMask(nullptr);
         superview->_mask = nullptr;
-    }
-    else {
+    } else {
+        _layer->removeFromSuperlayer();
         superview->_subviews.erase(std::remove(superview->_subviews.begin(), superview->_subviews.end(), shared_from_this()), superview->_subviews.end());
     }
     this->setSuperview(nullptr);
@@ -405,21 +406,35 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     for (auto& subview: _subviews) {
         subview->drawAndLayoutTreeIfNeeded();
     }
+    if (_mask) {
+        _mask->drawAndLayoutTreeIfNeeded();
+    }
 
     UIColor::_currentTint = oldTint;
 }
 
 void UIView::setMask(const std::shared_ptr<UIView>& mask) {
-    if (_mask == mask) { return; }
-    if (_mask) { _mask->removeFromSuperview(); }
+    if (_mask == mask || mask.get() == this) return;
 
-    _mask = mask;
-    if (mask) {
-        _layer->setMask(mask->_layer);
-        mask->setSuperview(shared_from_this());
-    } else {
+    // Reject an ancestor as a mask because that would create a view/layer cycle.
+    if (mask && isDescendantOf(mask)) return;
+
+    if (_mask) {
         _layer->setMask(nullptr);
+        _mask->setSuperview(nullptr);
+        _mask->setNeedsUpdateSafeAreaInsets();
+        _mask = nullptr;
     }
+
+    if (mask) {
+        mask->removeFromSuperview();
+        _mask = mask;
+        _layer->setMask(_mask->_layer);
+        mask->setSuperview(shared_from_this());
+        mask->setNeedsUpdateSafeAreaInsets();
+    }
+
+    setNeedsLayout();
 }
 
 void UIView::setContentMode(UIViewContentMode mode) {
@@ -485,6 +500,9 @@ void UIView::tintColorDidChange() {
     for (const auto& child : subviews()) {
         if (!child->_tintColor.has_value())
             child->tintColorDidChange();
+    }
+    if (_mask && !_mask->_tintColor.has_value()) {
+        _mask->tintColorDidChange();
     }
 }
 
@@ -771,16 +789,19 @@ void UIView::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previou
         subview->_traitCollection = _traitCollection;
         subview->traitCollectionDidChange(previousTraitCollection);
     }
+    if (_mask && _mask->_parentController.expired()) {
+        _mask->_traitCollection = _traitCollection;
+        _mask->traitCollectionDidChange(previousTraitCollection);
+    }
 }
 
 // MARK: - Layout
 bool UIView::isDescendantOf(const std::shared_ptr<UIView>& view) {
     if (view == nullptr) return false;
-    auto parent = this;
-    while (parent != nullptr) {
-        if (parent == view.get()) return true;
-        if (superview().expired()) return false;
-        parent = superview().lock().get();
+    auto current = shared_from_this();
+    while (current) {
+        if (current == view) return true;
+        current = current->_superview.lock();
     }
     return false;
 }

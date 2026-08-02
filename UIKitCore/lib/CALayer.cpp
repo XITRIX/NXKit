@@ -33,6 +33,9 @@ void CALayer::setLayerTreeDirtyIfNeeded() const {
 
 void CALayer::updateIsPartOfPresentedHierarchy(bool value) {
     _isPartOfPresentedHierarchy = value;
+    if (_mask) {
+        _mask->updateIsPartOfPresentedHierarchy(isPartOfPresentedHierarchy());
+    }
     for (auto sublayer : _sublayers) {
         sublayer->updateIsPartOfPresentedHierarchy(isPartOfPresentedHierarchy());
     }
@@ -184,12 +187,29 @@ void CALayer::setContents(std::shared_ptr<CGImage> contents) {
 }
 
 void CALayer::setMask(const std::shared_ptr<CALayer>& mask) {
-    if (this->_mask) {
-        this->_mask->_superlayer.reset();
+    if (_mask == mask || mask.get() == this) return;
+
+    // A mask cannot be an ancestor of the layer it masks. Apart from creating a
+    // render cycle, Core Animation requires a mask not to have a superlayer.
+    for (auto ancestor = _superlayer.lock(); ancestor; ancestor = ancestor->_superlayer.lock()) {
+        if (ancestor == mask) return;
     }
 
-    this->_mask = mask;
-    if (mask) _mask->_superlayer = shared_from_this();
+    if (_mask) {
+        _mask->_superlayer.reset();
+        _mask->updateIsPartOfPresentedHierarchy(false);
+    }
+
+    if (mask && !mask->_superlayer.expired()) {
+        mask->removeFromSuperlayer();
+    }
+
+    _mask = mask;
+    if (_mask) {
+        _mask->_superlayer = shared_from_this();
+        _mask->updateIsPartOfPresentedHierarchy(isPartOfPresentedHierarchy());
+    }
+    setLayerTreeDirtyIfNeeded();
 }
 
 void CALayer::addSublayer(const std::shared_ptr<CALayer>& layer) {
@@ -227,17 +247,16 @@ void CALayer::removeFromSuperlayer() {
     auto super = _superlayer.lock();
     if (super == nullptr) return;
 
-    // Should not be removed from mask on this step, they are not related
-//    // If it's mask - remove
-//    if (super->_mask.get() == this) {
-//        super->_mask = nullptr;
-//        return;
-//    }
+    if (super->_mask.get() == this) {
+        super->setMask(nullptr);
+        return;
+    }
 
     // Find and remove this from superlayer
     super->_sublayers.erase(std::remove(super->_sublayers.begin(), super->_sublayers.end(), shared_from_this()), super->_sublayers.end());
+    _superlayer.reset();
     updateIsPartOfPresentedHierarchy(false);
-    setLayerTreeDirtyIfNeeded();
+    super->setLayerTreeDirtyIfNeeded();
 }
 
 void CALayer::draw(SkCanvas* context) {}
@@ -260,6 +279,18 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     // Set Anchor matrix
     canvas->concat(CATransform3DMakeTranslation(-_bounds.width() * _anchorPoint.x, -_bounds.height() * _anchorPoint.y, 0).toSkM44());
+
+    // Isolate masked content before drawing it. Initializing from the previous
+    // canvas contents is required for backdrop effects such as CABlurLayer to
+    // keep seeing the pixels behind this layer.
+    if (_mask) {
+        SkCanvas::SaveLayerRec maskedContent(
+            nullptr,
+            nullptr,
+            SkCanvas::kInitWithPrevious_SaveLayerFlag
+        );
+        canvas->saveLayer(maskedContent);
+    }
 
     // Masks To Bounds
     if (_masksToBounds) {
@@ -343,6 +374,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     draw(canvas);
 
+    canvas->save();
     canvas->concat(CATransform3DMakeTranslation(-_bounds.origin.x, -_bounds.origin.y, 0).toSkM44());
 
     struct {
@@ -356,6 +388,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     for (const auto& sublayer: sortedSublayers) {
         sublayer->presentationOrSelf()->skiaRender(canvas);
     }
+    canvas->restore();
 
     // Border
     if (_borderColor.has_value() && _borderWidth > 0) {
@@ -376,13 +409,29 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         canvas->restore();
     }
 
-    // Reset Anchor to Origin matrix
-    // Origin matrix save 2 // restore
-    canvas->restore();
-
     if (_masksToBounds) {
         canvas->restore();
     }
+
+    if (_mask) {
+        // Render the mask into a transparent layer and use only its alpha to
+        // retain the corresponding pixels from the destination content.
+        SkPaint maskPaint;
+        maskPaint.setBlendMode(SkBlendMode::kDstIn);
+        canvas->saveLayer(nullptr, &maskPaint);
+        canvas->save();
+        canvas->concat(CATransform3DMakeTranslation(-_bounds.origin.x, -_bounds.origin.y, 0).toSkM44());
+        _mask->presentationOrSelf()->skiaRender(canvas);
+        canvas->restore();
+        canvas->restore();
+
+        // Composite the now-masked content back over the original backdrop.
+        canvas->restore();
+    }
+
+    // Reset Anchor to Origin matrix
+    // Origin matrix save 2 // restore
+    canvas->restore();
 
     // Initial save 1 // restore
     canvas->restore();
