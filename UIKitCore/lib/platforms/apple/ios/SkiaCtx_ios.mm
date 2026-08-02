@@ -2,12 +2,13 @@
 
 #include "include/core/SkColorSpace.h"
 #include <include/core/SkGraphics.h>
-#include "include/gpu/ganesh/GrBackendSurface.h"
-#include "include/gpu/ganesh/SkSurfaceGanesh.h"
-#include "include/gpu/ganesh/GrDirectContext.h"
-#include "include/gpu/ganesh/mtl/GrMtlBackendContext.h"
-#include "include/gpu/ganesh/mtl/GrMtlBackendSurface.h"
-#include "include/gpu/ganesh/mtl/GrMtlDirectContext.h"
+#include "include/gpu/graphite/BackendTexture.h"
+#include "include/gpu/graphite/Context.h"
+#include "include/gpu/graphite/ContextOptions.h"
+#include "include/gpu/graphite/Recorder.h"
+#include "include/gpu/graphite/Surface.h"
+#include "include/gpu/graphite/mtl/MtlBackendContext.h"
+#include "include/gpu/graphite/mtl/MtlGraphiteTypes_cpp.h"
 
 #include "include/ports/SkFontMgr_mac_ct.h"
 
@@ -24,10 +25,10 @@ namespace {
 
 #if __has_feature(objc_arc)
 #define NX_OBJC_BRIDGE(type, value) ((__bridge type)(value))
-#define NX_OBJC_BRIDGE_RETAIN(type, value) ((type)CFBridgingRetain(value))
+#define NX_OBJC_BRIDGE_RETAIN(value) CFBridgingRetain(value)
 #else
 #define NX_OBJC_BRIDGE(type, value) ((type)(value))
-#define NX_OBJC_BRIDGE_RETAIN(type, value) ((type)(value))
+#define NX_OBJC_BRIDGE_RETAIN(value) ((CFTypeRef)(value))
 #endif
 
 UIWindow *currentWindow(SDL_Window *window) {
@@ -92,7 +93,7 @@ void SkiaCtx_ios::initContext() {
         return;
     }
 
-    device.reset(NX_OBJC_BRIDGE_RETAIN(GrMTLHandle, metalDevice));
+    device.reset(NX_OBJC_BRIDGE_RETAIN(metalDevice));
 
     auto commandQueue = [metalDevice newCommandQueue];
     if (commandQueue == nil) {
@@ -101,14 +102,31 @@ void SkiaCtx_ios::initContext() {
         return;
     }
 
-    queue.reset(NX_OBJC_BRIDGE_RETAIN(GrMTLHandle, commandQueue));
+    queue.reset(NX_OBJC_BRIDGE_RETAIN(commandQueue));
 
     configureMetalLayer(NX_OBJC_BRIDGE(CAMetalLayer*, metalLayer()), metalDevice);
 
-    GrMtlBackendContext backendContext = {};
+    skgpu::graphite::MtlBackendContext backendContext = {};
     backendContext.fDevice.retain(device.get());
     backendContext.fQueue.retain(queue.get());
-    context = GrDirectContexts::MakeMetal(backendContext);
+
+    skgpu::graphite::ContextOptions options;
+    options.fRequireOrderedRecordings = true;
+    context = skgpu::graphite::ContextFactory::MakeMetal(backendContext, options);
+    if (!context) {
+        NSLog(@"Failed to create Graphite Metal context");
+        queue.reset();
+        device.reset();
+        return;
+    }
+
+    recorder = createGraphiteRecorder(context.get());
+    if (!recorder) {
+        NSLog(@"Failed to create Graphite recorder");
+        context.reset();
+        queue.reset();
+        device.reset();
+    }
 }
 
 void SkiaCtx_ios::destroyContext() {
@@ -116,10 +134,10 @@ void SkiaCtx_ios::destroyContext() {
     drawable.reset();
 
     if (context) {
-        context->flushAndSubmit(GrSyncCpu::kYes);
-        context->abandonContext();
-        context.reset();
+        context->submit(skgpu::graphite::SyncToCpu::kYes);
     }
+    recorder.reset();
+    context.reset();
 
     if (auto layer = NX_OBJC_BRIDGE(CAMetalLayer*, metalLayer())) {
         layer.device = nil;
@@ -225,21 +243,19 @@ sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
         return nullptr;
     }
 
-    drawable.reset((GrMTLHandle)CFRetain((__bridge CFTypeRef)currentDrawable));
+    drawable.reset(CFRetain((__bridge CFTypeRef)currentDrawable));
 
-    GrMtlTextureInfo textureInfo;
-    textureInfo.fTexture.retain((__bridge GrMTLHandle)currentDrawable.texture);
-
-    GrBackendRenderTarget backendRenderTarget = GrBackendRenderTargets::MakeMtl(drawableWidth,
-                                                                                drawableHeight,
-                                                                                textureInfo);
+    auto backendTexture = skgpu::graphite::BackendTextures::MakeMetal(
+            SkISize::Make(drawableWidth, drawableHeight),
+            (__bridge CFTypeRef)currentDrawable.texture);
     SkSurfaceProps props;
-    surface = SkSurfaces::WrapBackendRenderTarget(context.get(),
-                                                  backendRenderTarget,
-                                                  kTopLeft_GrSurfaceOrigin,
-                                                  kBGRA_8888_SkColorType,
-                                                  nullptr,
-                                                  &props);
+    surface = SkSurfaces::WrapBackendTexture(recorder.get(),
+                                             backendTexture,
+                                             nullptr,
+                                             &props,
+                                             nullptr,
+                                             nullptr,
+                                             "NXKit iOS backbuffer");
 
     if (!surface) {
         drawable.reset();

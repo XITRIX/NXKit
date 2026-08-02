@@ -1,8 +1,6 @@
 #pragma once
 
 #include <SDL3/SDL_events.h>
-#include "include/gpu/ganesh/GrDirectContext.h"
-#include "tools/window/WindowContext.h"
 #include "SkiaCtx.h"
 #include "UIView.h"
 

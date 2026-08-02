@@ -89,8 +89,7 @@ if (APPLE)
         )
     endif ()
 elseif (PLATFORM_SWITCH)
-    target_sources(XITRIXUIKit PUBLIC
-            lib/platforms/SkiaCtx_sdlBase.cpp
+    target_sources(XITRIXUIKit PRIVATE
             lib/platforms/switch/SkiaCtx_switch.cpp
             lib/platforms/switch/switch_wrapper.c
     )

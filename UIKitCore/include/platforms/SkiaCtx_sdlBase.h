@@ -2,7 +2,6 @@
 
 #include <SkiaCtx.h>
 #include <SDL3/SDL_metal.h>
-#include <include/gpu/ganesh/GrDirectContext.h>
 #include "Timer.h"
 
 namespace NXKit {

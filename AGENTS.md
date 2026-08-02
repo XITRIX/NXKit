@@ -29,7 +29,7 @@ The core CMake target is currently `XITRIXUIKit`, with alias `Xitrix::UIKit`; th
 ## Architecture
 
 - SDL 3 owns window creation, lifecycle events, touch/mouse/gamepad input, and the platform surface.
-- Skia/Ganesh owns GPU rendering. Apple platforms use Metal; Switch uses the OpenGL/GLES path.
+- Skia Graphite owns GPU rendering. Apple platforms use Graphite's native Metal backend; Switch uses Graphite through Dawn's OpenGL ES compatibility backend.
 - SkParagraph plus ICU-backed SkUnicode handles text shaping and layout.
 - `CALayer` is the retained rendering and animation tree.
 - `UIView` owns a backing layer and participates in layout, responder, gesture, trait, and focus systems.

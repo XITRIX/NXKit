@@ -5,6 +5,7 @@
 #pragma once
 
 #include <Geometry.h>
+#include <vector>
 
 namespace NXKit {
 

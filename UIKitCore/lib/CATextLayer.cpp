@@ -65,11 +65,19 @@ void CATextLayer::setTextAlignment(NSTextAlignment textAlignment) {
 }
 
 void CATextLayer::updateParagraph() {
-    SkFontStyle fontStyle;
-    auto typeface = SkiaCtx::main()->getFontMgr()->matchFamilyStyle(nullptr, fontStyle);
+    SkFontStyle fontStyle(static_cast<int>(_fontWeight), SkFontStyle::kNormal_Width,
+                          SkFontStyle::kUpright_Slant);
+    auto skiaContext = SkiaCtx::main();
+    auto fontManager = skiaContext->getFontMgr();
+    auto defaultFamilyName = skiaContext->getDefaultFontFamilyName();
+    auto typeface = skiaContext->getDefaultTypeface(fontStyle);
 
     auto fontCollection = sk_make_sp<FontCollection>();
-    fontCollection->setDefaultFontManager(SkiaCtx::main()->getFontMgr());
+    if (defaultFamilyName.isEmpty()) {
+        fontCollection->setDefaultFontManager(fontManager);
+    } else {
+        fontCollection->setDefaultFontManager(fontManager, defaultFamilyName.c_str());
+    }
 
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -78,9 +86,11 @@ void CATextLayer::updateParagraph() {
     skia::textlayout::TextStyle style;
     style.setForegroundColor(paint);
     style.setTypeface(typeface);
+    if (!defaultFamilyName.isEmpty()) {
+        style.setFontFamilies({defaultFamilyName});
+    }
     style.setFontSize(_fontSize);
-    style.setFontStyle(SkFontStyle(_fontWeight, SkFontStyle::kNormal_Width,
-                                    SkFontStyle::kUpright_Slant));
+    style.setFontStyle(fontStyle);
 
     ParagraphStyle paraStyle;
     paraStyle.setTextStyle(style);

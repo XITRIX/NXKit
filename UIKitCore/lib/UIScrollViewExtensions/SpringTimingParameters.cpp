@@ -4,6 +4,9 @@
 
 #include <UIScrollViewExtensions/SpringTimingParameters.h>
 
+#include <cmath>
+#include <numbers>
+
 namespace NXKit {
 struct UnderdampedSpringTimingParameters: public TimingParameters {
     Spring spring;
@@ -26,12 +29,14 @@ struct UnderdampedSpringTimingParameters: public TimingParameters {
             return 0;
         }
 
-        return NXFloat(log((displacement.magnitude() + c2().magnitude()) / threshold) / spring.beta());
+        return NXFloat(std::log((displacement.magnitude() + c2().magnitude()) / threshold) /
+                       spring.beta());
     }
 
     NXPoint valueAt(NXFloat t) const override {
         auto wd = spring.dampedNaturalFrequency();
-        return (displacement * cos(wd * t) + c2() * sin(wd * t)) * exp(-spring.beta() * t);
+        return (displacement * std::cos(wd * t) + c2() * std::sin(wd * t)) *
+               std::exp(-spring.beta() * t);
     }
 };
 
@@ -57,21 +62,21 @@ struct CriticallyDampedSpringTimingParameters: public TimingParameters {
         }
 
         auto b = spring.beta();
-        auto e = NXFloat(M_E);
+        constexpr auto e = std::numbers::e_v<NXFloat>;
 
-        auto t1 = 1 / b * log(2 * displacement.magnitude() / threshold);
-        auto t2 = 2 / b * log(4 * c2().magnitude() / (e * b * threshold));
+        auto t1 = 1 / b * std::log(2 * displacement.magnitude() / threshold);
+        auto t2 = 2 / b * std::log(4 * c2().magnitude() / (e * b * threshold));
 
-        return fmaxf(t1, t2);
+        return std::fmax(t1, t2);
     }
 
     NXPoint valueAt(NXFloat t) const override {
-        return (displacement + c2() * t) * exp(-spring.beta() * t);
+        return (displacement + c2() * t) * std::exp(-spring.beta() * t);
     }
 };
 
 NXFloat Spring::damping() const {
-    return 2 * dampingRatio * sqrt(mass * stiffness);
+    return 2 * dampingRatio * std::sqrt(mass * stiffness);
 }
 
 NXFloat Spring::beta() const {
@@ -79,7 +84,7 @@ NXFloat Spring::beta() const {
 }
 
 NXFloat Spring::dampedNaturalFrequency() const {
-    return sqrt(stiffness / mass) * sqrt(1 - dampingRatio * dampingRatio);
+    return std::sqrt(stiffness / mass) * std::sqrt(1 - dampingRatio * dampingRatio);
 }
 
 SpringTimingParameters::SpringTimingParameters(Spring spring, NXPoint displacement, NXPoint initialVelocity, NXFloat threshold):

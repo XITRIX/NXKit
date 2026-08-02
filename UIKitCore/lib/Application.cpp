@@ -7,9 +7,6 @@
 
 #include <memory>
 
-// SKIA METAL GPU
-#include "include/gpu/ganesh/GrBackendSurface.h"
-
 #include "include/effects/SkGradient.h"
 #include "include/effects/SkImageFilters.h"
 #include "include/core/SkFont.h"
@@ -25,7 +22,7 @@ Application::Application() {
     skiaCtx = MakeSkiaCtx();
 
     SkFontStyle style;
-    typeface = skiaCtx->getFontMgr()->matchFamilyStyle(nullptr, style);
+    typeface = skiaCtx->getDefaultTypeface(style);
 
     keyWindow = new_shared<UIView>();
     keyWindow->layer()->setBackgroundColor(UIColor::systemBackground);

@@ -22,6 +22,13 @@
 
 static int nxlink_sock = -1;
 
+// Referenced by the C++ renderer so this translation unit is extracted from
+// XITRIXUIKit's static archive. That also makes the strong userAppInit and
+// userAppExit hooks visible to libnx's startup runtime.
+void nxkitEnsureSwitchRuntimeLinked(void)
+{
+}
+
 void userAppInit()
 {
     printf("userAppInit\n");

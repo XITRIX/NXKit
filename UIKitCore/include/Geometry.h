@@ -1,7 +1,5 @@
 #pragma once
 
-#include "src/gpu/ganesh/gl/builders/GrGLProgramBuilder.h"
-
 namespace NXKit {
 
 typedef float NXFloat;

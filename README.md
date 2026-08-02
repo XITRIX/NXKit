@@ -4,7 +4,7 @@
 Main goal is to create a UI framework that tries to mimic [Apple's UIKit](https://developer.apple.com/documentation/uikit/) as much as possible, so any iOS developer will be able to start using it without learning things from scratch and be as much portable as possible supporting various of platforms.
 
 ## Current state:
-- [Skia](https://github.com/google/skia) powered renderer
+- [Skia Graphite](https://skia.org/docs/user/api/graphite/) powered renderer
 - SDL 3.4 platform integration, including the UIScene lifecycle on iOS and the
   devkitPro libnx backend on Nintendo Switch
 - Platforms supported:
@@ -38,23 +38,25 @@ Initialize the dependencies first:
 git submodule update --init --recursive
 ```
 
-First Skia need to be compiled:
+Skia must first be compiled with Graphite. Apple platforms use Graphite's native
+Metal backend; Nintendo Switch uses Graphite through Dawn's OpenGL ES
+compatibility backend.
 
 ### Switch:
 ```shell
-bin/gn gen out/horizon --args='is_official_build=false skia_use_gl=true is_trivial_abi=true target_cpu="arm64" target_os="horizon" is_debug=false'
+bin/gn gen out/horizon --args='is_official_build=false target_cpu="arm64" target_os="horizon" skia_enable_graphite=true skia_enable_ganesh=false skia_use_dawn=true skia_use_gl=false skia_use_metal=false skia_use_vulkan=false is_trivial_abi=true is_debug=false'
 ninja -C out/horizon skia skparagraph
 ```
 
 ### iOS:
 ```shell
-bin/gn gen out/ios-arm64 --args='is_official_build=false target_cpu="arm64" skia_use_gl=true skia_use_metal=true is_trivial_abi=true target_os="ios" ios_min_target="15.0"'
+bin/gn gen out/ios-arm64 --args='is_official_build=false target_cpu="arm64" target_os="ios" ios_min_target="15.0" skia_enable_graphite=true skia_enable_ganesh=false skia_use_gl=false skia_use_metal=true is_trivial_abi=true is_debug=false'
 ninja -C out/ios-arm64 skia skparagraph
 ```
 
 ### macOS:
 ```shell
-bin/gn gen out/mac-arm64 --args='is_official_build=false target_cpu="arm64" skia_use_gl=true skia_use_metal=true is_trivial_abi=true'
+bin/gn gen out/mac-arm64 --args='is_official_build=false target_cpu="arm64" skia_enable_graphite=true skia_enable_ganesh=false skia_use_gl=false skia_use_metal=true is_trivial_abi=true is_debug=false'
 ninja -C out/mac-arm64 skia skparagraph
 ```
 

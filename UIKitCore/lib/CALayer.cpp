@@ -10,6 +10,7 @@
 
 #include "include/core/SkRRect.h"
 #include "include/core/SkBlurTypes.h"
+#include "include/core/SkColorFilter.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/effects/SkGradient.h"
 #include "include/effects/SkImageFilters.h"

@@ -2,8 +2,8 @@
 
 This document tracks NXKit against the portable, application-facing core of Apple's UIKit. It is both a compatibility audit and an implementation roadmap.
 
-- Last audited: **2026-07-31**
-- NXKit revision: **working tree after `ef260c94a4a566f276e014c15718af42a2e49004`**
+- Last audited: **2026-08-02**
+- NXKit revision: **working tree after `a955d2ca1e9b62eb0fa8073d84f6538deb707938`**
 - UIKit-cross-platform reference: **[`ed2c290`](https://github.com/flowkey/UIKit-cross-platform/commit/ed2c290025f2dfd714ed945153069ca54e55a23e)**
 
 ## How to maintain this document
@@ -54,10 +54,10 @@ Apple's [views and controls](https://developer.apple.com/documentation/uikit/vie
 | Modal `present` / `dismiss` | Partial | Full-screen-style presentation and dismissal exist. Complete ownership semantics, nested presentation, interruption, transition completion timing, and presentation styles that make sense cross-platform. |
 | `UIColor` and dynamic colors | Partial | RGBA colors, many semantic colors, alpha changes, tint and dark/light dynamic providers exist. Add color-space-independent semantics, stable resolution rules, more system colors, and tests. Pattern colors are not core priority. |
 | Trait environment and `UITraitCollection` | Partial | Interface style and display scale propagate. Add layout direction, preferred content size, accessibility contrast, interface idiom where portable, and explicit trait-change registration/ordering. |
-| `UIImage` / `CGImage` | Partial | Images load from path, resources, and data; scale and template rendering exist. Add orientation-independent image metadata, resizing/cropping, cap insets or a portable equivalent, decoding errors, and cache/lifetime tests. |
+| `UIImage` / `CGImage` | Partial | Images load from path, resources, and data; scale and template rendering exist, and raster images are promoted through a bounded Graphite image-provider cache on every supported backend. Add orientation-independent image metadata, resizing/cropping, cap insets or a portable equivalent, decoding errors, and cache/lifetime tests. |
 | `UIImageView` | Partial | Basic image display, tint/template mode, content mode, and fitting exist. Add highlighted/animated images only after core invalidation and state behavior are dependable. |
 | `UIFont` and font descriptors | Missing | Labels accept only numeric size and weight. Add a portable `UIFont` facade for family, size, weight, traits, metrics, fallback, and custom font registration. |
-| `UILabel` | Partial | SkParagraph/ICU shaping, text, color, size, weight, alignment, measurement, and rendering exist. Expose and implement line count, wrapping, truncation, attributed text, baseline behavior, font objects, intrinsic size, and accessibility text. Remove debug logging. |
+| `UILabel` | Partial | SkParagraph/ICU shaping, text, color, size, weight, alignment, measurement, and rendering exist; default-family resolution also supports platform custom-data font managers. Expose and implement line count, wrapping, truncation, attributed text, baseline behavior, font objects, intrinsic size, and accessibility text. Remove debug logging. |
 | `UIControl` target/action and state | Stub/unsafe | Enabled/selected/highlighted bits and one `primaryAction` exist. Implement combinable UIKit-like states, target/action or event-scoped actions, event dispatch, disabled behavior, tracking/cancellation, and state-change invalidation. |
 | `UIButton` | Partial | A title label, image view, four visual styles, Yoga layout, focus and primary action exist. Add per-state title/image/color, content alignment/insets, configuration/state updates, disabled behavior, touch cancellation, and intrinsic sizing. |
 | `UIGestureRecognizer` base | Partial | State, delegate, enablement, touch/press routing, and simultaneous-recognition cancellation exist. Complete dependency/failure relationships, cancellation policies, touch filtering, reset rules, and delegate coverage. |

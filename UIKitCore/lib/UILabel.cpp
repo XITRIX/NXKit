@@ -136,8 +136,18 @@ void UILabel::draw() {
         scale = traitCollection()->displayScale() * layer()->scaleModifier();
         size = bounds().size;
     }
-    bitmap.allocPixels(SkImageInfo::MakeN32Premul(scaledBitmapDimension(size.width, scale),
-                                                  scaledBitmapDimension(size.height, scale)));
+    const auto bitmapWidth = scaledBitmapDimension(size.width, scale);
+    const auto bitmapHeight = scaledBitmapDimension(size.height, scale);
+#if defined(PLATFORM_SWITCH)
+    // Dawn's GLES compatibility path has a portable RGBA8 upload format,
+    // while Skia's native N32 color type is BGRA on this target.
+    const auto bitmapInfo = SkImageInfo::Make(bitmapWidth, bitmapHeight,
+                                              kRGBA_8888_SkColorType,
+                                              kPremul_SkAlphaType);
+#else
+    const auto bitmapInfo = SkImageInfo::MakeN32Premul(bitmapWidth, bitmapHeight);
+#endif
+    bitmap.allocPixels(bitmapInfo);
     bitmap.eraseColor(SK_ColorTRANSPARENT);
     SkCanvas canvas(bitmap);
 
@@ -152,11 +162,19 @@ void UILabel::draw() {
 }
 
 void UILabel::updateParagraph() {
-    SkFontStyle fontStyle;
-    auto typeface = SkiaCtx::main()->getFontMgr()->matchFamilyStyle(nullptr, fontStyle);
+    SkFontStyle fontStyle(static_cast<int>(_fontWeight), SkFontStyle::kNormal_Width,
+                          SkFontStyle::kUpright_Slant);
+    auto skiaContext = SkiaCtx::main();
+    auto fontManager = skiaContext->getFontMgr();
+    auto defaultFamilyName = skiaContext->getDefaultFontFamilyName();
+    auto typeface = skiaContext->getDefaultTypeface(fontStyle);
 
     auto fontCollection = sk_make_sp<FontCollection>();
-    fontCollection->setDefaultFontManager(SkiaCtx::main()->getFontMgr());
+    if (defaultFamilyName.isEmpty()) {
+        fontCollection->setDefaultFontManager(fontManager);
+    } else {
+        fontCollection->setDefaultFontManager(fontManager, defaultFamilyName.c_str());
+    }
 
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -165,10 +183,12 @@ void UILabel::updateParagraph() {
     skia::textlayout::TextStyle style;
     style.setForegroundColor(paint);
     style.setTypeface(typeface);
+    if (!defaultFamilyName.isEmpty()) {
+        style.setFontFamilies({defaultFamilyName});
+    }
     style.setFontSize(_fontSize);
 //    style.setHeight(_fontSize);
-    style.setFontStyle(SkFontStyle((int) _fontWeight, SkFontStyle::kNormal_Width,
-                                    SkFontStyle::kUpright_Slant));
+    style.setFontStyle(fontStyle);
 
     ParagraphStyle paraStyle;
     paraStyle.setTextStyle(style);

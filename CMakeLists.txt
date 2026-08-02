@@ -17,7 +17,7 @@ if (APPLE)
     if (PLATFORM_DESKTOP)
         set(SKIA_MAC_OUT_DIR ${EXTERN_PATH}/skia/out/mac-arm64)
         if (NOT EXISTS "${SKIA_MAC_OUT_DIR}/libskia.a")
-            message(FATAL_ERROR "Native Metal Skia archive is missing: ${SKIA_MAC_OUT_DIR}/libskia.a")
+            message(FATAL_ERROR "Graphite/Metal Skia archive is missing: ${SKIA_MAC_OUT_DIR}/libskia.a")
         endif ()
 
         list(APPEND platform_libs
@@ -33,7 +33,7 @@ if (APPLE)
     elseif (PLATFORM_IOS)
         set(SKIA_IOS_OUT_DIR ${EXTERN_PATH}/skia/out/ios-arm64)
         if (NOT EXISTS "${SKIA_IOS_OUT_DIR}/libskia.a")
-            message(FATAL_ERROR "Native Metal Skia archive is missing: ${SKIA_IOS_OUT_DIR}/libskia.a")
+            message(FATAL_ERROR "Graphite/Metal Skia archive is missing: ${SKIA_IOS_OUT_DIR}/libskia.a")
         endif ()
 
         list(APPEND platform_libs
@@ -47,25 +47,42 @@ if (APPLE)
         )
     endif ()
 elseif (PLATFORM_SWITCH)
+        set(SKIA_SWITCH_OUT_DIR ${EXTERN_PATH}/skia/out/horizon)
+        if (NOT EXISTS "${SKIA_SWITCH_OUT_DIR}/libskia.a")
+            message(FATAL_ERROR "Graphite/Dawn Skia archive is missing: ${SKIA_SWITCH_OUT_DIR}/libskia.a")
+        endif ()
+        if (NOT EXISTS "${SKIA_SWITCH_OUT_DIR}/libdawn_combined.a")
+            message(FATAL_ERROR "Dawn archive is missing: ${SKIA_SWITCH_OUT_DIR}/libdawn_combined.a")
+        endif ()
+
         list(APPEND platform_libs SDL3::SDL3)
 
-        # GPU
-        target_link_libraries(XITRIXUIKit PUBLIC EGL glapi GLESv2 drm_nouveau nx)
+        target_include_directories(XITRIXUIKit PRIVATE
+                ${EXTERN_PATH}/skia/third_party/externals/dawn
+                ${EXTERN_PATH}/skia/third_party/externals/dawn/include
+                ${SKIA_SWITCH_OUT_DIR}/gen/third_party/dawn/include
+        )
 
         target_link_libraries(XITRIXUIKit PUBLIC
-                ${EXTERN_PATH}/skia/out/horizon/libskia.a
-                ${EXTERN_PATH}/skia/out/horizon/libskparagraph.a
-                ${EXTERN_PATH}/skia/out/horizon/libskshaper.a
-                ${EXTERN_PATH}/skia/out/horizon/libskunicode_core.a
-                ${EXTERN_PATH}/skia/out/horizon/libskunicode_icu.a
-                ${EXTERN_PATH}/skia/out/horizon/libicu.a
-                ${EXTERN_PATH}/skia/out/horizon/libskcms.a
+                ${SKIA_SWITCH_OUT_DIR}/libskia.a
+                ${SKIA_SWITCH_OUT_DIR}/libskparagraph.a
+                ${SKIA_SWITCH_OUT_DIR}/libskshaper.a
+                ${SKIA_SWITCH_OUT_DIR}/libskunicode_core.a
+                ${SKIA_SWITCH_OUT_DIR}/libskunicode_icu.a
+                ${SKIA_SWITCH_OUT_DIR}/libicu.a
+                ${SKIA_SWITCH_OUT_DIR}/libskcms.a
+                ${SKIA_SWITCH_OUT_DIR}/libdawn_combined.a
                 freetype
                 expat
                 jpeg
                 png
                 bz2
                 z
+                EGL
+                glapi
+                GLESv2
+                drm_nouveau
+                nx
         )
 endif ()
 
