@@ -8,6 +8,7 @@
 namespace NXKit {
 
 class NXControl: public UIControl {
+protected:
     void didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationCoordinator* coordinator) override;
 
     void willGainFocus() override;

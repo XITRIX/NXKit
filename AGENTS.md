@@ -137,7 +137,6 @@ Confirm these areas before building on them:
 - Some visual setters do not dirty the layer tree, so updates may be deferred until another mutation.
 - `UIScrollView::contentSize()` is inferred from only the first subview; indicators and parts of delegate delivery are incomplete.
 - `UIControlEvent` lacks a real target/action registry, and control states do not model UIKit option-set semantics.
-- `NXControl` dereferences `primaryAction` on focus entry and performs activation as a focus side effect.
 - `NXNavigationController` and `NXTabBarController` are console/demo components, not UIKit-compatible container implementations.
 - Public headers leak Skia implementation details.
 - Debug `printf` calls remain in frame and text paths.

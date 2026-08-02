@@ -266,19 +266,8 @@ void UIView::addGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& ge
 }
 
 void UIView::addSubview(const std::shared_ptr<UIView>& view) {
-    bool needToNotifyViewController = false;
-    if (!view->_parentController.expired()) {
-        auto window = this->window();
-        if (window) {
-            needToNotifyViewController = true;
-        }
-    }
-
     setNeedsLayout();
     view->removeFromSuperview();
-
-    if (needToNotifyViewController)
-        view->_parentController.lock()->viewWillAppear(true);
 
     _layer->addSublayer(view->_layer);
     _subviews.push_back(view);
@@ -303,19 +292,8 @@ void UIView::setSuperview(const std::shared_ptr<UIView>& superview) {
 }
 
 void UIView::insertSubviewAt(const std::shared_ptr<UIView>& view, int index) {
-    bool needToNotifyViewController = false;
-    if (!view->_parentController.expired()) {
-        auto window = this->window();
-        if (window) {
-            needToNotifyViewController = true;
-        }
-    }
-
     setNeedsLayout();
     view->removeFromSuperview();
-
-    if (needToNotifyViewController)
-        view->_parentController.lock()->viewWillAppear(true);
 
     _layer->insertSublayerAt(view->_layer, index);
     _subviews.insert(_subviews.begin() + index, view);
@@ -327,19 +305,8 @@ void UIView::insertSubviewBelow(const std::shared_ptr<UIView>& view, const std::
     auto itr = std::find(subviews().cbegin(), subviews().cend(), belowSubview);
     if (itr == subviews().cend()) { return; }
 
-    bool needToNotifyViewController = false;
-    if (!view->_parentController.expired()) {
-        auto window = this->window();
-        if (window) {
-            needToNotifyViewController = true;
-        }
-    }
-
     setNeedsLayout();
     view->removeFromSuperview();
-
-    if (needToNotifyViewController)
-        view->_parentController.lock()->viewWillAppear(true);
 
     _layer->insertSublayerBelow(view->_layer, belowSubview->layer());
     _subviews.insert(itr, view);

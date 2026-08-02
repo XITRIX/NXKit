@@ -188,22 +188,46 @@ std::shared_ptr<UIViewController> NXNavigationController::topViewController() {
 }
 
 void NXNavigationController::updatePresentedViewController(bool animated) {
-    if (presentedViewController != nullptr) {
-        presentedViewController->willMoveToParent(nullptr);
-        presentedViewController->view()->removeFromSuperview();
-        presentedViewController->removeFromParent();
+    const auto nextViewController = topViewController();
+    if (presentedViewController == nextViewController) {
+        return;
     }
 
-    presentedViewController = topViewController();
-    if (presentedViewController == nullptr) return;
+    const bool isVisible = viewIsLoaded() && view()->window() != nullptr;
+    const auto previousViewController = presentedViewController;
 
-    addChild(presentedViewController);
-    view()->insertSubviewAt(presentedViewController->view(), 0);
-    presentedViewController->didMoveToParent(shared_from_this());
+    if (isVisible && previousViewController) {
+        previousViewController->viewWillDisappear(animated);
+    }
+    if (isVisible && nextViewController) {
+        nextViewController->viewWillAppear(animated);
+    }
 
-    presentedViewController->view()->configureLayout([](std::shared_ptr<YGLayout> layout) {
-        layout->setWidth(100_percent);
-        layout->setHeight(100_percent);
-        layout->setPositionType(YGPositionTypeAbsolute);
-    });
+    if (previousViewController) {
+        previousViewController->willMoveToParent(nullptr);
+        if (previousViewController->viewIsLoaded()) {
+            previousViewController->view()->removeFromSuperview();
+        }
+        previousViewController->removeFromParent();
+    }
+
+    presentedViewController = nextViewController;
+    if (presentedViewController) {
+        addChild(presentedViewController);
+        view()->insertSubviewAt(presentedViewController->view(), 0);
+        presentedViewController->didMoveToParent(shared_from_this());
+
+        presentedViewController->view()->configureLayout([](std::shared_ptr<YGLayout> layout) {
+            layout->setWidth(100_percent);
+            layout->setHeight(100_percent);
+            layout->setPositionType(YGPositionTypeAbsolute);
+        });
+    }
+
+    if (isVisible && previousViewController) {
+        previousViewController->viewDidDisappear(animated);
+    }
+    if (isVisible && presentedViewController) {
+        presentedViewController->viewDidAppear(animated);
+    }
 }

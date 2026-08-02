@@ -8,13 +8,6 @@ using namespace NXKit;
 
 void NXControl::didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationCoordinator* coordinator) {
     UIControl::didUpdateFocusIn(context, coordinator);
-
-    if (context.nextFocusedItem().lock() == shared_from_this()) {
-        willGainFocus();
-        primaryAction->perform();
-    } else {
-        willLoseFocus();
-    }
 }
 
 void NXControl::willGainFocus() {

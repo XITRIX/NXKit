@@ -2,6 +2,9 @@
 #include <UIWindow.h>
 #include <DispatchQueue.h>
 
+#include <algorithm>
+#include <stdexcept>
+
 using namespace NXKit;
 
 std::shared_ptr<UIResponder> UIViewController::next() {
@@ -68,28 +71,42 @@ void UIViewController::viewDidDisappear(bool animated) {
 }
 
 void UIViewController::addChild(const std::shared_ptr<UIViewController>& child) {
+    if (!child) {
+        throw std::invalid_argument("UIViewController::addChild requires a non-null child");
+    }
+    if (child.get() == this) {
+        throw std::invalid_argument("A view controller cannot contain itself");
+    }
+    if (!child->_parent.expired()) {
+        throw std::invalid_argument("The child view controller already has a parent");
+    }
+
+    for (auto ancestor = shared_from_this(); ancestor; ancestor = ancestor->parent().lock()) {
+        if (ancestor == child) {
+            throw std::invalid_argument("Adding this child would create a controller hierarchy cycle");
+        }
+    }
+
+    auto parent = shared_from_this();
+    child->willMoveToParent(parent);
+    child->_parent = parent;
     _children.push_back(child);
-    child->willMoveToParent(weak_from_this().lock());
 
     child->_traitCollection = _traitCollection;
     child->traitCollectionDidChange(nullptr);
 }
 
 void UIViewController::willMoveToParent(const std::shared_ptr<UIViewController>& parent) {
-    if (parent)
-        this->_parent = parent;
 }
 
 void UIViewController::didMoveToParent(std::shared_ptr<UIViewController> parent) {
-    if (parent->view()->window())
-        viewDidAppear(true);
 }
 
 void UIViewController::removeFromParent() {
     if (auto spt = _parent.lock()) {
         spt->_children.erase(std::remove(spt->_children.begin(), spt->_children.end(), shared_from_this()), spt->_children.end());
         this->_parent.reset();
-        viewDidDisappear(true);
+        didMoveToParent(nullptr);
     }
 }
 

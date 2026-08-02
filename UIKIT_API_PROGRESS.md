@@ -3,7 +3,7 @@
 This document tracks NXKit against the portable, application-facing core of Apple's UIKit. It is both a compatibility audit and an implementation roadmap.
 
 - Last audited: **2026-08-02**
-- NXKit revision: **working tree after `d6e6c6b9aa44ae88e4b9a49a15ebc76d4039a8da`**
+- NXKit revision: **working tree after `0a9e6de1f3a4d76502b440e54e96387aaa15876c`**
 - UIKit-cross-platform reference: **[`ed2c290`](https://github.com/flowkey/UIKit-cross-platform/commit/ed2c290025f2dfd714ed945153069ca54e55a23e)**
 
 ## How to maintain this document
@@ -49,8 +49,8 @@ Apple's [views and controls](https://developer.apple.com/documentation/uikit/vie
 | Core Animation actions and transactions | Partial | `CAAction`, `CABasicAnimation`, spring animation, timing functions, model/presentation layers, implicit actions, and basic transactions exist. Add robust begin/commit nesting, completion semantics, repeat/autoreverse, fill behavior, additive/keyframe/group animation where useful, interruption, and tests. |
 | `UIView` animation APIs | Partial | Duration, delay, options, spring parameters, completion, and without-animation blocks exist. Verify lifecycle timing, curve/options behavior, nested blocks, interruption, completion delivery, and interaction gating. |
 | `CADisplayLink` | Partial | A callback is registered with the main dispatch loop and can be invalidated. Add timestamp/duration, preferred rate/range, pause, safe lifetime/thread behavior, frame-drop behavior, and tests. |
-| `UIViewController` view loading and lifecycle | Partial | Lazy view loading, appearance callbacks, title, safe-area callbacks, traits, and responder participation exist. Add strict appearance ordering, repeated presentation tests, memory/unload behavior, and transition cancellation semantics. |
-| View-controller containment | Partial | `addChild`, parent/children, move callbacks, and removal exist. Validate ordering and ensure containers forward appearance transitions correctly. |
+| `UIViewController` view loading and lifecycle | Partial | Lazy view loading, appearance callbacks, title, safe-area callbacks, traits, and responder participation exist. View insertion no longer synthesizes duplicate appearance callbacks, and NX containers now explicitly forward transitions when swapping visible children. Add strict appearance ordering tests, repeated presentation tests, memory/unload behavior, animation coordination, and transition cancellation semantics. |
+| View-controller containment | Partial | `addChild` now rejects null children, existing parents, self-containment, and ancestor cycles; removal completes the move callback without incorrectly synthesizing disappearance. `NXTabBarController` keeps every configured controller contained while swapping only the selected view, and regression coverage verifies attachment, removal, and selection without containment churn. Add broader ordering, reparenting, nested-container, and callback-mutation tests. |
 | Modal `present` / `dismiss` | Partial | Full-screen-style presentation and dismissal exist. Complete ownership semantics, nested presentation, interruption, transition completion timing, and presentation styles that make sense cross-platform. |
 | `UIColor` and dynamic colors | Partial | RGBA colors, many semantic colors, alpha changes, tint and dark/light dynamic providers exist. Add color-space-independent semantics, stable resolution rules, more system colors, and tests. Pattern colors are not core priority. |
 | Trait environment and `UITraitCollection` | Partial | Interface style and display scale propagate. Add layout direction, preferred content size, accessibility contrast, interface idiom where portable, and explicit trait-change registration/ordering. |
@@ -67,7 +67,7 @@ Apple's [views and controls](https://developer.apple.com/documentation/uikit/vie
 | `UIScrollView` indicators and delegate | Stub/unsafe | Indicator methods are empty, begin-dragging is delivered repeatedly, and end-dragging is not delivered. Implement the public behavior or remove/mark the surface until it works. |
 | Editable text: `UITextInput`, `UITextField`, basic `UITextView` | Missing | Required for forms, search, login, and settings. Build a portable text-input client, SDL IME bridge, selection/caret model, clipboard integration, composition/marked text, secure entry, and keyboard navigation before styling breadth. |
 | Core accessibility element semantics | Missing | Add accessible flag, label, value, hint, traits/role, enabled/selected state, frame, hidden state, grouping, ordering, actions, focus, and a platform bridge. Accessibility is part of the core definition of done, not optional polish. See Apple's [Accessibility for UIKit](https://developer.apple.com/documentation/uikit/accessibility-for-uikit). |
-| Automated core tests | Missing | Add a fast test target covering ownership, geometry, view/layer hierarchy, conversion, layout, lifecycle, controls, gestures, scrolling, traits, and animation. Port applicable behavioral tests from UIKit-cross-platform. |
+| Automated core tests | Partial | The opt-in `NXKitTabBarControllerTests` target covers initial and invalid selection, grouped/empty content, delegate veto and notification, configuration changes, and configured-child containment. Expand into a fast core suite covering ownership, geometry, view/layer hierarchy, conversion, layout, lifecycle, controls, gestures, scrolling, traits, and animation; port applicable behavioral tests from UIKit-cross-platform. |
 
 ## P1 — common production application structure
 
@@ -75,9 +75,9 @@ Apple's [views and controls](https://developer.apple.com/documentation/uikit/vie
 | --- | --- | --- |
 | `UINavigationController` | Missing | `NXNavigationController` is fixed console/demo chrome, lacks normal push/pop behavior, and contains product-specific assets/text. Implement a separate UIKit-compatible stack container in `UIKitCore`. |
 | `UINavigationBar`, `UINavigationItem`, bar-button items | Missing | Build data-driven navigation items, title/back behavior, left/right actions, safe-area layout, appearance, and focus/touch input. |
-| `UITabBarController`, `UITabBar`, tab items | Missing | `NXTabBarController` is a 410-point sidebar, not a UIKit tab controller. Implement selection, child containment, item state, customizable placement, and adaptive bottom/sidebar layout without hard-coded product styling. |
+| `UITabBarController`, `UITabBar`, tab items | Missing | `NXTabBarController` now provides validated mutable content, flat and sectioned selection, a selected controller, delegate veto/notification, configurable sidebar width, focus-selection policy, and regression coverage, but remains Switch-specific and has no `UITabBarItem` model, UIKit bar presentation, customization, or adaptive bottom/sidebar mode. Implement the UIKit types separately in `UIKitCore`. |
 | `UIScreen`-like display information | Missing | Expose logical bounds, pixel scale, refresh rate/range, and display identity through a portable facade rather than requiring application code to access `SkiaCtx`. |
-| `IndexPath` | Partial | A two-component section/item value exists. Add const access, equality/order/hash, arbitrary components if needed, and tests before using it as the stable public list index type. |
+| `IndexPath` | Partial | A two-component section/item value now has const access and equality and is exercised by tab-controller tests. Add ordering/hash, arbitrary components if needed, negative-component policy, and focused value tests before using it as the stable public list index type. |
 | `UITableView`, cells, data source and delegate | Missing | High-value foundation for settings, lists, menus, and feeds. Start with vertical reusable cells, headers/footers, selection, scrolling, insert/delete/reload, stable reuse, focus, accessibility, and keyboard/gamepad navigation. |
 | `UICollectionView`, cells and basic layouts | Missing | Implement after table/reuse primitives. Begin with a flow/grid layout, reusable cells/supplementaries, selection, batch updates, and accessibility. |
 | Reuse and diffable data model | Missing | Define stable identifiers and snapshot/diff behavior shared by table and collection views. A simpler C++ API is acceptable if lifecycle and update semantics are documented. |
@@ -144,7 +144,7 @@ These are not silently “complete.” They must remain documented until a delib
 | Layout | Yoga flex layout replaces Auto Layout constraints and anchors. |
 | Interface files | NXKit's TinyXML2 format is a custom declarative layout dialect, not an Apple nib/storyboard parser. |
 | Rendering | Views are custom-rendered through Skia rather than native platform widgets. Native platform look, accessibility, text input, and system integration must therefore be implemented explicitly. |
-| Extension components | `NXNavigationController`, `NXTabBarController`, and `NXControl` are opinionated console/demo components and do not count as UIKit API coverage. |
+| Extension components | `NXNavigationController`, `NXTabBarController`, and `NXControl` are opinionated console components and do not count as UIKit API coverage. `NXTabBarController` deliberately keeps grouped sidebar and focus-following-selection behavior while borrowing UIKit's mutable controller list, selected controller/index, delegate veto/notification, and containment ordering. |
 
 ## Currently out of scope
 
