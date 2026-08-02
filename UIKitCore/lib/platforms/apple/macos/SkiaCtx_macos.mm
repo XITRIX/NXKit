@@ -118,6 +118,13 @@ void SkiaCtx_macos::destroyContext() {
     if (context) {
         context->submit(skgpu::graphite::SyncToCpu::kYes);
     }
+    if (recorder) {
+        clearGraphiteImageCache(recorder.get());
+        recorder->freeGpuResources();
+    }
+    if (context) {
+        context->freeGpuResources();
+    }
     recorder.reset();
     context.reset();
 

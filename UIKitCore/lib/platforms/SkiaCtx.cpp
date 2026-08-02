@@ -48,6 +48,14 @@ public:
         return graphiteImage;
     }
 
+    void clear() {
+        // Graphite-backed images retain texture proxies owned by the recorder's
+        // resource provider. Release them while the recorder and context are
+        // still alive instead of from ImageProvider's member destructor.
+        cache.clear();
+        recency.clear();
+    }
+
 private:
     static constexpr size_t kMaximumCachedImages = 256;
 
@@ -71,6 +79,18 @@ std::unique_ptr<skgpu::graphite::Recorder> SkiaCtx::createGraphiteRecorder(
     skgpu::graphite::RecorderOptions options;
     options.fImageProvider = sk_make_sp<NXKitImageProvider>();
     return context->makeRecorder(options);
+}
+
+void SkiaCtx::clearGraphiteImageCache(skgpu::graphite::Recorder* recorder) const {
+    if (!recorder) {
+        return;
+    }
+
+    auto* imageProvider =
+            dynamic_cast<NXKitImageProvider*>(recorder->clientImageProvider());
+    if (imageProvider) {
+        imageProvider->clear();
+    }
 }
 
 SkString SkiaCtx::getDefaultFontFamilyName() const {

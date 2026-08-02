@@ -3,7 +3,7 @@
 This document tracks NXKit against the portable, application-facing core of Apple's UIKit. It is both a compatibility audit and an implementation roadmap.
 
 - Last audited: **2026-08-02**
-- NXKit revision: **working tree after `d3680a73bbb95aaf20614329be6729d095225b46`**
+- NXKit revision: **working tree after `d6e6c6b9aa44ae88e4b9a49a15ebc76d4039a8da`**
 - UIKit-cross-platform reference: **[`ed2c290`](https://github.com/flowkey/UIKit-cross-platform/commit/ed2c290025f2dfd714ed945153069ca54e55a23e)**
 
 ## How to maintain this document
@@ -37,7 +37,7 @@ Apple's [views and controls](https://developer.apple.com/documentation/uikit/vie
 | `CGAffineTransform`, `CATransform3D` | Partial | `NXAffineTransform` and `NXTransform3D` support common transforms and animation. Expand conversion, concatenation, inversion, decomposition, and numerical tests. |
 | Safe object ownership | Stub/unsafe | UIKit-style objects depend on the custom `new_shared` ownership path. Stack allocation or `std::make_shared` can create competing owners. Replace `SharedBase.hpp` with standard ownership before declaring the object model dependable. |
 | Main-thread UI confinement | Partial | A main `DispatchQueue` exists, but UI objects have no enforcement or assertions comparable to `@MainActor`. Add a UI-thread contract and debug checks. |
-| `UIApplicationMain`, `UIApplication`, `UIApplicationDelegate` | Partial | Launch, quit, foreground/background callbacks, SDL event handling, and one global application exist. Switch teardown restores nxlink-redirected descriptors before socket shutdown, explicitly drains and destroys Graphite/Dawn, and terminates the EGL display for same-process homebrew-launcher handoff; hardware verification is pending. Complete lifecycle ordering, activation semantics, error handling, and reproducible tests. |
+| `UIApplicationMain`, `UIApplication`, `UIApplicationDelegate` | Partial | Launch, quit, foreground/background callbacks, SDL event handling, and one global application exist. The build now exports `SK_RELEASE` to match the checked-in release Skia archives, preventing incompatible inline `SkRefCnt` disposal semantics at shutdown. Apple and Switch teardown also clear promoted-image caches while the Graphite recorder is valid and drain GPU resources before destroying the context; Switch restores nxlink-redirected descriptors and terminates EGL for same-process homebrew-launcher handoff. Switch hardware verification is pending. Complete lifecycle ordering, activation semantics, error handling, and reproducible tests. |
 | `UIWindow` and root controller | Partial | Root-controller installation, key visibility, event dispatch, safe area, traits, and focus exist. Clarify key-window semantics, multiple-window support without adopting `UIScene`, resizing, and teardown. |
 | `UIResponder` and responder chain | Partial | Touch and press forwarding exists. Add `canPerformAction`-style routing where portable, first-responder management, loop protection, and chain tests. |
 | `UIEvent`, `UITouch`, presses and keys | Partial | Touch and gamepad/press events exist. The SDL3 Switch backend now preserves finger identity across polls and emits balanced down/motion/up events; the full Switch Demo `.nro` build verifies backend integration, but hardware touch behavior still needs manual confirmation. Complete timestamps, phases, multi-touch identity, cancellation, modifier/key semantics, mouse input, and deterministic tests. |

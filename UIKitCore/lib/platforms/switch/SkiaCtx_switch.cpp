@@ -124,6 +124,7 @@ SkiaCtx_switch::~SkiaCtx_switch() {
             graphite->context->submit(skgpu::graphite::SyncToCpu::kYes);
         }
         if (graphite->recorder) {
+            clearGraphiteImageCache(graphite->recorder.get());
             graphite->recorder->freeGpuResources();
         }
         if (graphite->context) {

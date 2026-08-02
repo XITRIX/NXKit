@@ -7,6 +7,12 @@ add_definitions(
 add_subdirectory(UIKitCore)
 add_subdirectory(NXKit)
 
+# The checked-in Skia archives are built with is_debug=false. Skia's public
+# inline ref-counting code changes with SK_DEBUG/SK_RELEASE, so every consumer
+# of those headers must use the same mode or an app-defined SkRefCnt subclass
+# can cross the static-library boundary with incompatible disposal semantics.
+target_compile_definitions(XITRIXUIKit PUBLIC SK_RELEASE)
+
 list(APPEND platform_libs yogacore tinyxml2)
 target_include_directories(XITRIXUIKit PUBLIC ${EXTERN_PATH}/yoga)
 target_include_directories(XITRIXUIKit PUBLIC ${EXTERN_PATH}/tinyxml2)
