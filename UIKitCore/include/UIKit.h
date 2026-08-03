@@ -15,6 +15,7 @@
 #include <UIPanGestureRecognizer.h>
 #include <UIScrollView.h>
 #include <UITapGestureRecognizer.h>
+#include <UITextView.h>
 #include <UIViewController.h>
 #include <tools/Logger.hpp>
 #include <yoga/Yoga.h>

@@ -10,9 +10,12 @@
 
 #include <UIScrollView.h>
 #include <CATransaction.h>
+#include <tools/IBTools.h>
 #include <UIScrollViewExtensions/SpringTimingParameters.h>
 #include <UIScrollViewExtensions/RubberBand.h>
 #include <algorithm>
+#include <cmath>
+#include <stdexcept>
 
 namespace NXKit {
 
@@ -53,6 +56,21 @@ void UIScrollView::setContentOffset(NXPoint offset, bool animated) {
     CATransaction::commit();
 }
 
+void UIScrollView::setScrollEnabled(bool scrollEnabled) {
+    if (_isScrollEnabled == scrollEnabled) return;
+
+    _isScrollEnabled = scrollEnabled;
+    _panGestureRecognizer->setEnabled(scrollEnabled);
+    if (scrollEnabled) return;
+
+    if (_timerAnimation) {
+        _timerAnimation->invalidate();
+    }
+    cancelDecelerationAnimations();
+    _isDecelerating = false;
+    weightedAverageVelocity = NXPoint();
+}
+
 void UIScrollView::setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior contentInsetAdjustmentBehavior) {
     if (_contentInsetAdjustmentBehavior == contentInsetAdjustmentBehavior) return;
     _contentInsetAdjustmentBehavior = contentInsetAdjustmentBehavior;
@@ -83,8 +101,32 @@ NXPoint UIScrollView::visibleContentOffset() const {
 }
 
 NXSize UIScrollView::contentSize() const {
+    if (_hasExplicitContentSize) return _contentSize;
+
+    // Preserve the historical inferred behavior for existing NXKit callers.
+    // New code should set contentSize explicitly, matching UIKit.
     if (subviews().empty()) return {};
     return subviews().front()->bounds().size;
+}
+
+void UIScrollView::setContentSize(NXSize contentSize) {
+    if (!std::isfinite(contentSize.width)
+        || !std::isfinite(contentSize.height)
+        || contentSize.width < 0
+        || contentSize.height < 0) {
+        throw std::invalid_argument(
+            "UIScrollView content size must be finite and non-negative"
+        );
+    }
+    if (_hasExplicitContentSize && _contentSize == contentSize) return;
+
+    _contentSize = contentSize;
+    _hasExplicitContentSize = true;
+    setNeedsLayout();
+}
+
+UIEdgeInsets UIScrollView::adjustedContentInset() {
+    return effectiveContentInsets();
 }
 
 UIEdgeInsets UIScrollView::effectiveContentInsets() {
@@ -362,14 +404,15 @@ void UIScrollView::cancelDecelerationAnimations() {
     layer()->removeAnimation("bounds");
 }
 
-//bool UIScrollView::applyXMLAttribute(std::string name, std::string value) {
-//    if (UIView::applyXMLAttribute(name, value)) { return true; }
-//
-//    REGISTER_XIB_ATTRIBUTE(bounceVertically, valueToBool, setBounceVertically)
-//    REGISTER_XIB_ATTRIBUTE(bounceHorizontally, valueToBool, setBounceHorizontally)
-//
-//    return false;
-//}
+bool UIScrollView::applyXMLAttribute(const std::string& name, const std::string& value) {
+    if (UIView::applyXMLAttribute(name, value)) return true;
+
+    REGISTER_XIB_ATTRIBUTE(scrollEnabled, valueToBool, setScrollEnabled)
+    REGISTER_XIB_ATTRIBUTE(bounceVertically, valueToBool, setBounceVertically)
+    REGISTER_XIB_ATTRIBUTE(bounceHorizontally, valueToBool, setBounceHorizontally)
+
+    return false;
+}
 
 void UIScrollView::layoutSubviews() {
     UIView::layoutSubviews();

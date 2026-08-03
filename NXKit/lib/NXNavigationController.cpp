@@ -839,7 +839,9 @@ void NXNavigationController::updateVisibleViewController(
     UIView::animate(
         navigationTransitionDuration,
         0,
-        curveEaseOut,
+        UIViewAnimationOptions(
+            curveEaseOut | preferredFramesPerSecond120
+        ),
         [operation, width, previousView, nextView]() {
             nextView->setTransform(NXAffineTransform::identity);
             if (!previousView) {

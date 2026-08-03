@@ -48,6 +48,7 @@ add_library(XITRIXUIKit
         lib/UIResponder.cpp
         lib/UIScrollView.cpp
         lib/UITapGestureRecognizer.cpp
+        lib/UITextView.cpp
         lib/UITouch.cpp
         lib/UITraitCollection.cpp
         lib/UITraitEnvironment.cpp

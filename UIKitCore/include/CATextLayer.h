@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CALayer.h>
+#include <NSTextAlignment.h>
 #include <SkiaCtx.h>
 #include <include/core/SkFont.h>
 #include <include/core/SkTypeface.h>
@@ -8,14 +9,6 @@
 #include <modules/skparagraph/include/ParagraphBuilder.h>
 
 namespace NXKit {
-
-enum class NSTextAlignment {
-    left,
-    right,
-    center,
-    justified,
-    natural
-};
 
 class CATextLayer: public CALayer {
 public:

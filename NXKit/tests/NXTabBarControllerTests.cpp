@@ -54,6 +54,13 @@ public:
     }
 };
 
+class WideIntrinsicView final : public UIView {
+public:
+    NXSize sizeThatFits(NXSize size) override {
+        return { 4000, size.height };
+    }
+};
+
 class RecordingDelegate final : public NXTabBarControllerDelegate {
 public:
     bool allowsSelection = true;
@@ -177,6 +184,25 @@ bool sendKeyPress(
 } // namespace
 
 int main() {
+    auto wideContentController = new_shared<UIViewController>();
+    wideContentController->setTitle("Wide content");
+    wideContentController->setView(new_shared<WideIntrinsicView>());
+    auto boundedTabController = new_shared<NXTabBarController>(
+        NXTabBarController::ViewControllerSection { wideContentController }
+    );
+    boundedTabController->view()->setFrame(NXRect(0, 0, 1280, 720));
+    boundedTabController->view()->layoutIfNeeded();
+    expect(
+        wideContentController->view()->frame()
+            == NXRect(
+                0,
+                0,
+                1280 - boundedTabController->tabBarWidth(),
+                720
+            ),
+        "the content column uses the remaining width instead of a child's intrinsic width"
+    );
+
     auto first = new_shared<RecordingViewController>();
     auto second = new_shared<RecordingViewController>();
     auto third = new_shared<RecordingViewController>();

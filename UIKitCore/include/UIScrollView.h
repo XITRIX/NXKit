@@ -38,13 +38,16 @@ public:
     UIScrollView(NXRect frame = NXRect());
 
     void addSubview(const std::shared_ptr<UIView> &view) override;
-//    bool applyXMLAttribute(std::string name, std::string value) override;
+    bool applyXMLAttribute(const std::string& name, const std::string& value) override;
     void layoutSubviews() override;
 
     void safeAreaInsetsDidChange() override;
 
     NXPoint contentOffset() { return bounds().origin; }
-    void setContentOffset(NXPoint offset, bool animated);
+    virtual void setContentOffset(NXPoint offset, bool animated);
+
+    [[nodiscard]] bool isScrollEnabled() const { return _isScrollEnabled; }
+    void setScrollEnabled(bool scrollEnabled);
 
     UIEdgeInsets contentInset() { return _contentInset; }
     void setContentInset(UIEdgeInsets contentInset) { _contentInset = contentInset; }
@@ -62,7 +65,9 @@ public:
     void setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior contentInsetAdjustmentBehavior);
 
     NXSize contentSize() const;
-//    void setContentSize(Size size) { _contentSize = size; }
+    void setContentSize(NXSize contentSize);
+
+    UIEdgeInsets adjustedContentInset();
 
 private:
     std::shared_ptr<UIPanGestureRecognizer> _panGestureRecognizer;
@@ -73,6 +78,7 @@ private:
 
     bool _bounceHorizontally = false;
     bool _bounceVertically = false;
+    bool _isScrollEnabled = true;
 
     bool shouldBounceHorizontally() const;
     bool shouldBounceVertically() const;
@@ -82,7 +88,8 @@ private:
     std::shared_ptr<TimerAnimation> _timerAnimation;
     UIEdgeInsets _lastSafeAreaInsets;
     UIEdgeInsets _contentInset;
-//    Size _contentSize;
+    NXSize _contentSize;
+    bool _hasExplicitContentSize = false;
 
     UIEdgeInsets effectiveContentInsets();
 

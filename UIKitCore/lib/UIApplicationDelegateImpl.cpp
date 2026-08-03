@@ -10,6 +10,7 @@ void UIApplicationDelegate::applicationNeedsXIBRegistration(UIApplication* appli
     REGISTER_NIB(UIButton)
     REGISTER_NIB(UIImageView)
     REGISTER_NIB(UIScrollView)
+    REGISTER_NIB(UITextView)
 }
 
 }

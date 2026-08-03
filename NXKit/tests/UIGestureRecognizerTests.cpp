@@ -2,11 +2,13 @@
 #include <UIControl.h>
 #include <UIEvent.h>
 #include <UIScrollView.h>
+#include <UITextView.h>
 #include <UITouch.h>
 #include <UIWindow.h>
 
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <string>
 
 using namespace NXKit;
@@ -89,6 +91,26 @@ int main() {
 
     auto contentView = new_shared<UIView>(NXRect(0, 0, 320, 800));
     scrollView->addSubview(contentView);
+    expect(
+        scrollView->contentSize() == NXSize(320, 800),
+        "a scroll view preserves legacy inferred content size when unset"
+    );
+    scrollView->setContentSize(NXSize(320, 900));
+    expect(
+        scrollView->contentSize() == NXSize(320, 900),
+        "an explicit scroll-view content size overrides subview inference"
+    );
+
+    bool rejectedInvalidContentSize = false;
+    try {
+        scrollView->setContentSize(NXSize(-1, 900));
+    } catch (const std::invalid_argument&) {
+        rejectedInvalidContentSize = true;
+    }
+    expect(
+        rejectedInvalidContentSize,
+        "a scroll view rejects negative content dimensions"
+    );
 
     auto control = new_shared<UIControl>();
     control->setFrame(NXRect(0, 0, 320, 80));
@@ -139,6 +161,111 @@ int main() {
     );
     expect(!control->isHighlighted(), "a cancelled touch clears control tracking");
     expect(primaryActionCount == 0, "a cancelled touch performs no control action");
+
+    auto disabledScrollWindow = new_shared<UIWindow>();
+    disabledScrollWindow->setFrame(NXRect(0, 0, 320, 480));
+
+    auto disabledScrollView = new_shared<UIScrollView>(
+        disabledScrollWindow->bounds()
+    );
+    disabledScrollView->setBounceVertically(true);
+    disabledScrollView->setScrollEnabled(false);
+    disabledScrollWindow->addSubview(disabledScrollView);
+
+    auto disabledScrollContent = new_shared<UIView>(NXRect(0, 0, 320, 800));
+    disabledScrollView->addSubview(disabledScrollContent);
+
+    auto disabledScrollControl = new_shared<UIControl>();
+    disabledScrollControl->setFrame(NXRect(0, 0, 320, 80));
+    disabledScrollContent->addSubview(disabledScrollControl);
+
+    int disabledScrollActionCount = 0;
+    disabledScrollControl->primaryAction = UIAction(
+        "",
+        [&disabledScrollActionCount]() {
+            ++disabledScrollActionCount;
+        }
+    );
+
+    expect(
+        !disabledScrollView->isScrollEnabled(),
+        "a scroll view reports disabled user scrolling"
+    );
+    disabledScrollView->setContentOffset(NXPoint(0, 100), false);
+    expect(
+        disabledScrollView->contentOffset() == NXPoint(0, 100),
+        "disabling user scrolling preserves programmatic content offsets"
+    );
+    disabledScrollView->setContentOffset(NXPoint(), false);
+
+    auto disabledScrollTouch = new_shared<UITouch>(5, NXPoint(20, 20), Timer());
+    auto disabledScrollEvent = UIGestureRecognizerTestHarness::eventWithTouch(
+        disabledScrollTouch,
+        disabledScrollWindow
+    );
+    sendTouch(
+        disabledScrollWindow,
+        disabledScrollEvent,
+        disabledScrollTouch,
+        UITouchPhase::began,
+        NXPoint(20, 20)
+    );
+    sendTouch(
+        disabledScrollWindow,
+        disabledScrollEvent,
+        disabledScrollTouch,
+        UITouchPhase::moved,
+        NXPoint(20, 50)
+    );
+    expect(
+        disabledScrollView->contentOffset() == NXPoint(),
+        "a drag does not move a scroll view when user scrolling is disabled"
+    );
+    expect(
+        disabledScrollControl->isHighlighted(),
+        "a disabled ancestor scroll recognizer does not cancel control tracking"
+    );
+    sendTouch(
+        disabledScrollWindow,
+        disabledScrollEvent,
+        disabledScrollTouch,
+        UITouchPhase::ended,
+        NXPoint(20, 50)
+    );
+    expect(
+        disabledScrollActionCount == 1,
+        "a control action completes inside a scroll-disabled view"
+    );
+
+    auto textView = new_shared<UITextView>();
+    expect(
+        textView->textContainerInset() == UIEdgeInsets(8, 0, 8, 0),
+        "a text view uses UIKit's default vertical text-container inset"
+    );
+    expect(textView->isScrollEnabled(), "a text view scrolls by default");
+    expect(
+        !textView->isHorizontalScrollEnabled(),
+        "a text view wraps instead of scrolling horizontally by default"
+    );
+    textView->setHorizontalScrollEnabled(true);
+    expect(
+        textView->isHorizontalScrollEnabled(),
+        "a text view can opt into unwrapped horizontal scrolling"
+    );
+    expect(
+        textView->bounceHorizontally(),
+        "enabling horizontal text scrolling enables its scroll physics"
+    );
+    textView->setHorizontalScrollEnabled(false);
+    expect(
+        !textView->bounceHorizontally(),
+        "disabling horizontal text scrolling restores wrapped-axis physics"
+    );
+    textView->setText("A multiline\ntext value");
+    expect(
+        textView->text() == "A multiline\ntext value",
+        "a text view stores multiline UTF-8 text"
+    );
 
     auto hierarchyMutationWindow = new_shared<UIWindow>();
     hierarchyMutationWindow->setFrame(NXRect(0, 0, 320, 480));

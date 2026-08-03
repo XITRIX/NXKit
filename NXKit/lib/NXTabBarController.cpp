@@ -480,6 +480,8 @@ void NXTabBarController::loadView() {
     _contentView->setAutolayoutEnabled(true);
     _contentView->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
         layout->setFlexGrow(1);
+        layout->setFlexShrink(1);
+        layout->setFlexBasis(0_pt);
         layout->setAlignItems(YGAlignStretch);
     });
 

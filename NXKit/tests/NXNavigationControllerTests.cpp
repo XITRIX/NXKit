@@ -1,5 +1,6 @@
 #include <NXNavigationController.h>
 #include <NXTabBarController.h>
+#include <CABasicAnimation.h>
 #include <UIApplication.h>
 #include <UIApplicationDelegate.h>
 #include <UIWindow.h>
@@ -80,6 +81,19 @@ public:
     void viewDidDisappear(bool animated) override {
         UIViewController::viewDidDisappear(animated);
         ++didDisappearCount;
+    }
+};
+
+class RecordingAnimationView final : public UIView {
+public:
+    UIViewAnimationOptions lastAnimationOptions = UIViewAnimationOptions::none;
+
+    std::shared_ptr<CABasicAnimation> actionForKey(std::string event) override {
+        const auto animation = UIView::actionForKey(std::move(event));
+        if (animation && animation->animationGroup) {
+            lastAnimationOptions = animation->animationGroup->options;
+        }
+        return animation;
     }
 };
 
@@ -613,6 +627,8 @@ int main() {
     auto transitionRoot = new_shared<RecordingViewController>();
     auto transitionSecond = new_shared<RecordingViewController>();
     auto transitionThird = new_shared<RecordingViewController>();
+    auto transitionSecondView = new_shared<RecordingAnimationView>();
+    transitionSecond->setView(transitionSecondView);
     auto transitionNavigationController =
         new_shared<NXNavigationController>(transitionRoot);
     auto transitionWindow = new_shared<UIWindow>();
@@ -626,6 +642,11 @@ int main() {
     expect(
         transitionNavigationController->isTransitioning(),
         "an animated push reports an in-progress navigation transition"
+    );
+    expect(
+        (transitionSecondView->lastAnimationOptions & preferredFramesPerSecond120)
+            == preferredFramesPerSecond120,
+        "an animated navigation transition requests a 120 fps frame limit"
     );
     transitionNavigationController->pushViewController(transitionThird, true);
     expect(
