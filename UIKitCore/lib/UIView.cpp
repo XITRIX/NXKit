@@ -560,7 +560,13 @@ std::shared_ptr<UIFocusEnvironment> UIView::parentFocusEnvironment() {
 }
 
 bool UIView::isFocused() {
-    auto currentFocus = window()->focusSystem()->focusedItem();
+    const auto containingWindow = window();
+    if (!containingWindow) return false;
+
+    const auto focusSystem = containingWindow->focusSystem();
+    if (!focusSystem) return false;
+
+    auto currentFocus = focusSystem->focusedItem();
     if (currentFocus.expired()) return false;
 
     return currentFocus.lock() == shared_from_base<UIFocusItem>();

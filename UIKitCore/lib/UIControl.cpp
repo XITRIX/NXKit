@@ -169,8 +169,11 @@ void UIControl::setBaseScaleMultiplier(NXFloat baseScaleMultiplier) {
 }
 
 void UIControl::performPrimaryAction() {
-    if (canBecomeFocused())
-        window()->focusSystem()->_focusedItem = shared_from_this();
+    if (canBecomeFocused()) {
+        if (const auto containingWindow = window()) {
+            containingWindow->focusSystem()->_focusedItem = shared_from_this();
+        }
+    }
 
     if (primaryAction.has_value() && isActionDispatchAllowed()) {
         primaryAction->_handler();

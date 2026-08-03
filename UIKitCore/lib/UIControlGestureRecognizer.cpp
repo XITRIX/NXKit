@@ -42,9 +42,10 @@ void UIControlGestureRecognizer::touchesEnded(std::vector<std::shared_ptr<UITouc
     _touchToTrack = nullptr;
 
     setState(UIGestureRecognizerState::ended);
-    if (control.lock()->isHighlighted()) {
-        control.lock()->setHighlighted(false);
-        control.lock()->performPrimaryAction();
+    const auto trackedControl = control.lock();
+    if (trackedControl && trackedControl->isHighlighted()) {
+        trackedControl->setHighlighted(false);
+        trackedControl->performPrimaryAction();
     }
 }
 
@@ -59,7 +60,8 @@ void UIControlGestureRecognizer::touchesCancelled(std::vector<std::shared_ptr<UI
 
 void UIControlGestureRecognizer::reset() {
     _touchToTrack = nullptr;
-    if (const auto trackedControl = control.lock()) {
+    if (const auto trackedControl = control.lock();
+        trackedControl && trackedControl->isHighlighted()) {
         trackedControl->setHighlighted(false);
     }
 }

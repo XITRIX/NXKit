@@ -81,7 +81,15 @@ bool UIFocusSystem::requestFocusUpdate(
         return false;
     }
 
-    _isActive = true;
+    if (!_isActive) {
+        // Touch input hides the focus appearance, but actions may still update
+        // the item that should regain focus when controller input resumes.
+        // Retain that destination without turning a touch-driven action into a
+        // visible focus update.
+        _focusedItem = item;
+        return true;
+    }
+
     applyFocusToItem(item, context);
     return true;
 }
@@ -210,7 +218,10 @@ void UIFocusSystem::applyFocusToItem(const std::shared_ptr<UIFocusItem>& item, U
     }
 
     UIFocusAnimationContext animationContext;
-    UIView::animate(animationContext.duration(), 0, curveEaseOut, [context, coordinator, animationContext]() {
+    UIView::animate(animationContext.duration(), 0,
+                    UIViewAnimationOptions(
+                        curveEaseOut | allowUserInteraction
+                    ), [context, coordinator, animationContext]() {
         for (const auto& animation: coordinator._coordinatedAnimations) { animation(); }
         for (const auto& animation: coordinator._coordinatedFocusingAnimations) { animation(animationContext); }
         for (const auto& animation: coordinator._coordinatedUnfocusingAnimations) { animation(animationContext); }
