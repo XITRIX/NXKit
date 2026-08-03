@@ -14,11 +14,11 @@ class UIPressesEvent;
 enum class UIGestureRecognizerState {
     possible,
     began,
-    recognized,
     changed,
     ended,
     cancelled,
-    failed
+    failed,
+    recognized = ended
 };
 
 class UIView;
@@ -45,6 +45,18 @@ public:
 
     std::weak_ptr<UIView> view() { return _view; }
 
+    bool cancelsTouchesInView() const { return _cancelsTouchesInView; }
+    void setCancelsTouchesInView(bool cancelsTouchesInView) {
+        _cancelsTouchesInView = cancelsTouchesInView;
+    }
+
+    virtual bool canPrevent(
+        const std::shared_ptr<UIGestureRecognizer>& preventedGestureRecognizer
+    ) const;
+    virtual bool canBePreventedBy(
+        const std::shared_ptr<UIGestureRecognizer>& preventingGestureRecognizer
+    ) const;
+
     virtual void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event);
     virtual void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event);
     virtual void touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event);
@@ -56,10 +68,14 @@ public:
     virtual void pressesCancelled(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event);
 
 protected:
+    virtual void reset();
+
     UIGestureRecognizerState _state = UIGestureRecognizerState::possible;
     
 private:
     bool _isEnabled = true;
+    bool _cancelsTouchesInView = true;
+    bool _didResetCurrentAttempt = false;
     std::weak_ptr<UIView> _view;
     std::vector<std::shared_ptr<UITouch>> _allTouches;
 
@@ -77,10 +93,12 @@ private:
 
     void addTouch(std::shared_ptr<UITouch> touch);
     void removeTouch(std::shared_ptr<UITouch> touch);
+    void resetCurrentAttemptIfNeeded();
     void cancelOtherGestureRecognizersThatShouldNotRecognizeSimultaneously();
 
     friend class UIView;
+    friend class UIWindow;
+    friend class UIGestureRecognizerTestHarness;
 };
 
 }
-

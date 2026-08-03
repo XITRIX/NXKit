@@ -9,7 +9,7 @@
 namespace NXKit {
 
 enum class UITouchPhase {
-    began, moved, ended
+    began, moved, ended, cancelled
 };
 
 class UIView;
@@ -59,6 +59,7 @@ private:
     friend class UIApplication;
     friend class UIWindow;
     friend class UIGestureRecognizer;
+    friend class UIGestureRecognizerTestHarness;
 };
 
 constexpr bool operator==(const UITouch& lhs, const UITouch& rhs) {
@@ -66,4 +67,3 @@ constexpr bool operator==(const UITouch& lhs, const UITouch& rhs) {
 }
 
 }
-

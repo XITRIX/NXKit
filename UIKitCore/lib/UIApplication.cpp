@@ -330,7 +330,9 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             if (!event || !touch) return;
 
             touch->_timestamp = Timer();
-            touch->_phase = UITouchPhase::ended;
+            touch->_phase = e.type == SDL_EVENT_FINGER_CANCELED
+                ? UITouchPhase::cancelled
+                : UITouchPhase::ended;
 
             sendEvent(event);
             UIEvent::activeEvents.erase(std::remove(UIEvent::activeEvents.begin(), UIEvent::activeEvents.end(), event), UIEvent::activeEvents.end());

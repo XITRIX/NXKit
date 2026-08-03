@@ -104,8 +104,6 @@ void UIPanGestureRecognizer::touchesBegan(std::vector<std::shared_ptr<UITouch>> 
         initialTouchPoint = trackingTouch->locationIn(nullptr);
         trackingWindow = trackingTouch->window();
         resetVelocityTracking();
-        _state = UIGestureRecognizerState::possible;
-        onStateChanged(shared_from_this());
     }
 }
 
@@ -133,10 +131,40 @@ void UIPanGestureRecognizer::touchesMoved(std::vector<std::shared_ptr<UITouch>> 
 void UIPanGestureRecognizer::touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     UIGestureRecognizer::touchesEnded(touches, event);
     if (trackingTouch == touches[0]) {
-        setState(UIGestureRecognizerState::ended);
+        if (state() == UIGestureRecognizerState::began
+            || state() == UIGestureRecognizerState::changed) {
+            setState(UIGestureRecognizerState::ended);
+        } else if (state() == UIGestureRecognizerState::possible) {
+            setState(UIGestureRecognizerState::failed);
+        }
         trackingTouch = nullptr;
         trackingWindow.reset();
+        resetVelocityTracking();
     }
+}
+
+void UIPanGestureRecognizer::touchesCancelled(
+    std::vector<std::shared_ptr<UITouch>> touches,
+    std::shared_ptr<UIEvent> event
+) {
+    UIGestureRecognizer::touchesCancelled(touches, event);
+    if (!trackingTouch
+        || std::find(touches.begin(), touches.end(), trackingTouch) == touches.end()) {
+        return;
+    }
+
+    if (state() == UIGestureRecognizerState::began
+        || state() == UIGestureRecognizerState::changed) {
+        setState(UIGestureRecognizerState::cancelled);
+    } else if (state() == UIGestureRecognizerState::possible) {
+        setState(UIGestureRecognizerState::failed);
+    }
+}
+
+void UIPanGestureRecognizer::reset() {
+    trackingTouch = nullptr;
+    trackingWindow.reset();
+    resetVelocityTracking();
 }
 
 }

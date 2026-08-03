@@ -30,4 +30,10 @@ if (NXKIT_BUILD_TESTS)
     )
     target_link_libraries(NXKitNavigationControllerTests PRIVATE NXKit)
     add_test(NAME NXKitNavigationControllerTests COMMAND NXKitNavigationControllerTests)
+
+    add_executable(NXKitGestureRecognizerTests
+            tests/UIGestureRecognizerTests.cpp
+    )
+    target_link_libraries(NXKitGestureRecognizerTests PRIVATE NXKit)
+    add_test(NAME NXKitGestureRecognizerTests COMMAND NXKitGestureRecognizerTests)
 endif ()

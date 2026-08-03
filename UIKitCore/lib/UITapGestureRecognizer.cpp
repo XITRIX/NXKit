@@ -2,6 +2,8 @@
 #include <UITouch.h>
 #include <UIPress.h>
 
+#include <algorithm>
+
 namespace NXKit {
 
 #define THRESHOLD 10
@@ -31,6 +33,25 @@ void UITapGestureRecognizer::touchesEnded(std::vector<std::shared_ptr<UITouch>> 
         setState(UIGestureRecognizerState::ended);
         trackingTouch = nullptr;
     }
+}
+
+void UITapGestureRecognizer::touchesCancelled(
+    std::vector<std::shared_ptr<UITouch>> touches,
+    std::shared_ptr<UIEvent> event
+) {
+    UIGestureRecognizer::touchesCancelled(touches, event);
+    if (!trackingTouch
+        || std::find(touches.begin(), touches.end(), trackingTouch) == touches.end()) {
+        return;
+    }
+
+    if (state() == UIGestureRecognizerState::possible) {
+        setState(UIGestureRecognizerState::failed);
+    }
+}
+
+void UITapGestureRecognizer::reset() {
+    trackingTouch = nullptr;
 }
 
 void UITapGestureRecognizer::pressesBegan(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) {

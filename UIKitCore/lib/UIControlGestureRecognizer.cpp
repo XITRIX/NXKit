@@ -8,6 +8,8 @@
 #include <UIControlGestureRecognizer.h>
 #include <UITouch.h>
 
+#include <algorithm>
+
 namespace NXKit {
 
 UIControlGestureRecognizer::UIControlGestureRecognizer(const std::weak_ptr<UIControl>& control) :
@@ -15,11 +17,11 @@ UIControlGestureRecognizer::UIControlGestureRecognizer(const std::weak_ptr<UICon
 { }
 
 void UIControlGestureRecognizer::touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
-    setState(UIGestureRecognizerState::began);
-
     if (_touchToTrack == nullptr) {
         _touchToTrack = std::vector<std::shared_ptr<UITouch>>(touches.begin(), touches.end()).front();
-        control.lock()->setHighlighted(true);
+        if (const auto trackedControl = control.lock()) {
+            trackedControl->setHighlighted(true);
+        }
     }
 }
 
@@ -47,7 +49,19 @@ void UIControlGestureRecognizer::touchesEnded(std::vector<std::shared_ptr<UITouc
 }
 
 void UIControlGestureRecognizer::touchesCancelled(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
+    if (_touchToTrack == nullptr
+        || std::find(touches.begin(), touches.end(), _touchToTrack) == touches.end()) {
+        return;
+    }
 
+    setState(UIGestureRecognizerState::failed);
+}
+
+void UIControlGestureRecognizer::reset() {
+    _touchToTrack = nullptr;
+    if (const auto trackedControl = control.lock()) {
+        trackedControl->setHighlighted(false);
+    }
 }
 
 void UIControlGestureRecognizer::pressesBegan(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) {

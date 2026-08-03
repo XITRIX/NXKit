@@ -13,11 +13,15 @@ public:
     void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
     void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
     void touchesEnded(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
+    void touchesCancelled(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
 
     NXPoint translationInView(const std::shared_ptr<UIView>& view);
     void setTranslation(NXPoint translation, const std::shared_ptr<UIView>& inView);
 
     NXPoint velocityIn(const std::shared_ptr<UIView>& view);
+
+protected:
+    void reset() override;
 
 private:
     std::shared_ptr<UITouch> trackingTouch;

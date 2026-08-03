@@ -28,7 +28,6 @@ NXPoint UITouch::previousLocationIn(std::shared_ptr<UIView> view) {
 
 void UITouch::runTouchActionOnRecognizerHierachy(const std::function<void(std::shared_ptr<UIGestureRecognizer>)>& action) {
     for (const auto& recognizer: _gestureRecognizers) {
-        if (_hasBeenCancelledByAGestureRecognizer) return;
         if (recognizer.expired() || !recognizer.lock()->isEnabled()) continue;
         action(recognizer.lock());
     }
@@ -36,4 +35,3 @@ void UITouch::runTouchActionOnRecognizerHierachy(const std::function<void(std::s
 
 
 }
-

@@ -27,6 +27,9 @@ public:
     void pressesEnded(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) override;
     void pressesCancelled(std::vector<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) override;
 
+protected:
+    void reset() override;
+
 private:
     std::weak_ptr<UIControl> control;
     std::shared_ptr<UITouch> _touchToTrack;
