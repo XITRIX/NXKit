@@ -466,16 +466,6 @@ void NXTabBarController::loadView() {
         }
     };
 
-    NXResponderAction {
-        .button = NXActionButton::b,
-        .isEnabled = true,
-        .action = UIAction("Back", [weakSelf]() {
-            if (const auto self = weakSelf.lock()) {
-                self->focusSelectedTab();
-            }
-        }),
-    }.registerOn(shared_from_base<NXTabBarController>());
-
     _contentView = new_shared<UIView>();
     _contentView->setAutolayoutEnabled(true);
     _contentView->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
@@ -484,6 +474,15 @@ void NXTabBarController::loadView() {
         layout->setFlexBasis(0_pt);
         layout->setAlignItems(YGAlignStretch);
     });
+    NXResponderAction {
+        .button = NXActionButton::b,
+        .isEnabled = true,
+        .action = UIAction("Back", [weakSelf]() {
+            if (const auto self = weakSelf.lock()) {
+                self->focusSelectedTab();
+            }
+        }),
+    }.registerOn(_contentView);
 
     contentView->addSubview(_tabBar);
     contentView->addSubview(_contentView);

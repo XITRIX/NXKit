@@ -1,5 +1,6 @@
 #include <NXNavigationController.h>
 
+#include <UIApplication.h>
 #include <UIBlurView.h>
 #include <UIImageView.h>
 #include <UILabel.h>
@@ -644,20 +645,24 @@ void NXNavigationController::updateChrome() {
     const auto item = topNavigationItem();
 
     const auto self = shared_from_base<NXNavigationController>();
+    const bool canNavigateBack = _viewControllers.size() > 1;
     NXResponderAction backAction {
         .button = NXActionButton::b,
         .isEnabled = true,
-        .action = UIAction("Back", [weakSelf = weak_from_base<NXNavigationController>()]() {
+        .action = UIAction(canNavigateBack ? "Back" : "Exit", [
+            weakSelf = weak_from_base<NXNavigationController>()
+        ]() {
             if (const auto navigationController = weakSelf.lock()) {
-                navigationController->popViewController(true);
+                if (navigationController->popViewController(true)) {
+                    return;
+                }
+                if (UIApplication::shared) {
+                    UIApplication::shared->handleSDLQuit();
+                }
             }
         }),
     };
-    if (_viewControllers.size() > 1) {
-        backAction.registerOn(self);
-    } else {
-        backAction.unregisterFrom(self);
-    }
+    backAction.registerOn(self);
     const auto title = item && item->titleOverride()
         ? *item->titleOverride()
         : (top ? top->title() : std::string {});

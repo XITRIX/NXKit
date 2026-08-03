@@ -433,6 +433,31 @@ int main() {
             focusableController->control->consumedBackCount == 1,
             "the child responder receives the B action once"
         );
+        focusableController->control->consumesBack = false;
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "B can return from tab content before exiting"
+        );
+        focusNavigationController->defaultActionsWidget()->refresh();
+        const auto& topLevelActions =
+            focusNavigationController->defaultActionsWidget()->actions();
+        expect(
+            std::any_of(
+                topLevelActions.begin(),
+                topLevelActions.end(),
+                [](const auto& action) {
+                    return action.button == NXActionButton::b
+                        && action.isEnabled
+                        && action.action.title() == "Exit";
+                }
+            ),
+            "the tab bar exposes navigation Exit once there is nowhere farther back"
+        );
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "the top-level B/menu key press is queued"
+        );
+        expect(application->isQuitRequested(), "top-level B requests app exit");
         SDL_QuitSubSystem(SDL_INIT_EVENTS);
     }
 

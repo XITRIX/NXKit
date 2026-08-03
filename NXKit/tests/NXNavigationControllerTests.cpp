@@ -327,10 +327,13 @@ int main() {
     expect(statusWidget->compact(), "status uses the compact footer representation by default");
     expect(actionsWidget && !actionsWidget->superview().expired(), "actions are installed by default");
     expect(
-        actionsWidget->actions().size() == 1
-            && actionsWidget->actions()[0].button == NXActionButton::a
-            && !actionsWidget->actions()[0].isEnabled,
-        "a disabled A action is always shown when no primary action is available"
+        actionsWidget->actions().size() == 2
+            && actionsWidget->actions()[0].button == NXActionButton::b
+            && actionsWidget->actions()[0].isEnabled
+            && actionsWidget->actions()[0].action.title() == "Exit"
+            && actionsWidget->actions()[1].button == NXActionButton::a
+            && !actionsWidget->actions()[1].isEnabled,
+        "the root shows Exit before its disabled A placeholder"
     );
 
     const auto originalStatusContainer = statusWidget->superview().lock();
@@ -382,14 +385,16 @@ int main() {
     rootAction.registerOn(root);
     actionsWidget->refresh();
     expect(
-        actionsWidget->actions().size() == 1
-            && actionsWidget->actions()[0]
+        actionsWidget->actions().size() == 2
+            && actionsWidget->actions()[0].button == NXActionButton::b
+            && actionsWidget->actions()[0].action.title() == "Exit"
+            && actionsWidget->actions()[1]
                 == NXResponderAction {
                     .button = NXActionButton::a,
                     .isEnabled = true,
                     .action = UIAction("Continue"),
                 },
-        "a responder A action replaces the disabled placeholder"
+        "a responder A action replaces the disabled placeholder beside Exit"
     );
     rootAction.unregisterFrom(root);
 
@@ -1366,6 +1371,22 @@ int main() {
             responderNavigationController->topViewController() == tabBarController,
             "an unclaimed menu press reaches the navigation controller's Back action"
         );
+        completePendingAnimations();
+        responderNavigationController->defaultActionsWidget()->refresh();
+        const auto& rootActions =
+            responderNavigationController->defaultActionsWidget()->actions();
+        expect(
+            std::any_of(rootActions.begin(), rootActions.end(), [](const auto& action) {
+                return action.button == NXActionButton::b
+                    && action.isEnabled
+                    && action.action.title() == "Exit";
+            }),
+            "the navigation root replaces Back with an enabled Exit action"
+        );
+        expect(SDL_PushEvent(&keyDown), "the root Exit key-down event is queued");
+        expect(SDL_PushEvent(&keyUp), "the root Exit key-up event is queued");
+        application->handleEventsIfNeeded();
+        expect(application->isQuitRequested(), "the navigation root B action requests app exit");
         SDL_QuitSubSystem(SDL_INIT_EVENTS);
     }
 
