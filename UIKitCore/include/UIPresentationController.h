@@ -1,5 +1,6 @@
 #pragma once
 
+#include <UIFocus.h>
 #include <UIViewControllerTransitioning.h>
 
 #include <memory>
@@ -9,7 +10,7 @@ namespace NXKit {
 class UIView;
 class UIViewController;
 
-class UIPresentationController {
+class UIPresentationController : public UIFocusEnvironment {
 public:
     UIPresentationController(
         const std::shared_ptr<UIViewController>& presentedViewController,
@@ -25,6 +26,10 @@ public:
     [[nodiscard]] virtual UIModalPresentationStyle presentationStyle() const;
     [[nodiscard]] virtual NXRect frameOfPresentedViewInContainerView() const;
     [[nodiscard]] virtual bool shouldRemovePresentersView() const;
+
+    std::vector<std::shared_ptr<UIFocusEnvironment>>
+    preferredFocusEnvironments() override;
+    std::shared_ptr<UIFocusEnvironment> parentFocusEnvironment() override;
 
     virtual void presentationTransitionWillBegin() {}
     virtual void presentationTransitionDidEnd(bool completed) {}

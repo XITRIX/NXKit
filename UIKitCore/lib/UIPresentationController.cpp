@@ -46,6 +46,20 @@ bool UIPresentationController::shouldRemovePresentersView() const {
     return false;
 }
 
+std::vector<std::shared_ptr<UIFocusEnvironment>>
+UIPresentationController::preferredFocusEnvironments() {
+    const auto controller = presentedViewController();
+    if (!controller) {
+        return {};
+    }
+    return { std::static_pointer_cast<UIFocusEnvironment>(controller) };
+}
+
+std::shared_ptr<UIFocusEnvironment>
+UIPresentationController::parentFocusEnvironment() {
+    return std::dynamic_pointer_cast<UIFocusEnvironment>(containerView());
+}
+
 void UIPresentationController::setContainerView(
     const std::shared_ptr<UIView>& containerView
 ) {

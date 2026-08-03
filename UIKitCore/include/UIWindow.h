@@ -43,6 +43,8 @@ private:
     std::vector<std::shared_ptr<UIViewController>> _presentedViewControllers;
 
     friend class UIViewController;
+    friend class UIFocusSystem;
+    std::shared_ptr<UIView> focusRootView();
     void addPresentedViewController(const std::shared_ptr<UIViewController>& controller);
     void removePresentedViewController(const std::shared_ptr<UIViewController>& controller);
 

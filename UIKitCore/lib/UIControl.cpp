@@ -171,7 +171,9 @@ void UIControl::setBaseScaleMultiplier(NXFloat baseScaleMultiplier) {
 void UIControl::performPrimaryAction() {
     if (canBecomeFocused()) {
         if (const auto containingWindow = window()) {
-            containingWindow->focusSystem()->_focusedItem = shared_from_this();
+            containingWindow->focusSystem()->requestFocusUpdate(
+                shared_from_base<UIFocusEnvironment>()
+            );
         }
     }
 

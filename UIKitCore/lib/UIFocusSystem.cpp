@@ -62,7 +62,10 @@ bool UIFocusSystem::requestFocusUpdate(
 
     const auto rootWindow = _rootWindow.lock();
     const auto itemView = std::dynamic_pointer_cast<UIView>(item);
-    if (!rootWindow || !itemView || itemView->window() != rootWindow) {
+    const auto focusRoot = rootWindow ? rootWindow->focusRootView() : nullptr;
+    if (!rootWindow || !focusRoot || !itemView
+        || itemView->window() != rootWindow
+        || !itemView->isDescendantOf(focusRoot)) {
         return false;
     }
 
@@ -99,7 +102,18 @@ void UIFocusSystem::setActive(bool active) {
         return;
     }
 
-    const auto retainedItem = _focusedItem.lock();
+    auto retainedItem = _focusedItem.lock();
+    if (active) {
+        const auto rootWindow = _rootWindow.lock();
+        const auto focusRoot = rootWindow ? rootWindow->focusRootView() : nullptr;
+        const auto retainedView =
+            std::dynamic_pointer_cast<UIView>(retainedItem);
+        if (!focusRoot || !retainedView
+            || !retainedView->isDescendantOf(focusRoot)) {
+            retainedItem = focusRoot ? focusRoot->searchForFocus() : nullptr;
+        }
+    }
+
     UIFocusUpdateContext context;
     context._previouslyFocusedItem = active
         ? std::weak_ptr<UIFocusItem> {}
@@ -120,6 +134,18 @@ void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
     if (!_isActive) {
         setActive(true);
         return;
+    }
+
+    const auto rootWindow = _rootWindow.lock();
+    const auto focusRoot = rootWindow ? rootWindow->focusRootView() : nullptr;
+    if (!rootWindow || !focusRoot) {
+        return;
+    }
+
+    if (const auto current = std::dynamic_pointer_cast<UIView>(
+            focusedItem().lock()
+        ); current && !current->isDescendantOf(focusRoot)) {
+        updateFocus();
     }
 
     std::shared_ptr<UIPress> press;
@@ -149,46 +175,59 @@ void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
 
     if (context._focusHeading == UIFocusHeading::none) return;
 
-    std::weak_ptr<UIFocusItem> nextItem;
-    if (focusedItem().expired()) nextItem = _rootWindow.lock()->searchForFocus();
-    else {
-        auto current = std::dynamic_pointer_cast<UIView>(focusedItem().lock());
-        if (current->superview().expired()) {
-            nextItem = _rootWindow.lock()->searchForFocus();
-        } else {
-            std::shared_ptr<UIFocusItem> potencianNextItem;
-            while (true) {
-                potencianNextItem = current->superview().lock()->getNextFocusItem(current, context._focusHeading);
-                if (!potencianNextItem) { // if no next item to focus
-                    if (!current->superview().lock()->superview().expired()) { // but item has parent, check parent
-                        current = current->superview().lock();
-                        continue;
-                    } else { // else stop searching
-                        break;
-                    }
-                }
-
-                context._nextFocusedItem = potencianNextItem;
-
-                bool currentIsFine = context.previouslyFocusedItem().expired() || context.previouslyFocusedItem().lock()->shouldUpdateFocusIn(context);
-                bool nextIsFine = context.nextFocusedItem().expired() || context.nextFocusedItem().lock()->shouldUpdateFocusIn(context);
-
-                if (currentIsFine && nextIsFine) { break; }
+    auto current = std::dynamic_pointer_cast<UIView>(focusedItem().lock());
+    const bool currentIsInFocusRoot = current
+        && current->isDescendantOf(focusRoot);
+    std::shared_ptr<UIFocusItem> nextItem;
+    if (!currentIsInFocusRoot) {
+        nextItem = focusRoot->searchForFocus();
+    } else {
+        // A modal presentation is its own focus branch. Walk no farther than
+        // the top presented controller's root view, even though that view is a
+        // sibling of the presenting hierarchy in UIWindow.
+        while (current && current != focusRoot) {
+            const auto parent = current->superview().lock();
+            if (!parent) {
+                break;
             }
-            nextItem = potencianNextItem;
+
+            const auto candidate = parent->getNextFocusItem(
+                current,
+                context._focusHeading
+            );
+            if (candidate) {
+                const auto candidateView =
+                    std::dynamic_pointer_cast<UIView>(candidate);
+                if (candidateView && candidateView->isDescendantOf(focusRoot)) {
+                    context._nextFocusedItem = candidate;
+                    const bool currentAllowsUpdate =
+                        context.previouslyFocusedItem().expired()
+                        || context.previouslyFocusedItem().lock()
+                            ->shouldUpdateFocusIn(context);
+                    const bool candidateAllowsUpdate =
+                        candidate->shouldUpdateFocusIn(context);
+                    if (currentAllowsUpdate && candidateAllowsUpdate) {
+                        nextItem = candidate;
+                    }
+                    break;
+                }
+            }
+            current = parent;
         }
     }
 
-    if (nextItem.expired()) {
-        nextItem = _focusedItem;
+    if (!nextItem && currentIsInFocusRoot) {
+        nextItem = _focusedItem.lock();
     }
 
     context._nextFocusedItem = nextItem;
-    applyFocusToItem(nextItem.lock(), context);
+    applyFocusToItem(nextItem, context);
 }
 
 void UIFocusSystem::updateFocus() {
-    auto item = _rootWindow.lock()->searchForFocus();
+    const auto rootWindow = _rootWindow.lock();
+    const auto focusRoot = rootWindow ? rootWindow->focusRootView() : nullptr;
+    const auto item = focusRoot ? focusRoot->searchForFocus() : nullptr;
 
     UIFocusUpdateContext context;
     context._previouslyFocusedItem = _focusedItem;

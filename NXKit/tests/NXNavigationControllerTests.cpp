@@ -1240,6 +1240,69 @@ int main() {
     const bool eventSubsystemReady = SDL_InitSubSystem(SDL_INIT_EVENTS);
     expect(eventSubsystemReady, "SDL's event subsystem is available for press routing");
     if (eventSubsystemReady) {
+        auto focusTrapModal = new_shared<RecordingViewController>();
+        auto modalFocusControl = new_shared<UIControl>();
+        focusTrapModal->view()->addSubview(modalFocusControl);
+        focusTrapModal->setModalPresentationStyle(
+            UIModalPresentationStyle::overFullScreen
+        );
+        responderDestination->present(focusTrapModal, false);
+        expect(
+            responderWindow->focusSystem()->focusedItem().lock()
+                == modalFocusControl,
+            "a presentation moves focus into its own hierarchy"
+        );
+        expect(
+            focusTrapModal->parentFocusEnvironment().get()
+                == focusTrapModal->presentationController().get(),
+            "a presented controller participates beneath its presentation controller"
+        );
+        expect(
+            !responderWindow->focusSystem()->requestFocusUpdate(
+                destinationFocusControl
+            )
+                && responderWindow->focusSystem()->focusedItem().lock()
+                    == modalFocusControl,
+            "an explicit focus request cannot escape the top presentation"
+        );
+
+        // Keep this movement assertion independent from the explicit-request
+        // assertion above if either behavior regresses in the future.
+        responderWindow->focusSystem()->requestFocusUpdate(modalFocusControl);
+        SDL_Event upDown {};
+        upDown.type = SDL_EVENT_KEY_DOWN;
+        upDown.key.key = SDLK_UP;
+        upDown.key.scancode = SDL_SCANCODE_UP;
+        upDown.key.down = true;
+
+        SDL_Event upUp = upDown;
+        upUp.type = SDL_EVENT_KEY_UP;
+        upUp.key.down = false;
+
+        expect(SDL_PushEvent(&upDown), "the modal focus-up key-down event is queued");
+        expect(SDL_PushEvent(&upUp), "the modal focus-up key-up event is queued");
+        application->handleEventsIfNeeded();
+        expect(
+            responderWindow->focusSystem()->focusedItem().lock()
+                == modalFocusControl,
+            "directional focus stops at the top presentation boundary"
+        );
+        focusTrapModal->dismiss(false);
+
+        auto emptyFocusModal = new_shared<RecordingViewController>();
+        emptyFocusModal->setModalPresentationStyle(
+            UIModalPresentationStyle::overFullScreen
+        );
+        responderDestination->present(emptyFocusModal, false);
+        expect(
+            responderWindow->focusSystem()->focusedItem().expired()
+                && !responderWindow->focusSystem()->requestFocusUpdate(
+                    destinationFocusControl
+                ),
+            "a presentation without an eligible item clears focus instead of falling through"
+        );
+        emptyFocusModal->dismiss(false);
+
         SDL_Event returnDown {};
         returnDown.type = SDL_EVENT_KEY_DOWN;
         returnDown.key.key = SDLK_RETURN;

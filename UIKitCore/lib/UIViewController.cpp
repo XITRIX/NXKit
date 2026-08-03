@@ -870,6 +870,9 @@ void UIViewController::traitCollectionDidChange(std::shared_ptr<UITraitCollectio
 }
 
 std::shared_ptr<UIFocusEnvironment> UIViewController::parentFocusEnvironment() {
+    if (_presentationController) {
+        return _presentationController;
+    }
     return std::dynamic_pointer_cast<UIFocusEnvironment>(next());
 }
 

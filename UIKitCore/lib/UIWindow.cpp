@@ -66,11 +66,14 @@ void UIWindow::makeKeyAndVisible() {
 }
 
 void UIWindow::updateFocus() {
-    if (!_presentedViewControllers.empty()
-        && _focusSystem->requestFocusUpdate(_presentedViewControllers.back())) {
-        return;
-    }
     _focusSystem->updateFocus();
+}
+
+std::shared_ptr<UIView> UIWindow::focusRootView() {
+    if (!_presentedViewControllers.empty()) {
+        return _presentedViewControllers.back()->view();
+    }
+    return shared_from_base<UIWindow>();
 }
 
 void UIWindow::sendEvent(const std::shared_ptr<UIEvent>& event) {
