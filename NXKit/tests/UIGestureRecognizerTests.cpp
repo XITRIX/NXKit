@@ -1,6 +1,7 @@
 #include <UIAction.h>
 #include <UIControl.h>
 #include <UIEvent.h>
+#include <UILabel.h>
 #include <UIScrollView.h>
 #include <UITextView.h>
 #include <UITouch.h>
@@ -30,11 +31,12 @@ public:
     static void updateTouch(
         const std::shared_ptr<UITouch>& touch,
         UITouchPhase phase,
-        NXPoint location
+        NXPoint location,
+        Timer timestamp = Timer()
     ) {
         touch->updateAbsoluteLocation(location);
         touch->_phase = phase;
-        touch->_timestamp = Timer();
+        touch->_timestamp = timestamp;
     }
 };
 
@@ -73,15 +75,39 @@ void sendTouch(
     const std::shared_ptr<UIEvent>& event,
     const std::shared_ptr<UITouch>& touch,
     UITouchPhase phase,
-    NXPoint location
+    NXPoint location,
+    Timer timestamp = Timer()
 ) {
-    UIGestureRecognizerTestHarness::updateTouch(touch, phase, location);
+    UIGestureRecognizerTestHarness::updateTouch(
+        touch,
+        phase,
+        location,
+        timestamp
+    );
     window->sendEvent(event);
 }
 
 } // namespace
 
 int main() {
+    auto intrinsicContainer = new_shared<UIView>(NXRect(0, 0, 500, 100));
+    intrinsicContainer->setAutolayoutEnabled(true);
+    intrinsicContainer->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        layout->setFlexDirection(YGFlexDirectionRow);
+    });
+    auto intrinsicLabel = new_shared<UILabel>();
+    intrinsicLabel->setAutolayoutEnabled(true);
+    intrinsicLabel->setText("1");
+    intrinsicContainer->addSubview(intrinsicLabel);
+    intrinsicContainer->layoutSubviews();
+    const auto narrowLabelWidth = intrinsicLabel->frame().width();
+    intrinsicLabel->setText("88:88:88");
+    intrinsicContainer->layoutIfNeeded();
+    expect(
+        intrinsicLabel->frame().width() > narrowLabelWidth,
+        "changing label text invalidates Yoga's cached intrinsic width"
+    );
+
     auto window = new_shared<UIWindow>();
     window->setFrame(NXRect(0, 0, 320, 480));
 
@@ -111,6 +137,58 @@ int main() {
         rejectedInvalidContentSize,
         "a scroll view rejects negative content dimensions"
     );
+
+    auto nonBouncingWindow = new_shared<UIWindow>();
+    nonBouncingWindow->setFrame(NXRect(0, 0, 320, 480));
+    auto nonBouncingScrollView = new_shared<UIScrollView>(
+        nonBouncingWindow->bounds()
+    );
+    nonBouncingScrollView->setContentSize(NXSize(320, 900));
+    nonBouncingWindow->addSubview(nonBouncingScrollView);
+
+    auto momentumTouch = new_shared<UITouch>(6, NXPoint(20, 300), Timer());
+    auto momentumEvent = UIGestureRecognizerTestHarness::eventWithTouch(
+        momentumTouch,
+        nonBouncingWindow
+    );
+    sendTouch(
+        nonBouncingWindow,
+        momentumEvent,
+        momentumTouch,
+        UITouchPhase::began,
+        NXPoint(20, 300),
+        Timer(0)
+    );
+    sendTouch(
+        nonBouncingWindow,
+        momentumEvent,
+        momentumTouch,
+        UITouchPhase::moved,
+        NXPoint(20, 270),
+        Timer(16)
+    );
+    sendTouch(
+        nonBouncingWindow,
+        momentumEvent,
+        momentumTouch,
+        UITouchPhase::moved,
+        NXPoint(20, 180),
+        Timer(32)
+    );
+    sendTouch(
+        nonBouncingWindow,
+        momentumEvent,
+        momentumTouch,
+        UITouchPhase::ended,
+        NXPoint(20, 180),
+        Timer(48)
+    );
+    expect(
+        !nonBouncingScrollView->bounceVertically()
+            && nonBouncingScrollView->isDecelerating(),
+        "a scrollable axis decelerates after release when bouncing is disabled"
+    );
+    nonBouncingScrollView->setScrollEnabled(false);
 
     auto control = new_shared<UIControl>();
     control->setFrame(NXRect(0, 0, 320, 80));

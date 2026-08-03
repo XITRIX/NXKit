@@ -56,6 +56,7 @@ add_library(XITRIXUIKit
         lib/UIViewAnimationGroup.cpp
         lib/UIViewAnimationOptions.cpp
         lib/UIViewController.cpp
+        lib/UIPresentationController.cpp
         lib/UIWindow.cpp
         lib/NXAffineTransform.cpp
         lib/NXTransform3D.cpp

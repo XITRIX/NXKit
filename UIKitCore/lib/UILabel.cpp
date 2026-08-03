@@ -71,8 +71,7 @@ void UILabel::setText(const std::string& text) {
     if (_text == text) return;
     _text = text;
     setNeedsDisplay();
-    setNeedsLayout();
-    printf("Test set %s\n", text.c_str());
+    invalidateIntrinsicContentSize();
 }
 
 void UILabel::setTextColor(const UIColor& textColor) {
@@ -86,7 +85,7 @@ void UILabel::setFontSize(NXFloat fontSize) {
     if (_fontSize == fontSize) return;
     _fontSize = fontSize;
     setNeedsDisplay();
-    setNeedsLayout();
+    invalidateIntrinsicContentSize();
 }
 
 void UILabel::setTextAlignment(NSTextAlignment textAlignment) {
@@ -100,7 +99,7 @@ void UILabel::setFontWeight(NXFloat fontWeight) {
     if (_fontWeight == fontWeight) return;
     _fontWeight = fontWeight;
     setNeedsDisplay();
-    setNeedsLayout();
+    invalidateIntrinsicContentSize();
 }
 
 void UILabel::setScaleModifier(NXFloat scaleModifier) {

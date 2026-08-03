@@ -299,10 +299,11 @@ void UIScrollView::startDeceleratingIfNecessary() {
     velocity.x = std::clamp(velocity.x, -maximumDecelerationVelocity, maximumDecelerationVelocity);
     velocity.y = std::clamp(velocity.y, -maximumDecelerationVelocity, maximumDecelerationVelocity);
 
-    if (!shouldBounceVertically()) {
+    const auto scrollableOffsetBounds = contentOffsetBounds();
+    if (scrollableOffsetBounds.height() <= 0 && !shouldBounceVertically()) {
         velocity.y = 0;
     }
-    if (!shouldBounceHorizontally()) {
+    if (scrollableOffsetBounds.width() <= 0 && !shouldBounceHorizontally()) {
         velocity.x = 0;
     }
 
@@ -313,7 +314,12 @@ void UIScrollView::startDeceleratingIfNecessary() {
 
     auto destination = parameters.destination();
     auto clippedDestination = getBoundsCheckedContentOffset(destination);
-    bool isClipped = destination != clippedDestination;
+    const bool isHorizontallyClipped = destination.x != clippedDestination.x;
+    const bool isVerticallyClipped = destination.y != clippedDestination.y;
+    const bool isClipped = isHorizontallyClipped || isVerticallyClipped;
+    const bool shouldBounceAtDestination =
+        (isHorizontallyClipped && shouldBounceHorizontally())
+        || (isVerticallyClipped && shouldBounceVertically());
 
     float duration;
     if (isClipped) {
@@ -325,11 +331,32 @@ void UIScrollView::startDeceleratingIfNecessary() {
     _isDecelerating = true;
     _timerAnimation = std::make_shared<TimerAnimation>(duration, [this, parameters](float, const double time) {
         setContentOffset(parameters.valueAt(time), false);
-    }, [this, parameters, duration, isClipped](bool) {
-        _isDecelerating = isClipped;
+    }, [
+        this,
+        parameters,
+        duration,
+        clippedDestination,
+        shouldBounceAtDestination
+    ](bool) {
+        auto settledOffset = contentOffset();
+        if (!shouldBounceHorizontally()) {
+            settledOffset.x = clippedDestination.x;
+        }
+        if (!shouldBounceVertically()) {
+            settledOffset.y = clippedDestination.y;
+        }
+        setContentOffset(settledOffset, false);
 
-        if (isClipped) {
+        _isDecelerating = shouldBounceAtDestination;
+
+        if (shouldBounceAtDestination) {
             auto velocity = parameters.velocityAt(duration);
+            if (!shouldBounceHorizontally()) {
+                velocity.x = 0;
+            }
+            if (!shouldBounceVertically()) {
+                velocity.y = 0;
+            }
             bounceWithVelocity(velocity);
         }
     });

@@ -129,6 +129,7 @@ public:
 
     virtual NXSize sizeThatFits(NXSize size);
     void sizeToFit();
+    virtual void invalidateIntrinsicContentSize();
 
     // FlexLayout
     std::shared_ptr<YGLayout> yoga() const { return _yoga; }

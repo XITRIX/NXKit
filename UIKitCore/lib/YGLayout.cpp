@@ -122,7 +122,14 @@ YGLayout::~YGLayout() {
 
 void YGLayout::layoutIfNeeded() {
     if (!isEnabled() || !isRoot()) return;
-    applyLayoutPreservingOrigin(false);
+
+    const auto view = _view.lock();
+    if (!view) return;
+
+    // A Yoga root can still be positioned by a non-Yoga superview, as happens
+    // for a custom modal presentation. Yoga owns the root's size and its child
+    // layout in that case, but the container owns the root's origin.
+    applyLayoutPreservingOrigin(!view->superview().expired());
 }
 
 void YGLayout::applyLayoutPreservingOrigin(bool preserveOrigin) {

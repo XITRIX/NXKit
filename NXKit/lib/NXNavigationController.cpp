@@ -234,7 +234,9 @@ void NXNavigationController::viewDidLoad() {
 
 void NXNavigationController::viewWillAppear(bool animated) {
     updateChrome();
-    const auto visible = visibleViewController();
+    const auto visible = _visibleViewController
+        ? _visibleViewController
+        : topViewController();
     if (!visible) {
         return;
     }
@@ -250,7 +252,9 @@ void NXNavigationController::viewWillAppear(bool animated) {
 }
 
 void NXNavigationController::viewDidAppear(bool animated) {
-    const auto visible = visibleViewController();
+    const auto visible = _visibleViewController
+        ? _visibleViewController
+        : topViewController();
     if (!visible) {
         return;
     }
@@ -266,13 +270,19 @@ void NXNavigationController::viewDidAppear(bool animated) {
 }
 
 void NXNavigationController::viewWillDisappear(bool animated) {
-    if (const auto visible = visibleViewController()) {
+    const auto visible = _visibleViewController
+        ? _visibleViewController
+        : topViewController();
+    if (visible) {
         visible->viewWillDisappear(animated);
     }
 }
 
 void NXNavigationController::viewDidDisappear(bool animated) {
-    if (const auto visible = visibleViewController()) {
+    const auto visible = _visibleViewController
+        ? _visibleViewController
+        : topViewController();
+    if (visible) {
         visible->viewDidDisappear(animated);
     }
 }
@@ -477,6 +487,10 @@ std::shared_ptr<UIViewController> NXNavigationController::topViewController() co
 }
 
 std::shared_ptr<UIViewController> NXNavigationController::visibleViewController() const {
+    if (const auto presented =
+            const_cast<NXNavigationController*>(this)->presentedViewController()) {
+        return presented;
+    }
     return _visibleViewController ? _visibleViewController : topViewController();
 }
 

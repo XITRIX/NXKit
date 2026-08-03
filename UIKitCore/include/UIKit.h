@@ -17,6 +17,8 @@
 #include <UITapGestureRecognizer.h>
 #include <UITextView.h>
 #include <UIViewController.h>
+#include <UIViewControllerTransitioning.h>
+#include <UIPresentationController.h>
 #include <tools/Logger.hpp>
 #include <yoga/Yoga.h>
 

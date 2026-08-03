@@ -1,10 +1,14 @@
 #pragma once
 
 #include <UIView.h>
+#include <UIViewControllerTransitioning.h>
 
+#include <deque>
 #include <utility>
 
 namespace NXKit {
+
+class UIPresentationController;
 
 class UIViewController: public UIResponder, public UITraitEnvironment, public UIFocusEnvironment, public enable_shared_from_this<UIViewController> {
 public:
@@ -52,6 +56,37 @@ public:
     void present(const std::shared_ptr<UIViewController>& otherViewController, bool animated, const std::function<void()>& completion = [](){});
     void dismiss(bool animated, const std::function<void()>& completion = [](){});
 
+    [[nodiscard]] std::shared_ptr<UIViewController> presentedViewController();
+    [[nodiscard]] std::shared_ptr<UIViewController> presentingViewController();
+
+    [[nodiscard]] UIModalPresentationStyle modalPresentationStyle() const {
+        return _modalPresentationStyle;
+    }
+    void setModalPresentationStyle(UIModalPresentationStyle presentationStyle) {
+        _modalPresentationStyle = presentationStyle;
+    }
+
+    [[nodiscard]] UIModalTransitionStyle modalTransitionStyle() const {
+        return _modalTransitionStyle;
+    }
+    void setModalTransitionStyle(UIModalTransitionStyle transitionStyle) {
+        _modalTransitionStyle = transitionStyle;
+    }
+
+    [[nodiscard]] std::shared_ptr<UIViewControllerTransitioningDelegate>
+    transitioningDelegate() const {
+        return _transitioningDelegate.lock();
+    }
+    void setTransitioningDelegate(
+        const std::shared_ptr<UIViewControllerTransitioningDelegate>& transitioningDelegate
+    ) {
+        _transitioningDelegate = transitioningDelegate;
+    }
+
+    [[nodiscard]] std::shared_ptr<UIPresentationController> presentationController();
+    [[nodiscard]] bool isBeingPresented();
+    [[nodiscard]] bool isBeingDismissed();
+
     virtual void show(
         const std::shared_ptr<UIViewController>& viewController,
         const std::shared_ptr<UIResponder>& sender = nullptr
@@ -63,24 +98,47 @@ public:
     // Focus
     std::shared_ptr<UIFocusEnvironment> parentFocusEnvironment() override;
 
-protected:
-    virtual void makeViewAppear(bool animated, std::shared_ptr<UIViewController> presentingViewController, std::function<void()> completion = [](){});
-    virtual void makeViewDisappear(bool animated, std::function<void(bool)> completion);
-
 private:
+    enum class PendingModalOperationKind {
+        present,
+        dismiss,
+    };
+
+    struct PendingModalOperation {
+        PendingModalOperationKind kind;
+        std::weak_ptr<UIViewController> source;
+        std::shared_ptr<UIViewController> presentedViewController;
+        bool animated;
+        std::function<void()> completion;
+    };
+
     std::shared_ptr<UIView> _view;
     std::weak_ptr<UIViewController> _parent;
     std::vector<std::shared_ptr<UIViewController>> _children;
     UIEdgeInsets _additionalSafeAreaInsets;
     UIEdgeInsets _systemMinimumLayoutMargins = UIEdgeInsets(0, 16, 0, 16);
     bool _viewRespectsSystemMinimumLayoutMargins = true;
-    float _animationTime = 0.5;
     std::string _title = "";
 
     std::shared_ptr<UIViewController> _presentedViewController;
     std::weak_ptr<UIViewController> _presentingViewController;
+    std::weak_ptr<UIViewControllerTransitioningDelegate> _transitioningDelegate;
+    std::shared_ptr<UIPresentationController> _presentationController;
+    std::shared_ptr<UIViewControllerContextTransitioning> _activeTransitionContext;
+    UIModalPresentationStyle _modalPresentationStyle = UIModalPresentationStyle::fullScreen;
+    UIModalTransitionStyle _modalTransitionStyle = UIModalTransitionStyle::coverVertical;
+    bool _isBeingPresented = false;
+    bool _isBeingDismissed = false;
+    bool _isPerformingModalTransition = false;
+    bool _isModalTransitionInFlight = false;
+    bool _isDrainingModalOperations = false;
+    std::deque<PendingModalOperation> _pendingModalOperations;
 
     std::shared_ptr<UIViewController> rootVC();
+    std::shared_ptr<UIViewController> modalTransitionCoordinator();
+    void enqueueModalOperation(PendingModalOperation operation);
+    void completeModalTransition();
+    void drainPendingModalOperations();
 };
 
 }

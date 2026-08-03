@@ -187,6 +187,9 @@ NXNavigationStatusView::NXNavigationStatusView() {
     _timeLabel->setAutolayoutEnabled(true);
     _timeLabel->setUserInteractionEnabled(false);
     _timeLabel->setFontSize(21);
+    _timeLabel->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        layout->setFlexShrink(0);
+    });
 
     rebuildLayout();
     refresh();

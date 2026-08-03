@@ -60,6 +60,7 @@ public:
 
     UIScrollViewDecelerationRate decelerationRate() const { return _decelerationRate; }
     void setDecelerationRate(UIScrollViewDecelerationRate decelerationRate) { _decelerationRate = decelerationRate; }
+    [[nodiscard]] bool isDecelerating() const { return _isDecelerating; }
 
     UIScrollViewContentInsetAdjustmentBehavior contentInsetAdjustmentBehavior() { return _contentInsetAdjustmentBehavior; }
     void setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior contentInsetAdjustmentBehavior);

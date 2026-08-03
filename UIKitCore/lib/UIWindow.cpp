@@ -1,10 +1,13 @@
 #include <UIWindow.h>
 #include <UIApplication.h>
+#include <UIPresentationController.h>
 #include <UIViewController.h>
 #include <UITouch.h>
 #include <UIPress.h>
 #include <UIPressesEvent.h>
 #include <SkiaCtx.h>
+
+#include <algorithm>
 
 using namespace NXKit;
 
@@ -63,6 +66,10 @@ void UIWindow::makeKeyAndVisible() {
 }
 
 void UIWindow::updateFocus() {
+    if (!_presentedViewControllers.empty()
+        && _focusSystem->requestFocusUpdate(_presentedViewControllers.back())) {
+        return;
+    }
     _focusSystem->updateFocus();
 }
 
@@ -176,15 +183,31 @@ void UIWindow::layoutSubviews() {
         _rootViewController->view()->setFrame(this->bounds());
     }
 
-    for(auto& vc: _presentedViewControllers) {
-        vc->view()->setFrame(this->bounds());
+    for (const auto& viewController : _presentedViewControllers) {
+        const auto presentationController = viewController->presentationController();
+        if (!presentationController) {
+            viewController->view()->setFrame(this->bounds());
+            continue;
+        }
+
+        presentationController->containerViewWillLayoutSubviews();
+        viewController->view()->setFrame(
+            presentationController->frameOfPresentedViewInContainerView()
+        );
+        presentationController->containerViewDidLayoutSubviews();
     }
 
     UIView::layoutSubviews();
 }
 
 void UIWindow::addPresentedViewController(const std::shared_ptr<UIViewController>& controller) {
-    _presentedViewControllers.push_back(controller);
+    if (std::find(
+            _presentedViewControllers.begin(),
+            _presentedViewControllers.end(),
+            controller
+        ) == _presentedViewControllers.end()) {
+        _presentedViewControllers.push_back(controller);
+    }
 }
 
 void UIWindow::removePresentedViewController(const std::shared_ptr<UIViewController>& controller) {

@@ -874,6 +874,13 @@ void UIView::sizeToFit() {
     setBounds(bounds);
 }
 
+void UIView::invalidateIntrinsicContentSize() {
+    if (_yoga && YGNodeHasMeasureFunc(_yoga->_node)) {
+        YGNodeMarkDirty(_yoga->_node);
+    }
+    setNeedsLayout();
+}
+
 // MARK: - Yoga layout
 void UIView::configureLayout(const std::function<void(std::shared_ptr<YGLayout>)>& block) {
     _yoga->setEnabled(true);

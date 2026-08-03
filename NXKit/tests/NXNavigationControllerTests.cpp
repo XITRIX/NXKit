@@ -3,6 +3,8 @@
 #include <CABasicAnimation.h>
 #include <UIApplication.h>
 #include <UIApplicationDelegate.h>
+#include <UIPresentationController.h>
+#include <UIViewControllerTransitioning.h>
 #include <UIWindow.h>
 
 #include <SDL3/SDL.h>
@@ -121,6 +123,130 @@ public:
         ++didShowCount;
         lastDidShow = viewController;
     }
+};
+
+struct PresentationStats {
+    int presentationWillBeginCount = 0;
+    int presentationDidEndCount = 0;
+    int dismissalWillBeginCount = 0;
+    int dismissalDidEndCount = 0;
+    int presentationAnimationCount = 0;
+    int dismissalAnimationCount = 0;
+    bool lastPresentationCompleted = false;
+    bool lastDismissalCompleted = false;
+};
+
+class RecordingPresentationController final : public UIPresentationController {
+public:
+    RecordingPresentationController(
+        const std::shared_ptr<UIViewController>& presented,
+        const std::shared_ptr<UIViewController>& presenting,
+        std::shared_ptr<PresentationStats> stats
+    ) : UIPresentationController(presented, presenting), _stats(std::move(stats)) {}
+
+    NXRect frameOfPresentedViewInContainerView() const override {
+        return NXRect(120, 80, 640, 480);
+    }
+
+    bool shouldRemovePresentersView() const override { return false; }
+
+    void presentationTransitionWillBegin() override {
+        ++_stats->presentationWillBeginCount;
+    }
+
+    void presentationTransitionDidEnd(bool completed) override {
+        ++_stats->presentationDidEndCount;
+        _stats->lastPresentationCompleted = completed;
+    }
+
+    void dismissalTransitionWillBegin() override {
+        ++_stats->dismissalWillBeginCount;
+    }
+
+    void dismissalTransitionDidEnd(bool completed) override {
+        ++_stats->dismissalDidEndCount;
+        _stats->lastDismissalCompleted = completed;
+    }
+
+private:
+    std::shared_ptr<PresentationStats> _stats;
+};
+
+class ImmediateTransitionAnimator final : public UIViewControllerAnimatedTransitioning {
+public:
+    ImmediateTransitionAnimator(
+        bool presenting,
+        std::shared_ptr<PresentationStats> stats
+    ) : _presenting(presenting), _stats(std::move(stats)) {}
+
+    double transitionDuration(
+        const std::shared_ptr<UIViewControllerContextTransitioning>&
+    ) const override {
+        return 0;
+    }
+
+    void animateTransition(
+        const std::shared_ptr<UIViewControllerContextTransitioning>& context
+    ) override {
+        if (_presenting) {
+            ++_stats->presentationAnimationCount;
+        } else {
+            ++_stats->dismissalAnimationCount;
+        }
+        context->completeTransition(
+            context->containerView() != nullptr
+                && context->viewControllerForKey(
+                    UITransitionContextViewControllerKey::from
+                ) != nullptr
+                && context->viewControllerForKey(
+                    UITransitionContextViewControllerKey::to
+                ) != nullptr
+        );
+    }
+
+private:
+    bool _presenting;
+    std::shared_ptr<PresentationStats> _stats;
+};
+
+class RecordingTransitioningDelegate final
+    : public UIViewControllerTransitioningDelegate {
+public:
+    explicit RecordingTransitioningDelegate(
+        std::shared_ptr<PresentationStats> stats
+    ) : _stats(std::move(stats)) {}
+
+    std::shared_ptr<UIViewControllerAnimatedTransitioning>
+    animationControllerForPresented(
+        const std::shared_ptr<UIViewController>&,
+        const std::shared_ptr<UIViewController>&,
+        const std::shared_ptr<UIViewController>&
+    ) override {
+        return new_shared<ImmediateTransitionAnimator>(true, _stats);
+    }
+
+    std::shared_ptr<UIViewControllerAnimatedTransitioning>
+    animationControllerForDismissed(
+        const std::shared_ptr<UIViewController>&
+    ) override {
+        return new_shared<ImmediateTransitionAnimator>(false, _stats);
+    }
+
+    std::shared_ptr<UIPresentationController>
+    presentationControllerForPresented(
+        const std::shared_ptr<UIViewController>& presented,
+        const std::shared_ptr<UIViewController>& presenting,
+        const std::shared_ptr<UIViewController>&
+    ) override {
+        return new_shared<RecordingPresentationController>(
+            presented,
+            presenting,
+            _stats
+        );
+    }
+
+private:
+    std::shared_ptr<PresentationStats> _stats;
 };
 
 } // namespace
@@ -533,6 +659,356 @@ int main() {
         visibleDelegate->lastWillShow == visibleRoot
             && visibleDelegate->lastDidShow == visibleRoot,
         "a visible pop brackets the transition with delegate callbacks"
+    );
+
+    auto presentationStats = new_shared<PresentationStats>();
+    auto transitioningDelegate =
+        new_shared<RecordingTransitioningDelegate>(presentationStats);
+    auto modalController = new_shared<RecordingViewController>();
+    auto modalContent = new_shared<UIView>();
+    modalContent->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        layout->setWidth(YGValue { 320, YGUnitPoint });
+        layout->setHeight(YGValue { 240, YGUnitPoint });
+    });
+    modalController->view()->configureLayout([](
+        const std::shared_ptr<YGLayout>& layout
+    ) {
+        layout->setAlignItems(YGAlignCenter);
+        layout->setJustifyContent(YGJustifyCenter);
+    });
+    modalController->view()->addSubview(modalContent);
+    modalController->setModalPresentationStyle(UIModalPresentationStyle::custom);
+    modalController->setTransitioningDelegate(transitioningDelegate);
+    bool presentationCompletionCalled = false;
+    visibleRoot->present(modalController, false, [&presentationCompletionCalled]() {
+        presentationCompletionCalled = true;
+    });
+
+    expect(
+        visibleNavigationController->presentedViewController() == modalController
+            && visibleRoot->presentedViewController() == modalController,
+        "a child presentation is owned by its full-screen navigation ancestor"
+    );
+    expect(
+        modalController->presentingViewController() == visibleNavigationController,
+        "the presented controller exposes the actual navigation presenter"
+    );
+    expect(
+        visibleNavigationController->visibleViewController() == modalController,
+        "the navigation visible controller follows a modal presentation"
+    );
+    expect(
+        modalController->presentationController() != nullptr
+            && modalController->view()->frame() == NXRect(120, 80, 640, 480),
+        "a custom presentation controller owns the modal frame across Yoga layout"
+    );
+    expect(
+        presentationStats->presentationWillBeginCount == 1
+            && presentationStats->presentationDidEndCount == 1
+            && presentationStats->presentationAnimationCount == 1
+            && presentationStats->lastPresentationCompleted
+            && presentationCompletionCalled,
+        "custom presentation hooks, animator, and completion run once"
+    );
+    expect(
+        modalController->willAppearCount == 1
+            && modalController->didAppearCount == 1,
+        "presentation appearance callbacks bracket the completed transition"
+    );
+
+    bool dismissalCompletionCalled = false;
+    modalController->dismiss(false, [&dismissalCompletionCalled]() {
+        dismissalCompletionCalled = true;
+    });
+    expect(
+        visibleNavigationController->presentedViewController() == nullptr
+            && modalController->presentingViewController() == nullptr,
+        "dismissal clears both sides of the presentation relationship"
+    );
+    expect(
+        visibleNavigationController->visibleViewController() == visibleRoot,
+        "the navigation visible controller returns to its top controller"
+    );
+    expect(
+        presentationStats->dismissalWillBeginCount == 1
+            && presentationStats->dismissalDidEndCount == 1
+            && presentationStats->dismissalAnimationCount == 1
+            && presentationStats->lastDismissalCompleted
+            && dismissalCompletionCalled,
+        "custom dismissal hooks, animator, and completion run once"
+    );
+    expect(
+        modalController->willDisappearCount == 1
+            && modalController->didDisappearCount == 1,
+        "dismissal appearance callbacks bracket the completed transition"
+    );
+
+    const auto rootWillDisappearBeforeFullScreen =
+        visibleRoot->willDisappearCount;
+    const auto rootDidDisappearBeforeFullScreen =
+        visibleRoot->didDisappearCount;
+    const auto rootWillAppearBeforeFullScreen = visibleRoot->willAppearCount;
+    const auto rootDidAppearBeforeFullScreen = visibleRoot->didAppearCount;
+    auto fullScreenModal = new_shared<RecordingViewController>();
+    bool fullScreenPresentationCompleted = false;
+    visibleRoot->present(
+        fullScreenModal,
+        false,
+        [&fullScreenPresentationCompleted]() {
+            fullScreenPresentationCompleted = true;
+        }
+    );
+    expect(
+        fullScreenPresentationCompleted
+            && visibleNavigationController->view()->superview().expired(),
+        "the built-in full-screen presentation removes the presenter after completion"
+    );
+    expect(
+        visibleRoot->willDisappearCount
+                == rootWillDisappearBeforeFullScreen + 1
+            && visibleRoot->didDisappearCount
+                == rootDidDisappearBeforeFullScreen + 1,
+        "full-screen presentation forwards disappearance to visible navigation content"
+    );
+
+    fullScreenModal->dismiss(false);
+    expect(
+        !visibleNavigationController->view()->superview().expired()
+            && visibleRoot->willAppearCount == rootWillAppearBeforeFullScreen + 1
+            && visibleRoot->didAppearCount == rootDidAppearBeforeFullScreen + 1,
+        "full-screen dismissal restores the presenter and appearance lifecycle"
+    );
+
+    const auto rootWillDisappearBeforeOverlay = visibleRoot->willDisappearCount;
+    const auto rootDidDisappearBeforeOverlay = visibleRoot->didDisappearCount;
+    auto overlayModal = new_shared<RecordingViewController>();
+    overlayModal->setModalPresentationStyle(
+        UIModalPresentationStyle::overFullScreen
+    );
+    visibleRoot->present(overlayModal, false);
+    expect(
+        !visibleNavigationController->view()->superview().expired()
+            && visibleRoot->willDisappearCount == rootWillDisappearBeforeOverlay
+            && visibleRoot->didDisappearCount == rootDidDisappearBeforeOverlay,
+        "over-full-screen presentation retains the presenter without disappearance"
+    );
+    overlayModal->dismiss(false);
+
+    auto partialCurlModal = new_shared<RecordingViewController>();
+    partialCurlModal->setModalTransitionStyle(
+        UIModalTransitionStyle::partialCurl
+    );
+    bool partialCurlPresentationCompleted = false;
+    visibleRoot->present(
+        partialCurlModal,
+        true,
+        [&partialCurlPresentationCompleted]() {
+            partialCurlPresentationCompleted = true;
+        }
+    );
+    expect(
+        partialCurlModal->view()->superview().lock() == window
+            && window->subviews().back() == partialCurlModal->view(),
+        "partial curl keeps the presented view above the live presenter"
+    );
+    for (int step = 0; step < 4 && !partialCurlPresentationCompleted; ++step) {
+        completePendingAnimations();
+    }
+    expect(
+        partialCurlPresentationCompleted
+            && visibleNavigationController->presentedViewController()
+                == partialCurlModal,
+        "partial-curl presentation completes without hierarchy mutation"
+    );
+    bool partialCurlDismissalCompleted = false;
+    partialCurlModal->dismiss(
+        true,
+        [&partialCurlDismissalCompleted]() {
+            partialCurlDismissalCompleted = true;
+        }
+    );
+    for (int step = 0; step < 4 && !partialCurlDismissalCompleted; ++step) {
+        completePendingAnimations();
+    }
+    expect(
+        partialCurlDismissalCompleted
+            && visibleNavigationController->presentedViewController() == nullptr,
+        "partial-curl dismissal restores the presenter without reordering crashes"
+    );
+
+    auto stableCoverVertical = new_shared<RecordingViewController>();
+    auto ignoredCoverVertical = new_shared<RecordingViewController>();
+    bool ignoredCoverVerticalCompletion = false;
+    visibleRoot->present(stableCoverVertical, false);
+    visibleRoot->present(
+        ignoredCoverVertical,
+        false,
+        [&ignoredCoverVerticalCompletion]() {
+            ignoredCoverVerticalCompletion = true;
+        }
+    );
+    expect(
+        visibleNavigationController->presentedViewController()
+                == stableCoverVertical
+            && ignoredCoverVertical->presentingViewController() == nullptr
+            && !ignoredCoverVerticalCompletion,
+        "a repeated cover-vertical action is ignored while a modal is already presented"
+    );
+    stableCoverVertical->dismiss(false);
+
+    auto containerSizedWindow = new_shared<UIWindow>();
+    containerSizedWindow->setFrame(NXRect(0, 0, 1280, 720));
+    auto containerSizedPresenter = new_shared<RecordingViewController>();
+    containerSizedPresenter->view()->setFrame(NXRect(0, 0, 960, 540));
+    containerSizedWindow->addSubview(containerSizedPresenter->view());
+    auto containerSizedPartialCurl = new_shared<RecordingViewController>();
+    containerSizedPartialCurl->setModalTransitionStyle(
+        UIModalTransitionStyle::partialCurl
+    );
+    containerSizedPresenter->present(containerSizedPartialCurl, false);
+    expect(
+        containerSizedPartialCurl->view()->frame()
+                == containerSizedWindow->bounds()
+            && containerSizedPresenter->presentedViewController()
+                == containerSizedPartialCurl,
+        "partial curl uses its full-screen presentation container instead of rejecting presenter bounds"
+    );
+    containerSizedPartialCurl->dismiss(false);
+
+    auto lowerModal = new_shared<RecordingViewController>();
+    lowerModal->setModalPresentationStyle(UIModalPresentationStyle::overFullScreen);
+    auto upperModal = new_shared<RecordingViewController>();
+    upperModal->setModalPresentationStyle(UIModalPresentationStyle::overFullScreen);
+    visibleRoot->present(lowerModal, false);
+    lowerModal->present(upperModal, false);
+    lowerModal->dismiss(false);
+    expect(
+        visibleNavigationController->presentedViewController() == lowerModal
+            && lowerModal->presentedViewController() == nullptr
+            && upperModal->presentingViewController() == nullptr,
+        "a presented controller dismisses its presented child before itself"
+    );
+    lowerModal->dismiss(false);
+
+    auto presentationThenDismissal = new_shared<RecordingViewController>();
+    auto presentationAnimationView = new_shared<RecordingAnimationView>();
+    presentationThenDismissal->setView(presentationAnimationView);
+    bool queuedDismissalCompleted = false;
+    visibleRoot->present(presentationThenDismissal, true);
+    expect(
+        (presentationAnimationView->lastAnimationOptions
+            & preferredFramesPerSecond120) == preferredFramesPerSecond120,
+        "built-in modal presentation requests a 120 fps frame limit"
+    );
+    expect(
+        (presentationAnimationView->lastAnimationOptions
+            & allowUserInteraction) == allowUserInteraction,
+        "the presented hierarchy accepts input while its transition is running"
+    );
+    expect(
+        window->hitTest(NXPoint(20, 20), nullptr)
+            == presentationAnimationView,
+        "input during presentation is captured by the modal instead of falling through to the presenter"
+    );
+    presentationThenDismissal->dismiss(
+        true,
+        [&queuedDismissalCompleted]() {
+            queuedDismissalCompleted = true;
+        }
+    );
+    expect(
+        visibleNavigationController->presentedViewController()
+            == presentationThenDismissal,
+        "a dismissal requested during presentation waits for that presentation"
+    );
+    for (int step = 0; step < 8 && !queuedDismissalCompleted; ++step) {
+        completePendingAnimations();
+    }
+    expect(
+        queuedDismissalCompleted
+            && visibleNavigationController->presentedViewController() == nullptr,
+        "presentation followed by an overlapping dismissal completes serially"
+    );
+
+    auto dismissalThenPresentation = new_shared<RecordingViewController>();
+    auto replacementModal = new_shared<RecordingViewController>();
+    bool replacementPresentationCompleted = false;
+    visibleRoot->present(dismissalThenPresentation, false);
+    dismissalThenPresentation->dismiss(true);
+    visibleRoot->present(
+        replacementModal,
+        true,
+        [&replacementPresentationCompleted]() {
+            replacementPresentationCompleted = true;
+        }
+    );
+    expect(
+        visibleNavigationController->presentedViewController()
+            == dismissalThenPresentation,
+        "a presentation requested during dismissal preserves the active relationship"
+    );
+    for (int step = 0; step < 8 && !replacementPresentationCompleted; ++step) {
+        completePendingAnimations();
+    }
+    expect(
+        replacementPresentationCompleted
+            && visibleNavigationController->presentedViewController()
+                == replacementModal,
+        "dismissal followed by an overlapping presentation completes serially"
+    );
+    replacementModal->dismiss(false);
+
+    auto repeatedPresentation = new_shared<RecordingViewController>();
+    auto obsoletePresentation = new_shared<RecordingViewController>();
+    bool repeatedPresentationCompleted = false;
+    bool obsoletePresentationCompleted = false;
+    visibleRoot->present(
+        repeatedPresentation,
+        true,
+        [&repeatedPresentationCompleted]() {
+            repeatedPresentationCompleted = true;
+        }
+    );
+    visibleRoot->present(
+        obsoletePresentation,
+        true,
+        [&obsoletePresentationCompleted]() {
+            obsoletePresentationCompleted = true;
+        }
+    );
+    for (int step = 0; step < 4 && !repeatedPresentationCompleted; ++step) {
+        completePendingAnimations();
+    }
+    expect(
+        repeatedPresentationCompleted
+            && !obsoletePresentationCompleted
+            && visibleNavigationController->presentedViewController()
+                == repeatedPresentation,
+        "a repeated present during animation is ignored once it becomes inapplicable"
+    );
+
+    bool firstRepeatedDismissalCompleted = false;
+    bool obsoleteDismissalCompleted = false;
+    repeatedPresentation->dismiss(
+        true,
+        [&firstRepeatedDismissalCompleted]() {
+            firstRepeatedDismissalCompleted = true;
+        }
+    );
+    repeatedPresentation->dismiss(
+        true,
+        [&obsoleteDismissalCompleted]() {
+            obsoleteDismissalCompleted = true;
+        }
+    );
+    for (int step = 0; step < 4 && !firstRepeatedDismissalCompleted; ++step) {
+        completePendingAnimations();
+    }
+    expect(
+        firstRepeatedDismissalCompleted
+            && !obsoleteDismissalCompleted
+            && visibleNavigationController->presentedViewController() == nullptr,
+        "a repeated dismiss during animation becomes a safe no-op"
     );
 
     auto gatedRoot = new_shared<RecordingViewController>();
