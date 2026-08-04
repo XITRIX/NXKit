@@ -15,6 +15,9 @@ public:
     UIViewAnimationGroup(UIViewAnimationOptions options, std::optional<std::function<void(bool)>> completion);
 
     void animationDidStop(bool finished);
+
+private:
+    bool _allAnimationsFinished = true;
 };
 
 }

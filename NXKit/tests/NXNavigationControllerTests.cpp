@@ -1024,8 +1024,21 @@ int main() {
     auto presentationThenDismissal = new_shared<RecordingViewController>();
     auto presentationAnimationView = new_shared<RecordingAnimationView>();
     presentationThenDismissal->setView(presentationAnimationView);
-    bool queuedDismissalCompleted = false;
-    visibleRoot->present(presentationThenDismissal, true);
+    const auto presenterWillAppearBeforeInterruption =
+        visibleRoot->willAppearCount;
+    const auto presenterDidAppearBeforeInterruption =
+        visibleRoot->didAppearCount;
+    const auto presenterDidDisappearBeforeInterruption =
+        visibleRoot->didDisappearCount;
+    bool interruptedPresentationCompleted = false;
+    bool interruptedDismissalCompleted = false;
+    visibleRoot->present(
+        presentationThenDismissal,
+        true,
+        [&interruptedPresentationCompleted]() {
+            interruptedPresentationCompleted = true;
+        }
+    );
     expect(
         (presentationAnimationView->lastAnimationOptions
             & preferredFramesPerSecond120) == preferredFramesPerSecond120,
@@ -1041,24 +1054,70 @@ int main() {
             == presentationAnimationView,
         "input during presentation is captured by the modal instead of falling through to the presenter"
     );
+    presentationAnimationView->layer()->animateAt(Timer(250));
+    const auto interruptedPresentationLayer =
+        presentationAnimationView->layer()->presentation();
+    const auto interruptedTransform = interruptedPresentationLayer
+        ? interruptedPresentationLayer->affineTransform()
+        : NXAffineTransform::identity;
+    expect(
+        interruptedPresentationLayer
+            && interruptedTransform.tY > 0
+            && interruptedTransform.tY < window->bounds().height(),
+        "the presentation reaches a visible intermediate transform before dismissal"
+    );
     presentationThenDismissal->dismiss(
         true,
-        [&queuedDismissalCompleted]() {
-            queuedDismissalCompleted = true;
+        [&interruptedDismissalCompleted]() {
+            interruptedDismissalCompleted = true;
         }
     );
     expect(
         visibleNavigationController->presentedViewController()
-            == presentationThenDismissal,
-        "a dismissal requested during presentation waits for that presentation"
+                == presentationThenDismissal
+            && !presentationThenDismissal->isBeingPresented()
+            && presentationThenDismissal->isBeingDismissed()
+            && !interruptedPresentationCompleted
+            && !interruptedDismissalCompleted,
+        "a dismissal requested during presentation reverses it immediately without completing either endpoint"
     );
-    for (int step = 0; step < 8 && !queuedDismissalCompleted; ++step) {
+    expect(
+        (presentationAnimationView->lastAnimationOptions
+            & beginFromCurrentState) == beginFromCurrentState
+            && presentationAnimationView->layer()->presentation()
+            && presentationAnimationView->layer()
+                    ->presentation()
+                    ->affineTransform() == interruptedTransform,
+        "the reversing dismissal starts from the presentation layer's interrupted transform"
+    );
+    expect(
+        presentationThenDismissal->willAppearCount == 1
+            && presentationThenDismissal->didAppearCount == 0
+            && presentationThenDismissal->willDisappearCount == 1
+            && presentationThenDismissal->didDisappearCount == 0
+            && visibleRoot->willAppearCount
+                == presenterWillAppearBeforeInterruption + 1
+            && visibleRoot->didAppearCount
+                == presenterDidAppearBeforeInterruption,
+        "interruption reverses appearance callbacks without synthesizing a completed presentation"
+    );
+    for (int step = 0; step < 4 && !interruptedDismissalCompleted; ++step) {
         completePendingAnimations();
     }
     expect(
-        queuedDismissalCompleted
+        interruptedDismissalCompleted
+            && !interruptedPresentationCompleted
             && visibleNavigationController->presentedViewController() == nullptr,
-        "presentation followed by an overlapping dismissal completes serially"
+        "the reversing dismissal completes and removes the interrupted presentation"
+    );
+    expect(
+        presentationThenDismissal->didAppearCount == 0
+            && presentationThenDismissal->didDisappearCount == 1
+            && visibleRoot->didAppearCount
+                == presenterDidAppearBeforeInterruption + 1
+            && visibleRoot->didDisappearCount
+                == presenterDidDisappearBeforeInterruption,
+        "the reversed transition balances controller lifecycle at the dismissal endpoint"
     );
 
     auto dismissalThenPresentation = new_shared<RecordingViewController>();
@@ -1389,7 +1448,12 @@ int main() {
         );
         expect(
             sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
-            "the transition-time modal Dismiss key press is queued"
+            "the transition-time modal Dismiss key press is handled"
+        );
+        expect(
+            !interactiveAnimationModal->isBeingPresented()
+                && interactiveAnimationModal->isBeingDismissed(),
+            "B immediately reverses an interaction-enabled modal presentation"
         );
         for (int step = 0;
              step < 8 && interactiveAnimationModal->presentingViewController();

@@ -134,6 +134,8 @@ private:
     bool _isBeingPresented = false;
     bool _isBeingDismissed = false;
     bool _isPerformingModalTransition = false;
+    bool _activePresentationCanBeInterrupted = false;
+    bool _isReversingModalPresentation = false;
     bool _isModalTransitionInFlight = false;
     bool _isDrainingModalOperations = false;
     std::deque<PendingModalOperation> _pendingModalOperations;

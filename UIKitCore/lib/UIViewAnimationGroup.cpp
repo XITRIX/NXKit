@@ -9,10 +9,14 @@ UIViewAnimationGroup::UIViewAnimationGroup(UIViewAnimationOptions options, std::
 { }
 
 void UIViewAnimationGroup::animationDidStop(bool finished) {
+    _allAnimationsFinished = _allAnimationsFinished && finished;
     queuedAnimations -= 1;
     if (queuedAnimations == 0) {
-        if (completion.has_value())
-            completion.value()(finished);
+        auto finalCompletion = std::move(completion);
+        completion.reset();
+        if (finalCompletion.has_value()) {
+            finalCompletion.value()(_allAnimationsFinished);
+        }
     }
 }
 

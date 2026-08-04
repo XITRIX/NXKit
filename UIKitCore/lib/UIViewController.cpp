@@ -227,6 +227,7 @@ public:
                 curveEaseOut
                     | preferredFramesPerSecond120
                     | allowUserInteraction
+                    | beginFromCurrentState
             ),
             animations,
             [context, transitionView, animatesToVisible](bool finished) {
@@ -488,7 +489,8 @@ void UIViewController::present(const std::shared_ptr<UIViewController>& otherVie
                 == UIModalPresentationStyle::fullScreen
         );
     }
-    if (!animator) {
+    const bool usesBuiltInAnimator = !animator;
+    if (usesBuiltInAnimator) {
         animator = new_shared<ModalTransitionAnimator>(
             otherViewController->modalTransitionStyle(),
             true
@@ -502,6 +504,8 @@ void UIViewController::present(const std::shared_ptr<UIViewController>& otherVie
     presentingViewController->_isPerformingModalTransition = true;
     otherViewController->_isPerformingModalTransition = true;
     otherViewController->_isBeingPresented = true;
+    otherViewController->_activePresentationCanBeInterrupted =
+        animated && usesBuiltInAnimator;
 
     const auto previousTraitCollection = otherViewController->_traitCollection;
     otherViewController->_traitCollection = presentingViewController->_traitCollection;
@@ -572,6 +576,19 @@ void UIViewController::present(const std::shared_ptr<UIViewController>& otherVie
                 return;
             }
 
+            // A built-in dismissal can reverse an in-flight presentation. The
+            // presentation itself is cancelled, but its hierarchy and modal
+            // relationships must remain installed until the dismissal reaches
+            // its own endpoint. Dismissal owns the matching appearance calls
+            // and eventually completes the stack coordinator.
+            if (!completed && presented->_isReversingModalPresentation) {
+                presented->_isBeingPresented = false;
+                presented->_activePresentationCanBeInterrupted = false;
+                presentationController->presentationTransitionDidEnd(false);
+                animator->animationEnded(false);
+                return;
+            }
+
             if (completed) {
                 if (removesPresentersView) {
                     presenting->view()->removeFromSuperview();
@@ -595,6 +612,7 @@ void UIViewController::present(const std::shared_ptr<UIViewController>& otherVie
 
             presented->_isBeingPresented = false;
             presented->_isPerformingModalTransition = false;
+            presented->_activePresentationCanBeInterrupted = false;
             presenting->_isPerformingModalTransition = false;
             presented->_activeTransitionContext.reset();
             presentationController->presentationTransitionDidEnd(completed);
@@ -636,17 +654,6 @@ void UIViewController::present(const std::shared_ptr<UIViewController>& otherVie
 void UIViewController::dismiss(bool animated, const std::function<void()>& completion) {
     const auto requester = rootVC();
     const auto coordinator = modalTransitionCoordinator();
-    if (coordinator->_isModalTransitionInFlight) {
-        coordinator->enqueueModalOperation({
-            PendingModalOperationKind::dismiss,
-            shared_from_this(),
-            nullptr,
-            animated,
-            completion,
-        });
-        return;
-    }
-
     const auto firstDismissed = requester->_presentedViewController
         ? requester->_presentedViewController
         : (!requester->_presentingViewController.expired() ? requester : nullptr);
@@ -666,11 +673,36 @@ void UIViewController::dismiss(bool animated, const std::function<void()>& compl
     }
     const auto topDismissed = dismissedControllers.back();
 
-    if (finalPresenting->_isPerformingModalTransition) {
+    // UIKit's begin-from-current-state behavior can reverse a standard modal
+    // presentation immediately. Custom presentation styles continue to
+    // serialize until NXKit has a UIViewPropertyAnimator-compatible
+    // interruptible-animator contract.
+    const bool interruptsActivePresentation =
+        coordinator->_isModalTransitionInFlight
+            && topDismissed->_isBeingPresented
+            && topDismissed->_activePresentationCanBeInterrupted
+            && topDismissed->_activeTransitionContext
+            && topDismissed->modalPresentationStyle()
+                != UIModalPresentationStyle::custom;
+    if (coordinator->_isModalTransitionInFlight
+        && !interruptsActivePresentation) {
+        coordinator->enqueueModalOperation({
+            PendingModalOperationKind::dismiss,
+            shared_from_this(),
+            nullptr,
+            animated,
+            completion,
+        });
+        return;
+    }
+
+    if (finalPresenting->_isPerformingModalTransition
+        && !interruptsActivePresentation) {
         throw std::logic_error("A modal transition is already in progress");
     }
     for (const auto& controller : dismissedControllers) {
-        if (controller->_isPerformingModalTransition) {
+        if (controller->_isPerformingModalTransition
+            && !interruptsActivePresentation) {
             throw std::logic_error("A modal transition is already in progress");
         }
     }
@@ -700,6 +732,18 @@ void UIViewController::dismiss(bool animated, const std::function<void()>& compl
         );
     }
 
+    if (interruptsActivePresentation) {
+        topDismissed->_isReversingModalPresentation = true;
+        const auto presentationContext = topDismissed->_activeTransitionContext;
+        try {
+            presentationContext->completeTransition(false);
+        } catch (...) {
+            topDismissed->_isReversingModalPresentation = false;
+            throw;
+        }
+        topDismissed->_isReversingModalPresentation = false;
+    }
+
     coordinator->_isModalTransitionInFlight = true;
     finalPresenting->_isPerformingModalTransition = true;
     for (const auto& controller : dismissedControllers) {
@@ -715,6 +759,12 @@ void UIViewController::dismiss(bool animated, const std::function<void()>& compl
     if (finalPresenterWasDetached) {
         finalPresenting->view()->setFrame(window->bounds());
         window->insertSubviewBelow(finalPresenting->view(), topDismissed->view());
+    }
+    const bool finalPresenterNeedsAppearance =
+        finalPresenterWasDetached
+            || (interruptsActivePresentation
+                && presentationController->shouldRemovePresentersView());
+    if (finalPresenterNeedsAppearance) {
         finalPresenting->viewWillAppear(animated);
     }
 
@@ -751,7 +801,7 @@ void UIViewController::dismiss(bool animated, const std::function<void()>& compl
             weakCoordinator,
             presentationController,
             animator,
-            finalPresenterWasDetached,
+            finalPresenterNeedsAppearance,
             animated,
             completion
         ](bool completed) {
@@ -771,7 +821,7 @@ void UIViewController::dismiss(bool animated, const std::function<void()>& compl
                 for (const auto& intermediate : visibleIntermediateControllers) {
                     intermediate->viewDidDisappear(false);
                 }
-                if (finalPresenterWasDetached) {
+                if (finalPresenterNeedsAppearance) {
                     finalPresenter->viewDidAppear(animated);
                 }
 
@@ -800,14 +850,14 @@ void UIViewController::dismiss(bool animated, const std::function<void()>& compl
                 for (const auto& intermediate : visibleIntermediateControllers) {
                     intermediate->viewWillAppear(false);
                 }
-                if (finalPresenterWasDetached) {
+                if (finalPresenterNeedsAppearance) {
                     finalPresenter->viewWillDisappear(animated);
                 }
                 top->viewDidAppear(animated);
                 for (const auto& intermediate : visibleIntermediateControllers) {
                     intermediate->viewDidAppear(false);
                 }
-                if (finalPresenterWasDetached) {
+                if (finalPresenterNeedsAppearance) {
                     finalPresenter->view()->removeFromSuperview();
                     finalPresenter->viewDidDisappear(animated);
                 }
@@ -822,6 +872,7 @@ void UIViewController::dismiss(bool animated, const std::function<void()>& compl
             for (const auto& controller : dismissedControllers) {
                 controller->_isBeingDismissed = false;
                 controller->_isPerformingModalTransition = false;
+                controller->_activePresentationCanBeInterrupted = false;
                 controller->_activeTransitionContext.reset();
             }
             finalPresenter->_isPerformingModalTransition = false;

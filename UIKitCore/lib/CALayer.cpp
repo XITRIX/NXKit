@@ -517,12 +517,23 @@ void CALayer::add(const std::shared_ptr<CABasicAnimation>& animation, const std:
     if (copy->animationGroup)
         copy->animationGroup->queuedAnimations += 1;
 
-    if (animations.count(keyPath) && animations[keyPath]->animationGroup)
-        animations[keyPath]->animationGroup->animationDidStop(false);
-
-    auto isEmpty = animations.empty();
+    const auto previousAnimation = animations.count(keyPath)
+        ? animations[keyPath]
+        : nullptr;
+    const auto isEmpty = animations.empty();
     animations[keyPath] = copy;
     onDidSetAnimations(isEmpty);
+
+    // Notify the previous group only after the replacement is installed. A
+    // completion is allowed to mutate this layer, so it must never observe the
+    // animations collection halfway through replacement.
+    if (previousAnimation && previousAnimation->animationGroup) {
+        const bool continuesSameAnimationGroup =
+            previousAnimation->animationGroup == copy->animationGroup;
+        previousAnimation->animationGroup->animationDidStop(
+            continuesSameAnimationGroup
+        );
+    }
 }
 
 void CALayer::removeAllAnimations() {
