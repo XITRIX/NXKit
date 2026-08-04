@@ -39,7 +39,9 @@ public:
 
     /**
      A rounded liquid-glass lens with refraction, chromatic dispersion, tint,
-     and directional specular highlights.
+     and a live backdrop-colored specular reflection along its rim. Achromatic
+     backdrops receive directional fallback lighting and adaptive body contrast
+     so the default glass remains visible over both black and white content.
      */
     static BackdropEffect glass();
 

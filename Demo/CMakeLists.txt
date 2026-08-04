@@ -27,6 +27,7 @@ add_executable(${PROJECT_NAME}
         app/Screens/IBTestController/IBTestController.cpp
         app/Screens/TestScrollController/TestScrollController.cpp
         app/Screens/NavigationTestViewController/NavigationTestViewController.cpp
+        app/Screens/GlassDemoViewController/GlassDemoViewController.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

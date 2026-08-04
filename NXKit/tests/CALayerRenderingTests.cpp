@@ -3,10 +3,13 @@
 
 #include "CABackdropEffectLayer.hpp"
 
+#include "include/core/SkBitmap.h"
 #include "include/core/SkImageFilter.h"
 #include "include/core/SkPaint.h"
+#include "include/core/SkSurface.h"
 #include "include/utils/SkNoDrawCanvas.h"
 
+#include <cstdlib>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -122,11 +125,259 @@ void testBackdropFilterCacheTracksGeometry() {
            "backdrop effect changes rebuild the image filter");
 }
 
+struct GlassSamples {
+    SkColor leftRim = SK_ColorTRANSPARENT;
+    SkColor topRim = SK_ColorTRANSPARENT;
+    SkColor bottomRim = SK_ColorTRANSPARENT;
+    SkColor center = SK_ColorTRANSPARENT;
+};
+
+int brightness(SkColor color) {
+    return SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
+}
+
+GlassSamples renderGlassSamples(
+    SkColor exteriorColor,
+    SkColor interiorColor,
+    NXFloat specFallbackStrength = 0.50f,
+    NXFloat specBrightFallbackStrength = 0.14f
+) {
+    constexpr int padding = 24;
+    constexpr int lensWidth = 40;
+    constexpr int lensHeight = 24;
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(
+        lensWidth + padding * 2,
+        lensHeight + padding * 2
+    ));
+    if (!surface) return {};
+
+    auto* canvas = surface->getCanvas();
+    canvas->clear(exteriorColor);
+
+    SkPaint interiorPaint;
+    interiorPaint.setColor(interiorColor);
+    canvas->drawRect(
+        SkRect::MakeXYWH(padding, padding, lensWidth, lensHeight),
+        interiorPaint
+    );
+
+    const auto glass = BackdropEffect::glass();
+    BackdropEffect reflectionOnly(glass.shaderSource(), "content", 16, 0);
+    reflectionOnly.setUniform("refraction", 0.0f);
+    reflectionOnly.setUniform("curve", 0.0f);
+    reflectionOnly.setUniform("dispersion", 0.0f);
+    reflectionOnly.setUniform("saturation", 1.0f);
+    reflectionOnly.setUniform("contrast", 1.0f);
+    reflectionOnly.setUniform("tint", UIColor(255, 255, 255, 32));
+    reflectionOnly.setUniform("edge", 1.0f);
+    reflectionOnly.setUniform("specStrength", 0.52f);
+    reflectionOnly.setUniform("specFallbackStrength", specFallbackStrength);
+    reflectionOnly.setUniform("specBrightFallbackStrength", specBrightFallbackStrength);
+    reflectionOnly.setUniform("specLightDirection", NXPoint(0.0f, -1.0f));
+    reflectionOnly.setUniform("specDirectionalPower", 3.0f);
+    reflectionOnly.setUniform("specWidthPx", 6.0f);
+    reflectionOnly.setUniform("reflectionSamplePx", 10.0f);
+    reflectionOnly.setUniform("reflectionSpreadPx", 0.0f);
+    reflectionOnly.setUniform("brightBackdropShade", 0.008f);
+
+    auto layer = new_shared<CABackdropEffectLayer>(reflectionOnly);
+    layer->setBounds(NXRect(0, 0, lensWidth, lensHeight));
+    layer->setCornerRadius(6);
+
+    canvas->save();
+    canvas->translate(padding, padding);
+    layer->draw(canvas);
+    canvas->restore();
+
+    SkBitmap pixels;
+    pixels.allocN32Pixels(surface->width(), surface->height());
+    if (!surface->readPixels(pixels, 0, 0)) return {};
+    return {
+        .leftRim = pixels.getColor(padding + 1, padding + lensHeight / 2),
+        .topRim = pixels.getColor(padding + lensWidth / 2, padding + 1),
+        .bottomRim = pixels.getColor(
+            padding + lensWidth / 2,
+            padding + lensHeight - 2
+        ),
+        .center = pixels.getColor(
+            padding + lensWidth / 2,
+            padding + lensHeight / 2
+        ),
+    };
+}
+
+SkColor renderDefaultGlassRefractionSample() {
+    constexpr int padding = 24;
+    constexpr int lensWidth = 120;
+    constexpr int lensHeight = 60;
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(
+        lensWidth + padding * 2,
+        lensHeight + padding * 2
+    ));
+    if (!surface) return SK_ColorTRANSPARENT;
+
+    auto* canvas = surface->getCanvas();
+    canvas->clear(SK_ColorBLUE);
+
+    // The inspected point is red in the undistorted source. Strong default
+    // refraction bends it downward across this boundary into the blue region.
+    SkPaint redPaint;
+    redPaint.setColor(SK_ColorRED);
+    canvas->drawRect(
+        SkRect::MakeXYWH(0, 0, surface->width(), padding + 10),
+        redPaint
+    );
+
+    auto layer = new_shared<CABackdropEffectLayer>(BackdropEffect::glass());
+    layer->setBounds(NXRect(0, 0, lensWidth, lensHeight));
+    layer->setCornerRadius(lensHeight * 0.5f);
+
+    canvas->save();
+    canvas->translate(padding, padding);
+    layer->draw(canvas);
+    canvas->restore();
+
+    SkBitmap pixels;
+    pixels.allocN32Pixels(surface->width(), surface->height());
+    if (!surface->readPixels(pixels, 0, 0)) return SK_ColorTRANSPARENT;
+    return pixels.getColor(padding + lensWidth / 2, padding + 6);
+}
+
+struct RefractionSeamSamples {
+    SkColor above = SK_ColorTRANSPARENT;
+    SkColor below = SK_ColorTRANSPARENT;
+};
+
+RefractionSeamSamples renderLargeGlassDiagonalSeamSamples() {
+    constexpr int lensWidth = 340;
+    constexpr int lensHeight = 140;
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(
+        lensWidth,
+        lensHeight
+    ));
+    if (!surface) return {};
+
+    auto* canvas = surface->getCanvas();
+    canvas->clear(SK_ColorBLUE);
+
+    // Both inspected pixels are red without displacement. An uncapped deep
+    // refraction field sends the pixel above the rounded-rect medial axis to
+    // the blue side while the pixel below it remains red, revealing a seam.
+    SkPaint redPaint;
+    redPaint.setColor(SK_ColorRED);
+    canvas->drawRect(
+        SkRect::MakeXYWH(0, 0, 42, surface->height()),
+        redPaint
+    );
+
+    const auto glass = BackdropEffect::glass();
+    BackdropEffect refractionOnly(glass.shaderSource(), "content", 64, 0);
+    refractionOnly.setUniform("refraction", 0.90f);
+    refractionOnly.setUniform("curve", 0.55f);
+    refractionOnly.setUniform("dispersion", 0.0f);
+    refractionOnly.setUniform("saturation", 1.0f);
+    refractionOnly.setUniform("contrast", 1.0f);
+    refractionOnly.setUniform("tint", UIColor(0, 0, 0, 0));
+    refractionOnly.setUniform("edge", 0.0f);
+    refractionOnly.setUniform("specStrength", 0.0f);
+    refractionOnly.setUniform("brightBackdropShade", 0.0f);
+
+    auto layer = new_shared<CABackdropEffectLayer>(refractionOnly);
+    layer->setBounds(NXRect(0, 0, lensWidth, lensHeight));
+    layer->setCornerRadius(36);
+
+    layer->draw(canvas);
+
+    SkBitmap pixels;
+    pixels.allocN32Pixels(surface->width(), surface->height());
+    if (!surface->readPixels(pixels, 0, 0)) return {};
+    return {
+        .above = pixels.getColor(39, 99),
+        .below = pixels.getColor(39, 101),
+    };
+}
+
+void testGlassSpecularReflectionUsesBackdropOverscan() {
+    const auto interior = SkColorSetRGB(48, 48, 48);
+    const auto red = renderGlassSamples(SkColorSetRGB(240, 32, 24), interior);
+    const auto blue = renderGlassSamples(SkColorSetRGB(24, 48, 240), interior);
+    const auto blackWithoutFallback = renderGlassSamples(
+        SK_ColorBLACK,
+        SK_ColorBLACK,
+        0
+    );
+    const auto blackWithFallback = renderGlassSamples(SK_ColorBLACK, SK_ColorBLACK);
+    const auto white = renderGlassSamples(SK_ColorWHITE, SK_ColorWHITE);
+
+    expect(
+        SkColorGetR(red.leftRim) > SkColorGetB(red.leftRim) + 30,
+        "red content outside the lens colors its specular rim"
+    );
+    expect(
+        SkColorGetB(blue.leftRim) > SkColorGetR(blue.leftRim) + 30,
+        "blue content outside the lens colors its specular rim"
+    );
+    expect(
+        brightness(blackWithFallback.topRim)
+            > brightness(blackWithoutFallback.topRim) + 30,
+        "pure black exterior content receives the neutral specular fallback"
+    );
+    expect(
+        std::abs(
+            static_cast<int>(SkColorGetR(blackWithFallback.topRim))
+            - static_cast<int>(SkColorGetB(blackWithFallback.topRim))
+        ) <= 2,
+        "the pure-black specular fallback remains neutral white"
+    );
+    expect(
+        brightness(blackWithFallback.topRim)
+            > brightness(blackWithFallback.leftRim) + 30,
+        "the black-backdrop fallback forms a partial highlight, not a full border"
+    );
+    expect(
+        brightness(blackWithFallback.bottomRim)
+            > brightness(blackWithFallback.leftRim) + 30,
+        "the black-backdrop fallback retains the opposite optical highlight"
+    );
+    expect(
+        brightness(white.topRim) < brightness(white.center) - 15,
+        "bright neutral content receives a contrasting specular reflection"
+    );
+    expect(
+        brightness(white.leftRim) < brightness(white.center),
+        "bright neutral content keeps a subtle ambient side reflection"
+    );
+    expect(
+        brightness(white.center) < brightness(SK_ColorWHITE),
+        "the glass body remains faintly visible on a pure-white backdrop"
+    );
+}
+
+void testDefaultGlassRefractionExtendsIntoLensBody() {
+    const auto refracted = renderDefaultGlassRefractionSample();
+    expect(
+        SkColorGetB(refracted) > SkColorGetR(refracted) + 30,
+        "default glass strongly refracts source content beyond the outer edge band"
+    );
+}
+
+void testLargeGlassRefractionStopsBeforeDiagonalMedialAxis() {
+    const auto samples = renderLargeGlassDiagonalSeamSamples();
+    expect(
+        SkColorGetR(samples.above) > SkColorGetB(samples.above) + 30
+            && SkColorGetR(samples.below) > SkColorGetB(samples.below) + 30,
+        "large rounded glass fades refraction before its diagonal normal seam"
+    );
+}
+
 } // namespace
 
 int main() {
     testMaskLayersUseLocalBounds();
     testBackdropFilterCacheTracksGeometry();
+    testGlassSpecularReflectionUsesBackdropOverscan();
+    testDefaultGlassRefractionExtendsIntoLensBody();
+    testLargeGlassRefractionStopsBeforeDiagonalMedialAxis();
 
     if (failures != 0) {
         std::cerr << failures << " layer-rendering assertion(s) failed\n";

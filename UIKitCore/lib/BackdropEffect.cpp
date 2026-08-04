@@ -4,10 +4,34 @@
  * Copyright 2022 Jaewoong Eum
  * Licensed under the Apache License, Version 2.0.
  *
+ * The backdrop-colored specular reflection is adapted from the OpticalBorder
+ * shader in Liquid Glass Easy:
+ * https://github.com/AhmeedGamil/liquid_glass_easy
+ * Copyright (c) 2025 Ahmed Gamil
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  * Modified for NXKit's Skia backdrop pipeline in 2026. The NXKit adaptation
  * changes the host-side bindings and default tuning; the shader's SDF lens,
- * refraction, and dispersion are retained, while lighting is reduced to a
- * narrow edge-only glint.
+ * refraction, and dispersion are retained. Its former fixed white edge glint
+ * is replaced by a narrow Fresnel-style reflection sampled from the live
+ * backdrop just outside the lens.
  */
 
 #include <BackdropEffect.h>
@@ -32,10 +56,15 @@ uniform float saturation;
 uniform float contrast;
 uniform float4 tint;
 uniform float edge;
-uniform float2 lightDir;
 uniform float specStrength;
-uniform float specPower;
+uniform float specFallbackStrength;
+uniform float specBrightFallbackStrength;
+uniform float2 specLightDirection;
+uniform float specDirectionalPower;
 uniform float specWidthPx;
+uniform float reflectionSamplePx;
+uniform float reflectionSpreadPx;
+uniform float brightBackdropShade;
 uniform shader content;
 
 const float SMOOTH_EDGE_PX = 1.5;
@@ -70,6 +99,111 @@ half3 processColor(half3 src, float vibrancy, float intensity, float4 overlay) {
     return mix(adjusted, half3(overlay.rgb), overlay.a);
 }
 
+float directionalHighlight(float2 normal) {
+    float directionLength = max(length(specLightDirection), 0.0001);
+    float2 lightDirection = specLightDirection / directionLength;
+    float highlightPower = max(specDirectionalPower, 1.0);
+    float key = pow(max(dot(normal, lightDirection), 0.0), highlightPower);
+    float kick = pow(max(dot(normal, -lightDirection), 0.0), highlightPower);
+    return clamp(key + kick, 0.0, 1.0);
+}
+
+// Compress a backdrop sample toward a coherent reflection tone. This follows
+// Liquid Glass Easy's OpticalBorder approach: preserve nearby color while
+// avoiding a noisy, literal copy of every source pixel. The achromatic
+// fallbacks are directionally lit instead of forming a constant border.
+half3 reflectionColor(half3 backdrop, float2 normal, half3 bodyColor) {
+    float luminance = toBrightness(backdrop);
+    half3 saturated = backdrop / max(luminance, 0.001);
+    saturated = mix(backdrop, saturated, 0.75);
+
+    float colorfulness = length(float3(backdrop) - float3(luminance));
+    float colorMix = clamp(colorfulness + 0.35, 0.35, 0.9);
+    float targetBrightness = clamp(luminance * 1.2, 0.0, 1.0);
+    half3 reflected = half3(clamp(
+        mix(half3(targetBrightness), saturated, colorMix),
+        0.0,
+        1.0
+    ));
+
+    float directionality = directionalHighlight(normal);
+
+    // A perfectly black environment has no hue or luminance to carry into the
+    // rim. Start from the processed glass body so unlit sides do not become a
+    // dark outline, then add directional white key and kick reflections.
+    float maxChannel = max(backdrop.r, max(backdrop.g, backdrop.b));
+    float blackFallback = 1.0 - smoothstep(0.0, 0.015, maxChannel);
+    reflected = mix(reflected, bodyColor, blackFallback);
+    reflected = mix(
+        reflected,
+        half3(1.0),
+        blackFallback
+            * directionality
+            * clamp(specFallbackStrength, 0.0, 1.0)
+    );
+
+    // White reflected into white is equally invisible. On bright neutral
+    // samples, shift the reflection toward grey. Keep a small ambient term so
+    // the sides remain perceptible while the directional lobes stay dominant.
+    float minChannel = min(backdrop.r, min(backdrop.g, backdrop.b));
+    float chroma = maxChannel - minChannel;
+    float brightNeutral = smoothstep(0.85, 0.98, luminance)
+        * (1.0 - smoothstep(0.02, 0.12, chroma));
+    float brightVisibility = 0.15 + directionality * 0.85;
+    return mix(
+        reflected,
+        half3(0.0),
+        brightNeutral
+            * brightVisibility
+            * clamp(specBrightFallbackStrength, 0.0, 1.0)
+    );
+}
+
+half3 sampleReflection(
+    float2 xy,
+    float2 normal,
+    float sdf,
+    float2 lensCenter,
+    float2 halfDim,
+    half3 fallback
+) {
+    // Project onto the SDF boundary, continue along its normal until the ray
+    // leaves the rectangular frame, then sample beyond it. This keeps rounded
+    // corners from accidentally reflecting pixels that are outside the glass
+    // shape but still inside its frame.
+    float2 boundaryXY = xy - normal * sdf;
+    float2 frameRemaining = max(
+        halfDim - abs(boundaryXY - lensCenter),
+        float2(0.0)
+    );
+    float2 absNormal = abs(normal);
+    float toFrameX = absNormal.x > 0.0001
+        ? frameRemaining.x / absNormal.x
+        : 100000.0;
+    float toFrameY = absNormal.y > 0.0001
+        ? frameRemaining.y / absNormal.y
+        : 100000.0;
+    float toFrame = min(toFrameX, toFrameY);
+
+    float2 tangent = float2(-normal.y, normal.x);
+    float2 reflectionXY = boundaryXY
+        + normal * (toFrame + max(reflectionSamplePx, 0.0));
+    float spread = max(reflectionSpreadPx, 0.0);
+
+    half4 center = content.eval(reflectionXY);
+    half4 before = content.eval(reflectionXY - tangent * spread);
+    half4 after = content.eval(reflectionXY + tangent * spread);
+    half4 reflected = center * 0.5 + (before + after) * 0.25;
+
+    // At a window edge the overscan may be transparent. Fade back to the
+    // refracted pixel rather than introducing a dark or transparent seam.
+    return reflectionColor(
+        mix(fallback, reflected.rgb, clamp(reflected.a, 0.0, 1.0)),
+        normal,
+        fallback
+    );
+}
+
 half4 main(float2 xy) {
     float2 halfDim = lensSize * 0.5;
     float r = min(cornerRadius, min(halfDim.x, halfDim.y));
@@ -87,7 +221,14 @@ half4 main(float2 xy) {
     float2 sampleXY = xy;
     if (refraction > 0.0 && curve > 0.0) {
         float minDim = min(halfDim.x, halfDim.y);
-        float depth = clamp(-sdf / (minDim * refraction), 0.0, 1.0);
+        // A rounded-rectangle SDF has diagonal medial axes where its nearest
+        // edge changes. Refraction must fade out before reaching those axes or
+        // a large lens exposes the normal discontinuity as a sharp diagonal.
+        // Corner radius is exactly the safe bevel depth; capsules retain the
+        // full requested depth because r equals their shortest half-dimension.
+        float requestedDepth = minDim * refraction;
+        float safeDepth = max(min(requestedDepth, max(r, 1.0)), 1.0);
+        float depth = clamp(-sdf / safeDepth, 0.0, 1.0);
         float curvature = 1.0 - depth;
         float bend = 1.0 - sqrt(1.0 - curvature * curvature);
         sampleXY = xy - bend * curve * minDim * normal;
@@ -121,17 +262,31 @@ half4 main(float2 xy) {
 
     pixel.rgb = processColor(pixel.rgb, saturation, contrast, tint);
 
-    // Keep illumination on a narrow rim. A whole-surface dome or focal pool
-    // creates corner blooms and a flare in the center of a wide glass pane.
-    if (edge > 0.0 && specStrength > 0.0) {
-        float2 lightVec = normalize(lightDir);
-        float rimBand = smoothstep(-max(specWidthPx, 1.0), 0.0, sdf);
-        float glint = pow(max(dot(normal, lightVec), 0.0), specPower);
-        float back = pow(max(dot(normal, -lightVec), 0.0), specPower) * 0.12;
-        float highlight = (glint + back) * rimBand
-            * specStrength * clamp(edge, 0.0, 1.0);
+    // Preserve a faint body on white backdrops. White tint alone cannot do
+    // this because compositing white over white is an identity operation.
+    float brightBody = smoothstep(0.85, 0.98, toBrightness(pixel.rgb));
+    pixel.rgb *= 1.0 - brightBody * clamp(brightBackdropShade, 0.0, 0.1);
 
-        pixel.rgb += half3((1.0 - pixel.rgb) * clamp(highlight, 0.0, 1.0));
+    // A grazing-angle reflection replaces the old fixed white border light.
+    // Its color comes from live pixels just beyond the lens boundary, so nearby
+    // content moves through the rim as the glass or its backdrop moves.
+    if (edge > 0.0 && specStrength > 0.0) {
+        float rimBand = smoothstep(-max(specWidthPx, 1.0), 0.0, sdf);
+        float fresnel = rimBand * rimBand;
+        float reflectance = clamp(
+            fresnel * specStrength * clamp(edge, 0.0, 1.0),
+            0.0,
+            0.9
+        );
+        half3 reflected = sampleReflection(
+            xy,
+            normal,
+            sdf,
+            lensCenter,
+            halfDim,
+            pixel.rgb
+        );
+        pixel.rgb = mix(pixel.rgb, reflected, reflectance);
     }
 
     float alpha = 1.0 - smoothstep(-SMOOTH_EDGE_PX * 0.5, SMOOTH_EDGE_PX * 0.5, sdf);
@@ -195,17 +350,25 @@ BackdropEffect BackdropEffect::glass() {
     // blur keeps the lens crisp while softening high-frequency aliasing after
     // refraction, which is closer to the current iOS glass appearance.
     BackdropEffect effect(glassShader, "content", 64, 2.5f);
-    effect.setUniform("refraction", 0.25f);
-    effect.setUniform("curve", 0.25f);
+    // Keep the curved depth field active across most of the lens. The former
+    // 0.25 values collapsed refraction into a thin edge band, leaving the body
+    // visually close to an ordinary blurred backdrop.
+    effect.setUniform("refraction", 0.90f);
+    effect.setUniform("curve", 0.55f);
     effect.setUniform("dispersion", 0.32f);
     effect.setUniform("saturation", 1.12f);
     effect.setUniform("contrast", 1.04f);
-    effect.setUniform("tint", UIColor(255, 255, 255, 18));
+    effect.setUniform("tint", UIColor(255, 255, 255, 32));
     effect.setUniform("edge", 1.0f);
-    effect.setUniform("lightDir", NXPoint(-1, -1));
-    effect.setUniform("specStrength", 0.3f);
-    effect.setUniform("specPower", 14.0f);
-    effect.setUniform("specWidthPx", 3.0f);
+    effect.setUniform("specStrength", 0.52f);
+    effect.setUniform("specFallbackStrength", 0.50f);
+    effect.setUniform("specBrightFallbackStrength", 0.14f);
+    effect.setUniform("specLightDirection", NXPoint(0.0f, -1.0f));
+    effect.setUniform("specDirectionalPower", 3.0f);
+    effect.setUniform("specWidthPx", 4.0f);
+    effect.setUniform("reflectionSamplePx", 12.0f);
+    effect.setUniform("reflectionSpreadPx", 3.0f);
+    effect.setUniform("brightBackdropShade", 0.008f);
     return effect;
 }
 

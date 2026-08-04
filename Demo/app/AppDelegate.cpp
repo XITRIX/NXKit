@@ -5,6 +5,7 @@
 #include <Screens/YogaTestViewController/YogaTestViewController.hpp>
 #include <Screens/TestScrollController/TestScrollController.hpp>
 #include <Screens/NavigationTestViewController/NavigationTestViewController.hpp>
+#include <Screens/GlassDemoViewController/GlassDemoViewController.hpp>
 // #include <TextViewController/TextViewController.hpp>
 #include <romfs/romfs.hpp>
 
@@ -32,8 +33,13 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     auto vc2 = new_shared<YogaTestViewController>();
     auto vc3 = new_shared<TestScrollController>();
     auto navigationTestController = new_shared<NavigationTestViewController>();
+    auto glassDemoController = new_shared<GlassDemoViewController>();
 //    auto vc4 = new_shared<TextViewController>();
-    std::vector<std::shared_ptr<UIViewController>> vcs1 = { vc, vc1 };
+    std::vector<std::shared_ptr<UIViewController>> vcs1 = {
+        vc,
+        vc1,
+        glassDemoController
+    };
     std::vector<std::shared_ptr<UIViewController>> vcs2 = { vc2, vc3 };
     std::vector<std::shared_ptr<UIViewController>> navigationTests = {
         navigationTestController
