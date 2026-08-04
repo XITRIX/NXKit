@@ -5,6 +5,7 @@
 #include <SDL3/SDL.h>
 #include <SkiaCtx.h>
 
+#include <algorithm>
 #include <cmath>
 
 using namespace NXKit;
@@ -218,6 +219,74 @@ void UIApplication::handleEventsIfNeeded() {
     while (SDL_PollEvent(&e)) {
         handleSDLEvent(e);
     }
+
+    if (!quitRequested) {
+        sendPressRepeatsIfNeeded(Timer());
+    }
+}
+
+void UIApplication::sendPressRepeatsIfNeeded(const Timer& timestamp) {
+    // Match Borealis's controller/keyboard behavior: the first repeat arrives
+    // after 250 ms, followed by one delivery every 100 ms. A delayed frame
+    // emits at most one repeat instead of replaying a burst of missed ticks.
+    constexpr double initialRepeatDelayMilliseconds = 250.0;
+    constexpr double repeatIntervalMilliseconds = 100.0;
+
+    const auto window = keyWindow.lock();
+    if (!window) {
+        return;
+    }
+
+    // Action callbacks may release active presses or clear the application, so
+    // iterate snapshots and confirm each physical press is still active.
+    const auto activeEvents = UIPressesEvent::activePressesEvents;
+    for (const auto& event : activeEvents) {
+        if (!event || std::find(
+                UIPressesEvent::activePressesEvents.begin(),
+                UIPressesEvent::activePressesEvents.end(),
+                event
+            ) == UIPressesEvent::activePressesEvents.end()) {
+            continue;
+        }
+
+        for (const auto& press : event->allPresses()) {
+            if (!press || press->phase() != UIPressPhase::began) {
+                continue;
+            }
+
+            const auto& referenceTimestamp = press->_hasDeliveredRepeat
+                ? press->_lastRepeatTimestamp
+                : press->_timestamp;
+            const double requiredDelay = press->_hasDeliveredRepeat
+                ? repeatIntervalMilliseconds
+                : initialRepeatDelayMilliseconds;
+            if (timestamp - referenceTimestamp < requiredDelay) {
+                continue;
+            }
+
+            press->_hasDeliveredRepeat = true;
+            press->_lastRepeatTimestamp = timestamp;
+
+            auto repeatedPress = new_shared<UIPress>(timestamp);
+            repeatedPress->_isRepeat = true;
+            repeatedPress->_type = press->_type;
+            repeatedPress->_key = press->_key;
+            repeatedPress->_gamepadKey = press->_gamepadKey;
+            repeatedPress->setForWindow(window);
+
+            auto repeatedEvent = std::shared_ptr<UIPressesEvent>(
+                new UIPressesEvent(repeatedPress)
+            );
+            sendEvent(repeatedEvent);
+
+            repeatedPress->_phase = UIPressPhase::ended;
+            sendEvent(repeatedEvent);
+
+            if (quitRequested) {
+                return;
+            }
+        }
+    }
 }
 
 void UIApplication::startHandlingLifecycleEvents() {
@@ -429,23 +498,16 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             std::shared_ptr<UIPress> press;
 
             UIGamepadKey gamepadKey = mapGamepadButtonEventToUIGamepadKey(e.gbutton);
-            UIPressType type = mapGamepadInputToUIPressType(gamepadKey.inputType());
 
             for (auto& levent: UIPressesEvent::activePressesEvents) {
                 for (auto& lpress: levent->allPresses()) {
-                    if (type != UIPressType::none) {
-                        if (lpress->type() == type) {
-                            event = levent;
-                            press = lpress;
-                            goto FOUND;
-                        }
-                    } else if (lpress->gamepadKey().has_value()) {
-                        if (lpress->gamepadKey().value().inputType() == gamepadKey.inputType()) {
-                            lpress->_gamepadKey = gamepadKey;
-                            event = levent;
-                            press = lpress;
-                            goto FOUND;
-                        }
+                    if (lpress->gamepadKey()
+                        && lpress->gamepadKey()->inputType()
+                            == gamepadKey.inputType()) {
+                        lpress->_gamepadKey = gamepadKey;
+                        event = levent;
+                        press = lpress;
+                        goto FOUND;
                     }
                 }
             }
@@ -484,13 +546,46 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
 
             UPDATE_AND_SEND:
 
-            press->_phase = gamepadKey->isPressed() ? UIPressPhase::began : UIPressPhase::ended;
+            const bool isBeginning = gamepadKey->isPressed();
+            press->_phase = isBeginning
+                ? UIPressPhase::began
+                : UIPressPhase::ended;
             press->_gamepadKey = gamepadKey;
             press->_type = mapGamepadInputToUIPressType(gamepadKey->inputType());
 
+            if (isBeginning) {
+                // Axis presses reuse their UIPress object. Start a fresh hold
+                // interval and remove any ended event left by the prior hold.
+                press->_timestamp = Timer();
+                press->_isHandled = false;
+                press->_isRepeat = false;
+                press->_hasDeliveredRepeat = false;
+                press->_lastRepeatTimestamp = press->_timestamp;
+                press->setForWindow(delegate->window);
+                std::erase_if(
+                    UIPressesEvent::activePressesEvents,
+                    [&press](const std::shared_ptr<UIPressesEvent>& candidate) {
+                        return candidate
+                            && candidate->allPresses().contains(press);
+                    }
+                );
+            }
+
             auto event = std::shared_ptr<UIPressesEvent>(new UIPressesEvent(press));
-            UIPressesEvent::activePressesEvents.push_back(event);
+            if (isBeginning) {
+                UIPressesEvent::activePressesEvents.push_back(event);
+            }
             sendEvent(event);
+
+            if (!isBeginning) {
+                std::erase_if(
+                    UIPressesEvent::activePressesEvents,
+                    [&press](const std::shared_ptr<UIPressesEvent>& candidate) {
+                        return candidate
+                            && candidate->allPresses().contains(press);
+                    }
+                );
+            }
 
             break;
         }
@@ -503,6 +598,12 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             break;
         }
         case SDL_EVENT_KEY_DOWN: {
+            // NXKit supplies consistent controller-style timing itself. Ignore
+            // platform keyboard repeats so every backend uses the same cadence.
+            if (e.key.repeat) {
+                break;
+            }
+
             if (e.key.key == SDLK_Q) {
                 handleSDLQuit();
             }

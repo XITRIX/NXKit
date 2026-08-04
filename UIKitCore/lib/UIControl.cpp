@@ -24,7 +24,7 @@ void UIControl::pressesBegan(std::set<std::shared_ptr<UIPress>> pressees, std::s
     UIView::pressesBegan(pressees, event);
 
     if (std::any_of(pressees.begin(), pressees.end(), [&](const std::shared_ptr<UIPress>& item) {
-        return item->type() == UIPressType::select;
+        return item->type() == UIPressType::select && !item->isRepeat();
     })) {
         setHighlighted(true);
     }
@@ -38,7 +38,7 @@ void UIControl::pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::s
             continue;
         }
         if (performRegisteredAction(press)) {
-            if (isHighlighted()) {
+            if (!press->isRepeat() && isHighlighted()) {
                 setHighlighted(false);
             }
             unhandledPresses.erase(press);
@@ -48,8 +48,13 @@ void UIControl::pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::s
             continue;
         }
 
-        const bool shouldPerform = isHighlighted() && primaryAction.has_value();
-        if (isHighlighted()) {
+        const bool repeatIsAllowed = !press->isRepeat()
+            || (primaryAction
+                && primaryAction->repeatBehavior()
+                    == UIMenuElementRepeatBehavior::repeatable);
+        const bool shouldPerform = isHighlighted() && primaryAction.has_value()
+            && repeatIsAllowed;
+        if (!press->isRepeat() && isHighlighted()) {
             setHighlighted(false);
         }
         if (shouldPerform) {

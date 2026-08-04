@@ -71,7 +71,10 @@ bool UIResponder::performRegisteredAction(const std::shared_ptr<UIPress>& press)
         registeredActions.begin(),
         registeredActions.end(),
         [&press](const UIResponderAction& candidate) {
-            return candidate.matches && candidate.matches(press)
+            return (!press->isRepeat()
+                    || candidate.action.repeatBehavior()
+                        == UIMenuElementRepeatBehavior::repeatable)
+                && candidate.matches && candidate.matches(press)
                 && (!candidate.canPerform || candidate.canPerform());
         }
     );

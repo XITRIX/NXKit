@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL_events.h>
 
+#include <Timer.h>
 #include <UIApplicationDelegate.h>
 #include <UIWindow.h>
 
@@ -43,9 +44,12 @@ private:
     static UIGamepadKey mapGamepadButtonEventToUIGamepadKey(SDL_GamepadButtonEvent event);
     static std::optional<UIGamepadKey> mapGamepadAxisEventToUIGamepadKey(SDL_GamepadAxisEvent event);
     static UIPressType mapGamepadInputToUIPressType(UIGamepadInputType key);
+    void sendPressRepeatsIfNeeded(const Timer& timestamp);
 
     bool lifecycleEventWatchInstalled = false;
     bool quitRequested = false;
+
+    friend class UIApplicationPressRepeatTestHarness;
 };
 
 }

@@ -41,6 +41,9 @@ public:
     [[nodiscard]] std::optional<UIKey> key() const { return _key; }
     [[nodiscard]] std::optional<UIGamepadKey> gamepadKey() const { return _gamepadKey; }
     [[nodiscard]] bool isHandled() const { return _isHandled; }
+    // A portable extension identifying a synthetic hold-repeat delivery.
+    // UIKit's UIPress does not currently expose equivalent metadata.
+    [[nodiscard]] bool isRepeat() const { return _isRepeat; }
 
 private:
     std::weak_ptr<UIResponder> _responder;
@@ -53,6 +56,9 @@ private:
     std::vector<std::weak_ptr<UIGestureRecognizer>> _gestureRecognizers;
     bool _hasBeenCancelledByAGestureRecognizer = false;
     bool _isHandled = false;
+    bool _isRepeat = false;
+    bool _hasDeliveredRepeat = false;
+    Timer _lastRepeatTimestamp;
     std::optional<UIKey> _key;
     std::optional<UIGamepadKey> _gamepadKey;
 

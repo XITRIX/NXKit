@@ -36,4 +36,10 @@ if (NXKIT_BUILD_TESTS)
     )
     target_link_libraries(NXKitGestureRecognizerTests PRIVATE NXKit)
     add_test(NAME NXKitGestureRecognizerTests COMMAND NXKitGestureRecognizerTests)
+
+    add_executable(NXKitPressRepeatTests
+            tests/UIPressRepeatTests.cpp
+    )
+    target_link_libraries(NXKitPressRepeatTests PRIVATE NXKit)
+    add_test(NAME NXKitPressRepeatTests COMMAND NXKitPressRepeatTests)
 endif ()
