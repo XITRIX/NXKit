@@ -1,3 +1,4 @@
+#include <BackdropEffectView.h>
 #include <NXTabBarController.h>
 #include <NXNavigationController.h>
 #include <NXResponderAction.h>
@@ -5,6 +6,7 @@
 #include <UIApplication.h>
 #include <UIApplicationDelegate.h>
 #include <UIControl.h>
+#include <UIGlassEffect.h>
 #include <UIPress.h>
 #include <UIWindow.h>
 
@@ -19,6 +21,8 @@
 using namespace NXKit;
 
 namespace NXKit {
+
+bool applicationRunLoop();
 
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(
     UIApplication*,
@@ -35,9 +39,12 @@ int failures = 0;
 
 class TestSkiaContext final : public SkiaCtx {
 public:
+    UIUserInterfaceStyle themeMode = UIUserInterfaceStyle::light;
+
     sk_sp<SkSurface> getBackbufferSurface() override { return nullptr; }
     NXSize getSize() override { return { 1280, 720 }; }
     void swapBuffers() override {}
+    UIUserInterfaceStyle getThemeMode() override { return themeMode; }
     bool platformRunLoop(std::function<bool()> loop) override { return loop(); }
 
 protected:
@@ -51,6 +58,27 @@ void expect(bool condition, const std::string& message) {
     }
     ++failures;
     std::cerr << "FAIL: " << message << '\n';
+}
+
+std::vector<NXFloat> glassTint(const std::shared_ptr<BackdropEffectView>& view) {
+    const auto tint = view->effect().uniform("tint");
+    if (!tint || tint->size() != 4) {
+        expect(false, "regular glass exposes a four-component tint uniform");
+        return std::vector<NXFloat>(4);
+    }
+    return *tint;
+}
+
+NXFloat glassScalar(
+    const std::shared_ptr<BackdropEffectView>& view,
+    const std::string& name
+) {
+    const auto value = view->effect().uniform(name);
+    if (!value || value->size() != 1) {
+        expect(false, "regular glass exposes scalar uniform '" + name + "'");
+        return 0;
+    }
+    return value->front();
 }
 
 void registerExitAction(
@@ -84,6 +112,18 @@ public:
         } else {
             ++removedFromParentCount;
         }
+    }
+};
+
+class RecordingTraitView final : public UIView {
+public:
+    int traitChangeCount = 0;
+
+    void traitCollectionDidChange(
+        std::shared_ptr<UITraitCollection> previousTraitCollection
+    ) override {
+        UIView::traitCollectionDidChange(std::move(previousTraitCollection));
+        ++traitChangeCount;
     }
 };
 
@@ -217,7 +257,8 @@ bool sendKeyPress(
 } // namespace
 
 int main() {
-    SkiaCtx::_main = std::make_shared<TestSkiaContext>();
+    auto skiaContext = std::make_shared<TestSkiaContext>();
+    SkiaCtx::_main = skiaContext;
 
     auto wideContentController = new_shared<UIViewController>();
     wideContentController->setTitle("Wide content");
@@ -397,6 +438,69 @@ int main() {
     application->keyWindow = focusWindow;
     UIApplication::shared = application;
     registerExitAction(focusWindow, application);
+
+    expect(applicationRunLoop(), "the initial light trait update completes");
+    auto presentationChrome = new_shared<RecordingTraitView>();
+    focusWindow->addSubview(presentationChrome);
+    presentationChrome->traitChangeCount = 0;
+
+    auto presentedRoot = new_shared<UIView>();
+    auto presentedGlass = new_shared<BackdropEffectView>(
+        UIGlassEffect(UIGlassEffect::Style::regular)
+    );
+    presentedGlass->setFrame(NXRect(0, 0, 520, 320));
+    presentedRoot->addSubview(presentedGlass);
+    auto presentedController = new_shared<UIViewController>();
+    presentedController->setView(presentedRoot);
+    presentedController->setModalPresentationStyle(
+        UIModalPresentationStyle::overFullScreen
+    );
+    focusNavigationController->present(presentedController, false);
+
+    const auto initialLightTint = glassTint(presentedGlass);
+    const auto initialLightLuminosity = glassScalar(
+        presentedGlass,
+        "luminosity"
+    );
+    expect(
+        initialLightTint[0] > 0.99f
+            && initialLightTint[1] > 0.99f
+            && initialLightTint[2] > 0.99f
+            && initialLightTint[3] < 0.30f
+            && initialLightLuminosity > 0.10f,
+        "presented regular glass starts with the translucent light material"
+    );
+
+    skiaContext->themeMode = UIUserInterfaceStyle::dark;
+    expect(applicationRunLoop(), "the dark trait update completes");
+    expect(
+        presentationChrome->traitChangeCount == 1
+            && presentationChrome->traitCollection()
+            && presentationChrome->traitCollection()->userInterfaceStyle()
+                == UIUserInterfaceStyle::dark,
+        "window-owned presentation chrome receives the dark trait update"
+    );
+    const auto darkTint = glassTint(presentedGlass);
+    const auto darkLuminosity = glassScalar(presentedGlass, "luminosity");
+    expect(
+        darkTint[0] < 0.01f
+            && darkTint[1] < 0.01f
+            && darkTint[2] < 0.01f
+            && darkTint[3] > initialLightTint[3]
+            && darkLuminosity < 0.001f,
+        "an active presented glass view reinstalls its dark material"
+    );
+
+    skiaContext->themeMode = UIUserInterfaceStyle::light;
+    expect(applicationRunLoop(), "the restored light trait update completes");
+    const auto restoredLightTint = glassTint(presentedGlass);
+    expect(
+        restoredLightTint == initialLightTint
+            && glassScalar(presentedGlass, "luminosity")
+                == initialLightLuminosity,
+        "an active presented glass view restores its light material"
+    );
+    presentedController->dismiss(false);
 
     const bool eventSubsystemReady = SDL_InitSubSystem(SDL_INIT_EVENTS);
     expect(eventSubsystemReady, "SDL's event subsystem is available for tab focus routing");

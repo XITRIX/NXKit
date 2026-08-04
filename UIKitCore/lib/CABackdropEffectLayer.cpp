@@ -125,7 +125,12 @@ void CABackdropEffectLayer::validateUniforms(
 }
 
 void CABackdropEffectLayer::setEffect(const BackdropEffect& effect) {
-    auto runtimeEffect = compile(effect);
+    const auto canReuseRuntimeEffect = _runtimeEffect
+        && effect._shaderSource == _effect._shaderSource
+        && effect._backdropShaderName == _effect._backdropShaderName;
+    auto runtimeEffect = canReuseRuntimeEffect
+        ? _runtimeEffect
+        : compile(effect);
     validateUniforms(effect, *runtimeEffect);
 
     _effect = effect;

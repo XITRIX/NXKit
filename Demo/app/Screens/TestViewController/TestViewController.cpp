@@ -183,7 +183,9 @@ void TestViewController::loadView() {
     };
     blur->addGestureRecognizer(panGesture);
 
-    auto glass = new_shared<BackdropEffectView>(BackdropEffect::glass());
+    auto glass = new_shared<BackdropEffectView>(
+        UIGlassEffect(UIGlassEffect::Style::regular)
+    );
     glass->setFrame({ 40, 260, 340, 140 });
     glass->layer()->setCornerRadius(36);
     rootView->addSubview(glass);

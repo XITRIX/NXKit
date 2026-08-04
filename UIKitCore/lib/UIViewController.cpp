@@ -957,6 +957,12 @@ void UIViewController::traitCollectionDidChange(std::shared_ptr<UITraitCollectio
         child->_traitCollection = _traitCollection;
         child->traitCollectionDidChange(previousTraitCollection);
     }
+    if (_presentedViewController) {
+        _presentedViewController->_traitCollection = _traitCollection;
+        _presentedViewController->traitCollectionDidChange(
+            previousTraitCollection
+        );
+    }
 }
 
 std::shared_ptr<UIFocusEnvironment> UIViewController::parentFocusEnvironment() {

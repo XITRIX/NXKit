@@ -48,10 +48,10 @@ public:
 
     std::shared_ptr<UIResponder> next() override;
 
-    void setFrame(NXRect frame);
+    virtual void setFrame(NXRect frame);
     [[nodiscard]] NXRect frame() const { return _layer->getFrame(); }
 
-    void setBounds(NXRect bounds);
+    virtual void setBounds(NXRect bounds);
     [[nodiscard]] NXRect bounds() const { return _layer->bounds(); }
 
     void setCenter(NXPoint position);

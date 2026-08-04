@@ -5,12 +5,14 @@
 
 #include <array>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
 namespace NXKit {
 
 class CABackdropEffectLayer;
+class UIGlassEffect;
 
 /**
  Describes an SkSL effect that samples the pixels behind a BackdropEffectView.
@@ -50,6 +52,9 @@ public:
     [[nodiscard]] const std::string& backdropShaderName() const { return _backdropShaderName; }
     [[nodiscard]] NXFloat maximumSampleRadius() const { return _maximumSampleRadius; }
     [[nodiscard]] NXFloat backdropBlurRadius() const { return _backdropBlurRadius; }
+    [[nodiscard]] std::optional<std::vector<NXFloat>> uniform(
+        const std::string& name
+    ) const;
 
     void setUniform(const std::string& name, NXFloat value);
     void setUniform(const std::string& name, NXPoint value);
@@ -62,8 +67,13 @@ public:
 
 private:
     friend class CABackdropEffectLayer;
+    friend class UIGlassEffect;
 
     static bool isAutomaticUniform(const std::string& name);
+    static BackdropEffect glassShaderEffect(
+        NXFloat maximumSampleRadius,
+        NXFloat backdropBlurRadius
+    );
     void setFloatUniform(const std::string& name, std::vector<NXFloat> value);
 
     std::string _shaderSource;

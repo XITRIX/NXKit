@@ -24,7 +24,12 @@ constexpr NXFloat alertPreferredWidth = 520;
 constexpr NXFloat alertHorizontalMargin = 40;
 constexpr NXFloat alertVerticalMargin = 40;
 constexpr NXFloat alertCornerRadius = 32;
-constexpr NXFloat alertDimmingAlpha = 0.42f;
+
+UIColor alertDimmingColor = UIColorThemed(
+    UIColor(0, 0, 0, 56),
+    UIColor(0, 0, 0, 107),
+    "alertDimmingColor"
+);
 
 enum class DestinationChrome {
     standard,
@@ -182,7 +187,7 @@ public:
         }
 
         _dimmingView = new_shared<UIView>(container->bounds());
-        _dimmingView->setBackgroundColor(UIColor::black);
+        _dimmingView->setBackgroundColor(alertDimmingColor);
         _dimmingView->setAlpha(0);
         container->addSubview(_dimmingView);
         UIView::animate(
@@ -192,7 +197,7 @@ public:
                 preferredFramesPerSecond120 | allowUserInteraction
             ),
             [dimmingView = _dimmingView]() {
-                dimmingView->setAlpha(alertDimmingAlpha);
+                dimmingView->setAlpha(1);
             }
         );
     }
@@ -228,7 +233,7 @@ public:
             _dimmingView->removeFromSuperview();
             _dimmingView.reset();
         } else {
-            _dimmingView->setAlpha(alertDimmingAlpha);
+            _dimmingView->setAlpha(1);
         }
     }
 
@@ -290,10 +295,8 @@ public:
         UIView::animate(
             transitionDuration(context),
             0,
-            0.82,
-            0.15,
             UIViewAnimationOptions(
-                curveEaseOut
+                curveEaseInOut
                     | preferredFramesPerSecond120
                     | allowUserInteraction
             ),

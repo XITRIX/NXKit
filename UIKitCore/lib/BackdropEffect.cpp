@@ -35,6 +35,7 @@
  */
 
 #include <BackdropEffect.h>
+#include <UIGlassEffect.h>
 
 #include <cmath>
 #include <stdexcept>
@@ -55,6 +56,7 @@ uniform float curve;
 uniform float dispersion;
 uniform float saturation;
 uniform float contrast;
+uniform float luminosity;
 uniform float4 tint;
 uniform float edge;
 uniform float specStrength;
@@ -106,11 +108,18 @@ float toBrightness(half3 c) {
     return dot(c, half3(0.2126, 0.7152, 0.0722));
 }
 
-half3 processColor(half3 src, float vibrancy, float intensity, float4 overlay) {
+half3 processColor(
+    half3 src,
+    float vibrancy,
+    float intensity,
+    float luminosityAdjustment,
+    float4 overlay
+) {
     float mono = toBrightness(src);
     half3 vibrant = half3(clamp(mix(half3(mono), src, vibrancy), 0.0, 1.0));
     half3 adjusted = half3(clamp((vibrant - 0.5) * intensity + 0.5, 0.0, 1.0));
-    return mix(adjusted, half3(overlay.rgb), overlay.a);
+    half3 luminous = half3(clamp(adjusted + luminosityAdjustment, 0.0, 1.0));
+    return mix(luminous, half3(overlay.rgb), overlay.a);
 }
 
 float directionalHighlight(float2 normal) {
@@ -274,7 +283,7 @@ half4 main(float2 xy) {
         pixel = sampleBackdrop(xy, xy);
     }
 
-    pixel.rgb = processColor(pixel.rgb, saturation, contrast, tint);
+    pixel.rgb = processColor(pixel.rgb, saturation, contrast, luminosity, tint);
 
     // Preserve a faint body on white backdrops. White tint alone cannot do
     // this because compositing white over white is an identity operation.
@@ -365,30 +374,33 @@ BackdropEffect::BackdropEffect(
 }
 
 BackdropEffect BackdropEffect::glass() {
-    // Cloudy's shader models the optic separately from blur. A small backdrop
-    // blur keeps the lens crisp while softening high-frequency aliasing after
-    // refraction, which is closer to the current iOS glass appearance.
-    BackdropEffect effect(glassShader, "content", 64, 2.5f);
-    // Keep the curved depth field active across most of the lens. The former
-    // 0.25 values collapsed refraction into a thin edge band, leaving the body
-    // visually close to an ordinary blurred backdrop.
-    effect.setUniform("refraction", 0.90f);
-    effect.setUniform("curve", 0.55f);
-    effect.setUniform("dispersion", 0.32f);
-    effect.setUniform("saturation", 1.12f);
-    effect.setUniform("contrast", 1.04f);
-    effect.setUniform("tint", UIColor(255, 255, 255, 32));
-    effect.setUniform("edge", 1.0f);
-    effect.setUniform("specStrength", 0.52f);
-    effect.setUniform("specFallbackStrength", 0.50f);
-    effect.setUniform("specBrightFallbackStrength", 0.14f);
-    effect.setUniform("specLightDirection", NXPoint(0.0f, -1.0f));
-    effect.setUniform("specDirectionalPower", 3.0f);
-    effect.setUniform("specWidthPx", 4.0f);
-    effect.setUniform("reflectionSamplePx", 12.0f);
-    effect.setUniform("reflectionSpreadPx", 3.0f);
-    effect.setUniform("brightBackdropShade", 0.008f);
-    return effect;
+    // Preserve the original factory as a compatibility spelling for the old,
+    // highly translucent glass. New code should install UIGlassEffect on a
+    // BackdropEffectView so regular glass can adapt to its view and traits.
+    return UIGlassEffect(UIGlassEffect::Style::clear)._backdropEffect(
+        NXSize(),
+        UITraitCollection::current()
+    );
+}
+
+BackdropEffect BackdropEffect::glassShaderEffect(
+    NXFloat maximumSampleRadius,
+    NXFloat backdropBlurRadius
+) {
+    return BackdropEffect(
+        glassShader,
+        "content",
+        maximumSampleRadius,
+        backdropBlurRadius
+    );
+}
+
+std::optional<std::vector<NXFloat>> BackdropEffect::uniform(
+    const std::string& name
+) const {
+    const auto iterator = _uniforms.find(name);
+    if (iterator == _uniforms.end()) return std::nullopt;
+    return iterator->second;
 }
 
 bool BackdropEffect::isAutomaticUniform(const std::string& name) {

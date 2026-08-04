@@ -8,6 +8,8 @@
 
 namespace NXKit {
 
+class UIGlassEffect;
+
 #define UIColorThemed(lightColor, darkColor, id)                               \
 UIColor([](auto collection) {\
 if (collection->userInterfaceStyle() == UIUserInterfaceStyle::dark) \
@@ -113,6 +115,11 @@ public:
 
 private:
     friend class UIView;
+    friend class UIGlassEffect;
+
+    [[nodiscard]] uint32_t resolvedRaw(
+        const std::shared_ptr<UITraitCollection>& traits
+    ) const;
 
     static UIColor _currentTint;
     std::string _id;

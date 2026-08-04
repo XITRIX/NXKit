@@ -96,11 +96,18 @@ UIColor::UIColor(const std::function<UIColor(std::shared_ptr<UITraitCollection>)
 }
 
 uint32_t UIColor::raw() const {
+    return resolvedRaw(UITraitCollection::current());
+}
+
+uint32_t UIColor::resolvedRaw(
+    const std::shared_ptr<UITraitCollection>& traits
+) const {
     if (dynamicProvider == std::nullopt) {
         return color;
     }
 
-    return dynamicProvider.value()(UITraitCollection::current()).raw();
+    const auto resolvedTraits = traits ? traits : UITraitCollection::current();
+    return dynamicProvider.value()(resolvedTraits).resolvedRaw(resolvedTraits);
 }
 
 unsigned char UIColor::r() const {

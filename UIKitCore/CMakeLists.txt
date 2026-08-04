@@ -39,6 +39,7 @@ add_library(XITRIXUIKit
         lib/UIFocus.cpp
         lib/UIFocusAnimationCoordinator.cpp
         lib/UIFocusSystem.cpp
+        lib/UIGlassEffect.cpp
         lib/UIGestureRecognizer.cpp
         lib/UIImage.cpp
         lib/UIImageView.cpp

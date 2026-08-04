@@ -1,5 +1,7 @@
 #include <BackdropEffect.h>
+#include <BackdropEffectView.h>
 #include <CALayer.h>
+#include <UIGlassEffect.h>
 
 #include "CABackdropEffectLayer.hpp"
 
@@ -137,6 +139,173 @@ int brightness(SkColor color) {
     return SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
 }
 
+NXFloat scalarUniform(const BackdropEffect& effect, const std::string& name) {
+    const auto values = effect.uniform(name);
+    if (!values || values->size() != 1) {
+        expect(false, "glass uniform '" + name + "' is a scalar");
+        return 0;
+    }
+    return values->front();
+}
+
+std::vector<NXFloat> vectorUniform(
+    const BackdropEffect& effect,
+    const std::string& name,
+    size_t expectedSize
+) {
+    const auto values = effect.uniform(name);
+    if (!values || values->size() != expectedSize) {
+        expect(false, "glass uniform '" + name + "' has the expected shape");
+        return std::vector<NXFloat>(expectedSize);
+    }
+    return *values;
+}
+
+void testGlassStylesResolveThroughTheirView() {
+    auto clearView = new_shared<BackdropEffectView>(
+        UIGlassEffect(UIGlassEffect::Style::clear)
+    );
+    clearView->setFrame(NXRect(0, 0, 64, 64));
+    const auto smallClear = clearView->effect();
+    clearView->setFrame(NXRect(0, 0, 320, 320));
+    const auto largeClear = clearView->effect();
+
+    expect(
+        std::abs(
+            smallClear.backdropBlurRadius() - largeClear.backdropBlurRadius()
+        ) < 0.001f,
+        "clear glass keeps a size-invariant frost radius"
+    );
+    expect(
+        vectorUniform(smallClear, "tint", 4)
+            == vectorUniform(largeClear, "tint", 4),
+        "clear glass keeps a size-invariant translucent tint"
+    );
+
+    auto regularView = new_shared<BackdropEffectView>(
+        UIGlassEffect(UIGlassEffect::Style::regular)
+    );
+    regularView->setFrame(NXRect(0, 0, 64, 64));
+    const auto smallRegular = regularView->effect();
+    const std::shared_ptr<UIView> regularAsView = regularView;
+    regularAsView->setFrame(NXRect(0, 0, 320, 320));
+    const auto largeRegular = regularView->effect();
+    const auto smallRegularTint = vectorUniform(smallRegular, "tint", 4);
+    const auto largeRegularTint = vectorUniform(largeRegular, "tint", 4);
+
+    expect(
+        largeRegular.backdropBlurRadius()
+            > smallRegular.backdropBlurRadius() + 15.0f,
+        "regular glass increases backdrop frost with view size"
+    );
+    expect(
+        largeRegularTint[3] > smallRegularTint[3] + 0.20f,
+        "regular glass increases its system-background tint with view size"
+    );
+    expect(
+        largeRegularTint[3] < 0.30f,
+        "large regular glass stays translucent in light appearance"
+    );
+    expect(
+        scalarUniform(largeRegular, "luminosity") > 0.10f,
+        "large regular glass lifts luminosity in light appearance"
+    );
+    expect(
+        largeRegularTint[0] > 0.99f
+            && largeRegularTint[1] > 0.99f
+            && largeRegularTint[2] > 0.99f,
+        "regular glass resolves systemBackground for the current light appearance"
+    );
+
+    UIGlassEffect manual(UIGlassEffect::Style::regular);
+    manual.setMaximumSampleRadius(48.0f);
+    manual.setFrostRadius(7.0f);
+    manual.setRefraction(0.21f);
+    manual.setRefractionDepth(0.34f);
+    manual.setDispersion(0.12f);
+    manual.setSaturation(0.91f);
+    manual.setContrast(0.83f);
+    manual.setLuminosity(0.08f);
+    manual.setTintColor(UIColor::systemBlue);
+    manual.setTintOpacity(0.23f);
+    manual.setEdgeStrength(0.72f);
+    manual.setSpecularStrength(0.31f);
+    manual.setDarkBackdropSpecularStrength(0.27f);
+    manual.setBrightBackdropSpecularStrength(0.09f);
+    manual.setLightAngle(30.0f);
+    manual.setSpecularDirectionalPower(4.0f);
+    manual.setSpecularWidth(6.0f);
+    manual.setReflectionSampleDistance(9.0f);
+    manual.setReflectionSpread(2.0f);
+    manual.setBrightBackdropShade(0.004f);
+
+    auto manualView = new_shared<BackdropEffectView>(manual);
+    manualView->setFrame(NXRect(0, 0, 400, 400));
+    const auto resolvedManual = manualView->effect();
+    const auto resolvedManualTint = vectorUniform(resolvedManual, "tint", 4);
+    const auto resolvedLightDirection = vectorUniform(
+        resolvedManual,
+        "specLightDirection",
+        2
+    );
+
+    expect(
+        std::abs(resolvedManual.maximumSampleRadius() - 48.0f) < 0.001f
+            && std::abs(resolvedManual.backdropBlurRadius() - 7.0f) < 0.001f,
+        "manual sample and frost radii override regular size adaptation"
+    );
+    expect(
+        std::abs(scalarUniform(resolvedManual, "curve") - 0.21f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "refraction") - 0.34f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "dispersion") - 0.12f) < 0.001f,
+        "manual refraction, depth, and dispersion reach the shader"
+    );
+    expect(
+        std::abs(scalarUniform(resolvedManual, "saturation") - 0.91f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "contrast") - 0.83f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "luminosity") - 0.08f) < 0.001f,
+        "manual color processing reaches the shader"
+    );
+    expect(
+        std::abs(resolvedManualTint[0] - 0.0f) < 0.001f
+            && std::abs(resolvedManualTint[1] - 122.0f / 255.0f) < 0.001f
+            && std::abs(resolvedManualTint[2] - 1.0f) < 0.001f
+            && std::abs(resolvedManualTint[3] - 59.0f / 255.0f) < 0.001f,
+        "manual dynamic tint hue and opacity resolve into the shader"
+    );
+    expect(
+        std::abs(resolvedLightDirection[0] - 0.8660254f) < 0.001f
+            && std::abs(resolvedLightDirection[1] - 0.5f) < 0.001f,
+        "manual light angle reaches the shader as a direction"
+    );
+    expect(
+        std::abs(scalarUniform(resolvedManual, "edge") - 0.72f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "specStrength") - 0.31f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "specFallbackStrength") - 0.27f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "specBrightFallbackStrength") - 0.09f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "specDirectionalPower") - 4.0f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "specWidthPx") - 6.0f) < 0.001f,
+        "manual rim and specular parameters reach the shader"
+    );
+    expect(
+        std::abs(scalarUniform(resolvedManual, "reflectionSamplePx") - 9.0f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "reflectionSpreadPx") - 2.0f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "brightBackdropShade") - 0.004f) < 0.001f,
+        "manual reflection and backdrop-shading parameters reach the shader"
+    );
+
+    bool rejectedInvalidOverride = false;
+    try {
+        manual.setTintOpacity(1.1f);
+    } catch (const std::invalid_argument&) {
+        rejectedInvalidOverride = true;
+    }
+    expect(
+        rejectedInvalidOverride,
+        "glass rejects an out-of-range manual parameter at its public boundary"
+    );
+}
+
 GlassSamples renderGlassSamples(
     SkColor exteriorColor,
     SkColor interiorColor,
@@ -169,6 +338,7 @@ GlassSamples renderGlassSamples(
     reflectionOnly.setUniform("dispersion", 0.0f);
     reflectionOnly.setUniform("saturation", 1.0f);
     reflectionOnly.setUniform("contrast", 1.0f);
+    reflectionOnly.setUniform("luminosity", 0.0f);
     reflectionOnly.setUniform("tint", UIColor(255, 255, 255, 32));
     reflectionOnly.setUniform("edge", 1.0f);
     reflectionOnly.setUniform("specStrength", 0.52f);
@@ -241,6 +411,7 @@ SkColor renderRadiusClampedReflectionSample() {
     reflectionOnly.setUniform("dispersion", 0.0f);
     reflectionOnly.setUniform("saturation", 1.0f);
     reflectionOnly.setUniform("contrast", 1.0f);
+    reflectionOnly.setUniform("luminosity", 0.0f);
     reflectionOnly.setUniform("tint", UIColor(0, 0, 0, 0));
     reflectionOnly.setUniform("edge", 1.0f);
     reflectionOnly.setUniform("specStrength", 1.0f);
@@ -341,6 +512,7 @@ RefractionSeamSamples renderLargeGlassDiagonalSeamSamples() {
     refractionOnly.setUniform("dispersion", 0.0f);
     refractionOnly.setUniform("saturation", 1.0f);
     refractionOnly.setUniform("contrast", 1.0f);
+    refractionOnly.setUniform("luminosity", 0.0f);
     refractionOnly.setUniform("tint", UIColor(0, 0, 0, 0));
     refractionOnly.setUniform("edge", 0.0f);
     refractionOnly.setUniform("specStrength", 0.0f);
@@ -459,6 +631,7 @@ void testLargeGlassRefractionStopsBeforeDiagonalMedialAxis() {
 int main() {
     testMaskLayersUseLocalBounds();
     testBackdropFilterCacheTracksGeometry();
+    testGlassStylesResolveThroughTheirView();
     testGlassSpecularReflectionUsesBackdropOverscan();
     testGlassBackdropReadsStayInsideDeclaredRadius();
     testDefaultGlassRefractionExtendsIntoLensBody();

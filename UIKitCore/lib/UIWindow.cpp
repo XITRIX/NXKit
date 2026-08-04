@@ -243,7 +243,10 @@ void UIWindow::pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std
 }
 
 void UIWindow::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
-    UITraitEnvironment::traitCollectionDidChange(previousTraitCollection);
+    // Let ordinary window-owned views, including presentation chrome such as
+    // dimming views, inherit the new environment. Controller-owned roots are
+    // skipped by UIView and updated through their controllers below.
+    UIView::traitCollectionDidChange(previousTraitCollection);
     if (!rootViewController()) return;
 
     rootViewController()->_traitCollection = _traitCollection;
