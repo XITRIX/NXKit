@@ -6,6 +6,7 @@
 #include "include/core/SkRefCnt.h"
 
 class SkRuntimeEffect;
+class SkImageFilter;
 
 namespace NXKit {
 
@@ -24,9 +25,16 @@ public:
 private:
     static sk_sp<SkRuntimeEffect> compile(const BackdropEffect& effect);
     static void validateUniforms(const BackdropEffect& effect, const SkRuntimeEffect& runtimeEffect);
+    sk_sp<SkImageFilter> imageFilterForCurrentState();
+    void invalidateImageFilterCache();
 
     BackdropEffect _effect;
     sk_sp<SkRuntimeEffect> _runtimeEffect;
+    sk_sp<SkImageFilter> _cachedImageFilter;
+    NXSize _cachedFilterSize;
+    NXFloat _cachedFilterCornerRadius = 0;
+    NXFloat _cachedFilterContentsScale = 0;
+    bool _hasCachedFilterState = false;
 };
 
 }

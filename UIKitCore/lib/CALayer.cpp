@@ -283,9 +283,10 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     // Isolate masked content before drawing it. Initializing from the previous
     // canvas contents is required for backdrop effects such as CABlurLayer to
     // keep seeing the pixels behind this layer.
+    const auto localBounds = SkRect::MakeWH(_bounds.width(), _bounds.height());
     if (_mask) {
         SkCanvas::SaveLayerRec maskedContent(
-            nullptr,
+            &localBounds,
             nullptr,
             SkCanvas::kInitWithPrevious_SaveLayerFlag
         );
@@ -418,7 +419,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         // retain the corresponding pixels from the destination content.
         SkPaint maskPaint;
         maskPaint.setBlendMode(SkBlendMode::kDstIn);
-        canvas->saveLayer(nullptr, &maskPaint);
+        canvas->saveLayer(&localBounds, &maskPaint);
         canvas->save();
         canvas->concat(CATransform3DMakeTranslation(-_bounds.origin.x, -_bounds.origin.y, 0).toSkM44());
         _mask->presentationOrSelf()->skiaRender(canvas);

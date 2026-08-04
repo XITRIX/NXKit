@@ -42,4 +42,13 @@ if (NXKIT_BUILD_TESTS)
     )
     target_link_libraries(NXKitPressRepeatTests PRIVATE NXKit)
     add_test(NAME NXKitPressRepeatTests COMMAND NXKitPressRepeatTests)
+
+    add_executable(NXKitLayerRenderingTests
+            tests/CALayerRenderingTests.cpp
+    )
+    # The checked-in Skia archives are built without RTTI. Match that mode for
+    # the test canvas subclass so its vtable does not require Skia typeinfo.
+    target_compile_options(NXKitLayerRenderingTests PRIVATE -fno-rtti)
+    target_link_libraries(NXKitLayerRenderingTests PRIVATE NXKit)
+    add_test(NAME NXKitLayerRenderingTests COMMAND NXKitLayerRenderingTests)
 endif ()

@@ -64,7 +64,12 @@ CABackdropEffectLayer::CABackdropEffectLayer(const BackdropEffect& effect):
 CABackdropEffectLayer::CABackdropEffectLayer(CABackdropEffectLayer* layer):
     CALayer(layer),
     _effect(layer->_effect),
-    _runtimeEffect(layer->_runtimeEffect)
+    _runtimeEffect(layer->_runtimeEffect),
+    _cachedImageFilter(layer->_cachedImageFilter),
+    _cachedFilterSize(layer->_cachedFilterSize),
+    _cachedFilterCornerRadius(layer->_cachedFilterCornerRadius),
+    _cachedFilterContentsScale(layer->_cachedFilterContentsScale),
+    _hasCachedFilterState(layer->_hasCachedFilterState)
 {}
 
 sk_sp<SkRuntimeEffect> CABackdropEffectLayer::compile(const BackdropEffect& effect) {
@@ -124,6 +129,7 @@ void CABackdropEffectLayer::setEffect(const BackdropEffect& effect) {
 
     _effect = effect;
     _runtimeEffect = std::move(runtimeEffect);
+    invalidateImageFilterCache();
     setNeedsDisplay();
 }
 
@@ -131,18 +137,26 @@ std::shared_ptr<CALayer> CABackdropEffectLayer::copy() {
     return new_shared<CABackdropEffectLayer>(this);
 }
 
-void CABackdropEffectLayer::draw(SkCanvas* context) {
-    const auto layerBounds = bounds();
-    if (!_runtimeEffect
-        || !layerBounds.size.valid()
-        || layerBounds.width() <= 0
-        || layerBounds.height() <= 0)
+void CABackdropEffectLayer::invalidateImageFilterCache() {
+    _cachedImageFilter.reset();
+    _hasCachedFilterState = false;
+}
+
+sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
+    const auto layerSize = bounds().size;
+    const auto layerCornerRadius = cornerRadius();
+    const auto layerContentsScale = contentsScale();
+    if (_cachedImageFilter
+        && _hasCachedFilterState
+        && _cachedFilterSize == layerSize
+        && _cachedFilterCornerRadius == layerCornerRadius
+        && _cachedFilterContentsScale == layerContentsScale)
     {
-        return;
+        return _cachedImageFilter;
     }
 
     SkRuntimeEffectBuilder builder(_runtimeEffect);
-    const auto size = SkV2{layerBounds.width(), layerBounds.height()};
+    const auto size = SkV2{layerSize.width, layerSize.height};
 
     if (findUniform(*_runtimeEffect, "resolution")) {
         builder.uniform("resolution") = size;
@@ -180,6 +194,30 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
         _effect._backdropShaderName,
         std::move(input)
     );
+    if (!imageFilter) {
+        invalidateImageFilterCache();
+        return nullptr;
+    }
+
+    _cachedImageFilter = std::move(imageFilter);
+    _cachedFilterSize = layerSize;
+    _cachedFilterCornerRadius = layerCornerRadius;
+    _cachedFilterContentsScale = layerContentsScale;
+    _hasCachedFilterState = true;
+    return _cachedImageFilter;
+}
+
+void CABackdropEffectLayer::draw(SkCanvas* context) {
+    const auto layerBounds = bounds();
+    if (!_runtimeEffect
+        || !layerBounds.size.valid()
+        || layerBounds.width() <= 0
+        || layerBounds.height() <= 0)
+    {
+        return;
+    }
+
+    auto imageFilter = imageFilterForCurrentState();
     if (!imageFilter) return;
 
     const auto rect = SkRect::MakeWH(layerBounds.width(), layerBounds.height());
