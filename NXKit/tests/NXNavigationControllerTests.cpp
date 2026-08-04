@@ -1286,6 +1286,11 @@ int main() {
         auto focusTrapModal = new_shared<RecordingViewController>();
         auto modalFocusControl = new_shared<UIControl>();
         focusTrapModal->view()->addSubview(modalFocusControl);
+        NXResponderAction {
+            .button = NXActionButton::x,
+            .isEnabled = true,
+            .action = UIAction("Modal Action"),
+        }.registerOn(modalFocusControl);
         focusTrapModal->setModalPresentationStyle(
             UIModalPresentationStyle::overFullScreen
         );
@@ -1332,16 +1337,22 @@ int main() {
         );
         responderNavigationController->defaultActionsWidget()->refresh();
         expect(
-            std::any_of(
+            std::none_of(
+                responderNavigationController->defaultActionsWidget()->actions().begin(),
+                responderNavigationController->defaultActionsWidget()->actions().end(),
+                [](const NXResponderAction& action) {
+                    return action.action.title() == "Modal Action"
+                        || action.action.title() == "Dismiss";
+                }
+            ) && std::any_of(
                 responderNavigationController->defaultActionsWidget()->actions().begin(),
                 responderNavigationController->defaultActionsWidget()->actions().end(),
                 [](const NXResponderAction& action) {
                     return action.button == NXActionButton::b
-                        && action.isEnabled
-                        && action.action.title() == "Dismiss";
+                        && action.action.title() == "Back";
                 }
             ),
-            "a presented controller exposes its default Dismiss action"
+            "the retained navigation legend stays within its own presentation layer"
         );
         expect(
             sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
@@ -1372,15 +1383,21 @@ int main() {
         );
         responderNavigationController->defaultActionsWidget()->refresh();
         expect(
-            std::any_of(
+            std::none_of(
+                responderNavigationController->defaultActionsWidget()->actions().begin(),
+                responderNavigationController->defaultActionsWidget()->actions().end(),
+                [](const NXResponderAction& action) {
+                    return action.action.title() == "Dismiss";
+                }
+            ) && std::any_of(
                 responderNavigationController->defaultActionsWidget()->actions().begin(),
                 responderNavigationController->defaultActionsWidget()->actions().end(),
                 [](const NXResponderAction& action) {
                     return action.button == NXActionButton::b
-                        && action.action.title() == "Dismiss";
+                        && action.action.title() == "Back";
                 }
             ),
-            "an empty-focus presentation still resolves Dismiss for the legend"
+            "an empty presentation does not replace the retained navigation legend"
         );
         expect(
             sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
@@ -1403,6 +1420,11 @@ int main() {
         auto modalNavigationSecond = new_shared<RecordingViewController>();
         auto modalNavigationSecondControl = new_shared<UIControl>();
         modalNavigationSecond->view()->addSubview(modalNavigationSecondControl);
+        NXResponderAction {
+            .button = NXActionButton::x,
+            .isEnabled = true,
+            .action = UIAction("Presented Navigation Action"),
+        }.registerOn(modalNavigationSecondControl);
         auto modalNavigationController = new_shared<NXNavigationController>(
             modalNavigationRoot
         );
@@ -1416,6 +1438,24 @@ int main() {
                 modalNavigationSecondControl
             ),
             "a presented navigation destination accepts focus"
+        );
+        modalNavigationController->defaultActionsWidget()->refresh();
+        responderNavigationController->defaultActionsWidget()->refresh();
+        expect(
+            std::any_of(
+                modalNavigationController->defaultActionsWidget()->actions().begin(),
+                modalNavigationController->defaultActionsWidget()->actions().end(),
+                [](const NXResponderAction& action) {
+                    return action.action.title() == "Presented Navigation Action";
+                }
+            ) && std::none_of(
+                responderNavigationController->defaultActionsWidget()->actions().begin(),
+                responderNavigationController->defaultActionsWidget()->actions().end(),
+                [](const NXResponderAction& action) {
+                    return action.action.title() == "Presented Navigation Action";
+                }
+            ),
+            "each navigation legend resolves actions from its own presentation layer"
         );
         expect(
             sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),

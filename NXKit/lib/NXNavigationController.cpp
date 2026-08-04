@@ -26,6 +26,21 @@ bool containsController(
     return std::find(controllers.begin(), controllers.end(), controller) != controllers.end();
 }
 
+bool responderChainContains(
+    const std::shared_ptr<UIResponder>& firstResponder,
+    const UIResponder* expectedResponder
+) {
+    std::unordered_set<const UIResponder*> visited;
+    for (auto responder = firstResponder;
+         responder && visited.insert(responder.get()).second;
+         responder = responder->next()) {
+        if (responder.get() == expectedResponder) {
+            return true;
+        }
+    }
+    return false;
+}
+
 }
 
 NXNavigationController::NXNavigationController(
@@ -580,13 +595,20 @@ std::vector<NXResponderAction> NXNavigationController::resolvedActions() {
         if (const auto window = view()->window()) {
             if (const auto focusedView = std::dynamic_pointer_cast<UIView>(
                     window->focusSystem()->focusedItem().lock()
-                ); focusedView && focusedView->window() == window) {
+                ); focusedView
+                    && focusedView->window() == window
+                    && responderChainContains(focusedView, this)) {
                 firstResponder = focusedView;
             }
         }
     }
     if (!firstResponder) {
-        if (const auto visible = visibleViewController()) {
+        // A presented controller has a separate responder/presentation layer.
+        // Keep this navigation controller's retained legend scoped to its own
+        // visible content instead of mirroring focus from the presentation above it.
+        if (const auto visible = _visibleViewController
+                ? _visibleViewController
+                : topViewController()) {
             firstResponder = visible->view();
         }
     }
