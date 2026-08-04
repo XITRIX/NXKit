@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <BackdropEffectView.h>
 #include <DispatchQueue.h>
 #include <IndexPath.h>
 #include <UIApplicationDelegate.h>

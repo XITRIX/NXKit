@@ -183,6 +183,45 @@ void TestViewController::loadView() {
     };
     blur->addGestureRecognizer(panGesture);
 
+    auto glass = new_shared<BackdropEffectView>(BackdropEffect::glass());
+    glass->setFrame({ 40, 260, 340, 140 });
+    glass->layer()->setCornerRadius(36);
+    rootView->addSubview(glass);
+
+    auto glassLabel = new_shared<UILabel>();
+    glassLabel->setFrame({ 0, 0, 340, 140 });
+    glassLabel->setText("Glass — drag me!");
+    glassLabel->setFontSize(34);
+    glassLabel->setFontWeight(800);
+    glassLabel->setTextAlignment(NSTextAlignment::center);
+    glassLabel->setTextColor(UIColor::label);
+    glassLabel->setUserInteractionEnabled(false);
+    glass->addSubview(glassLabel);
+
+    auto glassPanGesture = new_shared<UIPanGestureRecognizer>();
+    glassPanGesture->onStateChanged = [this](auto gesture) {
+        const auto pan = std::static_pointer_cast<UIPanGestureRecognizer>(gesture);
+        static NXPoint initial;
+        const auto glassView = pan->view().lock();
+        if (!glassView) return;
+
+        switch (pan->state()) {
+            case UIGestureRecognizerState::began:
+                initial = glassView->frame().origin;
+                break;
+            case UIGestureRecognizerState::changed: {
+                const auto translation = pan->translationInView(view());
+                auto frame = glassView->frame();
+                frame.origin = initial + translation;
+                glassView->setFrame(frame);
+                break;
+            }
+            default:
+                break;
+        }
+    };
+    glass->addGestureRecognizer(glassPanGesture);
+
     setView(rootView);
 }
 

@@ -5,6 +5,7 @@ add_library(XITRIXUIKit
         lib/tools/Tools.cpp
         lib/CABasicAnimation.cpp
         lib/CABasicAnimationPrototype.cpp
+        lib/CABackdropEffectLayer.cpp
         lib/CABlurLayer.cpp
         lib/CASpringAnimation.cpp
         lib/CASpringAnimationPrototype.cpp
@@ -14,6 +15,8 @@ add_library(XITRIXUIKit
         lib/ContentsGravityTransformation.cpp
         lib/platforms/SkiaCtx.cpp
         lib/Application.cpp
+        lib/BackdropEffect.cpp
+        lib/BackdropEffectView.cpp
         lib/DispatchQueue.cpp
         lib/Timer.cpp
         lib/Geometry.cpp

@@ -129,7 +129,10 @@ public:
     std::shared_ptr<CALayer> presentationOrSelf();
 
     bool needsDisplay() { return _needsDisplay; }
-    void setNeedsDisplay() { _needsDisplay = true; }
+    void setNeedsDisplay() {
+        _needsDisplay = true;
+        setLayerTreeDirtyIfNeeded();
+    }
     void display();
 
     // Animations
