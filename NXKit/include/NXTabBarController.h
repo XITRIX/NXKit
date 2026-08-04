@@ -66,6 +66,9 @@ public:
     [[nodiscard]] const Items& items() const { return _items; }
     void setItems(Items items);
 
+    std::vector<std::shared_ptr<UIFocusEnvironment>>
+        preferredFocusEnvironments() override;
+
     [[nodiscard]] std::optional<IndexPath> selectedIndexPath() const { return _selectedIndexPath; }
     bool setSelectedIndexPath(const IndexPath& indexPath);
     bool activateItemAt(const IndexPath& indexPath);

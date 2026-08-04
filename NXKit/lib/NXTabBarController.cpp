@@ -185,6 +185,19 @@ void NXTabBar::setItems(Items items) {
     }
 }
 
+std::vector<std::shared_ptr<UIFocusEnvironment>>
+NXTabBar::preferredFocusEnvironments() {
+    if (_selectedIndexPath && contains(*_selectedIndexPath)) {
+        const auto section = static_cast<size_t>(_selectedIndexPath->section());
+        const auto item = static_cast<size_t>(_selectedIndexPath->item());
+        if (const auto& button = _buttons[section][item];
+            button && button->canBecomeFocused()) {
+            return { button };
+        }
+    }
+    return UIScrollView::preferredFocusEnvironments();
+}
+
 bool NXTabBar::setSelectedIndexPath(const IndexPath& indexPath) {
     if (!contains(indexPath)) {
         return false;

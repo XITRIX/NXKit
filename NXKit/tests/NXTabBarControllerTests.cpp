@@ -1,6 +1,7 @@
 #include <NXTabBarController.h>
 #include <NXNavigationController.h>
 #include <NXResponderAction.h>
+#include <SkiaCtx.h>
 #include <UIApplication.h>
 #include <UIApplicationDelegate.h>
 #include <UIControl.h>
@@ -31,6 +32,18 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(
 namespace {
 
 int failures = 0;
+
+class TestSkiaContext final : public SkiaCtx {
+public:
+    sk_sp<SkSurface> getBackbufferSurface() override { return nullptr; }
+    NXSize getSize() override { return { 1280, 720 }; }
+    void swapBuffers() override {}
+    bool platformRunLoop(std::function<bool()> loop) override { return loop(); }
+
+protected:
+    skgpu::graphite::Context* graphiteContext() override { return nullptr; }
+    skgpu::graphite::Recorder* graphiteRecorder() override { return nullptr; }
+};
 
 void expect(bool condition, const std::string& message) {
     if (condition) {
@@ -204,6 +217,8 @@ bool sendKeyPress(
 } // namespace
 
 int main() {
+    SkiaCtx::_main = std::make_shared<TestSkiaContext>();
+
     auto wideContentController = new_shared<UIViewController>();
     wideContentController->setTitle("Wide content");
     wideContentController->setView(new_shared<WideIntrinsicView>());
@@ -483,6 +498,37 @@ int main() {
             ),
             "the tab bar exposes navigation Exit once there is nowhere farther back"
         );
+
+        focusWindow->sendEvent(new_shared<UIEvent>());
+        expect(
+            focusTabController->tabBar()->activateItemAt(IndexPath(1, 0)),
+            "touch-mode user selection can activate a different tab"
+        );
+        expect(
+            focusWindow->focusSystem()->requestFocusUpdate(otherFocusableController),
+            "the touch action can retain focus inside the newly selected content"
+        );
+        expect(
+            sendKeyPress(application, SDLK_LEFT, SDL_SCANCODE_LEFT),
+            "the first controller direction reactivates retained focus"
+        );
+        expect(
+            focusWindow->focusSystem()->focusedItem().lock()
+                == otherFocusableController->control,
+            "controller focus resumes in the touch-selected tab content"
+        );
+        expect(
+            sendKeyPress(application, SDLK_LEFT, SDL_SCANCODE_LEFT),
+            "the second controller direction returns to the tab bar"
+        );
+        const auto touchSelectedTab = std::dynamic_pointer_cast<NXTabBarButton>(
+            focusWindow->focusSystem()->focusedItem().lock()
+        );
+        expect(
+            touchSelectedTab && touchSelectedTab->text() == "Other",
+            "returning from touch-selected content focuses its selected tab item"
+        );
+
         expect(
             sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
             "the top-level B/menu key press is queued"
