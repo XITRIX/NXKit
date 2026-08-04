@@ -69,6 +69,22 @@ void UIControl::pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::s
     }
 }
 
+void UIControl::pressesCancelled(
+    std::set<std::shared_ptr<UIPress>> pressees,
+    std::shared_ptr<UIPressesEvent> event
+) {
+    if (isHighlighted() && std::any_of(
+            pressees.begin(),
+            pressees.end(),
+            [](const std::shared_ptr<UIPress>& press) {
+                return press && press->type() == UIPressType::select;
+            }
+        )) {
+        setHighlighted(false);
+    }
+    UIView::pressesCancelled(std::move(pressees), std::move(event));
+}
+
 void UIControl::didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationCoordinator* coordinator) {
     UIView::didUpdateFocusIn(context, coordinator);
 

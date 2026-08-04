@@ -83,6 +83,8 @@ void NXTabBarButton::setText(const std::string& text) {
 }
 
 NXTabBar::NXTabBar() {
+    setFocusTrackingMode(UIScrollViewFocusTrackingMode::centered);
+
     _container = new_shared<UIView>();
     addSubview(_container);
 

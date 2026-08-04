@@ -10,10 +10,14 @@
 #include <UIFocus.h>
 #include <UIEvent.h>
 
+#include <utility>
+#include <vector>
+
 namespace NXKit {
 
 class UIView;
 class UIWindow;
+class UIPress;
 class UIPressesEvent;
 class UIFocusSystem {
 public:
@@ -32,9 +36,17 @@ private:
     std::weak_ptr<UIFocusItem> _selectedFocusedItem;
     std::weak_ptr<UIFocusItem> _focusedItem;
     std::weak_ptr<UIWindow> _rootWindow;
+    std::vector<std::pair<std::weak_ptr<UIPress>, UIFocusHeading>>
+        _pressedFocusHeadings;
 
     void updateFocus();
     void sendEvent(const std::shared_ptr<UIEvent>& event);
+    bool shouldAllowFocusUpdate(UIFocusUpdateContext context);
+    void updatePressedFocusHeadings(
+        const std::shared_ptr<UIPressesEvent>& event
+    );
+    bool isFocusHeadingPressed(UIFocusHeading heading);
+    bool requestExactFocusUpdate(const std::shared_ptr<UIFocusItem>& item);
 
     std::shared_ptr<UIFocusItem> findItemToFocus();
     void applyFocusToItem(const std::shared_ptr<UIFocusItem>& item, UIFocusUpdateContext context);
@@ -43,6 +55,7 @@ private:
 
     friend class UIWindow;
     friend class UIControl;
+    friend class UIScrollView;
 };
 
 }

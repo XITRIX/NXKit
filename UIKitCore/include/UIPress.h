@@ -10,7 +10,7 @@
 namespace NXKit {
 
 enum class UIPressPhase {
-    began, changed, stationary, ended
+    began, changed, stationary, ended, cancelled
 };
 
 enum class UIPressType {

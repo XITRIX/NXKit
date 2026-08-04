@@ -54,8 +54,12 @@ bool UIFocusSystem::requestFocusUpdate(
         return nullptr;
     };
 
-    const auto item = resolveItem(environment);
+    return requestExactFocusUpdate(resolveItem(environment));
+}
 
+bool UIFocusSystem::requestExactFocusUpdate(
+    const std::shared_ptr<UIFocusItem>& item
+) {
     if (!item || !item->canBecomeFocused()) {
         return false;
     }
@@ -76,11 +80,7 @@ bool UIFocusSystem::requestFocusUpdate(
     context._nextFocusedItem = item;
     context._focusHeading = UIFocusHeading::none;
 
-    if (const auto previous = context.previouslyFocusedItem().lock();
-        previous && !previous->shouldUpdateFocusIn(context)) {
-        return false;
-    }
-    if (!item->shouldUpdateFocusIn(context)) {
+    if (!shouldAllowFocusUpdate(context)) {
         return false;
     }
 
@@ -131,6 +131,8 @@ void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
     auto pevent = std::dynamic_pointer_cast<UIPressesEvent>(event);
     if (pevent == nullptr) return setActive(false);
 
+    updatePressedFocusHeadings(pevent);
+
     if (!_isActive) {
         setActive(true);
         return;
@@ -163,6 +165,9 @@ void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
                 _selectedFocusedItem = focusedView;
             } else if (press->phase() == UIPressPhase::ended) {
                 focusedView->pressesEnded(pevent->allPresses(), pevent);
+                _selectedFocusedItem.reset();
+            } else if (press->phase() == UIPressPhase::cancelled) {
+                focusedView->pressesCancelled(pevent->allPresses(), pevent);
                 _selectedFocusedItem.reset();
             }
         }
@@ -199,16 +204,7 @@ void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
                 const auto candidateView =
                     std::dynamic_pointer_cast<UIView>(candidate);
                 if (candidateView && candidateView->isDescendantOf(focusRoot)) {
-                    context._nextFocusedItem = candidate;
-                    const bool currentAllowsUpdate =
-                        context.previouslyFocusedItem().expired()
-                        || context.previouslyFocusedItem().lock()
-                            ->shouldUpdateFocusIn(context);
-                    const bool candidateAllowsUpdate =
-                        candidate->shouldUpdateFocusIn(context);
-                    if (currentAllowsUpdate && candidateAllowsUpdate) {
-                        nextItem = candidate;
-                    }
+                    nextItem = candidate;
                     break;
                 }
             }
@@ -221,7 +217,104 @@ void UIFocusSystem::sendEvent(const std::shared_ptr<UIEvent>& event) {
     }
 
     context._nextFocusedItem = nextItem;
+    if (!shouldAllowFocusUpdate(context)) {
+        nextItem = currentIsInFocusRoot ? _focusedItem.lock() : nullptr;
+        context._nextFocusedItem = nextItem;
+    }
     applyFocusToItem(nextItem, context);
+}
+
+void UIFocusSystem::updatePressedFocusHeadings(
+    const std::shared_ptr<UIPressesEvent>& event
+) {
+    if (!event) {
+        return;
+    }
+
+    std::erase_if(_pressedFocusHeadings, [](const auto& entry) {
+        return entry.first.expired();
+    });
+    for (const auto& press : event->allPresses()) {
+        if (!press || press->isRepeat()) {
+            continue;
+        }
+
+        UIFocusHeading heading = UIFocusHeading::none;
+        switch (press->type()) {
+            case UIPressType::upArrow:
+                heading = UIFocusHeading::up;
+                break;
+            case UIPressType::downArrow:
+                heading = UIFocusHeading::down;
+                break;
+            case UIPressType::leftArrow:
+                heading = UIFocusHeading::left;
+                break;
+            case UIPressType::rightArrow:
+                heading = UIFocusHeading::right;
+                break;
+            default:
+                break;
+        }
+        if (heading == UIFocusHeading::none) {
+            continue;
+        }
+
+        std::erase_if(_pressedFocusHeadings, [&press](const auto& entry) {
+            return entry.first.lock() == press;
+        });
+        if (press->phase() == UIPressPhase::began) {
+            _pressedFocusHeadings.emplace_back(press, heading);
+        }
+    }
+}
+
+bool UIFocusSystem::isFocusHeadingPressed(UIFocusHeading heading) {
+    std::erase_if(_pressedFocusHeadings, [](const auto& entry) {
+        return entry.first.expired();
+    });
+    return _isActive && std::any_of(
+        _pressedFocusHeadings.begin(),
+        _pressedFocusHeadings.end(),
+        [heading](const auto& entry) {
+            return entry.second == heading;
+        }
+    );
+}
+
+bool UIFocusSystem::shouldAllowFocusUpdate(UIFocusUpdateContext context) {
+    std::unordered_set<const UIFocusEnvironment*> visited;
+    const auto validate = [&visited, &context](
+        const std::shared_ptr<UIFocusEnvironment>& environment
+    ) {
+        return !environment || !visited.insert(environment.get()).second
+            || environment->shouldUpdateFocusIn(context);
+    };
+    const auto validateParentPath = [&validate](
+        const std::shared_ptr<UIFocusItem>& item
+    ) {
+        std::unordered_set<const UIFocusEnvironment*> pathVisited;
+        std::shared_ptr<UIFocusEnvironment> environment = item
+            ? item->parentFocusEnvironment()
+            : nullptr;
+        while (environment) {
+            if (!pathVisited.insert(environment.get()).second) {
+                break;
+            }
+            if (!validate(environment)) {
+                return false;
+            }
+            environment = environment->parentFocusEnvironment();
+        }
+        return true;
+    };
+
+    const auto previous = context.previouslyFocusedItem().lock();
+    const auto next = context.nextFocusedItem().lock();
+    return validate(previous)
+        && validate(next)
+        && validateParentPath(previous)
+        && validateParentPath(next);
 }
 
 void UIFocusSystem::updateFocus() {
@@ -259,7 +352,9 @@ void UIFocusSystem::applyFocusToItem(const std::shared_ptr<UIFocusItem>& item, U
     UIFocusAnimationContext animationContext;
     UIView::animate(animationContext.duration(), 0,
                     UIViewAnimationOptions(
-                        curveEaseOut | allowUserInteraction
+                        curveEaseOut
+                            | allowUserInteraction
+                            | beginFromCurrentState
                     ), [context, coordinator, animationContext]() {
         for (const auto& animation: coordinator._coordinatedAnimations) { animation(); }
         for (const auto& animation: coordinator._coordinatedFocusingAnimations) { animation(animationContext); }

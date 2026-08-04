@@ -10,14 +10,31 @@
 
 #include <UIScrollView.h>
 #include <CATransaction.h>
+#include <UIWindow.h>
 #include <tools/IBTools.h>
 #include <UIScrollViewExtensions/SpringTimingParameters.h>
 #include <UIScrollViewExtensions/RubberBand.h>
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <stdexcept>
+#include <unordered_set>
 
 namespace NXKit {
+
+namespace {
+
+constexpr NXFloat kFocusVisibilityTolerance = 0.5f;
+constexpr NXFloat kNaturalFocusScrollSpeed = 1000.0f;
+
+bool isDirectionalFocusHeading(UIFocusHeading heading) {
+    return heading == UIFocusHeading::up
+        || heading == UIFocusHeading::down
+        || heading == UIFocusHeading::left
+        || heading == UIFocusHeading::right;
+}
+
+} // namespace
 
 UIScrollView::UIScrollView(const NXRect frame): UIView(frame) {
     _panGestureRecognizer = new_shared<UIPanGestureRecognizer>();
@@ -30,6 +47,490 @@ UIScrollView::UIScrollView(const NXRect frame): UIView(frame) {
 //        $0.alpha = 0
 //        addSubview($0)
 //    }
+}
+
+UIScrollView::~UIScrollView() {
+    if (_naturalFocusDisplayLink) {
+        _naturalFocusDisplayLink->invalidate();
+    }
+}
+
+bool UIScrollView::canBecomeFocused() {
+    return _isScrollEnabled
+        && !isHidden()
+        && alpha() > 0
+        && isUserInteractionEnabled();
+}
+
+std::shared_ptr<UIFocusItem> UIScrollView::searchForFocus() {
+    const auto descendant = findFocusableDescendant(
+        _focusTrackingMode == UIScrollViewFocusTrackingMode::natural
+    );
+    if (descendant) {
+        return descendant;
+    }
+    return canBecomeFocused()
+        ? shared_from_base<UIFocusItem>()
+        : nullptr;
+}
+
+std::shared_ptr<UIView> UIScrollView::findFocusableDescendant(
+    bool visibleOnly
+) {
+    const auto scrollView = shared_from_base<UIScrollView>();
+    std::unordered_set<const UIFocusEnvironment*> visited;
+    std::function<std::shared_ptr<UIView>(
+        const std::shared_ptr<UIFocusEnvironment>&
+    )> visit;
+    visit = [this, &scrollView, visibleOnly, &visited, &visit](
+        const std::shared_ptr<UIFocusEnvironment>& environment
+    ) -> std::shared_ptr<UIView> {
+        if (!environment || !visited.insert(environment.get()).second) {
+            return nullptr;
+        }
+
+        const auto view = std::dynamic_pointer_cast<UIView>(environment);
+        if (view && view.get() != this) {
+            if (!view->isDescendantOf(scrollView)) {
+                return nullptr;
+            }
+            if (view->canBecomeFocused()
+                && (!visibleOnly || isFullyVisibleForFocus(view))) {
+                return view;
+            }
+        }
+
+        for (const auto& preferred : environment->preferredFocusEnvironments()) {
+            if (const auto result = visit(preferred)) {
+                return result;
+            }
+        }
+        if (!view) {
+            return nullptr;
+        }
+        for (const auto& child : view->subviews()) {
+            if (const auto result = visit(child)) {
+                return result;
+            }
+        }
+        return nullptr;
+    };
+
+    for (const auto& preferred : preferredFocusEnvironments()) {
+        if (const auto result = visit(preferred)) {
+            return result;
+        }
+    }
+    for (const auto& child : subviews()) {
+        if (const auto result = visit(child)) {
+            return result;
+        }
+    }
+    return nullptr;
+}
+
+std::shared_ptr<UIView> UIScrollView::nextFocusableDescendant(
+    const std::shared_ptr<UIView>& current,
+    UIFocusHeading heading
+) {
+    if (!current || !containsFocusView(current) || current.get() == this) {
+        return nullptr;
+    }
+
+    auto cursor = current;
+    const auto scrollView = shared_from_base<UIScrollView>();
+    while (cursor && cursor != scrollView) {
+        const auto parent = cursor->superview().lock();
+        if (!parent) {
+            break;
+        }
+        const auto candidate = parent->getNextFocusItem(cursor, heading);
+        if (candidate) {
+            const auto candidateView =
+                std::dynamic_pointer_cast<UIView>(candidate);
+            return candidateView && candidateView.get() != this
+                    && candidateView->isDescendantOf(scrollView)
+                ? candidateView
+                : nullptr;
+        }
+        cursor = parent;
+    }
+    return nullptr;
+}
+
+NXRect UIScrollView::focusRectInContent(
+    const std::shared_ptr<UIView>& view
+) {
+    if (!view || view.get() == this || !containsFocusView(view)) {
+        return NXRect();
+    }
+    return {
+        view->convertToView(
+            view->bounds().origin,
+            shared_from_base<UIScrollView>()
+        ),
+        view->bounds().size
+    };
+}
+
+NXRect UIScrollView::focusViewport(NXPoint offset) {
+    auto insets = effectiveContentInsets();
+    const auto safeArea = safeAreaInsets();
+    insets.top = std::max(insets.top, safeArea.top);
+    insets.left = std::max(insets.left, safeArea.left);
+    insets.bottom = std::max(insets.bottom, safeArea.bottom);
+    insets.right = std::max(insets.right, safeArea.right);
+    return {
+        offset.x + insets.left,
+        offset.y + insets.top,
+        std::max<NXFloat>(
+            0,
+            bounds().width() - insets.left - insets.right
+        ),
+        std::max<NXFloat>(
+            0,
+            bounds().height() - insets.top - insets.bottom
+        )
+    };
+}
+
+bool UIScrollView::isFullyVisibleForFocus(
+    const std::shared_ptr<UIView>& view
+) {
+    const auto item = focusRectInContent(view);
+    const auto viewport = focusViewport(contentOffset());
+    return item.width() <= viewport.width() + kFocusVisibilityTolerance
+        && item.height() <= viewport.height() + kFocusVisibilityTolerance
+        && item.minX() >= viewport.minX() - kFocusVisibilityTolerance
+        && item.maxX() <= viewport.maxX() + kFocusVisibilityTolerance
+        && item.minY() >= viewport.minY() - kFocusVisibilityTolerance
+        && item.maxY() <= viewport.maxY() + kFocusVisibilityTolerance;
+}
+
+NXPoint UIScrollView::focusTrackingTargetOffset(
+    const std::shared_ptr<UIView>& view,
+    UIScrollViewFocusTrackingMode mode
+) {
+    auto target = contentOffset();
+    if (!view || view.get() == this || !containsFocusView(view)) {
+        return getBoundsCheckedContentOffset(target);
+    }
+
+    const auto item = focusRectInContent(view);
+    const auto viewport = focusViewport(target);
+    if (mode == UIScrollViewFocusTrackingMode::centered) {
+        target.x += item.midX() - viewport.midX();
+        target.y += item.midY() - viewport.midY();
+    } else if (mode == UIScrollViewFocusTrackingMode::focused) {
+        if (item.minX() < viewport.minX()) {
+            target.x += item.minX() - viewport.minX();
+        } else if (item.maxX() > viewport.maxX()) {
+            target.x += item.maxX() - viewport.maxX();
+        }
+        if (item.minY() < viewport.minY()) {
+            target.y += item.minY() - viewport.minY();
+        } else if (item.maxY() > viewport.maxY()) {
+            target.y += item.maxY() - viewport.maxY();
+        }
+    }
+    return getBoundsCheckedContentOffset(target);
+}
+
+bool UIScrollView::containsFocusView(const std::shared_ptr<UIView>& view) {
+    if (!view) {
+        return false;
+    }
+    return view.get() == this
+        || view->isDescendantOf(shared_from_base<UIScrollView>());
+}
+
+bool UIScrollView::canScrollForFocusHeading(UIFocusHeading heading) {
+    if (!_isScrollEnabled) {
+        return false;
+    }
+    const auto limits = contentOffsetBounds();
+    const auto offset = contentOffset();
+    switch (heading) {
+        case UIFocusHeading::up:
+            return offset.y > limits.minY() + kFocusVisibilityTolerance;
+        case UIFocusHeading::down:
+            return offset.y < limits.maxY() - kFocusVisibilityTolerance;
+        case UIFocusHeading::left:
+            return offset.x > limits.minX() + kFocusVisibilityTolerance;
+        case UIFocusHeading::right:
+            return offset.x < limits.maxX() - kFocusVisibilityTolerance;
+        default:
+            return false;
+    }
+}
+
+bool UIScrollView::shouldUpdateFocusIn(UIFocusUpdateContext context) {
+    const auto previous = std::dynamic_pointer_cast<UIView>(
+        context.previouslyFocusedItem().lock()
+    );
+    const auto next = std::dynamic_pointer_cast<UIView>(
+        context.nextFocusedItem().lock()
+    );
+    const auto heading = context.focusHeading();
+    if (!isDirectionalFocusHeading(heading) || !containsFocusView(previous)) {
+        return true;
+    }
+
+    const bool scrollViewIsFocused = previous.get() == this;
+    if (!scrollViewIsFocused
+        && _focusTrackingMode != UIScrollViewFocusTrackingMode::natural) {
+        return true;
+    }
+
+    if (next && next != previous && containsFocusView(next)
+        && next.get() != this) {
+        if (isFullyVisibleForFocus(next)) {
+            _naturalPendingFocusView.reset();
+            _naturalFocusScrollRequested = false;
+            return true;
+        }
+        _naturalPendingFocusView = next;
+    } else {
+        _naturalPendingFocusView.reset();
+    }
+
+    if (!canScrollForFocusHeading(heading)) {
+        _naturalFocusScrollRequested = false;
+        return true;
+    }
+
+    _naturalFocusScrollRequested = true;
+    if (isFocusHeadingPressed(heading)) {
+        startNaturalFocusScrollIfNeeded(heading);
+    }
+    return false;
+}
+
+void UIScrollView::didUpdateFocusIn(
+    UIFocusUpdateContext context,
+    UIFocusAnimationCoordinator* coordinator
+) {
+    UIView::didUpdateFocusIn(context, coordinator);
+
+    const auto previous = std::dynamic_pointer_cast<UIView>(
+        context.previouslyFocusedItem().lock()
+    );
+    const auto next = std::dynamic_pointer_cast<UIView>(
+        context.nextFocusedItem().lock()
+    );
+    if (containsFocusView(previous) && !containsFocusView(next)) {
+        stopNaturalFocusScroll();
+        return;
+    }
+    if (!next || next.get() == this || !containsFocusView(next)
+        || _focusTrackingMode == UIScrollViewFocusTrackingMode::natural) {
+        return;
+    }
+
+    const auto target = focusTrackingTargetOffset(next, _focusTrackingMode);
+    const auto weakSelf = weak_from_base<UIScrollView>();
+    const auto updateOffset = [weakSelf, target]() {
+        if (const auto self = weakSelf.lock()) {
+            self->setContentOffset(target, false);
+        }
+    };
+    if (coordinator) {
+        coordinator->addCoordinatedAnimations(updateOffset);
+    } else {
+        updateOffset();
+    }
+}
+
+bool UIScrollView::isFocusHeadingPressed(UIFocusHeading heading) {
+    const auto containingWindow = window();
+    return containingWindow && containingWindow->focusSystem()
+        && containingWindow->focusSystem()->isFocusHeadingPressed(heading);
+}
+
+void UIScrollView::startNaturalFocusScrollIfNeeded(UIFocusHeading heading) {
+    const auto focusedView = window() && window()->focusSystem()
+        ? std::dynamic_pointer_cast<UIView>(
+            window()->focusSystem()->focusedItem().lock()
+        )
+        : nullptr;
+    const bool scrollViewItselfIsFocused = focusedView.get() == this;
+    if (!_naturalFocusScrollRequested
+        || !isFocusHeadingPressed(heading)
+        || (_focusTrackingMode != UIScrollViewFocusTrackingMode::natural
+            && !scrollViewItselfIsFocused)
+        || !canScrollForFocusHeading(heading)) {
+        return;
+    }
+    if (_naturalFocusScrollActive && _naturalFocusDisplayLink
+        && _naturalFocusHeading == heading) {
+        return;
+    }
+
+    if (_naturalFocusDisplayLink) {
+        _naturalFocusDisplayLink->invalidate();
+        _naturalFocusDisplayLink.reset();
+    }
+    const auto visibleOffset = visibleContentOffset();
+    cancelDeceleratingIfNeccessary();
+    cancelDecelerationAnimations();
+    setContentOffset(
+        getBoundsCheckedContentOffset(visibleOffset),
+        false
+    );
+    _naturalFocusHeading = heading;
+    _naturalFocusScrollActive = true;
+    _lastNaturalFocusScrollTimestamp = Timer();
+    _naturalFocusDisplayLink = std::make_unique<CADisplayLink>([this]() {
+        naturalFocusScrollTick();
+    });
+}
+
+void UIScrollView::stopNaturalFocusScroll() {
+    if (_naturalFocusDisplayLink) {
+        _naturalFocusDisplayLink->invalidate();
+    }
+    _naturalFocusScrollActive = false;
+    _naturalFocusHeading = UIFocusHeading::none;
+    _naturalFocusScrollRequested = false;
+    _naturalPendingFocusView.reset();
+}
+
+void UIScrollView::naturalFocusScrollTick() {
+    const auto now = Timer();
+    const auto elapsedSeconds =
+        (now - _lastNaturalFocusScrollTimestamp) / 1000.0;
+    _lastNaturalFocusScrollTimestamp = now;
+    advanceNaturalFocusScroll(elapsedSeconds);
+}
+
+void UIScrollView::advanceNaturalFocusScroll(double elapsedSeconds) {
+    if (_naturalFocusHeading == UIFocusHeading::none) {
+        return;
+    }
+    if (!isFocusHeadingPressed(_naturalFocusHeading)
+        || !canScrollForFocusHeading(_naturalFocusHeading)) {
+        stopNaturalFocusScroll();
+        return;
+    }
+    if (elapsedSeconds <= 0) {
+        return;
+    }
+
+    CALayer::requestFramerate(120);
+    auto remaining = elapsedSeconds;
+    constexpr double maximumStep = 1.0 / 120.0;
+    while (remaining > 0
+        && canScrollForFocusHeading(_naturalFocusHeading)) {
+        const auto step = std::min(remaining, maximumStep);
+        auto target = contentOffset();
+        const auto distance = static_cast<NXFloat>(
+            kNaturalFocusScrollSpeed * step
+        );
+        switch (_naturalFocusHeading) {
+            case UIFocusHeading::up:
+                target.y -= distance;
+                break;
+            case UIFocusHeading::down:
+                target.y += distance;
+                break;
+            case UIFocusHeading::left:
+                target.x -= distance;
+                break;
+            case UIFocusHeading::right:
+                target.x += distance;
+                break;
+            default:
+                return;
+        }
+        setContentOffset(getBoundsCheckedContentOffset(target), false);
+        handOffNaturalFocusIfPossible();
+        remaining -= step;
+    }
+
+    if (!canScrollForFocusHeading(_naturalFocusHeading)) {
+        stopNaturalFocusScroll();
+    }
+}
+
+void UIScrollView::handOffNaturalFocusIfPossible() {
+    const auto containingWindow = window();
+    if (!containingWindow || !containingWindow->focusSystem()) {
+        stopNaturalFocusScroll();
+        return;
+    }
+    auto current = std::dynamic_pointer_cast<UIView>(
+        containingWindow->focusSystem()->focusedItem().lock()
+    );
+    if (!containsFocusView(current)) {
+        stopNaturalFocusScroll();
+        return;
+    }
+
+    auto pending = _naturalPendingFocusView.lock();
+    if (!pending && current.get() != this) {
+        pending = nextFocusableDescendant(current, _naturalFocusHeading);
+        _naturalPendingFocusView = pending;
+    }
+    if (pending && isFullyVisibleForFocus(pending)) {
+        _naturalPendingFocusView.reset();
+        containingWindow->focusSystem()->requestFocusUpdate(pending);
+        current = pending;
+    } else if (current.get() != this && !isFullyVisibleForFocus(current)) {
+        containingWindow->focusSystem()->requestExactFocusUpdate(
+            shared_from_base<UIScrollView>()
+        );
+        current = shared_from_base<UIScrollView>();
+    }
+
+}
+
+void UIScrollView::setFocusTrackingMode(
+    UIScrollViewFocusTrackingMode mode
+) {
+    switch (mode) {
+        case UIScrollViewFocusTrackingMode::natural:
+        case UIScrollViewFocusTrackingMode::centered:
+        case UIScrollViewFocusTrackingMode::focused:
+            break;
+        default:
+            throw std::invalid_argument(
+                "UIScrollView focus tracking mode is invalid"
+            );
+    }
+    if (_focusTrackingMode == mode) {
+        return;
+    }
+
+    stopNaturalFocusScroll();
+    _focusTrackingMode = mode;
+    if (mode == UIScrollViewFocusTrackingMode::natural) {
+        return;
+    }
+
+    const auto containingWindow = window();
+    const auto focusedView = containingWindow && containingWindow->focusSystem()
+        ? std::dynamic_pointer_cast<UIView>(
+            containingWindow->focusSystem()->focusedItem().lock()
+        )
+        : nullptr;
+    if (!focusedView || focusedView.get() == this
+        || !containsFocusView(focusedView)) {
+        return;
+    }
+    const auto target = focusTrackingTargetOffset(focusedView, mode);
+    const auto weakSelf = weak_from_base<UIScrollView>();
+    UIView::animate(
+        0.2,
+        0,
+        UIViewAnimationOptions(
+            beginFromCurrentState | curveEaseOut | allowUserInteraction
+        ),
+        [weakSelf, target]() {
+            if (const auto self = weakSelf.lock()) {
+                self->setContentOffset(target, false);
+            }
+        }
+    );
 }
 
 void UIScrollView::addSubview(const std::shared_ptr<UIView> &view) {
@@ -66,6 +567,7 @@ void UIScrollView::setScrollEnabled(bool scrollEnabled) {
     if (_timerAnimation) {
         _timerAnimation->invalidate();
     }
+    stopNaturalFocusScroll();
     cancelDecelerationAnimations();
     _isDecelerating = false;
     weightedAverageVelocity = NXPoint();
@@ -434,6 +936,22 @@ void UIScrollView::cancelDecelerationAnimations() {
 bool UIScrollView::applyXMLAttribute(const std::string& name, const std::string& value) {
     if (UIView::applyXMLAttribute(name, value)) return true;
 
+    if (name == "focusTrackingMode") {
+        if (value == "natural") {
+            setFocusTrackingMode(UIScrollViewFocusTrackingMode::natural);
+            return true;
+        }
+        if (value == "centered") {
+            setFocusTrackingMode(UIScrollViewFocusTrackingMode::centered);
+            return true;
+        }
+        if (value == "focused") {
+            setFocusTrackingMode(UIScrollViewFocusTrackingMode::focused);
+            return true;
+        }
+        return false;
+    }
+
     REGISTER_XIB_ATTRIBUTE(scrollEnabled, valueToBool, setScrollEnabled)
     REGISTER_XIB_ATTRIBUTE(bounceVertically, valueToBool, setBounceVertically)
     REGISTER_XIB_ATTRIBUTE(bounceHorizontally, valueToBool, setBounceHorizontally)
@@ -444,6 +962,23 @@ bool UIScrollView::applyXMLAttribute(const std::string& name, const std::string&
 void UIScrollView::layoutSubviews() {
     UIView::layoutSubviews();
     setContentOffset(getBoundsCheckedContentOffset(contentOffset()), false);
+
+    if (_focusTrackingMode == UIScrollViewFocusTrackingMode::natural) {
+        return;
+    }
+    const auto containingWindow = window();
+    const auto focusedView = containingWindow && containingWindow->focusSystem()
+        ? std::dynamic_pointer_cast<UIView>(
+            containingWindow->focusSystem()->focusedItem().lock()
+        )
+        : nullptr;
+    if (focusedView && focusedView.get() != this
+        && containsFocusView(focusedView)) {
+        setContentOffset(
+            focusTrackingTargetOffset(focusedView, _focusTrackingMode),
+            false
+        );
+    }
 }
 
 }

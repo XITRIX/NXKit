@@ -176,6 +176,10 @@ void UIWindow::sendPressEvent(const std::shared_ptr<UIPressesEvent>& event) {
                 press->responder().lock()->pressesEnded({ press }, event);
                 break;
             }
+            case UIPressPhase::cancelled: {
+                press->responder().lock()->pressesCancelled({ press }, event);
+                break;
+            }
             default:
                 break;
         }

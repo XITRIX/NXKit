@@ -41,6 +41,63 @@ UIApplication::~UIApplication() {
     gamepads.clear();
 }
 
+void UIApplication::finishActivePressEvent(
+    const std::shared_ptr<UIPressesEvent>& event,
+    UIPressPhase phase
+) {
+    if (!event) {
+        return;
+    }
+    for (const auto& press : event->allPresses()) {
+        if (!press || press->phase() != UIPressPhase::began) {
+            continue;
+        }
+        press->_timestamp = Timer();
+        press->_phase = phase;
+    }
+    sendEvent(event);
+    std::erase(UIPressesEvent::activePressesEvents, event);
+}
+
+void UIApplication::cancelGamepadPresses(SDL_JoystickID gamepadID) {
+    std::vector<std::shared_ptr<UIPressesEvent>> events;
+    const auto collect = [gamepadID, &events](const auto& entry) {
+        if (entry.first.first == gamepadID
+            && std::find(events.begin(), events.end(), entry.second)
+                == events.end()) {
+            events.push_back(entry.second);
+        }
+    };
+    std::for_each(
+        _gamepadButtonPresses.begin(),
+        _gamepadButtonPresses.end(),
+        collect
+    );
+    std::for_each(
+        _gamepadAxisPresses.begin(),
+        _gamepadAxisPresses.end(),
+        collect
+    );
+    for (const auto& event : events) {
+        finishActivePressEvent(event, UIPressPhase::cancelled);
+    }
+    std::erase_if(_gamepadButtonPresses, [gamepadID](const auto& entry) {
+        return entry.first.first == gamepadID;
+    });
+    std::erase_if(_gamepadAxisPresses, [gamepadID](const auto& entry) {
+        return entry.first.first == gamepadID;
+    });
+}
+
+void UIApplication::cancelAllActivePresses() {
+    const auto activeEvents = UIPressesEvent::activePressesEvents;
+    for (const auto& event : activeEvents) {
+        finishActivePressEvent(event, UIPressPhase::cancelled);
+    }
+    _gamepadButtonPresses.clear();
+    _gamepadAxisPresses.clear();
+}
+
 UIGamepadKey UIApplication::mapGamepadButtonEventToUIGamepadKey(SDL_GamepadButtonEvent event) {
     UIGamepadKey key;
     key._value = event.down ? 1.0f : 0.0f;
@@ -469,6 +526,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
         }
         case SDL_EVENT_GAMEPAD_REMOVED: {
             printf("Gamepad removed\n");
+            cancelGamepadPresses(e.gdevice.which);
             const auto gamepad = gamepads.find(e.gdevice.which);
             if (gamepad != gamepads.end()) {
                 SDL_CloseGamepad(gamepad->second);
@@ -479,6 +537,14 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
         case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
             printf("Gamepad button pressed\n");
 
+            const GamepadControlKey controlKey {
+                e.gbutton.which,
+                e.gbutton.button
+            };
+            if (_gamepadButtonPresses.contains(controlKey)) {
+                break;
+            }
+
             auto press = new_shared<UIPress>();
             press->_phase = UIPressPhase::began;
             press->setForWindow(delegate->window);
@@ -487,6 +553,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
 
             auto event = std::shared_ptr<UIPressesEvent>(new UIPressesEvent(press));
             UIPressesEvent::activePressesEvents.push_back(event);
+            _gamepadButtonPresses.emplace(controlKey, event);
             sendEvent(event);
 
             break;
@@ -494,98 +561,70 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
         case SDL_EVENT_GAMEPAD_BUTTON_UP: {
             printf("Gamepad button released\n");
 
-            std::shared_ptr<UIPressesEvent> event;
-            std::shared_ptr<UIPress> press;
-
-            UIGamepadKey gamepadKey = mapGamepadButtonEventToUIGamepadKey(e.gbutton);
-
-            for (auto& levent: UIPressesEvent::activePressesEvents) {
-                for (auto& lpress: levent->allPresses()) {
-                    if (lpress->gamepadKey()
-                        && lpress->gamepadKey()->inputType()
-                            == gamepadKey.inputType()) {
-                        lpress->_gamepadKey = gamepadKey;
-                        event = levent;
-                        press = lpress;
-                        goto FOUND;
-                    }
+            const GamepadControlKey controlKey {
+                e.gbutton.which,
+                e.gbutton.button
+            };
+            const auto active = _gamepadButtonPresses.find(controlKey);
+            if (active == _gamepadButtonPresses.end()) {
+                break;
+            }
+            for (const auto& press : active->second->allPresses()) {
+                if (press) {
+                    press->_gamepadKey =
+                        mapGamepadButtonEventToUIGamepadKey(e.gbutton);
                 }
             }
-            FOUND:
-
-            if (!event || !press) return;
-
-            press->_timestamp = Timer();
-            press->_phase = UIPressPhase::ended;
-
-            sendEvent(event);
-            UIPressesEvent::activePressesEvents.erase(std::remove(UIPressesEvent::activePressesEvents.begin(), UIPressesEvent::activePressesEvents.end(), event), UIPressesEvent::activePressesEvents.end());
+            finishActivePressEvent(active->second, UIPressPhase::ended);
+            _gamepadButtonPresses.erase(active);
 
             break;
         }
         case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
             printf("Gamepad axis moved\n");
 
-            static std::map<UIGamepadInputType, std::shared_ptr<UIPress>> _pressesMap;
-
             auto gamepadKey = mapGamepadAxisEventToUIGamepadKey(e.gaxis);
-            if (!gamepadKey.has_value()) return;
-
-            std::shared_ptr<UIPress> press;
-            if (_pressesMap.find(gamepadKey->_inputType) == _pressesMap.end()) {
-                press = new_shared<UIPress>();
-                press->setForWindow(delegate->window);
-                _pressesMap[gamepadKey->_inputType] = press;
-                goto UPDATE_AND_SEND;
-            } else {
-                press = _pressesMap[gamepadKey->_inputType];
+            const GamepadControlKey controlKey {
+                e.gaxis.which,
+                e.gaxis.axis
+            };
+            auto active = _gamepadAxisPresses.find(controlKey);
+            if (active != _gamepadAxisPresses.end()) {
+                const auto activePress = *active->second->allPresses().begin();
+                const bool continuesSameDirection = gamepadKey
+                    && gamepadKey->isPressed()
+                    && activePress && activePress->gamepadKey()
+                    && activePress->gamepadKey()->inputType()
+                        == gamepadKey->inputType();
+                if (continuesSameDirection) {
+                    activePress->_gamepadKey = gamepadKey;
+                    break;
+                }
+                finishActivePressEvent(
+                    active->second,
+                    UIPressPhase::ended
+                );
+                _gamepadAxisPresses.erase(active);
             }
 
-            // Ignore to send the same isPressed value
-            if (press->gamepadKey()->isPressed() == gamepadKey->isPressed()) return;
+            if (!gamepadKey || !gamepadKey->isPressed()) {
+                break;
+            }
 
-            UPDATE_AND_SEND:
-
-            const bool isBeginning = gamepadKey->isPressed();
-            press->_phase = isBeginning
-                ? UIPressPhase::began
-                : UIPressPhase::ended;
+            auto press = new_shared<UIPress>();
+            press->_phase = UIPressPhase::began;
             press->_gamepadKey = gamepadKey;
-            press->_type = mapGamepadInputToUIPressType(gamepadKey->inputType());
+            press->_type = mapGamepadInputToUIPressType(
+                gamepadKey->inputType()
+            );
+            press->setForWindow(delegate->window);
 
-            if (isBeginning) {
-                // Axis presses reuse their UIPress object. Start a fresh hold
-                // interval and remove any ended event left by the prior hold.
-                press->_timestamp = Timer();
-                press->_isHandled = false;
-                press->_isRepeat = false;
-                press->_hasDeliveredRepeat = false;
-                press->_lastRepeatTimestamp = press->_timestamp;
-                press->setForWindow(delegate->window);
-                std::erase_if(
-                    UIPressesEvent::activePressesEvents,
-                    [&press](const std::shared_ptr<UIPressesEvent>& candidate) {
-                        return candidate
-                            && candidate->allPresses().contains(press);
-                    }
-                );
-            }
-
-            auto event = std::shared_ptr<UIPressesEvent>(new UIPressesEvent(press));
-            if (isBeginning) {
-                UIPressesEvent::activePressesEvents.push_back(event);
-            }
+            auto event = std::shared_ptr<UIPressesEvent>(
+                new UIPressesEvent(press)
+            );
+            UIPressesEvent::activePressesEvents.push_back(event);
+            _gamepadAxisPresses.emplace(controlKey, event);
             sendEvent(event);
-
-            if (!isBeginning) {
-                std::erase_if(
-                    UIPressesEvent::activePressesEvents,
-                    [&press](const std::shared_ptr<UIPressesEvent>& candidate) {
-                        return candidate
-                            && candidate->allPresses().contains(press);
-                    }
-                );
-            }
 
             break;
         }
@@ -604,8 +643,31 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
                 break;
             }
 
+            const bool isAlreadyPressed = std::any_of(
+                UIPressesEvent::activePressesEvents.begin(),
+                UIPressesEvent::activePressesEvents.end(),
+                [&e](const std::shared_ptr<UIPressesEvent>& event) {
+                    return event && std::any_of(
+                        event->allPresses().begin(),
+                        event->allPresses().end(),
+                        [&e](const std::shared_ptr<UIPress>& press) {
+                            return press && press->phase() == UIPressPhase::began
+                                && press->key()
+                                && press->key()->_keyCode
+                                    == static_cast<UIKeyboardHIDUsage>(
+                                        e.key.scancode
+                                    );
+                        }
+                    );
+                }
+            );
+            if (isAlreadyPressed) {
+                break;
+            }
+
             if (e.key.key == SDLK_Q) {
                 handleSDLQuit();
+                break;
             }
 
             auto press = new_shared<UIPress>();
@@ -700,6 +762,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             break;
         }
         case SDL_EVENT_DID_ENTER_BACKGROUND: {
+            cancelAllActivePresses();
             break;
         }
         case SDL_EVENT_WILL_ENTER_FOREGROUND: {
@@ -712,14 +775,18 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
 //                    UIRenderer::main()->refreshScreenResolution(e.window.data1, e.window.data2);
             break;
         }
+        case SDL_EVENT_WINDOW_FOCUS_LOST: {
+            cancelAllActivePresses();
+            break;
+        }
         default:
             break;
     }
 }
 
 void UIApplication::handleSDLQuit() {
+    cancelAllActivePresses();
     UIEvent::activeEvents.clear();
-    UIPressesEvent::activePressesEvents.clear();
     quitRequested = true;
 }
 

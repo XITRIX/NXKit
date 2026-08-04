@@ -6,9 +6,14 @@
 #include <UIApplicationDelegate.h>
 #include <UIWindow.h>
 
+#include <map>
+#include <utility>
+
 namespace NXKit {
 
 struct UIGamepadKey;
+class UIPressesEvent;
+enum class UIPressPhase;
 enum class UIPressType;
 enum class UIGamepadInputType;
 
@@ -45,6 +50,18 @@ private:
     static std::optional<UIGamepadKey> mapGamepadAxisEventToUIGamepadKey(SDL_GamepadAxisEvent event);
     static UIPressType mapGamepadInputToUIPressType(UIGamepadInputType key);
     void sendPressRepeatsIfNeeded(const Timer& timestamp);
+    void finishActivePressEvent(
+        const std::shared_ptr<UIPressesEvent>& event,
+        UIPressPhase phase
+    );
+    void cancelGamepadPresses(SDL_JoystickID gamepadID);
+    void cancelAllActivePresses();
+
+    using GamepadControlKey = std::pair<SDL_JoystickID, Uint8>;
+    std::map<GamepadControlKey, std::shared_ptr<UIPressesEvent>>
+        _gamepadButtonPresses;
+    std::map<GamepadControlKey, std::shared_ptr<UIPressesEvent>>
+        _gamepadAxisPresses;
 
     bool lifecycleEventWatchInstalled = false;
     bool quitRequested = false;

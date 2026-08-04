@@ -253,6 +253,11 @@ int main() {
         controller->tabBar()->selectedIndexPath() == controller->selectedIndexPath(),
         "the visual tab selection matches the controller selection"
     );
+    expect(
+        controller->tabBar()->focusTrackingMode()
+            == UIScrollViewFocusTrackingMode::centered,
+        "the tab bar centers focused items within its scroll limits"
+    );
 
     auto delegate = new_shared<RecordingDelegate>();
     controller->delegate = delegate;

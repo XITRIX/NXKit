@@ -17,7 +17,7 @@ private:
     std::set<std::shared_ptr<UIPress>> _allPresses;
 
     friend class UIApplication;
+    friend class UIApplicationPressRepeatTestHarness;
 };
 
 }
-
