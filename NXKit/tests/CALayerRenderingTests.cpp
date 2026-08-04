@@ -34,6 +34,7 @@ struct SaveLayerCall {
     std::optional<SkRect> bounds;
     SkCanvas::SaveLayerFlags flags = 0;
     sk_sp<SkImageFilter> imageFilter;
+    NXFloat alpha = 1;
 };
 
 class SaveLayerTrackingCanvas final: public SkNoDrawCanvas {
@@ -48,6 +49,7 @@ protected:
             record.fBounds ? std::optional(*record.fBounds) : std::nullopt,
             record.fSaveLayerFlags,
             record.fPaint ? record.fPaint->refImageFilter() : nullptr,
+            record.fPaint ? record.fPaint->getAlphaf() : 1.0f,
         });
         return SkNoDrawCanvas::getSaveLayerStrategy(record);
     }
@@ -79,6 +81,75 @@ void testMaskLayersUseLocalBounds() {
                     & SkCanvas::kInitWithPrevious_SaveLayerFlag) != 0,
                "masked content retains the existing backdrop");
     }
+}
+
+void testOpacityLayersRetainBackdropForEffects() {
+    auto layer = new_shared<CABackdropEffectLayer>(BackdropEffect::glass());
+    layer->setBounds(NXRect(0, 0, 240, 120));
+    layer->setOpacity(0.5f);
+
+    SaveLayerTrackingCanvas canvas(640, 480);
+    layer->skiaRender(&canvas);
+
+    expect(
+        canvas.calls.size() == 2,
+        "partially opaque backdrop content uses opacity and effect layers"
+    );
+    if (canvas.calls.size() != 2) return;
+
+    const auto& opacityLayer = canvas.calls.front();
+    expect(
+        opacityLayer.bounds == std::optional(SkRect::MakeWH(240, 120)),
+        "the opacity group is bounded in layer-local coordinates"
+    );
+    expect(
+        (opacityLayer.flags & SkCanvas::kInitWithPrevious_SaveLayerFlag) != 0,
+        "an opacity group preserves pixels for its nested backdrop effect"
+    );
+    expect(
+        std::abs(opacityLayer.alpha - 0.5f) < 0.001f,
+        "the backdrop-preserving opacity group retains the requested alpha"
+    );
+    expect(
+        canvas.calls.back().imageFilter != nullptr,
+        "the nested backdrop effect still installs its runtime filter"
+    );
+
+    constexpr const char* invertBackdropShader = R"SKSL(
+uniform shader content;
+
+half4 main(float2 xy) {
+    half4 source = content.eval(xy);
+    return half4(half3(1.0) - source.rgb, source.a);
+}
+)SKSL";
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(20, 20));
+    expect(surface != nullptr, "the opacity regression creates a raster surface");
+    if (!surface) return;
+    surface->getCanvas()->clear(SK_ColorRED);
+
+    auto rasterLayer = new_shared<CABackdropEffectLayer>(BackdropEffect(
+        invertBackdropShader,
+        "content",
+        0,
+        0
+    ));
+    rasterLayer->setBounds(NXRect(0, 0, 20, 20));
+    rasterLayer->setPosition(NXPoint(10, 10));
+    rasterLayer->setOpacity(0.5f);
+    rasterLayer->skiaRender(surface->getCanvas());
+
+    SkBitmap pixels;
+    pixels.allocN32Pixels(20, 20);
+    expect(
+        surface->readPixels(pixels, 0, 0),
+        "the opacity regression reads its filtered result"
+    );
+    const auto center = pixels.getColor(10, 10);
+    expect(
+        SkColorGetG(center) > 80 && SkColorGetB(center) > 80,
+        "a partial-opacity backdrop effect visibly filters previous pixels"
+    );
 }
 
 void testBackdropFilterCacheTracksGeometry() {
@@ -630,6 +701,7 @@ void testLargeGlassRefractionStopsBeforeDiagonalMedialAxis() {
 
 int main() {
     testMaskLayersUseLocalBounds();
+    testOpacityLayersRetainBackdropForEffects();
     testBackdropFilterCacheTracksGeometry();
     testGlassStylesResolveThroughTheirView();
     testGlassSpecularReflectionUsesBackdropOverscan();

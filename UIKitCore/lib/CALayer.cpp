@@ -309,7 +309,18 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     // Opacity save 3
     if (_opacity < 1) {
-        canvas->saveLayerAlphaf(nullptr, _opacity);
+        // Backdrop layers nested in an opacity group must still see the
+        // already-rendered pixels behind the group. A transparent offscreen
+        // surface makes blur and refraction disappear for every intermediate
+        // opacity, then snap on when opacity reaches exactly one.
+        SkPaint opacityPaint;
+        opacityPaint.setAlphaf(_opacity);
+        SkCanvas::SaveLayerRec opacityLayer(
+            &localBounds,
+            &opacityPaint,
+            SkCanvas::kInitWithPrevious_SaveLayerFlag
+        );
+        canvas->saveLayer(opacityLayer);
     }
 
     // Update current Tint environment
