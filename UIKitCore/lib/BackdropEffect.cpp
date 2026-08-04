@@ -49,6 +49,7 @@ uniform float2 resolution;
 uniform float2 lensCenter;
 uniform float2 lensSize;
 uniform float cornerRadius;
+uniform float maximumSampleRadius;
 uniform float refraction;
 uniform float curve;
 uniform float dispersion;
@@ -68,6 +69,19 @@ uniform float brightBackdropShade;
 uniform shader content;
 
 const float SMOOTH_EDGE_PX = 1.5;
+
+// SkImageFilters::RuntimeShader uses maximumSampleRadius to size its backdrop
+// input. Keep every dynamic child evaluation inside the same radius even when
+// callers retune the built-in effect's displacement uniforms.
+half4 sampleBackdrop(float2 origin, float2 sampleXY) {
+    float2 offset = sampleXY - origin;
+    float offsetLength = length(offset);
+    float scale = min(
+        1.0,
+        max(maximumSampleRadius, 0.0) / max(offsetLength, 0.0001)
+    );
+    return content.eval(origin + offset * scale);
+}
 
 // Signed distance to a box with rounded corners.
 float boxRoundedSDF(float2 p, float2 halfDim, float r) {
@@ -190,9 +204,9 @@ half3 sampleReflection(
         + normal * (toFrame + max(reflectionSamplePx, 0.0));
     float spread = max(reflectionSpreadPx, 0.0);
 
-    half4 center = content.eval(reflectionXY);
-    half4 before = content.eval(reflectionXY - tangent * spread);
-    half4 after = content.eval(reflectionXY + tangent * spread);
+    half4 center = sampleBackdrop(xy, reflectionXY);
+    half4 before = sampleBackdrop(xy, reflectionXY - tangent * spread);
+    half4 after = sampleBackdrop(xy, reflectionXY + tangent * spread);
     half4 reflected = center * 0.5 + (before + after) * 0.25;
 
     // At a window edge the overscan may be transparent. Fade back to the
@@ -247,17 +261,17 @@ half4 main(float2 xy) {
         float sdfR = boxRoundedSDF(xyR - lensCenter, halfDim, r);
         float sdfB = boxRoundedSDF(xyB - lensCenter, halfDim, r);
 
-        half4 gVal = content.eval(xyG);
-        half4 rVal = (sdfR <= 0.0) ? content.eval(xyR) : gVal;
-        half4 bVal = (sdfB <= 0.0) ? content.eval(xyB) : gVal;
+        half4 gVal = sampleBackdrop(xy, xyG);
+        half4 rVal = (sdfR <= 0.0) ? sampleBackdrop(xy, xyR) : gVal;
+        half4 bVal = (sdfB <= 0.0) ? sampleBackdrop(xy, xyB) : gVal;
 
         pixel = half4(rVal.r, gVal.g, bVal.b, gVal.a);
     } else {
-        pixel = content.eval(sampleXY);
+        pixel = sampleBackdrop(xy, sampleXY);
     }
 
     if (pixel.a <= 0.0) {
-        pixel = content.eval(xy);
+        pixel = sampleBackdrop(xy, xy);
     }
 
     pixel.rgb = processColor(pixel.rgb, saturation, contrast, tint);
@@ -272,25 +286,29 @@ half4 main(float2 xy) {
     // content moves through the rim as the glass or its backdrop moves.
     if (edge > 0.0 && specStrength > 0.0) {
         float rimBand = smoothstep(-max(specWidthPx, 1.0), 0.0, sdf);
-        float fresnel = rimBand * rimBand;
-        float reflectance = clamp(
-            fresnel * specStrength * clamp(edge, 0.0, 1.0),
-            0.0,
-            0.9
-        );
-        half3 reflected = sampleReflection(
-            xy,
-            normal,
-            sdf,
-            lensCenter,
-            halfDim,
-            pixel.rgb
-        );
-        pixel.rgb = mix(pixel.rgb, reflected, reflectance);
+        // Avoid evaluating distant reflection coordinates for body pixels
+        // whose Fresnel contribution is exactly zero.
+        if (rimBand > 0.0) {
+            float fresnel = rimBand * rimBand;
+            float reflectance = clamp(
+                fresnel * specStrength * clamp(edge, 0.0, 1.0),
+                0.0,
+                0.9
+            );
+            half3 reflected = sampleReflection(
+                xy,
+                normal,
+                sdf,
+                lensCenter,
+                halfDim,
+                pixel.rgb
+            );
+            pixel.rgb = mix(pixel.rgb, reflected, reflectance);
+        }
     }
 
     float alpha = 1.0 - smoothstep(-SMOOTH_EDGE_PX * 0.5, SMOOTH_EDGE_PX * 0.5, sdf);
-    half4 background = content.eval(xy);
+    half4 background = sampleBackdrop(xy, xy);
     return mix(background, pixel, alpha);
 }
 )SKSL";
@@ -300,7 +318,8 @@ bool isAutomaticUniformName(const std::string& name) {
         || name == "lensCenter"
         || name == "lensSize"
         || name == "cornerRadius"
-        || name == "contentScale";
+        || name == "contentScale"
+        || name == "maximumSampleRadius";
 }
 
 void validateName(const std::string& name) {

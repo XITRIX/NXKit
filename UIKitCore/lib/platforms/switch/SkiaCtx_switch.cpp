@@ -112,27 +112,32 @@ SkiaCtx_switch::~SkiaCtx_switch() {
     surface.reset();
 
     if (graphite) {
-        if (graphite->swapchain) {
-            graphite->swapchain.Unconfigure();
-        }
+        // Sphaira's hbloader launches the next NRO in this process. Explicitly
+        // snap and finish recorder work before releasing any Dawn object.
+        finishGraphiteWork(graphite->context.get(), graphite->recorder.get());
         graphite->backbufferTexture = nullptr;
 
-        // Sphaira's hbloader launches the next NRO in this process. Explicitly
-        // finish and release every Graphite/Dawn resource because dropping the
-        // wrapper handles alone can leave EGL/Mesa mappings owned by this NRO.
-        if (graphite->context) {
-            graphite->context->submit(skgpu::graphite::SyncToCpu::kYes);
-        }
         if (graphite->recorder) {
-            clearGraphiteImageCache(graphite->recorder.get());
             graphite->recorder->freeGpuResources();
         }
+        // Recorder owns the image provider. Its destructor abandons tracked
+        // devices before the provider releases cached Graphite images, and its
+        // resource provider remains valid throughout that sequence.
+        graphite->recorder.reset();
         if (graphite->context) {
             graphite->context->freeGpuResources();
             graphite->context->submit(skgpu::graphite::SyncToCpu::kYes);
         }
-        graphite->recorder.reset();
         graphite->context.reset();
+
+        // Keep the configured surface alive until every recording, cached
+        // texture, and Graphite context that can reference it has gone away.
+        if (graphite->swapchain) {
+            graphite->swapchain.Unconfigure();
+            if (graphite->webgpuInstance) {
+                graphite->webgpuInstance.ProcessEvents();
+            }
+        }
         graphite->swapchain = nullptr;
 
         if (graphite->device) {

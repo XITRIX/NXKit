@@ -24,6 +24,7 @@ class CABackdropEffectLayer;
  - `lensSize`: the view size
  - `cornerRadius`: the backing layer's corner radius
  - `contentScale`: the backing layer's pixel scale
+ - `maximumSampleRadius`: the effect's declared backdrop sampling radius
 
  Other float, vector, matrix, or float-array uniforms can be supplied with
  setUniform(). Automatic uniforms cannot be overridden.

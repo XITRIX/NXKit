@@ -1,5 +1,6 @@
 #include <Screens/NavigationTestViewController/NavigationTestViewController.hpp>
 
+#include <BackdropEffectView.h>
 #include <NXNavigationController.h>
 #include <NXResponderAction.h>
 #include <UIButton.h>
@@ -18,6 +19,12 @@ using namespace NXKit;
 using namespace NXKit::yoga::literals;
 
 namespace {
+
+constexpr NXFloat alertPreferredWidth = 520;
+constexpr NXFloat alertHorizontalMargin = 40;
+constexpr NXFloat alertVerticalMargin = 40;
+constexpr NXFloat alertCornerRadius = 32;
+constexpr NXFloat alertDimmingAlpha = 0.42f;
 
 enum class DestinationChrome {
     standard,
@@ -42,9 +49,10 @@ std::shared_ptr<NXNavigationController> enclosingNavigationController(
 
 std::shared_ptr<UIButton> makeButton(
     std::string title,
-    std::function<void()> handler
+    std::function<void()> handler,
+    UIButtonStyle style = UIButtonStyle::tinted
 ) {
-    auto button = new_shared<UIButton>(UIButtonStyle::tinted);
+    auto button = new_shared<UIButton>(style);
     button->setText(title);
     button->layer()->setCornerRadius(8);
     button->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
@@ -119,16 +127,47 @@ public:
 
     NXRect frameOfPresentedViewInContainerView() const override {
         const auto container = containerView();
-        if (!container) {
+        const auto presented = presentedView();
+        if (!container || !presented) {
             return NXRect();
         }
 
         const auto bounds = container->bounds();
-        const auto width = std::min<NXFloat>(640, std::max<NXFloat>(0, bounds.width() - 80));
-        const auto height = std::min<NXFloat>(520, std::max<NXFloat>(0, bounds.height() - 80));
+        const auto safeArea = container->safeAreaInsets();
+        const auto availableWidth = std::max<NXFloat>(
+            0,
+            bounds.width() - safeArea.left - safeArea.right
+                - alertHorizontalMargin * 2
+        );
+        const auto availableHeight = std::max<NXFloat>(
+            0,
+            bounds.height() - safeArea.top - safeArea.bottom
+                - alertVerticalMargin * 2
+        );
+        const auto width = std::min(alertPreferredWidth, availableWidth);
+
+        // The presentation owns the alert's width. Yoga derives its natural
+        // height from the labels and button, then the frame is capped to the
+        // safe vertical space.
+        presented->yoga()->setWidth(YGValue {
+            static_cast<float>(width),
+            YGUnitPoint,
+        });
+        const auto measuredSize = presented->yoga()->calculateLayoutWithSize(
+            NXSize(width, YGUndefined)
+        );
+        const auto height = std::clamp<NXFloat>(
+            measuredSize.height,
+            0,
+            availableHeight
+        );
+        const auto safeMidX = bounds.minX() + safeArea.left
+            + (bounds.width() - safeArea.left - safeArea.right) * 0.5f;
+        const auto safeMidY = bounds.minY() + safeArea.top
+            + (bounds.height() - safeArea.top - safeArea.bottom) * 0.5f;
         return NXRect(
-            bounds.midX() - width * 0.5f,
-            bounds.midY() - height * 0.5f,
+            safeMidX - width * 0.5f,
+            safeMidY - height * 0.5f,
             width,
             height
         );
@@ -153,7 +192,7 @@ public:
                 preferredFramesPerSecond120 | allowUserInteraction
             ),
             [dimmingView = _dimmingView]() {
-                dimmingView->setAlpha(0.58f);
+                dimmingView->setAlpha(alertDimmingAlpha);
             }
         );
     }
@@ -189,7 +228,7 @@ public:
             _dimmingView->removeFromSuperview();
             _dimmingView.reset();
         } else {
-            _dimmingView->setAlpha(0.58f);
+            _dimmingView->setAlpha(alertDimmingAlpha);
         }
     }
 
@@ -316,35 +355,57 @@ public:
     }
 
     void loadView() override {
-        auto rootView = new_shared<UIView>();
-        rootView->setBackgroundColor(
-            _card ? UIColor::secondarySystemBackground : UIColor::systemBackground
-        );
+        std::shared_ptr<UIView> rootView = _card
+            ? std::static_pointer_cast<UIView>(new_shared<BackdropEffectView>())
+            : new_shared<UIView>();
+        if (!_card) {
+            rootView->setBackgroundColor(UIColor::systemBackground);
+        }
         rootView->setClipsToBounds(_card);
-        rootView->layer()->setCornerRadius(_card ? 28 : 0);
-        rootView->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        rootView->layer()->setCornerRadius(_card ? alertCornerRadius : 0);
+        rootView->configureLayout([isCard = _card](
+            const std::shared_ptr<YGLayout>& layout
+        ) {
+            if (isCard) {
+                layout->setFlexDirection(YGFlexDirectionColumn);
+                layout->setPaddingHorizontal(36_pt);
+                layout->setPaddingVertical(32_pt);
+                return;
+            }
             layout->setAlignItems(YGAlignCenter);
             layout->setJustifyContent(YGJustifyCenter);
         });
 
         auto content = new_shared<UIView>();
-        content->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        content->configureLayout([isCard = _card](
+            const std::shared_ptr<YGLayout>& layout
+        ) {
             layout->setWidth(100_percent);
             layout->setFlexDirection(YGFlexDirectionColumn);
-            layout->setAllGap(18);
-            layout->setPaddingHorizontal(40_pt);
+            layout->setAllGap(isCard ? 14 : 18);
+            if (isCard) {
+                layout->setAlignItems(YGAlignCenter);
+            } else {
+                layout->setPaddingHorizontal(40_pt);
+            }
         });
 
         auto heading = new_shared<UILabel>();
         heading->setText(title());
-        heading->setFontSize(32);
+        heading->setFontSize(_card ? 28 : 32);
         heading->setFontWeight(600);
+        heading->setTextAlignment(
+            _card ? NSTextAlignment::center : NSTextAlignment::natural
+        );
         heading->setAutolayoutEnabled(true);
 
         auto detail = new_shared<UILabel>();
         detail->setText(_detail);
-        detail->setFontSize(20);
+        detail->setFontSize(_card ? 18 : 20);
         detail->setTextColor(UIColor::secondaryLabel);
+        detail->setTextAlignment(
+            _card ? NSTextAlignment::center : NSTextAlignment::natural
+        );
         detail->setAutolayoutEnabled(true);
 
         const auto weakSelf = weak_from_base<ModalContentViewController>();
@@ -353,7 +414,20 @@ public:
                 self->dismiss(true);
             }
         };
-        auto dismissButton = makeButton("Dismiss presentation", dismiss);
+        auto dismissButton = makeButton(
+            _card ? "OK" : "Dismiss presentation",
+            dismiss,
+            _card ? UIButtonStyle::filled : UIButtonStyle::tinted
+        );
+        if (_card) {
+            dismissButton->layer()->setCornerRadius(14);
+            dismissButton->configureLayout([](
+                const std::shared_ptr<YGLayout>& layout
+            ) {
+                layout->setHeight(56_pt);
+                layout->setMarginTop(10_pt);
+            });
+        }
 
         content->addSubview(heading);
         content->addSubview(detail);
@@ -479,13 +553,13 @@ public:
         ));
 
         _contentContainer->addSubview(makeButton(
-            "Present custom card",
+            "Present glass alert",
             [weakSelf]() {
                 if (const auto self = weakSelf.lock()) {
                     auto modal = new_shared<ModalContentViewController>(
                         "Custom presentation",
-                        "A UIPresentationController supplies the centered frame and "
-                        "dimming chrome while custom animator objects drive both directions.",
+                        "This glass alert measures its content with Yoga, then the "
+                        "presentation controller centers the resulting height.",
                         true
                     );
                     modal->setModalPresentationStyle(UIModalPresentationStyle::custom);

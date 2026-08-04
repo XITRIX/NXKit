@@ -133,17 +133,17 @@ void SkiaCtx_ios::destroyContext() {
     surface = nullptr;
     drawable.reset();
 
-    if (context) {
-        context->submit(skgpu::graphite::SyncToCpu::kYes);
-    }
+    finishGraphiteWork(context.get(), recorder.get());
     if (recorder) {
-        clearGraphiteImageCache(recorder.get());
         recorder->freeGpuResources();
     }
+    // Recorder owns the client image provider. Let Recorder's destructor first
+    // abandon its tracked devices and then release the promoted-image cache
+    // while its resource provider and the Graphite context are still alive.
+    recorder.reset();
     if (context) {
         context->freeGpuResources();
     }
-    recorder.reset();
     context.reset();
 
     if (auto layer = NX_OBJC_BRIDGE(CAMetalLayer*, metalLayer())) {

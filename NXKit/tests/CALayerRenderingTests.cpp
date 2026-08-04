@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -206,6 +207,69 @@ GlassSamples renderGlassSamples(
     };
 }
 
+SkColor renderRadiusClampedReflectionSample() {
+    constexpr int padding = 120;
+    constexpr int lensWidth = 40;
+    constexpr int lensHeight = 24;
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(
+        lensWidth + padding * 2,
+        lensHeight + padding * 2
+    ));
+    if (!surface) return SK_ColorTRANSPARENT;
+
+    auto* canvas = surface->getCanvas();
+    canvas->clear(SK_ColorBLUE);
+
+    SkPaint nearExteriorPaint;
+    nearExteriorPaint.setColor(SK_ColorRED);
+    canvas->drawRect(
+        SkRect::MakeXYWH(padding - 18, padding, 18, lensHeight),
+        nearExteriorPaint
+    );
+
+    SkPaint interiorPaint;
+    interiorPaint.setColor(SkColorSetRGB(48, 48, 48));
+    canvas->drawRect(
+        SkRect::MakeXYWH(padding, padding, lensWidth, lensHeight),
+        interiorPaint
+    );
+
+    const auto glass = BackdropEffect::glass();
+    BackdropEffect reflectionOnly(glass.shaderSource(), "content", 16, 0);
+    reflectionOnly.setUniform("refraction", 0.0f);
+    reflectionOnly.setUniform("curve", 0.0f);
+    reflectionOnly.setUniform("dispersion", 0.0f);
+    reflectionOnly.setUniform("saturation", 1.0f);
+    reflectionOnly.setUniform("contrast", 1.0f);
+    reflectionOnly.setUniform("tint", UIColor(0, 0, 0, 0));
+    reflectionOnly.setUniform("edge", 1.0f);
+    reflectionOnly.setUniform("specStrength", 1.0f);
+    reflectionOnly.setUniform("specFallbackStrength", 0.0f);
+    reflectionOnly.setUniform("specBrightFallbackStrength", 0.0f);
+    reflectionOnly.setUniform("specLightDirection", NXPoint(0.0f, -1.0f));
+    reflectionOnly.setUniform("specDirectionalPower", 3.0f);
+    reflectionOnly.setUniform("specWidthPx", 6.0f);
+    // Deliberately request a coordinate far beyond the declared filter input.
+    // The automatic maximumSampleRadius uniform must clamp it to nearby red.
+    reflectionOnly.setUniform("reflectionSamplePx", 100.0f);
+    reflectionOnly.setUniform("reflectionSpreadPx", 0.0f);
+    reflectionOnly.setUniform("brightBackdropShade", 0.0f);
+
+    auto layer = new_shared<CABackdropEffectLayer>(reflectionOnly);
+    layer->setBounds(NXRect(0, 0, lensWidth, lensHeight));
+    layer->setCornerRadius(6);
+
+    canvas->save();
+    canvas->translate(padding, padding);
+    layer->draw(canvas);
+    canvas->restore();
+
+    SkBitmap pixels;
+    pixels.allocN32Pixels(surface->width(), surface->height());
+    if (!surface->readPixels(pixels, 0, 0)) return SK_ColorTRANSPARENT;
+    return pixels.getColor(padding + 1, padding + lensHeight / 2);
+}
+
 SkColor renderDefaultGlassRefractionSample() {
     constexpr int padding = 24;
     constexpr int lensWidth = 120;
@@ -353,6 +417,26 @@ void testGlassSpecularReflectionUsesBackdropOverscan() {
     );
 }
 
+void testGlassBackdropReadsStayInsideDeclaredRadius() {
+    const auto rim = renderRadiusClampedReflectionSample();
+    expect(
+        SkColorGetR(rim) > SkColorGetB(rim) + 30,
+        "glass clamps retuned reflection reads to its declared backdrop radius"
+    );
+
+    auto glass = BackdropEffect::glass();
+    bool rejectedAutomaticUniform = false;
+    try {
+        glass.setUniform("maximumSampleRadius", 8.0f);
+    } catch (const std::invalid_argument&) {
+        rejectedAutomaticUniform = true;
+    }
+    expect(
+        rejectedAutomaticUniform,
+        "maximumSampleRadius is populated automatically and cannot be overridden"
+    );
+}
+
 void testDefaultGlassRefractionExtendsIntoLensBody() {
     const auto refracted = renderDefaultGlassRefractionSample();
     expect(
@@ -376,6 +460,7 @@ int main() {
     testMaskLayersUseLocalBounds();
     testBackdropFilterCacheTracksGeometry();
     testGlassSpecularReflectionUsesBackdropOverscan();
+    testGlassBackdropReadsStayInsideDeclaredRadius();
     testDefaultGlassRefractionExtendsIntoLensBody();
     testLargeGlassRefractionStopsBeforeDiagonalMedialAxis();
 

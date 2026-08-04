@@ -48,14 +48,6 @@ public:
         return graphiteImage;
     }
 
-    void clear() {
-        // Graphite-backed images retain texture proxies owned by the recorder's
-        // resource provider. Release them while the recorder and context are
-        // still alive instead of from ImageProvider's member destructor.
-        cache.clear();
-        recency.clear();
-    }
-
 private:
     static constexpr size_t kMaximumCachedImages = 256;
 
@@ -81,16 +73,35 @@ std::unique_ptr<skgpu::graphite::Recorder> SkiaCtx::createGraphiteRecorder(
     return context->makeRecorder(options);
 }
 
-void SkiaCtx::clearGraphiteImageCache(skgpu::graphite::Recorder* recorder) const {
-    if (!recorder) {
-        return;
+bool SkiaCtx::finishGraphiteWork(skgpu::graphite::Context* context,
+                                 skgpu::graphite::Recorder* recorder) const {
+    if (!context) {
+        return false;
     }
 
-    auto* imageProvider =
-            dynamic_cast<NXKitImageProvider*>(recorder->clientImageProvider());
-    if (imageProvider) {
-        imageProvider->clear();
+    bool succeeded = true;
+    if (recorder) {
+        auto recording = recorder->snap();
+        if (!recording) {
+            SkDebugf("Graphite failed to snap pending shutdown work.\n");
+            succeeded = false;
+        } else {
+            skgpu::graphite::InsertRecordingInfo insertInfo;
+            insertInfo.fRecording = recording.get();
+            const auto status = context->insertRecording(insertInfo);
+            if (status != skgpu::graphite::InsertStatus::kSuccess) {
+                SkDebugf("Graphite failed to insert pending shutdown work: %s\n",
+                         status.message().c_str());
+                succeeded = false;
+            }
+        }
     }
+
+    if (!context->submit(skgpu::graphite::SyncToCpu::kYes)) {
+        SkDebugf("Graphite failed to finish shutdown work.\n");
+        succeeded = false;
+    }
+    return succeeded;
 }
 
 SkString SkiaCtx::getDefaultFontFamilyName() const {

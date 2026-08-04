@@ -51,7 +51,8 @@ public:
 protected:
     std::unique_ptr<skgpu::graphite::Recorder> createGraphiteRecorder(
             skgpu::graphite::Context* context) const;
-    void clearGraphiteImageCache(skgpu::graphite::Recorder* recorder) const;
+    bool finishGraphiteWork(skgpu::graphite::Context* context,
+                            skgpu::graphite::Recorder* recorder) const;
     virtual skgpu::graphite::Context* graphiteContext() = 0;
     virtual skgpu::graphite::Recorder* graphiteRecorder() = 0;
 

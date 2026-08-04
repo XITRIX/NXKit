@@ -104,6 +104,7 @@ void CABackdropEffectLayer::validateUniforms(
     validateAutomaticUniform(runtimeEffect, "lensSize", UniformType::kFloat2);
     validateAutomaticUniform(runtimeEffect, "cornerRadius", UniformType::kFloat);
     validateAutomaticUniform(runtimeEffect, "contentScale", UniformType::kFloat);
+    validateAutomaticUniform(runtimeEffect, "maximumSampleRadius", UniformType::kFloat);
 
     for (const auto& [name, components] : effect._uniforms) {
         const auto* uniform = findUniform(runtimeEffect, name);
@@ -172,6 +173,9 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
     }
     if (findUniform(*_runtimeEffect, "contentScale")) {
         builder.uniform("contentScale") = contentsScale();
+    }
+    if (findUniform(*_runtimeEffect, "maximumSampleRadius")) {
+        builder.uniform("maximumSampleRadius") = _effect._maximumSampleRadius;
     }
 
     for (const auto& [name, components] : _effect._uniforms) {
