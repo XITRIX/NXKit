@@ -354,11 +354,6 @@ public:
             }
         };
         auto dismissButton = makeButton("Dismiss presentation", dismiss);
-        NXResponderAction {
-            .button = NXActionButton::b,
-            .isEnabled = true,
-            .action = UIAction("Dismiss", dismiss),
-        }.registerOn(dismissButton);
 
         content->addSubview(heading);
         content->addSubview(detail);

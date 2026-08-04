@@ -143,6 +143,7 @@ private:
     );
     bool handleUserSelection(const IndexPath& indexPath);
     bool focusPresentedViewController();
+    bool canReturnFocusToSelectedTab();
     bool focusSelectedTab();
     void restoreTabBarSelection();
     std::shared_ptr<UIViewController> _presentedViewController;

@@ -18,12 +18,18 @@ enum class NXActionButton {
     minus,
 };
 
-// A console command registered on a responder. The closest responder action
-// for a button wins, including when that action is disabled.
+// A console command registered on a responder. The closest available action
+// for a button wins, including when that action is disabled. Unavailable
+// actions fall through to another action or the next responder.
 struct NXResponderAction {
     NXActionButton button = NXActionButton::a;
     bool isEnabled = true;
     UIAction action;
+    // Empty preserves the historical one-action-per-button replacement
+    // behavior. Semantic fallbacks use distinct identifiers and priorities.
+    std::string identifier;
+    std::function<bool()> canPerform = []() { return true; };
+    int priority = 0;
 
     void registerOn(const std::shared_ptr<UIResponder>& responder) const;
     void unregisterFrom(const std::shared_ptr<UIResponder>& responder) const;

@@ -344,14 +344,17 @@ void NXNavigationActionsView::performAction(NXActionButton button) {
     if (button == NXActionButton::a) {
         return;
     }
+    // Re-resolve immediately before touch execution. Availability and responder
+    // precedence may have changed since this legend row was rendered.
+    const auto actions = _actionProvider ? _actionProvider() : _actions;
     const auto match = std::find_if(
-        _actions.begin(),
-        _actions.end(),
+        actions.begin(),
+        actions.end(),
         [button](const NXResponderAction& action) {
             return action.button == button;
         }
     );
-    if (match == _actions.end() || !match->isEnabled) {
+    if (match == actions.end() || !match->isEnabled) {
         return;
     }
 

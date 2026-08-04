@@ -16,13 +16,26 @@ class UIPress;
 class UIEvent;
 class UIPressesEvent;
 
+inline constexpr char UIResponderActionInputSelect[] =
+    "UIKit.responderActionInput.select";
+inline constexpr char UIResponderActionInputMenu[] =
+    "UIKit.responderActionInput.menu";
+
 // An extensible responder command. UI-specific layers provide stable identifiers
 // and input matchers while UIResponder owns ordering and chain dispatch.
 struct UIResponderAction {
     std::string identifier;
+    // Groups semantic actions that compete for the same logical input during
+    // action discovery. Matchers remain authoritative for event dispatch.
+    std::string inputIdentifier;
     bool isEnabled = true;
     UIAction action;
     std::function<bool(const std::shared_ptr<UIPress>&)> matches;
+    // An unavailable action is skipped so another action on this responder or
+    // a later responder can handle the input. A disabled available action still
+    // consumes matching input without executing.
+    std::function<bool()> canPerform = []() { return true; };
+    int priority = 0;
 };
 
 class UIResponder {

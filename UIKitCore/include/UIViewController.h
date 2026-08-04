@@ -12,6 +12,8 @@ class UIPresentationController;
 
 class UIViewController: public UIResponder, public UITraitEnvironment, public UIFocusEnvironment, public enable_shared_from_this<UIViewController> {
 public:
+    UIViewController();
+
     std::map<std::string, std::shared_ptr<UIView>> idStorage;
 
     void setView(std::shared_ptr<UIView> view);

@@ -1,6 +1,5 @@
 #include <NXNavigationController.h>
 
-#include <UIApplication.h>
 #include <UIBlurView.h>
 #include <UIImageView.h>
 #include <UILabel.h>
@@ -587,8 +586,8 @@ std::vector<NXResponderAction> NXNavigationController::resolvedActions() {
         }
     }
     if (!firstResponder) {
-        if (const auto top = topViewController()) {
-            firstResponder = top->view();
+        if (const auto visible = visibleViewController()) {
+            firstResponder = visible->view();
         }
     }
     return NXCollectResponderActions(firstResponder);
@@ -645,22 +644,24 @@ void NXNavigationController::updateChrome() {
     const auto item = topNavigationItem();
 
     const auto self = shared_from_base<NXNavigationController>();
-    const bool canNavigateBack = _viewControllers.size() > 1;
     NXResponderAction backAction {
         .button = NXActionButton::b,
         .isEnabled = true,
-        .action = UIAction(canNavigateBack ? "Back" : "Exit", [
+        .action = UIAction("Back", [
             weakSelf = weak_from_base<NXNavigationController>()
         ]() {
             if (const auto navigationController = weakSelf.lock()) {
-                if (navigationController->popViewController(true)) {
-                    return;
-                }
-                if (UIApplication::shared) {
-                    UIApplication::shared->handleSDLQuit();
-                }
+                navigationController->popViewController(true);
             }
         }),
+        .canPerform = [
+            weakSelf = weak_from_base<NXNavigationController>()
+        ]() {
+            if (const auto navigationController = weakSelf.lock()) {
+                return navigationController->_viewControllers.size() > 1;
+            }
+            return false;
+        },
     };
     backAction.registerOn(self);
     const auto title = item && item->titleOverride()

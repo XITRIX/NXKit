@@ -44,6 +44,7 @@ private:
 
     friend class UIViewController;
     friend class UIFocusSystem;
+    friend class UIPress;
     std::shared_ptr<UIView> focusRootView();
     void addPresentedViewController(const std::shared_ptr<UIViewController>& controller);
     void removePresentedViewController(const std::shared_ptr<UIViewController>& controller);

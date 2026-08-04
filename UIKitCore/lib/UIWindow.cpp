@@ -73,6 +73,9 @@ std::shared_ptr<UIView> UIWindow::focusRootView() {
     if (!_presentedViewControllers.empty()) {
         return _presentedViewControllers.back()->view();
     }
+    if (_rootViewController) {
+        return _rootViewController->view();
+    }
     return shared_from_base<UIWindow>();
 }
 

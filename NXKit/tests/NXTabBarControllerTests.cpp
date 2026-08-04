@@ -1,5 +1,6 @@
 #include <NXTabBarController.h>
 #include <NXNavigationController.h>
+#include <NXResponderAction.h>
 #include <UIApplication.h>
 #include <UIApplicationDelegate.h>
 #include <UIControl.h>
@@ -37,6 +38,25 @@ void expect(bool condition, const std::string& message) {
     }
     ++failures;
     std::cerr << "FAIL: " << message << '\n';
+}
+
+void registerExitAction(
+    const std::shared_ptr<UIWindow>& window,
+    const std::shared_ptr<UIApplication>& application
+) {
+    NXResponderAction {
+        .button = NXActionButton::b,
+        .isEnabled = true,
+        .action = UIAction("Exit", [
+            weakApplication = std::weak_ptr<UIApplication>(application)
+        ]() {
+            if (const auto app = weakApplication.lock()) {
+                app->handleSDLQuit();
+            }
+        }),
+        .identifier = "NXKit.tests.application.exit",
+        .priority = -100,
+    }.registerOn(window);
 }
 
 class RecordingViewController final : public UIViewController {
@@ -318,11 +338,15 @@ int main() {
 
     auto focusableController = new_shared<FocusableViewController>();
     focusableController->setTitle("Focusable");
+    auto nestedNavigationController = new_shared<NXNavigationController>(
+        focusableController
+    );
+    nestedNavigationController->setTitle("Focusable");
     auto otherFocusableController = new_shared<FocusableViewController>();
     otherFocusableController->setTitle("Other");
     auto focusTabController = new_shared<NXTabBarController>(
         NXTabBarController::ViewControllerSection {
-            focusableController,
+            nestedNavigationController,
             otherFocusableController,
         }
     );
@@ -352,6 +376,7 @@ int main() {
     application->delegate = applicationDelegate;
     application->keyWindow = focusWindow;
     UIApplication::shared = application;
+    registerExitAction(focusWindow, application);
 
     const bool eventSubsystemReady = SDL_InitSubSystem(SDL_INIT_EVENTS);
     expect(eventSubsystemReady, "SDL's event subsystem is available for tab focus routing");

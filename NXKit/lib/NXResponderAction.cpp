@@ -26,6 +26,18 @@ std::string actionIdentifier(NXActionButton button) {
     return {};
 }
 
+std::string actionInputIdentifier(NXActionButton button) {
+    switch (button) {
+        case NXActionButton::a: return UIResponderActionInputSelect;
+        case NXActionButton::b: return UIResponderActionInputMenu;
+        case NXActionButton::x: return "NXKit.responderActionInput.x";
+        case NXActionButton::y: return "NXKit.responderActionInput.y";
+        case NXActionButton::plus: return "NXKit.responderActionInput.plus";
+        case NXActionButton::minus: return "NXKit.responderActionInput.minus";
+    }
+    return {};
+}
+
 bool matchesGamepadButton(UIGamepadInputType input, NXActionButton button) {
     switch (button) {
         case NXActionButton::a:
@@ -98,12 +110,27 @@ std::optional<NXResponderAction> actionRegisteredDirectlyOn(
         return std::nullopt;
     }
 
-    const auto registered = responder->registeredAction(actionIdentifier(button));
-    if (registered) {
+    // Work from a snapshot because availability predicates are application
+    // callbacks and may mutate responder registration.
+    const auto registeredActions = responder->registeredActions();
+    const auto registered = std::find_if(
+        registeredActions.begin(),
+        registeredActions.end(),
+        [inputIdentifier = actionInputIdentifier(button)](
+            const UIResponderAction& candidate
+        ) {
+            return candidate.inputIdentifier == inputIdentifier
+                && (!candidate.canPerform || candidate.canPerform());
+        }
+    );
+    if (registered != registeredActions.end()) {
         return NXResponderAction {
             .button = button,
             .isEnabled = registered->isEnabled,
             .action = registered->action,
+            .identifier = registered->identifier,
+            .canPerform = registered->canPerform,
+            .priority = registered->priority,
         };
     }
 
@@ -133,12 +160,15 @@ void NXResponderAction::registerOn(const std::shared_ptr<UIResponder>& responder
         throw std::invalid_argument("NXResponderAction requires a non-null responder");
     }
     responder->registerAction(UIResponderAction {
-        .identifier = actionIdentifier(button),
+        .identifier = identifier.empty() ? actionIdentifier(button) : identifier,
+        .inputIdentifier = actionInputIdentifier(button),
         .isEnabled = isEnabled,
         .action = action,
         .matches = [button = button](const std::shared_ptr<UIPress>& press) {
             return pressMatchesButton(press, button);
         },
+        .canPerform = canPerform,
+        .priority = priority,
     });
 }
 
@@ -146,7 +176,9 @@ void NXResponderAction::unregisterFrom(
     const std::shared_ptr<UIResponder>& responder
 ) const {
     if (responder) {
-        responder->unregisterAction(actionIdentifier(button));
+        responder->unregisterAction(
+            identifier.empty() ? actionIdentifier(button) : identifier
+        );
     }
 }
 

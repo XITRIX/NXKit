@@ -71,7 +71,8 @@ bool UIResponder::performRegisteredAction(const std::shared_ptr<UIPress>& press)
         registeredActions.begin(),
         registeredActions.end(),
         [&press](const UIResponderAction& candidate) {
-            return candidate.matches && candidate.matches(press);
+            return candidate.matches && candidate.matches(press)
+                && (!candidate.canPerform || candidate.canPerform());
         }
     );
     if (match == registeredActions.end()) {
@@ -125,6 +126,13 @@ void UIResponder::registerAction(UIResponderAction action) {
     } else {
         *existing = std::move(action);
     }
+    std::stable_sort(
+        _registeredActions.begin(),
+        _registeredActions.end(),
+        [](const UIResponderAction& lhs, const UIResponderAction& rhs) {
+            return lhs.priority > rhs.priority;
+        }
+    );
 }
 
 void UIResponder::unregisterAction(const std::string& identifier) {

@@ -1,5 +1,6 @@
 #include <UIViewController.h>
 #include <UIPresentationController.h>
+#include <UIPress.h>
 #include <UIWindow.h>
 #include <DispatchQueue.h>
 
@@ -244,6 +245,34 @@ private:
 };
 
 } // namespace
+
+UIViewController::UIViewController() {
+    const auto weakSelf = weak_from_base<UIViewController>();
+    registerAction(UIResponderAction {
+        .identifier = "UIKit.viewController.dismissPresentation",
+        .inputIdentifier = UIResponderActionInputMenu,
+        .isEnabled = true,
+        .action = UIAction("Dismiss", [weakSelf]() {
+            if (const auto self = weakSelf.lock()) {
+                self->dismiss(true);
+            }
+        }),
+        .matches = [](const std::shared_ptr<UIPress>& press) {
+            return press && press->type() == UIPressType::menu;
+        },
+        .canPerform = [weakSelf]() {
+            if (const auto self = weakSelf.lock()) {
+                // Contained children resolve through their container. Only the
+                // root controller installed by a presentation owns its default
+                // dismissal fallback.
+                return self->_parent.expired()
+                    && !self->_presentingViewController.expired();
+            }
+            return false;
+        },
+        .priority = -100,
+    });
+}
 
 std::shared_ptr<UIResponder> UIViewController::next() {
     if (!_view->_superview.expired()) {

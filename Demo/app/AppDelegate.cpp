@@ -1,4 +1,5 @@
 #include <NXKit.h>
+#include <UIApplication.h>
 #include <Screens/TestViewController/TestViewController.hpp>
 #include <Screens/IBTestController/IBTestController.h>
 #include <Screens/YogaTestViewController/YogaTestViewController.hpp>
@@ -12,6 +13,19 @@ namespace NXKit {
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplication* application, std::map<std::string, std::any> launchOptions) {
     DEFAULT_ROMFS_REGISTRATION
     window = new_shared<UIWindow>();
+    NXResponderAction {
+        .button = NXActionButton::b,
+        .isEnabled = true,
+        .action = UIAction("Exit", [
+            weakApplication = std::weak_ptr<UIApplication>(UIApplication::shared)
+        ]() {
+            if (const auto application = weakApplication.lock()) {
+                application->handleSDLQuit();
+            }
+        }),
+        .identifier = "NXKit.application.exit",
+        .priority = -100,
+    }.registerOn(window);
 
     auto vc = new_shared<IBTestController>();
     auto vc1 = new_shared<TestViewController>();

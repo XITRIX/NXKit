@@ -28,9 +28,10 @@ void UIPress::setForWindow(const std::shared_ptr<UIWindow>& window) {
     // particular, tab and navigation controllers keep inactive controllers
     // contained, so walking children().front() can select a detached view and
     // terminate the responder chain before the container sees the press.
-    // Starting at the root view is a safe fallback: its next responder is the
-    // root controller, which can handle or forward the press to its container.
-    _responder = window->rootViewController()->view();
+    // Start at the active presentation root when no item is focused. Its next
+    // responder is the presented controller, so modal fallbacks cannot be
+    // bypassed by an empty focus hierarchy.
+    _responder = window->focusRootView();
 }
 
 void UIPress::runPressActionOnRecognizerHierachy(const std::function<void(std::shared_ptr<UIGestureRecognizer>)>& action) {

@@ -1,4 +1,5 @@
 #include <NXNavigationController.h>
+#include <NXResponderAction.h>
 #include <NXTabBarController.h>
 #include <CABasicAnimation.h>
 #include <UIApplication.h>
@@ -45,6 +46,47 @@ void completePendingAnimations() {
     for (const auto& layer : animatedLayers) {
         layer->animateAt(Timer(1'000'000));
     }
+}
+
+void registerExitAction(
+    const std::shared_ptr<UIWindow>& window,
+    const std::shared_ptr<UIApplication>& application
+) {
+    NXResponderAction {
+        .button = NXActionButton::b,
+        .isEnabled = true,
+        .action = UIAction("Exit", [
+            weakApplication = std::weak_ptr<UIApplication>(application)
+        ]() {
+            if (const auto app = weakApplication.lock()) {
+                app->handleSDLQuit();
+            }
+        }),
+        .identifier = "NXKit.tests.application.exit",
+        .priority = -100,
+    }.registerOn(window);
+}
+
+bool sendKeyPress(
+    const std::shared_ptr<UIApplication>& application,
+    SDL_Keycode keycode,
+    SDL_Scancode scancode
+) {
+    SDL_Event keyDown {};
+    keyDown.type = SDL_EVENT_KEY_DOWN;
+    keyDown.key.key = keycode;
+    keyDown.key.scancode = scancode;
+    keyDown.key.down = true;
+
+    SDL_Event keyUp = keyDown;
+    keyUp.type = SDL_EVENT_KEY_UP;
+    keyUp.key.down = false;
+
+    if (!SDL_PushEvent(&keyDown) || !SDL_PushEvent(&keyUp)) {
+        return false;
+    }
+    application->handleEventsIfNeeded();
+    return true;
 }
 
 class RecordingViewController final : public UIViewController {
@@ -327,13 +369,10 @@ int main() {
     expect(statusWidget->compact(), "status uses the compact footer representation by default");
     expect(actionsWidget && !actionsWidget->superview().expired(), "actions are installed by default");
     expect(
-        actionsWidget->actions().size() == 2
-            && actionsWidget->actions()[0].button == NXActionButton::b
-            && actionsWidget->actions()[0].isEnabled
-            && actionsWidget->actions()[0].action.title() == "Exit"
-            && actionsWidget->actions()[1].button == NXActionButton::a
-            && !actionsWidget->actions()[1].isEnabled,
-        "the root shows Exit before its disabled A placeholder"
+        actionsWidget->actions().size() == 1
+            && actionsWidget->actions()[0].button == NXActionButton::a
+            && !actionsWidget->actions()[0].isEnabled,
+        "a detached navigation root has no application-owned Back fallback"
     );
 
     const auto originalStatusContainer = statusWidget->superview().lock();
@@ -385,16 +424,14 @@ int main() {
     rootAction.registerOn(root);
     actionsWidget->refresh();
     expect(
-        actionsWidget->actions().size() == 2
-            && actionsWidget->actions()[0].button == NXActionButton::b
-            && actionsWidget->actions()[0].action.title() == "Exit"
-            && actionsWidget->actions()[1]
+        actionsWidget->actions().size() == 1
+            && actionsWidget->actions()[0]
                 == NXResponderAction {
                     .button = NXActionButton::a,
                     .isEnabled = true,
                     .action = UIAction("Continue"),
                 },
-        "a responder A action replaces the disabled placeholder beside Exit"
+        "a responder A action replaces the detached root's disabled placeholder"
     );
     rootAction.unregisterFrom(root);
 
@@ -1201,6 +1238,7 @@ int main() {
     application->delegate = applicationDelegate;
     application->keyWindow = responderWindow;
     UIApplication::shared = application;
+    registerExitAction(responderWindow, application);
     responderNavigationController->loadViewIfNeeded();
     responderNavigationController->view()->setFrame(responderWindow->bounds());
     responderWindow->addSubview(responderNavigationController->view());
@@ -1292,7 +1330,33 @@ int main() {
                 == modalFocusControl,
             "directional focus stops at the top presentation boundary"
         );
-        focusTrapModal->dismiss(false);
+        responderNavigationController->defaultActionsWidget()->refresh();
+        expect(
+            std::any_of(
+                responderNavigationController->defaultActionsWidget()->actions().begin(),
+                responderNavigationController->defaultActionsWidget()->actions().end(),
+                [](const NXResponderAction& action) {
+                    return action.button == NXActionButton::b
+                        && action.isEnabled
+                        && action.action.title() == "Dismiss";
+                }
+            ),
+            "a presented controller exposes its default Dismiss action"
+        );
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "the modal Dismiss key press is queued"
+        );
+        for (int step = 0;
+             step < 4 && focusTrapModal->presentingViewController();
+             ++step) {
+            completePendingAnimations();
+        }
+        expect(
+            !focusTrapModal->presentingViewController()
+                && !application->isQuitRequested(),
+            "an unhandled modal B action dismisses instead of reaching window Exit"
+        );
 
         auto emptyFocusModal = new_shared<RecordingViewController>();
         emptyFocusModal->setModalPresentationStyle(
@@ -1303,10 +1367,86 @@ int main() {
             responderWindow->focusSystem()->focusedItem().expired()
                 && !responderWindow->focusSystem()->requestFocusUpdate(
                     destinationFocusControl
-                ),
+            ),
             "a presentation without an eligible item clears focus instead of falling through"
         );
-        emptyFocusModal->dismiss(false);
+        responderNavigationController->defaultActionsWidget()->refresh();
+        expect(
+            std::any_of(
+                responderNavigationController->defaultActionsWidget()->actions().begin(),
+                responderNavigationController->defaultActionsWidget()->actions().end(),
+                [](const NXResponderAction& action) {
+                    return action.button == NXActionButton::b
+                        && action.action.title() == "Dismiss";
+                }
+            ),
+            "an empty-focus presentation still resolves Dismiss for the legend"
+        );
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "the empty-focus modal Dismiss key press is queued"
+        );
+        for (int step = 0;
+             step < 4 && emptyFocusModal->presentingViewController();
+             ++step) {
+            completePendingAnimations();
+        }
+        expect(
+            !emptyFocusModal->presentingViewController()
+                && !application->isQuitRequested(),
+            "an empty-focus presentation dismisses before window Exit"
+        );
+
+        auto modalNavigationRoot = new_shared<RecordingViewController>();
+        auto modalNavigationRootControl = new_shared<UIControl>();
+        modalNavigationRoot->view()->addSubview(modalNavigationRootControl);
+        auto modalNavigationSecond = new_shared<RecordingViewController>();
+        auto modalNavigationSecondControl = new_shared<UIControl>();
+        modalNavigationSecond->view()->addSubview(modalNavigationSecondControl);
+        auto modalNavigationController = new_shared<NXNavigationController>(
+            modalNavigationRoot
+        );
+        responderDestination->present(modalNavigationController, false);
+        modalNavigationController->pushViewController(
+            modalNavigationSecond,
+            false
+        );
+        expect(
+            responderWindow->focusSystem()->requestFocusUpdate(
+                modalNavigationSecondControl
+            ),
+            "a presented navigation destination accepts focus"
+        );
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "the presented navigation Back key press is queued"
+        );
+        for (int step = 0;
+             step < 4 && modalNavigationController->isTransitioning();
+             ++step) {
+            completePendingAnimations();
+        }
+        expect(
+            modalNavigationController->topViewController()
+                    == modalNavigationRoot
+                && modalNavigationController->presentingViewController()
+                && !application->isQuitRequested(),
+            "navigation Back takes priority over default modal Dismiss"
+        );
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "the presented navigation Dismiss key press is queued"
+        );
+        for (int step = 0;
+             step < 4 && modalNavigationController->presentingViewController();
+             ++step) {
+            completePendingAnimations();
+        }
+        expect(
+            !modalNavigationController->presentingViewController()
+                && !application->isQuitRequested(),
+            "a presented navigation root falls through from Back to Dismiss"
+        );
 
         SDL_Event returnDown {};
         returnDown.type = SDL_EVENT_KEY_DOWN;
@@ -1363,14 +1503,35 @@ int main() {
             "an enabled child B action runs instead of navigation Back"
         );
 
-        destinationBackAction.unregisterFrom(destinationFocusControl);
-        expect(SDL_PushEvent(&keyDown), "the navigation Back key-down event is queued");
-        expect(SDL_PushEvent(&keyUp), "the navigation Back key-up event is queued");
+        destinationBackAction = NXResponderAction {
+            .button = NXActionButton::b,
+            .isEnabled = true,
+            .action = UIAction("Unavailable Back", [&overriddenBackCount]() {
+                ++overriddenBackCount;
+            }),
+            .canPerform = []() { return false; },
+        };
+        destinationBackAction.registerOn(destinationFocusControl);
+        responderNavigationController->defaultActionsWidget()->refresh();
+        expect(
+            std::none_of(
+                responderNavigationController->defaultActionsWidget()->actions().begin(),
+                responderNavigationController->defaultActionsWidget()->actions().end(),
+                [](const NXResponderAction& action) {
+                    return action.action.title() == "Unavailable Back";
+                }
+            ),
+            "an unavailable child action is omitted in favor of its parent fallback"
+        );
+        expect(SDL_PushEvent(&keyDown), "the fallback Back key-down event is queued");
+        expect(SDL_PushEvent(&keyUp), "the fallback Back key-up event is queued");
         application->handleEventsIfNeeded();
         expect(
-            responderNavigationController->topViewController() == tabBarController,
-            "an unclaimed menu press reaches the navigation controller's Back action"
+            responderNavigationController->topViewController() == tabBarController
+                && overriddenBackCount == 1,
+            "an unavailable child B action falls through to navigation Back"
         );
+        destinationBackAction.unregisterFrom(destinationFocusControl);
         completePendingAnimations();
         responderNavigationController->defaultActionsWidget()->refresh();
         const auto& rootActions =
@@ -1381,7 +1542,7 @@ int main() {
                     && action.isEnabled
                     && action.action.title() == "Exit";
             }),
-            "the navigation root replaces Back with an enabled Exit action"
+            "the navigation root resolves the window's enabled Exit action"
         );
         expect(SDL_PushEvent(&keyDown), "the root Exit key-down event is queued");
         expect(SDL_PushEvent(&keyUp), "the root Exit key-up event is queued");

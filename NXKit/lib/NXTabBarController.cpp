@@ -482,7 +482,13 @@ void NXTabBarController::loadView() {
                 self->focusSelectedTab();
             }
         }),
-    }.registerOn(_contentView);
+        .canPerform = [weakSelf]() {
+            if (const auto self = weakSelf.lock()) {
+                return self->canReturnFocusToSelectedTab();
+            }
+            return false;
+        },
+    }.registerOn(shared_from_base<NXTabBarController>());
 
     contentView->addSubview(_tabBar);
     contentView->addSubview(_contentView);
@@ -614,6 +620,20 @@ bool NXTabBarController::focusPresentedViewController() {
     return window && window->focusSystem()->requestFocusUpdate(
         _presentedViewController
     );
+}
+
+bool NXTabBarController::canReturnFocusToSelectedTab() {
+    if (!_tabBar || !_selectedIndexPath || !_tabBar->contains(*_selectedIndexPath)) {
+        return false;
+    }
+    const auto window = viewIsLoaded() ? view()->window() : nullptr;
+    if (!window) {
+        return false;
+    }
+    const auto focusedView = std::dynamic_pointer_cast<UIView>(
+        window->focusSystem()->focusedItem().lock()
+    );
+    return !focusedView || !focusedView->isDescendantOf(_tabBar);
 }
 
 bool NXTabBarController::focusSelectedTab() {
