@@ -274,6 +274,10 @@ UIViewController::UIViewController() {
     });
 }
 
+bool UIViewController::allowsActionDispatch() const {
+    return !_view || _view->allowsActionDispatch();
+}
+
 std::shared_ptr<UIResponder> UIViewController::next() {
     if (!_view->_superview.expired()) {
         return _view->_superview.lock();
@@ -525,6 +529,12 @@ void UIViewController::present(const std::shared_ptr<UIViewController>& otherVie
     );
     otherViewController->view()->layoutSubviews();
     presentationController->containerViewDidLayoutSubviews();
+
+    // Installing the presentation changes the active input branch immediately,
+    // not when its animation finishes. This keeps presses generated during the
+    // transition inside the incoming hierarchy. Its animation options still
+    // decide whether those presses may execute actions.
+    window->updateFocus();
 
     const auto weakPresented = std::weak_ptr<UIViewController>(otherViewController);
     const auto weakPresenting = std::weak_ptr<UIViewController>(presentingViewController);

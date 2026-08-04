@@ -144,6 +144,7 @@ public:
     NXPoint convertFromView(NXPoint point, const std::shared_ptr<UIView>& fromView);
     virtual std::shared_ptr<UIView> hitTest(NXPoint point, UIEvent* withEvent);
     virtual bool point(NXPoint insidePoint, UIEvent* withEvent);
+    bool allowsActionDispatch() const override;
 
     // Focus
     std::shared_ptr<UIFocusEnvironment> parentFocusEnvironment() override;

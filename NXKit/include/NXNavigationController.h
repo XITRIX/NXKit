@@ -76,7 +76,9 @@ public:
         const std::shared_ptr<UIViewController>& viewController,
         const std::shared_ptr<UIResponder>& sender = nullptr
     ) override;
-    bool allowsActionDispatch() const override { return !_isTransitioning; }
+    bool allowsActionDispatch() const override {
+        return !_isTransitioning && UIViewController::allowsActionDispatch();
+    }
 
     void loadView() override;
     void viewDidLoad() override;

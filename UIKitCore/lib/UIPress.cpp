@@ -16,9 +16,12 @@ void UIPress::setForWindow(const std::shared_ptr<UIWindow>& window) {
         return;
     }
 
+    const auto focusRoot = window->focusRootView();
     if (const auto focusedItem = window->focusSystem()->focusedItem().lock()) {
-        if (const auto focusedResponder =
-                std::dynamic_pointer_cast<UIResponder>(focusedItem)) {
+        if (const auto focusedView = std::dynamic_pointer_cast<UIView>(focusedItem);
+            focusedView && focusRoot && focusedView->isDescendantOf(focusRoot)) {
+            const auto focusedResponder =
+                std::dynamic_pointer_cast<UIResponder>(focusedView);
             _responder = focusedResponder;
             return;
         }
@@ -31,7 +34,7 @@ void UIPress::setForWindow(const std::shared_ptr<UIWindow>& window) {
     // Start at the active presentation root when no item is focused. Its next
     // responder is the presented controller, so modal fallbacks cannot be
     // bypassed by an empty focus hierarchy.
-    _responder = window->focusRootView();
+    _responder = focusRoot;
 }
 
 void UIPress::runPressActionOnRecognizerHierachy(const std::function<void(std::shared_ptr<UIGestureRecognizer>)>& action) {

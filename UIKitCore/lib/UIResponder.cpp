@@ -81,7 +81,11 @@ bool UIResponder::performRegisteredAction(const std::shared_ptr<UIPress>& press)
 
     const auto resolvedAction = *match;
     press->_isHandled = true;
-    if (resolvedAction.isEnabled && isActionDispatchAllowed()) {
+    const auto dispatchOrigin = press->responder().lock();
+    const bool dispatchAllowed = dispatchOrigin
+        ? dispatchOrigin->isActionDispatchAllowed()
+        : isActionDispatchAllowed();
+    if (resolvedAction.isEnabled && dispatchAllowed) {
         resolvedAction.action.perform();
     }
     return true;

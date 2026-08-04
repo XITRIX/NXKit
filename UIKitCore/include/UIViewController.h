@@ -16,6 +16,8 @@ public:
 
     std::map<std::string, std::shared_ptr<UIView>> idStorage;
 
+    bool allowsActionDispatch() const override;
+
     void setView(std::shared_ptr<UIView> view);
     std::shared_ptr<UIView> view();
     bool viewIsLoaded();

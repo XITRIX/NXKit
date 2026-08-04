@@ -150,9 +150,18 @@ std::shared_ptr<UIView> UIControl::hitTest(NXPoint point, UIEvent *withEvent) {
 
 void UIControl::setHighlighted(bool highlighted) {
     if (UIView::isFocused()) {
-        UIView::animate(0.2, [&]() {
-            willChangeFocusHighlight(highlighted);
-        });
+        // Highlighting is feedback for the press already in progress. It must
+        // not make that same press ineligible when its ended phase dispatches
+        // the action. Transition animations higher in the responder chain can
+        // still block the action when they omit allowUserInteraction.
+        UIView::animate(
+            0.2,
+            0,
+            UIViewAnimationOptions::allowUserInteraction,
+            [&]() {
+                willChangeFocusHighlight(highlighted);
+            }
+        );
     } else {
         UIView::animate(0.2, 0, UIViewAnimationOptions::allowUserInteraction, [&]() {
             willChangeHighlight(highlighted);

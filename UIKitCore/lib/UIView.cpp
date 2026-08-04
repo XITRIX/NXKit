@@ -550,6 +550,13 @@ std::shared_ptr<UIView> UIView::hitTest(NXPoint point, UIEvent* withEvent) {
     return shared_from_this();
 }
 
+bool UIView::allowsActionDispatch() const {
+    return !isHidden()
+        && _isUserInteractionEnabled
+        && alpha() >= 0.01
+        && anyCurrentlyRunningAnimationsAllowUserInteraction();
+}
+
 bool UIView::point(NXPoint insidePoint, UIEvent* withEvent) {
     return bounds().contains(insidePoint);
 }

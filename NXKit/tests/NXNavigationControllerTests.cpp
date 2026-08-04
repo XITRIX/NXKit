@@ -251,6 +251,95 @@ private:
     std::shared_ptr<PresentationStats> _stats;
 };
 
+class AnimationInteractionTransitionAnimator final
+    : public UIViewControllerAnimatedTransitioning {
+public:
+    AnimationInteractionTransitionAnimator(bool presenting, bool allowsInteraction)
+        : _presenting(presenting), _allowsInteraction(allowsInteraction) {}
+
+    double transitionDuration(
+        const std::shared_ptr<UIViewControllerContextTransitioning>&
+    ) const override {
+        return 0.5;
+    }
+
+    void animateTransition(
+        const std::shared_ptr<UIViewControllerContextTransitioning>& context
+    ) override {
+        const auto transitionView = context->viewForKey(
+            _presenting
+                ? UITransitionContextViewKey::to
+                : UITransitionContextViewKey::from
+        );
+        if (!transitionView) {
+            context->completeTransition(false);
+            return;
+        }
+
+        transitionView->setAlpha(_presenting ? 0.5f : 1.0f);
+        UIViewAnimationOptions options = UIViewAnimationOptions::curveEaseOut;
+        if (_allowsInteraction) {
+            options = UIViewAnimationOptions(options | allowUserInteraction);
+        }
+        UIView::animate(
+            transitionDuration(context),
+            0,
+            options,
+            [transitionView, presenting = _presenting]() {
+                transitionView->setAlpha(presenting ? 1.0f : 0.5f);
+            },
+            [context](bool finished) {
+                context->completeTransition(finished);
+            }
+        );
+    }
+
+private:
+    bool _presenting;
+    bool _allowsInteraction;
+};
+
+class AnimationInteractionTransitioningDelegate final
+    : public UIViewControllerTransitioningDelegate {
+public:
+    explicit AnimationInteractionTransitioningDelegate(bool allowsInteraction)
+        : _allowsInteraction(allowsInteraction) {}
+
+    std::shared_ptr<UIViewControllerAnimatedTransitioning>
+    animationControllerForPresented(
+        const std::shared_ptr<UIViewController>&,
+        const std::shared_ptr<UIViewController>&,
+        const std::shared_ptr<UIViewController>&
+    ) override {
+        return new_shared<AnimationInteractionTransitionAnimator>(
+            true,
+            _allowsInteraction
+        );
+    }
+
+    std::shared_ptr<UIViewControllerAnimatedTransitioning>
+    animationControllerForDismissed(
+        const std::shared_ptr<UIViewController>&
+    ) override {
+        return new_shared<AnimationInteractionTransitionAnimator>(
+            false,
+            _allowsInteraction
+        );
+    }
+
+    std::shared_ptr<UIPresentationController>
+    presentationControllerForPresented(
+        const std::shared_ptr<UIViewController>& presented,
+        const std::shared_ptr<UIViewController>& presenting,
+        const std::shared_ptr<UIViewController>&
+    ) override {
+        return new_shared<UIPresentationController>(presented, presenting);
+    }
+
+private:
+    bool _allowsInteraction;
+};
+
 class RecordingTransitioningDelegate final
     : public UIViewControllerTransitioningDelegate {
 public:
@@ -1283,6 +1372,87 @@ int main() {
     const bool eventSubsystemReady = SDL_InitSubSystem(SDL_INIT_EVENTS);
     expect(eventSubsystemReady, "SDL's event subsystem is available for press routing");
     if (eventSubsystemReady) {
+        auto interactiveAnimationModal = new_shared<RecordingViewController>();
+        auto interactiveAnimationControl = new_shared<UIControl>();
+        interactiveAnimationModal->view()->addSubview(
+            interactiveAnimationControl
+        );
+        interactiveAnimationModal->setModalPresentationStyle(
+            UIModalPresentationStyle::overFullScreen
+        );
+        responderDestination->present(interactiveAnimationModal, true);
+        expect(
+            responderWindow->focusSystem()->focusedItem().lock()
+                    == interactiveAnimationControl
+                && interactiveAnimationModal->isBeingPresented(),
+            "an animated presentation transfers focus before its transition completes"
+        );
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "the transition-time modal Dismiss key press is queued"
+        );
+        for (int step = 0;
+             step < 8 && interactiveAnimationModal->presentingViewController();
+             ++step) {
+            completePendingAnimations();
+        }
+        expect(
+            !interactiveAnimationModal->presentingViewController()
+                && responderNavigationController->topViewController()
+                    == responderDestination
+                && !application->isQuitRequested(),
+            "an interaction-enabled presentation routes B to the incoming controller"
+        );
+
+        auto blockedAnimationModal = new_shared<RecordingViewController>();
+        auto blockedAnimationControl = new_shared<UIControl>();
+        blockedAnimationModal->view()->addSubview(blockedAnimationControl);
+        auto blockedAnimationDelegate =
+            new_shared<AnimationInteractionTransitioningDelegate>(false);
+        blockedAnimationModal->setModalPresentationStyle(
+            UIModalPresentationStyle::custom
+        );
+        blockedAnimationModal->setTransitioningDelegate(
+            blockedAnimationDelegate
+        );
+        responderDestination->present(blockedAnimationModal, true);
+        expect(
+            responderWindow->focusSystem()->focusedItem().lock()
+                    == blockedAnimationControl
+                && !blockedAnimationModal->view()->allowsActionDispatch(),
+            "focus transfers even when the incoming animation blocks interaction"
+        );
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "the blocked transition-time B key press is queued"
+        );
+        for (int step = 0;
+             step < 4 && blockedAnimationModal->isBeingPresented();
+             ++step) {
+            completePendingAnimations();
+        }
+        expect(
+            blockedAnimationModal->presentingViewController()
+                && responderNavigationController->topViewController()
+                    == responderDestination
+                && !application->isQuitRequested(),
+            "a presentation without allowUserInteraction consumes B without dismissing or falling through"
+        );
+        expect(
+            sendKeyPress(application, SDLK_ESCAPE, SDL_SCANCODE_ESCAPE),
+            "the post-transition modal Dismiss key press is queued"
+        );
+        for (int step = 0;
+             step < 4 && blockedAnimationModal->presentingViewController();
+             ++step) {
+            completePendingAnimations();
+        }
+        expect(
+            !blockedAnimationModal->presentingViewController()
+                && !application->isQuitRequested(),
+            "the same modal accepts B after its interaction-blocking animation ends"
+        );
+
         auto focusTrapModal = new_shared<RecordingViewController>();
         auto modalFocusControl = new_shared<UIControl>();
         focusTrapModal->view()->addSubview(modalFocusControl);
