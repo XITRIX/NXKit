@@ -54,7 +54,19 @@ enum class UIGamepadInputType {
     rightThumbstickAxisLeft,
     rightThumbstickAxisRight,
     rightThumbstickAxisUp,
-    rightThumbstickAxisDown
+    rightThumbstickAxisDown,
+    misc1,
+    rightPaddle1,
+    leftPaddle1,
+    rightPaddle2,
+    leftPaddle2,
+    touchpad,
+    misc2,
+    misc3,
+    misc4,
+    misc5,
+    misc6,
+    unknown,
 };
 
 struct UIGamepadKey {
@@ -67,7 +79,7 @@ private:
 
     float _value = 0;
     float isPressedThreshold = 0.5f;
-    UIGamepadInputType _inputType;
+    UIGamepadInputType _inputType = UIGamepadInputType::unknown;
 };
 
 }

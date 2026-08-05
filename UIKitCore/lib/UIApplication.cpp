@@ -163,6 +163,50 @@ UIGamepadKey UIApplication::mapGamepadButtonEventToUIGamepadKey(SDL_GamepadButto
             key._inputType = UIGamepadInputType::rightThumbstickButton;
             break;
         }
+        case SDL_GAMEPAD_BUTTON_MISC1: {
+            key._inputType = UIGamepadInputType::misc1;
+            break;
+        }
+        case SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1: {
+            key._inputType = UIGamepadInputType::rightPaddle1;
+            break;
+        }
+        case SDL_GAMEPAD_BUTTON_LEFT_PADDLE1: {
+            key._inputType = UIGamepadInputType::leftPaddle1;
+            break;
+        }
+        case SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2: {
+            key._inputType = UIGamepadInputType::rightPaddle2;
+            break;
+        }
+        case SDL_GAMEPAD_BUTTON_LEFT_PADDLE2: {
+            key._inputType = UIGamepadInputType::leftPaddle2;
+            break;
+        }
+        case SDL_GAMEPAD_BUTTON_TOUCHPAD: {
+            key._inputType = UIGamepadInputType::touchpad;
+            break;
+        }
+        case SDL_GAMEPAD_BUTTON_MISC2: {
+            key._inputType = UIGamepadInputType::misc2;
+            break;
+        }
+        case SDL_GAMEPAD_BUTTON_MISC3: {
+            key._inputType = UIGamepadInputType::misc3;
+            break;
+        }
+        case SDL_GAMEPAD_BUTTON_MISC4: {
+            key._inputType = UIGamepadInputType::misc4;
+            break;
+        }
+        case SDL_GAMEPAD_BUTTON_MISC5: {
+            key._inputType = UIGamepadInputType::misc5;
+            break;
+        }
+        case SDL_GAMEPAD_BUTTON_MISC6: {
+            key._inputType = UIGamepadInputType::misc6;
+            break;
+        }
         default: break;
     }
 

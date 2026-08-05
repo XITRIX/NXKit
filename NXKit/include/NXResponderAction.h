@@ -9,6 +9,10 @@
 
 namespace NXKit {
 
+// Face-button names preserve NXKit's existing label/semantic mapping. Plus and
+// minus correspond to SDL's start and back positions; the remaining names map
+// directly to normalized SDL gamepad controls. Triggers are included because
+// they are physical controller buttons even though SDL reports them as axes.
 enum class NXActionButton {
     a,
     b,
@@ -16,6 +20,28 @@ enum class NXActionButton {
     y,
     plus,
     minus,
+    home,
+    leftThumbstick,
+    rightThumbstick,
+    leftShoulder,
+    rightShoulder,
+    leftTrigger,
+    rightTrigger,
+    dpadUp,
+    dpadDown,
+    dpadLeft,
+    dpadRight,
+    misc1,
+    rightPaddle1,
+    leftPaddle1,
+    rightPaddle2,
+    leftPaddle2,
+    touchpad,
+    misc2,
+    misc3,
+    misc4,
+    misc5,
+    misc6,
 };
 
 // A console command registered on a responder. The closest available action

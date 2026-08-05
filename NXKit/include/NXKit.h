@@ -7,6 +7,7 @@
 #include <UIKit.h>
 
 #include <NXControl.h>
+#include <NXControllerIconResolver.h>
 #include <NXNavigationItem.h>
 #include <NXNavigationController.h>
 #include <NXResponderAction.h>

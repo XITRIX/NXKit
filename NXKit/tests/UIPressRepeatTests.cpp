@@ -1,3 +1,4 @@
+#include <NXResponderAction.h>
 #include <UIApplication.h>
 #include <UIApplicationDelegate.h>
 #include <UIControl.h>
@@ -12,6 +13,7 @@
 #include <SDL3/SDL.h>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <iostream>
 #include <memory>
@@ -165,6 +167,132 @@ int main() {
         window->focusSystem()->focusedItem().lock() == first,
         "repeat test starts on the first focusable item"
     );
+
+    constexpr std::array buttonBindings {
+#if defined(PLATFORM_SWITCH)
+        std::pair {NXActionButton::a, SDL_GAMEPAD_BUTTON_EAST},
+        std::pair {NXActionButton::b, SDL_GAMEPAD_BUTTON_SOUTH},
+        std::pair {NXActionButton::x, SDL_GAMEPAD_BUTTON_NORTH},
+        std::pair {NXActionButton::y, SDL_GAMEPAD_BUTTON_WEST},
+#else
+        std::pair {NXActionButton::a, SDL_GAMEPAD_BUTTON_SOUTH},
+        std::pair {NXActionButton::b, SDL_GAMEPAD_BUTTON_EAST},
+        std::pair {NXActionButton::x, SDL_GAMEPAD_BUTTON_WEST},
+        std::pair {NXActionButton::y, SDL_GAMEPAD_BUTTON_NORTH},
+#endif
+        std::pair {NXActionButton::plus, SDL_GAMEPAD_BUTTON_START},
+        std::pair {NXActionButton::minus, SDL_GAMEPAD_BUTTON_BACK},
+        std::pair {NXActionButton::home, SDL_GAMEPAD_BUTTON_GUIDE},
+        std::pair {
+            NXActionButton::leftThumbstick,
+            SDL_GAMEPAD_BUTTON_LEFT_STICK
+        },
+        std::pair {
+            NXActionButton::rightThumbstick,
+            SDL_GAMEPAD_BUTTON_RIGHT_STICK
+        },
+        std::pair {
+            NXActionButton::leftShoulder,
+            SDL_GAMEPAD_BUTTON_LEFT_SHOULDER
+        },
+        std::pair {
+            NXActionButton::rightShoulder,
+            SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER
+        },
+        std::pair {NXActionButton::dpadUp, SDL_GAMEPAD_BUTTON_DPAD_UP},
+        std::pair {NXActionButton::dpadDown, SDL_GAMEPAD_BUTTON_DPAD_DOWN},
+        std::pair {NXActionButton::dpadLeft, SDL_GAMEPAD_BUTTON_DPAD_LEFT},
+        std::pair {NXActionButton::dpadRight, SDL_GAMEPAD_BUTTON_DPAD_RIGHT},
+        std::pair {NXActionButton::misc1, SDL_GAMEPAD_BUTTON_MISC1},
+        std::pair {
+            NXActionButton::rightPaddle1,
+            SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1
+        },
+        std::pair {
+            NXActionButton::leftPaddle1,
+            SDL_GAMEPAD_BUTTON_LEFT_PADDLE1
+        },
+        std::pair {
+            NXActionButton::rightPaddle2,
+            SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2
+        },
+        std::pair {
+            NXActionButton::leftPaddle2,
+            SDL_GAMEPAD_BUTTON_LEFT_PADDLE2
+        },
+        std::pair {NXActionButton::touchpad, SDL_GAMEPAD_BUTTON_TOUCHPAD},
+        std::pair {NXActionButton::misc2, SDL_GAMEPAD_BUTTON_MISC2},
+        std::pair {NXActionButton::misc3, SDL_GAMEPAD_BUTTON_MISC3},
+        std::pair {NXActionButton::misc4, SDL_GAMEPAD_BUTTON_MISC4},
+        std::pair {NXActionButton::misc5, SDL_GAMEPAD_BUTTON_MISC5},
+        std::pair {NXActionButton::misc6, SDL_GAMEPAD_BUTTON_MISC6},
+    };
+    for (const auto& [actionButton, gamepadButton] : buttonBindings) {
+        int actionCount = 0;
+        NXResponderAction action {
+            .button = actionButton,
+            .action = UIAction("Test", [&actionCount]() { ++actionCount; }),
+        };
+        action.registerOn(first);
+
+        SDL_Event buttonDown {};
+        buttonDown.type = SDL_EVENT_GAMEPAD_BUTTON_DOWN;
+        buttonDown.gbutton.which = 100;
+        buttonDown.gbutton.button = gamepadButton;
+        buttonDown.gbutton.down = true;
+        UIApplicationPressRepeatTestHarness::handleSDLEvent(
+            application,
+            buttonDown
+        );
+
+        SDL_Event buttonUp = buttonDown;
+        buttonUp.type = SDL_EVENT_GAMEPAD_BUTTON_UP;
+        buttonUp.gbutton.down = false;
+        UIApplicationPressRepeatTestHarness::handleSDLEvent(
+            application,
+            buttonUp
+        );
+        expect(
+            actionCount == 1,
+            "every SDL gamepad button routes to its NX responder action"
+        );
+        action.unregisterFrom(first);
+        window->focusSystem()->requestFocusUpdate(first);
+    }
+
+    constexpr std::array triggerBindings {
+        std::pair {NXActionButton::leftTrigger, SDL_GAMEPAD_AXIS_LEFT_TRIGGER},
+        std::pair {NXActionButton::rightTrigger, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER},
+    };
+    for (const auto& [actionButton, gamepadAxis] : triggerBindings) {
+        int actionCount = 0;
+        NXResponderAction action {
+            .button = actionButton,
+            .action = UIAction("Test", [&actionCount]() { ++actionCount; }),
+        };
+        action.registerOn(first);
+
+        SDL_Event triggerEvent {};
+        triggerEvent.type = SDL_EVENT_GAMEPAD_AXIS_MOTION;
+        triggerEvent.gaxis.which = 100;
+        triggerEvent.gaxis.axis = gamepadAxis;
+        triggerEvent.gaxis.value = 32767;
+        UIApplicationPressRepeatTestHarness::handleSDLEvent(
+            application,
+            triggerEvent
+        );
+        triggerEvent.gaxis.value = 0;
+        UIApplicationPressRepeatTestHarness::handleSDLEvent(
+            application,
+            triggerEvent
+        );
+        expect(
+            actionCount == 1,
+            "each analog trigger routes to its NX responder action"
+        );
+        action.unregisterFrom(first);
+    }
+
     expect(
         queueKeyEvent(SDL_EVENT_KEY_DOWN, SDLK_RIGHT, SDL_SCANCODE_RIGHT),
         "initial directional key-down is queued"

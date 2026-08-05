@@ -2,6 +2,7 @@
 
 #include <CADisplayLink.h>
 #include <UIControl.h>
+#include <UIImageView.h>
 #include <UILabel.h>
 
 #include <SDL3/SDL_power.h>
@@ -29,22 +30,11 @@ constexpr NXFloat batteryFillHeight = batteryBodyHeight - batteryContentInset * 
 constexpr NXFloat batteryTipWidth = 4;
 constexpr NXFloat batteryTipHeight = 10;
 
-std::string actionButtonTitle(NXActionButton button) {
-    switch (button) {
-        case NXActionButton::a: return "A";
-        case NXActionButton::b: return "B";
-        case NXActionButton::x: return "X";
-        case NXActionButton::y: return "Y";
-        case NXActionButton::plus: return "+";
-        case NXActionButton::minus: return "-";
-    }
-    return "";
-}
-
 class NXNavigationActionView final : public UIControl {
 public:
     NXNavigationActionView(
         const NXResponderAction& action,
+        NXControllerType controllerType,
         std::function<void()> touchHandler
     ) {
         setAutolayoutEnabled(true);
@@ -60,33 +50,22 @@ public:
             layout->setAllGap(8);
         });
 
-        auto buttonCircle = new_shared<UIView>();
-        buttonCircle->setAutolayoutEnabled(true);
-        buttonCircle->setUserInteractionEnabled(false);
-        buttonCircle->setBackgroundColor(
+        auto buttonIcon = new_shared<UIImageView>(
+            NXControllerIconResolver::shared().iconForButton(
+                action.button,
+                controllerType,
+                26
+            )
+        );
+        buttonIcon->setAutolayoutEnabled(true);
+        buttonIcon->setUserInteractionEnabled(false);
+        buttonIcon->setContentMode(UIViewContentMode::scaleAspectFit);
+        buttonIcon->setTintColor(
             action.isEnabled ? UIColor::label : UIColor::tertiaryLabel
         );
-        buttonCircle->layer()->setCornerRadius(12);
-        buttonCircle->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
-            layout->setSize({24, 24});
-            layout->setAlignItems(YGAlignCenter);
-            layout->setJustifyContent(YGJustifyCenter);
+        buttonIcon->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+            layout->setSize({26, 26});
         });
-
-        auto buttonLabel = new_shared<UILabel>();
-        buttonLabel->setAutolayoutEnabled(true);
-        buttonLabel->setUserInteractionEnabled(false);
-        buttonLabel->setText(actionButtonTitle(action.button));
-        buttonLabel->setFontSize(15);
-        buttonLabel->setFontWeight(700);
-        buttonLabel->setTextAlignment(NSTextAlignment::center);
-        buttonLabel->setTextColor(
-            action.isEnabled ? UIColor::systemBackground : UIColor::systemGray5
-        );
-        buttonLabel->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
-            layout->setWidth(24_pt);
-        });
-        buttonCircle->addSubview(buttonLabel);
 
         auto titleLabel = new_shared<UILabel>();
         titleLabel->setAutolayoutEnabled(true);
@@ -97,7 +76,7 @@ public:
             action.isEnabled ? UIColor::label : UIColor::tertiaryLabel
         );
 
-        addSubview(buttonCircle);
+        addSubview(buttonIcon);
         addSubview(titleLabel);
     }
 
@@ -306,7 +285,9 @@ void NXNavigationActionsView::setActions(std::vector<NXResponderAction> actions)
             .action = UIAction("OK"),
         });
     }
-    if (_actions == actions) {
+    const auto controllerType =
+        NXControllerIconResolver::shared().currentControllerType();
+    if (_actions == actions && _controllerType == controllerType) {
         // The visible metadata can stay identical while responder registration
         // replaces the executable callback. Keep the latest resolved actions
         // without rebuilding the legend every display-link tick.
@@ -314,6 +295,7 @@ void NXNavigationActionsView::setActions(std::vector<NXResponderAction> actions)
         return;
     }
     _actions = std::move(actions);
+    _controllerType = controllerType;
     rebuildActions();
 }
 
@@ -373,6 +355,7 @@ void NXNavigationActionsView::rebuildActions() {
         const auto weakSelf = weak_from_base<NXNavigationActionsView>();
         addSubview(new_shared<NXNavigationActionView>(
             action,
+            _controllerType,
             [weakSelf, button]() {
                 if (const auto self = weakSelf.lock()) {
                     self->performAction(button);

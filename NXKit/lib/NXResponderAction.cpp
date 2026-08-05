@@ -8,34 +8,60 @@
 #include <array>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 
 namespace NXKit {
 
 namespace {
 
-std::string actionIdentifier(NXActionButton button) {
+std::string_view actionButtonName(NXActionButton button) {
     switch (button) {
-        case NXActionButton::a: return "NXKit.responderAction.a";
-        case NXActionButton::b: return "NXKit.responderAction.b";
-        case NXActionButton::x: return "NXKit.responderAction.x";
-        case NXActionButton::y: return "NXKit.responderAction.y";
-        case NXActionButton::plus: return "NXKit.responderAction.plus";
-        case NXActionButton::minus: return "NXKit.responderAction.minus";
+        case NXActionButton::a: return "a";
+        case NXActionButton::b: return "b";
+        case NXActionButton::x: return "x";
+        case NXActionButton::y: return "y";
+        case NXActionButton::plus: return "plus";
+        case NXActionButton::minus: return "minus";
+        case NXActionButton::home: return "home";
+        case NXActionButton::leftThumbstick: return "leftThumbstick";
+        case NXActionButton::rightThumbstick: return "rightThumbstick";
+        case NXActionButton::leftShoulder: return "leftShoulder";
+        case NXActionButton::rightShoulder: return "rightShoulder";
+        case NXActionButton::leftTrigger: return "leftTrigger";
+        case NXActionButton::rightTrigger: return "rightTrigger";
+        case NXActionButton::dpadUp: return "dpadUp";
+        case NXActionButton::dpadDown: return "dpadDown";
+        case NXActionButton::dpadLeft: return "dpadLeft";
+        case NXActionButton::dpadRight: return "dpadRight";
+        case NXActionButton::misc1: return "misc1";
+        case NXActionButton::rightPaddle1: return "rightPaddle1";
+        case NXActionButton::leftPaddle1: return "leftPaddle1";
+        case NXActionButton::rightPaddle2: return "rightPaddle2";
+        case NXActionButton::leftPaddle2: return "leftPaddle2";
+        case NXActionButton::touchpad: return "touchpad";
+        case NXActionButton::misc2: return "misc2";
+        case NXActionButton::misc3: return "misc3";
+        case NXActionButton::misc4: return "misc4";
+        case NXActionButton::misc5: return "misc5";
+        case NXActionButton::misc6: return "misc6";
     }
     return {};
 }
 
+std::string actionIdentifier(NXActionButton button) {
+    return "NXKit.responderAction." + std::string(actionButtonName(button));
+}
+
 std::string actionInputIdentifier(NXActionButton button) {
-    switch (button) {
-        case NXActionButton::a: return UIResponderActionInputSelect;
-        case NXActionButton::b: return UIResponderActionInputMenu;
-        case NXActionButton::x: return "NXKit.responderActionInput.x";
-        case NXActionButton::y: return "NXKit.responderActionInput.y";
-        case NXActionButton::plus: return "NXKit.responderActionInput.plus";
-        case NXActionButton::minus: return "NXKit.responderActionInput.minus";
+    if (button == NXActionButton::a) {
+        return UIResponderActionInputSelect;
     }
-    return {};
+    if (button == NXActionButton::b) {
+        return UIResponderActionInputMenu;
+    }
+    return "NXKit.responderActionInput."
+        + std::string(actionButtonName(button));
 }
 
 bool matchesGamepadButton(UIGamepadInputType input, NXActionButton button) {
@@ -59,6 +85,50 @@ bool matchesGamepadButton(UIGamepadInputType input, NXActionButton button) {
             return input == UIGamepadInputType::buttonStart;
         case NXActionButton::minus:
             return input == UIGamepadInputType::buttonOptions;
+        case NXActionButton::home:
+            return input == UIGamepadInputType::buttonGuide;
+        case NXActionButton::leftThumbstick:
+            return input == UIGamepadInputType::leftThumbstickButton;
+        case NXActionButton::rightThumbstick:
+            return input == UIGamepadInputType::rightThumbstickButton;
+        case NXActionButton::leftShoulder:
+            return input == UIGamepadInputType::leftShoulder;
+        case NXActionButton::rightShoulder:
+            return input == UIGamepadInputType::rightShoulder;
+        case NXActionButton::leftTrigger:
+            return input == UIGamepadInputType::leftTrigger;
+        case NXActionButton::rightTrigger:
+            return input == UIGamepadInputType::rightTrigger;
+        case NXActionButton::dpadUp:
+            return input == UIGamepadInputType::up;
+        case NXActionButton::dpadDown:
+            return input == UIGamepadInputType::down;
+        case NXActionButton::dpadLeft:
+            return input == UIGamepadInputType::left;
+        case NXActionButton::dpadRight:
+            return input == UIGamepadInputType::right;
+        case NXActionButton::misc1:
+            return input == UIGamepadInputType::misc1;
+        case NXActionButton::rightPaddle1:
+            return input == UIGamepadInputType::rightPaddle1;
+        case NXActionButton::leftPaddle1:
+            return input == UIGamepadInputType::leftPaddle1;
+        case NXActionButton::rightPaddle2:
+            return input == UIGamepadInputType::rightPaddle2;
+        case NXActionButton::leftPaddle2:
+            return input == UIGamepadInputType::leftPaddle2;
+        case NXActionButton::touchpad:
+            return input == UIGamepadInputType::touchpad;
+        case NXActionButton::misc2:
+            return input == UIGamepadInputType::misc2;
+        case NXActionButton::misc3:
+            return input == UIGamepadInputType::misc3;
+        case NXActionButton::misc4:
+            return input == UIGamepadInputType::misc4;
+        case NXActionButton::misc5:
+            return input == UIGamepadInputType::misc5;
+        case NXActionButton::misc6:
+            return input == UIGamepadInputType::misc6;
     }
     return false;
 }
@@ -76,6 +146,33 @@ bool matchesKeyboardButton(UIKeyboardHIDUsage keyCode, NXActionButton button) {
             return keyCode == UIKeyboardHIDUsage::keyboardEqualSign;
         case NXActionButton::minus:
             return keyCode == UIKeyboardHIDUsage::keyboardHyphen;
+        case NXActionButton::dpadUp:
+            return keyCode == UIKeyboardHIDUsage::keyboardUpArrow;
+        case NXActionButton::dpadDown:
+            return keyCode == UIKeyboardHIDUsage::keyboardDownArrow;
+        case NXActionButton::dpadLeft:
+            return keyCode == UIKeyboardHIDUsage::keyboardLeftArrow;
+        case NXActionButton::dpadRight:
+            return keyCode == UIKeyboardHIDUsage::keyboardRightArrow;
+        case NXActionButton::home:
+        case NXActionButton::leftThumbstick:
+        case NXActionButton::rightThumbstick:
+        case NXActionButton::leftShoulder:
+        case NXActionButton::rightShoulder:
+        case NXActionButton::leftTrigger:
+        case NXActionButton::rightTrigger:
+        case NXActionButton::misc1:
+        case NXActionButton::rightPaddle1:
+        case NXActionButton::leftPaddle1:
+        case NXActionButton::rightPaddle2:
+        case NXActionButton::leftPaddle2:
+        case NXActionButton::touchpad:
+        case NXActionButton::misc2:
+        case NXActionButton::misc3:
+        case NXActionButton::misc4:
+        case NXActionButton::misc5:
+        case NXActionButton::misc6:
+            return false;
     }
     return false;
 }
@@ -195,6 +292,28 @@ std::vector<NXResponderAction> NXCollectResponderActions(
     constexpr std::array buttonOrder {
         NXActionButton::plus,
         NXActionButton::minus,
+        NXActionButton::home,
+        NXActionButton::misc1,
+        NXActionButton::touchpad,
+        NXActionButton::leftShoulder,
+        NXActionButton::rightShoulder,
+        NXActionButton::leftTrigger,
+        NXActionButton::rightTrigger,
+        NXActionButton::leftThumbstick,
+        NXActionButton::rightThumbstick,
+        NXActionButton::dpadUp,
+        NXActionButton::dpadDown,
+        NXActionButton::dpadLeft,
+        NXActionButton::dpadRight,
+        NXActionButton::rightPaddle1,
+        NXActionButton::leftPaddle1,
+        NXActionButton::rightPaddle2,
+        NXActionButton::leftPaddle2,
+        NXActionButton::misc2,
+        NXActionButton::misc3,
+        NXActionButton::misc4,
+        NXActionButton::misc5,
+        NXActionButton::misc6,
         NXActionButton::x,
         NXActionButton::y,
         NXActionButton::b,

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <NXControllerIconResolver.h>
 #include <NXResponderAction.h>
 #include <UIView.h>
 
@@ -64,6 +65,7 @@ public:
 
 private:
     std::vector<NXResponderAction> _actions;
+    NXControllerType _controllerType = NXControllerType::automatic;
     std::function<std::vector<NXResponderAction>()> _actionProvider;
     std::unique_ptr<CADisplayLink> _displayLink;
     void performAction(NXActionButton button);
