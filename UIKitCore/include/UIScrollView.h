@@ -13,6 +13,8 @@
 #include <UIScrollViewExtensions/DecelerationTimingParameters.h>
 #include <UIScrollViewExtensions/TimerAnimation.h>
 #include <UIScrollViewExtensions/UIScrollViewDecelerationRate.h>
+#include <cstdint>
+#include <functional>
 
 namespace NXKit {
 
@@ -30,6 +32,13 @@ enum class UIScrollViewContentInsetAdjustmentBehavior {
     always
 };
 
+enum class UIScrollViewIndicatorStyle {
+    // C++ cannot use UIKit's `default` case name because it is a keyword.
+    defaultStyle,
+    black,
+    white
+};
+
 // A portable extension controlling how controller/keyboard focus tracks
 // scrollable content. UIKit does not expose an equivalent three-mode API.
 enum class UIScrollViewFocusTrackingMode {
@@ -45,6 +54,7 @@ enum class UIScrollViewFocusTrackingMode {
 };
 
 class UIScrollViewFocusTestHarness;
+class UIScrollViewIndicatorTestHarness;
 
 class UIScrollView: public UIView {
 public:
@@ -75,7 +85,7 @@ public:
     void setScrollEnabled(bool scrollEnabled);
 
     UIEdgeInsets contentInset() { return _contentInset; }
-    void setContentInset(UIEdgeInsets contentInset) { _contentInset = contentInset; }
+    void setContentInset(UIEdgeInsets contentInset);
 
     bool bounceHorizontally() const { return _bounceHorizontally; }
     void setBounceHorizontally(bool bounceHorizontally);
@@ -86,6 +96,45 @@ public:
     UIScrollViewDecelerationRate decelerationRate() const { return _decelerationRate; }
     void setDecelerationRate(UIScrollViewDecelerationRate decelerationRate) { _decelerationRate = decelerationRate; }
     [[nodiscard]] bool isDecelerating() const { return _isDecelerating; }
+
+    [[nodiscard]] bool showsVerticalScrollIndicator() const {
+        return _showsVerticalScrollIndicator;
+    }
+    void setShowsVerticalScrollIndicator(bool showsVerticalScrollIndicator);
+
+    [[nodiscard]] bool showsHorizontalScrollIndicator() const {
+        return _showsHorizontalScrollIndicator;
+    }
+    void setShowsHorizontalScrollIndicator(bool showsHorizontalScrollIndicator);
+
+    [[nodiscard]] UIScrollViewIndicatorStyle indicatorStyle() const {
+        return _indicatorStyle;
+    }
+    void setIndicatorStyle(UIScrollViewIndicatorStyle indicatorStyle);
+
+    [[nodiscard]] UIEdgeInsets verticalScrollIndicatorInsets() const {
+        return _verticalScrollIndicatorInsets;
+    }
+    void setVerticalScrollIndicatorInsets(UIEdgeInsets insets);
+
+    [[nodiscard]] UIEdgeInsets horizontalScrollIndicatorInsets() const {
+        return _horizontalScrollIndicatorInsets;
+    }
+    void setHorizontalScrollIndicatorInsets(UIEdgeInsets insets);
+
+    [[deprecated(
+        "Use verticalScrollIndicatorInsets() and "
+        "horizontalScrollIndicatorInsets() instead"
+    )]]
+    [[nodiscard]] UIEdgeInsets scrollIndicatorInsets() const {
+        return _verticalScrollIndicatorInsets;
+    }
+    void setScrollIndicatorInsets(UIEdgeInsets insets);
+
+    void flashScrollIndicators();
+    void withScrollIndicatorsShownForContentOffsetChanges(
+        const std::function<void()>& changes
+    );
 
     UIScrollViewContentInsetAdjustmentBehavior contentInsetAdjustmentBehavior() { return _contentInsetAdjustmentBehavior; }
     void setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior contentInsetAdjustmentBehavior);
@@ -121,6 +170,17 @@ private:
     UIEdgeInsets _contentInset;
     NXSize _contentSize;
     bool _hasExplicitContentSize = false;
+
+    bool _showsVerticalScrollIndicator = true;
+    bool _showsHorizontalScrollIndicator = true;
+    UIScrollViewIndicatorStyle _indicatorStyle =
+        UIScrollViewIndicatorStyle::defaultStyle;
+    UIEdgeInsets _verticalScrollIndicatorInsets;
+    UIEdgeInsets _horizontalScrollIndicatorInsets;
+    std::shared_ptr<CALayer> _verticalScrollIndicatorLayer;
+    std::shared_ptr<CALayer> _horizontalScrollIndicatorLayer;
+    bool _scrollIndicatorsShown = false;
+    std::uint64_t _scrollIndicatorVisibilityGeneration = 0;
 
     UIScrollViewFocusTrackingMode _focusTrackingMode =
         UIScrollViewFocusTrackingMode::natural;
@@ -163,8 +223,11 @@ private:
     NXRect contentOffsetBounds();
 
     void layoutScrollIndicatorsIfNeeded();
+    void applyScrollIndicatorStyle();
     void showScrollIndicators();
+    void showScrollIndicators(bool horizontal, bool vertical);
     void hideScrollIndicators();
+    void scheduleScrollIndicatorHide(double delay);
 
     void startDeceleratingIfNecessary();
     void cancelDeceleratingIfNeccessary();
@@ -173,6 +236,7 @@ private:
     void bounceWithVelocity(NXPoint velocity);
 
     friend class UIScrollViewFocusTestHarness;
+    friend class UIScrollViewIndicatorTestHarness;
 };
 
 }

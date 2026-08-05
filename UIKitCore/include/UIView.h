@@ -37,6 +37,7 @@ class UIWindow;
 class UIViewController;
 class UIGestureRecognizer;
 class UIScrollView;
+class UIScrollViewIndicatorTestHarness;
 class UIView: public UIResponder, public UITraitEnvironment, public CALayerDelegate, public UIFocusItem, public enable_shared_from_this<UIView> {
 public:
     std::map<std::string, std::shared_ptr<UIView>> idStorage;
@@ -189,6 +190,7 @@ private:
     friend class UIViewController;
     friend class UIFocusSystem;
     friend class UIScrollView;
+    friend class UIScrollViewIndicatorTestHarness;
     friend class UIWindow;
     friend class YGLayout;
     friend class UINib;

@@ -10,6 +10,7 @@
 
 #include <UIScrollView.h>
 #include <CATransaction.h>
+#include <DispatchQueue.h>
 #include <UIWindow.h>
 #include <tools/IBTools.h>
 #include <UIScrollViewExtensions/SpringTimingParameters.h>
@@ -26,6 +27,95 @@ namespace {
 
 constexpr NXFloat kFocusVisibilityTolerance = 0.5f;
 constexpr NXFloat kNaturalFocusScrollSpeed = 1000.0f;
+constexpr NXFloat kScrollIndicatorThickness = 3.0f;
+constexpr NXFloat kScrollIndicatorEdgePadding = 2.0f;
+constexpr NXFloat kScrollIndicatorMinimumLength = 36.0f;
+constexpr NXFloat kScrollIndicatorZPosition = 1000000.0f;
+constexpr double kScrollIndicatorFlashDuration = 0.5;
+constexpr double kScrollIndicatorFadeDuration = 0.25;
+
+struct ScrollIndicatorAxisGeometry {
+    NXFloat origin = 0;
+    NXFloat length = 0;
+    bool visible = false;
+};
+
+bool finiteInsets(const UIEdgeInsets& insets) {
+    return std::isfinite(insets.top)
+        && std::isfinite(insets.left)
+        && std::isfinite(insets.bottom)
+        && std::isfinite(insets.right);
+}
+
+ScrollIndicatorAxisGeometry scrollIndicatorAxisGeometry(
+    NXFloat trackOrigin,
+    NXFloat trackLength,
+    NXFloat viewportLength,
+    NXFloat scrollRange,
+    NXFloat relativeContentOffset
+) {
+    if (trackLength <= 0 || viewportLength <= 0 || scrollRange <= 0) {
+        return {};
+    }
+
+    const auto totalScrollableLength = viewportLength + scrollRange;
+    const auto proportionalLength =
+        trackLength * viewportLength / totalScrollableLength;
+    const auto normalLength = std::min(
+        trackLength,
+        std::max(
+            std::min(kScrollIndicatorMinimumLength, trackLength),
+            proportionalLength
+        )
+    );
+
+    const auto leadingOverscroll = std::max<NXFloat>(
+        0,
+        -relativeContentOffset
+    );
+    const auto trailingOverscroll = std::max<NXFloat>(
+        0,
+        relativeContentOffset - scrollRange
+    );
+    const auto overscroll = leadingOverscroll + trailingOverscroll;
+    const auto minimumCompressedLength = std::min(
+        kScrollIndicatorThickness,
+        normalLength
+    );
+    const auto indicatorLength = std::max(
+        minimumCompressedLength,
+        normalLength - overscroll
+    );
+
+    NXFloat indicatorOrigin;
+    if (leadingOverscroll > 0) {
+        indicatorOrigin = trackOrigin;
+    } else if (trailingOverscroll > 0) {
+        indicatorOrigin = trackOrigin + trackLength - indicatorLength;
+    } else {
+        const auto progress = std::clamp(
+            relativeContentOffset / scrollRange,
+            NXFloat(0),
+            NXFloat(1)
+        );
+        indicatorOrigin = trackOrigin
+            + (trackLength - normalLength) * progress;
+    }
+
+    return {indicatorOrigin, indicatorLength, true};
+}
+
+UIColor scrollIndicatorColor(UIScrollViewIndicatorStyle style) {
+    switch (style) {
+        case UIScrollViewIndicatorStyle::defaultStyle:
+            return UIColor::label.withAlphaComponent(0.5f);
+        case UIScrollViewIndicatorStyle::black:
+            return UIColor::black.withAlphaComponent(0.5f);
+        case UIScrollViewIndicatorStyle::white:
+            return UIColor::white.withAlphaComponent(0.6f);
+    }
+    return UIColor::label.withAlphaComponent(0.5f);
+}
 
 bool isDirectionalFocusHeading(UIFocusHeading heading) {
     return heading == UIFocusHeading::up
@@ -42,11 +132,19 @@ UIScrollView::UIScrollView(const NXRect frame): UIView(frame) {
     addGestureRecognizer(_panGestureRecognizer);
     setClipsToBounds(true);
 
-//    applyScrollIndicatorsStyle();
-//    [horizontalScrollIndicator, verticalScrollIndicator].forEach {
-//        $0.alpha = 0
-//        addSubview($0)
-//    }
+    _horizontalScrollIndicatorLayer = new_shared<CALayer>();
+    _verticalScrollIndicatorLayer = new_shared<CALayer>();
+    for (const auto& indicatorLayer : {
+        _horizontalScrollIndicatorLayer,
+        _verticalScrollIndicatorLayer
+    }) {
+        indicatorLayer->setZPosition(kScrollIndicatorZPosition);
+        indicatorLayer->setMasksToBounds(true);
+        indicatorLayer->setOpacity(0);
+        indicatorLayer->setHidden(true);
+        layer()->addSublayer(indicatorLayer);
+    }
+    applyScrollIndicatorStyle();
 }
 
 UIScrollView::~UIScrollView() {
@@ -379,6 +477,7 @@ void UIScrollView::startNaturalFocusScrollIfNeeded(UIFocusHeading heading) {
     );
     _naturalFocusHeading = heading;
     _naturalFocusScrollActive = true;
+    showScrollIndicators();
     _lastNaturalFocusScrollTimestamp = Timer();
     _naturalFocusDisplayLink = std::make_unique<CADisplayLink>([this]() {
         naturalFocusScrollTick();
@@ -386,6 +485,7 @@ void UIScrollView::startNaturalFocusScrollIfNeeded(UIFocusHeading heading) {
 }
 
 void UIScrollView::stopNaturalFocusScroll() {
+    const bool wasActive = _naturalFocusScrollActive;
     if (_naturalFocusDisplayLink) {
         _naturalFocusDisplayLink->invalidate();
     }
@@ -393,6 +493,9 @@ void UIScrollView::stopNaturalFocusScroll() {
     _naturalFocusHeading = UIFocusHeading::none;
     _naturalFocusScrollRequested = false;
     _naturalPendingFocusView.reset();
+    if (wasActive) {
+        hideScrollIndicators();
+    }
 }
 
 void UIScrollView::naturalFocusScrollTick() {
@@ -534,8 +637,14 @@ void UIScrollView::setFocusTrackingMode(
 }
 
 void UIScrollView::addSubview(const std::shared_ptr<UIView> &view) {
+    // UIView's indexed layer insertion assumes that view-backed layers occupy
+    // the leading positions in the backing layer. Keep private overlays after
+    // them so UIScrollView does not disturb ordinary subview ordering.
+    _horizontalScrollIndicatorLayer->removeFromSuperlayer();
+    _verticalScrollIndicatorLayer->removeFromSuperlayer();
     UIView::addSubview(view);
-    // view->yoga->setPositionType(YGPositionTypeAbsolute);
+    layer()->addSublayer(_horizontalScrollIndicatorLayer);
+    layer()->addSublayer(_verticalScrollIndicatorLayer);
 }
 
 void UIScrollView::setContentOffset(NXPoint offset, bool animated) {
@@ -571,6 +680,123 @@ void UIScrollView::setScrollEnabled(bool scrollEnabled) {
     cancelDecelerationAnimations();
     _isDecelerating = false;
     weightedAverageVelocity = NXPoint();
+    hideScrollIndicators();
+}
+
+void UIScrollView::setContentInset(UIEdgeInsets contentInset) {
+    if (!finiteInsets(contentInset)) {
+        throw std::invalid_argument(
+            "UIScrollView content inset must be finite"
+        );
+    }
+    if (_contentInset == contentInset) return;
+
+    _contentInset = contentInset;
+    setNeedsLayout();
+}
+
+void UIScrollView::setShowsVerticalScrollIndicator(
+    bool showsVerticalScrollIndicator
+) {
+    if (_showsVerticalScrollIndicator == showsVerticalScrollIndicator) {
+        return;
+    }
+    _showsVerticalScrollIndicator = showsVerticalScrollIndicator;
+    layoutScrollIndicatorsIfNeeded();
+}
+
+void UIScrollView::setShowsHorizontalScrollIndicator(
+    bool showsHorizontalScrollIndicator
+) {
+    if (_showsHorizontalScrollIndicator == showsHorizontalScrollIndicator) {
+        return;
+    }
+    _showsHorizontalScrollIndicator = showsHorizontalScrollIndicator;
+    layoutScrollIndicatorsIfNeeded();
+}
+
+void UIScrollView::setIndicatorStyle(
+    UIScrollViewIndicatorStyle indicatorStyle
+) {
+    switch (indicatorStyle) {
+        case UIScrollViewIndicatorStyle::defaultStyle:
+        case UIScrollViewIndicatorStyle::black:
+        case UIScrollViewIndicatorStyle::white:
+            break;
+        default:
+            throw std::invalid_argument(
+                "UIScrollView indicator style is invalid"
+            );
+    }
+    if (_indicatorStyle == indicatorStyle) return;
+
+    _indicatorStyle = indicatorStyle;
+    applyScrollIndicatorStyle();
+}
+
+void UIScrollView::setVerticalScrollIndicatorInsets(UIEdgeInsets insets) {
+    if (!finiteInsets(insets)) {
+        throw std::invalid_argument(
+            "UIScrollView vertical scroll indicator insets must be finite"
+        );
+    }
+    if (_verticalScrollIndicatorInsets == insets) return;
+
+    _verticalScrollIndicatorInsets = insets;
+    layoutScrollIndicatorsIfNeeded();
+}
+
+void UIScrollView::setHorizontalScrollIndicatorInsets(UIEdgeInsets insets) {
+    if (!finiteInsets(insets)) {
+        throw std::invalid_argument(
+            "UIScrollView horizontal scroll indicator insets must be finite"
+        );
+    }
+    if (_horizontalScrollIndicatorInsets == insets) return;
+
+    _horizontalScrollIndicatorInsets = insets;
+    layoutScrollIndicatorsIfNeeded();
+}
+
+void UIScrollView::setScrollIndicatorInsets(UIEdgeInsets insets) {
+    if (!finiteInsets(insets)) {
+        throw std::invalid_argument(
+            "UIScrollView scroll indicator insets must be finite"
+        );
+    }
+    if (_verticalScrollIndicatorInsets == insets
+        && _horizontalScrollIndicatorInsets == insets) {
+        return;
+    }
+
+    _verticalScrollIndicatorInsets = insets;
+    _horizontalScrollIndicatorInsets = insets;
+    layoutScrollIndicatorsIfNeeded();
+}
+
+void UIScrollView::flashScrollIndicators() {
+    showScrollIndicators();
+    scheduleScrollIndicatorHide(kScrollIndicatorFlashDuration);
+}
+
+void UIScrollView::withScrollIndicatorsShownForContentOffsetChanges(
+    const std::function<void()>& changes
+) {
+    if (!changes) {
+        throw std::invalid_argument(
+            "UIScrollView content-offset changes block must not be empty"
+        );
+    }
+
+    const auto initialOffset = contentOffset();
+    changes();
+    const auto finalOffset = contentOffset();
+    const bool changedHorizontally = initialOffset.x != finalOffset.x;
+    const bool changedVertically = initialOffset.y != finalOffset.y;
+    if (!changedHorizontally && !changedVertically) return;
+
+    showScrollIndicators(changedHorizontally, changedVertically);
+    scheduleScrollIndicatorHide(kScrollIndicatorFlashDuration);
 }
 
 void UIScrollView::setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior contentInsetAdjustmentBehavior) {
@@ -596,6 +822,7 @@ void UIScrollView::safeAreaInsetsDidChange() {
     _lastSafeAreaInsets = safeAreaInsets();
     const auto target = getBoundsCheckedContentOffset(contentOffset() + NXPoint(delta.left, delta.top));
     setContentOffset(target, false);
+    layoutScrollIndicatorsIfNeeded();
 }
 
 NXPoint UIScrollView::visibleContentOffset() const {
@@ -753,13 +980,12 @@ void UIScrollView::onPan() {
 void UIScrollView::onPanGestureStateChanged() {
     switch (_panGestureRecognizer->state()) {
         case UIGestureRecognizerState::possible: {
-//            showScrollIndicators();
             cancelDeceleratingIfNeccessary();
             break;
         }
         case UIGestureRecognizerState::began: {
-//            printf("Began\n");
             _initialContentOffset = contentOffset();
+            showScrollIndicators();
             break;
         }
         case UIGestureRecognizerState::changed: {
@@ -769,6 +995,12 @@ void UIScrollView::onPanGestureStateChanged() {
         }
         case UIGestureRecognizerState::ended: {
             startDeceleratingIfNecessary();
+            weightedAverageVelocity = NXPoint();
+            break;
+        }
+        case UIGestureRecognizerState::cancelled:
+        case UIGestureRecognizerState::failed: {
+            hideScrollIndicators();
             weightedAverageVelocity = NXPoint();
             break;
         }
@@ -782,15 +1014,187 @@ void UIScrollView::onPanGestureStateChanged() {
 }
 
 void UIScrollView::layoutScrollIndicatorsIfNeeded() {
+    const auto viewport = bounds();
+    const auto safeArea = safeAreaInsets();
+    const auto horizontalInsets = UIEdgeInsets(
+        std::max(_horizontalScrollIndicatorInsets.top, safeArea.top),
+        std::max(_horizontalScrollIndicatorInsets.left, safeArea.left),
+        std::max(_horizontalScrollIndicatorInsets.bottom, safeArea.bottom),
+        std::max(_horizontalScrollIndicatorInsets.right, safeArea.right)
+    );
+    const auto verticalInsets = UIEdgeInsets(
+        std::max(_verticalScrollIndicatorInsets.top, safeArea.top),
+        std::max(_verticalScrollIndicatorInsets.left, safeArea.left),
+        std::max(_verticalScrollIndicatorInsets.bottom, safeArea.bottom),
+        std::max(_verticalScrollIndicatorInsets.right, safeArea.right)
+    );
+    const auto offsetBounds = contentOffsetBounds();
+    const bool horizontalScrollable = offsetBounds.width() > 0;
+    const bool verticalScrollable = offsetBounds.height() > 0;
+    const bool horizontalHasVisibleCrossAxisSpace =
+        viewport.height()
+            - horizontalInsets.top
+            - horizontalInsets.bottom
+        >= kScrollIndicatorThickness + kScrollIndicatorEdgePadding * 2;
+    const bool verticalHasVisibleCrossAxisSpace =
+        viewport.width()
+            - verticalInsets.left
+            - verticalInsets.right
+        >= kScrollIndicatorThickness + kScrollIndicatorEdgePadding * 2;
+    const bool laysOutHorizontal = _showsHorizontalScrollIndicator
+        && horizontalScrollable
+        && horizontalHasVisibleCrossAxisSpace;
+    const bool laysOutVertical = _showsVerticalScrollIndicator
+        && verticalScrollable
+        && verticalHasVisibleCrossAxisSpace;
 
+    auto horizontalTrackOrigin = horizontalInsets.left
+        + kScrollIndicatorEdgePadding;
+    auto horizontalTrackLength = viewport.width()
+        - horizontalInsets.left
+        - horizontalInsets.right
+        - kScrollIndicatorEdgePadding * 2;
+    if (laysOutVertical) {
+        horizontalTrackLength -=
+            kScrollIndicatorThickness + kScrollIndicatorEdgePadding;
+    }
+
+    auto verticalTrackOrigin = verticalInsets.top
+        + kScrollIndicatorEdgePadding;
+    auto verticalTrackLength = viewport.height()
+        - verticalInsets.top
+        - verticalInsets.bottom
+        - kScrollIndicatorEdgePadding * 2;
+    if (laysOutHorizontal) {
+        verticalTrackLength -=
+            kScrollIndicatorThickness + kScrollIndicatorEdgePadding;
+    }
+
+    const auto horizontalGeometry = scrollIndicatorAxisGeometry(
+        horizontalTrackOrigin,
+        horizontalTrackLength,
+        viewport.width(),
+        offsetBounds.width(),
+        contentOffset().x - offsetBounds.origin.x
+    );
+    const auto verticalGeometry = scrollIndicatorAxisGeometry(
+        verticalTrackOrigin,
+        verticalTrackLength,
+        viewport.height(),
+        offsetBounds.height(),
+        contentOffset().y - offsetBounds.origin.y
+    );
+
+    const bool horizontalVisible = laysOutHorizontal
+        && horizontalGeometry.visible;
+    const bool verticalVisible = laysOutVertical
+        && verticalGeometry.visible;
+
+    CATransaction::begin();
+    CATransaction::setDisableActions(true);
+
+    _horizontalScrollIndicatorLayer->setFrame({
+        viewport.origin.x + horizontalGeometry.origin,
+        viewport.origin.y + viewport.height()
+            - horizontalInsets.bottom
+            - kScrollIndicatorEdgePadding
+            - kScrollIndicatorThickness,
+        horizontalGeometry.length,
+        kScrollIndicatorThickness
+    });
+    _horizontalScrollIndicatorLayer->setCornerRadius(
+        kScrollIndicatorThickness / 2
+    );
+    if (_horizontalScrollIndicatorLayer->isHidden() == horizontalVisible) {
+        _horizontalScrollIndicatorLayer->setHidden(!horizontalVisible);
+    }
+
+    _verticalScrollIndicatorLayer->setFrame({
+        viewport.origin.x + viewport.width()
+            - verticalInsets.right
+            - kScrollIndicatorEdgePadding
+            - kScrollIndicatorThickness,
+        viewport.origin.y + verticalGeometry.origin,
+        kScrollIndicatorThickness,
+        verticalGeometry.length
+    });
+    _verticalScrollIndicatorLayer->setCornerRadius(
+        kScrollIndicatorThickness / 2
+    );
+    if (_verticalScrollIndicatorLayer->isHidden() == verticalVisible) {
+        _verticalScrollIndicatorLayer->setHidden(!verticalVisible);
+    }
+
+    CATransaction::commit();
+}
+
+void UIScrollView::applyScrollIndicatorStyle() {
+    CATransaction::begin();
+    CATransaction::setDisableActions(true);
+    const auto color = scrollIndicatorColor(_indicatorStyle);
+    _horizontalScrollIndicatorLayer->setBackgroundColor(color);
+    _verticalScrollIndicatorLayer->setBackgroundColor(color);
+    CATransaction::commit();
 }
 
 void UIScrollView::showScrollIndicators() {
+    showScrollIndicators(true, true);
+}
 
+void UIScrollView::showScrollIndicators(bool horizontal, bool vertical) {
+    if (!horizontal && !vertical) return;
+
+    ++_scrollIndicatorVisibilityGeneration;
+    _scrollIndicatorsShown = true;
+    layoutScrollIndicatorsIfNeeded();
+
+    CATransaction::begin();
+    CATransaction::setDisableActions(true);
+    if (horizontal) {
+        _horizontalScrollIndicatorLayer->removeAnimation("opacity");
+        _horizontalScrollIndicatorLayer->setOpacity(1);
+    }
+    if (vertical) {
+        _verticalScrollIndicatorLayer->removeAnimation("opacity");
+        _verticalScrollIndicatorLayer->setOpacity(1);
+    }
+    CATransaction::commit();
 }
 
 void UIScrollView::hideScrollIndicators() {
+    ++_scrollIndicatorVisibilityGeneration;
+    _scrollIndicatorsShown = false;
 
+    for (const auto& indicatorLayer : {
+        _horizontalScrollIndicatorLayer,
+        _verticalScrollIndicatorLayer
+    }) {
+        if (indicatorLayer->isHidden()
+            || indicatorLayer->presentationOrSelf()->opacity() <= 0) {
+            continue;
+        }
+        auto fade = new_shared<CABasicAnimation>("opacity");
+        fade->duration = kScrollIndicatorFadeDuration;
+        indicatorLayer->add(fade, "opacity");
+    }
+
+    CATransaction::begin();
+    CATransaction::setDisableActions(true);
+    _horizontalScrollIndicatorLayer->setOpacity(0);
+    _verticalScrollIndicatorLayer->setOpacity(0);
+    CATransaction::commit();
+}
+
+void UIScrollView::scheduleScrollIndicatorHide(double delay) {
+    const auto generation = _scrollIndicatorVisibilityGeneration;
+    const auto weakSelf = weak_from_base<UIScrollView>();
+    DispatchQueue::main()->asyncAfter(delay, [weakSelf, generation]() {
+        if (const auto self = weakSelf.lock(); self
+            && self->_scrollIndicatorVisibilityGeneration == generation
+            && self->_scrollIndicatorsShown) {
+            self->hideScrollIndicators();
+        }
+    });
 }
 
 void UIScrollView::startDeceleratingIfNecessary() {
@@ -860,6 +1264,8 @@ void UIScrollView::startDeceleratingIfNecessary() {
                 velocity.y = 0;
             }
             bounceWithVelocity(velocity);
+        } else {
+            hideScrollIndicators();
         }
     });
 //    auto nonBoundsCheckedScrollAnimationDistance = weightedAverageVelocity * dampingFactor; // hand-tuned
@@ -911,6 +1317,7 @@ void UIScrollView::bounceWithVelocity(NXPoint velocity) {
         CALayer::requestFramerate(120);
     }, [this](bool) {
         _isDecelerating = false;
+        hideScrollIndicators();
     });
 }
 
@@ -952,9 +1359,35 @@ bool UIScrollView::applyXMLAttribute(const std::string& name, const std::string&
         return false;
     }
 
+    if (name == "indicatorStyle") {
+        if (value == "default") {
+            setIndicatorStyle(UIScrollViewIndicatorStyle::defaultStyle);
+            return true;
+        }
+        if (value == "black") {
+            setIndicatorStyle(UIScrollViewIndicatorStyle::black);
+            return true;
+        }
+        if (value == "white") {
+            setIndicatorStyle(UIScrollViewIndicatorStyle::white);
+            return true;
+        }
+        return false;
+    }
+
     REGISTER_XIB_ATTRIBUTE(scrollEnabled, valueToBool, setScrollEnabled)
     REGISTER_XIB_ATTRIBUTE(bounceVertically, valueToBool, setBounceVertically)
     REGISTER_XIB_ATTRIBUTE(bounceHorizontally, valueToBool, setBounceHorizontally)
+    REGISTER_XIB_ATTRIBUTE(
+        showsVerticalScrollIndicator,
+        valueToBool,
+        setShowsVerticalScrollIndicator
+    )
+    REGISTER_XIB_ATTRIBUTE(
+        showsHorizontalScrollIndicator,
+        valueToBool,
+        setShowsHorizontalScrollIndicator
+    )
 
     return false;
 }
@@ -962,6 +1395,7 @@ bool UIScrollView::applyXMLAttribute(const std::string& name, const std::string&
 void UIScrollView::layoutSubviews() {
     UIView::layoutSubviews();
     setContentOffset(getBoundsCheckedContentOffset(contentOffset()), false);
+    layoutScrollIndicatorsIfNeeded();
 
     if (_focusTrackingMode == UIScrollViewFocusTrackingMode::natural) {
         return;
