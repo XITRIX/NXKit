@@ -6,6 +6,7 @@
 #include <Screens/TestScrollController/TestScrollController.hpp>
 #include <Screens/NavigationTestViewController/NavigationTestViewController.hpp>
 #include <Screens/GlassDemoViewController/GlassDemoViewController.hpp>
+#include <Screens/ControllerTestViewController/ControllerTestViewController.hpp>
 // #include <TextViewController/TextViewController.hpp>
 #include <romfs/romfs.hpp>
 
@@ -34,6 +35,7 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     auto vc3 = new_shared<TestScrollController>();
     auto navigationTestController = new_shared<NavigationTestViewController>();
     auto glassDemoController = new_shared<GlassDemoViewController>();
+    auto controllerTestController = new_shared<ControllerTestViewController>();
 //    auto vc4 = new_shared<TextViewController>();
     std::vector<std::shared_ptr<UIViewController>> vcs1 = {
         vc,
@@ -44,11 +46,15 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     std::vector<std::shared_ptr<UIViewController>> navigationTests = {
         navigationTestController
     };
+    std::vector<std::shared_ptr<UIViewController>> controllerTests = {
+        controllerTestController
+    };
     std::vector<std::vector<std::shared_ptr<UIViewController>>> vcs;
 
     vcs.push_back(vcs1);
     vcs.push_back(vcs2);
     vcs.push_back(navigationTests);
+    vcs.push_back(controllerTests);
 
     auto tbvc = new_shared<NXTabBarController>(vcs);
     tbvc->setTitle("NXKit Demo");
