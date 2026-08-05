@@ -40,6 +40,26 @@ using namespace NXKit;
 
 namespace {
 
+bool appendSharedFont(
+    PlSharedFontType type,
+    const char* name,
+    std::vector<sk_sp<SkData>>& fontData
+) {
+    PlFontData font{};
+    const Result result = plGetSharedFontByType(&font, type);
+    if (R_FAILED(result)) {
+        SkDebugf("Switch %s shared font load failed: 0x%x\n", name, result);
+        return false;
+    }
+    if (font.address == nullptr || font.size == 0) {
+        SkDebugf("Switch %s shared font service returned empty data.\n", name);
+        return false;
+    }
+
+    fontData.push_back(SkData::MakeWithoutCopy(font.address, font.size));
+    return true;
+}
+
 void reportWebGPUError(const char* source,
                        uint32_t type,
                        wgpu::StringView message) {
@@ -84,20 +104,29 @@ SkiaCtx_switch::SkiaCtx_switch() {
     }
 
     SkGraphics::Init();
-    PlFontData font{};
-    Result res = plGetSharedFontByType(&font, PlSharedFontType_Standard);
-    if (R_SUCCEEDED(res) && font.address != nullptr && font.size > 0) {
-        auto data = SkData::MakeWithoutCopy(font.address, font.size);
-        auto systemFontMgr = SkFontMgr_New_Custom_Data(SkSpan(&data, 1));
+    std::vector<sk_sp<SkData>> systemFontData;
+    systemFontData.reserve(2);
+    const bool hasStandardFont = appendSharedFont(
+        PlSharedFontType_Standard,
+        "standard",
+        systemFontData
+    );
+    appendSharedFont(
+        PlSharedFontType_NintendoExt,
+        "Nintendo extended",
+        systemFontData
+    );
+
+    // Keep the standard font first so it remains the default text face. The
+    // Nintendo extended font contains only private-use symbols such as the
+    // native controller-button artwork.
+    if (hasStandardFont) {
+        auto systemFontMgr = SkFontMgr_New_Custom_Data(SkSpan(systemFontData));
         if (systemFontMgr) {
             fontMgr = std::move(systemFontMgr);
         } else {
             SkDebugf("Skia could not create the Switch system font manager.\n");
         }
-    } else if (R_FAILED(res)) {
-        SkDebugf("Switch system font load failed: 0x%x\n", res);
-    } else {
-        SkDebugf("Switch system font service returned empty data.\n");
     }
 
     // Font setup must precede GPU setup: UIKit performs text layout before it

@@ -1,6 +1,9 @@
 #include <NXControllerIconResolver.h>
 
+#include "NXControllerIconProvider.h"
+
 #include <CGImage.h>
+#include <SkiaCtx.h>
 #include <UIImage.h>
 
 #include <algorithm>
@@ -33,6 +36,40 @@ public:
 } // namespace
 
 int main() {
+#if defined(PLATFORM_SWITCH)
+    SkiaCtx::_main = MakeSkiaCtx();
+    const auto switchProvider = NXMakePlatformControllerIconProvider();
+    constexpr std::array nativeSwitchButtons {
+        NXActionButton::a,
+        NXActionButton::b,
+        NXActionButton::x,
+        NXActionButton::y,
+        NXActionButton::plus,
+        NXActionButton::minus,
+        NXActionButton::leftThumbstick,
+        NXActionButton::rightThumbstick,
+        NXActionButton::leftShoulder,
+        NXActionButton::rightShoulder,
+        NXActionButton::leftTrigger,
+        NXActionButton::rightTrigger,
+        NXActionButton::dpadUp,
+        NXActionButton::dpadDown,
+        NXActionButton::dpadLeft,
+        NXActionButton::dpadRight,
+    };
+    for (const auto button : nativeSwitchButtons) {
+        expect(
+            switchProvider->iconForButton(
+                button,
+                NXControllerType::nintendoSwitch,
+                24,
+                1
+            ) != nullptr,
+            "the Switch provider resolves NintendoExt artwork without fallback"
+        );
+    }
+#endif
+
     auto& resolver = NXControllerIconResolver::shared();
     constexpr std::array controllerTypes {
         NXControllerType::generic,
@@ -145,5 +182,8 @@ int main() {
     if (failures == 0) {
         std::cout << "NXControllerIconResolver tests passed\n";
     }
+#if defined(PLATFORM_SWITCH)
+    SkiaCtx::_main.reset();
+#endif
     return failures == 0 ? 0 : 1;
 }

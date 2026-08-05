@@ -192,35 +192,36 @@ NSString* fallbackSymbolName(
 ) {
     if (controllerType == NXControllerType::playStation) {
         switch (button) {
-            case NXActionButton::a: return @"xmark.circle";
-            case NXActionButton::b: return @"circle.circle";
-            case NXActionButton::x: return @"square.circle";
-            case NXActionButton::y: return @"triangle.circle";
+            case NXActionButton::a: return @"xmark.circle.fill";
+            case NXActionButton::b: return @"circle.circle.fill";
+            case NXActionButton::x: return @"square.circle.fill";
+            case NXActionButton::y: return @"triangle.circle.fill";
             default: break;
         }
     }
 
     if (controllerType == NXControllerType::nintendoSwitch) {
         switch (button) {
-            case NXActionButton::a: return @"b.circle";
-            case NXActionButton::b: return @"a.circle";
-            case NXActionButton::x: return @"y.circle";
-            case NXActionButton::y: return @"x.circle";
+            case NXActionButton::a: return @"b.circle.fill";
+            case NXActionButton::b: return @"a.circle.fill";
+            case NXActionButton::x: return @"y.circle.fill";
+            case NXActionButton::y: return @"x.circle.fill";
             default: break;
         }
     }
 
     switch (button) {
-        case NXActionButton::a: return @"a.circle";
-        case NXActionButton::b: return @"b.circle";
-        case NXActionButton::x: return @"x.circle";
-        case NXActionButton::y: return @"y.circle";
+        case NXActionButton::a: return @"a.circle.fill";
+        case NXActionButton::b: return @"b.circle.fill";
+        case NXActionButton::x: return @"x.circle.fill";
+        case NXActionButton::y: return @"y.circle.fill";
         case NXActionButton::plus:
             return controllerType == NXControllerType::nintendoSwitch
-                ? @"plus.circle" : @"line.3.horizontal.circle";
+                ? @"plus.circle.fill" : @"line.3.horizontal.circle.fill";
         case NXActionButton::minus:
             return controllerType == NXControllerType::nintendoSwitch
-                ? @"minus.circle" : @"rectangle.on.rectangle.circle";
+                ? @"minus.circle.fill"
+                : @"rectangle.on.rectangle.circle.fill";
         case NXActionButton::home:
             if (controllerType == NXControllerType::xbox) {
                 return @"xbox.logo";
@@ -228,65 +229,69 @@ NSString* fallbackSymbolName(
             if (controllerType == NXControllerType::playStation) {
                 return @"playstation.logo";
             }
-            return @"house.circle";
+            return @"house.circle.fill";
         case NXActionButton::leftThumbstick:
-            return @"l.joystick.press.down";
+            return @"l.joystick.press.down.fill";
         case NXActionButton::rightThumbstick:
-            return @"r.joystick.press.down";
+            return @"r.joystick.press.down.fill";
         case NXActionButton::leftShoulder:
             if (controllerType == NXControllerType::xbox) {
-                return @"lb.button.roundedbottom.horizontal";
+                return @"lb.button.roundedbottom.horizontal.fill";
             }
             if (controllerType == NXControllerType::nintendoSwitch) {
-                return @"l.button.roundedbottom.horizontal";
+                return @"l.button.roundedbottom.horizontal.fill";
             }
-            return @"l1.button.roundedbottom.horizontal";
+            return @"l1.button.roundedbottom.horizontal.fill";
         case NXActionButton::rightShoulder:
             if (controllerType == NXControllerType::xbox) {
-                return @"rb.button.roundedbottom.horizontal";
+                return @"rb.button.roundedbottom.horizontal.fill";
             }
             if (controllerType == NXControllerType::nintendoSwitch) {
-                return @"r.button.roundedbottom.horizontal";
+                return @"r.button.roundedbottom.horizontal.fill";
             }
-            return @"r1.button.roundedbottom.horizontal";
+            return @"r1.button.roundedbottom.horizontal.fill";
         case NXActionButton::leftTrigger:
             if (controllerType == NXControllerType::xbox) {
-                return @"lt.button.roundedtop.horizontal";
+                return @"lt.button.roundedtop.horizontal.fill";
             }
             if (controllerType == NXControllerType::nintendoSwitch) {
-                return @"zl.button.roundedtop.horizontal";
+                return @"zl.button.roundedtop.horizontal.fill";
             }
-            return @"l2.button.roundedtop.horizontal";
+            return @"l2.button.roundedtop.horizontal.fill";
         case NXActionButton::rightTrigger:
             if (controllerType == NXControllerType::xbox) {
-                return @"rt.button.roundedtop.horizontal";
+                return @"rt.button.roundedtop.horizontal.fill";
             }
             if (controllerType == NXControllerType::nintendoSwitch) {
-                return @"zr.button.roundedtop.horizontal";
+                return @"zr.button.roundedtop.horizontal.fill";
             }
-            return @"r2.button.roundedtop.horizontal";
+            return @"r2.button.roundedtop.horizontal.fill";
         case NXActionButton::dpadUp: return @"dpad.up.filled";
         case NXActionButton::dpadDown: return @"dpad.down.filled";
         case NXActionButton::dpadLeft: return @"dpad.left.filled";
         case NXActionButton::dpadRight: return @"dpad.right.filled";
         case NXActionButton::misc1:
             if (controllerType == NXControllerType::playStation) {
-                return @"mic.circle";
+                return @"mic.circle.fill";
             }
             if (controllerType == NXControllerType::nintendoSwitch) {
-                return @"viewfinder.circle";
+                return @"viewfinder.circle.fill";
             }
-            return @"square.and.arrow.up.circle";
-        case NXActionButton::rightPaddle1: return @"p1.button.horizontal";
-        case NXActionButton::leftPaddle1: return @"p3.button.horizontal";
-        case NXActionButton::rightPaddle2: return @"p2.button.horizontal";
-        case NXActionButton::leftPaddle2: return @"p4.button.horizontal";
+            return @"square.and.arrow.up.circle.fill";
+        case NXActionButton::rightPaddle1:
+            return @"p1.button.horizontal.fill";
+        case NXActionButton::leftPaddle1:
+            return @"p3.button.horizontal.fill";
+        case NXActionButton::rightPaddle2:
+            return @"p2.button.horizontal.fill";
+        case NXActionButton::leftPaddle2:
+            return @"p4.button.horizontal.fill";
         case NXActionButton::touchpad: return @"rectangle.inset.filled";
-        case NXActionButton::misc2: return @"2.circle";
-        case NXActionButton::misc3: return @"3.circle";
-        case NXActionButton::misc4: return @"4.circle";
-        case NXActionButton::misc5: return @"5.circle";
-        case NXActionButton::misc6: return @"6.circle";
+        case NXActionButton::misc2: return @"2.circle.fill";
+        case NXActionButton::misc3: return @"3.circle.fill";
+        case NXActionButton::misc4: return @"4.circle.fill";
+        case NXActionButton::misc5: return @"5.circle.fill";
+        case NXActionButton::misc6: return @"6.circle.fill";
     }
     return nil;
 }

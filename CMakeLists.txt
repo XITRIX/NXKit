@@ -79,6 +79,7 @@ elseif (PLATFORM_SWITCH)
                 ${SKIA_SWITCH_OUT_DIR}/libskcms.a
                 ${SKIA_SWITCH_OUT_DIR}/libdawn_combined.a
                 freetype
+                harfbuzz
                 expat
                 jpeg
                 png
