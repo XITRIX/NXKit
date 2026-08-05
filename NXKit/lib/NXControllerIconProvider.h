@@ -13,6 +13,12 @@ class NXControllerIconProvider {
 public:
     virtual ~NXControllerIconProvider() = default;
 
+    [[nodiscard]] virtual NXControllerType resolvedControllerType(
+        NXControllerType detectedControllerType
+    ) const {
+        return detectedControllerType;
+    }
+
     [[nodiscard]] virtual std::shared_ptr<UIImage> iconForButton(
         NXActionButton button,
         NXControllerType controllerType,

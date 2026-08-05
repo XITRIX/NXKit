@@ -490,7 +490,10 @@ public:
         if (activeGamepadID.load() == 0) {
             selectFirstConnectedGamepad();
         }
-        return activeControllerType.load();
+        const auto detectedControllerType = activeControllerType.load();
+        return platformProvider
+            ? platformProvider->resolvedControllerType(detectedControllerType)
+            : detectedControllerType;
 #endif
     }
 

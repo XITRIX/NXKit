@@ -50,22 +50,18 @@ public:
             layout->setAllGap(8);
         });
 
-        auto buttonIcon = new_shared<UIImageView>(
-            NXControllerIconResolver::shared().iconForButton(
-                action.button,
-                controllerType,
-                26
-            )
-        );
-        buttonIcon->setAutolayoutEnabled(true);
-        buttonIcon->setUserInteractionEnabled(false);
-        buttonIcon->setContentMode(UIViewContentMode::scaleAspectFit);
-        buttonIcon->setTintColor(
+        _button = action.button;
+        _buttonIcon = new_shared<UIImageView>();
+        _buttonIcon->setAutolayoutEnabled(true);
+        _buttonIcon->setUserInteractionEnabled(false);
+        _buttonIcon->setContentMode(UIViewContentMode::scaleAspectFit);
+        _buttonIcon->setTintColor(
             action.isEnabled ? UIColor::label : UIColor::tertiaryLabel
         );
-        buttonIcon->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        _buttonIcon->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
             layout->setSize({26, 26});
         });
+        setControllerType(controllerType);
 
         auto titleLabel = new_shared<UILabel>();
         titleLabel->setAutolayoutEnabled(true);
@@ -76,13 +72,32 @@ public:
             action.isEnabled ? UIColor::label : UIColor::tertiaryLabel
         );
 
-        addSubview(buttonIcon);
+        addSubview(_buttonIcon);
         addSubview(titleLabel);
+    }
+
+    void setControllerType(NXControllerType controllerType) {
+        if (_controllerType == controllerType) {
+            return;
+        }
+        _controllerType = controllerType;
+        _buttonIcon->setImage(
+            NXControllerIconResolver::shared().iconForButton(
+                _button,
+                controllerType,
+                26
+            )
+        );
     }
 
     bool canBecomeFocused() override {
         return false;
     }
+
+private:
+    NXActionButton _button = NXActionButton::a;
+    NXControllerType _controllerType = NXControllerType::automatic;
+    std::shared_ptr<UIImageView> _buttonIcon;
 };
 
 std::tm localTime(std::time_t time) {
@@ -264,6 +279,13 @@ NXNavigationActionsView::NXNavigationActionsView() {
         layout->setAllGap(30);
     });
     setActions({});
+
+    const auto weakSelf = weak_from_base<NXNavigationActionsView>();
+    _displayLink = std::make_unique<CADisplayLink>([weakSelf]() {
+        if (const auto self = weakSelf.lock()) {
+            self->refresh();
+        }
+    });
 }
 
 NXNavigationActionsView::~NXNavigationActionsView() = default;
@@ -287,11 +309,21 @@ void NXNavigationActionsView::setActions(std::vector<NXResponderAction> actions)
     }
     const auto controllerType =
         NXControllerIconResolver::shared().currentControllerType();
-    if (_actions == actions && _controllerType == controllerType) {
+    if (_actions == actions) {
         // The visible metadata can stay identical while responder registration
         // replaces the executable callback. Keep the latest resolved actions
         // without rebuilding the legend every display-link tick.
         _actions = std::move(actions);
+        if (_controllerType != controllerType) {
+            _controllerType = controllerType;
+            for (const auto& subview : subviews()) {
+                if (const auto actionView = std::dynamic_pointer_cast<
+                        NXNavigationActionView
+                    >(subview)) {
+                    actionView->setControllerType(controllerType);
+                }
+            }
+        }
         return;
     }
     _actions = std::move(actions);
@@ -303,22 +335,22 @@ void NXNavigationActionsView::setActionProvider(
     std::function<std::vector<NXResponderAction>()> provider
 ) {
     _actionProvider = std::move(provider);
-    if (_actionProvider && !_displayLink) {
-        const auto weakSelf = weak_from_base<NXNavigationActionsView>();
-        _displayLink = std::make_unique<CADisplayLink>([weakSelf]() {
-            if (const auto self = weakSelf.lock()) {
-                self->refresh();
-            }
-        });
-    } else if (!_actionProvider) {
-        _displayLink.reset();
-    }
     refresh();
 }
 
 void NXNavigationActionsView::refresh() {
     if (_actionProvider) {
         setActions(_actionProvider());
+    }
+
+    const auto controllerType =
+        NXControllerIconResolver::shared().currentControllerType();
+    _controllerType = controllerType;
+    for (const auto& subview : subviews()) {
+        if (const auto actionView =
+                std::dynamic_pointer_cast<NXNavigationActionView>(subview)) {
+            actionView->setControllerType(controllerType);
+        }
     }
 }
 

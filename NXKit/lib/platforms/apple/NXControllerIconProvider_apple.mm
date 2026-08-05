@@ -25,6 +25,21 @@ namespace {
 #define NX_AUTORELEASE(value) [(value) autorelease]
 #endif
 
+NSString* physicalSymbolName(GCControllerElement* element) {
+    if (!element) {
+        return nil;
+    }
+    if (@available(macOS 11.0, iOS 14.0, *)) {
+        return element.unmappedSfSymbolsName ?: element.sfSymbolsName;
+    }
+    return nil;
+}
+
+bool symbolContains(NSString* symbolName, NSString* component) {
+    return symbolName
+        && [symbolName.lowercaseString containsString:component];
+}
+
 NXControllerType controllerTypeForGCController(GCController* controller) {
     if (!controller) {
         return NXControllerType::generic;
@@ -53,14 +68,39 @@ NXControllerType controllerTypeForGCController(GCController* controller) {
         || [identity containsString:@"gamecube"]) {
         return NXControllerType::nintendoSwitch;
     }
+
+    // Third-party controllers often expose only a generic vendor/category.
+    // Their physical face-button symbols still describe the actual printed
+    // layout, including Backbone's PlayStation Edition controllers.
+    if (const auto gamepad = controller.extendedGamepad) {
+        NSString* buttonA = physicalSymbolName(gamepad.buttonA);
+        NSString* buttonB = physicalSymbolName(gamepad.buttonB);
+        NSString* buttonX = physicalSymbolName(gamepad.buttonX);
+        NSString* buttonY = physicalSymbolName(gamepad.buttonY);
+        if (symbolContains(buttonA, @"xmark")
+            || symbolContains(buttonB, @"circle.circle")
+            || symbolContains(buttonX, @"square")
+            || symbolContains(buttonY, @"triangle")) {
+            return NXControllerType::playStation;
+        }
+        if (symbolContains(buttonA, @"b.circle")
+            && symbolContains(buttonB, @"a.circle")
+            && symbolContains(buttonX, @"y.circle")
+            && symbolContains(buttonY, @"x.circle")) {
+            return NXControllerType::nintendoSwitch;
+        }
+        if (symbolContains(buttonA, @"a.circle")
+            && symbolContains(buttonB, @"b.circle")
+            && symbolContains(buttonX, @"x.circle")
+            && symbolContains(buttonY, @"y.circle")) {
+            return NXControllerType::xbox;
+        }
+    }
     return NXControllerType::generic;
 }
 
 GCController* controllerForType(NXControllerType controllerType) {
     NSArray<GCController*>* controllers = GCController.controllers;
-    if (controllerType == NXControllerType::generic) {
-        return nil;
-    }
 
     for (GCController* controller in controllers) {
         if (controllerTypeForGCController(controller) == controllerType) {
@@ -68,8 +108,9 @@ GCController* controllerForType(NXControllerType controllerType) {
         }
     }
 
-    // SDL may know a device more precisely than GameController's public
-    // product strings. A sole controller is still the best symbol authority.
+    // SDL and GameController do not always assign the same family to
+    // third-party hardware. A sole connected controller is still the best
+    // physical-symbol authority, even when SDL calls it generic.
     return controllers.count == 1 ? controllers.firstObject : nil;
 }
 
@@ -389,6 +430,23 @@ std::shared_ptr<UIImage> renderSystemSymbol(
 
 class AppleControllerIconProvider final : public NXControllerIconProvider {
 public:
+    NXControllerType resolvedControllerType(
+        NXControllerType detectedControllerType
+    ) const override {
+        if (detectedControllerType != NXControllerType::generic) {
+            return detectedControllerType;
+        }
+
+        @autoreleasepool {
+            const auto appleControllerType = controllerTypeForGCController(
+                controllerForType(detectedControllerType)
+            );
+            return appleControllerType == NXControllerType::generic
+                ? detectedControllerType
+                : appleControllerType;
+        }
+    }
+
     std::shared_ptr<UIImage> iconForButton(
         NXActionButton button,
         NXControllerType controllerType,
