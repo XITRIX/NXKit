@@ -4,6 +4,7 @@
 #include <UIViewController.h>
 
 #include <deque>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -90,6 +91,14 @@ public:
     void viewDidLayoutSubviews() override;
 
 private:
+    friend class NXTabBarController;
+    struct StackObserver {
+        std::weak_ptr<UIViewController> owner;
+        std::function<void()> handler;
+    };
+    void observeStackUpdates(const std::shared_ptr<UIViewController>& owner, std::function<void()> handler);
+    std::vector<StackObserver> _stackObservers;
+
     enum class Operation {
         none,
         push,

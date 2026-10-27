@@ -34,7 +34,7 @@ enum class UIGlassEffectStyle {
 
  The material adapts liquid_glass_widgets' lens to NXKit's live backdrop,
  with lighting and tint calibrated against native UIKit gallery captures.
- Interactive effects add touch-following sheen, spring inflation and anchored stretch without altering the view's public geometry.
+ Interactive effects add touch-following sheen, size-dependent spring inflation and centered stretch without altering the view's public geometry.
  Refraction and body frost can be tuned independently, and the perimeter
  uses a sub-point hairline with localized light lobes rather than a white ring.
  `BackdropEffect::glass()` resolves the same clear material.

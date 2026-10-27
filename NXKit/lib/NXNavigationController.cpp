@@ -421,12 +421,26 @@ void NXNavigationController::completeStackUpdate() {
         if (_defaultActionsWidget) {
             _defaultActionsWidget->refresh();
         }
+        std::erase_if(_stackObservers, [](const auto& observer) { return observer.owner.expired(); });
+        const auto observers = _stackObservers;
+        for (const auto& observer : observers) {
+            if (!observer.owner.expired()) observer.handler();
+        }
         return;
     }
 
     auto nextUpdate = std::move(_pendingStackUpdates.front());
     _pendingStackUpdates.pop_front();
     beginStackUpdate(std::move(nextUpdate.viewControllers), nextUpdate.animated);
+}
+
+void NXNavigationController::observeStackUpdates(
+    const std::shared_ptr<UIViewController>& owner, std::function<void()> handler
+) {
+    std::erase_if(_stackObservers, [&owner](const auto& observer) {
+        return observer.owner.expired() || observer.owner.lock() == owner;
+    });
+    _stackObservers.push_back({owner, std::move(handler)});
 }
 
 void NXNavigationController::pushViewController(
@@ -608,7 +622,7 @@ std::vector<NXResponderAction> NXNavigationController::resolvedActions() {
         // visible content instead of mirroring focus from the presentation above it.
         if (const auto visible = _visibleViewController
                 ? _visibleViewController
-                : topViewController()) {
+                : topViewController(); visible && visible->viewIsLoaded()) {
             firstResponder = visible->view();
         }
     }

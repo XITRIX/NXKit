@@ -14,6 +14,7 @@
 namespace NXKit {
 
 class NXTabBarController;
+class NXNavigationController;
 
 class NXTabBarControllerDelegate {
 public:
@@ -88,10 +89,16 @@ private:
     std::shared_ptr<UIView> _container;
     std::vector<std::vector<std::shared_ptr<NXTabBarButton>>> _buttons;
     bool _selectionFollowsFocus = true;
+    bool _allowsFocusSelection = true;
+    void setAllowsFocusSelection(bool allowed);
     std::function<bool(const IndexPath&)> _selectionHandler;
     std::function<void(const IndexPath&)> _primaryActionHandler;
 };
 
+// Regular horizontal size class embeds the selection beside a sidebar.
+// Compact shows the list alone; activating an item opens its controller via
+// show(). Returning to regular restores the same selected controller in place.
+// An unspecified size class retains the regular layout.
 class NXTabBarController : public UIViewController {
 public:
     using ViewControllerSection = std::vector<std::shared_ptr<UIViewController>>;
@@ -130,6 +137,8 @@ public:
     void viewDidAppear(bool animated) override;
     void viewWillDisappear(bool animated) override;
     void viewDidDisappear(bool animated) override;
+    void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previous) override;
+    void viewDidLayoutSubviews() override;
 private:
     [[nodiscard]] bool contains(const IndexPath& indexPath) const;
     [[nodiscard]] std::optional<IndexPath> firstIndexPath() const;
@@ -149,7 +158,24 @@ private:
     bool canReturnFocusToSelectedTab();
     bool focusSelectedTab();
     void restoreTabBarSelection();
-    std::shared_ptr<UIViewController> _presentedViewController;
+    bool isCompactLayout() const;
+    void updateAdaptiveLayout();
+    void updateAdaptivePresentation();
+    void scheduleAdaptivePresentation();
+    void releaseCompactController();
+    void returnToTabContainer(const std::shared_ptr<UIViewController>& controller);
+    std::shared_ptr<NXNavigationController> enclosingNavigationController();
+
+    std::shared_ptr<UIViewController> _embeddedViewController;
+    std::shared_ptr<UIViewController> _compactController;
+    std::weak_ptr<NXNavigationController> _compactNavigation;
+    std::weak_ptr<NXNavigationController> _observedNavigation;
+    bool _compactMode = false;
+    bool _compactPresentationRequested = false;
+    bool _closingCompactPresentation = false;
+    bool _updatingAdaptivePresentation = false;
+    bool _needsAdaptivePresentation = false;
+    bool _adaptivePresentationScheduled = false;
     ViewControllerSections _viewControllers;
     std::optional<IndexPath> _selectedIndexPath;
     std::shared_ptr<NXTabBar> _tabBar;

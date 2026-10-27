@@ -59,8 +59,8 @@ public:
             layout->setFlexShrink(0);
         });
         _scene=new_shared<GlassDemoScene>(_demo,UIImage::fromRes("img/glass_demo_scene.png",1));
-        // The preview remains in its fixed logical coordinate space. Yoga owns
-        // its holder; it must not resize the glass scene's internal geometry.
+        // Yoga owns the holder. Fixed button examples retain point-sized touch
+        // targets; the original optical scenes keep their logical coordinates.
         _scene->setAutolayoutEnabled(false);
         _scene->layer()->setAnchorPoint({0,0}); _holder->addSubview(_scene); _contentContainer->addSubview(_holder);
         const auto weak=weak_from_base<GlassSceneViewController>();
@@ -87,8 +87,9 @@ public:
     void viewDidLayoutSubviews() override {
         UIViewController::viewDidLayoutSubviews();
         updateGlassContent(_scroll,_contentContainer);
-        const auto scale=_holder->bounds().width()/720;
-        _scene->setBounds({0,0,720,440});
+        const bool fixedButtons=GlassDemoHasButtons(_demo);
+        const auto scale=fixedButtons ? 1 : _holder->bounds().width()/720;
+        _scene->setBounds(fixedButtons ? _holder->bounds() : NXRect(0,0,720,440));
         _scene->setTransform(NXAffineTransform::scale(scale));
         _scene->layer()->setPosition({0,0});
     }

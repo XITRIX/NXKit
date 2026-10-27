@@ -1,6 +1,8 @@
 #pragma once
 
-// Motion adapted from liquid_glass_widgets' stretch.dart and glass_spring.dart.
+// Analytic oscillator originally adapted from liquid_glass_widgets' glass_spring.dart.
+// Size policy, centered stretch and pull curves calibrated from UIKit traces;
+// see docs/liquid-glass-interaction for runtime evidence and remaining limits.
 // Copyright 2025 Tim Lehmann for whynotmake.it
 // Copyright (c) 2024–2026 Sebastian Degenaar
 // SPDX-License-Identifier: MIT. See licenses/liquid_glass_widgets-MIT.txt.
@@ -53,26 +55,76 @@ struct GlassInteraction {
     GlassSpring inflation;
     GlassSpring dragX;
     GlassSpring dragY;
+    GlassSpring stretchX;
+    GlassSpring stretchY;
     NXPoint dragTarget;
+    NXPoint displacement;
     NXPoint location;
+    NXSize interactionSize = {52, 52};
     double glowProgress = 0;
 
     void move(NXPoint point, NXPoint delta) {
         if (!std::isfinite(point.x) || !std::isfinite(point.y)
             || !std::isfinite(delta.x) || !std::isfinite(delta.y)) return;
         location = point;
-        const double magnitude = std::hypot(delta.x, delta.y);
-        const double resistance = 0.5 / (1 + magnitude * 0.01);
-        dragTarget = NXPoint(delta.x * resistance, delta.y * resistance);
+        displacement = delta;
+        updateDragTarget();
     }
 
-    void advance(double dt) {
+    static bool validSize(NXSize size) {
+        return std::isfinite(size.width) && std::isfinite(size.height)
+            && size.width > 0 && size.height > 0;
+    }
+
+    // Measured on UIKit 27.0 using public XCTest gestures and live presentation
+    // layers. These are fitted behavior, not a documented Apple size contract.
+    static double sizeWeight(double dimension) {
+        return std::clamp((dimension - 44) / 116, 0.0, 1.0);
+    }
+
+    static bool usesLargeResponse(NXSize size) {
+        return std::max(size.width, size.height) >= 120;
+    }
+
+    void updateDragTarget() {
+        if (!validSize(interactionSize)) { dragTarget = {}; return; }
+        const double resistance = usesLargeResponse(interactionSize)
+            ? 3 + 9 * sizeWeight(std::min(interactionSize.width, interactionSize.height)) : 1;
+        const auto pull = [resistance](double delta, double dimension) {
+            // Resistance changes at the edge, independently on each axis.
+            // This also keeps diagonal input from reducing either axis's pull.
+            const double distance = std::abs(delta);
+            return std::copysign((distance + 3 * std::max(0.0, distance - dimension * .5))
+                * dimension / (8000 * resistance), delta);
+        };
+        dragTarget = NXPoint(pull(displacement.x, interactionSize.width),
+                             pull(displacement.y, interactionSize.height));
+    }
+
+    void advance(double dt, NXSize size) {
         if (!std::isfinite(dt) || dt <= 0) return;
-        inflation.advance(pressed ? 1 : 0, dt, pressed ? 0.250 : 0.280, pressed ? 0.25 : 0.45);
-        dragX.advance(pressed ? dragTarget.x : 0, dt, pressed ? 0.150 : 0.500, pressed ? 0 : 0.3);
-        dragY.advance(pressed ? dragTarget.y : 0, dt, pressed ? 0.150 : 0.500, pressed ? 0 : 0.3);
+        interactionSize = size;
+        updateDragTarget();
+        const double weight = validSize(size) && usesLargeResponse(size)
+            ? sizeWeight(std::max(size.width, size.height)) : 0;
+        const double pressDuration = std::lerp(2 * std::numbers::pi / 24, 2 * std::numbers::pi / 20, weight);
+        const double releaseDuration = std::lerp(.4, .358, weight);
+        const double releaseBounce = std::lerp(.625, .4, weight);
+        inflation.advance(pressed ? 1 : 0, dt, pressed ? pressDuration : releaseDuration,
+                          pressed ? .375 : releaseBounce);
+        const double dragDuration = pressed
+            ? std::lerp(2 * std::numbers::pi / 22, 2 * std::numbers::pi / 18, weight) : releaseDuration;
+        dragX.advance(pressed ? dragTarget.x : 0, dt, dragDuration, pressed ? .375 : releaseBounce);
+        dragY.advance(pressed ? dragTarget.y : 0, dt, dragDuration, pressed ? .375 : releaseBounce);
+        // Deformation follows unsigned pull, independently of translation.
+        // Reversing the finger must not flip the current shape instantly; both
+        // presentation values and their velocities survive the new target.
+        stretchX.advance(pressed ? std::abs(dragTarget.x) : 0, dt, dragDuration, pressed ? .375 : releaseBounce);
+        stretchY.advance(pressed ? std::abs(dragTarget.y) : 0, dt, dragDuration, pressed ? .375 : releaseBounce);
         glowProgress = std::clamp(glowProgress + (pressed ? dt / 0.150 : -dt / 0.060), 0.0, 1.0);
     }
+
+    void advance(double dt) { advance(dt, interactionSize); }
 
     NXFloat glow() const {
         // Flutter Curves.easeOut: cubic Bezier (0, 0, 0.58, 1).
@@ -94,36 +146,26 @@ struct GlassInteraction {
         return inflation.atRest(pressed ? 1 : 0)
             && dragX.atRest(pressed ? dragTarget.x : 0)
             && dragY.atRest(pressed ? dragTarget.y : 0)
+            && stretchX.atRest(pressed ? std::abs(dragTarget.x) : 0)
+            && stretchY.atRest(pressed ? std::abs(dragTarget.y) : 0)
             && glowProgress == (pressed ? 1 : 0);
     }
 
     NXAffineTransform transform(NXSize size) const {
-        if (!std::isfinite(size.width) || !std::isfinite(size.height)
-            || size.width <= 0 || size.height <= 0) return NXAffineTransform::identity;
+        if (!validSize(size)) return NXAffineTransform::identity;
         const double dimension = std::max(size.width, size.height);
-        const double pressScale = 1 + 17 / std::max(17.0, dimension) * inflation.value;
-        const double aspect = size.width / size.height;
-        const double dampX = aspect > 1 ? 1 / aspect : 1;
-        const double dampY = aspect < 1 ? aspect : 1;
-        const double relativeX = std::abs(dragX.value) / dimension;
-        const double relativeY = std::abs(dragY.value) / dimension;
-        const double sx = (1 + std::clamp(relativeX * 0.1 * dampX, 0.0, 0.3))
-            * (1 - std::clamp(relativeY * 0.1 * dampX, 0.0, 0.15));
-        const double sy = (1 + std::clamp(relativeY * 0.1 * dampY, 0.0, 0.3))
-            * (1 - std::clamp(relativeX * 0.1 * dampY, 0.0, 0.15));
-        const auto signedSmoothstep = [](double value) {
-            const double t = std::clamp(std::abs(value) / 20, 0.0, 1.0);
-            return std::copysign(t * t * (3 - 2 * t), value);
-        };
-        const double px = size.width * (0.5 - signedSmoothstep(dragX.value) * 0.5);
-        const double py = size.height * (0.5 - signedSmoothstep(dragY.value) * 0.5);
-        // Centre inflation, then elongation anchored on the opposite edge.
+        const double growth = usesLargeResponse(size)
+            ? std::lerp(16.0, 4.0, sizeWeight(std::min(size.width, size.height))) : 16;
+        const double pressScale = 1 + growth / std::max(16.0, dimension) * inflation.value;
+        // Equal/opposite relative stretch preserves the mean inflation. UIKit
+        // centres it and applies the resisted translation before scaling.
+        const double stretch = std::clamp(stretchX.value / size.width - stretchY.value / size.height, -.45, .45);
+        const double sx = pressScale + stretch;
+        const double sy = pressScale - stretch;
         return NXAffineTransform(
-            pressScale * sx, 0, 0, pressScale * sy,
-            size.width * 0.5 * (1 - pressScale)
-                + pressScale * (px * (1 - sx) + sx * dragX.value * 0.1 * dampX),
-            size.height * 0.5 * (1 - pressScale)
-                + pressScale * (py * (1 - sy) + sy * dragY.value * 0.1 * dampY)
+            sx, 0, 0, sy,
+            size.width * .5 * (1 - sx) + sx * dragX.value,
+            size.height * .5 * (1 - sy) + sy * dragY.value
         );
     }
 };

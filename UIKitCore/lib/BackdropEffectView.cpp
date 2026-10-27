@@ -285,7 +285,7 @@ void BackdropEffectView::_advanceInteraction(double seconds) {
         }
     }
     if (state.motion.pressed && state.touch.expired()) state.motion.pressed = false;
-    state.motion.advance(seconds);
+    state.motion.advance(seconds, layer()->presentationOrSelf()->bounds().size);
     _backdropEffectLayer()->setGlassInteraction(state.motion);
     if (!state.motion.atRest()) CALayer::requestFramerate(120);
     if (state.motion.atRest() && !state.motion.pressed) {

@@ -18,7 +18,7 @@ const std::vector<MaterialUniform>& materialUniforms() {
         const std::regex declaration("uniform (float[234]?) ([A-Za-z0-9_]+);");
         for (auto i = std::sregex_iterator(source.begin(), source.end(), declaration); i != std::sregex_iterator(); ++i) {
             const std::string type = (*i)[1], name = (*i)[2];
-            if (name == "contentScale" || name == "filterScale" || name == "externalShapeCoverage" || name == "maximumSampleRadius") continue;
+            if (name == "contentScale" || name == "filterScale" || name == "externalShapeCoverage") continue;
             result.push_back({type, name, type.size() == 5 ? 1 : type.back() - '0'});
         }
         return result;
@@ -32,24 +32,28 @@ void replaceAll(std::string& text, const std::string& from, const std::string& t
 std::string shaderSource(size_t count) {
     const auto n = std::to_string(count);
     auto source = BackdropEffect::glass().shaderSource();
+    // Shading runs in each item's actual local coordinates and with its exact
+    // material. Discrete choices such as clear/regular and tintMode must never
+    // pass through intermediate values at an ownership boundary.
     for (const auto& u : materialUniforms()) {
         replaceAll(source, "uniform " + u.type + " " + u.name + ";",
             "uniform " + u.type + " material_" + u.name + "[" + n + "];\n" + u.type + " " + u.name + ";");
     }
-    std::string declarations = "uniform float4 inverseX[" + n + "], inverseY[" + n + "], geometry[" + n + "];\n"
-        "uniform float itemAlpha[" + n + "], itemShadow[" + n + "];\nuniform float mergeSpacing;\nfloat weights[" + n + "], distances[" + n + "];\nfloat2 mergedNormal;\n";
-    std::string backdrop = "half4 groupBackdrop(float2 xy) { half4 color = half4(0);\n";
+    std::string declarations = "uniform float4 inverseX[" + n + "], inverseY[" + n + "], forwardX[" + n + "], forwardY[" + n + "], geometry[" + n + "];\n"
+        "uniform float itemAlpha[" + n + "], itemShadow[" + n + "];\nuniform float mergeSpacing;\nfloat weights[" + n + "], distances[" + n + "];\nfloat2 mergedNormal, materialNormal;\nbool geometryBlended;\n"
+        "float3 materialForwardX, materialForwardY;\nint activeMaterial;\n"
+        "float2 groupXY(float2 xy) { float3 p = float3(xy / max(filterScale, 1.0), 1); return float2(dot(materialForwardX,p), dot(materialForwardY,p)) * max(filterScale,1.0); }\n";
+    std::string backdrop = "half4 groupBackdrop(float2 xy) { float2 p = groupXY(xy);\n";
     for (size_t i = 0; i < count; ++i) {
         declarations += "uniform shader backdrop" + std::to_string(i) + ";\n";
-        backdrop += "color += half(weights[" + std::to_string(i) + "]) * backdrop" + std::to_string(i) + ".eval(xy);\n";
+        backdrop += "if (activeMaterial == " + std::to_string(i) + ") return backdrop" + std::to_string(i) + ".eval(p);\n";
     }
-    backdrop += "return color; }\n";
-    source.insert(source.find("const float SMOOTH_EDGE_PX"), declarations + backdrop);
-    replaceAll(source, "return content.eval(filterXY);", "return sharpContent.eval(filterXY);");
+    backdrop += "return half4(0); }\n"
+        "half4 groupSharp(float2 xy) { return sharpContent.eval(groupXY(xy)); }\n";
     replaceAll(source, "content.eval(", "groupBackdrop(");
-    replaceAll(source, "float2 normal = lensNormalDirection(p, halfDim, r);", "float2 normal = mergedNormal;");
-    // Skia requires constant indices for uniform arrays on portable backends.
-    // Generate straight-line reductions; geometry and materials remain uniforms.
+    replaceAll(source, "sharpContent.eval(", "groupSharp(");
+    replaceAll(source, "float2 normal = lensNormalDirection(p, halfDim, r);", "float2 normal = materialNormal;");
+    source.insert(source.find("const float SMOOTH_EDGE_PX"), declarations + backdrop);
     const std::string itemFunction = R"SKSL(
 float3 itemDistanceINDEX(float2 xy) {
     float4 g = geometry[INDEX];
@@ -67,57 +71,76 @@ float3 itemDistanceINDEX(float2 xy) {
     std::string helpers;
     for (size_t i = 0; i < count; ++i) {
         auto function = itemFunction;
-        replaceAll(function, "INDEX", std::to_string(i));
-        helpers += function;
+        replaceAll(function, "INDEX", std::to_string(i)); helpers += function;
     }
-    helpers += "float mergeGeometry(float2 xy) { float3 first = itemDistance0(xy); float d = first.x; mergedNormal = first.yz; weights[0] = 1; distances[0] = d;\n";
+    // Preserve the calibrated zero contour exactly. Four neighbouring field
+    // evaluations supply the missing derivative of the normal-dependent blend
+    // width as well as the smooth-min's non-unit gradient near a narrow neck.
+    helpers += "float mergeGeometry(float2 xy, bool record) { float3 first = itemDistance0(xy); float d = first.x; mergedNormal = first.yz; if (record) { weights[0] = 1; distances[0] = d; geometryBlended = false; }\n";
     for (size_t i = 1; i < count; ++i) {
         const auto index = std::to_string(i);
-        helpers += "{ float3 item = itemDistance" + index + "(xy); float other = item.x; distances[" + index + "] = other;\n"
-            // Native contour measurements show a smaller blend for parallel
-            // normals. In particular, coincident flat edges must not bulge.
+        helpers += "{ float3 item = itemDistance" + index + "(xy); float other = item.x; if (record) distances[" + index + "] = other;\n"
             "float k = mergeSpacing * clamp(0.5 - 0.5 * dot(item.yz, mergedNormal / max(length(mergedNormal), 0.0001)), 0, 1);\n"
             "float h = k > 0.0001 ? clamp(0.5 + 0.5 * (other - d) / k, 0, 1) : (d <= other ? 1 : 0);\n";
-        for (size_t j = 0; j < i; ++j) helpers += "weights[" + std::to_string(j) + "] *= h;\n";
-        helpers += "weights[" + index + "] = 1 - h; mergedNormal = mix(item.yz, mergedNormal, h);\n"
+        for (size_t j = 0; j < i; ++j) helpers += "if (record) weights[" + std::to_string(j) + "] *= h;\n";
+        helpers += "if (record) { weights[" + index + "] = 1 - h; geometryBlended = geometryBlended || (h > 0 && h < 1); } mergedNormal = mix(item.yz, mergedNormal, h);\n"
             "d = mix(other, d, h) - k * h * (1 - h); }\n";
     }
-    // Geometry weights fill the bridge outside the individual shapes. Inside
-    // each item UIKit gives the front material ownership, with a narrow seam.
-    // The captured color handoff extends about six points ahead of the front
-    // shape, over an eight-point band; its darker internal optics are approximate.
-    // Material order must follow the same painter order as foreground content.
+    helpers += "return d; }\nvoid materialOwnership() {\n";
+    // Retain the previously measured painter-order handoff; only fully shaded
+    // material colors, rather than mode flags or optical geometry, are mixed.
     for (size_t i = 0; i < count; ++i) {
         const auto index = std::to_string(i);
         helpers += "{ float cover = clamp(1.25 - distances[" + index + "] / 8.0, 0, 1);\n";
         for (size_t j = 0; j < count; ++j) helpers += "weights[" + std::to_string(j) + "] *= 1-cover;\n";
         helpers += "weights[" + index + "] += cover; }\n";
     }
-    helpers += "mergedNormal /= max(length(mergedNormal), 0.0001); return d; }\n";
+    helpers += "}\n";
     source.insert(source.find("float toBrightness"), helpers);
-    std::string setup = "float2 xy = filterXY / max(filterScale, 1.0);\n"
-        "float sceneDistance = mergeGeometry(xy);\nfloat materialAlpha = 0, materialShadow = 0;\n";
-    for (const auto& u : materialUniforms()) {
-        setup += u.name + " = " + u.type + "(0);\n";
-        for (size_t i = 0; i < count; ++i) setup += u.name + " += weights[" + std::to_string(i) + "] * material_" + u.name + "[" + std::to_string(i) + "];\n";
+    source.erase(source.find("half4 main(float2 filterXY)"));
+    std::string main = R"SKSL(
+half4 main(float2 filterXY) {
+    float2 xy = filterXY / max(filterScale, 1.0);
+    float rawDistance = mergeGeometry(xy,true);
+    float2 sceneNormal = mergedNormal / max(length(mergedNormal),0.0001);
+    float sceneDistance = rawDistance;
+    if (geometryBlended) {
+        float epsilon = max(0.05, 0.25 / max(contentScale, 1.0));
+        float dx = mergeGeometry(xy + float2(epsilon,0),false) - mergeGeometry(xy - float2(epsilon,0),false);
+        float dy = mergeGeometry(xy + float2(0,epsilon),false) - mergeGeometry(xy - float2(0,epsilon),false);
+        float2 gradient = float2(dx,dy) / (2*epsilon);
+        float magnitude = length(gradient);
+        if (magnitude > 0.0001) sceneNormal = gradient / magnitude;
+        // Bound medial-axis/topology saddles without changing the field sign.
+        sceneDistance = rawDistance / max(magnitude,0.05);
     }
+    materialOwnership();
+    half4 original = sharpContent.eval(filterXY);
+    float materialShadow = 0;
+)SKSL";
+    for (size_t i = 0; i < count; ++i)
+        main += "materialShadow += weights[" + std::to_string(i) + "] * itemShadow[" + std::to_string(i) + "];\n";
+    main += R"SKSL(
+    float shadowDistance = max(sceneDistance - sceneNormal.y * 2, 0);
+    float shadow = materialShadow * (0.0294 * exp(-0.5 * pow(shadowDistance / 5.12, 2)) +
+        0.0098 * exp(-0.5 * pow(max(sceneDistance - sceneNormal.y, 0) / 1.65, 2)));
+    float coverage = clamp(0.5 - sceneDistance * max(contentScale,1), 0, 1);
+    if (coverage <= 0) return half4(original.rgb * half(1-shadow), original.a);
+    half4 result = original;
+)SKSL";
     for (size_t i = 0; i < count; ++i) {
         const auto index = std::to_string(i);
-        setup += "materialAlpha += weights[" + index + "] * itemAlpha[" + index + "];\n";
-        setup += "materialShadow += weights[" + index + "] * itemShadow[" + index + "];\n";
+        main += "if (weights[" + index + "] > 0) {\n";
+        for (const auto& u : materialUniforms()) main += u.name + " = material_" + u.name + "[" + index + "];\n";
+        main += "activeMaterial = " + index + "; materialForwardX = forwardX[" + index + "].xyz; materialForwardY = forwardY[" + index + "].xyz;\n"
+            "float2 localXY = float2(dot(inverseX[" + index + "].xyz,float3(xy,1)),dot(inverseY[" + index + "].xyz,float3(xy,1)));\n"
+            "float2 localGradient = float2(forwardX[" + index + "].x * sceneNormal.x + forwardY[" + index + "].x * sceneNormal.y, forwardX[" + index + "].y * sceneNormal.x + forwardY[" + index + "].y * sceneNormal.y);\n"
+            "float localMetric = max(length(localGradient),0.0001); materialNormal = localGradient / localMetric;\n"
+            "half4 color = referenceGlass(localXY,lensSize*0.5,min(cornerRadius,min(lensSize.x,lensSize.y)*0.5),localXY-lensCenter,sceneDistance/localMetric);\n"
+            "result += half(weights[" + index + "] * itemAlpha[" + index + "]) * (color-original); }\n";
     }
-    setup += "half4 original = sharpContent.eval(filterXY);\n"
-        "float shadowDistance = max(sceneDistance - mergedNormal.y * 2, 0);\n"
-        "float shadow = materialShadow * (0.0294 * exp(-0.5 * pow(shadowDistance / 5.12, 2)) + "
-        "0.0098 * exp(-0.5 * pow(max(sceneDistance - mergedNormal.y, 0) / 1.65, 2)));\n"
-        "half4 exterior = half4(original.rgb * half(1-shadow), original.a);\n";
-    replaceAll(source, "float2 xy = filterXY / max(filterScale, 1.0);", setup);
-    replaceAll(source, "return sharpContent.eval(filterXY);", "return exterior;");
-    replaceAll(source, "float sdf = boxRoundedSDF(p, halfDim, r);", "float sdf = sceneDistance;");
-    replaceAll(source, "return referenceGlass(xy, halfDim, r, p, sdf);", "half4 material = mix(original, referenceGlass(xy, halfDim, r, p, sdf), half(materialAlpha)); "
-        "float coverage = clamp(0.5 - sdf * max(contentScale, 1), 0, 1); "
-        "return half4(material.rgb - original.rgb * half(shadow * (1-coverage)), material.a);");
-    return source;
+    main += "half4 color = mix(original,result,half(coverage)); return half4(color.rgb-original.rgb*half(shadow*(1-coverage)),color.a); }\n";
+    return source + main;
 }
 }
 
@@ -189,7 +212,7 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
     auto children = sublayers();
     std::stable_sort(children.begin(), children.end(), [](const auto& a, const auto& b) { return a->zPosition() < b->zPosition(); });
     for (const auto& child : children) collect(child, parent, 1, items);
-    if (items.empty()) return;
+    if (items.size() < 2) return;
     if (!_runtime || _runtimeCount != items.size()) {
         // Reuse the program across containers and membership changes. All
         // current geometry, optics and traits are supplied afresh as uniforms.
@@ -207,7 +230,7 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
     SkRuntimeEffectBuilder builder(_runtime);
     NXFloat scale = std::isfinite(contentsScale()) ? std::max(1.0f, contentsScale()) : 1;
     NXFloat maximumRadius = 0;
-    std::vector<float> inverseX, inverseY, geometry, alphas, shadows;
+    std::vector<float> inverseX, inverseY, forwardX, forwardY, geometry, alphas, shadows;
     SkRect area = SkRect::MakeEmpty();
     std::vector<std::string> childNames;
     std::vector<sk_sp<SkImageFilter>> inputs;
@@ -215,9 +238,12 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
         const auto& item = items[i];
         const auto& m = item.inverse;
         const auto& layer = item.layer;
+        const auto& forward = item.matrix;
         const auto size = layer->bounds().size;
         inverseX.insert(inverseX.end(), {m.getScaleX(), m.getSkewX(), m.getTranslateX(), 0});
         inverseY.insert(inverseY.end(), {m.getSkewY(), m.getScaleY(), m.getTranslateY(), 0});
+        forwardX.insert(forwardX.end(), {forward.getScaleX(), forward.getSkewX(), forward.getTranslateX(), 0});
+        forwardY.insert(forwardY.end(), {forward.getSkewY(), forward.getScaleY(), forward.getTranslateY(), 0});
         geometry.insert(geometry.end(), {size.width, size.height,
             std::isfinite(layer->cornerRadius()) ? std::max(0.0f, layer->cornerRadius()) : 0,
             layer->cornerCurve() == CALayerCornerCurve::continuous ? 1.0f : 0.0f});
@@ -226,9 +252,12 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
         shadows.push_back(!layer->shadowColor() && appearance && appearance->front() > .5f
             ? std::max(0.0f, layer->shadowOpacity()) * item.alpha : 0);
         area.join(item.matrix.mapRect(SkRect::MakeWH(size.width, size.height)));
-        maximumRadius = std::max(maximumRadius, item.material.maximumSampleRadius());
+        const double a = forward.getScaleX(), b = forward.getSkewX(), c = forward.getSkewY(), d = forward.getScaleY();
+        const double squareNorm = a*a+b*b+c*c+d*d, determinant = a*d-b*c;
+        const auto stretch = std::sqrt((squareNorm + std::sqrt(std::max(0.0,squareNorm*squareNorm-4*determinant*determinant)))*.5);
+        maximumRadius = std::max(maximumRadius, static_cast<NXFloat>(item.material.maximumSampleRadius() * stretch));
         const auto blur = item.material.backdropBlurRadius() * scale;
-        inputs.push_back(blur > 0 ? SkImageFilters::Blur(blur, blur, SkTileMode::kClamp, nullptr) : nullptr);
+        inputs.push_back(blur > 0 ? SkImageFilters::Blur(blur * std::hypot(forward.getScaleX(),forward.getSkewX()), blur * std::hypot(forward.getSkewY(),forward.getScaleY()), SkTileMode::kClamp, nullptr) : nullptr);
         childNames.push_back("backdrop" + std::to_string(i));
         canvas->save(); canvas->concat(item.matrix); layer->observeBackdrop(canvas); canvas->restore();
     }
@@ -236,33 +265,36 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
         std::vector<float> values;
         for (const auto& item : items) {
             const auto size = item.layer->bounds().size;
-            const auto center = item.matrix.mapPoint({size.width * 0.5f, size.height * 0.5f});
+            const auto center = SkPoint::Make(size.width * 0.5f, size.height * 0.5f);
             if (u.name == "lensCenter") values.insert(values.end(), {center.x(), center.y()});
             else if (u.name == "lensSize" || u.name == "resolution") values.insert(values.end(), {size.width, size.height});
             else if (u.name == "cornerRadius") values.push_back(std::isfinite(item.layer->cornerRadius()) ? std::max(0.0f, item.layer->cornerRadius()) : 0);
             else if (u.name == "cornerCurve") values.push_back(item.layer->cornerCurve() == CALayerCornerCurve::continuous ? 1 : 0);
             else if (u.name == "interactionIntensity") values.push_back(item.layer->_interaction->glow());
             else if (u.name == "interactionLocation") {
-                const auto location = item.matrix.mapPoint({item.layer->_interaction->location.x, item.layer->_interaction->location.y});
+                const auto location = SkPoint::Make(item.layer->_interaction->location.x, item.layer->_interaction->location.y);
                 values.insert(values.end(), {location.x(), location.y()});
-            } else {
+            } else if (u.name == "maximumSampleRadius") values.push_back(item.material.maximumSampleRadius());
+            else {
                 const auto uniform = item.material.uniform(u.name);
                 if (!uniform || uniform->size() != u.count) throw std::logic_error("Missing glass material uniform " + u.name);
                 values.insert(values.end(), uniform->begin(), uniform->end());
             }
         }
-        builder.uniform("material_" + u.name).set(values.data(), values.size());
+        if (_runtime->findUniform("material_" + u.name))
+            builder.uniform("material_" + u.name).set(values.data(), values.size());
     }
     builder.uniform("inverseX").set(inverseX.data(), inverseX.size());
     builder.uniform("inverseY").set(inverseY.data(), inverseY.size());
+    builder.uniform("forwardX").set(forwardX.data(), forwardX.size());
+    builder.uniform("forwardY").set(forwardY.data(), forwardY.size());
     builder.uniform("geometry").set(geometry.data(), geometry.size());
     builder.uniform("itemAlpha").set(alphas.data(), alphas.size());
     builder.uniform("itemShadow").set(shadows.data(), shadows.size());
     builder.uniform("mergeSpacing") = _effect.spacing();
     builder.uniform("contentScale") = scale;
     builder.uniform("filterScale") = scale;
-    builder.uniform("externalShapeCoverage") = 0.0f;
-    builder.uniform("maximumSampleRadius") = maximumRadius;
+    builder.uniform("externalShapeCoverage") = 1.0f;
     childNames.push_back("sharpContent"); inputs.push_back(nullptr);
     std::vector<std::string_view> names(childNames.begin(), childNames.end());
     auto filter = SkImageFilters::RuntimeShader(builder, maximumRadius * scale, names.data(), inputs.data(), inputs.size());

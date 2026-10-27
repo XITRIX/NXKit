@@ -422,7 +422,13 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     float glow = clamp(interactionIntensity, 0.0, 1.0);
     float glowRadius = max(1.0, min(lensSize.x, lensSize.y) * 1.6);
     float sheen = 1.0 - smoothstep(0.0, glowRadius, length(xy - interactionLocation));
-    result = mix(result, half3(1.0), glow * mix(0.14, 0.22, backdropLuma));
+    // Native held-minus-settled samples separate regular neutral and tinted
+    // responses: the neutral total white opacity is about .50/.44 in light/
+    // dark, while explicit regular tints use .30 ambient plus the local sheen.
+    // Clear retains its existing response.
+    float ambientPressOpacity = bodyMode > 0.5 ? mix(0.14, 0.22, backdropLuma)
+        : (tintMode > 1.5 ? 0.30 : mix(0.385, 0.47, backdropLuma));
+    result = mix(result, half3(1.0), glow * ambientPressOpacity);
     result = mix(result, half3(1.0), glow * sheen * mix(0.07, 0.10, backdropLuma));
     float alpha = externalShapeCoverage > 0.5 ? 1.0 : clamp(0.5 - sdf / pixelWidth, 0.0, 1.0);
     return mix(background, half4(clamp(result, 0.0, 1.0) * pixel.a, pixel.a), alpha);

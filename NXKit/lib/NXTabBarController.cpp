@@ -1,5 +1,7 @@
 #include <NXTabBarController.h>
 #include <NXResponderAction.h>
+#include <NXNavigationController.h>
+#include <DispatchQueue.h>
 
 #include <NXSeparatorView.h>
 #include <UIWindow.h>
@@ -59,7 +61,7 @@ void NXTabBarButton::didUpdateFocusIn(
 
     const auto next = context.nextFocusedItem().lock();
     const auto previous = context.previouslyFocusedItem().lock();
-    if (_selectionFollowsFocus && next.get() == this && previous != next) {
+    if (_selectionFollowsFocus && !isSelected() && next.get() == this && previous != next) {
         if (_selectionAction) {
             _selectionAction();
         }
@@ -145,7 +147,7 @@ void NXTabBar::setItems(Items items) {
         for (size_t item = 0; item < _items[section].size(); ++item) {
             auto button = new_shared<NXTabBarButton>();
             button->setAutolayoutEnabled(true);
-            button->setSelectionFollowsFocus(_selectionFollowsFocus);
+            button->setSelectionFollowsFocus(_selectionFollowsFocus && _allowsFocusSelection);
             button->setText(_items[section][item]);
             button->_selectionAction = [weakSelf, section, item]() {
                 if (const auto self = weakSelf.lock()) {
@@ -248,7 +250,17 @@ void NXTabBar::setSelectionFollowsFocus(bool selectionFollowsFocus) {
     _selectionFollowsFocus = selectionFollowsFocus;
     for (const auto& section : _buttons) {
         for (const auto& button : section) {
-            button->setSelectionFollowsFocus(selectionFollowsFocus);
+            button->setSelectionFollowsFocus(selectionFollowsFocus && _allowsFocusSelection);
+        }
+    }
+}
+
+void NXTabBar::setAllowsFocusSelection(bool allowed) {
+    if (_allowsFocusSelection == allowed) return;
+    _allowsFocusSelection = allowed;
+    for (const auto& section : _buttons) {
+        for (const auto& button : section) {
+            button->setSelectionFollowsFocus(_selectionFollowsFocus && allowed);
         }
     }
 }
@@ -305,7 +317,8 @@ void NXTabBarController::setViewControllerSections(ViewControllerSections contro
                     "NXTabBarController cannot contain itself"
                 );
             }
-            if (const auto parent = controller->parent().lock(); parent && parent.get() != this) {
+            if (const auto parent = controller->parent().lock(); parent && parent.get() != this
+                && !(controller == _compactController && parent == _compactNavigation.lock())) {
                 throw std::invalid_argument(
                     "An NXTabBarController child already belongs to another container"
                 );
@@ -452,11 +465,7 @@ void NXTabBarController::setTabBarWidth(NXFloat tabBarWidth) {
     }
 
     _tabBarWidth = tabBarWidth;
-    if (_tabBar) {
-        _tabBar->configureLayout([tabBarWidth](const std::shared_ptr<YGLayout>& layout) {
-            layout->setWidth(YGValue { tabBarWidth, YGUnitPoint });
-        });
-    }
+    if (_tabBar) updateAdaptiveLayout();
 }
 
 void NXTabBarController::loadView() {
@@ -519,29 +528,31 @@ void NXTabBarController::viewDidLoad() {
     UIViewController::viewDidLoad();
     reloadTabBarItems();
     attachConfiguredChildren();
+    updateAdaptiveLayout();
     updateTabSelection();
 }
 
 void NXTabBarController::viewWillAppear(bool animated) {
-    if (const auto selected = selectedViewController()) {
+    if (const auto selected = _embeddedViewController) {
         selected->viewWillAppear(animated);
     }
 }
 
 void NXTabBarController::viewDidAppear(bool animated) {
-    if (const auto selected = selectedViewController()) {
-        selected->viewDidAppear(animated);
-    }
+    if (const auto selected = _embeddedViewController) selected->viewDidAppear(animated);
+    // Modal dismissal clears its relationships after viewDidAppear returns.
+    if (_compactController) scheduleAdaptivePresentation();
+    else updateAdaptivePresentation();
 }
 
 void NXTabBarController::viewWillDisappear(bool animated) {
-    if (const auto selected = selectedViewController()) {
+    if (const auto selected = _embeddedViewController) {
         selected->viewWillDisappear(animated);
     }
 }
 
 void NXTabBarController::viewDidDisappear(bool animated) {
-    if (const auto selected = selectedViewController()) {
+    if (const auto selected = _embeddedViewController) {
         selected->viewDidDisappear(animated);
     }
 }
@@ -569,6 +580,7 @@ void NXTabBarController::reloadTabBarItems() {
 void NXTabBarController::attachConfiguredChildren() {
     const auto self = shared_from_this();
     for (const auto& controller : viewControllers()) {
+        if (controller == _compactController) continue;
         if (const auto parent = controller->parent().lock()) {
             if (parent.get() != this) {
                 throw std::invalid_argument(
@@ -601,6 +613,7 @@ void NXTabBarController::removeUnconfiguredChildren(
 }
 
 bool NXTabBarController::handleUserSelection(const IndexPath& indexPath) {
+    updateAdaptivePresentation();
     const auto candidate = viewControllerAt(indexPath);
     if (!candidate) {
         restoreTabBarSelection();
@@ -621,23 +634,27 @@ bool NXTabBarController::handleUserSelection(const IndexPath& indexPath) {
         return false;
     }
 
-    if (strongDelegate) {
-        strongDelegate->tabBarControllerDidSelect(self, candidate);
+    if (strongDelegate) strongDelegate->tabBarControllerDidSelect(self, candidate);
+    // A selection callback can replace the list or the selection again.
+    if (_compactMode && selectedViewController() == candidate) {
+        _compactPresentationRequested = true;
+        updateAdaptivePresentation();
     }
     return true;
 }
 
 bool NXTabBarController::focusPresentedViewController() {
-    if (!_presentedViewController) {
+    if (!_embeddedViewController) {
         return false;
     }
     const auto window = view()->window();
     return window && window->focusSystem()->requestFocusUpdate(
-        _presentedViewController
+        _embeddedViewController
     );
 }
 
 bool NXTabBarController::canReturnFocusToSelectedTab() {
+    if (_compactMode) return false;
     if (!_tabBar || !_selectedIndexPath || !_tabBar->contains(*_selectedIndexPath)) {
         return false;
     }
@@ -674,13 +691,17 @@ void NXTabBarController::restoreTabBarSelection() {
 }
 
 void NXTabBarController::updateTabSelection() {
+    if (_compactMode || _compactController) {
+        updateAdaptivePresentation();
+        return;
+    }
     const auto nextViewController = selectedViewController();
-    if (_presentedViewController == nextViewController) {
+    if (_embeddedViewController == nextViewController) {
         return;
     }
 
     const bool isVisible = viewIsLoaded() && view()->window() != nullptr;
-    const auto previousViewController = _presentedViewController;
+    const auto previousViewController = _embeddedViewController;
 
     if (isVisible && previousViewController) {
         previousViewController->viewWillDisappear(false);
@@ -693,7 +714,7 @@ void NXTabBarController::updateTabSelection() {
         previousViewController->view()->removeFromSuperview();
     }
 
-    _presentedViewController = nextViewController;
+    _embeddedViewController = nextViewController;
     if (nextViewController) {
         if (const auto parent = nextViewController->parent().lock(); parent && parent.get() != this) {
             throw std::logic_error(
@@ -723,4 +744,165 @@ void NXTabBarController::updateTabSelection() {
             window->updateFocus();
         }
     }
+}
+
+bool NXTabBarController::isCompactLayout() const {
+    const auto traits = traitCollection();
+    return traits && traits->horizontalSizeClass() == UIUserInterfaceSizeClass::compact;
+}
+
+std::shared_ptr<NXNavigationController> NXTabBarController::enclosingNavigationController() {
+    for (auto ancestor = parent().lock(); ancestor; ancestor = ancestor->parent().lock()) {
+        if (const auto navigation = std::dynamic_pointer_cast<NXNavigationController>(ancestor)) return navigation;
+    }
+    return nullptr;
+}
+
+void NXTabBarController::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previous) {
+    UIViewController::traitCollectionDidChange(std::move(previous));
+    if (viewIsLoaded()) updateAdaptiveLayout();
+}
+
+void NXTabBarController::viewDidLayoutSubviews() {
+    UIViewController::viewDidLayoutSubviews();
+    updateAdaptiveLayout();
+}
+
+void NXTabBarController::updateAdaptiveLayout() {
+    if (!_tabBar || !_contentView) return;
+    const bool compact = isCompactLayout();
+    if (_compactMode != compact) {
+        _compactMode = compact;
+        // A fresh collapse shows the list. An interrupted expansion keeps an
+        // already open compact destination until the latest mode can settle.
+        _compactPresentationRequested = compact && _compactController != nullptr;
+    }
+    _tabBar->setAllowsFocusSelection(!compact);
+    _tabBar->configureLayout([compact, width = _tabBarWidth](const std::shared_ptr<YGLayout>& layout) {
+        layout->setWidth(compact ? 100_percent : YGValue{width,YGUnitPoint});
+    });
+    _contentView->setHidden(compact);
+    _contentView->configureLayout([compact](const std::shared_ptr<YGLayout>& layout) {
+        layout->setDisplay(compact ? YGDisplayNone : YGDisplayFlex);
+    });
+    if (compact && _embeddedViewController) {
+        const auto previous = std::exchange(_embeddedViewController,nullptr);
+        const bool visible = view()->window() != nullptr;
+        if (visible) previous->viewWillDisappear(false);
+        if (previous->viewIsLoaded()) previous->view()->removeFromSuperview();
+        if (visible) previous->viewDidDisappear(false);
+    }
+    updateAdaptivePresentation();
+}
+
+void NXTabBarController::scheduleAdaptivePresentation() {
+    if (_adaptivePresentationScheduled) return;
+    _adaptivePresentationScheduled = true;
+    DispatchQueue::main()->async([weak = weak_from_base<NXTabBarController>()] {
+        if (const auto self = weak.lock()) {
+            self->_adaptivePresentationScheduled = false;
+            self->updateAdaptivePresentation();
+        }
+    });
+}
+
+void NXTabBarController::returnToTabContainer(const std::shared_ptr<UIViewController>& controller) {
+    if (!indexPathOf(controller) || !controller->parent().expired()) return;
+    addChild(controller);
+    controller->didMoveToParent(shared_from_this());
+}
+
+void NXTabBarController::releaseCompactController() {
+    const auto controller = std::exchange(_compactController,nullptr);
+    if (!_closingCompactPresentation) _compactPresentationRequested = false;
+    _closingCompactPresentation = false;
+    _compactNavigation.reset();
+    if (controller) returnToTabContainer(controller);
+}
+
+void NXTabBarController::updateAdaptivePresentation() {
+    if (!_tabBar || !_contentView) return;
+    if (_updatingAdaptivePresentation) {
+        _needsAdaptivePresentation = true;
+        return;
+    }
+    _updatingAdaptivePresentation = true;
+    struct Restore { bool& flag; ~Restore() { flag = false; } } restore{_updatingAdaptivePresentation};
+    do {
+        _needsAdaptivePresentation = false;
+        const auto selected = selectedViewController();
+        auto navigation = _compactController ? _compactNavigation.lock() : enclosingNavigationController();
+        if (navigation && _observedNavigation.lock() != navigation) {
+            _observedNavigation = navigation;
+            navigation->observeStackUpdates(shared_from_this(), [
+                weak = weak_from_base<NXTabBarController>(),
+                source = std::weak_ptr<NXNavigationController>(navigation)
+            ] {
+                if (const auto self = weak.lock(); self && self->_observedNavigation.lock() == source.lock()) {
+                    self->updateAdaptivePresentation();
+                }
+            });
+        }
+        // Never reparent a controller whose push/pop is still in progress.
+        // The observer retries once the queued stack operations have settled.
+        if (navigation && navigation->isTransitioning()) break;
+
+        if (_compactController) {
+            const bool close = !_compactMode || !_compactPresentationRequested || selected != _compactController;
+            if (navigation) {
+                auto stack = navigation->viewControllers();
+                const auto entry = std::find(stack.begin(),stack.end(),_compactController);
+                if (entry == stack.end()) {
+                    // Back has already completed. Preserve the selection, but
+                    // keep the compact list visible instead of reopening it.
+                    releaseCompactController();
+                } else if (close) {
+                    _closingCompactPresentation = true;
+                    stack.erase(entry); // Leave unrelated pushes above this tab intact.
+                    navigation->setViewControllers(std::move(stack),false);
+                    if (navigation->isTransitioning()) break;
+                    releaseCompactController();
+                }
+            } else if (!_compactController->presentingViewController()
+                       && !_compactController->isBeingPresented()) {
+                releaseCompactController();
+            } else if (close && !_closingCompactPresentation) {
+                _closingCompactPresentation = true;
+                const std::weak_ptr<UIViewController> destination = _compactController;
+                _compactController->dismiss(false,[weak = weak_from_base<NXTabBarController>(),destination] {
+                    if (const auto self = weak.lock(); self && self->_compactController == destination.lock()) {
+                        self->releaseCompactController();
+                        self->updateAdaptivePresentation();
+                    }
+                });
+            }
+        }
+
+        if (!_compactMode && !_compactController) {
+            updateTabSelection();
+        } else if (_compactMode && !_compactController && _compactPresentationRequested && selected) {
+            navigation = enclosingNavigationController();
+            if (!navigation && view()->window() == nullptr) break;
+            if (const auto owner = selected->parent().lock(); owner.get() == this) {
+                selected->willMoveToParent(nullptr);
+                if (selected->viewIsLoaded()) selected->view()->removeFromSuperview();
+                selected->removeFromParent();
+            }
+            _compactController = selected;
+            _compactNavigation = navigation;
+            try {
+                // Use the actual tab controller, preserving its navigation item,
+                // responder chain, view state and any internal navigation stack.
+                show(selected,shared_from_this());
+            } catch (...) {
+                _compactPresentationRequested = false;
+                releaseCompactController();
+                throw;
+            }
+        }
+    } while (_needsAdaptivePresentation);
+    // Overlay presentations do not make the list disappear/reappear. Observe
+    // their dismissal on the main queue too, without replacing the tab's own
+    // presentation delegate. Each drain schedules at most one later check.
+    if (_compactController && _compactNavigation.expired()) scheduleAdaptivePresentation();
 }
