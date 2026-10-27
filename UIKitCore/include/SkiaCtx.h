@@ -4,6 +4,8 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <cmath>
+#include <utility>
 #include <vector>
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkFontStyle.h"
@@ -40,6 +42,18 @@ public:
     virtual void setTargetFrameRate(int frameRate) { targetFrameRate = frameRate; }
 
     virtual UIEdgeInsets deviceSafeAreaInsets() { return {}; }
+
+    /** Native UIKit overrides this with window traits. Other platforms use
+     logical window points: regular width >= 600, regular height >= 480.
+     An empty or invalid axis is unspecified; display scale does not affect it. */
+    virtual std::pair<UIUserInterfaceSizeClass, UIUserInterfaceSizeClass> getSizeClasses() {
+        const auto size = getSize();
+        const auto classify = [](NXFloat value, NXFloat regularMinimum) {
+            if (!std::isfinite(value) || value <= 0) return UIUserInterfaceSizeClass::unspecified;
+            return value >= regularMinimum ? UIUserInterfaceSizeClass::regular : UIUserInterfaceSizeClass::compact;
+        };
+        return {classify(size.width, 600), classify(size.height, 480)};
+    }
 
     virtual UIUserInterfaceStyle getThemeMode() { return UIUserInterfaceStyle::light; }
 

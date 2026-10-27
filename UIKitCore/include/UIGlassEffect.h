@@ -28,13 +28,13 @@ enum class UIGlassEffectStyle {
  following the style.
 
  `clear` is deliberately size-invariant and highly translucent. `regular`
- increases its frost radius and neutral body tint as the hosting view's
- shortest dimension grows. Appearance follows inherited light/dark traits
+ changes frost, vibrancy and neutral body tone with the hosting view's
+ shortest dimension. Appearance follows inherited light/dark traits
  unless the NXKit backdrop-appearance option is explicitly enabled.
 
- The material uses liquid_glass_widgets' lighting and tint model, adapted to
- NXKit's live backdrop. Interactive effects add touch-following sheen, spring
- inflation and anchored stretch without altering the view's public geometry.
+ The material adapts liquid_glass_widgets' lens to NXKit's live backdrop,
+ with lighting and tint calibrated against native UIKit gallery captures.
+ Interactive effects add touch-following sheen, spring inflation and anchored stretch without altering the view's public geometry.
  Refraction and body frost can be tuned independently, and the perimeter
  uses a sub-point hairline with localized light lobes rather than a white ring.
  `BackdropEffect::glass()` resolves the same clear material.
@@ -92,7 +92,9 @@ public:
     /**
      Optional custom tint hue. When unset, clear uses white; regular uses
      `UIColor::systemBackground` in light appearance and a white veil in dark
-     appearance. The color's alpha multiplies tintOpacity().
+     appearance. A supplied color uses UIKit-like clear/regular vibrancy; its
+     alpha controls the contribution. An explicit tintOpacity override selects
+     NXKit's low-level optical tint path and multiplies the color alpha.
      */
     [[nodiscard]] std::optional<UIColor> tintColor() const { return _tintColor; }
     void setTintColor(std::optional<UIColor> value) { _tintColor = std::move(value); }
@@ -139,6 +141,7 @@ private:
     friend class BackdropEffect;
     friend class BackdropEffectView;
     friend class CABackdropEffectLayer;
+    friend class CAGlassContainerLayer;
     friend class GlassMaterialTestHarness;
 
     [[nodiscard]] BackdropEffect _backdropEffect(

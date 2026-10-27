@@ -46,6 +46,11 @@ void UIWindow::setRootViewController(std::shared_ptr<UIViewController> rootViewC
     }
 
     _rootViewController = std::move(rootViewController);
+    if (_rootViewController && _traitCollection) {
+        const auto previous = _rootViewController->_traitCollection;
+        _rootViewController->_traitCollection = _traitCollection;
+        _rootViewController->traitCollectionDidChange(previous);
+    }
 }
 
 void UIWindow::makeKeyAndVisible() {
@@ -53,6 +58,9 @@ void UIWindow::makeKeyAndVisible() {
     auto window = std::static_pointer_cast<UIWindow>(shared_from_this());
 //    window->setBounds(UIRenderer::main()->bounds());
     UIApplication::shared->keyWindow = window;
+    if (const auto context = SkiaCtx::main()) setFrame({NXPoint::zero, context->getSize()});
+    // Supply traits before loadView/viewDidLoad and initial appearance callbacks.
+    updateTraitsFromPlatform();
 
     auto viewController = _rootViewController;
     if (viewController) {
@@ -186,6 +194,34 @@ void UIWindow::sendPressEvent(const std::shared_ptr<UIPressesEvent>& event) {
     }
 }
 
+void UIWindow::updateTraitsFromPlatform() {
+    const auto context = SkiaCtx::main();
+    if (!context) return;
+    const auto [horizontal, vertical] = context->getSizeClasses();
+    const auto style = context->getThemeMode();
+    const auto scale = context->getScaleFactor();
+    if (_traitCollection && _traitCollection->horizontalSizeClass() == horizontal
+        && _traitCollection->verticalSizeClass() == vertical
+        && _traitCollection->userInterfaceStyle() == style
+        && _traitCollection->displayScale() == scale) return;
+
+    const auto previous = _traitCollection;
+    auto next = previous ? previous->copy() : std::make_shared<UITraitCollection>();
+    next->_horizontalSizeClass = horizontal;
+    next->_verticalSizeClass = vertical;
+    next->_userInterfaceStyle = style;
+    next->_displayScale = scale;
+    _traitCollection = next;
+    // Match the key window's current environment before delivering callbacks;
+    // the old collection remains an immutable snapshot for client comparisons.
+    const auto oldCurrent = UITraitCollection::current();
+    UITraitCollection::setCurrent(next);
+    traitCollectionDidChange(previous);
+    UITraitCollection::setCurrent(oldCurrent);
+    setNeedsLayout();
+    layer()->setNeedsDisplay();
+}
+
 void UIWindow::layoutSubviews() {
     setSafeAreaInsets(SkiaCtx::main()->deviceSafeAreaInsets());
 
@@ -243,12 +279,13 @@ void UIWindow::pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std
 }
 
 void UIWindow::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
-    // Let ordinary window-owned views, including presentation chrome such as
-    // dimming views, inherit the new environment. Controller-owned roots are
-    // skipped by UIView and updated through their controllers below.
+    const auto root = _rootViewController;
+    // Ordinary window-owned views (including presentation chrome) inherit
+    // here; controller-owned roots update through their controllers below.
     UIView::traitCollectionDidChange(previousTraitCollection);
-    if (!rootViewController()) return;
-
-    rootViewController()->_traitCollection = _traitCollection;
-    rootViewController()->traitCollectionDidChange(previousTraitCollection);
+    if (root && _rootViewController == root) {
+        const auto previous = root->_traitCollection;
+        root->_traitCollection = _traitCollection;
+        root->traitCollectionDidChange(previous);
+    }
 }

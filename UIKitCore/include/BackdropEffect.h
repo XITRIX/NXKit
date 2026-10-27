@@ -27,6 +27,9 @@ class UIGlassEffect;
  - `lensCenter`: the center of the view
  - `lensSize`: the view size
  - `cornerRadius`: the backing layer's corner radius
+ - `cornerCurve`: 0 for circular, 1 for continuous corners (NXKit's default)
+ - `externalShapeCoverage`: 1 when the host's antialiased clip supplies edge
+   coverage; shaders should then return fully shaded pixels at the perimeter
  - `contentScale`: the backing layer's pixel scale
  - `filterScale`: opt in to a pixel-resolution image filter; divide main's
    coordinates by this scale and multiply child-sampling coordinates by it

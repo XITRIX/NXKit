@@ -31,19 +31,19 @@ namespace {
 #define NX_OBJC_BRIDGE_RETAIN(value) ((CFTypeRef)(value))
 #endif
 
-UIWindow *currentWindow(SDL_Window *window) {
+::UIWindow *currentWindow(SDL_Window *window) {
     if (window == nullptr) {
         return nil;
     }
 
     auto properties = SDL_GetWindowProperties(window);
     return NX_OBJC_BRIDGE(
-        UIWindow *,
+        ::UIWindow *,
         SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_UIKIT_WINDOW_POINTER, nullptr)
     );
 }
 
-CGSize currentViewSize(UIWindow *uiWindow) {
+CGSize currentViewSize(::UIWindow *uiWindow) {
     if (uiWindow == nil) {
         return CGSizeZero;
     }
@@ -193,6 +193,22 @@ NXKit::UIUserInterfaceStyle SkiaCtx_ios::getThemeMode() {
     } else {
         return NXKit::UIUserInterfaceStyle::light;
     }
+}
+
+std::pair<NXKit::UIUserInterfaceSizeClass, NXKit::UIUserInterfaceSizeClass> SkiaCtx_ios::getSizeClasses() {
+    auto uiWindow = currentWindow(window);
+    if (uiWindow == nil) return SkiaCtx::getSizeClasses();
+    // UIKit owns device-, orientation-, and multitasking-specific rules. Read
+    // them from the SDL window's root environment, without rescaling points.
+    auto traits = uiWindow.rootViewController.traitCollection ?: uiWindow.traitCollection;
+    const auto convert = [](::UIUserInterfaceSizeClass value) {
+        switch (value) {
+            case UIUserInterfaceSizeClassCompact: return NXKit::UIUserInterfaceSizeClass::compact;
+            case UIUserInterfaceSizeClassRegular: return NXKit::UIUserInterfaceSizeClass::regular;
+            default: return NXKit::UIUserInterfaceSizeClass::unspecified;
+        }
+    };
+    return {convert(traits.horizontalSizeClass), convert(traits.verticalSizeClass)};
 }
 
 NXKit::UIEdgeInsets SkiaCtx_ios::deviceSafeAreaInsets() {

@@ -1,412 +1,138 @@
-#include <Screens/GlassDemoViewController/GlassDemoViewController.hpp>
-
-#include <UITouch.h>
-
+#include "GlassDemoViewController.hpp"
+#include "GlassDemoScene.hpp"
 #include <algorithm>
-#include <cmath>
-#include <string>
 
 using namespace NXKit;
-
+using namespace NXKit::yoga::literals;
 namespace {
-
-constexpr NXFloat glassWidth = 120;
-constexpr NXFloat glassHeight = 60;
-constexpr NXFloat regularGlassWidth = 300;
-constexpr NXFloat regularGlassHeight = 160;
-constexpr NXFloat minimumRegularGlassWidth = 120;
-constexpr NXFloat minimumRegularGlassHeight = 64;
-constexpr NXFloat maximumRegularGlassWidth = 450;
-constexpr NXFloat maximumRegularGlassHeight = 240;
-constexpr NXFloat sliderHorizontalMargin = 24;
-constexpr NXFloat sliderBottomMargin = 20;
-constexpr NXFloat sliderHeight = 96;
-constexpr NXFloat glassSliderSpacing = 16;
-
-NXFloat interpolate(NXFloat lower, NXFloat upper, NXFloat progress) {
-    return lower + (upper - lower) * progress;
+void updateGlassContent(const std::shared_ptr<UIScrollView>& scroll,
+                        const std::shared_ptr<UIView>& content) {
+    if (!scroll || !content) return;
+    const auto safe=scroll->safeAreaInsets();
+    const auto availableWidth=scroll->bounds().width();
+    const auto width=availableWidth>0 ? std::min<NXFloat>(720,availableWidth) : 720;
+    // Match Navigation Test's measured, centered column and safe-area padding.
+    content->configureLayout([safe,width](const std::shared_ptr<YGLayout>& layout) {
+        layout->setWidth(YGValue{width,YGUnitPoint});
+        layout->setFlexDirection(YGFlexDirectionColumn);
+        layout->setAllGap(16);
+        layout->setPaddingLeft(48_pt);
+        layout->setPaddingRight(48_pt);
+        layout->setPaddingTop(YGValue{safe.top+36,YGUnitPoint});
+        layout->setPaddingBottom(YGValue{safe.bottom+36,YGUnitPoint});
+    });
+    scroll->setContentSize({std::max<NXFloat>(0,availableWidth),
+                           std::max<NXFloat>(0,content->frame().height())});
 }
 
-class GlassSliderGestureRecognizer final : public UIGestureRecognizer {
+std::shared_ptr<UIButton> button(const std::string& title, std::function<void()> action) {
+    auto view=new_shared<UIButton>(UIButtonStyle::tinted); view->setText(title);
+    view->layer()->setCornerRadius(8);
+    view->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        layout->setWidth(100_percent);
+        layout->setHeight(64_pt);
+        layout->setPaddingHorizontal(20_pt);
+    });
+    view->primaryAction=UIAction(title,std::move(action)); return view;
+}
+class GlassSceneViewController final : public UIViewController {
 public:
-    [[nodiscard]] NXPoint location() const { return _location; }
-
-    void touchesBegan(
-        std::vector<std::shared_ptr<UITouch>> touches,
-        std::shared_ptr<UIEvent> event
-    ) override {
-        UIGestureRecognizer::touchesBegan(touches, event);
-        if (_trackingTouch || touches.empty()) return;
-        _trackingTouch = touches.front();
-        updateLocation();
-        setState(UIGestureRecognizerState::began);
+    explicit GlassSceneViewController(GlassDemoID demo):_demo(demo) { setTitle(GlassDemos[demo].title); }
+    void loadView() override {
+        _scroll=new_shared<UIScrollView>(); _scroll->setBackgroundColor(UIColor::systemBackground);
+        _scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::never);
+        _scroll->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+            layout->setAlignItems(YGAlignCenter);
+        });
+        _contentContainer=new_shared<UIView>();
+        updateGlassContent(_scroll,_contentContainer);
+        auto detail=new_shared<UILabel>(); detail->setText(GlassDemos[_demo].detail);
+        detail->setFontSize(20); detail->setTextColor(UIColor::secondaryLabel);
+        detail->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+            layout->setMarginBottom(12_pt);
+        });
+        _contentContainer->addSubview(detail);
+        _holder=new_shared<UIView>(); _holder->setClipsToBounds(true); _holder->layer()->setCornerRadius(20);
+        _holder->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+            layout->setWidth(100_percent);
+            layout->setAspectRatio(720.0f/440.0f);
+            layout->setFlexShrink(0);
+        });
+        _scene=new_shared<GlassDemoScene>(_demo,UIImage::fromRes("img/glass_demo_scene.png",1));
+        // The preview remains in its fixed logical coordinate space. Yoga owns
+        // its holder; it must not resize the glass scene's internal geometry.
+        _scene->setAutolayoutEnabled(false);
+        _scene->layer()->setAnchorPoint({0,0}); _holder->addSubview(_scene); _contentContainer->addSubview(_holder);
+        const auto weak=weak_from_base<GlassSceneViewController>();
+        _buttons.push_back(button("Backdrop",[weak] { if (auto self=weak.lock()) self->_scene->setBackdrop((self->_scene->backdrop()+1)%5); }));
+        _buttons.push_back(button("Reset",[weak] { if (auto self=weak.lock()) self->_scene->reset(); }));
+        if (GlassDemos[_demo].action[0]) _buttons.push_back(button(GlassDemos[_demo].action,[weak] {
+            if (auto self=weak.lock()) {
+                auto scene=self->_scene; const auto target=scene->progress()<.5f ? 1.0f : 0.0f;
+                UIView::animate(.7,0,static_cast<UIViewAnimationOptions>(UIViewAnimationOptions::allowUserInteraction | UIViewAnimationOptions::beginFromCurrentState),
+                    [scene,target] { scene->setProgress(target); });
+            }
+        }));
+        if (_demo==GlassDemoTwoTints) _buttons.push_back(button("Swap order",[weak] {
+            if (auto self=weak.lock()) self->_scene->setReversedOrder(!self->_scene->reversedOrder());
+        }));
+        for (auto& control:_buttons) _contentContainer->addSubview(control);
+        _scroll->addSubview(_contentContainer);
+        setView(_scroll);
     }
-
-    void touchesMoved(
-        std::vector<std::shared_ptr<UITouch>> touches,
-        std::shared_ptr<UIEvent> event
-    ) override {
-        UIGestureRecognizer::touchesMoved(touches, event);
-        if (!_trackingTouch
-            || touches.empty()
-            || touches.front() != _trackingTouch)
-        {
-            return;
-        }
-
-        updateLocation();
-        if (_state != UIGestureRecognizerState::changed) {
-            setState(UIGestureRecognizerState::changed);
-        } else {
-            onStateChanged(shared_from_this());
-        }
+    void viewSafeAreaInsetsDidChange() override {
+        UIViewController::viewSafeAreaInsetsDidChange();
+        updateGlassContent(_scroll,_contentContainer);
     }
-
-    void touchesEnded(
-        std::vector<std::shared_ptr<UITouch>> touches,
-        std::shared_ptr<UIEvent> event
-    ) override {
-        UIGestureRecognizer::touchesEnded(touches, event);
-        if (!_trackingTouch
-            || touches.empty()
-            || touches.front() != _trackingTouch)
-        {
-            return;
-        }
-
-        updateLocation();
-        setState(UIGestureRecognizerState::ended);
-        _trackingTouch.reset();
+    void viewDidLayoutSubviews() override {
+        UIViewController::viewDidLayoutSubviews();
+        updateGlassContent(_scroll,_contentContainer);
+        const auto scale=_holder->bounds().width()/720;
+        _scene->setBounds({0,0,720,440});
+        _scene->setTransform(NXAffineTransform::scale(scale));
+        _scene->layer()->setPosition({0,0});
     }
-
-    void touchesCancelled(
-        std::vector<std::shared_ptr<UITouch>> touches,
-        std::shared_ptr<UIEvent> event
-    ) override {
-        UIGestureRecognizer::touchesCancelled(touches, event);
-        if (!_trackingTouch) return;
-        setState(UIGestureRecognizerState::cancelled);
-        _trackingTouch.reset();
-    }
-
-protected:
-    void reset() override { _trackingTouch.reset(); }
-
 private:
-    void updateLocation() {
-        if (!_trackingTouch) return;
-        _location = _trackingTouch->locationIn(view().lock());
-    }
-
-    std::shared_ptr<UITouch> _trackingTouch;
-    NXPoint _location;
+    GlassDemoID _demo;
+    std::shared_ptr<UIScrollView> _scroll;
+    std::shared_ptr<UIView> _contentContainer;
+    std::shared_ptr<UIView> _holder;
+    std::shared_ptr<GlassDemoScene> _scene;
+    std::vector<std::shared_ptr<UIButton>> _buttons;
 };
-
 }
-
-GlassDemoViewController::GlassDemoViewController() {
-    setTitle("Glass");
-}
-
+GlassDemoViewController::GlassDemoViewController() { setTitle("Glass"); }
 void GlassDemoViewController::loadView() {
-    auto rootView = new_shared<UIView>();
-    rootView->setBackgroundColor(UIColor::black);
-    rootView->setClipsToBounds(true);
-
-    _backgroundImageView = new_shared<UIImageView>(
-        UIImage::fromRes("img/glass_demo_background.png")
-    );
-    _backgroundImageView->setContentMode(UIViewContentMode::scaleAspectFill);
-    rootView->addSubview(_backgroundImageView);
-
-    UIGlassEffect clearGlass(UIGlassEffect::Style::clear);
-    clearGlass.setInteractive(true);
-    _clearGlassView = new_shared<BackdropEffectView>(clearGlass);
-    _clearGlassView->setFrame(NXRect(0, 0, glassWidth, glassHeight));
-    _clearGlassView->layer()->setCornerRadius(glassHeight * 0.5f);
-    rootView->addSubview(_clearGlassView);
-    makeDraggable(_clearGlassView);
-
-    UIGlassEffect regularGlass(UIGlassEffect::Style::regular);
-    regularGlass.setInteractive(true);
-    _regularGlassView = new_shared<BackdropEffectView>(regularGlass);
-    _regularGlassView->setFrame(NXRect(
-        0,
-        0,
-        regularGlassWidth,
-        regularGlassHeight
-    ));
-    _regularGlassView->layer()->setCornerRadius(52);
-    rootView->addSubview(_regularGlassView);
-    makeDraggable(_regularGlassView);
-
-    _sizeSliderView = new_shared<UIView>();
-    _sizeSliderView->setBackgroundColor(
-        UIColor::systemBackground.withAlphaComponent(0.88f)
-    );
-    _sizeSliderView->layer()->setCornerRadius(22);
-    _sizeSliderView->layer()->setBorderColor(
-        UIColor::separator.withAlphaComponent(0.7f)
-    );
-    _sizeSliderView->layer()->setBorderWidth(1);
-    _sizeSliderView->layer()->setShadowColor(
-        UIColor::black.withAlphaComponent(0.22f)
-    );
-    _sizeSliderView->layer()->setShadowOffset(NXPoint(0, 5));
-    _sizeSliderView->layer()->setShadowRadius(12);
-
-    _sizeSliderTitleLabel = new_shared<UILabel>();
-    _sizeSliderTitleLabel->setText("Regular glass size");
-    _sizeSliderTitleLabel->setTextColor(UIColor::label);
-    _sizeSliderTitleLabel->setFontSize(17);
-    _sizeSliderTitleLabel->setFontWeight(600);
-    _sizeSliderView->addSubview(_sizeSliderTitleLabel);
-
-    _sizeSliderValueLabel = new_shared<UILabel>();
-    _sizeSliderValueLabel->setTextColor(UIColor::secondaryLabel);
-    _sizeSliderValueLabel->setFontSize(15);
-    _sizeSliderValueLabel->setTextAlignment(NSTextAlignment::right);
-    _sizeSliderView->addSubview(_sizeSliderValueLabel);
-
-    _sizeSliderTrackView = new_shared<UIView>();
-    _sizeSliderTrackView->setBackgroundColor(UIColor::systemFill);
-    _sizeSliderTrackView->setClipsToBounds(true);
-    _sizeSliderTrackView->layer()->setCornerRadius(4);
-    _sizeSliderView->addSubview(_sizeSliderTrackView);
-
-    _sizeSliderFillView = new_shared<UIView>();
-    _sizeSliderFillView->setBackgroundColor(UIColor::systemBlue);
-    _sizeSliderTrackView->addSubview(_sizeSliderFillView);
-
-    _sizeSliderThumbView = new_shared<UIView>();
-    _sizeSliderThumbView->setBackgroundColor(UIColor::white);
-    _sizeSliderThumbView->layer()->setCornerRadius(13);
-    _sizeSliderThumbView->layer()->setBorderColor(UIColor::systemBlue);
-    _sizeSliderThumbView->layer()->setBorderWidth(3);
-    _sizeSliderThumbView->layer()->setShadowColor(
-        UIColor::black.withAlphaComponent(0.22f)
-    );
-    _sizeSliderThumbView->layer()->setShadowOffset(NXPoint(0, 2));
-    _sizeSliderThumbView->layer()->setShadowRadius(4);
-    _sizeSliderView->addSubview(_sizeSliderThumbView);
-
-    auto sliderGesture = new_shared<GlassSliderGestureRecognizer>();
-    sliderGesture->onStateChanged = [this](const auto& gesture) {
-        const auto slider = std::static_pointer_cast<
-            GlassSliderGestureRecognizer
-        >(gesture);
-        switch (slider->state()) {
-            case UIGestureRecognizerState::began:
-            case UIGestureRecognizerState::changed:
-            case UIGestureRecognizerState::ended: {
-                const auto trackFrame = _sizeSliderTrackView->frame();
-                if (trackFrame.width() <= 0) return;
-                setRegularGlassSizeProgress(
-                    (slider->location().x - trackFrame.minX())
-                        / trackFrame.width()
-                );
-                break;
-            }
-            default:
-                break;
-        }
-    };
-    _sizeSliderView->addGestureRecognizer(sliderGesture);
-    rootView->addSubview(_sizeSliderView);
-
-    setView(rootView);
+    _scroll=new_shared<UIScrollView>(); _scroll->setBackgroundColor(UIColor::systemBackground);
+    _scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::never);
+    _scroll->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        layout->setAlignItems(YGAlignCenter);
+    });
+    _contentContainer=new_shared<UIView>();
+    updateGlassContent(_scroll,_contentContainer);
+    auto heading=new_shared<UILabel>(); heading->setText("Liquid Glass");
+    heading->setFontSize(30); heading->setFontWeight(600); heading->setAutolayoutEnabled(true);
+    auto detail=new_shared<UILabel>(); detail->setText("Choose a demo. Use Back or B to return to this collection.");
+    detail->setFontSize(20); detail->setTextColor(UIColor::secondaryLabel); detail->setAutolayoutEnabled(true);
+    detail->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
+        layout->setMarginBottom(12_pt);
+    });
+    _contentContainer->addSubview(heading); _contentContainer->addSubview(detail);
+    const auto weak=weak_from_base<GlassDemoViewController>();
+    for (int i=0;i<GlassDemoCount;++i) {
+        auto item=button(GlassDemos[i].title,[weak,i] {
+            if (auto self=weak.lock()) self->show(new_shared<GlassSceneViewController>(static_cast<GlassDemoID>(i)),self);
+        });
+        _contentContainer->addSubview(item);
+    }
+    _scroll->addSubview(_contentContainer);
+    setView(_scroll);
 }
-
-void GlassDemoViewController::makeDraggable(
-    const std::shared_ptr<BackdropEffectView>& glassView
-) {
-    auto panGesture = new_shared<UIPanGestureRecognizer>();
-    panGesture->onStateChanged = [this](const auto& gesture) {
-        const auto pan = std::static_pointer_cast<UIPanGestureRecognizer>(gesture);
-        const auto glassView = pan->view().lock();
-        if (!glassView) return;
-
-        switch (pan->state()) {
-            case UIGestureRecognizerState::began:
-                _dragOrigin = glassView->frame().origin;
-                break;
-            case UIGestureRecognizerState::changed: {
-                auto frame = glassView->frame();
-                frame.origin = _dragOrigin + pan->translationInView(view());
-                glassView->setFrame(frame);
-                clampGlassToBounds(
-                    std::static_pointer_cast<BackdropEffectView>(glassView)
-                );
-                break;
-            }
-            default:
-                break;
-        }
-    };
-    glassView->addGestureRecognizer(panGesture);
+void GlassDemoViewController::viewSafeAreaInsetsDidChange() {
+    UIViewController::viewSafeAreaInsetsDidChange();
+    updateGlassContent(_scroll,_contentContainer);
 }
-
 void GlassDemoViewController::viewDidLayoutSubviews() {
     UIViewController::viewDidLayoutSubviews();
-
-    const auto rootBounds = view()->bounds();
-    const auto safeArea = view()->safeAreaInsets();
-    _backgroundImageView->setFrame(rootBounds);
-
-    const auto panelWidth = std::max<NXFloat>(
-        0,
-        rootBounds.width()
-            - safeArea.left
-            - safeArea.right
-            - sliderHorizontalMargin * 2
-    );
-    _sizeSliderView->setFrame(NXRect(
-        rootBounds.minX() + safeArea.left + sliderHorizontalMargin,
-        rootBounds.maxY() - safeArea.bottom - sliderBottomMargin - sliderHeight,
-        panelWidth,
-        sliderHeight
-    ));
-    setRegularGlassSizeProgress(_regularGlassSizeProgress);
-
-    if (!_hasPositionedGlass) {
-        const auto glassTop = rootBounds.minY() + safeArea.top;
-        const auto glassBottom = std::max(
-            glassTop,
-            _sizeSliderView->frame().minY() - glassSliderSpacing
-        );
-        const auto glassCenterY = (glassTop + glassBottom) * 0.5f;
-        const auto usableWidth = std::max<NXFloat>(
-            0,
-            rootBounds.width() - safeArea.left - safeArea.right
-        );
-        _clearGlassView->setCenter(NXPoint(
-            rootBounds.minX() + safeArea.left + usableWidth / 3.0f,
-            glassCenterY
-        ));
-        _regularGlassView->setCenter(NXPoint(
-            rootBounds.minX() + safeArea.left + usableWidth * 2.0f / 3.0f,
-            glassCenterY
-        ));
-        _hasPositionedGlass = true;
-    }
-    clampGlassToBounds(_clearGlassView);
-    clampGlassToBounds(_regularGlassView);
-}
-
-void GlassDemoViewController::layoutSizeSlider() {
-    if (!_sizeSliderView) return;
-
-    const auto bounds = _sizeSliderView->bounds();
-    constexpr NXFloat horizontalInset = 20;
-    constexpr NXFloat labelTop = 13;
-    constexpr NXFloat labelHeight = 24;
-    constexpr NXFloat valueWidth = 110;
-    constexpr NXFloat trackHeight = 8;
-    constexpr NXFloat trackTop = 60;
-    constexpr NXFloat thumbSize = 26;
-    const auto contentWidth = std::max<NXFloat>(
-        0,
-        bounds.width() - horizontalInset * 2
-    );
-
-    _sizeSliderTitleLabel->setFrame(NXRect(
-        horizontalInset,
-        labelTop,
-        std::max<NXFloat>(0, contentWidth - valueWidth),
-        labelHeight
-    ));
-    _sizeSliderValueLabel->setFrame(NXRect(
-        bounds.width() - horizontalInset - valueWidth,
-        labelTop,
-        valueWidth,
-        labelHeight
-    ));
-    _sizeSliderTrackView->setFrame(NXRect(
-        horizontalInset,
-        trackTop,
-        contentWidth,
-        trackHeight
-    ));
-    _sizeSliderFillView->setFrame(NXRect(
-        0,
-        0,
-        contentWidth * _regularGlassSizeProgress,
-        trackHeight
-    ));
-    _sizeSliderThumbView->setFrame(NXRect(
-        horizontalInset
-            + contentWidth * _regularGlassSizeProgress
-            - thumbSize * 0.5f,
-        trackTop + trackHeight * 0.5f - thumbSize * 0.5f,
-        thumbSize,
-        thumbSize
-    ));
-}
-
-void GlassDemoViewController::setRegularGlassSizeProgress(NXFloat progress) {
-    _regularGlassSizeProgress = std::clamp(progress, 0.0f, 1.0f);
-    if (!_regularGlassView) return;
-
-    auto size = NXSize(
-        interpolate(
-            minimumRegularGlassWidth,
-            maximumRegularGlassWidth,
-            _regularGlassSizeProgress
-        ),
-        interpolate(
-            minimumRegularGlassHeight,
-            maximumRegularGlassHeight,
-            _regularGlassSizeProgress
-        )
-    );
-    if (viewIsLoaded()) {
-        const auto rootBounds = view()->bounds();
-        const auto safeArea = view()->safeAreaInsets();
-        const auto availableWidth = std::max<NXFloat>(
-            minimumRegularGlassWidth,
-            rootBounds.width()
-                - safeArea.left
-                - safeArea.right
-                - sliderHorizontalMargin
-        );
-        size.width = std::min(size.width, availableWidth);
-    }
-
-    const auto center = _regularGlassView->center();
-    _regularGlassView->setFrame(NXRect(0, 0, size.width, size.height));
-    _regularGlassView->setCenter(center);
-    _regularGlassView->layer()->setCornerRadius(
-        std::min<NXFloat>(52, size.height * 0.42f)
-    );
-    _sizeSliderValueLabel->setText(
-        std::to_string(static_cast<int>(std::lround(size.width)))
-            + " x "
-            + std::to_string(static_cast<int>(std::lround(size.height)))
-    );
-    layoutSizeSlider();
-    clampGlassToBounds(_regularGlassView);
-}
-
-void GlassDemoViewController::clampGlassToBounds(
-    const std::shared_ptr<BackdropEffectView>& glassView
-) {
-    if (!glassView || !viewIsLoaded()) return;
-
-    const auto bounds = view()->bounds();
-    const auto safeArea = view()->safeAreaInsets();
-    auto frame = glassView->frame();
-    const auto minimumX = bounds.minX() + safeArea.left;
-    const auto minimumY = bounds.minY() + safeArea.top;
-    const auto maximumRight = bounds.maxX() - safeArea.right;
-    const auto maximumBottom = _sizeSliderView
-        ? std::min(
-            bounds.maxY() - safeArea.bottom,
-            _sizeSliderView->frame().minY() - glassSliderSpacing
-        )
-        : bounds.maxY() - safeArea.bottom;
-    const auto maximumX = std::max(minimumX, maximumRight - frame.width());
-    const auto maximumY = std::max(minimumY, maximumBottom - frame.height());
-    frame.origin.x = std::clamp(frame.origin.x, minimumX, maximumX);
-    frame.origin.y = std::clamp(frame.origin.y, minimumY, maximumY);
-    glassView->setFrame(frame);
+    updateGlassContent(_scroll,_contentContainer);
 }

@@ -9,6 +9,7 @@
 #include <CABasicAnimation.h>
 #include <CGImage.h>
 #include <UIColor.h>
+#include <CALayerCornerCurve.h>
 
 #include <tools/SharedBase.hpp>
 #include <optional>
@@ -82,6 +83,11 @@ public:
     void setCornerRadius(NXFloat cornerRadius);
     [[nodiscard]] NXFloat cornerRadius() const { return _cornerRadius; }
 
+    /** NXKit defaults to continuous corners; UIKit defaults to circular.
+     The curve is discrete; animated cornerRadius/bounds use the selected curve. */
+    void setCornerCurve(CALayerCornerCurve curve);
+    [[nodiscard]] CALayerCornerCurve cornerCurve() const { return _cornerCurve; }
+
     void setTransform(NXTransform3D transform);
     [[nodiscard]] NXTransform3D transform() const { return _transform; }
 
@@ -151,6 +157,8 @@ public:
 
     void skiaRender(SkCanvas* canvas);
 protected:
+    virtual void renderSublayers(SkCanvas* canvas);
+
     // Additional visual-only motion, composed with the application's transform.
     virtual NXAffineTransform renderingTransform() const { return NXAffineTransform::identity; }
 
@@ -159,6 +167,7 @@ protected:
 
 private:
     friend class UIView;
+    friend class CAGlassContainerLayer;
     friend bool applicationRunLoop();
 
     void setLayerTreeDirtyIfNeeded() const;
@@ -187,6 +196,7 @@ private:
     NXFloat _zPosition = 0.0;
     NXRect _bounds;
     NXFloat _cornerRadius = 0;
+    CALayerCornerCurve _cornerCurve = CALayerCornerCurve::continuous;
     std::optional<UIColor> _backgroundColor;
     NXFloat _borderWidth = 0;
     std::optional<UIColor> _borderColor;

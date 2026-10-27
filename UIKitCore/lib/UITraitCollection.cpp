@@ -9,5 +9,7 @@ std::shared_ptr<UITraitCollection> UITraitCollection::copy() {
     auto newCollection = new_shared<UITraitCollection>();
     newCollection->_userInterfaceStyle = _userInterfaceStyle;
     newCollection->_displayScale = _displayScale;
+    newCollection->_horizontalSizeClass = _horizontalSizeClass;
+    newCollection->_verticalSizeClass = _verticalSizeClass;
     return newCollection;
 }

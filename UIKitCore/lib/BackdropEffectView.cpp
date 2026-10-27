@@ -2,6 +2,7 @@
 
 #include "CABackdropEffectLayer.hpp"
 #include "GlassAppearance.hpp"
+#include "LayerCornerGeometry.hpp"
 #include <CADisplayLink.h>
 #include <UITouch.h>
 #include <UIWindow.h>
@@ -227,12 +228,8 @@ void BackdropEffectView::_handleGlassTouch(UITouchPhase phase, const std::shared
         const auto size = bounds().size;
         if (!std::isfinite(size.width) || !std::isfinite(size.height)
             || size.width <= 0 || size.height <= 0) return;
-        const auto radius = std::clamp(layer()->cornerRadius(), 0.0f, std::min(size.width, size.height) * 0.5f);
         const auto p = local - bounds().origin - NXPoint(size.width * 0.5f, size.height * 0.5f);
-        const auto dx = std::abs(p.x) - size.width * 0.5f + radius;
-        const auto dy = std::abs(p.y) - size.height * 0.5f + radius;
-        if (std::hypot(std::max(dx, 0.0f), std::max(dy, 0.0f))
-            + std::min(std::max(dx, dy), 0.0f) - radius > 0) return;
+        if (Internal::layerCornerDistance(p, size, layer()->cornerRadius(), layer()->cornerCurve()) > 0) return;
         state.touch = touch;
         state.window = window();
         state.parent = superview();

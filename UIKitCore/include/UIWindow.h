@@ -39,6 +39,10 @@ public:
 
     UIWindowInputType currentUserInputType() { return _inputType; }
 private:
+    friend bool applicationRunLoop();
+    friend class SizeClassTestHarness;
+    void updateTraitsFromPlatform();
+
     std::shared_ptr<UIViewController> _rootViewController;
     std::vector<std::shared_ptr<UIViewController>> _presentedViewControllers;
 

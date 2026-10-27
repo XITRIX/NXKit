@@ -9,6 +9,8 @@
 #include <utility>
 
 #include "include/core/SkRRect.h"
+#include "LayerCornerGeometry.hpp"
+#include <stdexcept>
 #include "include/core/SkBlurTypes.h"
 #include "include/core/SkColorFilter.h"
 #include "include/core/SkMaskFilter.h"
@@ -56,6 +58,7 @@ CALayer::CALayer(CALayer* layer) {
     _backgroundColor = layer->_backgroundColor;
     _isHidden = layer->_isHidden;
     _cornerRadius = layer->_cornerRadius;
+    _cornerCurve = layer->_cornerCurve;
     _borderWidth = layer->_borderWidth;
     _borderColor = layer->_borderColor;
     _shadowColor = layer->_shadowColor;
@@ -160,6 +163,16 @@ void CALayer::setCornerRadius(NXFloat cornerRadius) {
     if (_cornerRadius == cornerRadius) return;
     onWillSet("cornerRadius");
     _cornerRadius = cornerRadius;
+}
+
+void CALayer::setCornerCurve(CALayerCornerCurve curve) {
+    if (curve != CALayerCornerCurve::circular && curve != CALayerCornerCurve::continuous) {
+        throw std::invalid_argument("CALayer cornerCurve must be circular or continuous");
+    }
+    if (_cornerCurve == curve) return;
+    _cornerCurve = curve;
+    if (_presentation) _presentation->setCornerCurve(curve);
+    setNeedsDisplay();
 }
 
 void CALayer::setTransform(NXTransform3D transform) {
@@ -286,6 +299,11 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     // canvas contents is required for backdrop effects such as CABlurLayer to
     // keep seeing the pixels behind this layer.
     const auto localBounds = SkRect::MakeWH(_bounds.width(), _bounds.height());
+    const bool needsCornerShape = _masksToBounds || _backgroundColor.has_value()
+        || (_shadowColor && _shadowColor->a() > 0 && _shadowOpacity > 0)
+        || (_borderColor && _borderWidth > 0);
+    const auto cornerShape = needsCornerShape
+        ? Internal::layerCornerPath(_bounds.size, _cornerRadius, _cornerCurve) : SkPath();
     if (_mask) {
         SkCanvas::SaveLayerRec maskedContent(
             &localBounds,
@@ -297,13 +315,8 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     // Masks To Bounds
     if (_masksToBounds) {
-        SkRect rect = SkRect::MakeXYWH(0, 0, _bounds.width(), _bounds.height());
-        float radii = _cornerRadius;
-        SkVector corners[] = {{radii, radii}, {radii, radii}, {radii, radii}, {radii, radii}};
-        SkRRect rrect;
-        rrect.setRectRadii(rect, corners);
         canvas->save();
-        canvas->clipRRect(rrect, true);
+        canvas->clipPath(cornerShape, true);
     }
 
     SkPaint paint;
@@ -336,24 +349,19 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         shadowPaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, sigma, 0));
         shadowPaint.setColor(_shadowColor.value().withAlphaComponent((NXFloat(_shadowColor.value().a()) / 255.0f) * _shadowOpacity).raw());
 
-        SkRect rect = SkRect::MakeXYWH(_shadowOffset.x, _shadowOffset.y, _bounds.width(), _bounds.height());
-        SkRRect rrect;
-        float radii = _cornerRadius;
-        SkVector corners[] = {{radii, radii}, {radii, radii}, {radii, radii}, {radii, radii}};
-        rrect.setRectRadii(rect, corners);
-        canvas->drawRRect(rrect, shadowPaint);
+        canvas->save();
+        canvas->translate(_shadowOffset.x, _shadowOffset.y);
+        canvas->drawPath(cornerShape, shadowPaint);
+        canvas->restore();
     }
 
     // Background color
     if (_backgroundColor.has_value()) {
         paint.setColor(_backgroundColor->raw());
 
-        SkRect rect = SkRect::MakeXYWH(0, 0, _bounds.width(), _bounds.height());
-        SkRRect rrect;
-        float radii = _cornerRadius;
-        SkVector corners[] = {{radii, radii}, {radii, radii}, {radii, radii}, {radii, radii}};
-        rrect.setRectRadii(rect, corners);
-        canvas->drawRRect(rrect, paint);
+        // An existing rounded clip already supplies edge coverage.
+        if (_masksToBounds) canvas->drawPaint(paint);
+        else canvas->drawPath(cornerShape, paint);
     }
 
     // Contents
@@ -388,34 +396,19 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 
     draw(canvas);
 
-    canvas->save();
-    canvas->concat(CATransform3DMakeTranslation(-_bounds.origin.x, -_bounds.origin.y, 0).toSkM44());
-
-    struct {
-        bool operator()(const std::shared_ptr<CALayer>& a, const std::shared_ptr<CALayer>& b) const { return a->_zPosition < b->_zPosition; }
-    } sortByZPos;
-
-    auto sortedSublayers = _sublayers;
-
-    // Could be resource consuming, better to change approach
-    std::sort(sortedSublayers.begin(), sortedSublayers.end(), sortByZPos);
-    for (const auto& sublayer: sortedSublayers) {
-        sublayer->presentationOrSelf()->skiaRender(canvas);
-    }
-    canvas->restore();
+    renderSublayers(canvas);
 
     // Border
     if (_borderColor.has_value() && _borderWidth > 0) {
         paint.setColor(_borderColor->raw());
         paint.setStyle(SkPaint::Style::kStroke_Style);
-        paint.setStrokeWidth(_borderWidth);
-
-        SkRect rect = SkRect::MakeXYWH(0, 0, _bounds.width(), _bounds.height());
-        SkRRect rrect;
-        float radii = _cornerRadius;
-        SkVector corners[] = {{radii, radii}, {radii, radii}, {radii, radii}, {radii, radii}};
-        rrect.setRectRadii(rect, corners);
-        canvas->drawRRect(rrect, paint);
+        // Center the stroke on the boundary and retain its inside half, as
+        // UIKit does. The rounded clip owns the outside edge's AA coverage.
+        paint.setStrokeWidth(_borderWidth * 2);
+        canvas->save();
+        if (!_masksToBounds) canvas->clipPath(cornerShape, true);
+        canvas->drawPath(cornerShape, paint);
+        canvas->restore();
     }
 
     // Opacity save 3 // restore
@@ -450,6 +443,25 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     // Initial save 1 // restore
     canvas->restore();
 //    printf("End!\n");
+}
+
+void CALayer::renderSublayers(SkCanvas* canvas) {
+    canvas->save();
+    canvas->concat(CATransform3DMakeTranslation(-_bounds.origin.x, -_bounds.origin.y, 0).toSkM44());
+
+    struct {
+        bool operator()(const std::shared_ptr<CALayer>& a, const std::shared_ptr<CALayer>& b) const { return a->_zPosition < b->_zPosition; }
+    } sortByZPos;
+
+    auto sortedSublayers = _sublayers;
+
+    // Could be resource consuming, better to change approach
+    std::stable_sort(sortedSublayers.begin(), sortedSublayers.end(), sortByZPos);
+    for (const auto& sublayer: sortedSublayers) {
+        sublayer->presentationOrSelf()->skiaRender(canvas);
+    }
+    canvas->restore();
+
 }
 
 NXRect CALayer::getFrame() {

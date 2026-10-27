@@ -1,6 +1,8 @@
 #include "CABackdropEffectLayer.hpp"
+#include "CAGlassContainerLayer.hpp"
 #include "GlassAppearance.hpp"
 #include "GlassBackdrop.hpp"
+#include "LayerCornerGeometry.hpp"
 #include <DispatchQueue.h>
 #include <SkiaCtx.h>
 #include "include/core/SkSurface.h"
@@ -87,6 +89,7 @@ CABackdropEffectLayer::CABackdropEffectLayer(CABackdropEffectLayer* layer):
     _cachedImageFilter(layer->_cachedImageFilter),
     _cachedFilterSize(layer->_cachedFilterSize),
     _cachedFilterCornerRadius(layer->_cachedFilterCornerRadius),
+    _cachedFilterCornerCurve(layer->_cachedFilterCornerCurve),
     _cachedFilterContentsScale(layer->_cachedFilterContentsScale),
     _hasCachedFilterState(layer->_hasCachedFilterState),
     _cachedInteractionGlow(layer->_cachedInteractionGlow),
@@ -233,6 +236,8 @@ void CABackdropEffectLayer::validateUniforms(
     validateAutomaticUniform(runtimeEffect, "lensCenter", UniformType::kFloat2);
     validateAutomaticUniform(runtimeEffect, "lensSize", UniformType::kFloat2);
     validateAutomaticUniform(runtimeEffect, "cornerRadius", UniformType::kFloat);
+    validateAutomaticUniform(runtimeEffect, "cornerCurve", UniformType::kFloat);
+    validateAutomaticUniform(runtimeEffect, "externalShapeCoverage", UniformType::kFloat);
     validateAutomaticUniform(runtimeEffect, "contentScale", UniformType::kFloat);
     validateAutomaticUniform(runtimeEffect, "filterScale", UniformType::kFloat);
     validateAutomaticUniform(runtimeEffect, "maximumSampleRadius", UniformType::kFloat);
@@ -299,6 +304,7 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
         && _hasCachedFilterState
         && _cachedFilterSize == layerSize
         && _cachedFilterCornerRadius == layerCornerRadius
+        && _cachedFilterCornerCurve == cornerCurve()
         && _cachedFilterContentsScale == layerContentsScale
         && _cachedInteractionGlow == _interaction->glow()
         && _cachedInteractionLocation == _interaction->location)
@@ -324,7 +330,14 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
         builder.uniform("lensSize") = size;
     }
     if (findUniform(*_runtimeEffect, "cornerRadius")) {
-        builder.uniform("cornerRadius") = std::max<NXFloat>(0, cornerRadius());
+        const auto radius = cornerRadius();
+        builder.uniform("cornerRadius") = std::isfinite(radius) && radius >= 0.0001f ? radius : 0.0f;
+    }
+    if (findUniform(*_runtimeEffect, "cornerCurve")) {
+        builder.uniform("cornerCurve") = cornerCurve() == CALayerCornerCurve::continuous ? 1.0f : 0.0f;
+    }
+    if (findUniform(*_runtimeEffect, "externalShapeCoverage")) {
+        builder.uniform("externalShapeCoverage") = 1.0f;
     }
     if (findUniform(*_runtimeEffect, "contentScale")) {
         builder.uniform("contentScale") = contentsScale();
@@ -379,6 +392,7 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
     _cachedImageFilter = std::move(imageFilter);
     _cachedFilterSize = layerSize;
     _cachedFilterCornerRadius = layerCornerRadius;
+    _cachedFilterCornerCurve = cornerCurve();
     _cachedFilterContentsScale = layerContentsScale;
     _cachedInteractionGlow = _interaction->glow();
     _cachedInteractionLocation = _interaction->location;
@@ -387,6 +401,7 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
 }
 
 void CABackdropEffectLayer::draw(SkCanvas* context) {
+    if (CAGlassContainerLayer::contains(this)) return;
     const auto layerBounds = bounds();
     if (!_runtimeEffect
         || !std::isfinite(layerBounds.width())
@@ -402,13 +417,7 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
     if (!imageFilter) return;
 
     const auto rect = SkRect::MakeWH(layerBounds.width(), layerBounds.height());
-    const auto radius = std::clamp<NXFloat>(
-        cornerRadius(),
-        0,
-        std::min(layerBounds.width(), layerBounds.height()) * 0.5f
-    );
-    SkRRect roundedRect;
-    roundedRect.setRectXY(rect, radius, radius);
+    const auto shape = Internal::layerCornerPath(layerBounds.size, cornerRadius(), cornerCurve());
 
     SkPaint effectPaint;
     effectPaint.setAntiAlias(true);
@@ -422,10 +431,11 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
         && std::isfinite(contentsScale())
         ? std::max<NXFloat>(1, contentsScale()) : 1.0f;
     const auto filterRect = SkRect::MakeWH(rect.width() * filterScale, rect.height() * filterScale);
-    const auto filterShape = SkRRect::MakeRectXY(filterRect, radius * filterScale, radius * filterScale);
     context->save();
+    // Apply coverage once in device space; the built-in shader supplies the
+    // fully shaded material and shares this clip's continuous silhouette.
+    if (!masksToBounds()) context->clipPath(shape, true);
     context->scale(1.0f / filterScale, 1.0f / filterScale);
-    context->clipRRect(filterShape, true);
     SkCanvas::SaveLayerRec effectLayer(
         &filterRect,
         &effectPaint,
@@ -444,16 +454,17 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
         && appearance && appearance->front() > 0.5f
         && !shadowColor() && shadowOpacity() > 0) {
         context->save();
-        context->clipRRect(roundedRect, SkClipOp::kDifference, true);
+        context->clipPath(shape, SkClipOp::kDifference, true);
         const auto drawShadow = [&](NXFloat blur, NXFloat offset, NXFloat alpha) {
             SkPaint paint;
             paint.setAntiAlias(true);
             paint.setColor(SK_ColorBLACK);
             paint.setAlphaf(alpha * shadowOpacity());
             paint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, blur * 0.57735f + 0.5f));
-            auto shadow = roundedRect;
-            shadow.offset(0, offset);
-            context->drawRRect(shadow, paint);
+            context->save();
+            context->translate(0, offset);
+            context->drawPath(shape, paint);
+            context->restore();
         };
         drawShadow(8, 2, 15.0f / 255.0f);
         drawShadow(2, 1, 5.0f / 255.0f);

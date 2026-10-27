@@ -297,8 +297,9 @@ void UIViewController::setView(std::shared_ptr<UIView> view) {
     _view->_parentController = weak_from_this();
 
     if (traitCollection() != nullptr) {
+        const auto previous = _view->_traitCollection;
         _view->_traitCollection = traitCollection();
-        _view->UITraitEnvironment::traitCollectionDidChange(nullptr);
+        _view->traitCollectionDidChange(previous);
     }
 
     viewDidLoad();
@@ -948,20 +949,27 @@ void UIViewController::show(
 }
 
 void UIViewController::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
+    const auto view = _view;
+    const auto children = _children;
+    const auto presented = _presentedViewController;
     UITraitEnvironment::traitCollectionDidChange(previousTraitCollection);
-    if (_view) {
-        _view->_traitCollection = _traitCollection;
-        _view->traitCollectionDidChange(previousTraitCollection);
+    if (view && _view == view) {
+        const auto previous = view->_traitCollection;
+        view->_traitCollection = _traitCollection;
+        view->traitCollectionDidChange(previous);
     }
-    for (auto child : _children) {
+    // Client callbacks may change containment. New branches inherit on attach;
+    // removed branches must not receive another delivery from this traversal.
+    for (const auto& child : children) {
+        if (child->parent().lock().get() != this) continue;
+        const auto previous = child->_traitCollection;
         child->_traitCollection = _traitCollection;
-        child->traitCollectionDidChange(previousTraitCollection);
+        child->traitCollectionDidChange(previous);
     }
-    if (_presentedViewController) {
-        _presentedViewController->_traitCollection = _traitCollection;
-        _presentedViewController->traitCollectionDidChange(
-            previousTraitCollection
-        );
+    if (presented && _presentedViewController == presented) {
+        const auto previous = presented->_traitCollection;
+        presented->_traitCollection = _traitCollection;
+        presented->traitCollectionDidChange(previous);
     }
 }
 

@@ -49,6 +49,12 @@ void UIView::applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::str
 }
 
 bool UIView::applyXMLAttribute(const std::string& name, const std::string& value) {
+    if (name == "cornerCurve") {
+        if (value == "continuous") _layer->setCornerCurve(CALayerCornerCurve::continuous);
+        else if (value == "circular") _layer->setCornerCurve(CALayerCornerCurve::circular);
+        else return false;
+        return true;
+    }
     REGISTER_XIB_ATTRIBUTE(contentMode, valueToContentMode, setContentMode)
     REGISTER_XIB_ATTRIBUTE(clipsToBounds, valueToBool, setClipsToBounds)
     REGISTER_XIB_ATTRIBUTE(positionType, valueToPositionType, _yoga->setPositionType)
@@ -786,18 +792,24 @@ void UIView::updateCurrentEnvironment() {
 void UIView::display(std::shared_ptr<CALayer> layer) { }
 
 void UIView::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
+    const auto subviews = _subviews;
+    const auto mask = _mask;
     UITraitEnvironment::traitCollectionDidChange(previousTraitCollection);
-    for (const auto& subview : _subviews) {
-        // If subview has controller, it's controller will update related traitCollection
+    setNeedsLayout();
+    // Trait callbacks may add/remove/reparent views. Snapshot membership and
+    // skip branches that have left this parent before their turn.
+    for (const auto& subview : subviews) {
+        if (subview->superview().lock().get() != this) continue;
+        // Controller-owned roots receive traits through their controllers.
         if (!subview->_parentController.expired()) continue;
-
         const auto previous = subview->_traitCollection;
         subview->_traitCollection = traitsForSubviews();
         subview->traitCollectionDidChange(previous);
     }
-    if (_mask && _mask->_parentController.expired()) {
-        _mask->_traitCollection = _traitCollection;
-        _mask->traitCollectionDidChange(previousTraitCollection);
+    if (mask && _mask == mask && mask->_parentController.expired()) {
+        const auto previous = mask->_traitCollection;
+        mask->_traitCollection = _traitCollection;
+        mask->traitCollectionDidChange(previous);
     }
 }
 

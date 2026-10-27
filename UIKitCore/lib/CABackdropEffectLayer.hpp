@@ -34,6 +34,7 @@ protected:
 private:
     friend class GlassInteractionTestHarness;
     friend class BackdropEffectView;
+    friend class CAGlassContainerLayer;
     struct AppearanceObservation;
     void setAppearanceObserver(std::function<void(std::optional<NXFloat>, NXSize)> observer);
     void setGlassMaterial(std::optional<UIGlassEffect> glass, std::shared_ptr<UITraitCollection> traits);
@@ -48,6 +49,7 @@ private:
     sk_sp<SkImageFilter> _cachedImageFilter;
     NXSize _cachedFilterSize;
     NXFloat _cachedFilterCornerRadius = 0;
+    CALayerCornerCurve _cachedFilterCornerCurve = CALayerCornerCurve::continuous;
     NXFloat _cachedFilterContentsScale = 0;
     bool _hasCachedFilterState = false;
     NXFloat _cachedInteractionGlow = 0;

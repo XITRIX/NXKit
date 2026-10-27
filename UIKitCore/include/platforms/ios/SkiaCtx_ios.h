@@ -23,6 +23,7 @@ public:
     UIEdgeInsets deviceSafeAreaInsets() override;
 
     NXKit::UIUserInterfaceStyle getThemeMode() override;
+    std::pair<NXKit::UIUserInterfaceSizeClass, NXKit::UIUserInterfaceSizeClass> getSizeClasses() override;
 //    void setTargetFrameRate(int frameRate) override;
 
     bool platformRunLoop(std::function<bool ()> loop) override;

@@ -1,5 +1,6 @@
 #include <CABlurLayer.h>
 #include <tools/Tools.hpp>
+#include "LayerCornerGeometry.hpp"
 
 #include "include/core/SkRRect.h"
 #include "include/effects/SkImageFilters.h"
@@ -30,11 +31,7 @@ void CABlurLayer::draw(SkCanvas* context) {
     context->save();
 
     SkRect rect = SkRect::MakeXYWH(0, 0, bounds().width(), bounds().height());
-    float radii = cornerRadius();
-    SkVector corners[] = {{radii, radii}, {radii, radii}, {radii, radii}, {radii, radii}};
-    SkRRect rrect;
-    rrect.setRectRadii(rect, corners);
-    context->clipRRect(rrect, true);
+    if (!masksToBounds()) context->clipPath(Internal::layerCornerPath(bounds().size, cornerRadius(), cornerCurve()), true);
 //    // Make a separate layer using the blur filter, clipped to the middle rectangle's bounds
     SkCanvas::SaveLayerRec slr(&rect, &blurPaint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
     context->saveLayer(slr);

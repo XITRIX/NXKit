@@ -25,18 +25,9 @@ bool applicationRunLoop() {
     keyWindow->setFrame({ NXPoint::zero, size });
 
     const auto scale = SkiaCtx::_main->getScaleFactor();
-
-    if (keyWindow->_traitCollection == nullptr
-        || keyWindow->_traitCollection->_userInterfaceStyle != SkiaCtx::main()->getThemeMode()
-        || keyWindow->_traitCollection->_displayScale != scale)
-    {
-        const auto oldCollection = keyWindow->_traitCollection;
-        keyWindow->_traitCollection = new_shared<UITraitCollection>();
-        keyWindow->_traitCollection->_displayScale = scale;
-        keyWindow->_traitCollection->_userInterfaceStyle = SkiaCtx::main()->getThemeMode();
-        keyWindow->traitCollectionDidChange(oldCollection);
-        CALayer::setLayerTreeIsDirty();
-    }
+    // Poll even when geometry is unchanged: UIKit can change size classes at
+    // the same bounds after rotation, multitasking, or an environment change.
+    keyWindow->updateTraitsFromPlatform();
 
     const int maximumAnimationFrameRate = UIView::maximumAnimationFrameRate();
     CALayer::maxFramerateRequired = 0; // reset value

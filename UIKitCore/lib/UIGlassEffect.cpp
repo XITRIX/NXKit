@@ -59,7 +59,7 @@ ResolvedGlassParameters styleDefaults(
             .dispersion = 0.01f,
             .saturation = 1.0f,
             .contrast = 1.04f,
-            .luminosity = 0.095f,
+            .luminosity = 0.12f,
             .tintColor = UIColor::white,
             .tintOpacity = 0.0f,
             .edgeStrength = 1.0f,
@@ -75,17 +75,11 @@ ResolvedGlassParameters styleDefaults(
         };
     }
 
-    // Matched native UIKit captures (Demo/GlassComparison) separate body tone
-    // from blur: a large regular lens has a substantial neutral body, while
-    // small controls adapt that body to the content behind the whole lens.
-    const auto shortestDimension = std::max<NXFloat>(
-        0,
-        std::min(size.width, size.height)
-    );
+    // Matched gallery captures hold app appearance fixed while changing the
+    // backdrop. Regular glass retains a neutral body even on solid black.
+    const auto shortestDimension = std::max<NXFloat>(0, std::min(size.width, size.height));
     const auto sizeAmount = smoothstep(64.0f, 160.0f, shortestDimension);
-    const auto maximumTintOpacity = interfaceStyle == UIUserInterfaceStyle::dark
-        ? 0.18f
-        : 0.70f;
+    const bool dark = interfaceStyle == UIUserInterfaceStyle::dark;
     return {
         // Keep the declared backdrop extent at the proven cross-platform
         // limit used by the existing glass renderer. The largest regular
@@ -95,11 +89,11 @@ ResolvedGlassParameters styleDefaults(
         .refraction = interpolate(0.35f, 0.55f, sizeAmount),
         .refractionDepth = interpolate(0.70f, 0.90f, sizeAmount),
         .dispersion = 0.01f,
-        .saturation = interpolate(1.67f, 1.57f, sizeAmount),
-        .contrast = interpolate(0.64f, 1.0f, sizeAmount),
+        .saturation = dark ? interpolate(1.18f, 1.45f, sizeAmount) : interpolate(1.7f, 1.78f, sizeAmount),
+        .contrast = dark ? interpolate(0.99f, 0.84f, sizeAmount) : 1.067f,
         .luminosity = 0.0f,
         .tintColor = interfaceStyle == UIUserInterfaceStyle::dark ? UIColor::white : UIColor::systemBackground,
-        .tintOpacity = interpolate(interfaceStyle == UIUserInterfaceStyle::dark ? 0.10f : 0.075f, maximumTintOpacity, sizeAmount),
+        .tintOpacity = dark ? 0.145f : interpolate(0.525f, 0.537f, sizeAmount),
         .edgeStrength = 1.0f,
         .specularStrength = interpolate(0.44f, 0.34f, sizeAmount),
         .darkBackdropSpecularStrength = interpolate(0.11f, 0.55f, sizeAmount),
@@ -274,7 +268,7 @@ BackdropEffect UIGlassEffect::_backdropEffect(
     parameters.saturation = _saturation.value_or(parameters.saturation);
     parameters.contrast = _contrast.value_or(parameters.contrast);
     parameters.luminosity = _luminosity.value_or(parameters.luminosity);
-    parameters.tintOpacity = _tintOpacity.value_or(parameters.tintOpacity);
+    parameters.tintOpacity = _tintOpacity.value_or(_tintColor ? 1.0f : parameters.tintOpacity);
     parameters.edgeStrength = _edgeStrength.value_or(parameters.edgeStrength);
     parameters.specularStrength = _specularStrength.value_or(parameters.specularStrength);
     parameters.darkBackdropSpecularStrength = _darkBackdropSpecularStrength.value_or(
@@ -322,6 +316,7 @@ BackdropEffect UIGlassEffect::_backdropEffect(
     effect.setUniform("contrast", parameters.contrast);
     effect.setUniform("luminosity", parameters.luminosity);
     effect.setUniform("tint", resolvedTint);
+    effect.setUniform("tintMode", _tintColor && !_tintOpacity ? (_style == Style::clear ? 1.0f : 2.0f) : 0.0f);
     effect.setUniform("edge", parameters.edgeStrength);
     effect.setUniform("specStrength", parameters.specularStrength);
     effect.setUniform(
@@ -347,8 +342,8 @@ BackdropEffect UIGlassEffect::_backdropEffect(
     effect.setUniform("backdropLuma", interfaceStyle == UIUserInterfaceStyle::dark ? 0.15f : 0.85f);
     effect.setUniform("edgeAbsorption", _edgeAbsorption.value_or(0.035f));
     const auto bodySize = smoothstep(64.0f, 160.0f, std::max(0.0f, std::min(size.width, size.height)));
-    effect.setUniform("adaptiveTint", _style == Style::regular && !_tintOpacity
-        && interfaceStyle != UIUserInterfaceStyle::dark
-        ? interpolate(0.637f, 0.02f, bodySize) : 0.0f);
+    effect.setUniform("adaptiveTint", 0.0f);
+    effect.setUniform("bodyCompression", _style == Style::regular && !_tintColor && !_tintOpacity
+        ? interpolate(0.29f, 0.60f, bodySize) : 0.153f);
     return effect;
 }

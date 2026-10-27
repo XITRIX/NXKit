@@ -5,6 +5,7 @@ namespace NXKit {
 
 void UIApplicationDelegate::applicationNeedsXIBRegistration(UIApplication* application) {
     REGISTER_NIB(BackdropEffectView)
+    REGISTER_NIB(GlassContainerView)
     REGISTER_NIB(UIView)
     REGISTER_NIB(UILabel)
     REGISTER_NIB(UIControl)

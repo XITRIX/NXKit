@@ -5,6 +5,9 @@
 #pragma once
 
 #include <BackdropEffectView.h>
+#include <GlassContainerView.h>
+#include <UIGlassContainerEffect.h>
+#include <CALayerCornerCurve.h>
 #include <UIGlassEffect.h>
 #include <DispatchQueue.h>
 #include <IndexPath.h>
@@ -18,6 +21,8 @@
 #include <UIScrollView.h>
 #include <UITapGestureRecognizer.h>
 #include <UITextView.h>
+#include <UIUserInterfaceSizeClass.h>
+#include <UITraitCollection.h>
 #include <UIViewController.h>
 #include <UIViewControllerTransitioning.h>
 #include <UIPresentationController.h>

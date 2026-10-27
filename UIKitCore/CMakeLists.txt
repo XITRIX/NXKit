@@ -20,6 +20,11 @@ add_library(XITRIXUIKit
         lib/Application.cpp
         lib/BackdropEffect.cpp
         lib/BackdropEffectView.cpp
+        lib/GlassContainerView.cpp
+        lib/CAGlassContainerLayer.cpp
+        lib/CAGlassContainerLayer.hpp
+        include/GlassContainerView.h
+        include/UIGlassContainerEffect.h
         lib/DispatchQueue.cpp
         lib/Timer.cpp
         lib/Geometry.cpp
@@ -27,6 +32,9 @@ add_library(XITRIXUIKit
         lib/CGImage.cpp
         lib/CADisplayLink.cpp
         lib/CALayer.cpp
+        lib/LayerCornerGeometry.cpp
+        lib/LayerCornerGeometry.hpp
+        include/CALayerCornerCurve.h
         lib/YGLayout.cpp
         lib/UIAction.cpp
         lib/UIApplication.cpp
@@ -57,6 +65,7 @@ add_library(XITRIXUIKit
         lib/UITapGestureRecognizer.cpp
         lib/UITextView.cpp
         lib/UITouch.cpp
+        include/UIUserInterfaceSizeClass.h
         lib/UITraitCollection.cpp
         lib/UITraitEnvironment.cpp
         lib/UIView.cpp

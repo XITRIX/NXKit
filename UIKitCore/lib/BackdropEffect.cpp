@@ -57,6 +57,8 @@ uniform float2 resolution;
 uniform float2 lensCenter;
 uniform float2 lensSize;
 uniform float cornerRadius;
+uniform float cornerCurve;
+uniform float externalShapeCoverage;
 uniform float maximumSampleRadius;
 uniform float refraction;
 uniform float curve;
@@ -65,6 +67,8 @@ uniform float saturation;
 uniform float contrast;
 uniform float luminosity;
 uniform float4 tint;
+// 0: explicit optical overrides; 1: UIKit clear tint; 2: UIKit regular tint.
+uniform float tintMode;
 uniform float edge;
 uniform float specStrength;
 uniform float specFallbackStrength;
@@ -80,6 +84,7 @@ uniform float bodyMode;
 uniform float backdropLuma;
 uniform float edgeAbsorption;
 uniform float adaptiveTint;
+uniform float bodyCompression;
 uniform float contentScale;
 uniform float filterScale;
 uniform float interactionIntensity;
@@ -111,15 +116,45 @@ half4 sampleSharpBackdrop(float2 origin, float2 sampleXY) {
 }
 
 // Signed distance to a box with rounded corners.
-float boxRoundedSDF(float2 p, float2 halfDim, float r) {
+float circularBoxSDF(float2 p, float2 halfDim, float r) {
     float2 d = abs(p) - halfDim + float2(r);
     float exterior = length(max(d, 0.0));
     float interior = min(max(d.x, d.y), 0.0);
     return exterior + interior - r;
 }
 
+// Same continuous-curvature geometry as LayerCornerGeometry. The exponent and
+// extent soften toward a capsule as the radius approaches the shortest side.
+float3 continuousCorner(float2 halfDim, float r) {
+    float amount = smoothstep(1.0, 1.4, min(halfDim.x, halfDim.y) / max(r, 0.0001));
+    float extent = r * mix(1.05, 1.4, amount);
+    return float3(min(halfDim, float2(extent)), mix(2.05, 3.0, amount));
+}
+
+float boxRoundedSDF(float2 p, float2 halfDim, float r) {
+    if (cornerCurve < 0.5 || r <= 0.0) return circularBoxSDF(p, halfDim, r);
+    float3 c = continuousCorner(halfDim, r);
+    float2 side = abs(p) - halfDim;
+    float2 q = side + c.xy;
+    if (min(q.x, q.y) <= 0.0) return max(side.x, side.y);
+    float2 uv = q / c.xy;
+    float norm = pow(pow(uv.x, c.z) + pow(uv.y, c.z), 1.0 / c.z);
+    float2 gradient = pow(uv / max(norm, 0.0001), float2(c.z - 1.0)) / c.xy;
+    return (norm - 1.0) / max(length(gradient), 0.0001);
+}
+
 // Outward-facing direction vector from the lens surface.
 float2 lensNormalDirection(float2 p, float2 halfDim, float r) {
+    if (cornerCurve > 0.5 && r > 0.0) {
+        float3 c = continuousCorner(halfDim, r);
+        float2 q = abs(p) - halfDim + c.xy;
+        if (min(q.x, q.y) > 0.0) {
+            float2 normal = pow(q / c.xy, float2(c.z - 1.0)) / c.xy;
+            return sign(p) * normal / max(length(normal), 0.0001);
+        }
+        float2 side = abs(p) - halfDim;
+        return side.x > side.y ? float2(sign(p.x), 0.0) : float2(0.0, sign(p.y));
+    }
     float2 d = abs(p) - halfDim + float2(r);
     float2 s = float2(p.x >= 0.0 ? 1.0 : -1.0, p.y >= 0.0 ? 1.0 : -1.0);
 
@@ -131,6 +166,33 @@ float2 lensNormalDirection(float2 p, float2 halfDim, float r) {
 
 float toBrightness(half3 c) {
     return dot(c, half3(0.2126, 0.7152, 0.0722));
+}
+
+// Native gallery captures distinguish an opaque-color tint's vibrancy from
+// an alpha overlay. Work in linear RGB for transmitted tint luminance; the
+// source backdrop's sRGB luma controls how much of the supplied color survives.
+float3 tintLinear(float3 color) {
+    return mix(color / 12.92, pow((color + 0.055) / 1.055, float3(2.4)), step(float3(0.04045), color));
+}
+float3 tintSRGB(float3 color) {
+    color = max(color, float3(0));
+    return mix(color * 12.92, 1.055 * pow(color, float3(1.0/2.4)) - 0.055, step(float3(0.0031308), color));
+}
+float3 nativeTintColor(float3 color, float transmittedLuma) {
+    float amount = clamp(transmittedLuma, 0.0, 1.0);
+    if (tintMode > 1.5 && backdropLuma < 0.5) {
+        // Dark regular tint retains its supplied brightness over black and
+        // gains a small neutral highlight as the backdrop becomes brighter.
+        return color * (1.0 - 0.02 * amount) + (1.0 - color) * (0.11 * amount);
+    }
+    float red = max(color.r - max(color.g, color.b), 0.0);
+    float green = max(color.g - max(color.r, color.b), 0.0);
+    float gain = 0.395 + 0.265 * red - 0.045 * green;
+    float bias = -0.014 - 0.025 * red + 0.022 * green;
+    float3 linear = tintLinear(color);
+    float3 shaded = max(linear * gain + bias, float3(0));
+    if (tintMode > 1.5) amount = 0.4 + 0.6 * amount;
+    return clamp(tintSRGB(mix(shaded, linear, amount)), 0.0, 1.0);
 }
 
 half3 processColor(
@@ -286,7 +348,8 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     half4 background = sampleSharpBackdrop(xy, xy);
     if (pixel.a <= 0.0) pixel = background;
     pixel.rgb /= max(pixel.a, 0.0001);
-    half3 body = half3(clamp(mix(half3(toBrightness(pixel.rgb)), pixel.rgb, saturation), 0.0, 1.0));
+    float transmittedLuma = toBrightness(pixel.rgb);
+    half3 body = half3(clamp(mix(half3(transmittedLuma), pixel.rgb, saturation), 0.0, 1.0));
     body = bodyMode > 0.5
         ? half3(clamp((body - 0.5) * contrast + 0.5 + luminosity, 0.0, 1.0))
         : half3(clamp(body * contrast + luminosity, 0.0, 1.0));
@@ -315,10 +378,12 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     half3 directTint = mix(body, half3(tint.rgb), tintAlpha);
     half3 lumaTint = half3(clamp(tint.rgb + toBrightness(body) - toBrightness(half3(tint.rgb)), 0.0, 1.0));
     float chroma = max(tint.r, max(tint.g, tint.b)) - min(tint.r, min(tint.g, tint.b));
-    body = bodyMode > 0.5 ? directTint
-        : mix(directTint, mix(body, lumaTint, tintAlpha), clamp(chroma * 8.0, 0.0, 1.0));
+    body = tintMode > 0.5
+        ? mix(body, half3(nativeTintColor(tint.rgb, transmittedLuma)), tintAlpha)
+        : (bodyMode > 0.5 ? directTint
+            : mix(directTint, mix(body, lumaTint, tintAlpha), clamp(chroma * 8.0, 0.0, 1.0)));
     float bodyLuma = clamp(toBrightness(body), 0.0, 1.0);
-    if (bodyMode < 0.5 && backdropLuma < 0.5) body *= 1.0 - (1.0 - backdropLuma) * 0.18 * bodyLuma * bodyLuma;
+    if (bodyMode < 0.5 && backdropLuma < 0.5 && tintMode < 0.5) body *= 1.0 - bodyCompression * bodyLuma * bodyLuma;
 
     float along = dot(normal, lightDirection);
     float rimThickness = 1.0 - sqrt(max(0.0, 1.0 - (1.0 - normalZ) * (1.0 - normalZ)));
@@ -359,7 +424,7 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     float sheen = 1.0 - smoothstep(0.0, glowRadius, length(xy - interactionLocation));
     result = mix(result, half3(1.0), glow * mix(0.14, 0.22, backdropLuma));
     result = mix(result, half3(1.0), glow * sheen * mix(0.07, 0.10, backdropLuma));
-    float alpha = clamp(0.5 - sdf / pixelWidth, 0.0, 1.0);
+    float alpha = externalShapeCoverage > 0.5 ? 1.0 : clamp(0.5 - sdf / pixelWidth, 0.0, 1.0);
     return mix(background, half4(clamp(result, 0.0, 1.0) * pixel.a, pixel.a), alpha);
 }
 
@@ -457,7 +522,8 @@ half4 main(float2 filterXY) {
         }
     }
 
-    float alpha = 1.0 - smoothstep(-SMOOTH_EDGE_PX * 0.5, SMOOTH_EDGE_PX * 0.5, sdf);
+    float alpha = externalShapeCoverage > 0.5 ? 1.0
+        : 1.0 - smoothstep(-SMOOTH_EDGE_PX * 0.5, SMOOTH_EDGE_PX * 0.5, sdf);
     half4 background = sampleBackdrop(xy, xy);
     return mix(background, pixel, alpha);
 }
@@ -468,6 +534,8 @@ bool isAutomaticUniformName(const std::string& name) {
         || name == "lensCenter"
         || name == "lensSize"
         || name == "cornerRadius"
+        || name == "cornerCurve"
+        || name == "externalShapeCoverage"
         || name == "contentScale"
         || name == "filterScale"
         || name == "maximumSampleRadius"

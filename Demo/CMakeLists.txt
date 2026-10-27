@@ -28,6 +28,7 @@ add_executable(${PROJECT_NAME}
         app/Screens/TestScrollController/TestScrollController.cpp
         app/Screens/NavigationTestViewController/NavigationTestViewController.cpp
         app/Screens/GlassDemoViewController/GlassDemoViewController.cpp
+        app/Screens/GlassDemoViewController/GlassDemoScene.cpp
         app/Screens/ControllerTestViewController/ControllerTestViewController.cpp
 )
 
