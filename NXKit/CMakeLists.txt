@@ -106,4 +106,16 @@ if (NXKIT_BUILD_TESTS)
     target_compile_options(NXKitLayerRenderingTests PRIVATE -fno-rtti)
     target_link_libraries(NXKitLayerRenderingTests PRIVATE NXKit)
     add_test(NAME NXKitLayerRenderingTests COMMAND NXKitLayerRenderingTests)
+
+    add_executable(NXKitGlassMaterialTests tests/GlassMaterialTests.cpp)
+    target_link_libraries(NXKitGlassMaterialTests PRIVATE NXKit)
+    add_test(NAME NXKitGlassMaterialTests COMMAND NXKitGlassMaterialTests)
+
+    add_executable(NXKitGlassAppearanceTests tests/GlassAppearanceTests.cpp)
+    target_link_libraries(NXKitGlassAppearanceTests PRIVATE NXKit)
+    add_test(NAME NXKitGlassAppearanceTests COMMAND NXKitGlassAppearanceTests)
+
+    add_executable(NXKitDispatchQueueTests tests/DispatchQueueTests.cpp)
+    target_link_libraries(NXKitDispatchQueueTests PRIVATE NXKit)
+    add_test(NAME NXKitDispatchQueueTests COMMAND NXKitDispatchQueueTests)
 endif ()

@@ -286,7 +286,7 @@ void UIView::setSuperview(const std::shared_ptr<UIView>& superview) {
     _superview = superview;
 
     if (superview) {
-        _traitCollection = superview->traitCollection();
+        _traitCollection = superview->traitsForSubviews();
         traitCollectionDidChange(previousTraitCollection);
     }
 
@@ -791,8 +791,9 @@ void UIView::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previou
         // If subview has controller, it's controller will update related traitCollection
         if (!subview->_parentController.expired()) continue;
 
-        subview->_traitCollection = _traitCollection;
-        subview->traitCollectionDidChange(previousTraitCollection);
+        const auto previous = subview->_traitCollection;
+        subview->_traitCollection = traitsForSubviews();
+        subview->traitCollectionDidChange(previous);
     }
     if (_mask && _mask->_parentController.expired()) {
         _mask->_traitCollection = _traitCollection;

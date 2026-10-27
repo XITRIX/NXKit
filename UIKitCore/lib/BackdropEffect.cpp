@@ -28,10 +28,17 @@
  * SOFTWARE.
  *
  * Modified for NXKit's Skia backdrop pipeline in 2026. The NXKit adaptation
- * changes the host-side bindings and default tuning; the shader's SDF lens,
- * refraction, and dispersion are retained. Its former fixed white edge glint
- * is replaced by a narrow Fresnel-style reflection sampled from the live
- * backdrop just outside the lens.
+ * retains the legacy custom-shader path. Built-in UIGlassEffect uses the
+ * reference lens below and native UIKit calibration in Demo/GlassComparison.
+ *
+ * The UIKit glass material path below is adapted from liquid_glass_widgets:
+ * https://github.com/sdegenaar/liquid_glass_widgets
+ * Copyright 2025 Tim Lehmann for whynotmake.it
+ * Copyright (c) 2024–2026 Sebastian Degenaar
+ * MIT license; complete notices in licenses/liquid_glass_widgets-MIT.txt.
+ * Reference: 5d2859796ef0f6964e2fdf25962b033eede27814.
+ * SkSL adaptation retains live backdrop sampling in place of Flutter's
+ * captured texture and uses view-local points for all optical distances.
  */
 
 #include <BackdropEffect.h>
@@ -68,21 +75,39 @@ uniform float specWidthPx;
 uniform float reflectionSamplePx;
 uniform float reflectionSpreadPx;
 uniform float brightBackdropShade;
+uniform float referenceAppearance;
+uniform float bodyMode;
+uniform float backdropLuma;
+uniform float edgeAbsorption;
+uniform float adaptiveTint;
+uniform float contentScale;
+uniform float filterScale;
+uniform float interactionIntensity;
+uniform float2 interactionLocation;
 uniform shader content;
+uniform shader sharpContent;
 
 const float SMOOTH_EDGE_PX = 1.5;
 
 // SkImageFilters::RuntimeShader uses maximumSampleRadius to size its backdrop
 // input. Keep every dynamic child evaluation inside the same radius even when
 // callers retune the built-in effect's displacement uniforms.
-half4 sampleBackdrop(float2 origin, float2 sampleXY) {
+float2 boundedBackdropXY(float2 origin, float2 sampleXY) {
     float2 offset = sampleXY - origin;
     float offsetLength = length(offset);
     float scale = min(
         1.0,
         max(maximumSampleRadius, 0.0) / max(offsetLength, 0.0001)
     );
-    return content.eval(origin + offset * scale);
+    return origin + offset * scale;
+}
+
+half4 sampleBackdrop(float2 origin, float2 sampleXY) {
+    return content.eval(boundedBackdropXY(origin, sampleXY) * max(filterScale, 1.0));
+}
+
+half4 sampleSharpBackdrop(float2 origin, float2 sampleXY) {
+    return sharpContent.eval(boundedBackdropXY(origin, sampleXY) * max(filterScale, 1.0));
 }
 
 // Signed distance to a box with rounded corners.
@@ -227,7 +252,119 @@ half3 sampleReflection(
     );
 }
 
-half4 main(float2 xy) {
+// The reference's paraxial lens, calibrated against the native UIKit fixture
+// in Demo/GlassComparison. Analytic SDF normals replace its geometry texture.
+half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
+    float pixelWidth = 1.0 / max(contentScale, 1.0);
+    float distanceInside = max(-sdf, 0.0);
+    float2 normal = lensNormalDirection(p, halfDim, r);
+    float2 lightDirection = specLightDirection / max(length(specLightDirection), 0.0001);
+
+    // A quarter-circle bevel: the XY normal goes from horizontal at the rim
+    // to zero on the flat face. Fade before the rounded SDF's medial axis.
+    float bevel = min(18.0 * refraction / 0.90, max(r, 0.0));
+    float slope = bevel > 0.0001 ? clamp(1.0 - distanceInside / bevel, 0.0, 1.0) : 0.0;
+    float normalZ = sqrt(max(0.0, 1.0 - slope * slope));
+
+    // Paraxial refraction used by the reference's native-calibrated preset:
+    // -(n - 1) * sin(incidence)^2 * baseHeight. Inward displacement grows
+    // faster than distance-to-rim and therefore folds/mirrors the inner scene.
+    // The old outward translation only smeared the scene around the boundary.
+    float reach = min(2.0 * min(halfDim.x, halfDim.y), max(maximumSampleRadius, 0.0));
+    float displacement = min(40.0 * (curve / 0.55) * slope * slope, reach);
+    float2 sampleXY = xy - normal * displacement;
+    float2 chromaticShift = normal * displacement * dispersion * 0.3;
+    // Glass carries its frosted material through the entire bevel.
+    // Fading frost out with the surface normal exposes a broad transparent
+    // perimeter, unlike UIKit. Clear uses a much smaller blur kernel.
+    half4 pixel = sampleBackdrop(xy, sampleXY);
+    if (dispersion > 0.0 && slope > 0.0) {
+        half4 red = sampleBackdrop(xy, sampleXY + chromaticShift);
+        half4 blue = sampleBackdrop(xy, sampleXY - chromaticShift);
+        pixel = half4(red.r, pixel.g, blue.b, pixel.a);
+    }
+    half4 background = sampleSharpBackdrop(xy, xy);
+    if (pixel.a <= 0.0) pixel = background;
+    pixel.rgb /= max(pixel.a, 0.0001);
+    half3 body = half3(clamp(mix(half3(toBrightness(pixel.rgb)), pixel.rgb, saturation), 0.0, 1.0));
+    body = bodyMode > 0.5
+        ? half3(clamp((body - 0.5) * contrast + 0.5 + luminosity, 0.0, 1.0))
+        : half3(clamp(body * contrast + luminosity, 0.0, 1.0));
+
+    // UIKit's small regular material responds strongly to the surrounding
+    // content: nearly clear over black, but a neutral veil over busy artwork.
+    // These uniform sample locations are inside the output lens rectangle,
+    // already covered by the backdrop input; they do not need displacement
+    // overscan. A common tone across the lens avoids halos around source detail.
+    float contextLuma = 0.0;
+    float tintAlpha = tint.a;
+    if (adaptiveTint > 0.0) {
+        float2 span = halfDim * 0.6;
+        float scale = max(filterScale, 1.0);
+        contextLuma = toBrightness(content.eval(lensCenter * scale).rgb);
+        contextLuma += toBrightness(content.eval((lensCenter + float2(-span.x, -span.y)) * scale).rgb);
+        contextLuma += toBrightness(content.eval((lensCenter + float2(span.x, -span.y)) * scale).rgb);
+        contextLuma += toBrightness(content.eval((lensCenter + float2(-span.x, span.y)) * scale).rgb);
+        contextLuma += toBrightness(content.eval((lensCenter + span) * scale).rgb);
+        contextLuma *= 0.2;
+        tintAlpha = clamp(tint.a + adaptiveTint * (1.0 - exp(-contextLuma / 0.11)), 0.0, 1.0);
+    }
+
+    // Regular material keeps a visible body; chromatic tint changes hue without
+    // losing backdrop luminance. Clear material uses the direct tint path.
+    half3 directTint = mix(body, half3(tint.rgb), tintAlpha);
+    half3 lumaTint = half3(clamp(tint.rgb + toBrightness(body) - toBrightness(half3(tint.rgb)), 0.0, 1.0));
+    float chroma = max(tint.r, max(tint.g, tint.b)) - min(tint.r, min(tint.g, tint.b));
+    body = bodyMode > 0.5 ? directTint
+        : mix(directTint, mix(body, lumaTint, tintAlpha), clamp(chroma * 8.0, 0.0, 1.0));
+    float bodyLuma = clamp(toBrightness(body), 0.0, 1.0);
+    if (bodyMode < 0.5 && backdropLuma < 0.5) body *= 1.0 - (1.0 - backdropLuma) * 0.18 * bodyLuma * bodyLuma;
+
+    float along = dot(normal, lightDirection);
+    float rimThickness = 1.0 - sqrt(max(0.0, 1.0 - (1.0 - normalZ) * (1.0 - normalZ)));
+    float absorption = sqrt(max(rimThickness, 0.0)) * edgeAbsorption * mix(1.4, 0.6, along * 0.5 + 0.5);
+    half3 result = body * max(0.0, 1.0 - absorption);
+
+    // Analytic coverage of a sub-point hairline. The AA transition is centred
+    // on its inner boundary instead of adding a whole extra pixel of width.
+    float hairline = clamp((max(specWidthPx, 0.0) - distanceInside) / pixelWidth + 0.5, 0.0, 1.0);
+    if (specWidthPx <= 0.0) hairline = 0.0;
+    hairline *= edge;
+
+    // Two localized lobes, brightest immediately inside the dark hairline.
+    // No constant white ring or all-around Fresnel stripe.
+    float power = max(specDirectionalPower, 1.0);
+    float lobe = pow(max(along, 0.0), power) + 0.85 * pow(max(-along, 0.0), power);
+    float inset = max(0.0, distanceInside - 0.75);
+    float core = exp(-inset / 0.5);
+    float tail = exp(-inset / (8.0 / 3.0));
+    float rimLight = lobe * pow(max(1.0 - bodyLuma, 0.0), 0.3)
+        * (0.175 * core + 0.035 * tail) * (specStrength / 0.52) * edge * (1.0 - hairline);
+    if (rimLight > 0.0001) {
+        half3 reflected = sampleReflection(xy, normal, sdf, lensCenter, halfDim, body);
+        result += (half3(0.7) + reflected * 0.3) * rimLight;
+    }
+
+    // The native iPadOS 26.4.1 capture has a sub-point white reflection over
+    // the material, including over black. Sampling the raw scene here made
+    // regular edges transparent and produced a dark outline over white.
+    float lineStrength = clamp(specFallbackStrength + contextLuma * 0.5, 0.0, 1.0);
+    result = mix(result, half3(1.0), hairline * lineStrength);
+    result *= 1.0 - smoothstep(0.85, 0.98, toBrightness(result)) * brightBackdropShade;
+
+    // A single press overlay: stacking the fallback's additive glow and the
+    // native button overlay together produced a milky white plate on touch.
+    float glow = clamp(interactionIntensity, 0.0, 1.0);
+    float glowRadius = max(1.0, min(lensSize.x, lensSize.y) * 1.6);
+    float sheen = 1.0 - smoothstep(0.0, glowRadius, length(xy - interactionLocation));
+    result = mix(result, half3(1.0), glow * mix(0.14, 0.22, backdropLuma));
+    result = mix(result, half3(1.0), glow * sheen * mix(0.07, 0.10, backdropLuma));
+    float alpha = clamp(0.5 - sdf / pixelWidth, 0.0, 1.0);
+    return mix(background, half4(clamp(result, 0.0, 1.0) * pixel.a, pixel.a), alpha);
+}
+
+half4 main(float2 filterXY) {
+    float2 xy = filterXY / max(filterScale, 1.0);
     float2 halfDim = lensSize * 0.5;
     float r = min(cornerRadius, min(halfDim.x, halfDim.y));
 
@@ -235,7 +372,11 @@ half4 main(float2 xy) {
     float sdf = boxRoundedSDF(p, halfDim, r);
 
     if (sdf > SMOOTH_EDGE_PX) {
-        return content.eval(xy);
+        return content.eval(filterXY);
+    }
+
+    if (referenceAppearance > 0.5) {
+        return referenceGlass(xy, halfDim, r, p, sdf);
     }
 
     float2 normal = lensNormalDirection(p, halfDim, r);
@@ -328,7 +469,10 @@ bool isAutomaticUniformName(const std::string& name) {
         || name == "lensSize"
         || name == "cornerRadius"
         || name == "contentScale"
-        || name == "maximumSampleRadius";
+        || name == "filterScale"
+        || name == "maximumSampleRadius"
+        || name == "interactionIntensity"
+        || name == "interactionLocation";
 }
 
 void validateName(const std::string& name) {
@@ -374,9 +518,8 @@ BackdropEffect::BackdropEffect(
 }
 
 BackdropEffect BackdropEffect::glass() {
-    // Preserve the original factory as a compatibility spelling for the old,
-    // highly translucent glass. New code should install UIGlassEffect on a
-    // BackdropEffectView so regular glass can adapt to its view and traits.
+    // The low-level factory shares the clear material. Install UIGlassEffect
+    // on a view for adaptive regular styling and opt-in touch feedback.
     return UIGlassEffect(UIGlassEffect::Style::clear)._backdropEffect(
         NXSize(),
         UITraitCollection::current()

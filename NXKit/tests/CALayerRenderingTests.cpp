@@ -24,6 +24,7 @@ namespace {
 
 int failures = 0;
 
+
 void expect(bool condition, const std::string& message) {
     if (condition) return;
     ++failures;
@@ -206,6 +207,38 @@ struct GlassSamples {
     SkColor center = SK_ColorTRANSPARENT;
 };
 
+void testPresentationGlassReceivesLiveInteraction() {
+    auto view = new_shared<BackdropEffectView>(UIGlassEffect(UIGlassEffect::Style::clear));
+    view->setFrame({0, 0, 132, 56});
+    auto layer = std::static_pointer_cast<CABackdropEffectLayer>(view->layer());
+    auto presentation = std::static_pointer_cast<CABackdropEffectLayer>(layer->createPresentation());
+    SaveLayerTrackingCanvas canvas(320, 240);
+    presentation->draw(&canvas);
+    const auto idleFilter = canvas.calls.back().imageFilter;
+    Internal::GlassInteraction motion;
+    motion.pressed = true;
+    motion.move({30, 28}, {20, 0});
+    motion.advance(0.15);
+    layer->setGlassInteraction(motion);
+    presentation->draw(&canvas);
+    const auto pressedFilter = canvas.calls.back().imageFilter;
+    expect(pressedFilter != idleFilter,
+           "an existing presentation layer rebuilds its filter for live touch lighting");
+    presentation->draw(&canvas);
+    expect(canvas.calls.back().imageFilter == pressedFilter,
+           "unchanged presentation touch lighting reuses its filter");
+    auto glass = *view->glassEffect();
+    glass.setTintOpacity(0.4f);
+    view->setEffect(glass);
+    expect(presentation->effect().uniform("tint") == layer->effect().uniform("tint"),
+           "effect replacement reaches an existing presentation layer");
+    layer->setGlassInteraction({});
+    presentation->draw(&canvas);
+    expect(canvas.calls.back().imageFilter != pressedFilter,
+           "resetting touch lighting invalidates an existing presentation filter");
+}
+
+
 int brightness(SkColor color) {
     return SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
 }
@@ -266,21 +299,26 @@ void testGlassStylesResolveThroughTheirView() {
 
     expect(
         largeRegular.backdropBlurRadius()
-            > smallRegular.backdropBlurRadius() + 15.0f,
+            > smallRegular.backdropBlurRadius() + 2.0f,
         "regular glass increases backdrop frost with view size"
     );
     expect(
         largeRegularTint[3] > smallRegularTint[3] + 0.20f,
-        "regular glass increases its system-background tint with view size"
+        "regular glass increases its neutral body tint with view size"
     );
     expect(
-        largeRegularTint[3] < 0.30f,
-        "large regular glass stays translucent in light appearance"
+        smallRegularTint[3] >= 0.07f && largeRegularTint[3] >= 0.69f && largeRegularTint[3] < 0.72f,
+        "native-calibrated regular glass adapts its baseline body with size"
     );
     expect(
-        scalarUniform(largeRegular, "luminosity") > 0.10f,
-        "large regular glass lifts luminosity in light appearance"
+        scalarUniform(smallRegular, "adaptiveTint") > 0.6f
+            && scalarUniform(largeRegular, "adaptiveTint") < 0.03f,
+        "small regular glass adapts its neutral veil more strongly to backdrop content"
     );
+    expect(scalarUniform(largeRegular, "specWidthPx") < 1.0f,
+           "the native-calibrated reflection stays thinner than one point");
+    expect(smallClear.backdropBlurRadius() <= 2.0f,
+           "clear glass retains a sharp lens instead of a strong uniform blur");
     expect(
         largeRegularTint[0] > 0.99f
             && largeRegularTint[1] > 0.99f
@@ -300,6 +338,7 @@ void testGlassStylesResolveThroughTheirView() {
     manual.setTintColor(UIColor::systemBlue);
     manual.setTintOpacity(0.23f);
     manual.setEdgeStrength(0.72f);
+    manual.setEdgeAbsorption(0.12f);
     manual.setSpecularStrength(0.31f);
     manual.setDarkBackdropSpecularStrength(0.27f);
     manual.setBrightBackdropSpecularStrength(0.09f);
@@ -314,6 +353,8 @@ void testGlassStylesResolveThroughTheirView() {
     manualView->setFrame(NXRect(0, 0, 400, 400));
     const auto resolvedManual = manualView->effect();
     const auto resolvedManualTint = vectorUniform(resolvedManual, "tint", 4);
+    expect(scalarUniform(resolvedManual, "adaptiveTint") == 0.0f,
+           "an explicit tint opacity disables automatic backdrop veil adaptation");
     const auto resolvedLightDirection = vectorUniform(
         resolvedManual,
         "specLightDirection",
@@ -351,6 +392,7 @@ void testGlassStylesResolveThroughTheirView() {
     );
     expect(
         std::abs(scalarUniform(resolvedManual, "edge") - 0.72f) < 0.001f
+            && std::abs(scalarUniform(resolvedManual, "edgeAbsorption") - 0.12f) < 0.001f
             && std::abs(scalarUniform(resolvedManual, "specStrength") - 0.31f) < 0.001f
             && std::abs(scalarUniform(resolvedManual, "specFallbackStrength") - 0.27f) < 0.001f
             && std::abs(scalarUniform(resolvedManual, "specBrightFallbackStrength") - 0.09f) < 0.001f
@@ -512,7 +554,7 @@ SkColor renderRadiusClampedReflectionSample() {
     return pixels.getColor(padding + 1, padding + lensHeight / 2);
 }
 
-SkColor renderDefaultGlassRefractionSample() {
+std::pair<SkColor, SkColor> renderDefaultGlassRefractionSamples() {
     constexpr int padding = 24;
     constexpr int lensWidth = 120;
     constexpr int lensHeight = 60;
@@ -520,17 +562,17 @@ SkColor renderDefaultGlassRefractionSample() {
         lensWidth + padding * 2,
         lensHeight + padding * 2
     ));
-    if (!surface) return SK_ColorTRANSPARENT;
+    if (!surface) return {};
 
     auto* canvas = surface->getCanvas();
     canvas->clear(SK_ColorBLUE);
 
-    // The inspected point is red in the undistorted source. Strong default
-    // refraction bends it downward across this boundary into the blue region.
+    // Native lens refraction folds a red band from inside the lens toward
+    // its perimeter; the flat centre remains blue and undisplaced.
     SkPaint redPaint;
     redPaint.setColor(SK_ColorRED);
     canvas->drawRect(
-        SkRect::MakeXYWH(0, 0, surface->width(), padding + 10),
+        SkRect::MakeXYWH(0, padding + 34, surface->width(), 6),
         redPaint
     );
 
@@ -545,8 +587,11 @@ SkColor renderDefaultGlassRefractionSample() {
 
     SkBitmap pixels;
     pixels.allocN32Pixels(surface->width(), surface->height());
-    if (!surface->readPixels(pixels, 0, 0)) return SK_ColorTRANSPARENT;
-    return pixels.getColor(padding + lensWidth / 2, padding + 6);
+    if (!surface->readPixels(pixels, 0, 0)) return {};
+    return {
+        pixels.getColor(padding + lensWidth / 2, padding + 1),
+        pixels.getColor(padding + lensWidth / 2, padding + lensHeight / 2),
+    };
 }
 
 struct RefractionSeamSamples {
@@ -680,12 +725,14 @@ void testGlassBackdropReadsStayInsideDeclaredRadius() {
     );
 }
 
-void testDefaultGlassRefractionExtendsIntoLensBody() {
-    const auto refracted = renderDefaultGlassRefractionSample();
+void testDefaultGlassRefractionConcentratesAtTheEdge() {
+    const auto [refracted, center] = renderDefaultGlassRefractionSamples();
     expect(
-        SkColorGetB(refracted) > SkColorGetR(refracted) + 30,
-        "default glass strongly refracts source content beyond the outer edge band"
+        SkColorGetR(refracted) > SkColorGetB(refracted) + 30,
+        "default glass folds interior backdrop detail toward the curved edge"
     );
+    expect(SkColorGetB(center) > SkColorGetR(center) + 30,
+           "default glass leaves the flat lens interior undisplaced");
 }
 
 void testLargeGlassRefractionStopsBeforeDiagonalMedialAxis() {
@@ -703,10 +750,11 @@ int main() {
     testMaskLayersUseLocalBounds();
     testOpacityLayersRetainBackdropForEffects();
     testBackdropFilterCacheTracksGeometry();
+    testPresentationGlassReceivesLiveInteraction();
     testGlassStylesResolveThroughTheirView();
     testGlassSpecularReflectionUsesBackdropOverscan();
     testGlassBackdropReadsStayInsideDeclaredRadius();
-    testDefaultGlassRefractionExtendsIntoLensBody();
+    testDefaultGlassRefractionConcentratesAtTheEdge();
     testLargeGlassRefractionStopsBeforeDiagonalMedialAxis();
 
     if (failures != 0) {

@@ -407,29 +407,7 @@ sk_sp<SkSurface> SkiaCtx_switch::getBackbufferSurface() {
 }
 
 void SkiaCtx_switch::flushAndSubmit(sk_sp<SkSurface> frameSurface) {
-    if (!frameSurface || !graphite || !graphite->context || !graphite->recorder) {
-        return;
-    }
-
-    auto recording = graphite->recorder->snap();
-    if (!recording) {
-        SkDebugf("Skia Graphite failed to snap the frame recording.\n");
-        return;
-    }
-
-    skgpu::graphite::InsertRecordingInfo insertInfo;
-    insertInfo.fRecording = recording.get();
-    const auto status = graphite->context->insertRecording(insertInfo);
-    if (status != skgpu::graphite::InsertStatus::kSuccess) {
-        SkDebugf("Skia Graphite failed to insert the frame recording: %s\n",
-                 status.message().c_str());
-        return;
-    }
-
-    if (!graphite->context->submit(skgpu::graphite::SyncToCpu::kNo)) {
-        SkDebugf("Skia Graphite failed to submit the frame.\n");
-        return;
-    }
+    SkiaCtx::flushAndSubmit(std::move(frameSurface));
 }
 
 std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx() {

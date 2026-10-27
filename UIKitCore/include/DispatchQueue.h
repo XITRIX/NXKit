@@ -45,6 +45,7 @@ private:
     void performAll();
 
     friend bool applicationRunLoop();
+    friend class DispatchQueueTestHarness;
 };
 
 }

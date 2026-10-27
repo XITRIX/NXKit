@@ -2,8 +2,12 @@
 
 #include <BackdropEffect.h>
 #include <CALayer.h>
+#include <UIGlassEffect.h>
+#include "GlassInteraction.hpp"
 
 #include "include/core/SkRefCnt.h"
+#include <functional>
+#include <optional>
 
 class SkRuntimeEffect;
 class SkImageFilter;
@@ -22,7 +26,18 @@ public:
     void setEffect(const BackdropEffect& effect);
     [[nodiscard]] BackdropEffect effect() const { return _effect; }
 
+    void setGlassInteraction(const Internal::GlassInteraction& interaction);
+
+protected:
+    NXAffineTransform renderingTransform() const override;
+
 private:
+    friend class GlassInteractionTestHarness;
+    friend class BackdropEffectView;
+    struct AppearanceObservation;
+    void setAppearanceObserver(std::function<void(std::optional<NXFloat>, NXSize)> observer);
+    void setGlassMaterial(std::optional<UIGlassEffect> glass, std::shared_ptr<UITraitCollection> traits);
+    void observeBackdrop(SkCanvas* context);
     static sk_sp<SkRuntimeEffect> compile(const BackdropEffect& effect);
     static void validateUniforms(const BackdropEffect& effect, const SkRuntimeEffect& runtimeEffect);
     sk_sp<SkImageFilter> imageFilterForCurrentState();
@@ -35,6 +50,14 @@ private:
     NXFloat _cachedFilterCornerRadius = 0;
     NXFloat _cachedFilterContentsScale = 0;
     bool _hasCachedFilterState = false;
+    NXFloat _cachedInteractionGlow = 0;
+    NXPoint _cachedInteractionLocation;
+    // Shared by model and presentation copies, so concurrent app animations
+    // continue to receive the live touch feedback.
+    std::shared_ptr<Internal::GlassInteraction> _interaction;
+    std::shared_ptr<AppearanceObservation> _appearanceObservation;
+    std::optional<UIGlassEffect> _glassMaterial;
+    std::shared_ptr<UITraitCollection> _glassTraits;
 };
 
 }

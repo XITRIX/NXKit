@@ -14,6 +14,7 @@ bool applicationRunLoop() {
     if (UIApplication::shared->isQuitRequested()) {
         return false;
     }
+    SkiaCtx::_main->pollBackdropReads();
     DispatchQueue::main()->performAll(); // TODO: May be need to be after rendering loop
 //        UIRenderer::main()->render(UIApplication::shared->keyWindow.lock(), currentTime);
 

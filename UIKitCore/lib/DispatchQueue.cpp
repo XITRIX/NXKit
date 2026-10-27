@@ -49,10 +49,14 @@ void DispatchQueue::asyncAfter(double seconds, const std::function<void()>& task
 }
 
 void DispatchQueue::performAll() {
-    std::vector<CADisplayLink*> linksCopy = CADisplayLink::activeLinks;
-    for (auto link: linksCopy) {
-        if (link->isRunning)
-            link->func();
+    // Display links drive UI state. A background queue must only drain its
+    // own work, never run the main display links on its worker thread.
+    if (_tag == "main") {
+        std::vector<CADisplayLink*> linksCopy = CADisplayLink::activeLinks;
+        for (auto link: linksCopy) {
+            if (link->isRunning)
+                link->func();
+        }
     }
 
     std::queue<DispatchQueueTask> copy;

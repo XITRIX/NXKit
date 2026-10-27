@@ -1,13 +1,22 @@
 #include "CABackdropEffectLayer.hpp"
+#include "GlassAppearance.hpp"
+#include "GlassBackdrop.hpp"
+#include <DispatchQueue.h>
+#include <SkiaCtx.h>
+#include "include/core/SkSurface.h"
 
 #include "include/core/SkRRect.h"
 #include "include/core/SkM44.h"
+#include "include/core/SkMaskFilter.h"
+#include "include/core/SkBlurTypes.h"
 #include "include/effects/SkImageFilters.h"
 #include "include/effects/SkRuntimeEffect.h"
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 using namespace NXKit;
 
@@ -53,10 +62,20 @@ bool isFloatUniform(UniformType type) {
 
 }
 
+struct CABackdropEffectLayer::AppearanceObservation {
+    std::function<void(std::optional<NXFloat>, NXSize)> observer;
+    std::function<void()> requestDisplay;
+    bool pending = false;
+    bool missedFrame = false;
+    uint64_t generation = 0;
+};
+
 CABackdropEffectLayer::CABackdropEffectLayer(const BackdropEffect& effect):
     CALayer(),
     _effect(effect),
-    _runtimeEffect(compile(effect))
+    _runtimeEffect(compile(effect)),
+    _interaction(std::make_shared<Internal::GlassInteraction>()),
+    _appearanceObservation(std::make_shared<AppearanceObservation>())
 {
     validateUniforms(_effect, *_runtimeEffect);
 }
@@ -69,8 +88,116 @@ CABackdropEffectLayer::CABackdropEffectLayer(CABackdropEffectLayer* layer):
     _cachedFilterSize(layer->_cachedFilterSize),
     _cachedFilterCornerRadius(layer->_cachedFilterCornerRadius),
     _cachedFilterContentsScale(layer->_cachedFilterContentsScale),
-    _hasCachedFilterState(layer->_hasCachedFilterState)
+    _hasCachedFilterState(layer->_hasCachedFilterState),
+    _cachedInteractionGlow(layer->_cachedInteractionGlow),
+    _cachedInteractionLocation(layer->_cachedInteractionLocation),
+    _interaction(layer->_interaction),
+    _appearanceObservation(layer->_appearanceObservation),
+    _glassMaterial(layer->_glassMaterial),
+    _glassTraits(layer->_glassTraits)
 {}
+
+void CABackdropEffectLayer::setGlassMaterial(std::optional<UIGlassEffect> glass,
+                                           std::shared_ptr<UITraitCollection> traits) {
+    _glassMaterial = std::move(glass);
+    _glassTraits = std::move(traits);
+    invalidateImageFilterCache();
+    if (const auto active = presentation()) {
+        auto copy = std::static_pointer_cast<CABackdropEffectLayer>(active);
+        copy->_glassMaterial = _glassMaterial;
+        copy->_glassTraits = _glassTraits;
+        copy->invalidateImageFilterCache();
+    }
+}
+
+void CABackdropEffectLayer::setAppearanceObserver(std::function<void(std::optional<NXFloat>, NXSize)> observer) {
+    ++_appearanceObservation->generation;
+    _appearanceObservation->pending = false;
+    _appearanceObservation->missedFrame = false;
+    _appearanceObservation->observer = std::move(observer);
+    const auto weak = weak_from_base<CABackdropEffectLayer>();
+    _appearanceObservation->requestDisplay = [weak] {
+        if (const auto layer = weak.lock()) layer->setNeedsDisplay();
+    };
+    setNeedsDisplay();
+}
+
+void CABackdropEffectLayer::observeBackdrop(SkCanvas* context) {
+    const auto state = _appearanceObservation;
+    const auto size = bounds().size;
+    if (!state->observer) return;
+    if (state->pending) {
+        state->missedFrame = true;
+        return;
+    }
+    const auto generation = state->generation;
+    if (!Internal::isSmallGlass(size)) {
+        state->pending = true;
+        DispatchQueue::main()->async([state, generation, size] {
+            if (state->generation != generation) return;
+            state->pending = false;
+            if (state->observer) state->observer(std::nullopt, size);
+            if (state->missedFrame && state->requestDisplay) state->requestDisplay();
+            state->missedFrame = false;
+        });
+        return;
+    }
+    auto* surface = context->getSurface();
+    if (!surface) return;
+    const auto area = context->getTotalMatrix().mapRect(SkRect::MakeWH(size.width, size.height));
+    if (!area.isFinite()) return;
+    SkIRect pixels;
+    area.roundOut(&pixels);
+    if (!pixels.intersect(SkIRect::MakeWH(surface->width(), surface->height()))) return;
+    auto image = surface->makeImageSnapshot(pixels);
+    if (!image) return;
+    state->pending = true;
+    const auto complete = [state, generation, size](std::optional<NXFloat> luminance) {
+        DispatchQueue::main()->async([state, generation, size, luminance] {
+            if (state->generation != generation) return;
+            state->pending = false;
+            if (state->observer) state->observer(luminance, size);
+            if (state->missedFrame && state->requestDisplay) state->requestDisplay();
+            state->missedFrame = false;
+        });
+    };
+    SkPixmap source;
+    if (image->peekPixels(&source)) {
+        // Match Graphite's repeated reduction instead of taking eight sparse
+        // point samples that can alias stripes or checkerboards.
+        using Completion = std::function<void(std::optional<NXFloat>)>;
+        image->asyncRescaleAndReadPixels(
+            SkImageInfo::MakeN32Premul(8, 8), SkIRect::MakeWH(image->width(), image->height()),
+            SkImage::RescaleGamma::kSrc, SkImage::RescaleMode::kRepeatedLinear,
+            [](void* opaque, std::unique_ptr<const SkImage::AsyncReadResult> pixels) {
+                std::unique_ptr<Completion> callback(static_cast<Completion*>(opaque));
+                if (!pixels) { (*callback)(std::nullopt); return; }
+                const SkPixmap reduced(SkImageInfo::MakeN32Premul(8, 8),
+                                       pixels->data(0), pixels->rowBytes(0));
+                (*callback)(Internal::backdropLuminance(reduced));
+            }, new Completion(complete)
+        );
+    } else if (auto renderer = SkiaCtx::main()) {
+        renderer->readBackdrop(std::move(image), complete);
+    } else {
+        complete(std::nullopt);
+    }
+}
+
+NXAffineTransform CABackdropEffectLayer::renderingTransform() const {
+    return _interaction->transform(bounds().size);
+}
+
+void CABackdropEffectLayer::setGlassInteraction(const Internal::GlassInteraction& interaction) {
+    const bool lightingChanged = _interaction->glow() != interaction.glow()
+        || _interaction->location != interaction.location;
+    const bool transformChanged = _interaction->inflation.value != interaction.inflation.value
+        || _interaction->dragX.value != interaction.dragX.value
+        || _interaction->dragY.value != interaction.dragY.value;
+    *_interaction = interaction;
+    if (lightingChanged) invalidateImageFilterCache();
+    if (lightingChanged || transformChanged) setNeedsDisplay();
+}
 
 sk_sp<SkRuntimeEffect> CABackdropEffectLayer::compile(const BackdropEffect& effect) {
     auto result = SkRuntimeEffect::MakeForShader(SkString(effect._shaderSource.c_str()));
@@ -93,9 +220,12 @@ void CABackdropEffectLayer::validateUniforms(
             + effect._backdropShaderName + "'"
         );
     }
-    if (runtimeEffect.children().size() != 1) {
+    const auto* sharpChild = runtimeEffect.findChild("sharpContent");
+    const bool hasSharpBackdrop = sharpChild && effect._backdropShaderName != "sharpContent";
+    if (runtimeEffect.children().size() != (hasSharpBackdrop ? 2 : 1)
+        || (hasSharpBackdrop && sharpChild->type != SkRuntimeEffect::ChildType::kShader)) {
         throw std::invalid_argument(
-            "BackdropEffect currently supports exactly one child shader"
+            "BackdropEffect supports one backdrop shader and an optional shader named 'sharpContent'"
         );
     }
 
@@ -104,7 +234,10 @@ void CABackdropEffectLayer::validateUniforms(
     validateAutomaticUniform(runtimeEffect, "lensSize", UniformType::kFloat2);
     validateAutomaticUniform(runtimeEffect, "cornerRadius", UniformType::kFloat);
     validateAutomaticUniform(runtimeEffect, "contentScale", UniformType::kFloat);
+    validateAutomaticUniform(runtimeEffect, "filterScale", UniformType::kFloat);
     validateAutomaticUniform(runtimeEffect, "maximumSampleRadius", UniformType::kFloat);
+    validateAutomaticUniform(runtimeEffect, "interactionIntensity", UniformType::kFloat);
+    validateAutomaticUniform(runtimeEffect, "interactionLocation", UniformType::kFloat2);
 
     for (const auto& [name, components] : effect._uniforms) {
         const auto* uniform = findUniform(runtimeEffect, name);
@@ -134,8 +267,18 @@ void CABackdropEffectLayer::setEffect(const BackdropEffect& effect) {
     validateUniforms(effect, *runtimeEffect);
 
     _effect = effect;
+    _glassMaterial.reset();
+    _glassTraits.reset();
     _runtimeEffect = std::move(runtimeEffect);
     invalidateImageFilterCache();
+    if (const auto activePresentation = presentation()) {
+        const auto backdropPresentation = std::static_pointer_cast<CABackdropEffectLayer>(activePresentation);
+        backdropPresentation->_effect = _effect;
+        backdropPresentation->_glassMaterial.reset();
+        backdropPresentation->_glassTraits.reset();
+        backdropPresentation->_runtimeEffect = _runtimeEffect;
+        backdropPresentation->invalidateImageFilterCache();
+    }
     setNeedsDisplay();
 }
 
@@ -156,13 +299,20 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
         && _hasCachedFilterState
         && _cachedFilterSize == layerSize
         && _cachedFilterCornerRadius == layerCornerRadius
-        && _cachedFilterContentsScale == layerContentsScale)
+        && _cachedFilterContentsScale == layerContentsScale
+        && _cachedInteractionGlow == _interaction->glow()
+        && _cachedInteractionLocation == _interaction->location)
     {
         return _cachedImageFilter;
     }
 
+    const auto effect = _glassMaterial
+        ? _glassMaterial->_backdropEffect(layerSize, _glassTraits) : _effect;
     SkRuntimeEffectBuilder builder(_runtimeEffect);
     const auto size = SkV2{layerSize.width, layerSize.height};
+    const auto filterScale = findUniform(*_runtimeEffect, "filterScale")
+        && std::isfinite(layerContentsScale)
+        ? std::max<NXFloat>(1, layerContentsScale) : 1.0f;
 
     if (findUniform(*_runtimeEffect, "resolution")) {
         builder.uniform("resolution") = size;
@@ -179,30 +329,48 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
     if (findUniform(*_runtimeEffect, "contentScale")) {
         builder.uniform("contentScale") = contentsScale();
     }
+    if (findUniform(*_runtimeEffect, "filterScale")) {
+        builder.uniform("filterScale") = filterScale;
+    }
     if (findUniform(*_runtimeEffect, "maximumSampleRadius")) {
-        builder.uniform("maximumSampleRadius") = _effect._maximumSampleRadius;
+        builder.uniform("maximumSampleRadius") = effect._maximumSampleRadius;
     }
 
-    for (const auto& [name, components] : _effect._uniforms) {
+    for (const auto& [name, components] : effect._uniforms) {
         builder.uniform(name).set(components.data(), static_cast<int>(components.size()));
     }
 
+    if (findUniform(*_runtimeEffect, "interactionIntensity")) {
+        builder.uniform("interactionIntensity") = _interaction->glow();
+    }
+    if (findUniform(*_runtimeEffect, "interactionLocation")) {
+        builder.uniform("interactionLocation") = SkV2{_interaction->location.x, _interaction->location.y};
+    }
+
     sk_sp<SkImageFilter> input;
-    if (_effect._backdropBlurRadius > 0) {
+    if (effect._backdropBlurRadius > 0) {
         input = SkImageFilters::Blur(
-            _effect._backdropBlurRadius,
-            _effect._backdropBlurRadius,
+            effect._backdropBlurRadius * filterScale,
+            effect._backdropBlurRadius * filterScale,
             SkTileMode::kClamp,
             nullptr
         );
     }
 
-    auto imageFilter = SkImageFilters::RuntimeShader(
-        builder,
-        _effect._maximumSampleRadius,
-        _effect._backdropShaderName,
-        std::move(input)
-    );
+    sk_sp<SkImageFilter> imageFilter;
+    if (_runtimeEffect->findChild("sharpContent") && effect._backdropShaderName != "sharpContent") {
+        // Lens folds and the half-point rim need the original scene. Blurring
+        // the only input first erases those details before refraction can run.
+        std::string_view children[] = {effect._backdropShaderName, "sharpContent"};
+        const sk_sp<SkImageFilter> inputs[] = {std::move(input), nullptr};
+        imageFilter = SkImageFilters::RuntimeShader(
+            builder, effect._maximumSampleRadius * filterScale, children, inputs, 2
+        );
+    } else {
+        imageFilter = SkImageFilters::RuntimeShader(
+            builder, effect._maximumSampleRadius * filterScale, effect._backdropShaderName, std::move(input)
+        );
+    }
     if (!imageFilter) {
         invalidateImageFilterCache();
         return nullptr;
@@ -212,6 +380,8 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
     _cachedFilterSize = layerSize;
     _cachedFilterCornerRadius = layerCornerRadius;
     _cachedFilterContentsScale = layerContentsScale;
+    _cachedInteractionGlow = _interaction->glow();
+    _cachedInteractionLocation = _interaction->location;
     _hasCachedFilterState = true;
     return _cachedImageFilter;
 }
@@ -219,13 +389,15 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
 void CABackdropEffectLayer::draw(SkCanvas* context) {
     const auto layerBounds = bounds();
     if (!_runtimeEffect
-        || !layerBounds.size.valid()
+        || !std::isfinite(layerBounds.width())
+        || !std::isfinite(layerBounds.height())
         || layerBounds.width() <= 0
         || layerBounds.height() <= 0)
     {
         return;
     }
 
+    observeBackdrop(context);
     auto imageFilter = imageFilterForCurrentState();
     if (!imageFilter) return;
 
@@ -242,14 +414,49 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
     effectPaint.setAntiAlias(true);
     effectPaint.setImageFilter(std::move(imageFilter));
 
+    // RuntimeShader image filters force a translate-only CTM in Skia. Render
+    // opt-in shaders in pixel coordinates instead of making Skia rasterize a
+    // one-point grid and upscale it on Retina displays. Their filterScale
+    // uniform maps optical distances back to local points inside the shader.
+    const auto filterScale = findUniform(*_runtimeEffect, "filterScale")
+        && std::isfinite(contentsScale())
+        ? std::max<NXFloat>(1, contentsScale()) : 1.0f;
+    const auto filterRect = SkRect::MakeWH(rect.width() * filterScale, rect.height() * filterScale);
+    const auto filterShape = SkRRect::MakeRectXY(filterRect, radius * filterScale, radius * filterScale);
     context->save();
-    context->clipRRect(roundedRect, true);
+    context->scale(1.0f / filterScale, 1.0f / filterScale);
+    context->clipRRect(filterShape, true);
     SkCanvas::SaveLayerRec effectLayer(
-        &rect,
+        &filterRect,
         &effectPaint,
         SkCanvas::kInitWithPrevious_SaveLayerFlag
     );
     context->saveLayer(effectLayer);
     context->restore();
     context->restore();
+
+    // liquid_glass_widgets' inverse-clipped elevation/contact shadows. Draw
+    // after sampling the backdrop so the glass never refracts its own shadow.
+    // An explicit app shadow takes precedence; shadowOpacity(0) disables it.
+    const auto material = _effect.uniform("referenceAppearance");
+    const auto appearance = _effect.uniform("backdropLuma");
+    if (material && material->front() > 0.5f
+        && appearance && appearance->front() > 0.5f
+        && !shadowColor() && shadowOpacity() > 0) {
+        context->save();
+        context->clipRRect(roundedRect, SkClipOp::kDifference, true);
+        const auto drawShadow = [&](NXFloat blur, NXFloat offset, NXFloat alpha) {
+            SkPaint paint;
+            paint.setAntiAlias(true);
+            paint.setColor(SK_ColorBLACK);
+            paint.setAlphaf(alpha * shadowOpacity());
+            paint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, blur * 0.57735f + 0.5f));
+            auto shadow = roundedRect;
+            shadow.offset(0, offset);
+            context->drawRRect(shadow, paint);
+        };
+        drawShadow(8, 2, 15.0f / 255.0f);
+        drawShadow(2, 1, 5.0f / 255.0f);
+        context->restore();
+    }
 }

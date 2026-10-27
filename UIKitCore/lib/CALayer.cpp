@@ -280,6 +280,8 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     // Set Anchor matrix
     canvas->concat(CATransform3DMakeTranslation(-_bounds.width() * _anchorPoint.x, -_bounds.height() * _anchorPoint.y, 0).toSkM44());
 
+    canvas->concat(NXTransform3DMakeAffineTransform(renderingTransform()).toSkM44());
+
     // Isolate masked content before drawing it. Initializing from the previous
     // canvas contents is required for backdrop effects such as CABlurLayer to
     // keep seeing the pixels behind this layer.

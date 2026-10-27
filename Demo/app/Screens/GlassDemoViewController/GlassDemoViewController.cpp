@@ -119,17 +119,17 @@ void GlassDemoViewController::loadView() {
     _backgroundImageView->setContentMode(UIViewContentMode::scaleAspectFill);
     rootView->addSubview(_backgroundImageView);
 
-    _clearGlassView = new_shared<BackdropEffectView>(
-        UIGlassEffect(UIGlassEffect::Style::clear)
-    );
+    UIGlassEffect clearGlass(UIGlassEffect::Style::clear);
+    clearGlass.setInteractive(true);
+    _clearGlassView = new_shared<BackdropEffectView>(clearGlass);
     _clearGlassView->setFrame(NXRect(0, 0, glassWidth, glassHeight));
     _clearGlassView->layer()->setCornerRadius(glassHeight * 0.5f);
     rootView->addSubview(_clearGlassView);
     makeDraggable(_clearGlassView);
 
-    _regularGlassView = new_shared<BackdropEffectView>(
-        UIGlassEffect(UIGlassEffect::Style::regular)
-    );
+    UIGlassEffect regularGlass(UIGlassEffect::Style::regular);
+    regularGlass.setInteractive(true);
+    _regularGlassView = new_shared<BackdropEffectView>(regularGlass);
     _regularGlassView->setFrame(NXRect(
         0,
         0,

@@ -6,6 +6,9 @@ add_library(XITRIXUIKit
         lib/CABasicAnimation.cpp
         lib/CABasicAnimationPrototype.cpp
         lib/CABackdropEffectLayer.cpp
+        lib/GlassInteraction.hpp
+        lib/GlassAppearance.hpp
+        lib/GlassBackdrop.hpp
         lib/CABlurLayer.cpp
         lib/CASpringAnimation.cpp
         lib/CASpringAnimationPrototype.cpp

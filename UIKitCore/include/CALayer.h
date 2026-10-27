@@ -151,6 +151,9 @@ public:
 
     void skiaRender(SkCanvas* canvas);
 protected:
+    // Additional visual-only motion, composed with the application's transform.
+    virtual NXAffineTransform renderingTransform() const { return NXAffineTransform::identity; }
+
     // Override to add new animatable
     virtual void update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABasicAnimation> animation, float progress);
 

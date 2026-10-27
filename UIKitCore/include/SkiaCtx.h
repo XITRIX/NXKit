@@ -3,6 +3,8 @@
 #include <SDL3/SDL_video.h>
 #include <functional>
 #include <memory>
+#include <optional>
+#include <vector>
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkFontStyle.h"
 #include "include/core/SkString.h"
@@ -66,6 +68,17 @@ protected:
 private:
     int targetFrameRate = -1;
     friend class UIApplication;
+    friend class CABackdropEffectLayer;
+    friend bool applicationRunLoop();
+    using BackdropCompletion = std::function<void(std::optional<NXFloat>)>;
+    struct BackdropRead {
+        sk_sp<SkImage> image;
+        BackdropCompletion completion;
+    };
+    void readBackdrop(sk_sp<SkImage> image, BackdropCompletion completion);
+    void submitBackdropReads();
+    void pollBackdropReads();
+    std::vector<BackdropRead> _backdropReads;
 };
 
 std::unique_ptr<SkiaCtx> MakeSkiaCtx();

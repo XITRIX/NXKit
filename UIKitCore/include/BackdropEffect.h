@@ -17,8 +17,10 @@ class UIGlassEffect;
 /**
  Describes an SkSL effect that samples the pixels behind a BackdropEffectView.
 
- The shader must declare one child shader whose name matches backdropShaderName().
- NXKit supplies that child with the live backdrop. The following uniforms are
+ The shader must declare a child shader whose name matches backdropShaderName().
+ NXKit supplies that child with the optionally blurred live backdrop. An
+ optional second child named `sharpContent` receives the original, unfiltered
+ backdrop for sharp refraction and rim sampling. The following uniforms are
  optional and, when declared, are populated automatically in view-local points:
 
  - `resolution`: the view size
@@ -26,7 +28,11 @@ class UIGlassEffect;
  - `lensSize`: the view size
  - `cornerRadius`: the backing layer's corner radius
  - `contentScale`: the backing layer's pixel scale
+ - `filterScale`: opt in to a pixel-resolution image filter; divide main's
+   coordinates by this scale and multiply child-sampling coordinates by it
  - `maximumSampleRadius`: the effect's declared backdrop sampling radius
+ - `interactionIntensity`: the hosting glass view's animated press light, 0...1
+ - `interactionLocation`: the touch location relative to the material origin
 
  Other float, vector, matrix, or float-array uniforms can be supplied with
  setUniform(). Automatic uniforms cannot be overridden.
@@ -42,9 +48,9 @@ public:
 
     /**
      A rounded liquid-glass lens with refraction, chromatic dispersion, tint,
-     and a live backdrop-colored specular reflection along its rim. Achromatic
-     backdrops receive directional fallback lighting and adaptive body contrast
-     so the default glass remains visible over both black and white content.
+     and a thin white perimeter reflection with localized backdrop-colored
+     highlights. Its light frost and neutral body follow the native clear
+     material. Install UIGlassEffect for adaptive regular styling and input.
      */
     static BackdropEffect glass();
 

@@ -1,4 +1,6 @@
 #include "SkiaCtx.h"
+#include "GlassBackdrop.hpp"
+#include "include/core/SkImage.h"
 #include "include/gpu/graphite/Context.h"
 #include "include/gpu/graphite/GraphiteTypes.h"
 #include "include/gpu/graphite/Image.h"
@@ -61,6 +63,43 @@ private:
 };
 
 } // namespace
+
+void SkiaCtx::readBackdrop(sk_sp<SkImage> image, BackdropCompletion completion) {
+    _backdropReads.push_back({std::move(image), std::move(completion)});
+}
+
+void SkiaCtx::submitBackdropReads() {
+    auto reads = std::move(_backdropReads);
+    _backdropReads.clear();
+    auto* context = graphiteContext();
+    for (auto& read : reads) {
+        if (!context || !read.image) {
+            read.completion(std::nullopt);
+            continue;
+        }
+        // Keep the prefix snapshot alive until the transfer completes. Only
+        // 64 RGBA pixels cross to the CPU; there is no synchronous GPU wait.
+        auto* pending = new BackdropRead(std::move(read));
+        context->asyncRescaleAndReadPixels(
+            pending->image.get(), SkImageInfo::MakeN32Premul(8, 8),
+            SkIRect::MakeWH(pending->image->width(), pending->image->height()),
+            SkImage::RescaleGamma::kSrc, SkImage::RescaleMode::kRepeatedLinear,
+            [](void* opaque, std::unique_ptr<const SkImage::AsyncReadResult> pixels) {
+                std::unique_ptr<BackdropRead> request(static_cast<BackdropRead*>(opaque));
+                if (!pixels) {
+                    request->completion(std::nullopt);
+                    return;
+                }
+                SkPixmap pixmap(SkImageInfo::MakeN32Premul(8, 8), pixels->data(0), pixels->rowBytes(0));
+                request->completion(Internal::backdropLuminance(pixmap));
+            }, pending
+        );
+    }
+}
+
+void SkiaCtx::pollBackdropReads() {
+    if (auto* context = graphiteContext()) context->checkAsyncWorkCompletion();
+}
 
 std::unique_ptr<skgpu::graphite::Recorder> SkiaCtx::createGraphiteRecorder(
         skgpu::graphite::Context* context) const {
@@ -143,15 +182,22 @@ sk_sp<SkTypeface> SkiaCtx::getDefaultTypeface(const SkFontStyle& style) const {
 }
 
 void SkiaCtx::flushAndSubmit(sk_sp<SkSurface> surface) {
+    const auto cancelReads = [this] {
+        auto reads = std::move(_backdropReads);
+        _backdropReads.clear();
+        for (const auto& read : reads) read.completion(std::nullopt);
+    };
     auto* context = graphiteContext();
     auto* recorder = graphiteRecorder();
     if (!surface || !context || !recorder) {
+        cancelReads();
         return;
     }
 
     auto recording = recorder->snap();
     if (!recording) {
         SkDebugf("Graphite failed to snap the frame recording.\n");
+        cancelReads();
         return;
     }
 
@@ -161,9 +207,11 @@ void SkiaCtx::flushAndSubmit(sk_sp<SkSurface> surface) {
     if (status != skgpu::graphite::InsertStatus::kSuccess) {
         SkDebugf("Graphite failed to insert the frame recording: %s\n",
                  status.message().c_str());
+        cancelReads();
         return;
     }
 
+    submitBackdropReads();
     if (!context->submit(skgpu::graphite::SyncToCpu::kNo)) {
         SkDebugf("Graphite failed to submit the frame.\n");
     }

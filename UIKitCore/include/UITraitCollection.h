@@ -23,6 +23,9 @@ public:
 
 private:
     friend bool applicationRunLoop();
+    friend class GlassMaterialTestHarness;
+    friend class GlassAppearanceTestHarness;
+    friend class BackdropEffectView;
 
     static std::shared_ptr<UITraitCollection> _current;
 

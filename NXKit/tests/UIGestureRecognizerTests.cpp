@@ -6,6 +6,8 @@
 #include <UITextView.h>
 #include <UITouch.h>
 #include <UIWindow.h>
+#include <BackdropEffectView.h>
+#include "CABackdropEffectLayer.hpp"
 
 #include <iostream>
 #include <memory>
@@ -15,6 +17,16 @@
 using namespace NXKit;
 
 namespace NXKit {
+
+class GlassInteractionTestHarness {
+public:
+    static void advance(const std::shared_ptr<BackdropEffectView>& view, double seconds) {
+        view->_advanceInteraction(seconds);
+    }
+    static Internal::GlassInteraction motion(const std::shared_ptr<BackdropEffectView>& view) {
+        return *view->_backdropEffectLayer()->_interaction;
+    }
+};
 
 class UIGestureRecognizerTestHarness {
 public:
@@ -90,6 +102,90 @@ void sendTouch(
 } // namespace
 
 int main() {
+    {
+        auto glassWindow = new_shared<UIWindow>();
+        glassWindow->setFrame({0, 0, 320, 480});
+        UIGlassEffect effect(UIGlassEffect::Style::clear);
+        effect.setInteractive(true);
+        auto glass = new_shared<BackdropEffectView>(effect);
+        glass->setFrame({20, 20, 132, 56});
+        glass->layer()->setCornerRadius(28);
+        glassWindow->addSubview(glass);
+        auto button = new_shared<UIControl>();
+        button->setFrame({0, 0, 132, 56});
+        glass->addSubview(button);
+        int actions = 0;
+        button->primaryAction = UIAction("", [&] { ++actions; });
+
+        const auto tap = [&](unsigned long identifier, UITouchPhase endPhase) {
+            auto touch = new_shared<UITouch>(identifier, NXPoint(70, 48), Timer());
+            auto event = UIGestureRecognizerTestHarness::eventWithTouch(touch, glassWindow);
+            sendTouch(glassWindow, event, touch, UITouchPhase::began, {70, 48});
+            GlassInteractionTestHarness::advance(glass, 0.15);
+            expect(GlassInteractionTestHarness::motion(glass).glow() > 0.9f,
+                   "interactive glass responds to a touch on its descendant control");
+            expect(!touch->hasBeenCancelledByAGestureRecognizer(),
+                   "glass feedback does not cancel a descendant's touch");
+            sendTouch(glassWindow, event, touch, endPhase, {70, 48});
+            GlassInteractionTestHarness::advance(glass, 2);
+            expect(!GlassInteractionTestHarness::motion(glass).pressed
+                       && GlassInteractionTestHarness::motion(glass).atRest(),
+                   "glass returns to rest after release or system cancellation");
+        };
+        tap(700, UITouchPhase::ended);
+        expect(actions == 1, "a button hosted by interactive glass still fires exactly once");
+        tap(701, UITouchPhase::cancelled);
+        expect(actions == 1, "a cancelled glass touch does not activate the button");
+
+        auto pan = new_shared<UIPanGestureRecognizer>();
+        glass->addGestureRecognizer(pan);
+        auto touch = new_shared<UITouch>(702, NXPoint(70, 48), Timer());
+        auto event = UIGestureRecognizerTestHarness::eventWithTouch(touch, glassWindow);
+        sendTouch(glassWindow, event, touch, UITouchPhase::began, {70, 48});
+        sendTouch(glassWindow, event, touch, UITouchPhase::moved, {110, 48});
+        GlassInteractionTestHarness::advance(glass, 0.15);
+        expect(pan->state() == UIGestureRecognizerState::began
+                   || pan->state() == UIGestureRecognizerState::changed,
+               "app pan gestures recognize alongside glass feedback");
+        expect(GlassInteractionTestHarness::motion(glass).pressed,
+               "glass stays pressed when another recognizer wins the drag");
+        sendTouch(glassWindow, event, touch, UITouchPhase::ended, {110, 48});
+        GlassInteractionTestHarness::advance(glass, 2);
+        expect(actions == 1, "a recognized pan still suppresses button activation");
+
+        // Public transforms and bounds remain app-owned through feedback.
+        const auto appTransform = NXAffineTransform::scale(0.8f);
+        glass->setTransform(appTransform);
+        touch = new_shared<UITouch>(703, NXPoint(70, 48), Timer());
+        event = UIGestureRecognizerTestHarness::eventWithTouch(touch, glassWindow);
+        sendTouch(glassWindow, event, touch, UITouchPhase::began, {70, 48});
+        GlassInteractionTestHarness::advance(glass, 0.15);
+        expect(glass->transform() == appTransform, "glass does not overwrite an app's transform");
+        effect.setInteractive(false);
+        glass->setEffect(effect);
+        expect(GlassInteractionTestHarness::motion(glass).transform(glass->bounds().size).isIdentity(),
+               "disabling interactivity clears a held visual transform immediately");
+        effect.setInteractive(true);
+        glass->setEffect(effect);
+        sendTouch(glassWindow, event, touch, UITouchPhase::cancelled, {70, 48});
+        GlassInteractionTestHarness::advance(glass, 0.01);
+        expect(GlassInteractionTestHarness::motion(glass).atRest(),
+               "reenabling during the same touch safely finishes the old sequence");
+        touch = new_shared<UITouch>(704, NXPoint(70, 48), Timer());
+        event = UIGestureRecognizerTestHarness::eventWithTouch(touch, glassWindow);
+        sendTouch(glassWindow, event, touch, UITouchPhase::began, {70, 48});
+        GlassInteractionTestHarness::advance(glass, 0.15);
+        glass->removeFromSuperview();
+        GlassInteractionTestHarness::advance(glass, 0.01);
+        expect(!GlassInteractionTestHarness::motion(glass).pressed,
+               "removing held glass clears its touch and stops feedback");
+        expect(glass->applyXMLAttribute("isInteractive", "false")
+                   && !glass->glassEffect()->isInteractive(),
+               "XML can configure glass interactivity");
+        expect(!glass->applyXMLAttribute("isInteractive", "invalid"),
+               "XML rejects malformed interactive values");
+    }
+
     auto intrinsicContainer = new_shared<UIView>(NXRect(0, 0, 500, 100));
     intrinsicContainer->setAutolayoutEnabled(true);
     intrinsicContainer->configureLayout([](const std::shared_ptr<YGLayout>& layout) {

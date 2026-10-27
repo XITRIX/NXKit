@@ -28,9 +28,16 @@ enum class UIGlassEffectStyle {
  following the style.
 
  `clear` is deliberately size-invariant and highly translucent. `regular`
- increases its frost radius and system-background tint as the hosting view's
- shortest dimension grows. In light mode it also lifts the material's
- luminosity, while dark mode resolves the tint without that lift.
+ increases its frost radius and neutral body tint as the hosting view's
+ shortest dimension grows. Appearance follows inherited light/dark traits
+ unless the NXKit backdrop-appearance option is explicitly enabled.
+
+ The material uses liquid_glass_widgets' lighting and tint model, adapted to
+ NXKit's live backdrop. Interactive effects add touch-following sheen, spring
+ inflation and anchored stretch without altering the view's public geometry.
+ Refraction and body frost can be tuned independently, and the perimeter
+ uses a sub-point hairline with localized light lobes rather than a white ring.
+ `BackdropEffect::glass()` resolves the same clear material.
  */
 class UIGlassEffect {
 public:
@@ -39,6 +46,19 @@ public:
     explicit UIGlassEffect(Style style = Style::regular);
 
     [[nodiscard]] Style style() const { return _style; }
+
+    /** Opt-in touch feedback, as in UIKit. Defaults to false. Reinstall the
+     effect on its hosting view after changing this value (effects are copied). */
+    [[nodiscard]] bool isInteractive() const { return _isInteractive; }
+    void setInteractive(bool value) { _isInteractive = value; }
+
+    /** NXKit extension restoring iOS 26-style contrast-driven appearance for
+     small regular glass. Defaults to false. Large regular glass and clear
+     glass keep the inherited appearance. The host also updates its ordinary
+     subviews' color traits after the asynchronous backdrop sample completes.
+     Reinstall the effect after changing this copied value. */
+    [[nodiscard]] bool adaptsAppearanceToBackdrop() const { return _adaptsAppearanceToBackdrop; }
+    void setAdaptsAppearanceToBackdrop(bool value) { _adaptsAppearanceToBackdrop = value; }
 
     [[nodiscard]] std::optional<NXFloat> maximumSampleRadius() const { return _maximumSampleRadius; }
     void setMaximumSampleRadius(std::optional<NXFloat> value);
@@ -51,7 +71,8 @@ public:
     [[nodiscard]] std::optional<NXFloat> refraction() const { return _refraction; }
     void setRefraction(std::optional<NXFloat> value);
 
-    /** Fraction of the shortest half-dimension occupied by the curved lens edge. */
+    /** Normalized bevel depth. The native-calibrated 0.9 default gives a
+     18-point curved edge, constrained by the hosting shape's corner radius. */
     [[nodiscard]] std::optional<NXFloat> refractionDepth() const { return _refractionDepth; }
     void setRefractionDepth(std::optional<NXFloat> value);
 
@@ -69,8 +90,9 @@ public:
     void setLuminosity(std::optional<NXFloat> value);
 
     /**
-     Optional custom tint hue. When unset, clear uses white and regular uses
-     `UIColor::systemBackground`. The color's alpha multiplies tintOpacity().
+     Optional custom tint hue. When unset, clear uses white; regular uses
+     `UIColor::systemBackground` in light appearance and a white veil in dark
+     appearance. The color's alpha multiplies tintOpacity().
      */
     [[nodiscard]] std::optional<UIColor> tintColor() const { return _tintColor; }
     void setTintColor(std::optional<UIColor> value) { _tintColor = std::move(value); }
@@ -80,6 +102,10 @@ public:
 
     [[nodiscard]] std::optional<NXFloat> edgeStrength() const { return _edgeStrength; }
     void setEdgeStrength(std::optional<NXFloat> value);
+
+    /** Meniscus absorption at the curved perimeter, in the range 0...1. */
+    [[nodiscard]] std::optional<NXFloat> edgeAbsorption() const { return _edgeAbsorption; }
+    void setEdgeAbsorption(std::optional<NXFloat> value);
 
     [[nodiscard]] std::optional<NXFloat> specularStrength() const { return _specularStrength; }
     void setSpecularStrength(std::optional<NXFloat> value);
@@ -112,6 +138,8 @@ public:
 private:
     friend class BackdropEffect;
     friend class BackdropEffectView;
+    friend class CABackdropEffectLayer;
+    friend class GlassMaterialTestHarness;
 
     [[nodiscard]] BackdropEffect _backdropEffect(
         NXSize size,
@@ -119,6 +147,8 @@ private:
     ) const;
 
     Style _style;
+    bool _isInteractive = false;
+    bool _adaptsAppearanceToBackdrop = false;
     std::optional<NXFloat> _maximumSampleRadius;
     std::optional<NXFloat> _frostRadius;
     std::optional<NXFloat> _refraction;
@@ -130,6 +160,7 @@ private:
     std::optional<UIColor> _tintColor;
     std::optional<NXFloat> _tintOpacity;
     std::optional<NXFloat> _edgeStrength;
+    std::optional<NXFloat> _edgeAbsorption;
     std::optional<NXFloat> _specularStrength;
     std::optional<NXFloat> _darkBackdropSpecularStrength;
     std::optional<NXFloat> _brightBackdropSpecularStrength;

@@ -53,69 +53,63 @@ ResolvedGlassParameters styleDefaults(
     if (style == UIGlassEffect::Style::clear) {
         return {
             .maximumSampleRadius = 64.0f,
-            .frostRadius = 2.5f,
+            .frostRadius = 2.0f,
             .refraction = 0.55f,
             .refractionDepth = 0.90f,
-            .dispersion = 0.32f,
-            .saturation = 1.12f,
+            .dispersion = 0.01f,
+            .saturation = 1.0f,
             .contrast = 1.04f,
-            .luminosity = 0.0f,
+            .luminosity = 0.095f,
             .tintColor = UIColor::white,
-            .tintOpacity = 32.0f / 255.0f,
+            .tintOpacity = 0.0f,
             .edgeStrength = 1.0f,
             .specularStrength = 0.52f,
-            .darkBackdropSpecularStrength = 0.50f,
+            .darkBackdropSpecularStrength = 0.52f,
             .brightBackdropSpecularStrength = 0.14f,
-            .lightAngle = -90.0f,
+            .lightAngle = interfaceStyle == UIUserInterfaceStyle::dark ? 90.0f : -90.0f,
             .specularDirectionalPower = 3.0f,
-            .specularWidth = 4.0f,
+            .specularWidth = 0.8f,
             .reflectionSampleDistance = 12.0f,
             .reflectionSpread = 3.0f,
-            .brightBackdropShade = 0.008f,
+            .brightBackdropShade = 0.0f,
         };
     }
 
-    // Apple's regular material adapts with size. The supplied iOS captures
-    // show the small lens close to clear glass and the large lens with almost
-    // all high-frequency backdrop detail removed. Use the shortest dimension
-    // so controls stay lightweight while alerts, menus, and sidebars become
-    // progressively more prominent. The transition is smooth to avoid visible
-    // steps during ordinary layout changes.
+    // Matched native UIKit captures (Demo/GlassComparison) separate body tone
+    // from blur: a large regular lens has a substantial neutral body, while
+    // small controls adapt that body to the content behind the whole lens.
     const auto shortestDimension = std::max<NXFloat>(
         0,
         std::min(size.width, size.height)
     );
-    const auto sizeAmount = smoothstep(64.0f, 220.0f, shortestDimension);
+    const auto sizeAmount = smoothstep(64.0f, 160.0f, shortestDimension);
     const auto maximumTintOpacity = interfaceStyle == UIUserInterfaceStyle::dark
-        ? 0.36f
-        : 0.28f;
-    const auto maximumLuminosity = interfaceStyle == UIUserInterfaceStyle::dark
-        ? 0.0f
-        : 0.12f;
+        ? 0.18f
+        : 0.70f;
     return {
         // Keep the declared backdrop extent at the proven cross-platform
         // limit used by the existing glass renderer. The largest regular
         // frost kernel still fits comfortably inside it.
         .maximumSampleRadius = 64.0f,
-        .frostRadius = interpolate(3.0f, 24.0f, sizeAmount),
-        .refraction = interpolate(0.46f, 0.38f, sizeAmount),
-        .refractionDepth = interpolate(0.82f, 0.72f, sizeAmount),
-        .dispersion = interpolate(0.20f, 0.12f, sizeAmount),
-        .saturation = interpolate(1.06f, 0.96f, sizeAmount),
-        .contrast = interpolate(1.02f, 0.88f, sizeAmount),
-        .luminosity = interpolate(0.0f, maximumLuminosity, sizeAmount),
-        .tintColor = UIColor::systemBackground,
-        .tintOpacity = interpolate(0.06f, maximumTintOpacity, sizeAmount),
+        .frostRadius = interpolate(3.0f, 6.0f, sizeAmount),
+        .refraction = interpolate(0.35f, 0.55f, sizeAmount),
+        .refractionDepth = interpolate(0.70f, 0.90f, sizeAmount),
+        .dispersion = 0.01f,
+        .saturation = interpolate(1.67f, 1.57f, sizeAmount),
+        .contrast = interpolate(0.64f, 1.0f, sizeAmount),
+        .luminosity = 0.0f,
+        .tintColor = interfaceStyle == UIUserInterfaceStyle::dark ? UIColor::white : UIColor::systemBackground,
+        .tintOpacity = interpolate(interfaceStyle == UIUserInterfaceStyle::dark ? 0.10f : 0.075f, maximumTintOpacity, sizeAmount),
         .edgeStrength = 1.0f,
         .specularStrength = interpolate(0.44f, 0.34f, sizeAmount),
-        .darkBackdropSpecularStrength = 0.42f,
+        .darkBackdropSpecularStrength = interpolate(0.11f, 0.55f, sizeAmount),
         .brightBackdropSpecularStrength = 0.12f,
-        .lightAngle = -90.0f,
+        .lightAngle = interfaceStyle == UIUserInterfaceStyle::dark ? 90.0f : -90.0f,
         .specularDirectionalPower = 3.0f,
-        .specularWidth = interpolate(3.5f, 5.0f, sizeAmount),
+        .specularWidth = 0.8f,
         .reflectionSampleDistance = 12.0f,
         .reflectionSpread = 3.0f,
-        .brightBackdropShade = 0.008f,
+        .brightBackdropShade = interpolate(0.008f, 0.02f, sizeAmount),
     };
 }
 
@@ -209,6 +203,11 @@ void UIGlassEffect::setTintOpacity(std::optional<NXFloat> value) {
 void UIGlassEffect::setEdgeStrength(std::optional<NXFloat> value) {
     validateRange(value, 0, 1, "edge strength");
     _edgeStrength = value;
+}
+
+void UIGlassEffect::setEdgeAbsorption(std::optional<NXFloat> value) {
+    validateRange(value, 0, 1, "edge absorption");
+    _edgeAbsorption = value;
 }
 
 void UIGlassEffect::setSpecularStrength(std::optional<NXFloat> value) {
@@ -343,5 +342,13 @@ BackdropEffect UIGlassEffect::_backdropEffect(
     effect.setUniform("reflectionSamplePx", parameters.reflectionSampleDistance);
     effect.setUniform("reflectionSpreadPx", parameters.reflectionSpread);
     effect.setUniform("brightBackdropShade", parameters.brightBackdropShade);
+    effect.setUniform("referenceAppearance", 1.0f);
+    effect.setUniform("bodyMode", _style == Style::clear ? 1.0f : 0.0f);
+    effect.setUniform("backdropLuma", interfaceStyle == UIUserInterfaceStyle::dark ? 0.15f : 0.85f);
+    effect.setUniform("edgeAbsorption", _edgeAbsorption.value_or(0.035f));
+    const auto bodySize = smoothstep(64.0f, 160.0f, std::max(0.0f, std::min(size.width, size.height)));
+    effect.setUniform("adaptiveTint", _style == Style::regular && !_tintOpacity
+        && interfaceStyle != UIUserInterfaceStyle::dark
+        ? interpolate(0.637f, 0.02f, bodySize) : 0.0f);
     return effect;
 }

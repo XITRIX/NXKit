@@ -186,6 +186,10 @@ public:
     void display(std::shared_ptr<CALayer> layer) override;
 
     virtual bool applyXMLAttribute(const std::string& name, const std::string& value);
+protected:
+    // Material hosts may give their content a different color appearance
+    // while retaining the host's inherited traits.
+    virtual std::shared_ptr<UITraitCollection> traitsForSubviews() const { return traitCollection(); }
 private:
     friend class UIViewController;
     friend class UIFocusSystem;
