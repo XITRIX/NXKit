@@ -55,11 +55,13 @@ private:
     std::unique_ptr<InteractionState> _interaction;
 
     std::shared_ptr<CABackdropEffectLayer> _backdropEffectLayer() const;
+    void _updateDisplayScale();
     void _updateGlassEffect(bool force = false);
 
     std::optional<UIGlassEffect> _glassEffect;
     NXSize _resolvedGlassSize;
     UIUserInterfaceStyle _resolvedInterfaceStyle = UIUserInterfaceStyle::unspecified;
+    NXFloat _resolvedDisplayScale = 0;
     bool _hasResolvedGlass = false;
 };
 

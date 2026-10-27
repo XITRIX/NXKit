@@ -36,7 +36,7 @@ enum class UIGlassEffectStyle {
  with lighting and tint calibrated against native UIKit gallery captures.
  Interactive effects add touch-following sheen, size-dependent spring inflation and centered stretch without altering the view's public geometry.
  Refraction and body frost can be tuned independently, and the perimeter
- uses a sub-point hairline with localized light lobes rather than a white ring.
+ uses localized directional light; clear retains its sub-point hairline.
  `BackdropEffect::glass()` resolves the same clear material.
  */
 class UIGlassEffect {
@@ -128,6 +128,8 @@ public:
     [[nodiscard]] std::optional<NXFloat> specularWidth() const { return _specularWidth; }
     void setSpecularWidth(std::optional<NXFloat> value);
 
+    /** Exterior reflection sampling controls for the clear material. Regular
+     uses neutral directional light calibrated to the native rim. */
     [[nodiscard]] std::optional<NXFloat> reflectionSampleDistance() const { return _reflectionSampleDistance; }
     void setReflectionSampleDistance(std::optional<NXFloat> value);
 

@@ -1,5 +1,6 @@
 #include <GlassContainerView.h>
 #include "CAGlassContainerLayer.hpp"
+#include <CATransaction.h>
 #include <tools/IBTools.h>
 #include <cmath>
 #include <stdexcept>
@@ -12,6 +13,24 @@ void UIGlassContainerEffect::setSpacing(NXFloat value) {
 GlassContainerView::GlassContainerView(const UIGlassContainerEffect& effect):
     UIView(NXRect(), new_shared<CAGlassContainerLayer>(effect)), _contentView(new_shared<UIView>()) {
     addSubview(_contentView);
+    updateDisplayScale();
+}
+void GlassContainerView::updateDisplayScale() {
+    const auto traits = traitCollection();
+    const auto candidate = traits ? traits->displayScale() : 1;
+    const auto scale = std::isfinite(candidate) && candidate > 0 ? candidate : 1;
+    // A custom scale survives layout and same-screen trait notifications.
+    if (_resolvedDisplayScale == scale) return;
+    _resolvedDisplayScale = scale;
+    CATransaction::begin();
+    CATransaction::setDisableActions(true);
+    layer()->setContentsScale(scale);
+    layer()->presentationOrSelf()->setContentsScale(scale);
+    CATransaction::commit();
+}
+void GlassContainerView::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previous) {
+    updateDisplayScale();
+    UIView::traitCollectionDidChange(std::move(previous));
 }
 UIGlassContainerEffect GlassContainerView::effect() const {
     return std::static_pointer_cast<CAGlassContainerLayer>(layer())->effect();

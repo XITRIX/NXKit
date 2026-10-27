@@ -48,7 +48,8 @@ NXFloat interpolate(NXFloat lower, NXFloat upper, NXFloat progress) {
 ResolvedGlassParameters styleDefaults(
     UIGlassEffect::Style style,
     NXSize size,
-    UIUserInterfaceStyle interfaceStyle
+    UIUserInterfaceStyle interfaceStyle,
+    bool hasNativeTint
 ) {
     if (style == UIGlassEffect::Style::clear) {
         return {
@@ -80,30 +81,33 @@ ResolvedGlassParameters styleDefaults(
     const auto shortestDimension = std::max<NXFloat>(0, std::min(size.width, size.height));
     const auto sizeAmount = smoothstep(64.0f, 160.0f, shortestDimension);
     const bool dark = interfaceStyle == UIUserInterfaceStyle::dark;
+    const auto bodySize = std::clamp((shortestDimension - 52.0f) / 108.0f, 0.0f, 1.0f);
+    const auto darkSize = std::clamp((shortestDimension - 52.0f) / 68.0f, 0.0f, 1.0f);
     return {
         // Keep the declared backdrop extent at the proven cross-platform
         // limit used by the existing glass renderer. The largest regular
         // frost kernel still fits comfortably inside it.
         .maximumSampleRadius = 64.0f,
-        .frostRadius = interpolate(3.0f, 6.0f, sizeAmount),
+        .frostRadius = hasNativeTint ? interpolate(3.0f, 6.0f, sizeAmount)
+            : (dark ? 12.0f : interpolate(6.0f, 12.0f, sizeAmount)),
         .refraction = interpolate(0.35f, 0.55f, sizeAmount),
         .refractionDepth = interpolate(0.70f, 0.90f, sizeAmount),
         .dispersion = 0.01f,
-        .saturation = dark ? interpolate(1.18f, 1.45f, sizeAmount) : interpolate(1.7f, 1.78f, sizeAmount),
-        .contrast = dark ? interpolate(0.99f, 0.84f, sizeAmount) : 1.067f,
+        .saturation = dark ? interpolate(1.33764f, 1.34934f, darkSize) : interpolate(1.92f, 1.965f, bodySize),
+        .contrast = dark ? interpolate(1.05155f, 0.95258f, darkSize) : interpolate(1.015f, 1.113f, bodySize),
         .luminosity = 0.0f,
         .tintColor = interfaceStyle == UIUserInterfaceStyle::dark ? UIColor::white : UIColor::systemBackground,
-        .tintOpacity = dark ? 0.145f : interpolate(0.525f, 0.537f, sizeAmount),
+        .tintOpacity = dark ? interpolate(0.1261f, 0.12395f, darkSize) : interpolate(0.5201f, 0.53806f, bodySize),
         .edgeStrength = 1.0f,
-        .specularStrength = interpolate(0.44f, 0.34f, sizeAmount),
-        .darkBackdropSpecularStrength = interpolate(0.11f, 0.55f, sizeAmount),
-        .brightBackdropSpecularStrength = 0.12f,
+        .specularStrength = 0.52f,
+        .darkBackdropSpecularStrength = 0.52f,
+        .brightBackdropSpecularStrength = 0.52f,
         .lightAngle = interfaceStyle == UIUserInterfaceStyle::dark ? 90.0f : -90.0f,
         .specularDirectionalPower = 3.0f,
         .specularWidth = 0.8f,
         .reflectionSampleDistance = 12.0f,
         .reflectionSpread = 3.0f,
-        .brightBackdropShade = interpolate(0.008f, 0.02f, sizeAmount),
+        .brightBackdropShade = interpolate(0.008f, 0.004f, bodySize),
     };
 }
 
@@ -256,7 +260,8 @@ BackdropEffect UIGlassEffect::_backdropEffect(
     const auto interfaceStyle = traits
         ? traits->userInterfaceStyle()
         : UIUserInterfaceStyle::unspecified;
-    auto parameters = styleDefaults(_style, size, interfaceStyle);
+    const bool hasNativeTint = _tintColor && !_tintOpacity;
+    auto parameters = styleDefaults(_style, size, interfaceStyle, hasNativeTint);
 
     parameters.maximumSampleRadius = _maximumSampleRadius.value_or(
         parameters.maximumSampleRadius
@@ -341,9 +346,10 @@ BackdropEffect UIGlassEffect::_backdropEffect(
     effect.setUniform("bodyMode", _style == Style::clear ? 1.0f : 0.0f);
     effect.setUniform("backdropLuma", interfaceStyle == UIUserInterfaceStyle::dark ? 0.15f : 0.85f);
     effect.setUniform("edgeAbsorption", _edgeAbsorption.value_or(0.035f));
-    const auto bodySize = smoothstep(64.0f, 160.0f, std::max(0.0f, std::min(size.width, size.height)));
+    const auto bodySize = std::clamp((std::min(size.width, size.height) - 52.0f) / 68.0f, 0.0f, 1.0f);
     effect.setUniform("adaptiveTint", 0.0f);
     effect.setUniform("bodyCompression", _style == Style::regular && !_tintColor && !_tintOpacity
-        ? interpolate(0.29f, 0.60f, bodySize) : 0.153f);
+        ? interpolate(0.30563f, 0.55112f, bodySize) : 0.153f);
+    effect.setUniform("neutralDetail", _style == Style::regular && !_tintColor ? 0.5f : 0.0f);
     return effect;
 }

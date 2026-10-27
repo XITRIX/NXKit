@@ -4,12 +4,14 @@
 #include "GlassAppearance.hpp"
 #include "LayerCornerGeometry.hpp"
 #include <CADisplayLink.h>
+#include <CATransaction.h>
 #include <UITouch.h>
 #include <UIWindow.h>
 #include <tools/IBTools.h>
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 
 using namespace NXKit;
 
@@ -60,7 +62,7 @@ BackdropEffectView::BackdropEffectView():
 
 BackdropEffectView::BackdropEffectView(const BackdropEffect& effect):
     UIView(NXRect(), new_shared<CABackdropEffectLayer>(effect))
-{}
+{ _updateDisplayScale(); }
 
 BackdropEffectView::BackdropEffectView(const UIGlassEffect& effect):
     UIView(
@@ -72,6 +74,7 @@ BackdropEffectView::BackdropEffectView(const UIGlassEffect& effect):
     ),
     _glassEffect(effect)
 {
+    _updateDisplayScale();
     _updateGlassEffect(true);
     _configureAppearance();
     _configureInteraction();
@@ -92,6 +95,7 @@ void BackdropEffectView::setBounds(NXRect bounds) {
 void BackdropEffectView::traitCollectionDidChange(
     std::shared_ptr<UITraitCollection> previousTraitCollection
 ) {
+    _updateDisplayScale();
     _configureAppearance(false);
     UIView::traitCollectionDidChange(std::move(previousTraitCollection));
     _updateGlassEffect(true);
@@ -99,6 +103,21 @@ void BackdropEffectView::traitCollectionDidChange(
 
 std::shared_ptr<CABackdropEffectLayer> BackdropEffectView::_backdropEffectLayer() const {
     return std::static_pointer_cast<CABackdropEffectLayer>(layer());
+}
+
+void BackdropEffectView::_updateDisplayScale() {
+    const auto traits = traitCollection();
+    const auto candidate = traits ? traits->displayScale() : 1;
+    const auto scale = std::isfinite(candidate) && candidate > 0 ? candidate : 1;
+    // Only an environment change updates the managed backing scale. A custom
+    // layer override survives ordinary layout/style changes on the same screen.
+    if (_resolvedDisplayScale == scale) return;
+    _resolvedDisplayScale = scale;
+    CATransaction::begin();
+    CATransaction::setDisableActions(true);
+    layer()->setContentsScale(scale);
+    layer()->presentationOrSelf()->setContentsScale(scale);
+    CATransaction::commit();
 }
 
 void BackdropEffectView::setEffect(const BackdropEffect& effect) {

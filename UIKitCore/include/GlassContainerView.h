@@ -18,9 +18,12 @@ public:
     void setFrame(NXRect frame) override;
     void setBounds(NXRect bounds) override;
     void layoutSubviews() override;
+    void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) override;
     bool applyXMLAttribute(const std::string& name, const std::string& value) override;
 private:
     void updateContentFrame();
+    void updateDisplayScale();
     std::shared_ptr<UIView> _contentView;
+    NXFloat _resolvedDisplayScale = 0;
 };
 }

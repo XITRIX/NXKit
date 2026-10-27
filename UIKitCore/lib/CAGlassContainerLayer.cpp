@@ -87,11 +87,15 @@ float3 itemDistanceINDEX(float2 xy) {
             "d = mix(other, d, h) - k * h * (1 - h); }\n";
     }
     helpers += "return d; }\nvoid materialOwnership() {\n";
-    // Retain the previously measured painter-order handoff; only fully shaded
-    // material colors, rather than mode flags or optical geometry, are mixed.
-    for (size_t i = 0; i < count; ++i) {
+    // UIKit gives explicit regular tints ownership over neutral material,
+    // independent of insertion order. Equal-priority materials retain painter
+    // order. This changes color ownership only, never the merged zero contour.
+    // The smooth handoff is measured in world points. Its rounded endpoints
+    // avoid a visible first-derivative step at the former linear color ramp.
+    for (int tintedPass = 0; tintedPass < 2; ++tintedPass) for (size_t i = 0; i < count; ++i) {
         const auto index = std::to_string(i);
-        helpers += "{ float cover = clamp(1.25 - distances[" + index + "] / 8.0, 0, 1);\n";
+        helpers += "{ float cover = smoothstep(0.0, 1.0, 1.1875 - distances[" + index + "] / 8.0);\n";
+        helpers += "if (material_tintMode[" + index + "] " + (tintedPass ? "<=" : ">") + " 1.5) cover = 0;\n";
         for (size_t j = 0; j < count; ++j) helpers += "weights[" + std::to_string(j) + "] *= 1-cover;\n";
         helpers += "weights[" + index + "] += cover; }\n";
     }
@@ -128,6 +132,16 @@ half4 main(float2 filterXY) {
     if (coverage <= 0) return half4(original.rgb * half(1-shadow), original.a);
     half4 result = original;
 )SKSL";
+    // Touch lighting belongs to the merged surface. Clip each source to its
+    // own shape, then shade whichever material owns that world-space point.
+    // This lets a pressed rear tint illuminate a front tint at their overlap
+    // while the extruded bridge outside every pressed shape remains unlit.
+    main += "float groupInteraction = 0; float2 groupTouch = xy;\n";
+    for (size_t i = 0; i < count; ++i) {
+        const auto index = std::to_string(i);
+        main += "{ float intensity = material_interactionIntensity[" + index + "] * clamp(0.5 - distances[" + index + "] * max(contentScale,1), 0, 1);\n"
+            "if (intensity > groupInteraction) { groupInteraction = intensity; float3 touch = float3(material_interactionLocation[" + index + "],1); groupTouch = float2(dot(forwardX[" + index + "].xyz,touch),dot(forwardY[" + index + "].xyz,touch)); } }\n";
+    }
     for (size_t i = 0; i < count; ++i) {
         const auto index = std::to_string(i);
         main += "if (weights[" + index + "] > 0) {\n";
@@ -136,6 +150,9 @@ half4 main(float2 filterXY) {
             "float2 localXY = float2(dot(inverseX[" + index + "].xyz,float3(xy,1)),dot(inverseY[" + index + "].xyz,float3(xy,1)));\n"
             "float2 localGradient = float2(forwardX[" + index + "].x * sceneNormal.x + forwardY[" + index + "].x * sceneNormal.y, forwardX[" + index + "].y * sceneNormal.x + forwardY[" + index + "].y * sceneNormal.y);\n"
             "float localMetric = max(length(localGradient),0.0001); materialNormal = localGradient / localMetric;\n"
+            // Transform the active source's touch into this owner's local
+            // geometry; source and material can be different group members.
+            "interactionIntensity = groupInteraction; interactionLocation = float2(dot(inverseX[" + index + "].xyz,float3(groupTouch,1)),dot(inverseY[" + index + "].xyz,float3(groupTouch,1)));\n"
             "half4 color = referenceGlass(localXY,lensSize*0.5,min(cornerRadius,min(lensSize.x,lensSize.y)*0.5),localXY-lensCenter,sceneDistance/localMetric);\n"
             "result += half(weights[" + index + "] * itemAlpha[" + index + "]) * (color-original); }\n";
     }

@@ -85,6 +85,7 @@ uniform float backdropLuma;
 uniform float edgeAbsorption;
 uniform float adaptiveTint;
 uniform float bodyCompression;
+uniform float neutralDetail;
 uniform float contentScale;
 uniform float filterScale;
 uniform float interactionIntensity;
@@ -178,20 +179,35 @@ float3 tintSRGB(float3 color) {
     color = max(color, float3(0));
     return mix(color * 12.92, 1.055 * pow(color, float3(1.0/2.4)) - 0.055, step(float3(0.0031308), color));
 }
-float3 nativeTintColor(float3 color, float transmittedLuma) {
-    float amount = clamp(transmittedLuma, 0.0, 1.0);
-    if (tintMode > 1.5 && backdropLuma < 0.5) {
-        // Dark regular tint retains its supplied brightness over black and
-        // gains a small neutral highlight as the backdrop becomes brighter.
-        return color * (1.0 - 0.02 * amount) + (1.0 - color) * (0.11 * amount);
-    }
+float3 nativeTintColor(float3 color, float3 transmitted) {
+    float amount = clamp(toBrightness(half3(transmitted)), 0.0, 1.0);
     float red = max(color.r - max(color.g, color.b), 0.0);
     float green = max(color.g - max(color.r, color.b), 0.0);
     float gain = 0.395 + 0.265 * red - 0.045 * green;
     float bias = -0.014 - 0.025 * red + 0.022 * green;
+    if (tintMode > 1.5) {
+        // Native regular tint reacts to backdrop chroma as well as luminance.
+        // A luminance-only model over-brightened coral on saturated backgrounds.
+        float chroma = max(transmitted.r, max(transmitted.g, transmitted.b))
+            - min(transmitted.r, min(transmitted.g, transmitted.b));
+        if (backdropLuma < 0.5) {
+            float size = smoothstep(52.0, 120.0, min(lensSize.x, lensSize.y));
+            float luma = clamp(amount - 0.15 * chroma * 4.0 * amount * (1.0 - amount), 0.0, 1.0);
+            float knee = mix(0.54, 0.24, size);
+            float response = (1.0 - exp(-luma / knee)) / (1.0 - exp(-1.0 / knee)) * mix(1.0, 0.61, size);
+            float3 base = color - color * (1.0 - color) * 0.02;
+            return base * (1.0 - 0.02 * response) + (1.0 - base) * (0.12 + 0.09 * red) * response;
+        }
+        amount = pow(clamp(amount - 0.263 * chroma * 4.0 * amount * (1.0 - amount), 0.0, 1.0), 1.14);
+        float base = 0.4 - 0.235 * red;
+        amount = base + (1.0 - base) * amount;
+        gain = 0.395 + 0.50 * red - 0.045 * green;
+        bias = -0.014 - 0.043 * red + 0.022 * green;
+    }
+    // Retain the existing clear tint transfer. Regular uses the same linear
+    // RGB interpolation with the distinct response measured above.
     float3 linear = tintLinear(color);
     float3 shaded = max(linear * gain + bias, float3(0));
-    if (tintMode > 1.5) amount = 0.4 + 0.6 * amount;
     return clamp(tintSRGB(mix(shaded, linear, amount)), 0.0, 1.0);
 }
 
@@ -321,38 +337,62 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     float distanceInside = max(-sdf, 0.0);
     float2 normal = lensNormalDirection(p, halfDim, r);
     float2 lightDirection = specLightDirection / max(length(specLightDirection), 0.0001);
-
     // A quarter-circle bevel: the XY normal goes from horizontal at the rim
     // to zero on the flat face. Fade before the rounded SDF's medial axis.
     float bevel = min(18.0 * refraction / 0.90, max(r, 0.0));
     float slope = bevel > 0.0001 ? clamp(1.0 - distanceInside / bevel, 0.0, 1.0) : 0.0;
     float normalZ = sqrt(max(0.0, 1.0 - slope * slope));
 
-    // Paraxial refraction used by the reference's native-calibrated preset:
-    // -(n - 1) * sin(incidence)^2 * baseHeight. Inward displacement grows
-    // faster than distance-to-rim and therefore folds/mirrors the inner scene.
-    // The old outward translation only smeared the scene around the boundary.
+    // Regular glass uses a smooth cubic transfer with zero endpoint slopes.
+    // The former quadratic fold over-bent source lines into angular Z shapes.
+    // Keep clear's existing stronger paraxial displacement.
     float reach = min(2.0 * min(halfDim.x, halfDim.y), max(maximumSampleRadius, 0.0));
-    float displacement = min(40.0 * (curve / 0.55) * slope * slope, reach);
+    float u = bevel > 0.0001 ? clamp(distanceInside / bevel, 0.0, 1.0) : 1.0;
+    float transfer = bodyMode > 0.5 ? slope*slope : 1.0-u*u*(3.0-2.0*u);
+    float displacement = min((bodyMode > 0.5 ? 40.0 : 20.0) * (curve / 0.55) * transfer, reach);
     float2 sampleXY = xy - normal * displacement;
     float2 chromaticShift = normal * displacement * dispersion * 0.3;
     // Glass carries its frosted material through the entire bevel.
     // Fading frost out with the surface normal exposes a broad transparent
     // perimeter, unlike UIKit. Clear uses a much smaller blur kernel.
     half4 pixel = sampleBackdrop(xy, sampleXY);
+    half3 frostedRGB = pixel.rgb;
+    half4 sharpPixel = pixel;
     if (dispersion > 0.0 && slope > 0.0) {
         half4 red = sampleBackdrop(xy, sampleXY + chromaticShift);
         half4 blue = sampleBackdrop(xy, sampleXY - chromaticShift);
         pixel = half4(red.r, pixel.g, blue.b, pixel.a);
     }
+    // Preserve the chromatic assembly above; unshifted detail vanishes at frost0.
+    if (neutralDetail > 0.0) {
+        float smallDetail = 1.0 - smoothstep(64.0, 160.0, min(lensSize.x,lensSize.y));
+        sharpPixel = sampleSharpBackdrop(xy, sampleXY);
+        half3 detail = sharpPixel.rgb - frostedRGB;
+        detail = backdropLuma > 0.5 ? max(detail,half3(0)) : min(detail,half3(0));
+        pixel.rgb += detail * smallDetail * neutralDetail;
+    }
     half4 background = sampleSharpBackdrop(xy, xy);
     if (pixel.a <= 0.0) pixel = background;
     pixel.rgb /= max(pixel.a, 0.0001);
     float transmittedLuma = toBrightness(pixel.rgb);
-    half3 body = half3(clamp(mix(half3(transmittedLuma), pixel.rgb, saturation), 0.0, 1.0));
+    // Regular vibrancy needs extended RGB: early clamping washes out saturated
+    // red/green/yellow backdrops before the neutral material is composited.
+    float vibrancy = saturation;
+    if (neutralDetail > 0.0 && saturation > 1.0) {
+        // Blur mixes neighboring hues. Limit only the excess vibrancy by the
+        // chroma that survives that mixing, preserving solid colors/gradients.
+        // Reuse the sharp sample already needed by the neutral detail path.
+        half3 sharpRGB = sharpPixel.rgb / max(sharpPixel.a, 0.0001);
+        float sharpChroma = max(sharpRGB.r, max(sharpRGB.g, sharpRGB.b))
+            - min(sharpRGB.r, min(sharpRGB.g, sharpRGB.b));
+        float bodyChroma = max(pixel.r, max(pixel.g, pixel.b)) - min(pixel.r, min(pixel.g, pixel.b));
+        vibrancy = 1.0 + (saturation - 1.0) * clamp(bodyChroma / max(sharpChroma, 0.0001), 0.0, 1.0);
+    }
+    half3 body = mix(half3(transmittedLuma), pixel.rgb, vibrancy);
+    if (bodyMode > 0.5) body = clamp(body,0.0,1.0);
     body = bodyMode > 0.5
         ? half3(clamp((body - 0.5) * contrast + 0.5 + luminosity, 0.0, 1.0))
-        : half3(clamp(body * contrast + luminosity, 0.0, 1.0));
+        : half3(body * contrast + luminosity);
 
     // UIKit's small regular material responds strongly to the surrounding
     // content: nearly clear over black, but a neutral veil over busy artwork.
@@ -379,17 +419,32 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     half3 lumaTint = half3(clamp(tint.rgb + toBrightness(body) - toBrightness(half3(tint.rgb)), 0.0, 1.0));
     float chroma = max(tint.r, max(tint.g, tint.b)) - min(tint.r, min(tint.g, tint.b));
     body = tintMode > 0.5
-        ? mix(body, half3(nativeTintColor(tint.rgb, transmittedLuma)), tintAlpha)
+        ? mix(body, half3(nativeTintColor(tint.rgb, pixel.rgb)), tintAlpha)
         : (bodyMode > 0.5 ? directTint
             : mix(directTint, mix(body, lumaTint, tintAlpha), clamp(chroma * 8.0, 0.0, 1.0)));
     float bodyLuma = clamp(toBrightness(body), 0.0, 1.0);
     if (bodyMode < 0.5 && backdropLuma < 0.5 && tintMode < 0.5) body *= 1.0 - bodyCompression * bodyLuma * bodyLuma;
+    body = clamp(body,0.0,1.0);
+    bodyLuma = clamp(toBrightness(body),0.0,1.0);
 
     float along = dot(normal, lightDirection);
     float rimThickness = 1.0 - sqrt(max(0.0, 1.0 - (1.0 - normalZ) * (1.0 - normalZ)));
     float absorption = sqrt(max(rimThickness, 0.0)) * edgeAbsorption * mix(1.4, 0.6, along * 0.5 + 0.5);
     half3 result = body * max(0.0, 1.0 - absorption);
 
+    // Directional regular reflection: no omnidirectional white hairline.
+    // Preserve the existing clear rim separately.
+    if (bodyMode < 0.5) {
+        float width = max(specWidthPx / 0.8, 0.0001);
+        float inset = max(0.0, distanceInside / width - 0.55);
+        float lobe = pow(abs(along), max(specDirectionalPower, 1.0));
+        float rimLight = lobe * pow(max(1.0 - bodyLuma, 0.0), 0.3)
+            * (0.1539 * exp(-inset / 0.25) + 0.0569 * exp(-inset / 2.5))
+            * (specStrength / 0.52) * edge
+            * mix(specFallbackStrength, specBrightFallbackStrength, bodyLuma) / 0.52;
+        if (specWidthPx <= 0.0) rimLight = 0.0;
+        result += half3(rimLight);
+    } else {
     // Analytic coverage of a sub-point hairline. The AA transition is centred
     // on its inner boundary instead of adding a whole extra pixel of width.
     float hairline = clamp((max(specWidthPx, 0.0) - distanceInside) / pixelWidth + 0.5, 0.0, 1.0);
@@ -415,6 +470,7 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     // regular edges transparent and produced a dark outline over white.
     float lineStrength = clamp(specFallbackStrength + contextLuma * 0.5, 0.0, 1.0);
     result = mix(result, half3(1.0), hairline * lineStrength);
+    }
     result *= 1.0 - smoothstep(0.85, 0.98, toBrightness(result)) * brightBackdropShade;
 
     // A single press overlay: stacking the fallback's additive glow and the
