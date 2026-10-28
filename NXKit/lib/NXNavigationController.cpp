@@ -678,6 +678,7 @@ void NXNavigationController::updateChrome() {
 
     const auto top = topViewController();
     const auto item = topNavigationItem();
+    updateBarSafeAreas();
 
     const auto self = shared_from_base<NXNavigationController>();
     NXResponderAction backAction {
@@ -742,25 +743,30 @@ void NXNavigationController::updateBarSafeAreas() {
     const auto systemInsets = superview ? superview->safeAreaInsets() : UIEdgeInsets::zero;
     const auto topInset = std::max<NXFloat>(0, systemInsets.top);
     const auto bottomInset = std::max<NXFloat>(0, systemInsets.bottom);
-    _navigationBar->configureLayout([topInset](const std::shared_ptr<YGLayout>& layout) {
+    const auto item = topNavigationItem();
+    const bool hidesNavigation = item && item->hidesNavigationBar();
+    const bool hidesToolbar = item && item->hidesToolbar();
+    _navigationBar->setHidden(hidesNavigation);
+    _toolbar->setHidden(hidesToolbar);
+    _navigationBar->configureLayout([topInset,hidesNavigation](const std::shared_ptr<YGLayout>& layout) {
         layout->setHeight(YGValue {
-            static_cast<float>(navigationBarContentHeight + topInset),
+            static_cast<float>(hidesNavigation ? 0 : navigationBarContentHeight + topInset),
             YGUnitPoint
         });
         layout->setPaddingTop(YGValue { static_cast<float>(topInset), YGUnitPoint });
     });
-    _toolbar->configureLayout([bottomInset](const std::shared_ptr<YGLayout>& layout) {
+    _toolbar->configureLayout([bottomInset,hidesToolbar](const std::shared_ptr<YGLayout>& layout) {
         layout->setHeight(YGValue {
-            static_cast<float>(toolbarContentHeight + bottomInset),
+            static_cast<float>(hidesToolbar ? 0 : toolbarContentHeight + bottomInset),
             YGUnitPoint
         });
         layout->setPaddingBottom(YGValue { static_cast<float>(bottomInset), YGUnitPoint });
     });
 
     const UIEdgeInsets chromeInsets {
-        navigationBarContentHeight,
+        hidesNavigation ? 0 : navigationBarContentHeight,
         0,
-        toolbarContentHeight,
+        hidesToolbar ? 0 : toolbarContentHeight,
         0,
     };
     if (additionalSafeAreaInsets() != chromeInsets) {

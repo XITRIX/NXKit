@@ -450,3 +450,12 @@ void NXNavigationItem::notifyChanged() {
         _changeHandler();
     }
 }
+
+void NXNavigationItem::setHidesNavigationBar(bool hidden) {
+    if (_hidesNavigationBar == hidden) return;
+    _hidesNavigationBar = hidden; notifyChanged();
+}
+void NXNavigationItem::setHidesToolbar(bool hidden) {
+    if (_hidesToolbar == hidden) return;
+    _hidesToolbar = hidden; notifyChanged();
+}

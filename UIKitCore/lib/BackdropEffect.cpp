@@ -86,6 +86,8 @@ uniform float edgeAbsorption;
 uniform float adaptiveTint;
 uniform float bodyCompression;
 uniform float neutralDetail;
+// Resolved frost bounds the secondary kernels, including explicit zero frost.
+uniform float materialFrost;
 uniform float contentScale;
 uniform float filterScale;
 uniform float interactionIntensity;
@@ -343,12 +345,12 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     float slope = bevel > 0.0001 ? clamp(1.0 - distanceInside / bevel, 0.0, 1.0) : 0.0;
     float normalZ = sqrt(max(0.0, 1.0 - slope * slope));
 
-    // Regular glass uses a smooth cubic transfer with zero endpoint slopes.
-    // The former quadratic fold over-bent source lines into angular Z shapes.
+    // Regular uses a C1 quintic shoulder with zero endpoint slopes. Its softer
+    // inner shoulder reduces the deep fold without adding an angular seam.
     // Keep clear's existing stronger paraxial displacement.
     float reach = min(2.0 * min(halfDim.x, halfDim.y), max(maximumSampleRadius, 0.0));
     float u = bevel > 0.0001 ? clamp(distanceInside / bevel, 0.0, 1.0) : 1.0;
-    float transfer = bodyMode > 0.5 ? slope*slope : 1.0-u*u*(3.0-2.0*u);
+    float transfer = bodyMode > 0.5 ? slope*slope : (1.0-u*u*(3.0-2.0*u))*(1.0-u*u);
     float displacement = min((bodyMode > 0.5 ? 40.0 : 20.0) * (curve / 0.55) * transfer, reach);
     float2 sampleXY = xy - normal * displacement;
     float2 chromaticShift = normal * displacement * dispersion * 0.3;
@@ -367,9 +369,40 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     if (neutralDetail > 0.0) {
         float smallDetail = 1.0 - smoothstep(64.0, 160.0, min(lensSize.x,lensSize.y));
         sharpPixel = sampleSharpBackdrop(xy, sampleXY);
-        half3 detail = sharpPixel.rgb - frostedRGB;
+        // A fully sharp high-pass creates a needle through the frost on larger
+        // controls. A separable tent preserves the smoother native detail lane.
+        float detailRadius = min(materialFrost,
+            4.5 * smoothstep(80.0,160.0,min(lensSize.x,lensSize.y)));
+        half4 softDetail = sharpPixel;
+        if (detailRadius > 0.0 && smallDetail > 0.0) {
+            softDetail = sharpPixel*0.25;
+            softDetail += (sampleSharpBackdrop(xy,sampleXY+float2(detailRadius,0))
+                +sampleSharpBackdrop(xy,sampleXY-float2(detailRadius,0))
+                +sampleSharpBackdrop(xy,sampleXY+float2(0,detailRadius))
+                +sampleSharpBackdrop(xy,sampleXY-float2(0,detailRadius)))*0.125;
+            softDetail += (sampleSharpBackdrop(xy,sampleXY+float2(detailRadius,detailRadius))
+                +sampleSharpBackdrop(xy,sampleXY-float2(detailRadius,detailRadius))
+                +sampleSharpBackdrop(xy,sampleXY+float2(detailRadius,-detailRadius))
+                +sampleSharpBackdrop(xy,sampleXY-float2(detailRadius,-detailRadius)))*0.0625;
+        }
+        half3 detail = softDetail.rgb - frostedRGB;
         detail = backdropLuma > 0.5 ? max(detail,half3(0)) : min(detail,half3(0));
         pixel.rgb += detail * smallDetail * neutralDetail;
+    }
+    // The light regular material filters chroma over a wider context than luma. A
+    // positive five-tap kernel avoids the phase inversion of a bare tap ring.
+    // Preserve the transmitted luminance, coverage, uniform colors and clear.
+    if (bodyMode < 0.5 && backdropLuma > 0.5 && materialFrost > 0.0) {
+        float radius = min(20.0, materialFrost * 8.0);
+        half4 wider = (sampleBackdrop(xy,sampleXY+float2(radius,0))
+            +sampleBackdrop(xy,sampleXY-float2(radius,0))
+            +sampleBackdrop(xy,sampleXY+float2(0,radius))
+            +sampleBackdrop(xy,sampleXY-float2(0,radius)))*0.25;
+        half3 centerRGB = pixel.rgb/max(pixel.a,0.0001);
+        half3 widerRGB = wider.rgb/max(wider.a,0.0001);
+        half3 chromaDifference = widerRGB-centerRGB;
+        chromaDifference -= half3(toBrightness(chromaDifference));
+        pixel.rgb += chromaDifference*pixel.a*0.5;
     }
     half4 background = sampleSharpBackdrop(xy, xy);
     if (pixel.a <= 0.0) pixel = background;
@@ -660,12 +693,14 @@ BackdropEffect BackdropEffect::glassShaderEffect(
     NXFloat maximumSampleRadius,
     NXFloat backdropBlurRadius
 ) {
-    return BackdropEffect(
+    auto effect = BackdropEffect(
         glassShader,
         "content",
         maximumSampleRadius,
         backdropBlurRadius
     );
+    effect.setUniform("materialFrost", backdropBlurRadius);
+    return effect;
 }
 
 std::optional<std::vector<NXFloat>> BackdropEffect::uniform(

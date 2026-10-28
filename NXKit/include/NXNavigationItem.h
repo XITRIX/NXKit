@@ -92,6 +92,12 @@ public:
     }
     void setActionsWidgetPlacement(NXNavigationWidgetPlacement placement);
 
+    // Per-destination chrome: restored automatically when another item is top.
+    bool hidesNavigationBar() const { return _hidesNavigationBar; }
+    void setHidesNavigationBar(bool hidden);
+    bool hidesToolbar() const { return _hidesToolbar; }
+    void setHidesToolbar(bool hidden);
+
     // A null custom widget uses the navigation controller's live battery/time widget.
     [[nodiscard]] std::shared_ptr<UIView> statusWidget() const { return _statusWidget; }
     void setStatusWidget(std::shared_ptr<UIView> widget);
@@ -103,6 +109,7 @@ public:
 private:
     friend class NXNavigationController;
 
+    bool _hidesNavigationBar = false, _hidesToolbar = false;
     std::optional<std::string> _titleOverride;
     std::shared_ptr<UIImage> _icon;
     NXNavigationWidgetPlacement _statusWidgetPlacement =

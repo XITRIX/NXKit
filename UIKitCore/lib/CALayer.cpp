@@ -72,6 +72,7 @@ CALayer::CALayer(CALayer* layer) {
     _contentsScale = layer->_contentsScale;
     _superlayer = layer->_superlayer;
     _sublayers = layer->_sublayers;
+    _lensSourceOwners = layer->_lensSourceOwners;
     _contentsGravity = layer->_contentsGravity;
 }
 
@@ -275,6 +276,21 @@ void CALayer::removeFromSuperlayer() {
 void CALayer::draw(SkCanvas* context) {}
 
 void CALayer::skiaRender(SkCanvas* canvas) {
+    if (_lensSourceOwners) {
+        std::erase_if(*_lensSourceOwners, [](const auto& owner) { return owner.expired(); });
+        for (const auto& weakOwner : *_lensSourceOwners) if (const auto owner = weakOwner.lock()) {
+            const CALayer* sourceRoot = this;
+            for (auto parent = _superlayer.lock(); parent; parent = parent->_superlayer.lock()) sourceRoot = parent.get();
+            const CALayer* ownerRoot = owner.get();
+            bool sourceContainsOwner = owner.get() == this;
+            for (auto parent = owner->_superlayer.lock(); parent; parent = parent->_superlayer.lock()) {
+                sourceContainsOwner = sourceContainsOwner || parent.get() == this
+                    || parent->_lensSourceOwners == _lensSourceOwners;
+                ownerRoot = parent.get();
+            }
+            if (!sourceContainsOwner && sourceRoot == ownerRoot) return;
+        }
+    }
     // Do not render is hidden
     if (_isHidden || _opacity < 0.001f) return;
 

@@ -1,5 +1,7 @@
 #include "GlassDemoViewController.hpp"
 #include "GlassDemoScene.hpp"
+#include "LensDemoStage.hpp"
+#include "GlassScreenViewController.hpp"
 #include <algorithm>
 
 using namespace NXKit;
@@ -35,6 +37,38 @@ std::shared_ptr<UIButton> button(const std::string& title, std::function<void()>
     });
     view->primaryAction=UIAction(title,std::move(action)); return view;
 }
+class LensDemoViewController final : public UIViewController {
+public:
+    explicit LensDemoViewController(bool tabBarOnly = false):_tabBarOnly(tabBarOnly) {
+        setTitle(tabBarOnly?"Interactive glass tab bar":"Lens and tab bar study");
+    }
+    void loadView() override {
+        _scroll=new_shared<UIScrollView>(); _scroll->setBackgroundColor(UIColor::systemBackground);
+        _scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::never);
+        _scroll->configureLayout([](const auto& layout) { layout->setAlignItems(YGAlignCenter); });
+        _content=new_shared<UIView>(); updateGlassContent(_scroll,_content);
+        auto detail=new_shared<UILabel>();
+        detail->setText(_tabBarOnly
+            ?"Tap a tab, or drag and release the selection. Both the bar and selection react to touch. Lift holds the selection raised; Refraction grid reveals the edges."
+            :"Tap a tab or drag and release the selection. Press and pull the standalone knobs to explore their liquid response, or use Lift to keep them raised.");
+        detail->setFontSize(20); detail->setTextColor(UIColor::secondaryLabel); _content->addSubview(detail);
+        _stage=new_shared<LensDemoStage>(_tabBarOnly);
+        _stage->layer()->setCornerRadius(20);
+        _stage->configureLayout([](const auto& layout) { layout->setWidth(100_percent); layout->setHeight(440_pt); layout->setFlexShrink(0); }); _content->addSubview(_stage);
+        const auto weak=weak_from_base<LensDemoViewController>();
+        _content->addSubview(button("Lift / Rest",[weak] { if (auto self=weak.lock()) self->_stage->setLifted(!self->_stage->isLifted()); }));
+        _content->addSubview(button("Next tab",[weak] { if (auto self=weak.lock()) self->_stage->selectNext(); }));
+        _content->addSubview(button("Backdrop",[weak] { if (auto self=weak.lock()) self->_stage->setBackdrop(self->_stage->backdrop()+1); }));
+        _content->addSubview(button("Refraction grid",[weak] { if (auto self=weak.lock()) self->_stage->setBackdrop(5); }));
+        _content->addSubview(button("Change size",[weak] { if (auto self=weak.lock()) self->_stage->toggleSize(); }));
+        _scroll->addSubview(_content); setView(_scroll);
+    }
+    void viewDidLayoutSubviews() override { UIViewController::viewDidLayoutSubviews(); updateGlassContent(_scroll,_content); }
+    void viewSafeAreaInsetsDidChange() override { UIViewController::viewSafeAreaInsetsDidChange(); updateGlassContent(_scroll,_content); }
+private:
+    bool _tabBarOnly;
+    std::shared_ptr<UIScrollView> _scroll; std::shared_ptr<UIView> _content; std::shared_ptr<LensDemoStage> _stage;
+};
 class GlassSceneViewController final : public UIViewController {
 public:
     explicit GlassSceneViewController(GlassDemoID demo):_demo(demo) { setTitle(GlassDemos[demo].title); }
@@ -120,12 +154,21 @@ void GlassDemoViewController::loadView() {
     });
     _contentContainer->addSubview(heading); _contentContainer->addSubview(detail);
     const auto weak=weak_from_base<GlassDemoViewController>();
+    _contentContainer->addSubview(button("Full-screen iOS layout",[weak] {
+        if(auto self=weak.lock()) self->show(new_shared<GlassScreenViewController>(),self);
+    }));
+    _contentContainer->addSubview(button("Interactive tab bar",[weak] {
+        if (auto self=weak.lock()) self->show(new_shared<LensDemoViewController>(true),self);
+    }));
     for (int i=0;i<GlassDemoCount;++i) {
         auto item=button(GlassDemos[i].title,[weak,i] {
             if (auto self=weak.lock()) self->show(new_shared<GlassSceneViewController>(static_cast<GlassDemoID>(i)),self);
         });
         _contentContainer->addSubview(item);
     }
+    _contentContainer->addSubview(button("Lens · tab bar and knobs",[weak] {
+        if (auto self=weak.lock()) self->show(new_shared<LensDemoViewController>(),self);
+    }));
     _scroll->addSubview(_contentContainer);
     setView(_scroll);
 }

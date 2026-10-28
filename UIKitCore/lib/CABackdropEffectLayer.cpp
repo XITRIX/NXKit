@@ -1,6 +1,7 @@
 #include "CABackdropEffectLayer.hpp"
 #include "CAGlassContainerLayer.hpp"
 #include "GlassAppearance.hpp"
+#include "GlassShadow.hpp"
 #include "GlassBackdrop.hpp"
 #include "LayerCornerGeometry.hpp"
 #include <DispatchQueue.h>
@@ -445,29 +446,33 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
     context->restore();
     context->restore();
 
-    // liquid_glass_widgets' inverse-clipped elevation/contact shadows. Draw
-    // after sampling the backdrop so the glass never refracts its own shadow.
-    // An explicit app shadow takes precedence; shadowOpacity(0) disables it.
+    // Native regular glass casts one inverse-clipped elevation field. Sample
+    // the backdrop first so this layer never refracts its own shadow. Clear
+    // glass has no default shadow; an explicit app shadow retains precedence.
     const auto material = _effect.uniform("referenceAppearance");
     const auto appearance = _effect.uniform("backdropLuma");
-    if (material && material->front() > 0.5f
-        && appearance && appearance->front() > 0.5f
-        && !shadowColor() && shadowOpacity() > 0) {
-        context->save();
-        context->clipPath(shape, SkClipOp::kDifference, true);
-        const auto drawShadow = [&](NXFloat blur, NXFloat offset, NXFloat alpha) {
-            SkPaint paint;
-            paint.setAntiAlias(true);
-            paint.setColor(SK_ColorBLACK);
-            paint.setAlphaf(alpha * shadowOpacity());
-            paint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, blur * 0.57735f + 0.5f));
-            context->save();
-            context->translate(0, offset);
-            context->drawPath(shape, paint);
-            context->restore();
-        };
-        drawShadow(8, 2, 15.0f / 255.0f);
-        drawShadow(2, 1, 5.0f / 255.0f);
-        context->restore();
+    const auto body = _effect.uniform("bodyMode");
+    if (material && material->front()>0.5f && appearance && body && body->front()<0.5f
+        && !shadowColor() && shadowOpacity()>0) {
+        static thread_local const auto runtime=[] {
+            auto source=std::string("uniform float2 shadowSize; uniform float cornerRadius, cornerCurve, shadowSigma, shadowOpacity; uniform float2 shadowOffset;\n")
+                +Internal::glassShadowGeometrySource()+Internal::glassShadowCDF
+                +"half4 main(float2 xy) { float2 halfDim=shadowSize*0.5; float d=boxRoundedSDF(xy-shadowOffset-halfDim,halfDim,min(cornerRadius,min(halfDim.x,halfDim.y))); return half4(0,0,0,half(shadowOpacity*glassShadowTail(d/shadowSigma))); }";
+            auto compiled=SkRuntimeEffect::MakeForShader(SkString(source));
+            if(!compiled.effect) throw std::runtime_error("Glass shadow shader: "+std::string(compiled.errorText.c_str()));
+            return compiled.effect;
+        }();
+        const auto parameters=Internal::glassShadow(layerBounds.size,appearance->front()<0.5f);
+        SkRuntimeEffectBuilder builder(runtime);
+        const float size[]={layerBounds.width(),layerBounds.height()},offset[]={0,parameters.offset};
+        builder.uniform("shadowSize").set(size,2); builder.uniform("shadowOffset").set(offset,2);
+        builder.uniform("cornerRadius")=cornerRadius();
+        builder.uniform("cornerCurve")=cornerCurve()==CALayerCornerCurve::continuous?1.0f:0.0f;
+        builder.uniform("shadowSigma")=parameters.sigma;
+        builder.uniform("shadowOpacity")=parameters.opacity*shadowOpacity();
+        SkPaint paint; paint.setShader(builder.makeShader());
+        auto shadowBounds=rect;shadowBounds.outset(4*parameters.sigma+parameters.offset,4*parameters.sigma+parameters.offset);
+        context->save();context->clipPath(shape,SkClipOp::kDifference,true);
+        context->drawRect(shadowBounds,paint);context->restore();
     }
 }

@@ -20,6 +20,11 @@ add_library(XITRIXUIKit
         lib/Application.cpp
         lib/BackdropEffect.cpp
         lib/BackdropEffectView.cpp
+        lib/LensView.cpp
+        lib/LensMaterial.cpp
+        lib/LensMaterial.hpp
+        lib/LensInteraction.hpp
+        include/LensView.h
         lib/GlassContainerView.cpp
         lib/CAGlassContainerLayer.cpp
         lib/CAGlassContainerLayer.hpp

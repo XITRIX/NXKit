@@ -18,6 +18,8 @@
 
 namespace NXKit {
 
+namespace Internal { class LensLayer; }
+
 class CALayerDelegate {
 public:
     virtual std::shared_ptr<CABasicAnimation> actionForKey(std::string event) = 0;
@@ -168,6 +170,8 @@ protected:
 private:
     friend class UIView;
     friend class CAGlassContainerLayer;
+    friend class Internal::LensLayer;
+    friend class LensView;
     friend bool applicationRunLoop();
 
     void setLayerTreeDirtyIfNeeded() const;
@@ -234,6 +238,10 @@ private:
     void updateIsPartOfPresentedHierarchy(bool value);
     bool isPartOfPresentedHierarchy() const;
     bool _isPartOfPresentedHierarchy = false;
+    // Portal sources remain in their caller-owned hierarchy, but live lenses
+    // render them through a separate optical input. Share suppression with
+    // presentation copies without owning any lens or source hierarchy.
+    std::shared_ptr<std::vector<std::weak_ptr<CALayer>>> _lensSourceOwners;
 };
 
 }

@@ -5,6 +5,7 @@
 #pragma once
 
 #include <BackdropEffectView.h>
+#include <LensView.h>
 #include <GlassContainerView.h>
 #include <UIGlassContainerEffect.h>
 #include <CALayerCornerCurve.h>

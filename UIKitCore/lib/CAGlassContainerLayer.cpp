@@ -1,5 +1,6 @@
 #include "CAGlassContainerLayer.hpp"
 #include "CABackdropEffectLayer.hpp"
+#include "GlassShadow.hpp"
 #include "include/effects/SkImageFilters.h"
 #include <algorithm>
 #include <cmath>
@@ -40,7 +41,7 @@ std::string shaderSource(size_t count) {
             "uniform " + u.type + " material_" + u.name + "[" + n + "];\n" + u.type + " " + u.name + ";");
     }
     std::string declarations = "uniform float4 inverseX[" + n + "], inverseY[" + n + "], forwardX[" + n + "], forwardY[" + n + "], geometry[" + n + "];\n"
-        "uniform float itemAlpha[" + n + "], itemShadow[" + n + "];\nuniform float mergeSpacing;\nfloat weights[" + n + "], distances[" + n + "];\nfloat2 mergedNormal, materialNormal;\nbool geometryBlended;\n"
+        "uniform float itemAlpha[" + n + "], itemShadow[" + n + "];\nuniform float elevationSigma, elevationOpacity; uniform float2 elevationOffset; uniform float4 elevationBasis;\nuniform float mergeSpacing;\nfloat weights[" + n + "], distances[" + n + "];\nfloat2 mergedNormal, materialNormal;\nbool geometryBlended;\n"
         "float3 materialForwardX, materialForwardY;\nint activeMaterial;\n"
         "float2 groupXY(float2 xy) { float3 p = float3(xy / max(filterScale, 1.0), 1); return float2(dot(materialForwardX,p), dot(materialForwardY,p)) * max(filterScale,1.0); }\n";
     std::string backdrop = "half4 groupBackdrop(float2 xy) { float2 p = groupXY(xy);\n";
@@ -100,7 +101,7 @@ float3 itemDistanceINDEX(float2 xy) {
         helpers += "weights[" + index + "] += cover; }\n";
     }
     helpers += "}\n";
-    source.insert(source.find("float toBrightness"), helpers);
+    source.insert(source.find("float toBrightness"), helpers+Internal::glassShadowCDF);
     source.erase(source.find("half4 main(float2 filterXY)"));
     std::string main = R"SKSL(
 half4 main(float2 filterXY) {
@@ -125,11 +126,16 @@ half4 main(float2 filterXY) {
     for (size_t i = 0; i < count; ++i)
         main += "materialShadow += weights[" + std::to_string(i) + "] * itemShadow[" + std::to_string(i) + "];\n";
     main += R"SKSL(
-    float shadowDistance = max(sceneDistance - sceneNormal.y * 2, 0);
-    float shadow = materialShadow * (0.0294 * exp(-0.5 * pow(shadowDistance / 5.12, 2)) +
-        0.0098 * exp(-0.5 * pow(max(sceneDistance - sceneNormal.y, 0) / 1.65, 2)));
     float coverage = clamp(0.5 - sceneDistance * max(contentScale,1), 0, 1);
-    if (coverage <= 0) return half4(original.rgb * half(1-shadow), original.a);
+    float shadow = 0;
+    if(coverage<1 && elevationOpacity>0 && materialShadow>0) {
+        float distance=mergeGeometry(xy-elevationOffset,false);
+        float2 normal=mergedNormal/max(length(mergedNormal),0.0001);
+        float2 sigmaDirection=float2(elevationBasis.x*normal.x+elevationBasis.z*normal.y,elevationBasis.y*normal.x+elevationBasis.w*normal.y);
+        float sigma=elevationSigma*max(length(sigmaDirection),0.0001);
+        shadow=clamp(elevationOpacity*materialShadow*glassShadowTail(distance/sigma),0,1);
+    }
+    if (coverage <= 0) return half4(original.rgb * half(1-shadow), original.a+half(shadow)*(1-original.a));
     half4 result = original;
 )SKSL";
     // Touch lighting belongs to the merged surface. Clip each source to its
@@ -156,7 +162,7 @@ half4 main(float2 filterXY) {
             "half4 color = referenceGlass(localXY,lensSize*0.5,min(cornerRadius,min(lensSize.x,lensSize.y)*0.5),localXY-lensCenter,sceneDistance/localMetric);\n"
             "result += half(weights[" + index + "] * itemAlpha[" + index + "]) * (color-original); }\n";
     }
-    main += "half4 color = mix(original,result,half(coverage)); return half4(color.rgb-original.rgb*half(shadow*(1-coverage)),color.a); }\n";
+    main += "half4 color = mix(original,result,half(coverage)); return half4(color.rgb-original.rgb*half(shadow*(1-coverage)),color.a+half(shadow*(1-coverage))*(1-color.a)); }\n";
     return source + main;
 }
 }
@@ -230,6 +236,24 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
     std::stable_sort(children.begin(), children.end(), [](const auto& a, const auto& b) { return a->zPosition() < b->zPosition(); });
     for (const auto& child : children) collect(child, parent, 1, items);
     if (items.size() < 2) return;
+    // Native neutral regular members share their largest member's style
+    // defaults, even when disconnected. Resolve the copied description again
+    // so explicit optical overrides survive; lens and shape uniforms below
+    // continue to use each member's actual presentation geometry. Restrict
+    // this adaptation to the measured neutral regular material.
+    NXFloat sharedMaterialSize = 0;
+    for (const auto& item : items) {
+        const auto& effect = *item.layer->_glassMaterial;
+        if (effect.style() == UIGlassEffect::Style::regular && !effect.tintColor()) {
+            const auto size = item.layer->bounds().size;
+            sharedMaterialSize = std::max(sharedMaterialSize, std::min(size.width, size.height));
+        }
+    }
+    for (auto& item : items) {
+        const auto& effect = *item.layer->_glassMaterial;
+        if (effect.style() == UIGlassEffect::Style::regular && !effect.tintColor())
+            item.material = effect._backdropEffect({sharedMaterialSize, sharedMaterialSize}, item.layer->_glassTraits);
+    }
     if (!_runtime || _runtimeCount != items.size()) {
         // Reuse the program across containers and membership changes. All
         // current geometry, optics and traits are supplied afresh as uniforms.
@@ -246,7 +270,8 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
     }
     SkRuntimeEffectBuilder builder(_runtime);
     NXFloat scale = std::isfinite(contentsScale()) ? std::max(1.0f, contentsScale()) : 1;
-    NXFloat maximumRadius = 0;
+    NXFloat maximumRadius = 0, elevationOpacity=0, elevationSigma=2.7f, elevationMargin=0, dominantElevation=0;
+    float elevationOffset[]={0,8},elevationBasis[]={1,0,0,1};
     std::vector<float> inverseX, inverseY, forwardX, forwardY, geometry, alphas, shadows;
     SkRect area = SkRect::MakeEmpty();
     std::vector<std::string> childNames;
@@ -266,8 +291,20 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
             layer->cornerCurve() == CALayerCornerCurve::continuous ? 1.0f : 0.0f});
         alphas.push_back(item.alpha);
         const auto appearance = item.material.uniform("backdropLuma");
-        shadows.push_back(!layer->shadowColor() && appearance && appearance->front() > .5f
-            ? std::max(0.0f, layer->shadowOpacity()) * item.alpha : 0);
+        const auto body=item.material.uniform("bodyMode");
+        const bool casts=!layer->shadowColor() && appearance && body && body->front()<.5f && layer->shadowOpacity()>0 && item.alpha>0;
+        shadows.push_back(casts?std::max(0.0f,layer->shadowOpacity())*item.alpha:0);
+        if(casts) {
+            const auto native=Internal::glassShadow(size,appearance->front()<.5f);
+            const auto matrixNorm=std::sqrt(forward.getScaleX()*forward.getScaleX()+forward.getSkewX()*forward.getSkewX()+forward.getSkewY()*forward.getSkewY()+forward.getScaleY()*forward.getScaleY());
+            if(native.sigma*matrixNorm>dominantElevation) {
+                dominantElevation=native.sigma*matrixNorm; elevationSigma=native.sigma;
+                elevationOffset[0]=native.offset*forward.getSkewX(); elevationOffset[1]=native.offset*forward.getScaleY();
+                elevationBasis[0]=forward.getScaleX();elevationBasis[1]=forward.getSkewX();elevationBasis[2]=forward.getSkewY();elevationBasis[3]=forward.getScaleY();
+            }
+            elevationOpacity=std::max(elevationOpacity,native.opacity);
+            elevationMargin=std::max(elevationMargin,4*native.sigma*matrixNorm+native.offset*matrixNorm);
+        }
         area.join(item.matrix.mapRect(SkRect::MakeWH(size.width, size.height)));
         const double a = forward.getScaleX(), b = forward.getSkewX(), c = forward.getSkewY(), d = forward.getScaleY();
         const double squareNorm = a*a+b*b+c*c+d*d, determinant = a*d-b*c;
@@ -308,6 +345,8 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
     builder.uniform("geometry").set(geometry.data(), geometry.size());
     builder.uniform("itemAlpha").set(alphas.data(), alphas.size());
     builder.uniform("itemShadow").set(shadows.data(), shadows.size());
+    builder.uniform("elevationSigma")=elevationSigma;builder.uniform("elevationOpacity")=elevationOpacity;
+    builder.uniform("elevationOffset").set(elevationOffset,2);builder.uniform("elevationBasis").set(elevationBasis,4);
     builder.uniform("mergeSpacing") = _effect.spacing();
     builder.uniform("contentScale") = scale;
     builder.uniform("filterScale") = scale;
@@ -318,7 +357,7 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
     if (!filter) return;
     // Polynomial unions can extend beyond the input rectangles when several
     // shapes overlap. Include that bound and the unified elevation shadow.
-    const float margin = _effect.spacing() * .25f * (items.size() - 1) + 16;
+    const float margin = _effect.spacing() * .25f * (items.size() - 1) + std::max(16.0f,elevationMargin);
     area.outset(margin, margin);
     if (!area.isFinite()) return;
     area = SkRect::MakeLTRB(area.left() * scale, area.top() * scale, area.right() * scale, area.bottom() * scale);
