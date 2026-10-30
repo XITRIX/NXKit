@@ -30,6 +30,15 @@ constexpr NXFloat batteryFillHeight = batteryBodyHeight - batteryContentInset * 
 constexpr NXFloat batteryTipWidth = 4;
 constexpr NXFloat batteryTipHeight = 10;
 
+bool widgetIsVisible(const std::shared_ptr<UIView>& widget) {
+    if (!widget->window()) return false;
+    for (auto view=widget; view; view=view->superview().lock()) {
+        const auto layer=view->layer()->presentationOrSelf();
+        if (layer->isHidden() || layer->opacity()<.01f) return false;
+    }
+    return true;
+}
+
 class NXNavigationActionView final : public UIControl {
 public:
     NXNavigationActionView(
@@ -190,7 +199,7 @@ NXNavigationStatusView::NXNavigationStatusView() {
 
     const auto weakSelf = weak_from_base<NXNavigationStatusView>();
     _displayLink = std::make_unique<CADisplayLink>([weakSelf]() {
-        if (const auto self = weakSelf.lock()) {
+        if (const auto self = weakSelf.lock(); self && widgetIsVisible(self)) {
             self->refresh();
         }
     });
@@ -282,7 +291,7 @@ NXNavigationActionsView::NXNavigationActionsView() {
 
     const auto weakSelf = weak_from_base<NXNavigationActionsView>();
     _displayLink = std::make_unique<CADisplayLink>([weakSelf]() {
-        if (const auto self = weakSelf.lock()) {
+        if (const auto self = weakSelf.lock(); self && widgetIsVisible(self)) {
             self->refresh();
         }
     });

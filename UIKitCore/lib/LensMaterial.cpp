@@ -1,5 +1,6 @@
 #include "LensMaterial.hpp"
 #include "GlassVibrancy.hpp"
+#include "GlassForeground.hpp"
 #include "include/effects/SkImageFilters.h"
 #include "include/core/SkShader.h"
 #include "include/core/SkSurface.h"
@@ -92,6 +93,18 @@ void LensLayer::drawSource(SkCanvas* canvas) {
   const auto picture = recorder.finishRecordingAsPicture();
   const auto sourceToOwner = SkMatrix::Concat(commonToOwner,sourceToCommon);
   auto pictureToOwner = sourceToOwner; pictureToOwner.preTranslate(recordingBounds.left(),recordingBounds.top());
+  if(_vibrant && _progress==0) {
+    // No optical displacement at rest: blend the picture directly instead of
+    // allocating a source surface and filtering the painted platter each frame.
+    SkPaint paint;
+    paint.setShader(picture->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkFilterMode::kLinear,&pictureToOwner,nullptr));
+    paint.setBlender(glassForegroundBlender(_dark));
+    paint.setAlphaf(std::clamp(ancestorAlpha,0.0f,1.0f));
+    canvas->save();
+    canvas->clipPath(layerCornerPath(bounds().size,std::min(bounds().width(),bounds().height())*.5f,CALayerCornerCurve::continuous),true);
+    canvas->drawRect(SkRect::MakeWH(bounds().width(),bounds().height()),paint);
+    canvas->restore();return;
+  }
   sk_sp<SkShader> shader;SkMatrix samplingToOwner=SkMatrix::I();SkIRect sourceDeviceRect;
   bool useVibrancy=_vibrant;NXFloat sourceScale=_vibrant?std::max<NXFloat>(1,contentsScale()):1;
   if(_vibrant) {

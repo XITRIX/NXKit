@@ -3,7 +3,7 @@
 #include "GlassAppearance.hpp"
 #include "GlassShadow.hpp"
 #include "GlassRim.hpp"
-#include "GlassVibrancy.hpp"
+#include "GlassForeground.hpp"
 #include "GlassBackdrop.hpp"
 #include "LayerCornerGeometry.hpp"
 #include <DispatchQueue.h>
@@ -410,24 +410,8 @@ void CABackdropEffectLayer::renderSublayers(SkCanvas* canvas) {
     if(!_glassMaterial || !_glassMaterial->isContentVibrancyEnabled() || sublayers().empty()) {
         CALayer::renderSublayers(canvas);return;
     }
-    static const auto runtime=[] {
-        const auto code=std::string(Internal::glassVibrancySource)+R"sksl(
-uniform float dark;
-half4 main(half4 source,half4 backdrop) {
-    if(source.a<=0)return backdrop;
-    half3 color=half3(glassVibrantColor(float3(source.rgb/max(source.a,.0001)),float3(backdrop.rgb/max(backdrop.a,.0001)),dark));
-    // The overlap uses vibrancy. Where the destination is transparent retain
-    // ordinary source color; never invent energy or opacity in empty pixels.
-    half3 ink=mix(source.rgb,color*source.a,backdrop.a);
-    return half4(ink+backdrop.rgb*(1-source.a),source.a+backdrop.a*(1-source.a));
-})sksl";
-        auto result=SkRuntimeEffect::MakeForBlender(SkString(code));
-        if(!result.effect)throw std::runtime_error(result.errorText.c_str());
-        return result.effect;
-    }();
-    SkRuntimeBlendBuilder builder(runtime);
-    builder.uniform("dark")=_glassTraits&&_glassTraits->userInterfaceStyle()==UIUserInterfaceStyle::dark?1.f:0.f;
-    SkPaint paint;paint.setBlender(builder.makeBlender());
+    SkPaint paint;paint.setBlender(Internal::glassForegroundBlender(
+        _glassTraits&&_glassTraits->userInterfaceStyle()==UIUserInterfaceStyle::dark));
     // Only isolate children. The material is already painted into backdrop;
     // applying this to the whole layer would blend the glass twice.
     const auto contentBounds=SkRect::MakeWH(bounds().width(),bounds().height());

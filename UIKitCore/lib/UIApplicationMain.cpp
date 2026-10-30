@@ -10,6 +10,9 @@ namespace NXKit {
 
 bool applicationRunLoop() {
     const auto currentTime = Timer();
+    // Requests belong to this iteration, including display-link callbacks
+    // and presentation animations advanced below.
+    CALayer::maxFramerateRequired = 0;
     UIApplication::shared->handleEventsIfNeeded();
     if (UIApplication::shared->isQuitRequested()) {
         return false;
@@ -29,11 +32,12 @@ bool applicationRunLoop() {
     // the same bounds after rotation, multitasking, or an environment change.
     keyWindow->updateTraitsFromPlatform();
 
-    const int maximumAnimationFrameRate = UIView::maximumAnimationFrameRate();
-    CALayer::maxFramerateRequired = 0; // reset value
-
     UIView::animateIfNeeded(currentTime);
     keyWindow->drawAndLayoutTreeIfNeeded();
+
+    // Update pacing even on a clean frame. Otherwise the last 120 Hz touch
+    // frame leaves an idle screen polling its entire tree at 120 Hz forever.
+    SkiaCtx::_main->setTargetFrameRate(UIView::maximumAnimationFrameRate());
 
     static NXSize lastSize;
 
@@ -63,8 +67,6 @@ bool applicationRunLoop() {
     keyWindow->layer()->presentationOrSelf()->skiaRender(canvas);
     canvas->restore();
 
-    // TODO: Get target frame rate from UI context
-    SkiaCtx::_main->setTargetFrameRate(maximumAnimationFrameRate);
     SkiaCtx::_main->flushAndSubmit(surface);
     SkiaCtx::_main->swapBuffers();
     SkiaCtx::_main->sleepForNextFrame();

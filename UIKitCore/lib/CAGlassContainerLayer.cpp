@@ -384,13 +384,35 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
     const float margin = _effect.spacing() * .25f * (items.size() - 1) + std::max(16.0f,elevationMargin);
     area.outset(margin, margin);
     if (!area.isFinite()) return;
+    // Keep the same shared material/union program but avoid shading empty
+    // space between distant items (for example Back and the trailing pair).
+    // Include both output elevation and input sampling reach before splitting,
+    // so one pass cannot sample another pass's newly painted material.
+    std::vector<SkRect> regions;
+    const auto reach=std::max(margin,maximumRadius);
+    for(const auto& item:items) {
+        auto region=item.matrix.mapRect(SkRect::MakeWH(item.layer->bounds().width(),item.layer->bounds().height()));
+        region.outset(reach,reach);
+        if(!region.intersect(area))continue;
+        for(size_t i=0;i<regions.size();) {
+            if(SkRect::Intersects(region,regions[i])) {
+                region.join(regions[i]);regions.erase(regions.begin()+i);i=0;
+            } else ++i;
+        }
+        regions.push_back(region);
+    }
     area = SkRect::MakeLTRB(area.left() * scale, area.top() * scale, area.right() * scale, area.bottom() * scale);
     SkPaint paint; paint.setImageFilter(std::move(filter));
     canvas->save(); canvas->scale(1 / scale, 1 / scale);
     // saveLayer bounds are only an allocation hint. A real clip keeps each
     // runtime filter local, rather than shading the entire window per group.
     canvas->clipRect(area);
-    canvas->saveLayer(SkCanvas::SaveLayerRec(&area, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag));
-    canvas->restore(); canvas->restore();
+    for(auto region:regions) {
+        region=SkRect::MakeLTRB(region.left()*scale,region.top()*scale,region.right()*scale,region.bottom()*scale);
+        canvas->save();canvas->clipRect(region);
+        canvas->saveLayer(SkCanvas::SaveLayerRec(&region, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag));
+        canvas->restore();canvas->restore();
+    }
+    canvas->restore();
     for (const auto& item : items) _renderedItems.push_back(item.layer.get());
 }

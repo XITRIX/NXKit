@@ -30,6 +30,7 @@ public:
   }
   NXAffineTransform renderingTransform() const override { return _elastic; }
   void setElasticTransform(NXAffineTransform value) {
+    if(_elastic==value)return;
     _elastic = value;
     if (auto active = presentation())
       std::static_pointer_cast<LensMotionLayer>(active)->_elastic = value;
