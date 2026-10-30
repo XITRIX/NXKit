@@ -38,6 +38,7 @@ LensDemoStage::LensDemoStage(bool tabBarOnly): UIView({0,0,720,440}), _tabBarOnl
     for (int i=0;i<(_tabBarOnly?0:3);i++) {
         auto lens=new_shared<LensView>(i==0?LensView::Style::regular:LensView::Style::selection);
         lens->setInteractive(true);
+        lens->setLiftedContentMagnification(1.16f);
         lens->setRestingBackgroundColor(i==0?UIColor::white:UIColor::label.withAlphaComponent(.10f)); addSubview(lens); _samples.push_back(lens);
         auto control=new_shared<LensTouchControl>(); lens->contentView()->addSubview(control);
         const auto weakLens=std::weak_ptr<LensView>(lens);

@@ -292,6 +292,18 @@ void LensView::observeTouch(UITouchPhase phase,const std::shared_ptr<UITouch>& t
     state.lastTouchLocation=location; state.lastTouchTimestamp=touch->timestamp();
   }
 }
+void LensView::setContentVibrancyEnabled(bool enabled) {
+  if (_contentVibrancy == enabled) return;
+  _contentVibrancy = enabled;
+  updateMaterial();
+}
+void LensView::setLiftedContentMagnification(NXFloat magnification) {
+  if (!std::isfinite(magnification) || magnification < 1)
+    throw std::invalid_argument("Lifted content magnification must be finite and at least one");
+  if (_liftedContentMagnification == magnification) return;
+  _liftedContentMagnification = magnification;
+  updateMaterial();
+}
 void LensView::setStyle(Style style) {
   if (style != Style::regular && style != Style::selection)
     throw std::invalid_argument("Invalid lens style");
@@ -423,7 +435,7 @@ void LensView::updateMaterial() {
   _optics->setEffect(
       Internal::lensMaterial(_style == Style::selection, _progress, dark));
   std::static_pointer_cast<Internal::LensLayer>(_contact->layer())
-      ->setLiftState(_style == Style::selection, _progress);
+      ->setLiftState(_style == Style::selection, _progress, _liftedContentMagnification, _contentVibrancy, dark);
   CATransaction::commit();
   layer()->setNeedsDisplay();
 }
@@ -501,6 +513,15 @@ bool LensView::applyXMLAttribute(const std::string &name,
     const auto parsed=valueToBool(value);
     if(!parsed) return false;
     setInteractive(*parsed); return true;
+  }
+  if (name == "contentVibrancyEnabled") {
+    const auto parsed=valueToBool(value);if(!parsed)return false;
+    setContentVibrancyEnabled(*parsed);return true;
+  }
+  if (name == "liftedContentMagnification") {
+    const auto parsed=valueToFloat(value);
+    if (!parsed || !std::isfinite(*parsed) || *parsed < 1) return false;
+    setLiftedContentMagnification(*parsed); return true;
   }
   if (name == "isLifted") {
     const auto parsed = valueToBool(value);

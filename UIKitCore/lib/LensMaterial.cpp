@@ -1,7 +1,12 @@
 #include "LensMaterial.hpp"
+#include "GlassVibrancy.hpp"
+#include "include/effects/SkImageFilters.h"
+#include "include/core/SkShader.h"
+#include "include/core/SkSurface.h"
 #include "include/core/SkCanvas.h"
 #include "include/effects/SkRuntimeEffect.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <stdexcept>
 
@@ -87,50 +92,97 @@ void LensLayer::drawSource(SkCanvas* canvas) {
   const auto picture = recorder.finishRecordingAsPicture();
   const auto sourceToOwner = SkMatrix::Concat(commonToOwner,sourceToCommon);
   auto pictureToOwner = sourceToOwner; pictureToOwner.preTranslate(recordingBounds.left(),recordingBounds.top());
-  auto shader = picture->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkFilterMode::kLinear,&pictureToOwner,nullptr);
+  sk_sp<SkShader> shader;SkMatrix samplingToOwner=SkMatrix::I();SkIRect sourceDeviceRect;
+  bool useVibrancy=_vibrant;NXFloat sourceScale=_vibrant?std::max<NXFloat>(1,contentsScale()):1;
+  if(_vibrant) {
+    // Resolve the source on the actual device pixel grid before the image
+    // filter samples it. A Picture shader inside a runtime image filter can
+    // cache a one-point tile or introduce a second fractional edge filter.
+    // A compatible surface keeps GPU images on their rendering backend.
+    const auto ownerToDevice=canvas->getTotalMatrix();SkMatrix deviceToOwner;
+    if(!ownerToDevice.invert(&deviceToOwner))return;
+    auto deviceRect=ownerToDevice.mapRect(SkRect::MakeWH(bounds().width(),bounds().height())).roundOut();deviceRect.outset(2,2);
+    samplingToOwner=deviceToOwner;sourceDeviceRect=deviceRect;
+    auto surface=canvas->makeSurface(SkImageInfo::MakeN32Premul(deviceRect.width(),deviceRect.height(),canvas->imageInfo().refColorSpace()));
+    if(surface) {
+      auto input=surface->getCanvas();input->clear(SK_ColorTRANSPARENT);
+      input->translate(-deviceRect.left(),-deviceRect.top());input->concat(ownerToDevice);
+      input->drawPicture(picture,&pictureToOwner,nullptr);
+      auto image=surface->makeImageSnapshot();if(image) {
+        auto imageToOwner=deviceToOwner;imageToOwner.preTranslate(deviceRect.left(),deviceRect.top());imageToOwner.postScale(sourceScale,sourceScale);
+        shader=image->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkSamplingOptions(SkFilterMode::kLinear),&imageToOwner);
+      }
+    }
+  }
+  if(!shader) {
+    // Recording canvases have no compatible render target. Preserve their
+    // selected content with the normal path instead of recording a blank.
+    useVibrancy=false;sourceScale=1;samplingToOwner=SkMatrix::I();
+    shader=picture->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkFilterMode::kLinear,&pictureToOwner,nullptr);
+  }
   if (!shader) return;
   // Native line sweeps retain an identity center but fold selected source
   // bands inward near the perimeter. Keep the full picture shader here: an
   // additional Picture image-filter input changes fractional source phase.
-  static const auto sourceEffect = [] {
-    auto compiled = SkRuntimeEffect::MakeForShader(SkString(R"sksl(
+  static const auto sourceEffects = [] {
+    std::array<sk_sp<SkRuntimeEffect>,2> effects;
+    for(int variant=0;variant<2;++variant) {
+    auto compiled = SkRuntimeEffect::MakeForShader(SkString(std::string(variant?"const bool vibrantSource=true;\n":"const bool vibrantSource=false;\n") + "uniform float cornerCurve;\n" + layerCornerShaderUniforms + layerCornerShaderSource() + glassVibrancySource + R"sksl(
 uniform shader selected;
+uniform shader scene;
+uniform float3x3 samplingToOwner;
+uniform float sourceScale;
+uniform float dark;
 uniform float2 size;
 uniform float pass;
 uniform float progress;
 uniform float selection;
 uniform float opacity;
+uniform float sourceMagnification;
+float2 magnifiedPosition(float2 p) {
+  return sourceMagnification==1.0 ? p : size*.5+(p-size*.5)/sourceMagnification;
+}
 float capsule(float2 p) {
-  float r=min(size.x,size.y)*.5;
-  float2 q=abs(p-size*.5)-size*.5+r;
-  return min(max(q.x,q.y),0.0)+length(max(q,0.0))-r;
+  return boxRoundedSDF(p-size*.5,size*.5,min(size.x,size.y)*.5);
 }
 float2 opticalNormal(float2 p) {
-  float2 g=float2(capsule(p+float2(.1,0))-capsule(p-float2(.1,0)),capsule(p+float2(0,.1))-capsule(p-float2(0,.1)));
-  return g/max(length(g),.00001);
+  return lensNormalDirection(p-size*.5,size*.5,min(size.x,size.y)*.5);
 }
 // Effective radial fit to the native 1pt line sweep, in logical points.
 // These reconstruction parameters are not Apple's private shader equation.
 float2 sourcePosition(float2 p) {
   float depth=max(-capsule(p),0.0);
   float projected=sqrt(7.94*7.94+(depth-3.42)*(depth-3.42));
-  float target=mix(projected,depth,smoothstep(4.34,13.70,depth));
+  float shoulder=smoothstep(4.34,13.70,depth);
+  float target=projected;
   if(selection<.5) target+=5.3*exp(-depth/1.5)*(1.0-smoothstep(3.0,5.0,depth));
-  target=min(target,min(size.x,size.y)*.5);
-  return p-opticalNormal(p)*(target-depth);
+  // Bound the perimeter fold before blending back to identity. The continuous
+  // shape's first-order distance can exceed half-height in its interior;
+  // clamping the final mixed target used to reintroduce a center displacement.
+  target=mix(min(target,min(size.x,size.y)*.5),depth,shoulder);
+  return magnifiedPosition(p-opticalNormal(p)*(target-depth));
 }
 half4 sourceAt(float2 p,float2 normal,float sigma) {
-  half4 value=selected.eval(p);
+  sigma/=sourceMagnification;
+  half4 value=selected.eval(p*sourceScale);
   if(sigma>.05) {
     value*=.375;
-    value+=(selected.eval(p-normal*sigma)+selected.eval(p+normal*sigma))*.25;
-    value+=(selected.eval(p-normal*sigma*2.0)+selected.eval(p+normal*sigma*2.0))*.0625;
+    value+=(selected.eval((p-normal*sigma)*sourceScale)+selected.eval((p+normal*sigma)*sourceScale))*.25;
+    value+=(selected.eval((p-normal*sigma*2.0)*sourceScale)+selected.eval((p+normal*sigma*2.0)*sourceScale))*.0625;
   }
   return value;
 }
+half4 vibrantSample(half4 source,half4 background) {
+  if(source.a<=0)return half4(0);
+  half3 color=half3(glassVibrantColor(float3(source.rgb/max(source.a,.0001)),float3(background.rgb/max(background.a,.0001)),dark));
+  return half4(mix(source.rgb,color*source.a,background.a),source.a);
+}
 half4 main(float2 coordinate) {
+  half4 background=half4(0);
+  if(vibrantSource) { background=scene.eval(coordinate);coordinate=(samplingToOwner*float3(coordinate,1)).xy; }
   float2 p=coordinate;
-  half4 original=selected.eval(coordinate);
+  half4 original=selected.eval(magnifiedPosition(coordinate)*sourceScale);
+  if(vibrantSource)original=vibrantSample(original,background);
   half3 ink=original.rgb;
   half3 coverage=original.aaa;
   if(progress>0.0) {
@@ -139,16 +191,31 @@ half4 main(float2 coordinate) {
     float2 uv=sourcePosition(p);
     float sigma=.6*exp(-depth/1.2);
     half4 green=sourceAt(uv,normal,sigma);
+    if(vibrantSource)green=vibrantSample(green,background);
     half3 color=green.rgb;
     half3 alpha=green.aaa;
     if(selection>.5) {
       float edge=1.0-smoothstep(6.0,12.0,depth);
       float v=(3.5-depth)/sqrt((3.5-depth)*(3.5-depth)+2.25);
-      float2 shift=(float2(normal.y*1.45,normal.x*.80)-normal*(.06*v))*edge;
+      // Native selected-ink G/B centroids separate about 1.6pt at the top
+      // and 1.05pt at the curved side. The old smaller field left saturated
+      // tinted glyphs with narrow fringes despite a strongly dispersed backdrop.
+      // Keep the independently measured diagonal fold while increasing the
+      // dispersion in the measured top/side sectors. A uniform gain changes
+      // the corner's outer/inner branch ownership and loses native ink.
+      float side=abs(normal.x);
+      float2 spread=float2(1.45+.27*(1.0-smoothstep(.05,.25,side)),
+                           .80+.36*smoothstep(.65,.95,side));
+      // UIKit's side markers also separate radially (blue inward,
+      // red outward). Tangential transport alone leaves long blue glyph
+      // strokes with identical channel boundaries along the curved sides.
+      float2 shift=(float2(normal.y,normal.x)*spread-normal*(.06*v))*edge;
+      float sideRay=smoothstep(.85,.98,side)*edge;
       // Perturb before folding. At curved corners the radial fold can
       // reverse channel order; adding a shift after the fold cannot do so.
-      half4 red=sourceAt(sourcePosition(p+shift),normal,sigma);
-      half4 blue=sourceAt(sourcePosition(p-shift),normal,sigma);
+      half4 red=sourceAt(sourcePosition(p+shift-normal*(.70*sideRay)),normal,sigma);
+      half4 blue=sourceAt(sourcePosition(p-shift+normal*(2.25*sideRay)),normal,sigma);
+      if(vibrantSource) { red=vibrantSample(red,background);blue=vibrantSample(blue,background); }
       color=half3(red.r,green.g,blue.b);
       alpha=half3(red.a,green.a,blue.a);
     }
@@ -157,12 +224,16 @@ half4 main(float2 coordinate) {
   }
   ink*=half(opacity); coverage*=half(opacity);
   half alpha=max(coverage.r,max(coverage.g,coverage.b));
+  if(vibrantSource&&pass>1.5)return half4(ink+background.rgb*(half3(1)-coverage),alpha+background.a*(1-alpha));
   return pass<.5 ? half4(coverage,1) : half4(ink,alpha);
 }
 )sksl"));
     if (!compiled.effect) throw std::runtime_error(compiled.errorText.c_str());
-    return compiled.effect;
+    effects[variant]=compiled.effect;
+    }
+    return effects;
   }();
+  const auto& sourceEffect=sourceEffects[useVibrancy?1:0];
   // Channel-dependent coverage must attenuate the destination separately;
   // one maximum-alpha SrcOver would darken uncovered channels around black
   // ink. Two direct draws implement inkRGB + dstRGB * (1 - coverageRGB).
@@ -180,13 +251,29 @@ half4 main(float2 coordinate) {
   }();
   SkRuntimeShaderBuilder sourceBuilder(sourceEffect);
   sourceBuilder.child("selected")=shader;
+  if(useVibrancy) {sourceBuilder.child("scene")=SkShaders::Color(SK_ColorTRANSPARENT);sourceBuilder.uniform("samplingToOwner")=samplingToOwner;}
+  sourceBuilder.uniform("sourceScale")=sourceScale;
+  if(useVibrancy)sourceBuilder.uniform("dark")=_dark?1.f:0.f;
   sourceBuilder.uniform("size")=SkV2{bounds().width(),bounds().height()};
+  sourceBuilder.uniform("cornerCurve")=1.f;
+  bindLayerCornerGeometry(sourceBuilder,*sourceEffect,bounds().size,std::min(bounds().width(),bounds().height())*.5f);
   sourceBuilder.uniform("progress")=_progress;
+  sourceBuilder.uniform("sourceMagnification")=1+(_magnification-1)*_progress;
   sourceBuilder.uniform("selection")=_selection?1.f:0.f;
   sourceBuilder.uniform("opacity")=std::clamp(ancestorAlpha,0.0f,1.0f);
   SkPaint paint;
   canvas->save();
   canvas->clipPath(layerCornerPath(bounds().size,std::min(bounds().width(),bounds().height())*.5f,CALayerCornerCurve::continuous),true);
+  if(useVibrancy) {
+    sourceBuilder.uniform("pass")=2.f;
+    paint.setImageFilter(SkImageFilters::RuntimeShader(sourceBuilder,0,"scene",nullptr));
+    // Keep the image filter itself on integer device pixels. Restoring an
+    // owner-local fractional layer would bilinearly filter its ink again.
+    canvas->resetMatrix();
+    const auto rect=SkRect::Make(sourceDeviceRect);
+    canvas->saveLayer(SkCanvas::SaveLayerRec(&rect,&paint,SkCanvas::kInitWithPrevious_SaveLayerFlag));
+    canvas->restore();canvas->restore();return;
+  }
   sourceBuilder.uniform("pass")=0.f;
   paint.setShader(sourceBuilder.makeShader()); paint.setBlender(attenuate);
   canvas->drawRect(SkRect::MakeWH(bounds().width(),bounds().height()),paint);
@@ -198,17 +285,21 @@ half4 main(float2 coordinate) {
 
 LensLayer::LensLayer(LensLayer *source)
     : CALayer(source), _source(source->_source), _owner(source->_owner), _selection(source->_selection),
-      _progress(source->_progress) {}
+      _progress(source->_progress), _magnification(source->_magnification), _vibrant(source->_vibrant), _dark(source->_dark) {}
 std::shared_ptr<CALayer> LensLayer::copy() {
   return new_shared<LensLayer>(this);
 }
-void LensLayer::setLiftState(bool selection, NXFloat progress) {
+void LensLayer::setLiftState(bool selection, NXFloat progress, NXFloat magnification, bool vibrant, bool dark) {
   _selection = selection;
   _progress = progress;
+  _magnification = magnification;
+  _vibrant = vibrant;_dark = dark;
   if (auto active = presentation()) {
     auto lens = std::static_pointer_cast<LensLayer>(active);
     lens->_selection = selection;
     lens->_progress = progress;
+    lens->_magnification = magnification;
+    lens->_vibrant = vibrant;lens->_dark = dark;
   }
   setNeedsDisplay();
 }
@@ -219,21 +310,18 @@ void LensLayer::draw(SkCanvas *canvas) {
   // Native gray controls show a sub-point dark contact contour plus a soft
   // lower lobe. Restrict both to the exterior so the lens body stays clear.
   static const auto effect = [] {
-    auto result = SkRuntimeEffect::MakeForShader(SkString(R"sksl(
+    auto result = SkRuntimeEffect::MakeForShader(SkString(std::string("uniform float cornerCurve;\n") + layerCornerShaderUniforms + layerCornerShaderSource() + R"sksl(
 uniform float2 size;
 uniform float scale;
 uniform float progress;
 uniform float selection;
 float sdf(float2 p) {
-    float r=min(size.x,size.y)*.5;
-    float2 q=abs(p-size*.5)-size*.5+r;
-    return min(max(q.x,q.y),0.0)+length(max(q,0.0))-r;
+    return boxRoundedSDF(p-size*.5,size*.5,min(size.x,size.y)*.5);
 }
 half4 main(float2 p) {
     float d=sdf(p);
     if (d<=0.0) return half4(0);
-    float2 g=float2(sdf(p+float2(.1,0))-sdf(p-float2(.1,0)),sdf(p+float2(0,.1))-sdf(p-float2(0,.1)));
-    float2 n=g/max(length(g),.00001);
+    float2 n=lensNormalDirection(p-size*.5,size*.5,min(size.x,size.y)*.5);
     float aa=.5/max(scale,1.0);
     float contour=(.4+.22*n.x*n.x)*(1.0-smoothstep(1.0-aa,1.0+aa,d));
     float lower=pow(max(n.y,0.0),2.0)*mix(.075,.05,selection)*exp(-pow((d-5.5)/5.0,2.0));
@@ -247,6 +335,8 @@ half4 main(float2 p) {
   }();
   SkRuntimeShaderBuilder builder(effect);
   builder.uniform("size") = SkV2{bounds().size.width, bounds().size.height};
+  builder.uniform("cornerCurve")=1.f;
+  bindLayerCornerGeometry(builder,*effect,bounds().size,std::min(bounds().width(),bounds().height())*.5f);
   builder.uniform("scale") = contentsScale();
   builder.uniform("progress") = _progress;
   builder.uniform("selection") = _selection ? 1.f : 0.f;
@@ -260,7 +350,7 @@ BackdropEffect lensMaterial(bool selection, NXFloat progress, bool dark) {
   // Native lifted lenses retain sharp interior detail. Their curved perimeter
   // bends lines and separates colors; there is no regular-glass body veil.
   // This is an independent optical model, not Apple's private shader.
-  static const char *source = R"sksl(
+  static const std::string source = std::string("uniform float cornerCurve;\n") + layerCornerShaderUniforms + layerCornerShaderSource() + R"sksl(
 uniform shader content;
 uniform float2 resolution;
 uniform float filterScale;
@@ -278,9 +368,7 @@ uniform float reflectionDistance;
 uniform float rimShadeScale;
 
 float distanceToCapsule(float2 p) {
-    float radius = min(resolution.x, resolution.y) * .5;
-    float2 q = abs(p - resolution * .5) - resolution * .5 + radius;
-    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - radius;
+    return boxRoundedSDF(p-resolution*.5,resolution*.5,min(resolution.x,resolution.y)*.5);
 }
 half4 sampleAt(float2 p) { return content.eval(p * filterScale); }
 // Native monochrome backdrop probes show tangential RGB separation with a
@@ -301,9 +389,7 @@ half4 main(float2 coordinate) {
     float2 p = coordinate / filterScale;
     half4 original = sampleAt(p);
     float d = distanceToCapsule(p);
-    float2 gradient = float2(distanceToCapsule(p + float2(.1,0)) - distanceToCapsule(p - float2(.1,0)),
-                             distanceToCapsule(p + float2(0,.1)) - distanceToCapsule(p - float2(0,.1)));
-    float2 normal = gradient / max(length(gradient), .00001);
+    float2 normal = lensNormalDirection(p-resolution*.5,resolution*.5,min(resolution.x,resolution.y)*.5);
     float depth = max(-d, 0.0);
     float bevel = min(bevelWidth, min(resolution.x, resolution.y) * .5);
     float t = clamp(depth / max(bevel,.01),0.0,1.0);

@@ -25,16 +25,16 @@ UIColor UIColor::magenta = UIColor(255, 0, 255, "magenta");
 UIColor UIColor::brown = UIColor(153, 102, 51, "brown");
 
 // Adaptable
-UIColor UIColor::systemRed = UIColorThemed(UIColor(255, 59, 48), UIColor(255, 69, 58), "systemRed");
-UIColor UIColor::systemOrange = UIColorThemed(UIColor(255, 149, 0), UIColor(255, 159, 10), "systemOrange");
-UIColor UIColor::systemYellow = UIColorThemed(UIColor(242, 204, 0), UIColor(255, 214, 10), "systemYellow");
+UIColor UIColor::systemRed = UIColorThemed(UIColor(255, 56, 60), UIColor(255, 66, 69), "systemRed");
+UIColor UIColor::systemOrange = UIColorThemed(UIColor(255, 141, 40), UIColor(255, 146, 48), "systemOrange");
+UIColor UIColor::systemYellow = UIColorThemed(UIColor(255, 204, 0), UIColor(255, 214, 0), "systemYellow");
 UIColor UIColor::systemGreen = UIColorThemed(UIColor(52, 199, 89), UIColor(48, 209, 88), "systemGreen");
-UIColor UIColor::systemMint = UIColorThemed(UIColor(0, 199, 190), UIColor(99, 230, 226), "systemMint");
-UIColor UIColor::systemTeal = UIColorThemed(UIColor(48, 176, 199), UIColor(64, 200, 224), "systemTeal");
-UIColor UIColor::systemCyan = UIColorThemed(UIColor(50, 173, 230), UIColor(100, 210, 255), "systemCyan");
-UIColor UIColor::systemBlue = UIColorThemed(UIColor(0, 122, 255), UIColor(10, 132, 255), "systemBlue");
-UIColor UIColor::systemIndigo = UIColorThemed(UIColor(88, 86, 214), UIColor(94, 92, 230), "systemIndigo");
-UIColor UIColor::systemPurple = UIColorThemed(UIColor(175, 82, 222), UIColor(191, 90, 242), "systemPurple");
+UIColor UIColor::systemMint = UIColorThemed(UIColor(0, 200, 179), UIColor(0, 218, 195), "systemMint");
+UIColor UIColor::systemTeal = UIColorThemed(UIColor(0, 195, 208), UIColor(0, 210, 224), "systemTeal");
+UIColor UIColor::systemCyan = UIColorThemed(UIColor(0, 192, 232), UIColor(60, 211, 254), "systemCyan");
+UIColor UIColor::systemBlue = UIColorThemed(UIColor(0, 136, 255), UIColor(0, 145, 255), "systemBlue");
+UIColor UIColor::systemIndigo = UIColorThemed(UIColor(97, 85, 245), UIColor(109, 124, 255), "systemIndigo");
+UIColor UIColor::systemPurple = UIColorThemed(UIColor(203, 48, 224), UIColor(219, 52, 242), "systemPurple");
 UIColor UIColor::systemPink = UIColorThemed(UIColor(255, 45, 85), UIColor(255, 55, 95), "systemPink");
 UIColor UIColor::systemBrown = UIColorThemed(UIColor(162, 132, 94), UIColor(172, 142, 104), "systemBrown");
 

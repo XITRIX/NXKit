@@ -16,6 +16,8 @@ public:
     ~SkiaCtx_macos() override;
 
     sk_sp<SkSurface> getBackbufferSurface() override;
+    sk_sp<SkTypeface> getDefaultTypeface(const SkFontStyle& style = SkFontStyle(),
+                                        NXFloat pointSize = 17) const override;
 //    float getScaleFactor() override;
     void swapBuffers() override;
     UIUserInterfaceStyle getThemeMode() override;

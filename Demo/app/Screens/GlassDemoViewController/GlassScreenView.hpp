@@ -40,6 +40,7 @@ private:
     std::set<int> _completed;
     std::shared_ptr<NXKit::UIScrollView> _scroll;
     std::shared_ptr<NXKit::UIView> _content, _navigation;
+    std::shared_ptr<NXKit::GlassContainerView> _navigationGlass;
     std::shared_ptr<NXKit::UIBlurView> _edgeBlur;
     std::shared_ptr<NXKit::UILabel> _title;
     std::shared_ptr<NXKit::BackdropEffectView> _plusGlass;

@@ -2,6 +2,8 @@
 #include "CAGlassContainerLayer.hpp"
 #include "GlassAppearance.hpp"
 #include "GlassShadow.hpp"
+#include "GlassRim.hpp"
+#include "GlassVibrancy.hpp"
 #include "GlassBackdrop.hpp"
 #include "LayerCornerGeometry.hpp"
 #include <DispatchQueue.h>
@@ -238,6 +240,8 @@ void CABackdropEffectLayer::validateUniforms(
     validateAutomaticUniform(runtimeEffect, "lensSize", UniformType::kFloat2);
     validateAutomaticUniform(runtimeEffect, "cornerRadius", UniformType::kFloat);
     validateAutomaticUniform(runtimeEffect, "cornerCurve", UniformType::kFloat);
+    for (const auto* name : Internal::layerCornerShaderNames)
+        validateAutomaticUniform(runtimeEffect, name, UniformType::kFloat4);
     validateAutomaticUniform(runtimeEffect, "externalShapeCoverage", UniformType::kFloat);
     validateAutomaticUniform(runtimeEffect, "contentScale", UniformType::kFloat);
     validateAutomaticUniform(runtimeEffect, "filterScale", UniformType::kFloat);
@@ -337,6 +341,7 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
     if (findUniform(*_runtimeEffect, "cornerCurve")) {
         builder.uniform("cornerCurve") = cornerCurve() == CALayerCornerCurve::continuous ? 1.0f : 0.0f;
     }
+    Internal::bindLayerCornerGeometry(builder, *_runtimeEffect, layerSize, cornerRadius());
     if (findUniform(*_runtimeEffect, "externalShapeCoverage")) {
         builder.uniform("externalShapeCoverage") = 1.0f;
     }
@@ -401,6 +406,34 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
     return _cachedImageFilter;
 }
 
+void CABackdropEffectLayer::renderSublayers(SkCanvas* canvas) {
+    if(!_glassMaterial || !_glassMaterial->isContentVibrancyEnabled() || sublayers().empty()) {
+        CALayer::renderSublayers(canvas);return;
+    }
+    static const auto runtime=[] {
+        const auto code=std::string(Internal::glassVibrancySource)+R"sksl(
+uniform float dark;
+half4 main(half4 source,half4 backdrop) {
+    if(source.a<=0)return backdrop;
+    half3 color=half3(glassVibrantColor(float3(source.rgb/max(source.a,.0001)),float3(backdrop.rgb/max(backdrop.a,.0001)),dark));
+    // The overlap uses vibrancy. Where the destination is transparent retain
+    // ordinary source color; never invent energy or opacity in empty pixels.
+    half3 ink=mix(source.rgb,color*source.a,backdrop.a);
+    return half4(ink+backdrop.rgb*(1-source.a),source.a+backdrop.a*(1-source.a));
+})sksl";
+        auto result=SkRuntimeEffect::MakeForBlender(SkString(code));
+        if(!result.effect)throw std::runtime_error(result.errorText.c_str());
+        return result.effect;
+    }();
+    SkRuntimeBlendBuilder builder(runtime);
+    builder.uniform("dark")=_glassTraits&&_glassTraits->userInterfaceStyle()==UIUserInterfaceStyle::dark?1.f:0.f;
+    SkPaint paint;paint.setBlender(builder.makeBlender());
+    // Only isolate children. The material is already painted into backdrop;
+    // applying this to the whole layer would blend the glass twice.
+    const auto contentBounds=SkRect::MakeWH(bounds().width(),bounds().height());
+    canvas->saveLayer(&contentBounds,&paint);CALayer::renderSublayers(canvas);canvas->restore();
+}
+
 void CABackdropEffectLayer::draw(SkCanvas* context) {
     if (CAGlassContainerLayer::contains(this)) return;
     const auto layerBounds = bounds();
@@ -446,6 +479,64 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
     context->restore();
     context->restore();
 
+    // The native dark contour lies outside the material's coverage. Keep it
+    // separate from the clipped body and automatic elevation, with one shared
+    // distance/normal law also used by glass containers. It must never enter
+    // the input sampled for the refraction above.
+    const auto contourEffect = _glassMaterial
+        ? _glassMaterial->_backdropEffect(layerBounds.size,_glassTraits) : _effect;
+    const auto scalar = [&](const char* name,float fallback) {
+        const auto value=contourEffect.uniform(name);
+        return value && !value->empty() ? value->front() : fallback;
+    };
+    const auto light=contourEffect.uniform("specLightDirection");
+    const float contourStrength=scalar("edge",0)*scalar("edgeAbsorption",0)/0.035f;
+    if (scalar("referenceAppearance",0)>.5f && scalar("bodyMode",1)<.5f
+        && contourStrength>0 && scalar("specWidthPx",0)>0 && light && light->size()==2) {
+        static thread_local const auto runtime=[] {
+            auto source=std::string("uniform shader scene; uniform float2 size, light; uniform float cornerRadius, cornerCurve, scale, dark, power, width, strength;\n")
+                +Internal::layerCornerShaderUniforms+Internal::glassShadowGeometrySource()+Internal::glassRimSource
+                +R"SKSL(
+half4 main(float2 pixelXY) {
+    float2 xy=pixelXY/max(scale,1.0), halfDim=size*0.5, p=xy-halfDim;
+    float r=min(cornerRadius,min(halfDim.x,halfDim.y));
+    float d=boxRoundedSDF(p,halfDim,r);
+    float2 normal=lensNormalDirection(p,halfDim,r);
+    half4 original=scene.eval(pixelXY);
+    // Read beyond the already drawn material's AA footprint. Subtract only
+    // the backdrop contribution: otherwise black backgrounds incorrectly lose
+    // some of the glass's fractional edge coverage to the exterior contour.
+    half4 outside=scene.eval((xy+normal*max(2.0-d,0.0))*max(scale,1.0));
+    float luma=dot(outside.rgb/max(outside.a,0.0001),half3(0.2126,0.7152,0.0722));
+    float density=glassRimDarkening(d,normal,luma,dark,light,power,width,scale,strength,min(size.x,size.y));
+    half3 loss=min(half3(density)*outside.a,outside.rgb);
+    return half4(max(original.rgb-loss,half3(0)),original.a);
+})SKSL";
+            auto compiled=SkRuntimeEffect::MakeForShader(SkString(source));
+            if(!compiled.effect) throw std::runtime_error("Glass contour shader: "+std::string(compiled.errorText.c_str()));
+            return compiled.effect;
+        }();
+        SkRuntimeEffectBuilder builder(runtime);
+        const float size[]={layerBounds.width(),layerBounds.height()};
+        builder.uniform("size").set(size,2);builder.uniform("light").set(light->data(),2);
+        builder.uniform("cornerRadius")=cornerRadius();
+        builder.uniform("cornerCurve")=cornerCurve()==CALayerCornerCurve::continuous?1.0f:0.0f;
+        Internal::bindLayerCornerGeometry(builder, *runtime, layerBounds.size, cornerRadius());
+        builder.uniform("scale")=filterScale;
+        builder.uniform("dark")=scalar("backdropLuma",.85f)<.5f?1.0f:0.0f;
+        builder.uniform("power")=scalar("specDirectionalPower",3);
+        builder.uniform("width")=scalar("specWidthPx",.8f);
+        builder.uniform("strength")=contourStrength;
+        SkPaint paint;paint.setImageFilter(SkImageFilters::RuntimeShader(builder,3*filterScale,"scene",nullptr));
+        auto contourBounds=rect;contourBounds.outset(scalar("specWidthPx",.8f)*.625f+1,scalar("specWidthPx",.8f)*.625f+1);
+        context->save();context->clipPath(shape,SkClipOp::kDifference,true);
+        context->scale(1/filterScale,1/filterScale);
+        contourBounds=SkRect::MakeLTRB(contourBounds.left()*filterScale,contourBounds.top()*filterScale,contourBounds.right()*filterScale,contourBounds.bottom()*filterScale);
+        context->clipRect(contourBounds);
+        context->saveLayer(SkCanvas::SaveLayerRec(&contourBounds,&paint,SkCanvas::kInitWithPrevious_SaveLayerFlag));
+        context->restore();context->restore();
+    }
+
     // Native regular glass casts one inverse-clipped elevation field. Sample
     // the backdrop first so this layer never refracts its own shadow. Clear
     // glass has no default shadow; an explicit app shadow retains precedence.
@@ -456,7 +547,7 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
         && !shadowColor() && shadowOpacity()>0) {
         static thread_local const auto runtime=[] {
             auto source=std::string("uniform float2 shadowSize; uniform float cornerRadius, cornerCurve, shadowSigma, shadowOpacity; uniform float2 shadowOffset;\n")
-                +Internal::glassShadowGeometrySource()+Internal::glassShadowCDF
+                +Internal::layerCornerShaderUniforms+Internal::glassShadowGeometrySource()+Internal::glassShadowCDF
                 +"half4 main(float2 xy) { float2 halfDim=shadowSize*0.5; float d=boxRoundedSDF(xy-shadowOffset-halfDim,halfDim,min(cornerRadius,min(halfDim.x,halfDim.y))); return half4(0,0,0,half(shadowOpacity*glassShadowTail(d/shadowSigma))); }";
             auto compiled=SkRuntimeEffect::MakeForShader(SkString(source));
             if(!compiled.effect) throw std::runtime_error("Glass shadow shader: "+std::string(compiled.errorText.c_str()));
@@ -468,6 +559,7 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
         builder.uniform("shadowSize").set(size,2); builder.uniform("shadowOffset").set(offset,2);
         builder.uniform("cornerRadius")=cornerRadius();
         builder.uniform("cornerCurve")=cornerCurve()==CALayerCornerCurve::continuous?1.0f:0.0f;
+        Internal::bindLayerCornerGeometry(builder, *runtime, layerBounds.size, cornerRadius());
         builder.uniform("shadowSigma")=parameters.sigma;
         builder.uniform("shadowOpacity")=parameters.opacity*shadowOpacity();
         SkPaint paint; paint.setShader(builder.makeShader());

@@ -35,6 +35,9 @@ enum class UIGlassEffectStyle {
  The material adapts liquid_glass_widgets' lens to NXKit's live backdrop,
  with lighting and tint calibrated against native UIKit gallery captures.
  Interactive effects add touch-following sheen, size-dependent spring inflation and centered stretch without altering the view's public geometry.
+ Long neutral regular platters use a color-preserving pressed gain rather than
+ the stronger white press veil of short buttons. This response is calibrated
+ against native tab bars in both themes; it is an approximation of UIKit.
  Refraction and body frost can be tuned independently, and the perimeter
  uses localized directional light; clear retains its sub-point hairline.
  `BackdropEffect::glass()` resolves the same clear material.
@@ -46,6 +49,14 @@ public:
     explicit UIGlassEffect(Style style = Style::regular);
 
     [[nodiscard]] Style style() const { return _style; }
+
+    /** NXKit extension: apply color-dependent foreground vibrancy to this
+     material's subviews. Opt-in; literal RGB content stays source-over by
+     default, as in native glass. Intended for semantic/template foregrounds,
+     not photographs or another glass surface. Reinstall the copied effect
+     after changing this value. */
+    [[nodiscard]] bool isContentVibrancyEnabled() const { return _contentVibrancy; }
+    void setContentVibrancyEnabled(bool value) { _contentVibrancy = value; }
 
     /** Opt-in touch feedback, as in UIKit. Defaults to false. Reinstall the
      effect on its hosting view after changing this value (effects are copied). */
@@ -152,6 +163,7 @@ private:
     ) const;
 
     Style _style;
+    bool _contentVibrancy = false;
     bool _isInteractive = false;
     bool _adaptsAppearanceToBackdrop = false;
     std::optional<NXFloat> _maximumSampleRadius;

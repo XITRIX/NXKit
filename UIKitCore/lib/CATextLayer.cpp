@@ -1,4 +1,5 @@
 #include <CATextLayer.h>
+#include "TextRendering.hpp"
 #include <modules/skunicode/include/SkUnicode_icu.h>
 #include <tools/Tools.hpp>
 
@@ -28,7 +29,7 @@ std::shared_ptr<CALayer> CATextLayer::copy() {
 
 void CATextLayer::draw(SkCanvas* context) {
     paragraph->layout(bounds().size.width);
-    paragraph->paint(context, 0, 0);
+    Internal::paintPlainText(*paragraph, context, 0, 0, _textColor.raw());
 }
 
 void CATextLayer::setText(const std::string& text) {
@@ -68,30 +69,16 @@ void CATextLayer::updateParagraph() {
     SkFontStyle fontStyle(static_cast<int>(_fontWeight), SkFontStyle::kNormal_Width,
                           SkFontStyle::kUpright_Slant);
     auto skiaContext = SkiaCtx::main();
-    auto fontManager = skiaContext->getFontMgr();
-    auto defaultFamilyName = skiaContext->getDefaultFontFamilyName();
-    auto typeface = skiaContext->getDefaultTypeface(fontStyle);
-
-    auto fontCollection = sk_make_sp<FontCollection>();
-    if (defaultFamilyName.isEmpty()) {
-        fontCollection->setDefaultFontManager(fontManager);
-    } else {
-        fontCollection->setDefaultFontManager(fontManager, defaultFamilyName.c_str());
-    }
-
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(_textColor.raw());
 
     skia::textlayout::TextStyle style;
     style.setForegroundColor(paint);
-    style.setTypeface(typeface);
-    if (!defaultFamilyName.isEmpty()) {
-        style.setFontFamilies({defaultFamilyName});
-    }
     style.setFontSize(_fontSize);
     style.setFontStyle(fontStyle);
 
+    auto fontCollection = Internal::plainTextFonts(skiaContext, fontStyle, _fontSize, style);
     ParagraphStyle paraStyle;
     paraStyle.setTextStyle(style);
     switch (_textAlignment) {

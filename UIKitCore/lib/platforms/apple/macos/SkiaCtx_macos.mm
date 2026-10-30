@@ -1,3 +1,4 @@
+#include "../AppleSystemFont.hpp"
 #include <platforms/macos/SkiaCtx_macos.h>
 
 #include "include/core/SkColorSpace.h"
@@ -197,7 +198,7 @@ sk_sp<SkSurface> SkiaCtx_macos::getBackbufferSurface() {
     auto backendTexture = skgpu::graphite::BackendTextures::MakeMetal(
             SkISize::Make(drawableWidth, drawableHeight),
             (__bridge CFTypeRef)currentDrawable.texture);
-    SkSurfaceProps props;
+    SkSurfaceProps props(0, kUnknown_SkPixelGeometry, 0, 1);
     surface = SkSurfaces::WrapBackendTexture(recorder.get(),
                                              backendTexture,
                                              nullptr,
@@ -251,3 +252,7 @@ std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx() {
 
 #undef NX_OBJC_BRIDGE
 #undef NX_OBJC_BRIDGE_RETAIN
+
+sk_sp<SkTypeface> SkiaCtx_macos::getDefaultTypeface(const SkFontStyle& style, NXFloat pointSize) const {
+    return Internal::appleSystemTypeface(style, pointSize);
+}

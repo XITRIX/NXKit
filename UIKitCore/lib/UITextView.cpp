@@ -1,4 +1,5 @@
 #include <UITextView.h>
+#include "TextRendering.hpp"
 
 #include <SkiaCtx.h>
 #include <tools/IBTools.h>
@@ -32,6 +33,7 @@ struct TextLayout {
     NXFloat width = 0;
     NXFloat height = 0;
     NXFloat longestLine = 0;
+    UIColor color;
 };
 
 ParagraphStyle makeParagraphStyle(
@@ -39,8 +41,8 @@ ParagraphStyle makeParagraphStyle(
     NXFloat fontSize,
     NXFloat fontWeight,
     NSTextAlignment textAlignment,
-    const SkString& defaultFamilyName,
-    const sk_sp<SkTypeface>& typeface
+    const std::shared_ptr<SkiaCtx>& context,
+    sk_sp<FontCollection>& fonts
 ) {
     SkFontStyle fontStyle(
         static_cast<int>(fontWeight),
@@ -54,13 +56,10 @@ ParagraphStyle makeParagraphStyle(
 
     TextStyle textStyle;
     textStyle.setForegroundColor(paint);
-    textStyle.setTypeface(typeface);
-    if (!defaultFamilyName.isEmpty()) {
-        textStyle.setFontFamilies({defaultFamilyName});
-    }
     textStyle.setFontSize(fontSize);
     textStyle.setFontStyle(fontStyle);
 
+    fonts = Internal::plainTextFonts(context, fontStyle, fontSize, textStyle);
     ParagraphStyle paragraphStyle;
     paragraphStyle.setTextStyle(textStyle);
     switch (textAlignment) {
@@ -94,38 +93,21 @@ std::shared_ptr<TextLayout> buildTextLayout(
     const sk_sp<SkUnicode>& unicode
 ) {
     auto result = std::make_shared<TextLayout>();
+    result->color = textColor;
     result->width = std::max<NXFloat>(0, width);
     if (result->width <= 0 || !unicode) return result;
 
     const auto skiaContext = SkiaCtx::main();
     if (!skiaContext) return result;
 
-    const auto fontManager = skiaContext->getFontMgr();
-    const auto defaultFamilyName = skiaContext->getDefaultFontFamilyName();
-    const SkFontStyle fontStyle(
-        static_cast<int>(fontWeight),
-        SkFontStyle::kNormal_Width,
-        SkFontStyle::kUpright_Slant
-    );
-    const auto typeface = skiaContext->getDefaultTypeface(fontStyle);
-
-    auto fontCollection = sk_make_sp<FontCollection>();
-    if (defaultFamilyName.isEmpty()) {
-        fontCollection->setDefaultFontManager(fontManager);
-    } else {
-        fontCollection->setDefaultFontManager(
-            fontManager,
-            defaultFamilyName.c_str()
-        );
-    }
-
+    sk_sp<FontCollection> fontCollection;
     auto paragraphStyle = makeParagraphStyle(
         textColor,
         fontSize,
         fontWeight,
         textAlignment,
-        defaultFamilyName,
-        typeface
+        skiaContext,
+        fontCollection
     );
     auto builder = ParagraphBuilder::make(
         paragraphStyle,
@@ -180,7 +162,7 @@ public:
 
     void draw(SkCanvas* canvas) override {
         if (!_textLayout || !_textLayout->paragraph) return;
-        _textLayout->paragraph->paint(canvas, 0, -_paragraphOriginY);
+        Internal::paintPlainText(*_textLayout->paragraph, canvas, 0, -_paragraphOriginY, _textLayout->color.raw());
     }
 
     std::shared_ptr<CALayer> copy() override {

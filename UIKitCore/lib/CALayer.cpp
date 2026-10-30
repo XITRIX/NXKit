@@ -404,7 +404,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
             float(0),
             float(width),
             float(height)
-        }, SkSamplingOptions(), &imgPaint);
+        }, SkSamplingOptions(SkFilterMode::kLinear), &imgPaint);
 
         // Contents matrix save 4 // restore
         canvas->restore();

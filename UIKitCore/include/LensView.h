@@ -30,6 +30,20 @@ public:
   [[nodiscard]] bool isLifted() const { return _lifted; }
   void setLifted(bool lifted, bool animated = false);
 
+  /** Color-dependent foreground blending for a semantic selected source.
+      Defaults false, preserving caller RGB ink. The containing control may
+      enable it for system-colored icons/labels, independently of lift. */
+  [[nodiscard]] bool isContentVibrancyEnabled() const { return _contentVibrancy; }
+  void setContentVibrancyEnabled(bool enabled);
+
+  /** Optional source magnification about the lens center, interpolated with
+      lift progress. Defaults to 1, matching a standalone native lens whose
+      caller has not enlarged its source. Must be finite and at least 1.
+      Controls may instead scale individual source items about their own
+      centers, as UIKit's tab bar does; do not apply both to the same content. */
+  [[nodiscard]] NXFloat liftedContentMagnification() const { return _liftedContentMagnification; }
+  void setLiftedContentMagnification(NXFloat magnification);
+
   /** Opt-in elastic contact response. The containing control continues to own
       selection, model frame, and lifted state. Explicit hooks also work when
       this view's ordinary user interaction is disabled. */
@@ -98,7 +112,9 @@ private:
   void setSourceOwnership(const std::shared_ptr<CALayer> &source, bool owned);
   Style _style;
   bool _lifted = false;
+  bool _contentVibrancy = false;
   NXFloat _progress = 0;
+  NXFloat _liftedContentMagnification = 1;
   NXFloat _resolvedDisplayScale = 0;
   std::shared_ptr<UIView> _restingHost;
   std::shared_ptr<UIView> _resting;

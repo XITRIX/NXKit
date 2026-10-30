@@ -1,6 +1,8 @@
 #include "CAGlassContainerLayer.hpp"
 #include "CABackdropEffectLayer.hpp"
 #include "GlassShadow.hpp"
+#include "GlassRim.hpp"
+#include "LayerCornerGeometry.hpp"
 #include "include/effects/SkImageFilters.h"
 #include <algorithm>
 #include <cmath>
@@ -60,6 +62,8 @@ float3 itemDistanceINDEX(float2 xy) {
     float4 g = geometry[INDEX];
     float2 p = float2(dot(inverseX[INDEX].xyz, float3(xy, 1)), dot(inverseY[INDEX].xyz, float3(xy, 1))) - g.xy * 0.5;
     cornerCurve = g.w;
+    cornerTop=material_cornerTop[INDEX]; cornerTopCircle=material_cornerTopCircle[INDEX];
+    cornerRight=material_cornerRight[INDEX]; cornerRightCircle=material_cornerRightCircle[INDEX];
     float r = min(g.z, min(g.x, g.y) * 0.5);
     float d = boxRoundedSDF(p, g.xy * 0.5, r);
     float2 n = lensNormalDirection(p, g.xy * 0.5, r);
@@ -101,7 +105,7 @@ float3 itemDistanceINDEX(float2 xy) {
         helpers += "weights[" + index + "] += cover; }\n";
     }
     helpers += "}\n";
-    source.insert(source.find("float toBrightness"), helpers+Internal::glassShadowCDF);
+    source.insert(source.find("float toBrightness"), helpers+Internal::glassShadowCDF+Internal::glassRimSource);
     source.erase(source.find("half4 main(float2 filterXY)"));
     std::string main = R"SKSL(
 half4 main(float2 filterXY) {
@@ -135,7 +139,21 @@ half4 main(float2 filterXY) {
         float sigma=elevationSigma*max(length(sigmaDirection),0.0001);
         shadow=clamp(elevationOpacity*materialShadow*glassShadowTail(distance/sigma),0,1);
     }
-    if (coverage <= 0) return half4(original.rgb * half(1-shadow), original.a+half(shadow)*(1-original.a));
+    float contour = 0;
+    if (coverage < 1) {
+)SKSL";
+    // One contour on the merged SDF, never on each member's internal join.
+    for(size_t i=0;i<count;++i) {
+        const auto index=std::to_string(i);
+        main+="if(material_bodyMode["+index+"]<.5 && material_referenceAppearance["+index+"]>.5) {\n"
+            "float2 gradient=float2(forwardX["+index+"].x*sceneNormal.x+forwardY["+index+"].x*sceneNormal.y,forwardX["+index+"].y*sceneNormal.x+forwardY["+index+"].y*sceneNormal.y);\n"
+            "float metric=max(length(gradient),.0001); float luma=dot(original.rgb/max(original.a,.0001),half3(.2126,.7152,.0722));\n"
+            "contour+=weights["+index+"]*itemAlpha["+index+"]*glassRimDarkening(sceneDistance/metric,gradient/metric,luma,material_backdropLuma["+index+"]<.5?1.0:0.0,material_specLightDirection["+index+"],material_specDirectionalPower["+index+"],material_specWidthPx["+index+"],contentScale*metric,material_edge["+index+"]*material_edgeAbsorption["+index+"]/.035,min(geometry["+index+"].x,geometry["+index+"].y)); }\n";
+    }
+    main+=R"SKSL(
+    }
+    half3 contourLoss=min(half3(contour)*original.a,original.rgb);
+    if (coverage <= 0) return half4(max(original.rgb*half(1-shadow)-contourLoss,half3(0)),original.a+half(shadow)*(1-original.a));
     half4 result = original;
 )SKSL";
     // Touch lighting belongs to the merged surface. Clip each source to its
@@ -162,7 +180,7 @@ half4 main(float2 filterXY) {
             "half4 color = referenceGlass(localXY,lensSize*0.5,min(cornerRadius,min(lensSize.x,lensSize.y)*0.5),localXY-lensCenter,sceneDistance/localMetric);\n"
             "result += half(weights[" + index + "] * itemAlpha[" + index + "]) * (color-original); }\n";
     }
-    main += "half4 color = mix(original,result,half(coverage)); return half4(color.rgb-original.rgb*half(shadow*(1-coverage)),color.a+half(shadow*(1-coverage))*(1-color.a)); }\n";
+    main += "half4 color = mix(original,result,half(coverage)); return half4(max(color.rgb-original.rgb*half(shadow*(1-coverage))-contourLoss*half(1-coverage),half3(0)),color.a+half(shadow*(1-coverage))*(1-color.a)); }\n";
     return source + main;
 }
 }
@@ -324,6 +342,12 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
             else if (u.name == "lensSize" || u.name == "resolution") values.insert(values.end(), {size.width, size.height});
             else if (u.name == "cornerRadius") values.push_back(std::isfinite(item.layer->cornerRadius()) ? std::max(0.0f, item.layer->cornerRadius()) : 0);
             else if (u.name == "cornerCurve") values.push_back(item.layer->cornerCurve() == CALayerCornerCurve::continuous ? 1 : 0);
+            else if (auto it=std::find(Internal::layerCornerShaderNames.begin(),Internal::layerCornerShaderNames.end(),u.name);
+                     it!=Internal::layerCornerShaderNames.end()) {
+                const auto data=Internal::layerCornerShaderData(size,item.layer->cornerRadius());
+                const auto& components=data[std::distance(Internal::layerCornerShaderNames.begin(),it)];
+                values.insert(values.end(),components.begin(),components.end());
+            }
             else if (u.name == "interactionIntensity") values.push_back(item.layer->_interaction->glow());
             else if (u.name == "interactionLocation") {
                 const auto location = SkPoint::Make(item.layer->_interaction->location.x, item.layer->_interaction->location.y);

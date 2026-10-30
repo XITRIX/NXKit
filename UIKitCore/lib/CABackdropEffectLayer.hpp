@@ -30,6 +30,7 @@ public:
 
 protected:
     NXAffineTransform renderingTransform() const override;
+    void renderSublayers(SkCanvas* canvas) override;
 
 private:
     friend class GlassInteractionTestHarness;

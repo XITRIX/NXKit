@@ -1,5 +1,6 @@
 #include "NXAffineTransform.h"
 #include "NXTransform3D.h"
+#include <cmath>
 
 using namespace NXKit;
 
@@ -50,19 +51,15 @@ NXAffineTransform NXAffineTransform::rotationBy(NXFloat angle) {
 }
 
 std::optional<NXAffineTransform> NXAffineTransform::inverted() const {
-    auto d = m11 * m22 - m12 * m21;
-    if (d < 0) return std::nullopt;
-
-    NXAffineTransform transform;
-    NXFloat multiplyer = 1 / d;
-
-    transform.m11 = m22 * multiplyer;
-    transform.m12 = -m12 * multiplyer;
-    transform.m21 = -m21 * multiplyer;
-    transform.m22 = m11 * multiplyer;
-    transform.tX = tX;
-    transform.tY = tY;
-
+    if (!std::isfinite(m11) || !std::isfinite(m12) || !std::isfinite(m21) ||
+        !std::isfinite(m22) || !std::isfinite(tX) || !std::isfinite(tY)) return std::nullopt;
+    const double d = double(m11) * m22 - double(m12) * m21;
+    if (d == 0 || !std::isfinite(d)) return std::nullopt;
+    NXAffineTransform transform(m22 / d, -m12 / d, -m21 / d, m11 / d,
+        (double(m21) * tY - double(m22) * tX) / d,
+        (double(m12) * tX - double(m11) * tY) / d);
+    if (!std::isfinite(transform.m11) || !std::isfinite(transform.m12) || !std::isfinite(transform.m21) ||
+        !std::isfinite(transform.m22) || !std::isfinite(transform.tX) || !std::isfinite(transform.tY)) return std::nullopt;
     return transform;
 }
 

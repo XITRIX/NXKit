@@ -1,9 +1,10 @@
 #include <UILabel.h>
+#include "TextRendering.hpp"
 #include <tools/IBTools.h>
 #include <include/core/SkBitmap.h>
 #include <modules/skunicode/include/SkUnicode_icu.h>
 #include <cmath>
-#include <limits>
+#include <stdexcept>
 #include <vector>
 
 using namespace NXKit;
@@ -11,49 +12,23 @@ using namespace skia::textlayout;
 
 namespace {
 
-struct ParagraphVisualBounds {
+struct ParagraphMetrics {
     NXFloat width = 0;
-    NXFloat top = 0;
     NXFloat height = 0;
+    size_t lines = 0;
 };
 
-ParagraphVisualBounds measureParagraph(const std::unique_ptr<Paragraph>& paragraph, NXFloat width) {
+ParagraphMetrics measureParagraph(const std::unique_ptr<Paragraph>& paragraph, NXFloat width, NXFloat lineHeight) {
     paragraph->layout(width);
 
-    ParagraphVisualBounds result;
-    result.width = paragraph->getLongestLine();
-
+    ParagraphMetrics result;
+    result.width = std::max<NXFloat>(0, paragraph->getLongestLine());
+    // Font-wide fTop/fBottom include extrema of unrelated glyphs. UIKit
+    // centers the typographic line box, not that font bounding rectangle.
     std::vector<LineMetrics> lines;
     paragraph->getLineMetrics(lines);
-    if (lines.empty()) {
-        result.height = paragraph->getHeight();
-        return result;
-    }
-
-    NXFloat top = std::numeric_limits<NXFloat>::infinity();
-    NXFloat bottom = -std::numeric_limits<NXFloat>::infinity();
-
-    for (const auto& line : lines) {
-        NXFloat lineTop = static_cast<NXFloat>(line.fBaseline - line.fAscent);
-        NXFloat lineBottom = static_cast<NXFloat>(line.fBaseline + line.fDescent);
-
-        for (const auto& [_, styleMetrics] : line.fLineMetrics) {
-            const auto& fontMetrics = styleMetrics.font_metrics;
-            if (fontMetrics.hasBounds()) {
-                lineTop = std::min(lineTop, static_cast<NXFloat>(line.fBaseline + fontMetrics.fTop));
-                lineBottom = std::max(lineBottom, static_cast<NXFloat>(line.fBaseline + fontMetrics.fBottom));
-            } else {
-                lineTop = std::min(lineTop, static_cast<NXFloat>(line.fBaseline + fontMetrics.fAscent));
-                lineBottom = std::max(lineBottom, static_cast<NXFloat>(line.fBaseline + fontMetrics.fDescent));
-            }
-        }
-
-        top = std::min(top, lineTop);
-        bottom = std::max(bottom, lineBottom);
-    }
-
-    result.top = std::floor(top);
-    result.height = std::max<NXFloat>(0, std::ceil(bottom) - result.top);
+    result.lines = lines.size();
+    result.height = lineHeight > 0 ? lineHeight * result.lines : paragraph->getHeight();
     return result;
 }
 
@@ -82,6 +57,8 @@ void UILabel::setTextColor(const UIColor& textColor) {
 }
 
 void UILabel::setFontSize(NXFloat fontSize) {
+    if (!std::isfinite(fontSize) || fontSize <= 0)
+        throw std::invalid_argument("UILabel font size must be finite and positive");
     if (_fontSize == fontSize) return;
     _fontSize = fontSize;
     setNeedsDisplay();
@@ -96,6 +73,8 @@ void UILabel::setTextAlignment(NSTextAlignment textAlignment) {
 }
 
 void UILabel::setFontWeight(NXFloat fontWeight) {
+    if (!std::isfinite(fontWeight))
+        throw std::invalid_argument("UILabel font weight must be finite");
     if (_fontWeight == fontWeight) return;
     _fontWeight = fontWeight;
     setNeedsDisplay();
@@ -109,16 +88,20 @@ void UILabel::setScaleModifier(NXFloat scaleModifier) {
 }
 
 NXSize UILabel::sizeThatFits(NXSize size) {
+    if (_text.empty()) return {};
     updateParagraph();
-    auto metrics = measureParagraph(paragraph, size.width);
+    auto metrics = measureParagraph(paragraph, size.width, _lineHeight);
 
-    // Adds extra 1, because of extra content scale could be not enough to fit text line
-    auto rWidth = std::ceil(metrics.width) + 1;
-    return { rWidth, metrics.height };
+    const auto traits = traitCollection();
+    const auto scale = traits ? std::max<NXFloat>(1, traits->displayScale()) : 1;
+    return { std::ceil(metrics.width * scale) / scale,
+             std::ceil(metrics.height * scale) / scale };
 }
 
 void UILabel::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
     UIView::traitCollectionDidChange(previousTraitCollection);
+    if (!previousTraitCollection || previousTraitCollection->displayScale() != traitCollection()->displayScale())
+        invalidateIntrinsicContentSize();
     setNeedsDisplay();
 }
 
@@ -148,13 +131,25 @@ void UILabel::draw() {
 #endif
     bitmap.allocPixels(bitmapInfo);
     bitmap.eraseColor(SK_ColorTRANSPARENT);
-    SkCanvas canvas(bitmap);
+#ifdef __APPLE__
+    const SkSurfaceProps textProps(0, kUnknown_SkPixelGeometry, 0, 1);
+#else
+    const SkSurfaceProps textProps;
+#endif
+    SkCanvas canvas(bitmap, textProps);
 
     canvas.scale(scale, scale);
-    auto metrics = measureParagraph(paragraph, size.width);
-    auto yOffset = (size.height - metrics.height) / 2 - metrics.top;
+    auto metrics = measureParagraph(paragraph, size.width, _lineHeight);
+    // UILabel rounds its typographic block, centered origin and baselines to
+    // display pixels independently. SkParagraph instead rounds baselines to
+    // whole points, which is visibly different on Retina displays.
+    const auto blockHeight = std::ceil(metrics.height * scale) / scale;
+    auto yOffset = std::round((size.height - blockHeight) * scale / 2) / scale;
+    std::vector<SkScalar> baselines;
+    if (_lineHeight > 0) for (size_t i=0; i<metrics.lines; ++i)
+        baselines.push_back(std::round((_ascender+i*_lineHeight) * scale) / scale);
 
-    paragraph->paint(&canvas, 0, yOffset);
+    Internal::paintPlainText(*paragraph, &canvas, 0, yOffset, _textColor.raw(), baselines);
 
     layer()->setContents(new_shared<CGImage>(bitmap.asImage()));
     layer()->setContentsScale(scale);
@@ -164,32 +159,40 @@ void UILabel::updateParagraph() {
     SkFontStyle fontStyle(static_cast<int>(_fontWeight), SkFontStyle::kNormal_Width,
                           SkFontStyle::kUpright_Slant);
     auto skiaContext = SkiaCtx::main();
-    auto fontManager = skiaContext->getFontMgr();
-    auto defaultFamilyName = skiaContext->getDefaultFontFamilyName();
-    auto typeface = skiaContext->getDefaultTypeface(fontStyle);
-
-    auto fontCollection = sk_make_sp<FontCollection>();
-    if (defaultFamilyName.isEmpty()) {
-        fontCollection->setDefaultFontManager(fontManager);
-    } else {
-        fontCollection->setDefaultFontManager(fontManager, defaultFamilyName.c_str());
-    }
-
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(_textColor.raw());
 
     skia::textlayout::TextStyle style;
     style.setForegroundColor(paint);
-    style.setTypeface(typeface);
-    if (!defaultFamilyName.isEmpty()) {
-        style.setFontFamilies({defaultFamilyName});
-    }
     style.setFontSize(_fontSize);
 //    style.setHeight(_fontSize);
     style.setFontStyle(fontStyle);
 
+    auto fontCollection = Internal::plainTextFonts(skiaContext, fontStyle, _fontSize, style);
+    _ascender = _lineHeight = 0;
+    if (auto face = style.refTypeface()) {
+        SkFontMetrics metrics;
+        SkFont(face, _fontSize).getMetrics(&metrics);
+        _ascender = -metrics.fAscent;
+        _lineHeight = metrics.fDescent - metrics.fAscent + metrics.fLeading;
+    }
     ParagraphStyle paraStyle;
+    // SkParagraph's Flutter compatibility mode floors layout width to whole
+    // points. A label fitted to a Retina-pixel width can then wrap despite
+    // having enough room. Preserve fractional UIKit layout coordinates.
+    paraStyle.setApplyRoundingHack(false);
+    if (_lineHeight > 0) {
+        // UILabel retains its primary font's line box when fallback glyphs
+        // (such as emoji) have taller font-wide bounds.
+        StrutStyle strut;
+        strut.setFontFamilies(style.getFontFamilies());
+        strut.setFontStyle(fontStyle);
+        strut.setFontSize(_fontSize);
+        strut.setStrutEnabled(true);
+        strut.setForceStrutHeight(true);
+        paraStyle.setStrutStyle(strut);
+    }
     paraStyle.setTextStyle(style);
     switch (_textAlignment) {
         case NSTextAlignment::left:
@@ -221,6 +224,7 @@ bool UILabel::applyXMLAttribute(const std::string& name, const std::string& valu
     REGISTER_XIB_ATTRIBUTE(text, valueToString, setText)
     REGISTER_XIB_ATTRIBUTE(textColor, valueToColor, setTextColor)
     REGISTER_XIB_ATTRIBUTE(fontSize, valueToFloat, setFontSize)
+    REGISTER_XIB_ATTRIBUTE(fontWeight, valueToFloat, setFontWeight)
     REGISTER_XIB_ATTRIBUTE(textAlignment, valueToTextAlignment, setTextAlignment)
 
 //    if (name == "font") {

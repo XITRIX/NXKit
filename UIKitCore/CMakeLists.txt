@@ -13,6 +13,9 @@ add_library(XITRIXUIKit
         lib/CASpringAnimation.cpp
         lib/CASpringAnimationPrototype.cpp
         lib/CAMediaTimingFunction.cpp
+        lib/FontResolution.cpp
+        lib/FontTracking.hpp
+        lib/TextRendering.hpp
         lib/CATextLayer.cpp
         lib/CATransaction.cpp
         lib/ContentsGravityTransformation.cpp
@@ -101,6 +104,8 @@ target_include_directories(XITRIXUIKit PUBLIC
 if (APPLE)
     target_sources(XITRIXUIKit PRIVATE
             lib/platforms/SkiaCtx_sdlBase.cpp
+            lib/platforms/apple/AppleSystemFont.mm
+            lib/platforms/apple/AppleSystemImage.mm
     )
     if (PLATFORM_DESKTOP)
         target_sources(XITRIXUIKit PRIVATE

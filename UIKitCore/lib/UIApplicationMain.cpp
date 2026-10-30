@@ -80,10 +80,6 @@ int UIApplicationMain(const std::shared_ptr<UIApplicationDelegate>& appDelegate)
     UIApplication::shared = new_shared<UIApplication>();
     SkiaCtx::_main = MakeSkiaCtx();
 
-#ifdef PLATFORM_IOS
-    SkiaCtx::_main->setExtraScaleFactor(1.3f);
-#endif
-
     UIApplication::shared->delegate = appDelegate;
     UIApplication::shared->startHandlingLifecycleEvents();
 

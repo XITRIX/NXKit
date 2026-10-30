@@ -37,6 +37,9 @@ public:
     void setEffect(const UIGlassEffect& effect);
     [[nodiscard]] BackdropEffect effect() const;
     [[nodiscard]] std::optional<UIGlassEffect> glassEffect() const { return _glassEffect; }
+    /** Visual-only touch deformation in local points, shared by presentation
+     layers. Use its inverse when aligning contact coordinates with the glass. */
+    [[nodiscard]] NXAffineTransform interactionTransform() const;
     bool applyXMLAttribute(const std::string& name, const std::string& value) override;
 
 private:

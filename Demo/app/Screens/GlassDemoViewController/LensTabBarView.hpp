@@ -28,19 +28,24 @@ public:
 private:
     void arrange();
     void observeTouch(NXKit::UITouchPhase phase, const std::shared_ptr<NXKit::UITouch>& touch);
+    float positionForContact(NXKit::NXFloat x) const;
+    float positionForFinger(NXKit::NXPoint point) const;
     size_t _count;
     bool _compact, _lifted = false, _dragging = false;
     size_t _selected = 0, _dragStart = 0;
     float _position = 0, _selectionStep = 1;
+    std::vector<NXKit::NXFloat> _selectionCenters;
     std::weak_ptr<NXKit::UITouch> _trackingTouch;
     NXKit::NXPoint _lastContact;
+    NXKit::NXFloat _grabOffsetX = 0;
+    bool _grabbedLens = false;
     NXKit::Timer _lastContactTime;
     std::optional<NXKit::NXRect> _comparisonFrame;
-    std::shared_ptr<NXKit::BackdropEffectView> _glass;
+    std::shared_ptr<NXKit::BackdropEffectView> _glass, _selectionFill;
     std::shared_ptr<NXKit::UIView> _normal, _selectedHost, _selectedContent;
     std::shared_ptr<NXKit::LensView> _lens;
     std::shared_ptr<NXKit::UIImageView> _normalImage, _selectedImage;
     std::vector<std::shared_ptr<NXKit::UIControl>> _controls;
-    std::vector<std::shared_ptr<NXKit::UIView>> _normalSymbols, _selectedSymbols;
+    std::vector<std::shared_ptr<NXKit::UIView>> _normalSymbols, _selectedSymbols, _selectedItems;
     std::vector<std::shared_ptr<NXKit::UILabel>> _normalLabels, _selectedLabels;
 };

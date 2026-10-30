@@ -147,11 +147,12 @@ void BackdropEffectView::setEffect(const UIGlassEffect& effect) {
 }
 
 bool BackdropEffectView::applyXMLAttribute(const std::string& name, const std::string& value) {
-    if (name == "isInteractive" || name == "adaptsAppearanceToBackdrop") {
+    if (name == "isInteractive" || name == "adaptsAppearanceToBackdrop" || name == "contentVibrancyEnabled") {
         const auto interactive = valueToBool(value);
         if (!interactive || !_glassEffect) return false;
         auto glass = *_glassEffect;
         if (name == "isInteractive") glass.setInteractive(*interactive);
+        else if(name == "contentVibrancyEnabled") glass.setContentVibrancyEnabled(*interactive);
         else glass.setAdaptsAppearanceToBackdrop(*interactive);
         setEffect(glass);
         return true;
@@ -311,6 +312,10 @@ void BackdropEffectView::_advanceInteraction(double seconds) {
         state.displayLink->invalidate();
         state.ticking = false;
     }
+}
+
+NXAffineTransform BackdropEffectView::interactionTransform() const {
+    return _backdropEffectLayer()->_interaction->transform(layer()->presentationOrSelf()->bounds().size);
 }
 
 BackdropEffect BackdropEffectView::effect() const {

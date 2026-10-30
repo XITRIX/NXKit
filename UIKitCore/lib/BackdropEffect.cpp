@@ -43,6 +43,7 @@
 
 #include <BackdropEffect.h>
 #include <UIGlassEffect.h>
+#include "LayerCornerGeometry.hpp"
 
 #include <cmath>
 #include <stdexcept>
@@ -52,7 +53,7 @@ using namespace NXKit;
 
 namespace {
 
-constexpr const char* glassShader = R"SKSL(
+const std::string glassShader = std::string(R"SKSL(
 uniform float2 resolution;
 uniform float2 lensCenter;
 uniform float2 lensSize;
@@ -118,55 +119,7 @@ half4 sampleSharpBackdrop(float2 origin, float2 sampleXY) {
     return sharpContent.eval(boundedBackdropXY(origin, sampleXY) * max(filterScale, 1.0));
 }
 
-// Signed distance to a box with rounded corners.
-float circularBoxSDF(float2 p, float2 halfDim, float r) {
-    float2 d = abs(p) - halfDim + float2(r);
-    float exterior = length(max(d, 0.0));
-    float interior = min(max(d.x, d.y), 0.0);
-    return exterior + interior - r;
-}
-
-// Same continuous-curvature geometry as LayerCornerGeometry. The exponent and
-// extent soften toward a capsule as the radius approaches the shortest side.
-float3 continuousCorner(float2 halfDim, float r) {
-    float amount = smoothstep(1.0, 1.4, min(halfDim.x, halfDim.y) / max(r, 0.0001));
-    float extent = r * mix(1.05, 1.4, amount);
-    return float3(min(halfDim, float2(extent)), mix(2.05, 3.0, amount));
-}
-
-float boxRoundedSDF(float2 p, float2 halfDim, float r) {
-    if (cornerCurve < 0.5 || r <= 0.0) return circularBoxSDF(p, halfDim, r);
-    float3 c = continuousCorner(halfDim, r);
-    float2 side = abs(p) - halfDim;
-    float2 q = side + c.xy;
-    if (min(q.x, q.y) <= 0.0) return max(side.x, side.y);
-    float2 uv = q / c.xy;
-    float norm = pow(pow(uv.x, c.z) + pow(uv.y, c.z), 1.0 / c.z);
-    float2 gradient = pow(uv / max(norm, 0.0001), float2(c.z - 1.0)) / c.xy;
-    return (norm - 1.0) / max(length(gradient), 0.0001);
-}
-
-// Outward-facing direction vector from the lens surface.
-float2 lensNormalDirection(float2 p, float2 halfDim, float r) {
-    if (cornerCurve > 0.5 && r > 0.0) {
-        float3 c = continuousCorner(halfDim, r);
-        float2 q = abs(p) - halfDim + c.xy;
-        if (min(q.x, q.y) > 0.0) {
-            float2 normal = pow(q / c.xy, float2(c.z - 1.0)) / c.xy;
-            return sign(p) * normal / max(length(normal), 0.0001);
-        }
-        float2 side = abs(p) - halfDim;
-        return side.x > side.y ? float2(sign(p.x), 0.0) : float2(0.0, sign(p.y));
-    }
-    float2 d = abs(p) - halfDim + float2(r);
-    float2 s = float2(p.x >= 0.0 ? 1.0 : -1.0, p.y >= 0.0 ? 1.0 : -1.0);
-
-    if (max(d.x, d.y) > 0.0) {
-        return s * normalize(max(d, 0.0));
-    }
-    return d.x > d.y ? float2(s.x, 0.0) : float2(0.0, s.y);
-}
-
+)SKSL") + Internal::layerCornerShaderUniforms + Internal::layerCornerShaderSource() + R"SKSL(
 float toBrightness(half3 c) {
     return dot(c, half3(0.2126, 0.7152, 0.0722));
 }
@@ -476,6 +429,12 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
             * (specStrength / 0.52) * edge
             * mix(specFallbackStrength, specBrightFallbackStrength, bodyLuma) / 0.52;
         if (specWidthPx <= 0.0) rimLight = 0.0;
+        // Pale light-mode material still has a tight white reflection beside
+        // its exterior dark contour. The contrast-scaled lobe alone vanishes
+        // as the body approaches white; retain this measured near-edge core.
+        rimLight += lobe * smoothstep(0.80,0.98,bodyLuma)
+            * smoothstep(0.5,0.85,backdropLuma) * 0.03 * exp(-distanceInside/0.6)
+            * (specStrength/0.52) * edge * (specWidthPx>0.0 ? 1.0 : 0.0);
         result += half3(rimLight);
     } else {
     // Analytic coverage of a sub-point hairline. The AA transition is centred
@@ -517,8 +476,26 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     // Clear retains its existing response.
     float ambientPressOpacity = bodyMode > 0.5 ? mix(0.14, 0.22, backdropLuma)
         : (tintMode > 1.5 ? 0.30 : mix(0.385, 0.47, backdropLuma));
+    half3 restingResult = result;
     result = mix(result, half3(1.0), glow * ambientPressOpacity);
     result = mix(result, half3(1.0), glow * sheen * mix(0.07, 0.10, backdropLuma));
+    // Long neutral platters brighten transmitted color instead of painting
+    // the button's white press veil over the entire surface. Native four-tab
+    // captures in both themes retain blue/brown chroma; over black the dark
+    // interior rises from32 to44, rather than32 to121. Keep short buttons,
+    // explicit tints and clear glass on their independently calibrated path.
+    float shortSide = max(1.0, min(lensSize.x,lensSize.y));
+    float longSide = max(lensSize.x,lensSize.y);
+    float platterPress = (bodyMode < 0.5 && tintMode < 0.5 ? 1.0 : 0.0)
+        * smoothstep(160.0,280.0,longSide) * smoothstep(2.5,4.0,longSide/shortSide);
+    float peak = max(restingResult.r,max(restingResult.g,restingResult.b));
+    float chromaticRange = peak-min(restingResult.r,min(restingResult.g,restingResult.b));
+    float neutralPress = 1.0-smoothstep(0.01,0.10,chromaticRange);
+    float lightAppearance = smoothstep(0.15,0.85,backdropLuma);
+    float pressGain = mix(1.18-0.06*peak,1.06,lightAppearance);
+    half3 colorPress = mix(half3(toBrightness(restingResult)),restingResult,mix(1.03,1.06,lightAppearance))*pressGain;
+    colorPress += half3(neutralPress*mix(7.0/255.0,11.5/255.0,lightAppearance));
+    result = mix(result,mix(restingResult,colorPress,glow),platterPress);
     float alpha = externalShapeCoverage > 0.5 ? 1.0 : clamp(0.5 - sdf / pixelWidth, 0.0, 1.0);
     return mix(background, half4(clamp(result, 0.0, 1.0) * pixel.a, pixel.a), alpha);
 }
@@ -630,6 +607,8 @@ bool isAutomaticUniformName(const std::string& name) {
         || name == "lensSize"
         || name == "cornerRadius"
         || name == "cornerCurve"
+        || name == "cornerTop" || name == "cornerTopCircle"
+        || name == "cornerRight" || name == "cornerRightCircle"
         || name == "externalShapeCoverage"
         || name == "contentScale"
         || name == "filterScale"

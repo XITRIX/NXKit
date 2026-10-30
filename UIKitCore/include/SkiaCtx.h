@@ -36,7 +36,8 @@ public:
     virtual float getExtraScaleFactor() { return 1; }
     virtual sk_sp<SkFontMgr> getFontMgr() { return fontMgr; }
     SkString getDefaultFontFamilyName() const;
-    sk_sp<SkTypeface> getDefaultTypeface(const SkFontStyle& style = SkFontStyle()) const;
+    virtual sk_sp<SkTypeface> getDefaultTypeface(const SkFontStyle& style = SkFontStyle(),
+                                                NXFloat pointSize = 17) const;
 
     virtual int screenFrameRate() { return 60; }
     virtual void setTargetFrameRate(int frameRate) { targetFrameRate = frameRate; }

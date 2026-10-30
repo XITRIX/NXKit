@@ -1,5 +1,7 @@
 #include "LensTabBarView.hpp"
 #include "GlassScreenTypography.hpp"
+#include "DemoSystemSymbol.hpp"
+#include "TabSelectionMaterial.hpp"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -10,6 +12,21 @@
 #include "../../../../UIKitCore/lib/LayerCornerGeometry.hpp"
 using namespace NXKit;
 namespace {
+template<class Matrix> SkPoint mapLensPoint(const Matrix& matrix,NXPoint point) {
+    if constexpr(requires { matrix.mapPoint(SkPoint::Make(point.x,point.y)); })
+        return matrix.mapPoint(SkPoint::Make(point.x,point.y));
+    else return matrix.mapXY(point.x,point.y);
+}
+SkMatrix lensToPlatter(const std::shared_ptr<LensView>& lens) {
+    const auto layer=lens->layer()->presentationOrSelf();
+    const auto size=layer->bounds().size;
+    const auto position=layer->position(),anchor=layer->anchorPoint();
+    auto matrix=CATransform3DMakeTranslation(position.x,position.y,0)
+        .concat(layer->transform()).toSkM44().asM33();
+    matrix.preTranslate(-size.width*anchor.x,-size.height*anchor.y);
+    matrix.preConcat(NXTransform3DMakeAffineTransform(lens->interactionTransform()).toSkM44().asM33());
+    return matrix;
+}
 // UIKit's lens punches the ordinary row out beneath its selected-content portal.
 // Keep that composition in the containing control, rather than hiding arbitrary
 // siblings inside the reusable LensView.
@@ -26,11 +43,7 @@ public:
         if (auto view=lens.lock()) {
             const auto layer=view->layer()->presentationOrSelf();
             const auto size=layer->bounds().size;
-            const auto position=layer->position(), anchor=layer->anchorPoint();
-            auto matrix=CATransform3DMakeTranslation(position.x,position.y,0)
-                .concat(layer->transform()).toSkM44().asM33();
-            matrix.preTranslate(-size.width*anchor.x,-size.height*anchor.y);
-            matrix.preConcat(NXTransform3DMakeAffineTransform(view->interactionTransform()).toSkM44().asM33());
+            const auto matrix=lensToPlatter(view);
             const auto silhouette=Internal::layerCornerPath(size,layer->cornerRadius(),layer->cornerCurve());
             path.addPath(silhouette.makeTransform(matrix));
         }
@@ -75,6 +88,7 @@ public:
     explicit PhoneTabSymbolLayer(PhoneTabSymbolLayer* old):CALayer(old),shape(old->shape),ink(old->ink) {}
     std::shared_ptr<CALayer> copy() override { return new_shared<PhoneTabSymbolLayer>(this); }
     void draw(SkCanvas* canvas) override {
+        canvas->save();canvas->scale(bounds().width()/24,bounds().height()/24);
         SkPaint p; p.setColor(ink.raw()); p.setAntiAlias(true);
         if(shape==0) {
             SkPathBuilder roof; roof.moveTo(1,11);roof.lineTo(12,1);roof.lineTo(23,11);
@@ -88,6 +102,7 @@ public:
         } else {
             for(int i=0;i<3;++i){canvas->drawRoundRect(SkRect::MakeXYWH(1,4+i*7,22,2),1,1,p);canvas->drawRoundRect(SkRect::MakeXYWH(i==1?6:15,1+i*7,4,8),1,1,p);}
         }
+        canvas->restore();
     }
 };
 class PhoneTabSymbol final : public UIView {
@@ -128,8 +143,10 @@ LensTabBarView::LensTabBarView(bool compact, size_t itemCount): _count(itemCount
     _selectedContent=new_shared<UIView>(); _selectedContent->setUserInteractionEnabled(false); _selectedHost->addSubview(_selectedContent);
     _lens=new_shared<LensView>(LensView::Style::selection); _lens->setUserInteractionEnabled(false);
     _lens->setInteractive(true);
+    _lens->setContentVibrancyEnabled(true);
     _lens->setInteractionSource(LensView::InteractionSource::viewMotion);
-    _lens->setRestingBackgroundColor(UIColor::label.withAlphaComponent(.10f)); _glass->addSubview(_lens);
+    _selectionFill=new_shared<TabSelectionBackground>();
+    _lens->restingBackgroundView()->addSubview(_selectionFill);_glass->addSubview(_lens);
     auto rowMask=new_shared<NormalRowMask>(); rowMask->lens=_lens;
     _normal->setMask(new_shared<UIView>(NXRect(),rowMask));
     _lens->setLiftedContentView(_selectedContent);
@@ -137,29 +154,41 @@ LensTabBarView::LensTabBarView(bool compact, size_t itemCount): _count(itemCount
     for (size_t i=0;i<_count;i++) {
         auto control=new_shared<TabControl>(); _normal->addSubview(control); _controls.push_back(control);
         control->primaryAction=UIAction(titles[i],[weak,i] { if (auto self=weak.lock()) self->setSelectedIndex(i,true); });
-        control->onHighlight=[weak](bool highlighted) { if (auto self=weak.lock(); self && !self->_dragging) self->setLifted(highlighted,true); };
+        control->onHighlight=[weak](bool highlighted) {
+            // Pan recognition cancels the descendant control before its began
+            // callback runs. A live platter contact owns lift across that handoff.
+            if (auto self=weak.lock(); self && !self->_dragging && self->_trackingTouch.expired())
+                self->setLifted(highlighted,true);
+        };
+        auto selectedItem=new_shared<UIView>(); selectedItem->setUserInteractionEnabled(false);
+        _selectedContent->addSubview(selectedItem); _selectedItems.push_back(selectedItem);
         const auto icon=_count==4?(i==2?3:(i==3?2:int(i))):int(i);
-        std::shared_ptr<UIView> normal=_count==4?std::static_pointer_cast<UIView>(new_shared<PhoneTabSymbol>(icon,UIColor::label)):symbol(icon,UIColor::label);
-        std::shared_ptr<UIView> selected=_count==4?std::static_pointer_cast<UIView>(new_shared<PhoneTabSymbol>(icon,UIColor(0,122,255))):symbol(icon,UIColor(0,122,255)); control->addSubview(normal); _selectedContent->addSubview(selected);
+        const char* names[]={"house.fill","star.fill","books.vertical.fill","slider.horizontal.3"};
+        std::shared_ptr<UIView> normal=_count==4?std::static_pointer_cast<UIView>(new_shared<DemoSystemSymbol>(names[i],28,400,UIColor::label,new_shared<PhoneTabSymbol>(icon,UIColor::label))):symbol(icon,UIColor::label);
+        std::shared_ptr<UIView> selected=_count==4?std::static_pointer_cast<UIView>(new_shared<DemoSystemSymbol>(names[i],28,400,UIColor::systemBlue,new_shared<PhoneTabSymbol>(icon,UIColor::systemBlue))):symbol(icon,UIColor::systemBlue); control->addSubview(normal); selectedItem->addSubview(selected);
+        if(_count==4) { std::static_pointer_cast<DemoSystemSymbol>(normal)->setFitsSymbolToBounds(true);std::static_pointer_cast<DemoSystemSymbol>(selected)->setFitsSymbolToBounds(true); }
         _normalSymbols.push_back(normal); _selectedSymbols.push_back(selected);
         for (bool blue : {false,true}) {
-            auto label=new_shared<UILabel>(); label->setText(titles[i]); if(_count==4) GlassScreenTypography::apply(label,GlassScreenTypography::caption2); else label->setFontSize(compact?17:11);
-            label->setTextAlignment(NSTextAlignment::center); label->setTextColor(blue?UIColor(0,122,255):UIColor::label); label->setUserInteractionEnabled(false);
-            if (blue) { _selectedContent->addSubview(label); _selectedLabels.push_back(label); }
+            auto label=new_shared<UILabel>(); label->setText(titles[i]); if(_count==4) GlassScreenTypography::apply(label,blue?GlassScreenTypography::selectedTabCaption:GlassScreenTypography::tabCaption); else label->setFontSize(compact?17:11);
+            label->setTextAlignment(_count==4?NSTextAlignment::natural:NSTextAlignment::center); label->setTextColor(blue?UIColor::systemBlue:UIColor::label); label->setUserInteractionEnabled(false);
+            if (blue) { selectedItem->addSubview(label); _selectedLabels.push_back(label); }
             else { control->addSubview(label); _normalLabels.push_back(label); }
         }
     }
     auto pan=new_shared<UIPanGestureRecognizer>();
     pan->onStateChanged=[weak](const auto& recognizer) {
         const auto self=weak.lock(); if (!self) return;
-        const auto gesture=std::static_pointer_cast<UIPanGestureRecognizer>(recognizer);
-        const auto state=gesture->state();
-        if (state==UIGestureRecognizerState::began) { self->_dragStart=self->_selected; self->_dragging=true; self->setLifted(true,true); }
-        if (state==UIGestureRecognizerState::began || state==UIGestureRecognizerState::changed) {
-            const auto x=float(self->_dragStart)+gesture->translationInView(self).x/std::max(1.0f,self->_selectionStep);
-            self->setSelectionPosition(x);
+        const auto state=recognizer->state();
+        if (state==UIGestureRecognizerState::began) {
+            if(self->_trackingTouch.expired()) return;
+            self->_dragging=true;
+            // The touch-down approach animation gives way to direct tracking.
+            self->_lens->layer()->removeAnimation("position");
         }
-        if (state==UIGestureRecognizerState::ended) { self->_dragging=false; self->setSelectedIndex(size_t(std::round(self->_position)),true); self->setLifted(false,true); }
+        if (state==UIGestureRecognizerState::began || state==UIGestureRecognizerState::changed) {
+            if(const auto touch=self->_trackingTouch.lock()) self->setSelectionPosition(self->positionForFinger(touch->locationIn(self->_glass)));
+        }
+        if (self->_dragging && state==UIGestureRecognizerState::ended) { self->_dragging=false; self->setSelectedIndex(size_t(std::round(self->_position)),true); self->setLifted(false,true); }
         if (self->_dragging && (state==UIGestureRecognizerState::cancelled || state==UIGestureRecognizerState::failed)) { self->_dragging=false; self->setSelectedIndex(self->_dragStart,true); self->setLifted(false,true); }
     };
     addGestureRecognizer(pan);
@@ -180,6 +209,30 @@ void LensTabBarView::observeTouch(UITouchPhase phase,const std::shared_ptr<UITou
         const auto y=std::max(0.0f,std::abs(point.y-size.height*.5f)-(size.height*.5f-radius));
         if(size.width<=0||size.height<=0||x*x+y*y>radius*radius) return;
         _trackingTouch=touch; _lastContact=point; _lastContactTime=touch->timestamp();
+        _dragStart=_selected;
+        const auto lensLayer=_lens->layer()->presentationOrSelf();
+        const auto lensSize=lensLayer->bounds().size;
+        const auto placement=lensToPlatter(_lens);
+        const auto glassTransform=_glass->interactionTransform();
+        const auto inverseGlass=glassTransform.inverted();
+        const auto surfacePoint=inverseGlass?point.applying(*inverseGlass):point;
+        SkMatrix inverseLens;
+        _grabbedLens=false; _grabOffsetX=0;
+        if(placement.invert(&inverseLens)) {
+            const auto local=mapLensPoint(inverseLens,surfacePoint);
+            _grabbedLens=Internal::layerCornerPath(lensSize,lensLayer->cornerRadius(),lensLayer->cornerCurve()).contains(local.x(),local.y());
+        }
+        if(_grabbedLens) {
+            const auto center=mapLensPoint(placement,{lensSize.width*.5f,lensSize.height*.5f});
+            const auto visibleCenter=NXPoint(center.x(),center.y()).applying(glassTransform);
+            _grabOffsetX=point.x-visibleCenter.x;
+            // Catch the visible lens during an in-flight approach as well.
+            _lens->layer()->removeAnimation("position");
+            setSelectionPosition(positionForContact(center.x()));
+        }
+        setLifted(true,true);
+        if(!_grabbedLens) UIView::animate(.18,0,static_cast<UIViewAnimationOptions>(UIViewAnimationOptions::allowUserInteraction|UIViewAnimationOptions::beginFromCurrentState),
+            [this,point] { setSelectionPosition(positionForFinger(point)); });
         _lens->beginInteraction(point);
     } else if(_trackingTouch.lock()==touch) {
         if(phase==UITouchPhase::moved) {
@@ -187,13 +240,36 @@ void LensTabBarView::observeTouch(UITouchPhase phase,const std::shared_ptr<UITou
             const auto velocity=seconds>0 ? (point-_lastContact)/std::max(float(seconds),1.0f/240) : NXPoint();
             _lastContact=point; _lastContactTime=touch->timestamp();
             _lens->updateInteraction(point,velocity);
+            if(!_dragging) {
+                if(_grabbedLens) setSelectionPosition(positionForFinger(point));
+                else UIView::animate(.18,0,static_cast<UIViewAnimationOptions>(UIViewAnimationOptions::allowUserInteraction|UIViewAnimationOptions::beginFromCurrentState),
+                    [this,point] { setSelectionPosition(positionForFinger(point)); });
+            }
         } else {
             _trackingTouch.reset();
             // Release the driving force while preserving the lens spring's
             // current velocity; a held finger must not inject a stale fling.
             _lens->endInteraction({},phase==UITouchPhase::cancelled);
+            // A stationary contact never begins the pan, but still previews
+            // the lens immediately. Restore it on cancellation or release;
+            // the descendant's ordinary tap action commits its tab afterward.
+            if(!_dragging) { setSelectedIndex(_selected,true); setLifted(false,true); }
         }
     }
+}
+float LensTabBarView::positionForFinger(NXPoint point) const {
+    point.x-=_grabOffsetX;
+    if(const auto inverse=_glass->interactionTransform().inverted()) point=point.applying(*inverse);
+    return positionForContact(point.x);
+}
+float LensTabBarView::positionForContact(NXFloat x) const {
+    if(_selectionCenters.size()!=_count||!std::isfinite(x)) return _position;
+    if(x<=_selectionCenters.front()) return 0;
+    for(size_t i=1;i<_count;++i) if(x<=_selectionCenters[i]) {
+        const auto step=_selectionCenters[i]-_selectionCenters[i-1];
+        return float(i-1)+(step>0?(x-_selectionCenters[i-1])/step:0);
+    }
+    return float(_count-1);
 }
 void LensTabBarView::setSelectedIndex(size_t index, bool animated) {
     if (index>=_count) throw std::out_of_range("Lens tab index");
@@ -236,14 +312,29 @@ void LensTabBarView::arrange() {
         _selectionStep=std::max(0.0f,(w-8-itemWidth)/3);
         for(size_t i=0;i<_count;++i) { left[i]=4+i*_selectionStep; width[i]=itemWidth; }
     }
+    _selectionCenters.resize(_count);
+    for(size_t i=0;i<_count;++i) _selectionCenters[i]=left[i]+width[i]*.5f;
     const int a=std::min(int(_count)-2,int(_position)),b=a+1; const float t=_position-a;
-    const auto growth=_lifted?8.0f:0.0f;
+    // UIKit's real tab control adds 8pt on each edge while lifted (both the
+    // 54pt phone lens and 36pt compact lens), separately from platter inflation.
+    const auto growth=_lifted?16.0f:0.0f;
     const auto lensW=std::max(0.0f,width[a]+(width[b]-width[a])*t+growth);
     const auto lensH=std::max(0.0f,(_compact?h-8:std::min(56.0f,h-8))+growth);
     const auto centerX=(left[a]+width[a]*.5f)*(1-t)+(left[b]+width[b]*.5f)*t;
     const auto lensFrame=_comparisonFrame.value_or(NXRect(centerX-lensW*.5f,(h-lensH)*.5f,lensW,lensH));
-    _lens->setFrame(lensFrame); _selectedContent->setFrame({0,0,w,h});
+    _lens->setFrame(lensFrame);_selectionFill->setFrame(_lens->restingBackgroundView()->bounds()); _selectedContent->setFrame({0,0,w,h});
     for (size_t i=0;i<_count;i++) {
+        // Full-row local coordinates preserve the supplied source placement.
+        // Native selected items enlarge 16% around each item center, including
+        // items partly visible through a lens held between two selections.
+        const auto itemCenter=_selectionCenters[i];
+        auto itemLayer=_selectedItems[i]->layer();
+        itemLayer->setAnchorPoint({0,0});
+        itemLayer->setBounds({0,0,w,h}); itemLayer->setPosition({0,0});
+        // Use an explicit pivot translation. At rest this is exactly identity,
+        // avoiding round-off in (center / width) * width at fractional sizes.
+        const auto scale=_lifted?1.16f:1.f;
+        _selectedItems[i]->setTransform({scale,0,0,scale,(1-scale)*itemCenter,(1-scale)*h*.5f});
         _controls[i]->setFrame({i*w/_count,0,w/_count,h}); _controls[i]->layer()->setCornerRadius(h*.5f);
         float localX=w/(_count*2)-12;
         if (_compact && _count==3) {
@@ -253,10 +344,28 @@ void LensTabBarView::arrange() {
             _normalLabels[i]->setFrame({start+28-i*w/_count,0,textWidth,h}); _selectedLabels[i]->setFrame({start+28,0,textWidth,h});
         } else if(_count==4) {
             const auto center=left[i]+width[i]*.5f, slot=w/_count;
-            _normalSymbols[i]->setFrame({center-i*slot-12,7,24,24});
-            _selectedSymbols[i]->setFrame({center-12,7,24,24});
-            _normalLabels[i]->setFrame({center-i*slot-slot*.5f,h-27,slot,18});
-            _selectedLabels[i]->setFrame({center-slot*.5f,h-27,slot,18});
+            // UIImageView bounds measured independently in the native four-tab
+            // fixture; intrinsic symbol padding differs between UIKit/AppKit.
+            constexpr NXFloat iconWidth[]={100.0f/3,91.0f/3,100.0f/3,88.0f/3};
+            constexpr NXFloat iconHeight[]={28,85.0f/3,88.0f/3,71.0f/3};
+            constexpr NXFloat iconTop[]={10,9,9,12};
+            _normalSymbols[i]->setFrame({center-i*slot-iconWidth[i]*.5f,iconTop[i],iconWidth[i],iconHeight[i]});
+            _selectedSymbols[i]->setFrame({center-iconWidth[i]*.5f,iconTop[i],iconWidth[i],iconHeight[i]});
+            const auto traits=traitCollection();
+            const auto scale=traits?std::max(1.0f,traits->displayScale()):1;
+            const auto captionFrame=[&](const auto& label,NXFloat offset) {
+                // A geometry-only harness can construct chrome before the
+                // application/font context exists. Real layout measures ink.
+                constexpr NXFloat fallbackNormal[]={88.0f/3,46,107.0f/3,127.0f/3};
+                constexpr NXFloat fallbackSelected[]={29,136.0f/3,35,124.0f/3};
+                const auto size=SkiaCtx::main()?label->sizeThatFits({1000,18})
+                    :NXSize(label->fontWeight()==600?fallbackNormal[i]:fallbackSelected[i],12);
+                // Native tab labels align their tight leading edge upward to
+                // the display grid. Avoid rounding a float epsilon to a pixel.
+                return NXRect(std::ceil((center-size.width*.5f)*scale-1e-4f)/scale-offset,h-23,size.width,size.height);
+            };
+            _normalLabels[i]->setFrame(captionFrame(_normalLabels[i],i*slot));
+            _selectedLabels[i]->setFrame(captionFrame(_selectedLabels[i],0));
         } else {
             _normalSymbols[i]->setFrame({localX,std::min(13.0f,h-49),24,24}); _selectedSymbols[i]->setFrame({i*w/_count+localX,std::min(13.0f,h-49),24,24});
             _normalLabels[i]->setFrame({0,h-32,w/_count,18}); _selectedLabels[i]->setFrame({i*w/_count,h-32,w/_count,18});
@@ -268,8 +377,15 @@ void LensTabBarView::arrange() {
 void LensTabBarView::layoutSubviews() { UIView::layoutSubviews(); arrange(); }
 
 void LensTabBarView::setAccentColor(UIColor color) {
+    // A literal accent opts out, just as a custom UITabBar.tintColor does.
+    const UIColor semantic[]={UIColor::systemBlue,UIColor::systemRed,UIColor::systemGreen,
+        UIColor::systemOrange,UIColor::systemPurple,UIColor::systemMint,UIColor::systemYellow,
+        UIColor::systemIndigo,UIColor::systemGray,UIColor::systemTeal,UIColor::systemCyan,
+        UIColor::systemPink,UIColor::systemBrown,UIColor::tint};
+    _lens->setContentVibrancyEnabled(std::any_of(std::begin(semantic),std::end(semantic),[&](const auto& tint){return color==tint;}));
     for(const auto& label:_selectedLabels) label->setTextColor(color);
     const auto recolor=[&](const auto& self,const std::shared_ptr<UIView>& view)->void {
+        view->setTintColor(color);
         if(auto symbol=std::dynamic_pointer_cast<PhoneTabSymbol>(view)) symbol->setColor(color);
         if(view->backgroundColor()) view->setBackgroundColor(color);
         for(const auto& child:view->subviews()) self(self,child);

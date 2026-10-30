@@ -44,6 +44,8 @@ private:
 
     sk_sp<SkUnicode> unicode;
     std::unique_ptr<skia::textlayout::Paragraph> paragraph;
+    NXFloat _ascender = 0;
+    NXFloat _lineHeight = 0;
 
     void updateParagraph();
 };

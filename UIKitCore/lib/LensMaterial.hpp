@@ -13,7 +13,7 @@ public:
   explicit LensLayer(LensLayer *source);
   std::shared_ptr<CALayer> copy() override;
   void draw(SkCanvas *canvas) override;
-  void setLiftState(bool selection, NXFloat progress);
+  void setLiftState(bool selection, NXFloat progress, NXFloat magnification, bool vibrant, bool dark);
   void setSource(const std::shared_ptr<UIView>& source, const std::shared_ptr<UIView>& owner);
   void drawSource(SkCanvas* canvas);
 
@@ -21,5 +21,7 @@ private:
   std::weak_ptr<UIView> _source, _owner;
   bool _selection = false;
   NXFloat _progress = 0;
+  NXFloat _magnification = 1;
+  bool _vibrant = false, _dark = false;
 };
 } // namespace NXKit::Internal
