@@ -224,6 +224,7 @@ public:
     bool isDirty();
 
 private:
+    YGConfigRef _config = nullptr;
     YGNodeRef _node = nullptr;
     std::weak_ptr<UIView> _view;
     bool _isEnabled = false;
@@ -237,7 +238,6 @@ private:
     static float YGSanitizeMeasurement(float constrainedSize, float measuredSize, YGMeasureMode measureMode);
     static bool YGNodeHasExactSameChildren(const YGNodeRef node, std::vector<std::shared_ptr<UIView>> subviews);
     static void YGApplyLayoutToViewHierarchy(const std::shared_ptr<UIView>&view, bool preserveOrigin);
-    static float YGRoundPixelValue(float value);
     void invalidateLayout();
 
     friend class UIView;

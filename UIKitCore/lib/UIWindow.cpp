@@ -68,6 +68,7 @@ void UIWindow::makeKeyAndVisible() {
         viewController->view()->setFrame(this->bounds());
         viewController->viewWillAppear(false);
         addSubview(viewController->view());
+        layoutIfNeeded();
         viewController->viewDidAppear(false);
         updateFocus();
     }
@@ -223,7 +224,7 @@ void UIWindow::updateTraitsFromPlatform() {
 }
 
 void UIWindow::layoutSubviews() {
-    setSafeAreaInsets(SkiaCtx::main()->deviceSafeAreaInsets());
+    if (const auto context = SkiaCtx::main()) setSafeAreaInsets(context->deviceSafeAreaInsets());
 
     if (_rootViewController) {
         _rootViewController->view()->setFrame(this->bounds());

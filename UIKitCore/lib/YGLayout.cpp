@@ -8,6 +8,7 @@
 #include <YGLayout.h>
 #include <UIView.h>
 #include <UIViewController.h>
+#include <cmath>
 
 namespace NXKit {
 
@@ -55,6 +56,9 @@ void YGLayout::YGAttachNodesFromViewHierachy(const std::shared_ptr<UIView>& view
 {
   auto yoga = view->_yoga;
   const YGNodeRef node = yoga->_node;
+  const auto traits = view->traitCollection() ? view->traitCollection() : UITraitCollection::current();
+  const auto scale = traits ? traits->displayScale() : 1.f;
+  YGConfigSetPointScaleFactor(yoga->_config, std::isfinite(scale) && scale > 0 ? scale : 1.f);
 
   // Only leaf nodes should have a measure function
   if (yoga->isLeaf()) {
@@ -106,7 +110,7 @@ void YGLayout::YGRemoveAllChildren(const YGNodeRef node) {
 }
 
 YGLayout::YGLayout(const std::shared_ptr<UIView>& view):
-    _view(view), _node(YGNodeNew())
+    _config(YGConfigNew()), _node(YGNodeNewWithConfig(_config)), _view(view)
 {
     YGNodeSetContext(_node, view.get());
     _isEnabled = false;
@@ -118,6 +122,7 @@ YGLayout::YGLayout(const std::shared_ptr<UIView>& view):
 
 YGLayout::~YGLayout() {
     YGNodeFree(_node);
+    YGConfigFree(_config);
 }
 
 void YGLayout::layoutIfNeeded() {
@@ -140,10 +145,6 @@ void YGLayout::applyLayoutPreservingOrigin(bool preserveOrigin) {
 void YGLayout::YGApplyLayoutToViewHierarchy(const std::shared_ptr<UIView>&view, bool preserveOrigin) {
     auto yoga = view->_yoga;
 
-    // We don't need it cause if it is not included in layout
-    // it still could contains it's own layout that needs to be calculated
-//    if (!yoga->_isIncludedInLayout) { return; }
-
     YGNodeRef node = yoga->_node;
     const NXPoint topLeft = {
       YGNodeLayoutGetLeft(node),
@@ -159,12 +160,12 @@ void YGLayout::YGApplyLayoutToViewHierarchy(const std::shared_ptr<UIView>&view, 
 
     auto frame = NXRect(
       NXPoint (
-        YGRoundPixelValue(topLeft.x + origin.x),
-        YGRoundPixelValue(topLeft.y + origin.y)
+        topLeft.x + origin.x,
+        topLeft.y + origin.y
       ),
       NXSize (
-        YGRoundPixelValue(bottomRight.x) - YGRoundPixelValue(topLeft.x),
-        YGRoundPixelValue(bottomRight.y) - YGRoundPixelValue(topLeft.y)
+        bottomRight.x - topLeft.x,
+        bottomRight.y - topLeft.y
       )
     );
 
@@ -175,27 +176,24 @@ void YGLayout::YGApplyLayoutToViewHierarchy(const std::shared_ptr<UIView>&view, 
     if (view->layer()->position() != position) {
         view->layer()->setPosition(position);
         view->setNeedsDisplay();
+        view->setNeedsUpdateSafeAreaInsets();
     }
 
     auto bounds = view->layer()->bounds();
     bounds.size = frame.size;
 
-    // Probably required to not reset it if bounds not changed
-//    if (view->layer()->bounds() != bounds) {
-        view->layer()->setBounds(bounds);
-//        view->setNeedsDisplay();
-//    }
+    // Keep transforms out of Yoga placement, but use UIView's bounds setter
+    // so manual descendants, drawing and safe areas see this pass's size.
+    if (view->bounds() != bounds) view->setBounds(bounds);
 
     if (!yoga->isLeaf()) {
-        for (const auto & i : view->subviews()) {
-            YGApplyLayoutToViewHierarchy(i, false);
+        const auto children = view->subviews();
+        for (const auto& i : children) {
+            if (i->superview().lock() == view && i->_yoga->_isEnabled
+                && i->_yoga->_isIncludedInLayout && YGNodeGetParent(i->_yoga->_node) == node)
+                YGApplyLayoutToViewHierarchy(i, false);
         }
     }
-}
-
-float YGLayout::YGRoundPixelValue(float value) {
-    static float scale = UITraitCollection::current()->displayScale(); // UIRenderer::main()->scale();
-    return roundf(value * scale) / scale;
 }
 
 NXSize YGLayout::calculateLayoutWithSize(NXSize size) {

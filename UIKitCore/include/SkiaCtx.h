@@ -73,6 +73,9 @@ protected:
     virtual skgpu::graphite::Context* graphiteContext() = 0;
     virtual skgpu::graphite::Recorder* graphiteRecorder() = 0;
 
+    int millisecondsUntilNextFrame();
+    void renderImmediatelyForResize() { if (_immediateResizeFrame) _immediateResizeFrame(); }
+
     NXSize _size;
     NXFloat _extraScaleFactor = 1;
     // Rendering clients assume a usable manager even when a platform-specific
@@ -81,6 +84,11 @@ protected:
     Timer currentRunLoopStartTimer;
 
 private:
+    // Platform frame preparation freezes geometry for layout, traits and the
+    // drawable acquired in the same frame. No public resize-animation API.
+    virtual void prepareFrame() {}
+    std::function<void()> _immediateResizeFrame;
+    friend void renderApplicationFrame();
     int targetFrameRate = -1;
     friend class UIApplication;
     friend class CABackdropEffectLayer;

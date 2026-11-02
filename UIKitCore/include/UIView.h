@@ -199,6 +199,7 @@ private:
     friend class YGLayout;
     friend class UINib;
     friend bool applicationRunLoop();
+    friend void renderApplicationFrame();
 
     std::shared_ptr<YGLayout> _yoga;
     std::vector<std::shared_ptr<UIGestureRecognizer>> _gestureRecognizers;
@@ -229,6 +230,7 @@ private:
     void setNeedsUpdateLayoutMargins() { _needsUpdateLayoutMargins = true; }
 
     bool _needsLayout = true;
+    bool _isLayingOut = false;
     bool _needsDisplay = true;
     bool _needsUpdateSafeAreaInsets = true;
     bool _needsUpdateLayoutMargins = true;
@@ -242,6 +244,8 @@ private:
     virtual std::shared_ptr<UIFocusItem> searchForFocus();
 
     std::shared_ptr<UIView> layoutRoot();
+    void layoutTreeIfNeeded(bool includeHidden, bool resolveRoot = true);
+    void displayTreeIfNeeded();
 
     static std::shared_ptr<UIView> instantiateFromXib(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* idStorage = nullptr);
     virtual void applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::string, std::shared_ptr<UIView>>* parsingIdStorage);

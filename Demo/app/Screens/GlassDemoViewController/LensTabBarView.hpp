@@ -2,6 +2,7 @@
 #include <UIKit.h>
 #include <UITouch.h>
 #include <functional>
+#include <chrono>
 
 // A comparison/demo composition, not a public UIKit tab controller. The platter
 // is the existing regular glass; only the selection is a LensView.
@@ -26,7 +27,12 @@ public:
     std::function<void(size_t)> onSelectionChanged;
     void layoutSubviews() override;
 private:
+    friend class LensTabBarTestHarness;
     void arrange();
+    void animateSelectionPosition(float position);
+    void beginLift();
+    void releaseLift(bool cancelled = false);
+    void advanceLift(double seconds);
     void observeTouch(NXKit::UITouchPhase phase, const std::shared_ptr<NXKit::UITouch>& touch);
     float positionForContact(NXKit::NXFloat x) const;
     float positionForFinger(NXKit::NXPoint point) const;
@@ -40,6 +46,11 @@ private:
     NXKit::NXFloat _grabOffsetX = 0;
     bool _grabbedLens = false;
     NXKit::Timer _lastContactTime;
+    double _minimumLiftRemaining = 0;
+    std::shared_ptr<NXKit::CADisplayLink> _liftLink;
+    std::chrono::steady_clock::time_point _lastLiftFrame;
+    std::weak_ptr<NXKit::UIView> _liftParent;
+    std::weak_ptr<NXKit::UIWindow> _liftWindow;
     std::optional<NXKit::NXRect> _comparisonFrame;
     std::shared_ptr<NXKit::BackdropEffectView> _glass, _selectionFill;
     std::shared_ptr<NXKit::UIView> _normal, _selectedHost, _selectedContent;

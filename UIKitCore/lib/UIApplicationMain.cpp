@@ -9,22 +9,17 @@
 
 namespace NXKit {
 
-bool applicationRunLoop() {
-    const auto currentTime = Timer();
-    // Requests belong to this iteration, including display-link callbacks
-    // and presentation animations advanced below.
-    CALayer::maxFramerateRequired = 0;
-    UIApplication::shared->handleEventsIfNeeded();
-    if (UIApplication::shared->isQuitRequested()) {
-        return false;
-    }
-    SkiaCtx::_main->pollBackdropReads();
-    DispatchQueue::main()->performAll(); // TODO: May be need to be after rendering loop
-//        UIRenderer::main()->render(UIApplication::shared->keyWindow.lock(), currentTime);
-
-
-    // Move to UIRenderer
+// Shared by the outer loop and native live-resize exposes. This path never
+// polls events, runs dispatch callbacks or sleeps, avoiding recursive pumps.
+void renderApplicationFrame() {
+    static thread_local bool rendering = false;
+    if (rendering || !UIApplication::shared || UIApplication::shared->isQuitRequested() || !SkiaCtx::_main) return;
     const auto keyWindow = UIApplication::shared->keyWindow.lock();
+    if (!keyWindow) return;
+    rendering = true;
+    struct Restore { bool& value; ~Restore() { value = false; } } restore{rendering};
+    SkiaCtx::_main->prepareFrame();
+    // Move to UIRenderer
     NXSize size = SkiaCtx::_main->getSize();
     keyWindow->setFrame({ NXPoint::zero, size });
 
@@ -33,10 +28,16 @@ bool applicationRunLoop() {
     // the same bounds after rotation, multitasking, or an environment change.
     keyWindow->updateTraitsFromPlatform();
 
-    UIView::animateIfNeeded(currentTime);
+    const Timer frameTime;
+    UIView::animateIfNeeded(frameTime);
     {
         Internal::RenderPerformanceScope timer(Internal::RenderPerformance::current ? &Internal::RenderPerformance::current->layoutMs : nullptr);
-        keyWindow->drawAndLayoutTreeIfNeeded();
+        keyWindow->layoutTreeIfNeeded(false);
+        // Layout can resize/reposition an animating layer after its first
+        // presentation snapshot. Refresh with the same timestamp so properties
+        // not animated by that layer do not retain the previous frame's size.
+        UIView::animateIfNeeded(frameTime);
+        keyWindow->displayTreeIfNeeded();
     }
 
     // Resolve pacing after callbacks and animations. Rendering is continuous,
@@ -46,8 +47,7 @@ bool applicationRunLoop() {
     const auto surface = SkiaCtx::_main->getBackbufferSurface();
     if (!surface) {
         CALayer::layerTreeIsDirty = true;
-        SkiaCtx::_main->sleepForNextFrame();
-        return true;
+        return;
     }
 
     CALayer::layerTreeIsDirty = false;
@@ -70,8 +70,19 @@ bool applicationRunLoop() {
         SkiaCtx::_main->flushAndSubmit(surface);
         SkiaCtx::_main->swapBuffers();
     }
-    SkiaCtx::_main->sleepForNextFrame();
+}
 
+bool applicationRunLoop() {
+    CALayer::maxFramerateRequired = 0;
+    if (!SkiaCtx::_main->_immediateResizeFrame) {
+        SkiaCtx::_main->_immediateResizeFrame = [] { renderApplicationFrame(); };
+    }
+    UIApplication::shared->handleEventsIfNeeded();
+    if (UIApplication::shared->isQuitRequested()) return false;
+    SkiaCtx::_main->pollBackdropReads();
+    DispatchQueue::main()->performAll();
+    renderApplicationFrame();
+    SkiaCtx::_main->sleepForNextFrame();
     return true;
 }
 

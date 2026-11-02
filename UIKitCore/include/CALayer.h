@@ -173,6 +173,7 @@ private:
     friend class Internal::LensLayer;
     friend class LensView;
     friend bool applicationRunLoop();
+    friend void renderApplicationFrame();
 
     void setLayerTreeDirtyIfNeeded() const;
 

@@ -81,6 +81,8 @@ void CALayer::setContentsScale(NXFloat contentsScale) {
     if (_contentsScale == contentsScale) return;
     onWillSet("contentsScale");
     _contentsScale = contentsScale;
+    if (_presentation && !animations.contains("contentsScale"))
+        _presentation->_contentsScale = contentsScale;
 }
 
 void CALayer::setScaleModifier(NXFloat scaleModifier) {
@@ -198,6 +200,9 @@ void CALayer::setHidden(bool hidden) {
 
 void CALayer::setContents(std::shared_ptr<CGImage> contents) {
     _contents = std::move(contents);
+    // A view regenerates its bitmap after animation geometry is sampled.
+    // Contents are not animated here; show the new bitmap in this frame.
+    if (_presentation) _presentation->_contents = _contents;
     setLayerTreeDirtyIfNeeded();
 }
 

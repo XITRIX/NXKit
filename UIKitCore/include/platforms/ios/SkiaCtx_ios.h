@@ -8,6 +8,7 @@
 #include "include/core/SkFont.h"
 
 namespace NXKit {
+namespace Internal { class IOSWindowGeometry; struct IOSWindowFrame; }
 
 class SkiaCtx_ios : public SkiaCtx_sdlBase {
 public:
@@ -32,6 +33,9 @@ public:
 //    void sleepForNextFrame() override {}
 
 private:
+    void prepareFrame() override;
+    std::unique_ptr<Internal::IOSWindowGeometry> _windowGeometry;
+    std::unique_ptr<Internal::IOSWindowFrame> _frameGeometry;
     std::unique_ptr<skgpu::graphite::Context> context;
     std::unique_ptr<skgpu::graphite::Recorder> recorder;
     sk_sp<SkSurface> surface;

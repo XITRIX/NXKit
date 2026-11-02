@@ -6,6 +6,8 @@
 #include <cmath>
 #include <stdexcept>
 #include <UITouch.h>
+#include <CADisplayLink.h>
+#include <CABasicAnimation.h>
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPathBuilder.h"
@@ -158,7 +160,7 @@ LensTabBarView::LensTabBarView(bool compact, size_t itemCount): _count(itemCount
             // Pan recognition cancels the descendant control before its began
             // callback runs. A live platter contact owns lift across that handoff.
             if (auto self=weak.lock(); self && !self->_dragging && self->_trackingTouch.expired())
-                self->setLifted(highlighted,true);
+                highlighted ? self->beginLift() : self->releaseLift();
         };
         auto selectedItem=new_shared<UIView>(); selectedItem->setUserInteractionEnabled(false);
         _selectedContent->addSubview(selectedItem); _selectedItems.push_back(selectedItem);
@@ -188,8 +190,8 @@ LensTabBarView::LensTabBarView(bool compact, size_t itemCount): _count(itemCount
         if (state==UIGestureRecognizerState::began || state==UIGestureRecognizerState::changed) {
             if(const auto touch=self->_trackingTouch.lock()) self->setSelectionPosition(self->positionForFinger(touch->locationIn(self->_glass)));
         }
-        if (self->_dragging && state==UIGestureRecognizerState::ended) { self->_dragging=false; self->setSelectedIndex(size_t(std::round(self->_position)),true); self->setLifted(false,true); }
-        if (self->_dragging && (state==UIGestureRecognizerState::cancelled || state==UIGestureRecognizerState::failed)) { self->_dragging=false; self->setSelectedIndex(self->_dragStart,true); self->setLifted(false,true); }
+        if (self->_dragging && state==UIGestureRecognizerState::ended) { self->_dragging=false; self->setSelectedIndex(size_t(std::round(self->_position)),true); self->releaseLift(); }
+        if (self->_dragging && (state==UIGestureRecognizerState::cancelled || state==UIGestureRecognizerState::failed)) { self->_dragging=false; self->setSelectedIndex(self->_dragStart,true); self->releaseLift(true); }
     };
     addGestureRecognizer(pan);
     auto contact=new_shared<LensContactObserver>();
@@ -223,16 +225,18 @@ void LensTabBarView::observeTouch(UITouchPhase phase,const std::shared_ptr<UITou
             _grabbedLens=Internal::layerCornerPath(lensSize,lensLayer->cornerRadius(),lensLayer->cornerCurve()).contains(local.x(),local.y());
         }
         if(_grabbedLens) {
-            const auto center=mapLensPoint(placement,{lensSize.width*.5f,lensSize.height*.5f});
-            const auto visibleCenter=NXPoint(center.x(),center.y()).applying(glassTransform);
+            // Freeze the presentation placement, retaining the independent
+            // elastic affine. Folding its drift into model position would
+            // apply that drift twice when catching a travelling lens.
+            const auto center=lensLayer->position();
+            const auto visibleCenter=center.applying(glassTransform);
             _grabOffsetX=point.x-visibleCenter.x;
             // Catch the visible lens during an in-flight approach as well.
             _lens->layer()->removeAnimation("position");
-            setSelectionPosition(positionForContact(center.x()));
+            setSelectionPosition(positionForContact(center.x));
         }
-        setLifted(true,true);
-        if(!_grabbedLens) UIView::animate(.18,0,static_cast<UIViewAnimationOptions>(UIViewAnimationOptions::allowUserInteraction|UIViewAnimationOptions::beginFromCurrentState),
-            [this,point] { setSelectionPosition(positionForFinger(point)); });
+        beginLift();
+        if(!_grabbedLens) animateSelectionPosition(positionForFinger(point));
         _lens->beginInteraction(point);
     } else if(_trackingTouch.lock()==touch) {
         if(phase==UITouchPhase::moved) {
@@ -242,18 +246,17 @@ void LensTabBarView::observeTouch(UITouchPhase phase,const std::shared_ptr<UITou
             _lens->updateInteraction(point,velocity);
             if(!_dragging) {
                 if(_grabbedLens) setSelectionPosition(positionForFinger(point));
-                else UIView::animate(.18,0,static_cast<UIViewAnimationOptions>(UIViewAnimationOptions::allowUserInteraction|UIViewAnimationOptions::beginFromCurrentState),
-                    [this,point] { setSelectionPosition(positionForFinger(point)); });
+                else animateSelectionPosition(positionForFinger(point));
             }
         } else {
             _trackingTouch.reset();
             // Release the driving force while preserving the lens spring's
             // current velocity; a held finger must not inject a stale fling.
             _lens->endInteraction({},phase==UITouchPhase::cancelled);
-            // A stationary contact never begins the pan, but still previews
-            // the lens immediately. Restore it on cancellation or release;
-            // the descendant's ordinary tap action commits its tab afterward.
-            if(!_dragging) { setSelectedIndex(_selected,true); setLifted(false,true); }
+            // A stationary contact never begins the pan. Keep the committed
+            // slot (including the descendant's ordinary tap action) and let
+            // the raised approach finish before lowering on release.
+            if(!_dragging) { setSelectedIndex(_selected,true); releaseLift(phase==UITouchPhase::cancelled); }
         }
     }
 }
@@ -274,17 +277,79 @@ float LensTabBarView::positionForContact(NXFloat x) const {
 void LensTabBarView::setSelectedIndex(size_t index, bool animated) {
     if (index>=_count) throw std::out_of_range("Lens tab index");
     const auto changed=_selected!=index; _selected=index;
-    auto apply=[this,index] { setSelectionPosition(float(index)); };
-    if (animated) UIView::animate(.28,0,static_cast<UIViewAnimationOptions>(UIViewAnimationOptions::allowUserInteraction|UIViewAnimationOptions::beginFromCurrentState),apply);
-    else apply();
+    if (animated) {
+        if(changed && !_liftLink) beginLift();
+        animateSelectionPosition(float(index));
+    } else {
+        if(_liftLink && _trackingTouch.expired() && !_dragging) setLifted(false);
+        _lens->layer()->removeAnimation("position");
+        UIView::performWithoutAnimation([&] { setSelectionPosition(float(index)); });
+    }
     for (size_t i=0;i<_count;i++) _controls[i]->setSelected(i==index);
     if (changed && onSelectionChanged) onSelectionChanged(index);
+}
+void LensTabBarView::animateSelectionPosition(float position) {
+    // A tap action arrives after touch-down has already targeted the same
+    // slot. Keep that in-flight approach instead of starting it a second time.
+    if(std::abs(_position-position)<1e-5f) return;
+    const auto from=_lens->layer()->presentationOrSelf()->position();
+    UIView::animate(.6,0,static_cast<UIViewAnimationOptions>(UIViewAnimationOptions::allowUserInteraction|UIViewAnimationOptions::beginFromCurrentState),
+        [this,position] { setSelectionPosition(position); });
+    auto movement=new_shared<CABasicAnimation>("position");
+    movement->duration=.6; movement->fromValue=from; movement->toValue=_lens->layer()->position();
+    // Empirical fit to native UITabBar presentation positions, not Apple's
+    // private spring implementation. Small overshoot is intentional.
+    movement->timingFunction=new_shared<CAMediaTimingFunction>([](double fraction) {
+        if(fraction<=0) return 0.0;
+        if(fraction>=1) return 1.0;
+        constexpr double damping=.85,frequency=15.8;
+        const auto damped=std::sqrt(1-damping*damping);
+        const auto time=fraction*.6;
+        return 1-std::exp(-damping*frequency*time)*(std::cos(frequency*damped*time)+damping/damped*std::sin(frequency*damped*time));
+    });
+    _lens->layer()->add(movement,"position");
+}
+void LensTabBarView::beginLift() {
+    _minimumLiftRemaining=.2;
+    _liftParent=superview(); _liftWindow=window();
+    setLifted(true,true);
+    if(_liftLink) return;
+    _lastLiftFrame=std::chrono::steady_clock::now();
+    const auto weak=weak_from_base<LensTabBarView>();
+    _liftLink=std::make_shared<CADisplayLink>([weak] {
+        if(auto self=weak.lock()) {
+            const auto now=std::chrono::steady_clock::now();
+            const auto elapsed=std::chrono::duration<double>(now-self->_lastLiftFrame).count();
+            self->_lastLiftFrame=now; self->advanceLift(elapsed);
+        }
+    });
+    CALayer::requestFramerate(120);
+}
+void LensTabBarView::releaseLift(bool cancelled) {
+    if(cancelled) setLifted(false,true);
+    else advanceLift(0);
+}
+void LensTabBarView::advanceLift(double seconds) {
+    if(!_liftLink || !std::isfinite(seconds) || seconds<0) return;
+    bool invalid=_liftParent.lock()!=superview().lock() || _liftWindow.lock()!=window();
+    for(auto view=shared_from_this();view;view=view->superview().lock())
+        invalid=invalid||view->isHidden()||view->alpha()<.01f||!view->isUserInteractionEnabled();
+    if(invalid) { setLifted(false); return; }
+    _minimumLiftRemaining=std::max(0.0,_minimumLiftRemaining-seconds);
+    const auto layer=_lens->layer();
+    const auto remaining=std::abs(layer->presentationOrSelf()->position().x-layer->position().x);
+    // Native short taps hold the raised 111x70 lens through transit and
+    // lower within about eight points of arrival, after at least 200ms.
+    if(_trackingTouch.expired()&&!_dragging&&_minimumLiftRemaining==0&&remaining<=8)
+        setLifted(false,true);
+    else CALayer::requestFramerate(120);
 }
 void LensTabBarView::setSelectionPosition(float position) {
     if (!std::isfinite(position)) return;
     _position=std::clamp(position,0.0f,float(_count-1)); arrange();
 }
 void LensTabBarView::setLifted(bool lifted, bool animated) {
+    if(!lifted && _liftLink) { _liftLink->invalidate(); _liftLink.reset(); _minimumLiftRemaining=0; }
     _lifted=lifted; _lens->setLifted(lifted,animated);
     if (animated) UIView::animate(.28,0,static_cast<UIViewAnimationOptions>(UIViewAnimationOptions::allowUserInteraction|UIViewAnimationOptions::beginFromCurrentState),[this] { arrange(); });
     else arrange();

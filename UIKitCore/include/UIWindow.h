@@ -40,6 +40,7 @@ public:
     UIWindowInputType currentUserInputType() { return _inputType; }
 private:
     friend bool applicationRunLoop();
+    friend void renderApplicationFrame();
     friend class SizeClassTestHarness;
     void updateTraitsFromPlatform();
 

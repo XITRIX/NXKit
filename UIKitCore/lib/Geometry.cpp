@@ -242,7 +242,7 @@ bool NXRect::operator==(const NXRect& rhs) const {
 }
 
 bool NXRect::operator!=(const NXRect& rhs) const {
-    return (*this == rhs);
+    return !(*this == rhs);
 }
 
 NXRect NXRect::operator+(const NXRect& rhs) const {

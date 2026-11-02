@@ -3,6 +3,8 @@
 #include <SkiaCtx.h>
 #include <SDL3/SDL_metal.h>
 #include "Timer.h"
+#include <SDL3/SDL_events.h>
+#include <thread>
 
 namespace NXKit {
 
@@ -12,12 +14,18 @@ public:
     ~SkiaCtx_sdlBase() override;
 
     void swapBuffers() override;
+    void sleepForNextFrame() override;
 
     NXSize getSize() override;
 
     float getScaleFactor() override;
 
     int screenFrameRate() override;
+
+private:
+    static bool SDLCALL watchWindowExpose(void* userdata, SDL_Event* event);
+    std::thread::id _eventThread;
+    bool _watchesWindowExpose = false;
 
 protected:
     SDL_Window *window = nullptr;

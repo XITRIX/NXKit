@@ -15,6 +15,7 @@
 
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
+#include <QuartzCore/CATransaction.h>
 #include <Cocoa/Cocoa.h>
 #include <SDL3/SDL_metal.h>
 
@@ -182,9 +183,12 @@ sk_sp<SkSurface> SkiaCtx_macos::getBackbufferSurface() {
     auto logicalWidth = static_cast<CGFloat>(windowWidth > 0 ? windowWidth : drawableWidth);
     auto logicalHeight = static_cast<CGFloat>(windowHeight > 0 ? windowHeight : drawableHeight);
 
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
     layer.frame = CGRectMake(0.0, 0.0, logicalWidth, logicalHeight);
     layer.contentsScale = logicalWidth > 0.0 ? drawableWidth / logicalWidth : 1.0;
     layer.drawableSize = CGSizeMake(drawableWidth, drawableHeight);
+    [CATransaction commit];
 
     _size = getSize();
 
@@ -196,7 +200,7 @@ sk_sp<SkSurface> SkiaCtx_macos::getBackbufferSurface() {
     drawable.reset(CFRetain((__bridge CFTypeRef)currentDrawable));
 
     auto backendTexture = skgpu::graphite::BackendTextures::MakeMetal(
-            SkISize::Make(drawableWidth, drawableHeight),
+            SkISize::Make(int(currentDrawable.texture.width), int(currentDrawable.texture.height)),
             (__bridge CFTypeRef)currentDrawable.texture);
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry, 0, 1);
     surface = SkSurfaces::WrapBackendTexture(recorder.get(),

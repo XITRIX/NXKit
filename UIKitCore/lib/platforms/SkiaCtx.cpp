@@ -9,7 +9,6 @@
 #include "include/gpu/graphite/Recording.h"
 #include <cstdint>
 #include <list>
-#include <thread>
 #include <unordered_map>
 
 using namespace NXKit;
@@ -176,13 +175,5 @@ void SkiaCtx::flushAndSubmit(sk_sp<SkSurface> surface) {
     submitBackdropReads();
     if (!context->submit(skgpu::graphite::SyncToCpu::kNo)) {
         SkDebugf("Graphite failed to submit the frame.\n");
-    }
-}
-
-void SkiaCtx::sleepForNextFrame() {
-    auto _screenFrameRate = float(targetFrameRate > 0 ? targetFrameRate : screenFrameRate());
-    auto frameTime = int(1000.f / _screenFrameRate - currentRunLoopStartTimer.getElapsedTimeInMilliseconds());
-    if (frameTime > 0) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(frameTime));
     }
 }

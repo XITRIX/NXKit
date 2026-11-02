@@ -115,6 +115,7 @@ void UIView::setFrame(NXRect frame) {
     if (this->frame().size != frame.size) {
         setNeedsDisplay();
         setNeedsLayout();
+        updateSafeAreaInsetsInChilds();
     }
     _layer->setFrame(frame);
     setNeedsUpdateSafeAreaInsets();
@@ -125,6 +126,7 @@ void UIView::setBounds(NXRect bounds) {
         setNeedsDisplay();
         setNeedsLayout();
         setNeedsUpdateSafeAreaInsets();
+        updateSafeAreaInsetsInChilds();
     }
     _layer->setBounds(bounds);
 }
@@ -149,12 +151,14 @@ NXPoint UIView::center() const {
 void UIView::setInsetsLayoutMarginsFromSafeArea(bool insetsLayoutMarginsFromSafeArea) {
     if (_insetsLayoutMarginsFromSafeArea == insetsLayoutMarginsFromSafeArea) return;
     _insetsLayoutMarginsFromSafeArea = insetsLayoutMarginsFromSafeArea;
+    setNeedsUpdateLayoutMargins();
     setNeedsLayout();
 }
 
 void UIView::setPreservesSuperviewLayoutMargins(bool preservesSuperviewLayoutMargins) {
     if (_preservesSuperviewLayoutMargins == preservesSuperviewLayoutMargins) return;
     _preservesSuperviewLayoutMargins = preservesSuperviewLayoutMargins;
+    setNeedsUpdateLayoutMargins();
     setNeedsLayout();
 }
 
@@ -206,7 +210,6 @@ void UIView::updateSafeAreaInsets() {
     auto parentSafeArea = _superview.lock()->_safeAreaInsets;
     auto parentSize = _superview.lock()->bounds().size;
 
-    layoutIfNeeded();
     auto frame = this->frame();
 
 
@@ -260,6 +263,10 @@ void UIView::updateLayoutMargin() {
 
     if (_calculatedLayoutMargins != margins) {
         _calculatedLayoutMargins = margins;
+        setNeedsLayout();
+        for (const auto& child : _subviews) {
+            if (child->_preservesSuperviewLayoutMargins) child->setNeedsUpdateLayoutMargins();
+        }
         layoutMarginsDidChange();
         if (auto parentController = _parentController.lock()) {
             parentController->viewLayoutMarginsDidChange();
@@ -348,6 +355,11 @@ void UIView::removeFromSuperview() {
 }
 
 void UIView::drawAndLayoutTreeIfNeeded() {
+    layoutTreeIfNeeded(false);
+    displayTreeIfNeeded();
+}
+
+void UIView::displayTreeIfNeeded() {
     if (Internal::RenderPerformance::current) ++Internal::RenderPerformance::current->views;
     auto visibleLayer = layer()->presentationOrSelf();
 
@@ -377,8 +389,8 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     UIColor::_currentTint = tint;
 
     if (visibleLayer->_needsDisplay) {
-        visibleLayer->display();
         visibleLayer->_needsDisplay = false;
+        visibleLayer->display();
     }
 
     if (currentTraitCollection) {
@@ -387,8 +399,8 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     UIColor::_currentTint = tint;
 
     if (_needsDisplay) {
-        draw();
         _needsDisplay = false;
+        draw();
     }
 
     if (currentTraitCollection) {
@@ -396,15 +408,13 @@ void UIView::drawAndLayoutTreeIfNeeded() {
     }
     UIColor::_currentTint = tint;
 
-    updateSafeAreaInsetsIfNeeded();
-    updateLayoutMarginIfNeeded();
-    layoutIfNeeded();
-
-    for (auto& subview: _subviews) {
-        subview->drawAndLayoutTreeIfNeeded();
+    const auto subviews = _subviews;
+    for (const auto& subview: subviews) {
+        if (subview->superview().lock().get() == this)
+            subview->displayTreeIfNeeded();
     }
     if (_mask) {
-        _mask->drawAndLayoutTreeIfNeeded();
+        _mask->displayTreeIfNeeded();
     }
 
     UIColor::_currentTint = oldTint;
@@ -849,20 +859,58 @@ void UIView::setNeedsLayout() {
 }
 
 void UIView::layoutIfNeeded() {
-    if (_needsLayout) {
-        _needsLayout = false;
+    layoutTreeIfNeeded(true);
+}
 
-        layoutRoot()->layoutIfNeeded();
-
-//        for (const auto &view : subviews()) {
-//            view->setNeedsLayout();
-//        }
-        layoutSubviews();
+void UIView::layoutTreeIfNeeded(bool includeHidden, bool resolveRoot) {
+    if (_isLayingOut) return;
+    if (!includeHidden) {
+        const auto visible = layer()->presentationOrSelf();
+        if (visible->isHidden() || visible->opacity() < .01f) return;
+    }
+    if (resolveRoot) {
+        const auto root = layoutRoot();
+        if (root.get() != this && root->_needsLayout && !root->_isLayingOut) {
+            root->layoutTreeIfNeeded(includeHidden);
+            return;
+        }
+    }
+    _isLayingOut = true;
+    const auto previousTraits = UITraitCollection::current();
+    const auto previousTint = UIColor::_currentTint;
+    struct Restore {
+        UIView* view;
+        std::shared_ptr<UITraitCollection> traits;
+        UIColor tint;
+        ~Restore() { view->_isLayingOut = false; UITraitCollection::setCurrent(traits); UIColor::_currentTint = tint; }
+    } restore{this, previousTraits, previousTint};
+    // A callback may change Yoga styles, safe areas or already visited views.
+    // Finish those changes before drawing. Bound pathological callbacks that
+    // unconditionally invalidate themselves; retain their dirty state.
+    for (int pass = 0; pass < 8; ++pass) {
+        if (_needsLayout || _needsUpdateSafeAreaInsets || _needsUpdateLayoutMargins) {
+            if (const auto traits = traitCollection()) UITraitCollection::setCurrent(traits);
+            UIColor::_currentTint = tintColor();
+            updateSafeAreaInsetsIfNeeded();
+            updateLayoutMarginIfNeeded();
+            if (_needsLayout) {
+                _needsLayout = false;
+                layoutSubviews();
+            }
+        }
+        const auto subviews = _subviews;
+        for (const auto& subview : subviews) {
+            if (subview->superview().lock().get() == this)
+                subview->layoutTreeIfNeeded(includeHidden, false);
+        }
+        const auto mask = _mask;
+        if (mask && _mask == mask) mask->layoutTreeIfNeeded(includeHidden, false);
+        if (!_needsLayout && !_needsUpdateSafeAreaInsets && !_needsUpdateLayoutMargins) break;
     }
 }
 
 void UIView::layoutSubviews() {
-    _needsLayout = false;
+    if (!_isLayingOut) _needsLayout = false;
     if (!_parentController.expired()) {
         _parentController.lock()->viewWillLayoutSubviews();
     }

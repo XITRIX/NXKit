@@ -1,4 +1,6 @@
 #include "../AppleSystemFont.hpp"
+#include "IOSWindowGeometry.hpp"
+#include <CALayer.h>
 #include <platforms/ios/SkiaCtx_ios.h>
 
 #include "include/core/SkColorSpace.h"
@@ -15,6 +17,7 @@
 
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
+#include <QuartzCore/CATransaction.h>
 #include <SDL3/SDL_metal.h>
 #include <UIKit/UIKit.h>
 #include <algorithm>
@@ -44,23 +47,6 @@ namespace {
     );
 }
 
-CGSize currentViewSize(::UIWindow *uiWindow) {
-    if (uiWindow == nil) {
-        return CGSizeZero;
-    }
-
-    auto view = uiWindow.rootViewController.view;
-    if (view != nil && !CGRectIsEmpty(view.bounds)) {
-        return view.bounds.size;
-    }
-
-    if (!CGRectIsEmpty(uiWindow.bounds)) {
-        return uiWindow.bounds.size;
-    }
-
-    return CGSizeZero;
-}
-
 void configureMetalLayer(CAMetalLayer* layer, id<MTLDevice> device) {
     if (layer == nil || device == nil) {
         return;
@@ -69,19 +55,22 @@ void configureMetalLayer(CAMetalLayer* layer, id<MTLDevice> device) {
     layer.device = device;
     layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     layer.framebufferOnly = NO;
-    layer.contentsGravity = kCAGravityTopLeft;
+    layer.contentsGravity = kCAGravityResize;
 }
 
 }
 
 SkiaCtx_ios::SkiaCtx_ios(): SkiaCtx_sdlBase() {
     SkGraphics::Init();
+    _windowGeometry = std::make_unique<Internal::IOSWindowGeometry>((__bridge void*)currentWindow(window));
+    prepareFrame();
     initContext();
 
     fontMgr = SkFontMgr_New_CoreText(nullptr);
 }
 
 SkiaCtx_ios::~SkiaCtx_ios() {
+    _windowGeometry.reset();
     destroyContext();
 }
 
@@ -155,35 +144,24 @@ void SkiaCtx_ios::destroyContext() {
     device.reset();
 }
 
-NXSize SkiaCtx_ios::getSize() {
-    auto size = currentViewSize(currentWindow(window));
-    if (CGSizeEqualToSize(size, CGSizeZero)) {
-        return SkiaCtx_sdlBase::getSize() * _extraScaleFactor;
-    }
+void SkiaCtx_ios::prepareFrame() {
+    if (!_windowGeometry) return;
+    if (!_frameGeometry) _frameGeometry = std::make_unique<Internal::IOSWindowFrame>();
+    *_frameGeometry = _windowGeometry->sample();
+    if (_frameGeometry->transitioning) NXKit::CALayer::requestFramerate(screenFrameRate());
+}
 
-    return {
-        static_cast<NXFloat>(size.width * _extraScaleFactor),
-        static_cast<NXFloat>(size.height * _extraScaleFactor)
-    };
+NXSize SkiaCtx_ios::getSize() {
+    if (_frameGeometry && _frameGeometry->width > 0 && _frameGeometry->height > 0)
+        return {_frameGeometry->width * _extraScaleFactor, _frameGeometry->height * _extraScaleFactor};
+    return SkiaCtx_sdlBase::getSize() * _extraScaleFactor;
 }
 
 float SkiaCtx_ios::getScaleFactor() {
-    int drawableWidth = 0;
-    int drawableHeight = 0;
-    SDL_GetWindowSizeInPixels(window, &drawableWidth, &drawableHeight);
-
-    auto size = currentViewSize(currentWindow(window));
-    if (drawableWidth > 0 && drawableHeight > 0 && size.width > 0.0 && size.height > 0.0) {
-        auto horizontalScale = static_cast<float>(drawableWidth / size.width);
-        auto verticalScale = static_cast<float>(drawableHeight / size.height);
-        return std::max(horizontalScale, verticalScale) / _extraScaleFactor;
-    }
-
-    auto uiWindow = currentWindow(window);
-    if (uiWindow != nil) {
-        return uiWindow.screen.nativeScale / _extraScaleFactor;
-    }
-
+    // SDL pixel dimensions can already be the rotation endpoint while the
+    // animated point bounds are still between orientations. Never derive
+    // display density by dividing those two different geometry snapshots.
+    if (_frameGeometry) return _frameGeometry->scale / _extraScaleFactor;
     return SkiaCtx_sdlBase::getScaleFactor() / _extraScaleFactor;
 }
 
@@ -213,8 +191,7 @@ std::pair<NXKit::UIUserInterfaceSizeClass, NXKit::UIUserInterfaceSizeClass> Skia
 }
 
 NXKit::UIEdgeInsets SkiaCtx_ios::deviceSafeAreaInsets() {
-    auto safeArea = currentWindow(window).safeAreaInsets;
-    return { (NXFloat)safeArea.top, (NXFloat)safeArea.left, (NXFloat)safeArea.bottom, (NXFloat)safeArea.right };
+    return _frameGeometry ? NXKit::UIEdgeInsets{_frameGeometry->top, _frameGeometry->left, _frameGeometry->bottom, _frameGeometry->right} : NXKit::UIEdgeInsets{};
 }
 
 sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
@@ -229,38 +206,22 @@ sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
 
     configureMetalLayer(layer, NX_OBJC_BRIDGE(id<MTLDevice>, device.get()));
 
-    int drawableWidth = 0;
-    int drawableHeight = 0;
-    SDL_GetWindowSizeInPixels(window, &drawableWidth, &drawableHeight);
-    if (drawableWidth <= 0 || drawableHeight <= 0) {
-        auto contentScale = layer.contentsScale;
-        if (contentScale <= 0.0) {
-            auto uiWindow = currentWindow(window);
-            if (uiWindow != nil) {
-                contentScale = uiWindow.screen.nativeScale;
-            }
-        }
+    const auto size = getSize() / _extraScaleFactor;
+    const auto scale = getScaleFactor() * _extraScaleFactor;
+    const int drawableWidth = int(std::lround(size.width * scale));
+    const int drawableHeight = int(std::lround(size.height * scale));
+    if (drawableWidth <= 0 || drawableHeight <= 0) return nullptr;
 
-        if (layer.bounds.size.width > 0.0 && layer.bounds.size.height > 0.0 && contentScale > 0.0) {
-            drawableWidth = static_cast<int>(std::lround(layer.bounds.size.width * contentScale));
-            drawableHeight = static_cast<int>(std::lround(layer.bounds.size.height * contentScale));
-        }
-    }
-
-    if (drawableWidth <= 0 || drawableHeight <= 0) {
-        return nullptr;
-    }
-
-    auto logicalSize = currentViewSize(currentWindow(window));
-    if (CGSizeEqualToSize(logicalSize, CGSizeZero)) {
-        logicalSize = CGSizeMake(drawableWidth, drawableHeight);
-    }
-
-    layer.frame = CGRectMake(0.0, 0.0, logicalSize.width, logicalSize.height);
-    layer.contentsScale = logicalSize.width > 0.0 ? drawableWidth / logicalSize.width : 1.0;
+    // SDL/UIKit own the native view's frame and rotation transform. Changing
+    // layer.frame here would overwrite the coordinator's animation endpoint.
+    // The texture follows the probe's presented bounds instead, at native scale.
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    layer.contentsScale = scale;
+    layer.contentsGravity = kCAGravityResize;
     layer.drawableSize = CGSizeMake(drawableWidth, drawableHeight);
-
-    _size = getSize() / _extraScaleFactor;
+    [CATransaction commit];
+    _size = size;
 
     auto currentDrawable = [layer nextDrawable];
     if (currentDrawable == nil || currentDrawable.texture == nil) {
@@ -270,7 +231,7 @@ sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
     drawable.reset(CFRetain((__bridge CFTypeRef)currentDrawable));
 
     auto backendTexture = skgpu::graphite::BackendTextures::MakeMetal(
-            SkISize::Make(drawableWidth, drawableHeight),
+            SkISize::Make(int(currentDrawable.texture.width), int(currentDrawable.texture.height)),
             (__bridge CFTypeRef)currentDrawable.texture);
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry, 0, 1);
     surface = SkSurfaces::WrapBackendTexture(recorder.get(),

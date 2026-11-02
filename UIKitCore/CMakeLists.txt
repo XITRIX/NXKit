@@ -1,3 +1,5 @@
+set_source_files_properties(lib/platforms/apple/ios/IOSWindowGeometry.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
+
 add_library(XITRIXUIKit
         lib/tools/Logger.cpp
         lib/tools/IBTools.cpp
@@ -19,6 +21,7 @@ add_library(XITRIXUIKit
         lib/CATextLayer.cpp
         lib/CATransaction.cpp
         lib/ContentsGravityTransformation.cpp
+        lib/platforms/FramePacing.cpp
         lib/platforms/SkiaCtx.cpp
         lib/Application.cpp
         lib/BackdropEffect.cpp
@@ -115,6 +118,8 @@ if (APPLE)
     elseif (PLATFORM_IOS)
         target_sources(XITRIXUIKit PRIVATE
                 lib/platforms/apple/ios/SkiaCtx_ios.mm
+                lib/platforms/apple/ios/IOSWindowGeometry.mm
+                lib/platforms/apple/ios/IOSWindowGeometry.hpp
         )
     endif ()
 elseif (PLATFORM_SWITCH)

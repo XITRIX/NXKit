@@ -46,9 +46,14 @@ SkiaCtx_sdlBase::SkiaCtx_sdlBase()
     glContext = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, glContext);
 #endif
+#if defined(PLATFORM_MAC)
+    _eventThread = std::this_thread::get_id();
+    _watchesWindowExpose = SDL_AddEventWatch(watchWindowExpose, this);
+#endif
 }
 
 SkiaCtx_sdlBase::~SkiaCtx_sdlBase() {
+    if (_watchesWindowExpose) SDL_RemoveEventWatch(watchWindowExpose, this);
 #if defined(PLATFORM_MAC) || defined(PLATFORM_IOS)
     if (metalView) {
         SDL_Metal_DestroyView(metalView);
@@ -137,3 +142,23 @@ void* SkiaCtx_sdlBase::metalLayer() const {
     return SDL_Metal_GetLayer(metalView);
 }
 #endif
+
+// AppKit enters a modal event-tracking loop during live resizing. SDL emits
+// expose callbacks from that loop, before the outer application's poll returns.
+// OS exposes run on the video thread; reject synthetic events on other threads.
+bool SDLCALL SkiaCtx_sdlBase::watchWindowExpose(void* userdata, SDL_Event* event) {
+    auto* self = static_cast<SkiaCtx_sdlBase*>(userdata);
+    if (event->type == SDL_EVENT_WINDOW_EXPOSED && self->window
+        && event->window.windowID == SDL_GetWindowID(self->window)
+        && std::this_thread::get_id() == self->_eventThread) {
+        self->renderImmediatelyForResize();
+    }
+    return true;
+}
+
+void SkiaCtx_sdlBase::sleepForNextFrame() {
+    const auto milliseconds = millisecondsUntilNextFrame();
+    // Preserve the event for UIApplication, and wake promptly on window/input
+    // changes instead of sleeping through an idle-frame interval.
+    if (milliseconds > 0) SDL_WaitEventTimeout(nullptr, milliseconds);
+}
