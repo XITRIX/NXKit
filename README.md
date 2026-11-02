@@ -30,6 +30,25 @@ Main goal is to create a UI framework that tries to mimic [Apple's UIKit](https:
 - Interface Builder
 - A lot of things tbh ...
 
+## Modules
+
+`UIKitCore` provides style-independent views, controllers, controls, text/images,
+scrolling, input/focus, layout, animation, generic rendering, and platform backends.
+`UIKit` adds Apple-styled components and glass materials; `NXKit` adds
+Nintendo-styled controls, navigation, tabs, and controller hints. Both component
+kits depend directly on Core and can be used together on every supported platform.
+
+Include `<UIKitCore.h>`, `<UIKit.h>`, or `<NXKit.h>` and link the corresponding
+`Xitrix::UIKitCore`, `Xitrix::UIKit`, or `Xitrix::NXKit` target. `XITRIXUIKit`
+remains the underlying UIKit target to avoid an Xcode name collision with the
+native UIKit framework. Optional kits can be disabled with
+`UIKIT_BUILD_UIKIT=OFF` and `UIKIT_BUILD_NXKIT=OFF` when embedding the repository.
+The Demo requires both kits. UIKit XML components require `registerUIKitViews()`
+before inflation; Core registers only its own views.
+
+See [module boundaries and migration](docs/module-boundaries.md) for the component
+inventory, shared controller contracts, API differences, and next steps.
+
 # Build
 
 Initialize the dependencies first:

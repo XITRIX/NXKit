@@ -30,12 +30,11 @@ else ()
     )
 endif ()
 
-target_include_directories(NXKit PUBLIC
-        include
-        lib
-)
+target_include_directories(NXKit PUBLIC include PRIVATE lib)
 
-target_link_libraries(NXKit PUBLIC XITRIXUIKit)
+add_library(Xitrix::NXKit ALIAS NXKit)
+
+target_link_libraries(NXKit PUBLIC UIKitCore)
 
 option(NXKIT_BUILD_TESTS "Build NXKit regression tests" OFF)
 if (NXKIT_BUILD_TESTS)
@@ -44,6 +43,7 @@ if (NXKIT_BUILD_TESTS)
             tests/NXControllerIconResolverTests.cpp
     )
     target_link_libraries(NXKitControllerIconResolverTests PRIVATE NXKit)
+    target_include_directories(NXKitControllerIconResolverTests PRIVATE lib)
     if (PLATFORM_IOS)
         set_target_properties(NXKitControllerIconResolverTests PROPERTIES
                 XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER
@@ -69,21 +69,6 @@ if (NXKIT_BUILD_TESTS)
     target_link_libraries(NXKitNavigationControllerTests PRIVATE NXKit)
     add_test(NAME NXKitNavigationControllerTests COMMAND NXKitNavigationControllerTests)
 
-    add_executable(NXKitGestureRecognizerTests
-            tests/UIGestureRecognizerTests.cpp
-    )
-    target_link_libraries(NXKitGestureRecognizerTests PRIVATE NXKit)
-    add_test(NAME NXKitGestureRecognizerTests COMMAND NXKitGestureRecognizerTests)
-
-    add_executable(NXKitScrollViewIndicatorTests
-            tests/UIScrollViewIndicatorTests.cpp
-    )
-    target_link_libraries(NXKitScrollViewIndicatorTests PRIVATE NXKit)
-    add_test(
-            NAME NXKitScrollViewIndicatorTests
-            COMMAND NXKitScrollViewIndicatorTests
-    )
-
     add_executable(NXKitPressRepeatTests
             tests/UIPressRepeatTests.cpp
     )
@@ -98,24 +83,8 @@ if (NXKIT_BUILD_TESTS)
     endif ()
     add_test(NAME NXKitPressRepeatTests COMMAND NXKitPressRepeatTests)
 
-    add_executable(NXKitLayerRenderingTests
-            tests/CALayerRenderingTests.cpp
-    )
-    # The checked-in Skia archives are built without RTTI. Match that mode for
-    # the test canvas subclass so its vtable does not require Skia typeinfo.
-    target_compile_options(NXKitLayerRenderingTests PRIVATE -fno-rtti)
-    target_link_libraries(NXKitLayerRenderingTests PRIVATE NXKit)
-    add_test(NAME NXKitLayerRenderingTests COMMAND NXKitLayerRenderingTests)
+    add_executable(NXKitAdaptiveTabBarControllerTests tests/NXAdaptiveTabBarControllerTests.cpp)
+    target_link_libraries(NXKitAdaptiveTabBarControllerTests PRIVATE NXKit)
+    add_test(NAME NXKitAdaptiveTabBarControllerTests COMMAND NXKitAdaptiveTabBarControllerTests)
 
-    add_executable(NXKitGlassMaterialTests tests/GlassMaterialTests.cpp)
-    target_link_libraries(NXKitGlassMaterialTests PRIVATE NXKit)
-    add_test(NAME NXKitGlassMaterialTests COMMAND NXKitGlassMaterialTests)
-
-    add_executable(NXKitGlassAppearanceTests tests/GlassAppearanceTests.cpp)
-    target_link_libraries(NXKitGlassAppearanceTests PRIVATE NXKit)
-    add_test(NAME NXKitGlassAppearanceTests COMMAND NXKitGlassAppearanceTests)
-
-    add_executable(NXKitDispatchQueueTests tests/DispatchQueueTests.cpp)
-    target_link_libraries(NXKitDispatchQueueTests PRIVATE NXKit)
-    add_test(NAME NXKitDispatchQueueTests COMMAND NXKitDispatchQueueTests)
 endif ()

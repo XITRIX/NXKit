@@ -8,7 +8,6 @@
 
 namespace NXKit {
 
-class UIGlassEffect;
 
 #define UIColorThemed(lightColor, darkColor, id)                               \
 UIColor([](auto collection) {\
@@ -39,6 +38,9 @@ public:
 
     [[nodiscard]] UIColor interpolationTo(const UIColor& endResult, NXFloat progress) const;
     [[nodiscard]] uint32_t raw() const;
+    [[nodiscard]] UIColor resolvedColorWithTraitCollection(
+        const std::shared_ptr<UITraitCollection>& traits
+    ) const { return UIColor(static_cast<int>(resolvedRaw(traits))); }
 
     // Transparent
     static UIColor clear;
@@ -115,8 +117,6 @@ public:
 
 private:
     friend class UIView;
-    friend class UIGlassEffect;
-
     [[nodiscard]] uint32_t resolvedRaw(
         const std::shared_ptr<UITraitCollection>& traits
     ) const;

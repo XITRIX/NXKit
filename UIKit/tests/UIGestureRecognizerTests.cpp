@@ -313,6 +313,9 @@ int main() {
         "lifting after a recognized scroll does not perform the control action"
     );
 
+    // A touch which catches active inertia belongs to the pan. This assertion
+    // checks a fresh idle control touch, so explicitly finish the previous drag.
+    scrollView->setContentOffset({}, false);
     auto cancelledTouch = new_shared<UITouch>(2, NXPoint(20, 20), Timer());
     auto cancelledEvent = UIGestureRecognizerTestHarness::eventWithTouch(
         cancelledTouch,

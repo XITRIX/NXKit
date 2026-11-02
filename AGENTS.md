@@ -18,13 +18,14 @@ Android, Windows, and Linux are desired future targets but are not implemented.
 
 ## Repository structure
 
-- `UIKitCore/` contains the portable UIKit-style API, rendering, layout, events, controllers, and platform backends. New UIKit-compatible functionality belongs here.
-- `NXKit/` contains opinionated or product-specific components such as the current console-oriented navigation and tab controllers. Do not treat these as UIKit-compatible implementations unless their behavior and public API are brought into parity.
+- `UIKitCore/` contains style-independent UI behavior, rendering primitives, layout, events, focus, traits, view/controller infrastructure, shared container interfaces, and platform backends. It must build and link without either component kit.
+- `UIKit/` contains Apple-styled components and materials. UIKit-facing APIs should follow Apple public headers wherever practical; document C++ and portable extensions explicitly.
+- `NXKit/` contains Nintendo-styled controls, navigation, tabs, controller hints, and other console presentation. It depends directly on UIKitCore, not UIKit. Applications may freely mix components from both kits on any supported platform.
 - `Demo/` is the executable smoke-test and visual playground.
 - `Submodules/` contains SDL, Skia, Yoga, TinyXML2, fmt, vcpkg, and platform support dependencies. Avoid unrelated submodule changes.
 - `UIKIT_API_PROGRESS.md` is the required compatibility and roadmap tracker.
 
-The core CMake target is currently `XITRIXUIKit`, with alias `Xitrix::UIKit`; the extension target is `NXKit`. The namespace is `NXKit`. This naming is existing technical debt: do not introduce another project name.
+The CMake targets are `UIKitCore`, `XITRIXUIKit` (the UIKit module), and `NXKit`, with aliases `Xitrix::UIKitCore`, `Xitrix::UIKit`, and `Xitrix::NXKit`. UIKit retains the historical target name to avoid colliding with Apple’s native UIKit framework in the Xcode generator. The shared namespace remains `NXKit`; do not introduce another project name. Component selection is independent of the operating system.
 
 ## Architecture
 
@@ -58,7 +59,7 @@ When borrowing an algorithm or porting code, check its license, preserve require
 - Maintain familiar hierarchy and ownership behavior: views own subviews and layers; parents, delegates, and back-references should normally be weak.
 - UI state is main-thread/main-queue confined. New asynchronous work must marshal UI mutations back to `DispatchQueue::main()`.
 - New public headers should not include private Skia source headers or expose backend types unless the API is explicitly a low-level rendering extension.
-- Keep `UIKitCore` independently usable; optional NXKit components may depend on it, never the reverse.
+- Keep `UIKitCore` independently usable. UIKit and NXKit depend on Core, never the reverse or on each other. Keep generic rendering and control state neutral; put appearance and visual feedback in the component kit. XML registration of optional UIKit components is explicit through `registerUIKitViews()`.
 
 ## Current C++ conventions
 
@@ -126,7 +127,7 @@ cmake --build Demo/build/macos --target ThorVGApp -j
 
 Equivalent iOS and Switch commands are in `README.md`. CMake configuration intentionally fails if the expected Skia archive is missing; report that as an unmet prerequisite, not a successful source build.
 
-There is currently no first-party automated test suite or CI. Adding a small, fast core test target—beginning with geometry, ownership, hierarchy, event delivery, animation, controls, and scroll behavior—is a higher priority than broad API expansion.
+Regression tests live under each module’s `tests/` directory. Enable them with `UIKITCORE_BUILD_TESTS`, `UIKIT_BUILD_TESTS`, and `NXKIT_BUILD_TESTS`; the legacy NXKit flag also defaults the other two on in the top-level build. The existing headless raster harness is `Demo/GlassComparison/RasterTests`. Its `NXKIT_RASTER_CORE_ONLY` option verifies Core without either component kit. There is no first-party CI yet; prefer focused behavior and module-boundary tests over broad API expansion.
 
 ## Known high-priority hazards
 

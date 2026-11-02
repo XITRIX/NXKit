@@ -7,6 +7,10 @@
 #include <UIPresentationController.h>
 #include <UIViewControllerTransitioning.h>
 #include <UIWindow.h>
+#include <SkiaCtx.h>
+#ifdef __APPLE__
+#include "include/ports/SkFontMgr_mac_ct.h"
+#endif
 
 #include <SDL3/SDL.h>
 
@@ -32,6 +36,22 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(
 namespace {
 
 int failures = 0;
+class NavigationTestContext final : public SkiaCtx {
+public:
+    NavigationTestContext() {
+#ifdef __APPLE__
+        fontMgr = SkFontMgr_New_CoreText(nullptr);
+#endif
+    }
+    NXKit::NXSize getSize() override { return {1280,720}; }
+    sk_sp<SkSurface> getBackbufferSurface() override { return nullptr; }
+    void swapBuffers() override {}
+    void sleepForNextFrame() override {}
+    bool platformRunLoop(std::function<bool()>) override { return false; }
+protected:
+    skgpu::graphite::Context* graphiteContext() override { return nullptr; }
+    skgpu::graphite::Recorder* graphiteRecorder() override { return nullptr; }
+};
 
 void expect(bool condition, const std::string& message) {
     if (condition) {
@@ -383,6 +403,9 @@ private:
 } // namespace
 
 int main() {
+    // makeKeyAndVisible now completes initial layout before appearance. Supply
+    // the font service used by navigation chrome's intrinsic measurements.
+    SkiaCtx::_main = std::make_shared<NavigationTestContext>();
     auto yogaRoot = new_shared<UIView>();
     yogaRoot->setAutolayoutEnabled(true);
     yogaRoot->setFrame(NXRect(0, 0, 320, 180));
@@ -441,7 +464,11 @@ int main() {
         navigationController->visibleViewController() == root,
         "the root is initially the visible controller"
     );
-    expect(root->parent().expired(), "containment remains lazy until the navigation view loads");
+    expect(root->parent().lock() == navigationController
+           && root->navigationController() == navigationController,
+           "configured root discovers navigation before the container view loads");
+    expect(!navigationController->viewIsLoaded() && !root->viewIsLoaded(),
+           "navigation containment does not load either view");
 
     navigationController->loadViewIfNeeded();
     expect(
@@ -1050,7 +1077,7 @@ int main() {
         "the presented hierarchy accepts input while its transition is running"
     );
     expect(
-        window->hitTest(NXPoint(20, 20), nullptr)
+        window->hitTest(NXKit::NXPoint(20, 20), nullptr)
             == presentationAnimationView,
         "input during presentation is captured by the modal instead of falling through to the presenter"
     );

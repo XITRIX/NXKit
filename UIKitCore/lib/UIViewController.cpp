@@ -1042,3 +1042,21 @@ void UIViewController::drainPendingModalOperations() {
     }
     _isDrainingModalOperations = false;
 }
+
+std::shared_ptr<UINavigationControllerInterface> UIViewController::navigationController() const {
+    for (auto ancestor = _parent.lock(); ancestor; ancestor = ancestor->_parent.lock()) {
+        if (auto navigation = std::dynamic_pointer_cast<UINavigationControllerInterface>(ancestor)) {
+            return navigation;
+        }
+    }
+    return nullptr;
+}
+
+std::shared_ptr<UITabBarControllerInterface> UIViewController::tabBarController() const {
+    for (auto ancestor = _parent.lock(); ancestor; ancestor = ancestor->_parent.lock()) {
+        if (auto tabs = std::dynamic_pointer_cast<UITabBarControllerInterface>(ancestor)) {
+            return tabs;
+        }
+    }
+    return nullptr;
+}

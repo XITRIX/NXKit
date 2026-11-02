@@ -34,8 +34,11 @@ public:
     std::shared_ptr<UIImageView> imageView() { return _imageView; }
 
     void baseScaleMultiplierDidChange() override;
-//    void willGainFocus() override;
-//    void willLoseFocus() override;
+    void willGainFocus() override;
+    void willLoseFocus() override;
+    void focusFailedToMove(UIFocusHeading heading) override;
+    void willChangeFocusHighlight(bool highlighted) override;
+    void willChangeHighlight(bool highlighted) override;
 
     void applyStyle(UIButtonStyle style);
     bool applyXMLAttribute(const std::string& name, const std::string& value) override;

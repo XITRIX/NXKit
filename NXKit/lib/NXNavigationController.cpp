@@ -57,6 +57,9 @@ NXNavigationController::NXNavigationController(
         );
     }
     _viewControllers.push_back(rootViewController);
+    _isTransitioning = true;
+    attachConfiguredChildren();
+    completeStackUpdate();
 }
 
 void NXNavigationController::loadView() {
@@ -401,13 +404,14 @@ void NXNavigationController::beginStackUpdate(
     }
 
     _viewControllers = std::move(viewControllers);
-    if (!viewIsLoaded()) {
-        return;
-    }
-
     _isTransitioning = true;
     try {
         attachConfiguredChildren();
+        if (!viewIsLoaded()) {
+            detachRemovedControllers(removedControllers);
+            completeStackUpdate();
+            return;
+        }
         updateVisibleViewController(operation, animated, std::move(removedControllers));
     } catch (...) {
         _isTransitioning = false;

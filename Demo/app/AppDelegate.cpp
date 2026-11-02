@@ -1,4 +1,5 @@
 #include <NXKit.h>
+#include <UIKit.h>
 #include <UIApplication.h>
 #include <Screens/TestViewController/TestViewController.hpp>
 #include <Screens/IBTestController/IBTestController.h>
@@ -15,6 +16,7 @@
 namespace NXKit {
 
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplication* application, std::map<std::string, std::any> launchOptions) {
+    registerUIKitViews();
     DEFAULT_ROMFS_REGISTRATION
     window = new_shared<UIWindow>();
     NXResponderAction {

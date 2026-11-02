@@ -1,5 +1,5 @@
 #include "SkiaCtx.h"
-#include "GlassBackdrop.hpp"
+#include "BackdropSampling.hpp"
 #include "include/core/SkImage.h"
 #include "include/gpu/graphite/Context.h"
 #include "include/gpu/graphite/GraphiteTypes.h"

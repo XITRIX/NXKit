@@ -11,7 +11,6 @@
 #include <string>
 #include <yoga/Yoga.h>
 #include <UIImage.h>
-#include <UIButton.h>
 #include <UIEdgeInsets.h>
 #include <UIViewContentMode.h>
 
@@ -42,6 +41,5 @@ std::optional<YGPositionType> valueToPositionType(const std::string& value);
 std::optional<NSTextAlignment> valueToTextAlignment(const std::string& value);
 //std::optional<UIEdgeInsets> valueToEdgeInsets(std::string value);
 //std::optional<UIViewEdgeRespects> valueToEdgeRespects(std::string value);
-std::optional<UIButtonStyle> valueToButtonStyle(const std::string& value);
 
 }

@@ -1,16 +1,12 @@
 set_source_files_properties(lib/platforms/apple/ios/IOSWindowGeometry.mm PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
 
-add_library(XITRIXUIKit
+add_library(UIKitCore
         lib/tools/Logger.cpp
         lib/tools/IBTools.cpp
         lib/tools/Fatal.cpp
         lib/tools/Tools.cpp
         lib/CABasicAnimation.cpp
         lib/CABasicAnimationPrototype.cpp
-        lib/CABackdropEffectLayer.cpp
-        lib/GlassInteraction.hpp
-        lib/GlassAppearance.hpp
-        lib/GlassBackdrop.hpp
         lib/CABlurLayer.cpp
         lib/CASpringAnimation.cpp
         lib/CASpringAnimationPrototype.cpp
@@ -25,17 +21,14 @@ add_library(XITRIXUIKit
         lib/platforms/SkiaCtx.cpp
         lib/Application.cpp
         lib/BackdropEffect.cpp
-        lib/BackdropEffectView.cpp
-        lib/LensView.cpp
-        lib/LensMaterial.cpp
-        lib/LensMaterial.hpp
-        lib/LensInteraction.hpp
-        include/LensView.h
-        lib/GlassContainerView.cpp
-        lib/CAGlassContainerLayer.cpp
-        lib/CAGlassContainerLayer.hpp
-        include/GlassContainerView.h
-        include/UIGlassContainerEffect.h
+        lib/BackdropShader.cpp
+        lib/BackdropShader.hpp
+        lib/BackdropSampling.hpp
+        lib/CABackdropLayer.cpp
+        include/CABackdropLayer.h
+        include/UIKitCore.h
+        include/UINavigationControllerInterface.h
+        include/UITabBarControllerInterface.h
         lib/DispatchQueue.cpp
         lib/Timer.cpp
         lib/Geometry.cpp
@@ -53,7 +46,6 @@ add_library(XITRIXUIKit
         lib/UIApplicationDelegateImpl.cpp
         lib/UIApplicationMain.cpp
         lib/UIBlurView.cpp
-        lib/UIButton.cpp
         lib/UIColor.cpp
         lib/UIControl.cpp
         lib/UIControlGestureRecognizer.cpp
@@ -62,7 +54,6 @@ add_library(XITRIXUIKit
         lib/UIFocus.cpp
         lib/UIFocusAnimationCoordinator.cpp
         lib/UIFocusSystem.cpp
-        lib/UIGlassEffect.cpp
         lib/UIGestureRecognizer.cpp
         lib/UIImage.cpp
         lib/UIImageView.cpp
@@ -97,34 +88,67 @@ add_library(XITRIXUIKit
         lib/SkTools/SkDebugfTracer.cpp
 )
 
-add_library(Xitrix::UIKit ALIAS XITRIXUIKit)
+add_library(Xitrix::UIKitCore ALIAS UIKitCore)
 
-target_include_directories(XITRIXUIKit PUBLIC
-        include
-        lib
-)
+target_include_directories(UIKitCore PUBLIC include PRIVATE lib)
 
 
 if (APPLE)
-    target_sources(XITRIXUIKit PRIVATE
+    target_sources(UIKitCore PRIVATE
             lib/platforms/SkiaCtx_sdlBase.cpp
             lib/platforms/apple/AppleSystemFont.mm
             lib/platforms/apple/AppleSystemImage.mm
     )
     if (PLATFORM_DESKTOP)
-        target_sources(XITRIXUIKit PRIVATE
+        target_sources(UIKitCore PRIVATE
                 lib/platforms/apple/macos/SkiaCtx_macos.mm
         )
     elseif (PLATFORM_IOS)
-        target_sources(XITRIXUIKit PRIVATE
+        target_sources(UIKitCore PRIVATE
                 lib/platforms/apple/ios/SkiaCtx_ios.mm
                 lib/platforms/apple/ios/IOSWindowGeometry.mm
                 lib/platforms/apple/ios/IOSWindowGeometry.hpp
         )
     endif ()
 elseif (PLATFORM_SWITCH)
-    target_sources(XITRIXUIKit PRIVATE
+    target_sources(UIKitCore PRIVATE
             lib/platforms/switch/SkiaCtx_switch.cpp
             lib/platforms/switch/switch_wrapper.c
     )
+endif ()
+
+option(UIKITCORE_BUILD_TESTS "Build UIKitCore regression tests" OFF)
+if (UIKITCORE_BUILD_TESTS)
+    enable_testing()
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+    add_executable(UIKitCoreModuleBoundaryTests tests/ModuleBoundaryTests.cpp)
+    target_link_libraries(UIKitCoreModuleBoundaryTests PRIVATE UIKitCore)
+    add_test(NAME UIKitCoreModuleBoundaryTests COMMAND UIKitCoreModuleBoundaryTests)
+    add_executable(NXKitLayoutPassTests tests/LayoutPassTests.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib/UIApplicationMain.cpp)
+    target_link_libraries(NXKitLayoutPassTests PRIVATE UIKitCore)
+    add_test(NAME NXKitLayoutPassTests COMMAND NXKitLayoutPassTests)
+    add_executable(NXKitRenderTraversalTests tests/RenderTraversalTests.cpp)
+    target_link_libraries(NXKitRenderTraversalTests PRIVATE UIKitCore)
+    add_test(NAME NXKitRenderTraversalTests COMMAND NXKitRenderTraversalTests)
+    add_executable(NXKitLayerSamplingTests tests/LayerSamplingTests.cpp)
+    target_link_libraries(NXKitLayerSamplingTests PRIVATE UIKitCore)
+    add_test(NAME NXKitLayerSamplingTests COMMAND NXKitLayerSamplingTests)
+    add_executable(NXKitScrollPhysicsTests tests/ScrollPhysicsTests.cpp)
+    target_include_directories(NXKitScrollPhysicsTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib)
+    target_link_libraries(NXKitScrollPhysicsTests PRIVATE UIKitCore)
+    add_test(NAME NXKitScrollPhysicsTests COMMAND NXKitScrollPhysicsTests)
+
+    add_executable(NXKitScrollViewIndicatorTests
+            tests/UIScrollViewIndicatorTests.cpp
+    )
+    target_link_libraries(NXKitScrollViewIndicatorTests PRIVATE UIKitCore)
+    add_test(
+            NAME NXKitScrollViewIndicatorTests
+            COMMAND NXKitScrollViewIndicatorTests
+    )
+
+    add_executable(NXKitDispatchQueueTests tests/DispatchQueueTests.cpp)
+    target_link_libraries(NXKitDispatchQueueTests PRIVATE UIKitCore)
+    add_test(NAME NXKitDispatchQueueTests COMMAND NXKitDispatchQueueTests)
 endif ()

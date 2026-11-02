@@ -105,45 +105,11 @@ void UIControl::didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationC
     }
 }
 
-void UIControl::willGainFocus() {
-    setTransform(NXAffineTransform::scale(1.06f));
-    setBaseScaleMultiplier(1.1f);
-    layer()->setShadowColor(UIColor::black);
-    layer()->setShadowOpacity(0.4);
-    layer()->setShadowOffset({0, 6});
-    layer()->setShadowRadius(18);
-    layer()->setZPosition(1);
-}
-
-void UIControl::willLoseFocus() {
-    setTransform(NXAffineTransform::identity);
-    setBaseScaleMultiplier(1);
-    layer()->setShadowOpacity(0);
-    layer()->setShadowRadius(0);
-    layer()->setZPosition(0);
-}
-
-void UIControl::focusFailedToMove(UIFocusHeading heading) {
-
-}
-
-void UIControl::willChangeFocusHighlight(bool highlighted) {
-    if (highlighted) {
-        setTransform(NXAffineTransform::scale(1.02f));
-        setBaseScaleMultiplier(1.0f);
-        layer()->setShadowOffset({0, 3});
-        layer()->setShadowRadius(4);
-    } else {
-        setTransform(NXAffineTransform::scale(1.06f));
-        setBaseScaleMultiplier(1.1f);
-        layer()->setShadowOffset({0, 6});
-        layer()->setShadowRadius(18);
-    }
-}
-
-void UIControl::willChangeHighlight(bool highlighted) {
-    setAlpha(highlighted ? 0.8 : 1);
-}
+void UIControl::willGainFocus() {}
+void UIControl::willLoseFocus() {}
+void UIControl::focusFailedToMove(UIFocusHeading) {}
+void UIControl::willChangeFocusHighlight(bool) {}
+void UIControl::willChangeHighlight(bool) {}
 
 bool UIControl::isEnabled() const {
     return !_state[uint8_t (UIControlState::disabled)];

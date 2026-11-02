@@ -1,6 +1,8 @@
 #pragma once
 
 #include <UIView.h>
+#include <UINavigationControllerInterface.h>
+#include <UITabBarControllerInterface.h>
 #include <UIViewControllerTransitioning.h>
 
 #include <deque>
@@ -40,6 +42,12 @@ public:
 
     std::vector<std::shared_ptr<UIViewController>> children() { return _children; }
     std::weak_ptr<UIViewController> parent() { return _parent; }
+
+    /** Nearest enclosing container implementing the capability. These accessors
+        follow actual containment, exclude self, and do not retain ancestors. */
+    [[nodiscard]] std::shared_ptr<UINavigationControllerInterface> navigationController() const;
+    [[nodiscard]] std::shared_ptr<UITabBarControllerInterface> tabBarController() const;
+
 
     std::string title() { return _title; }
     void setTitle(std::string title) { _title = std::move(title); }

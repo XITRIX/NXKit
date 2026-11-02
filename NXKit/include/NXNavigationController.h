@@ -32,33 +32,33 @@ public:
     ) {}
 };
 
-class NXNavigationController : public UIViewController {
+class NXNavigationController : public UIViewController, public UINavigationControllerInterface {
 public:
     explicit NXNavigationController(const std::shared_ptr<UIViewController>& rootViewController);
 
     std::weak_ptr<NXNavigationControllerDelegate> delegate;
 
-    [[nodiscard]] std::vector<std::shared_ptr<UIViewController>> viewControllers() const {
+    [[nodiscard]] std::vector<std::shared_ptr<UIViewController>> viewControllers() const override {
         return _viewControllers;
     }
     void setViewControllers(
         std::vector<std::shared_ptr<UIViewController>> viewControllers,
         bool animated
-    );
+    ) override;
 
     void pushViewController(
         const std::shared_ptr<UIViewController>& viewController,
         bool animated
-    );
-    std::shared_ptr<UIViewController> popViewController(bool animated);
+    ) override;
+    std::shared_ptr<UIViewController> popViewController(bool animated) override;
     std::vector<std::shared_ptr<UIViewController>> popToViewController(
         const std::shared_ptr<UIViewController>& viewController,
         bool animated
-    );
-    std::vector<std::shared_ptr<UIViewController>> popToRootViewController(bool animated);
+    ) override;
+    std::vector<std::shared_ptr<UIViewController>> popToRootViewController(bool animated) override;
 
-    [[nodiscard]] std::shared_ptr<UIViewController> topViewController() const;
-    [[nodiscard]] std::shared_ptr<UIViewController> visibleViewController() const;
+    [[nodiscard]] std::shared_ptr<UIViewController> topViewController() const override;
+    [[nodiscard]] std::shared_ptr<UIViewController> visibleViewController() const override;
     [[nodiscard]] bool isTransitioning() const { return _isTransitioning; }
 
     std::shared_ptr<NXNavigationItem> navigationItemFor(

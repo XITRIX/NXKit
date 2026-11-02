@@ -1,3 +1,4 @@
+#include <UIGlassEffect.h>
 #pragma once
 #include <Geometry.h>
 #include <BackdropEffect.h>
@@ -30,7 +31,7 @@ float glassShadowTail(float z) {
 )SKSL";
 
 inline std::string glassShadowGeometrySource() {
-    const auto source = BackdropEffect::glass().shaderSource();
+    const auto source = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect().shaderSource();
     const auto start = source.find("float circularBoxSDF(");
     return source.substr(start, source.find("float toBrightness", start) - start);
 }

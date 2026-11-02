@@ -1,3 +1,4 @@
+#include "LayerCornerGeometry.hpp"
 #include <BackdropEffect.h>
 #include <UIGlassEffect.h>
 #include <UITraitCollection.h>
@@ -25,7 +26,12 @@ namespace NXKit {
 class GlassMaterialTestHarness {
 public:
     static BackdropEffect resolve(UIGlassEffect::Style style, NXSize size) {
-        return UIGlassEffect(style)._backdropEffect(size, UITraitCollection::current());
+        return resolve(UIGlassEffect(style),size,false);
+    }
+    static BackdropEffect resolve(const UIGlassEffect& effect, NXSize size, bool dark) {
+        auto traits=std::make_shared<UITraitCollection>();
+        traits->_userInterfaceStyle=dark ? UIUserInterfaceStyle::dark : UIUserInterfaceStyle::light;
+        return effect._backdropEffect(size,traits);
     }
 };
 }
@@ -71,10 +77,10 @@ void testMotion() {
     held.pressed = true;
     held.advance(2);
     const auto pill = held.transform({132, 56});
-    expect(std::abs(pill.m11 * 132 - 149) < 0.01,
-           "press grows the longest side by 17 points");
-    expect(std::abs(held.transform({56, 56}).m11 * 56 - 73) < 0.01,
-           "circle press uses the same point growth as the pill");
+    expect(std::abs(pill.m11 * 132 - (132 + 16 - 12 * 12.0 / 116)) < 0.01,
+           "large-mode pill inflation resolves from its shortest dimension");
+    expect(std::abs(held.transform({56, 56}).m11 * 56 - 72) < 0.01,
+           "small circle press grows by sixteen points");
     expect(circle.m11 > 1 && circle.m22 > 1, "a dragged pressed material remains inflated");
     expect(sixty.transform({0, 0}).isIdentity(), "empty glass has an identity visual transform");
     expect(sixty.transform({std::numeric_limits<float>::infinity(), 56}).isIdentity(),
@@ -132,10 +138,10 @@ void bindMaterial(SkRuntimeEffectBuilder& builder, const BackdropEffect& glass,
                   NXSize size, NXFloat radius, NXFloat scale) {
     for (const auto* name : {
         "refraction", "curve", "dispersion", "saturation", "contrast", "luminosity",
-        "tint", "edge", "specStrength", "specFallbackStrength", "specBrightFallbackStrength",
+        "tint", "tintMode", "edge", "specStrength", "specFallbackStrength", "specBrightFallbackStrength",
         "specLightDirection", "specDirectionalPower", "specWidthPx", "reflectionSamplePx",
         "reflectionSpreadPx", "brightBackdropShade", "referenceAppearance", "bodyMode",
-        "backdropLuma", "edgeAbsorption", "adaptiveTint"
+        "backdropLuma", "edgeAbsorption", "adaptiveTint", "bodyCompression", "neutralDetail", "materialFrost"
     }) {
         const auto components = glass.uniform(name);
         if (components) builder.uniform(name).set(components->data(), components->size());
@@ -144,6 +150,7 @@ void bindMaterial(SkRuntimeEffectBuilder& builder, const BackdropEffect& glass,
     builder.uniform("lensSize") = SkV2{size.width, size.height};
     builder.uniform("lensCenter") = SkV2{size.width * 0.5f, size.height * 0.5f};
     builder.uniform("cornerRadius") = radius;
+    Internal::bindLayerCornerGeometry(builder,*runtime,size,radius);
     builder.uniform("contentScale") = scale;
     builder.uniform("filterScale") = 1.0f;
     builder.uniform("maximumSampleRadius") = glass.maximumSampleRadius();
@@ -164,7 +171,7 @@ SkBitmap renderFilterFixture(int scale, bool lineOnly, bool regular = false) {
         // The native-calibrated fold reaches this band near the top perimeter.
         canvas->drawRect(SkRect::MakeXYWH(0, padding + 34, width + padding * 2, 6), red);
     }
-    auto glass = BackdropEffect::glass();
+    auto glass = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
     glass.setUniform("bodyMode", regular ? 0.0f : 1.0f);
     glass.setUniform("tint", UIColor::clear);
     glass.setUniform("saturation", 1.0f);
@@ -207,7 +214,7 @@ SkBitmap renderFilterFixture(int scale, bool lineOnly, bool regular = false) {
 SkColor render(bool clear, bool dark, NXFloat glow, NXPoint touch, NXPoint sample,
                const UIColor& tint, NXFloat radius = 28, NXFloat scale = 1,
                SkColor background = SkColorSetRGB(70, 100, 125)) {
-    auto glass = BackdropEffect::glass();
+    auto glass = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
     auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(132, 56));
     SkRuntimeEffectBuilder builder(runtime);
     // Start from the same clear material used by UIGlassEffect; override only
@@ -238,8 +245,7 @@ int luma(SkColor color) {
     return SkColorGetR(color) * 0.2126 + SkColorGetG(color) * 0.7152 + SkColorGetB(color) * 0.0722;
 }
 
-SkColor renderDefaultBody(UIGlassEffect::Style style, NXSize size, SkColor background = SK_ColorBLACK) {
-    const auto effect = GlassMaterialTestHarness::resolve(style, size);
+SkColor renderResolvedBody(const BackdropEffect& effect, NXSize size, SkColor background = SK_ColorBLACK, NXPoint sample = {-1, -1}) {
     SkRuntimeEffectBuilder builder(runtime);
     bindMaterial(builder, effect, size, std::min(size.width, size.height) * 0.5f, 1);
     builder.uniform("interactionIntensity") = 0.0f;
@@ -253,29 +259,195 @@ SkColor renderDefaultBody(UIGlassEffect::Style style, NXSize size, SkColor backg
     SkBitmap pixels;
     pixels.allocN32Pixels(size.width, size.height);
     surface->readPixels(pixels, 0, 0);
-    return pixels.getColor(size.width / 2, size.height / 2);
+    return sample.x < 0 ? pixels.getColor(size.width / 2, size.height / 2)
+        : pixels.getColor(sample.x, sample.y);
+}
+
+SkColor renderDefaultBody(UIGlassEffect::Style style, NXSize size, SkColor background = SK_ColorBLACK) {
+    return renderResolvedBody(GlassMaterialTestHarness::resolve(style,size),size,background);
+}
+void testNativeTint() {
+    for (bool dark:{false,true}) for (auto style:{UIGlassEffect::Style::clear,UIGlassEffect::Style::regular}) {
+        UIGlassEffect glass(style);glass.setTintColor(UIColor(0,122,255));
+        const auto resolved=GlassMaterialTestHarness::resolve(glass,{160,70},dark);
+        const auto black=renderResolvedBody(resolved,{160,70});
+        const int expectedGreen=style==UIGlassEffect::Style::clear ? 71 : (dark ? 122 : 94);
+        const int expectedBlue=style==UIGlassEffect::Style::clear ? 166 : (dark ? 255 : 206);
+        expect(SkColorGetR(black)<4 && std::abs(static_cast<int>(SkColorGetG(black))-expectedGreen)<6 && std::abs(static_cast<int>(SkColorGetB(black))-expectedBlue)<6,
+               "full-alpha tint matches UIKit's clear/regular/light/dark black-backdrop controls");
+        const auto white=renderResolvedBody(resolved,{160,70},SK_ColorWHITE);
+        expect(SkColorGetB(white)>245 && SkColorGetG(white)>115,"tinted glass retains the supplied color on white");
+        glass.setTintColor(UIColor(0,122,255,128));
+        const auto alpha=renderResolvedBody(GlassMaterialTestHarness::resolve(glass,{160,70},dark),{160,70});
+        expect(SkColorGetB(alpha)<SkColorGetB(black) && SkColorGetA(alpha)==255,"tint alpha interpolates with material without punching out its backdrop");
+        glass.setTintOpacity(0);
+        const auto override=GlassMaterialTestHarness::resolve(glass,{160,70},dark);
+        expect(override.uniform("tintMode")->front()==0 && override.uniform("tint")->back()==0,"explicit opacity overrides retain the low-level tint path");
+    }
+}
+
+void testNativeOpticalControls() {
+    // Independent iPadOS 27.0 sRGB framebuffer controls, captured by
+    // Demo/GlassComparison/OpticalReference.m. See docs/liquid-glass-optics.
+    // Yellow was withheld from fitting; the larger light neutral residual is
+    // retained with its measured tolerance instead of adjusting the reference.
+    struct Control { bool dark; int tint; NXFloat size; SkColor background, expected; int tolerance; };
+    const Control controls[] = {
+        {false,0,52,SkColorSetRGB(0,0,0),SkColorSetRGB(133,133,133),6},
+        {false,0,120,SkColorSetRGB(0,0,0),SkColorSetRGB(135,135,135),6},
+        {false,0,52,SkColorSetRGB(128,128,128),SkColorSetRGB(195,195,195),6},
+        {false,0,120,SkColorSetRGB(128,128,128),SkColorSetRGB(200,200,200),6},
+        {false,0,52,SkColorSetRGB(255,255,255),SkColorSetRGB(253,253,253),6},
+        {false,0,120,SkColorSetRGB(255,255,255),SkColorSetRGB(254,254,254),6},
+        {false,0,52,SkColorSetRGB(255,0,0),SkColorSetRGB(255,108,108),6},
+        {false,0,120,SkColorSetRGB(255,0,0),SkColorSetRGB(255,111,111),6},
+        {false,0,52,SkColorSetRGB(0,255,0),SkColorSetRGB(51,255,51),6},
+        {false,0,120,SkColorSetRGB(0,255,0),SkColorSetRGB(48,255,48),6},
+        {false,0,52,SkColorSetRGB(0,0,255),SkColorSetRGB(124,124,255),6},
+        {false,0,120,SkColorSetRGB(0,0,255),SkColorSetRGB(127,127,255),6},
+        {false,0,52,SkColorSetRGB(255,255,0),SkColorSetRGB(255,255,27),6},
+        {false,0,120,SkColorSetRGB(255,255,0),SkColorSetRGB(255,255,14),12},
+        {false,1,52,SkColorSetRGB(0,0,0),SkColorSetRGB(0,94,206),4},
+        {false,1,120,SkColorSetRGB(0,0,0),SkColorSetRGB(0,95,207),4},
+        {false,1,52,SkColorSetRGB(128,128,128),SkColorSetRGB(0,108,231),4},
+        {false,1,120,SkColorSetRGB(128,128,128),SkColorSetRGB(0,109,233),4},
+        {false,1,52,SkColorSetRGB(255,255,255),SkColorSetRGB(0,122,254),4},
+        {false,1,120,SkColorSetRGB(255,255,255),SkColorSetRGB(0,122,255),4},
+        {false,1,52,SkColorSetRGB(255,0,0),SkColorSetRGB(0,96,209),4},
+        {false,1,120,SkColorSetRGB(255,0,0),SkColorSetRGB(0,96,210),4},
+        {false,1,52,SkColorSetRGB(0,255,0),SkColorSetRGB(0,109,232),4},
+        {false,1,120,SkColorSetRGB(0,255,0),SkColorSetRGB(0,109,231),4},
+        {false,1,52,SkColorSetRGB(0,0,255),SkColorSetRGB(0,94,206),4},
+        {false,1,120,SkColorSetRGB(0,0,255),SkColorSetRGB(0,95,207),4},
+        {false,1,52,SkColorSetRGB(255,255,0),SkColorSetRGB(0,118,248),4},
+        {false,1,120,SkColorSetRGB(255,255,0),SkColorSetRGB(0,118,248),4},
+        {false,2,52,SkColorSetRGB(0,0,0),SkColorSetRGB(228,30,25),4},
+        {false,2,120,SkColorSetRGB(0,0,0),SkColorSetRGB(228,31,26),4},
+        {false,2,52,SkColorSetRGB(128,128,128),SkColorSetRGB(242,50,42),4},
+        {false,2,120,SkColorSetRGB(128,128,128),SkColorSetRGB(243,51,43),4},
+        {false,2,52,SkColorSetRGB(255,255,255),SkColorSetRGB(255,68,57),4},
+        {false,2,120,SkColorSetRGB(255,255,255),SkColorSetRGB(255,69,58),4},
+        {false,2,52,SkColorSetRGB(255,0,0),SkColorSetRGB(229,32,27),4},
+        {false,2,120,SkColorSetRGB(255,0,0),SkColorSetRGB(230,33,28),4},
+        {false,2,52,SkColorSetRGB(0,255,0),SkColorSetRGB(242,51,42),4},
+        {false,2,120,SkColorSetRGB(0,255,0),SkColorSetRGB(242,50,42),4},
+        {false,2,52,SkColorSetRGB(0,0,255),SkColorSetRGB(228,30,25),4},
+        {false,2,120,SkColorSetRGB(0,0,255),SkColorSetRGB(228,31,26),4},
+        {false,2,52,SkColorSetRGB(255,255,0),SkColorSetRGB(251,64,54),4},
+        {false,2,120,SkColorSetRGB(255,255,0),SkColorSetRGB(251,63,53),4},
+        {true,0,52,SkColorSetRGB(0,0,0),SkColorSetRGB(32,32,32),6},
+        {true,0,120,SkColorSetRGB(0,0,0),SkColorSetRGB(32,32,32),6},
+        {true,0,52,SkColorSetRGB(128,128,128),SkColorSetRGB(134,134,134),6},
+        {true,0,120,SkColorSetRGB(128,128,128),SkColorSetRGB(117,117,117),6},
+        {true,0,52,SkColorSetRGB(255,255,255),SkColorSetRGB(185,185,185),6},
+        {true,0,120,SkColorSetRGB(255,255,255),SkColorSetRGB(121,121,121),6},
+        {true,0,52,SkColorSetRGB(255,0,0),SkColorSetRGB(255,15,15),6},
+        {true,0,120,SkColorSetRGB(255,0,0),SkColorSetRGB(255,14,14),6},
+        {true,0,52,SkColorSetRGB(0,255,0),SkColorSetRGB(0,235,0),6},
+        {true,0,120,SkColorSetRGB(0,255,0),SkColorSetRGB(0,187,0),6},
+        {true,0,52,SkColorSetRGB(0,0,255),SkColorSetRGB(26,26,255),6},
+        {true,0,120,SkColorSetRGB(0,0,255),SkColorSetRGB(25,25,255),6},
+        {true,0,52,SkColorSetRGB(255,255,0),SkColorSetRGB(197,197,0),6},
+        {true,0,120,SkColorSetRGB(255,255,0),SkColorSetRGB(137,137,0),6},
+        {true,1,52,SkColorSetRGB(0,0,0),SkColorSetRGB(0,121,255),4},
+        {true,1,120,SkColorSetRGB(0,0,0),SkColorSetRGB(0,121,255),4},
+        {true,1,52,SkColorSetRGB(128,128,128),SkColorSetRGB(20,130,251),4},
+        {true,1,120,SkColorSetRGB(128,128,128),SkColorSetRGB(16,129,252),4},
+        {true,1,52,SkColorSetRGB(255,255,255),SkColorSetRGB(30,135,249),4},
+        {true,1,120,SkColorSetRGB(255,255,255),SkColorSetRGB(17,129,252),4},
+        {true,1,52,SkColorSetRGB(255,0,0),SkColorSetRGB(6,124,254),4},
+        {true,1,120,SkColorSetRGB(255,0,0),SkColorSetRGB(6,124,254),4},
+        {true,1,52,SkColorSetRGB(0,255,0),SkColorSetRGB(27,133,250),4},
+        {true,1,120,SkColorSetRGB(0,255,0),SkColorSetRGB(19,130,251),4},
+        {true,1,52,SkColorSetRGB(0,0,255),SkColorSetRGB(1,122,255),4},
+        {true,1,120,SkColorSetRGB(0,0,255),SkColorSetRGB(1,122,255),4},
+        {true,1,52,SkColorSetRGB(255,255,0),SkColorSetRGB(30,135,250),4},
+        {true,1,120,SkColorSetRGB(255,255,0),SkColorSetRGB(18,130,252),4},
+        {true,2,52,SkColorSetRGB(0,0,0),SkColorSetRGB(255,68,57),4},
+        {true,2,120,SkColorSetRGB(0,0,0),SkColorSetRGB(255,68,57),4},
+        {true,2,52,SkColorSetRGB(128,128,128),SkColorSetRGB(252,90,80),4},
+        {true,2,120,SkColorSetRGB(128,128,128),SkColorSetRGB(253,86,76),4},
+        {true,2,52,SkColorSetRGB(255,255,255),SkColorSetRGB(251,101,92),4},
+        {true,2,120,SkColorSetRGB(255,255,255),SkColorSetRGB(253,87,77),4},
+        {true,2,52,SkColorSetRGB(255,0,0),SkColorSetRGB(254,75,64),4},
+        {true,2,120,SkColorSetRGB(255,0,0),SkColorSetRGB(254,75,64),4},
+        {true,2,52,SkColorSetRGB(0,255,0),SkColorSetRGB(251,97,88),4},
+        {true,2,120,SkColorSetRGB(0,255,0),SkColorSetRGB(252,90,80),4},
+        {true,2,52,SkColorSetRGB(0,0,255),SkColorSetRGB(255,70,59),4},
+        {true,2,120,SkColorSetRGB(0,0,255),SkColorSetRGB(255,70,59),4},
+        {true,2,52,SkColorSetRGB(255,255,0),SkColorSetRGB(251,100,91),4},
+        {true,2,120,SkColorSetRGB(255,255,0),SkColorSetRGB(253,88,79),4},
+        // Independent pastel holdouts: neither tint nor body fitting used these.
+        {false,0,52,SkColorSetRGB(180,120,200),SkColorSetRGB(239,183,255),6},
+        {false,0,120,SkColorSetRGB(180,120,200),SkColorSetRGB(245,187,255),6},
+        {true,0,52,SkColorSetRGB(180,120,200),SkColorSetRGB(185,120,207),6},
+        {true,0,120,SkColorSetRGB(180,120,200),SkColorSetRGB(159,103,177),6},
+        {false,0,52,SkColorSetRGB(128,200,160),SkColorSetRGB(170,237,200),6},
+        {false,0,120,SkColorSetRGB(128,200,160),SkColorSetRGB(172,242,204),6},
+        {true,0,52,SkColorSetRGB(128,200,160),SkColorSetRGB(108,180,140),6},
+        {true,0,120,SkColorSetRGB(128,200,160),SkColorSetRGB(86,143,111),6},
+        {false,0,52,SkColorSetRGB(200,160,128),SkColorSetRGB(245,207,177),6},
+        {false,0,120,SkColorSetRGB(200,160,128),SkColorSetRGB(251,212,181),6},
+        {true,0,52,SkColorSetRGB(200,160,128),SkColorSetRGB(190,148,115),6},
+        {true,0,120,SkColorSetRGB(200,160,128),SkColorSetRGB(155,121,94),6},
+    };
+    for (const auto& c : controls) {
+        UIGlassEffect glass;
+        if (c.tint) glass.setTintColor(c.tint == 1 ? UIColor(0,122,255) : UIColor(255,69,58));
+        const auto resolved = GlassMaterialTestHarness::resolve(glass, {c.size,c.size}, c.dark);
+        const auto actual = renderResolvedBody(resolved, {c.size,c.size}, c.background);
+        const int error = std::max({std::abs(int(SkColorGetR(actual))-int(SkColorGetR(c.expected))),
+            std::abs(int(SkColorGetG(actual))-int(SkColorGetG(c.expected))),
+            std::abs(int(SkColorGetB(actual))-int(SkColorGetB(c.expected)))});
+        if (error > c.tolerance) std::cerr << "Native control dark=" << c.dark << " tint=" << c.tint
+            << " size=" << c.size << " background=" << std::hex << c.background
+            << " actual=" << actual << " expected=" << c.expected << std::dec << '\n';
+        expect(error <= c.tolerance, "regular body and tint match native solid-color controls");
+    }
+    UIGlassEffect glass;
+    auto resolved = GlassMaterialTestHarness::resolve(glass,{52,52},false);
+    const auto background = SkColorSetRGB(128,128,128);
+    const auto top = renderResolvedBody(resolved,{52,52},background,{26,0});
+    const auto side = renderResolvedBody(resolved,{52,52},background,{0,26});
+    expect(luma(top) > luma(side) + 12, "regular rim is directed light rather than a white border");
+    glass.setLightAngle(0);
+    resolved = GlassMaterialTestHarness::resolve(glass,{52,52},false);
+    expect(luma(renderResolvedBody(resolved,{52,52},background,{0,26}))
+        > luma(renderResolvedBody(resolved,{52,52},background,{26,0})) + 12,
+        "the regular light direction follows the optical override");
+    glass.setSpecularStrength(0);
+    resolved = GlassMaterialTestHarness::resolve(glass,{52,52},false);
+    expect(luma(renderResolvedBody(resolved,{52,52},background,{0,26})) < luma(top)-12,
+        "zero specular strength removes the regular rim reflection");
+    glass.setFrostRadius(0); glass.setSaturation(1); glass.setContrast(1); glass.setTintOpacity(0);
+    resolved = GlassMaterialTestHarness::resolve(glass,{52,52},false);
+    expect(resolved.backdropBlurRadius() == 0, "explicit zero frost overrides the regular preset");
+    expect(renderResolvedBody(resolved,{52,52},SK_ColorRED) == SK_ColorRED,
+        "explicit material overrides bypass the fitted default tone");
 }
 
 void testMaterial() {
-    auto result = SkRuntimeEffect::MakeForShader(SkString(BackdropEffect::glass().shaderSource()));
+    auto result = SkRuntimeEffect::MakeForShader(SkString(UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect().shaderSource()));
     expect(result.effect != nullptr, "complete liquid glass shader compiles with Skia");
     if (!result.effect) {
         std::cerr << result.errorText.c_str() << '\n';
         return;
     }
     runtime = result.effect;
+    testNativeTint();
+    testNativeOpticalControls();
     const auto clearBody = renderDefaultBody(UIGlassEffect::Style::clear, {132, 56});
     const auto smallBody = renderDefaultBody(UIGlassEffect::Style::regular, {132, 56});
     const auto largeBody = renderDefaultBody(UIGlassEffect::Style::regular, {320, 240});
-    expect(luma(clearBody) >= 17 && luma(clearBody) <= 22
-               && luma(smallBody) >= 17 && luma(smallBody) <= 22,
-           "clear and small regular glass match the native black-backdrop body samples");
-    expect(luma(largeBody) >= 174 && luma(largeBody) <= 184,
-           "large regular glass matches the native 179/255 neutral body over black");
+    expect(luma(clearBody) >= 23 && luma(clearBody) <= 28
+               && luma(smallBody) >= 130 && luma(smallBody) <= 137,
+           "clear and small regular glass match the theme-fixed native black-backdrop samples");
+    expect(luma(largeBody) >= 133 && luma(largeBody) <= 139,
+           "large regular glass retains the native neutral body over black");
     const auto gray = SkColorSetRGB(128, 128, 128);
-    expect(std::abs(luma(renderDefaultBody(UIGlassEffect::Style::regular, {132, 56}, gray)) - 205) <= 6,
+    expect(std::abs(luma(renderDefaultBody(UIGlassEffect::Style::regular, {132, 56}, gray)) - 199) <= 6,
            "small regular glass adapts to the native mid-gray sample rather than staying transparent");
-    expect(std::abs(luma(renderDefaultBody(UIGlassEffect::Style::regular, {300, 160}, gray)) - 219) <= 6,
+    expect(std::abs(luma(renderDefaultBody(UIGlassEffect::Style::regular, {300, 160}, gray)) - 201) <= 6,
            "large regular glass preserves the native neutral tone over gray");
     const auto rest = render(true, false, 0, {20, 28}, {20, 28}, UIColor::clear);
     const auto press = render(true, false, 1, {20, 28}, {20, 28}, UIColor::clear);

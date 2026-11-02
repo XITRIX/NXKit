@@ -1,6 +1,8 @@
 #pragma once
 
 #include <Geometry.h>
+#include <BackdropEffect.h>
+#include <UITraitCollection.h>
 #include <UIColor.h>
 
 #include <memory>
@@ -40,7 +42,7 @@ enum class UIGlassEffectStyle {
  against native tab bars in both themes; it is an approximation of UIKit.
  Refraction and body frost can be tuned independently, and the perimeter
  uses localized directional light; clear retains its sub-point hairline.
- `BackdropEffect::glass()` resolves the same clear material.
+ `backdropEffect()` exposes the resolved material as a portable rendering extension.
  */
 class UIGlassEffect {
 public:
@@ -49,6 +51,12 @@ public:
     explicit UIGlassEffect(Style style = Style::regular);
 
     [[nodiscard]] Style style() const { return _style; }
+
+    /** Rendering extension: resolves this material without installing a view. */
+    [[nodiscard]] BackdropEffect backdropEffect(
+        NXSize size = {},
+        const std::shared_ptr<UITraitCollection>& traits = UITraitCollection::current()
+    ) const { return _backdropEffect(size, traits); }
 
     /** NXKit extension: apply color-dependent foreground vibrancy to this
      material's subviews. Opt-in; literal RGB content stays source-over by

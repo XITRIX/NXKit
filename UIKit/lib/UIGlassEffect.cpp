@@ -1,4 +1,5 @@
 #include <UIGlassEffect.h>
+#include "GlassShader.hpp"
 
 #include <BackdropEffect.h>
 #include <UITraitCollection.h>
@@ -296,7 +297,7 @@ BackdropEffect UIGlassEffect::_backdropEffect(
     );
 
     const auto tint = _tintColor.value_or(parameters.tintColor);
-    const auto tintRaw = tint.resolvedRaw(traits);
+    const auto tintRaw = tint.resolvedColorWithTraitCollection(traits).raw();
     const auto tintAlpha = static_cast<NXFloat>((tintRaw >> 24) & 0xff) / 255.0f;
     const auto resolvedTint = UIColor(
         static_cast<unsigned char>((tintRaw >> 16) & 0xff),
@@ -307,7 +308,7 @@ BackdropEffect UIGlassEffect::_backdropEffect(
         )
     );
 
-    auto effect = BackdropEffect::glassShaderEffect(
+    auto effect = Internal::makeGlassShaderEffect(
         parameters.maximumSampleRadius,
         parameters.frostRadius
     );

@@ -5,6 +5,25 @@ namespace NXKit {
 
 using namespace yoga::literals;
 
+namespace {
+std::optional<UIButtonStyle> valueToButtonStyle(const std::string& value) {
+    if (value == "plain") {
+        return UIButtonStyle::plain;
+    }
+    if (value == "gray") {
+        return UIButtonStyle::gray;
+    }
+    if (value == "tinted") {
+        return UIButtonStyle::tinted;
+    }
+    if (value == "filled") {
+        return UIButtonStyle::filled;
+    }
+    return std::nullopt;
+}
+}
+
+
 UIButton::UIButton(UIButtonStyle style) {
     _titleLabel = new_shared<UILabel>();
     _imageView = new_shared<UIImageView>();
@@ -92,4 +111,49 @@ bool UIButton::applyXMLAttribute(const std::string& name, const std::string& val
 
     return false;
 }
+}
+
+namespace NXKit {
+
+void UIButton::willGainFocus() {
+    setTransform(NXAffineTransform::scale(1.06f));
+    setBaseScaleMultiplier(1.1f);
+    layer()->setShadowColor(UIColor::black);
+    layer()->setShadowOpacity(0.4);
+    layer()->setShadowOffset({0, 6});
+    layer()->setShadowRadius(18);
+    layer()->setZPosition(1);
+}
+
+void UIButton::willLoseFocus() {
+    setTransform(NXAffineTransform::identity);
+    setBaseScaleMultiplier(1);
+    layer()->setShadowOpacity(0);
+    layer()->setShadowRadius(0);
+    layer()->setZPosition(0);
+}
+
+void UIButton::focusFailedToMove(UIFocusHeading heading) {
+
+}
+
+void UIButton::willChangeFocusHighlight(bool highlighted) {
+    if (highlighted) {
+        setTransform(NXAffineTransform::scale(1.02f));
+        setBaseScaleMultiplier(1.0f);
+        layer()->setShadowOffset({0, 3});
+        layer()->setShadowRadius(4);
+    } else {
+        setTransform(NXAffineTransform::scale(1.06f));
+        setBaseScaleMultiplier(1.1f);
+        layer()->setShadowOffset({0, 6});
+        layer()->setShadowRadius(18);
+    }
+}
+
+void UIButton::willChangeHighlight(bool highlighted) {
+    setAlpha(highlighted ? 0.8 : 1);
+}
+
+
 }

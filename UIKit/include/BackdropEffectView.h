@@ -7,6 +7,7 @@
 namespace NXKit {
 
 enum class UITouchPhase;
+class CABackdropEffectLayer;
 
 /**
  A view that applies an SkSL effect to the already-rendered content behind it.

@@ -85,7 +85,7 @@ void testMaskLayersUseLocalBounds() {
 }
 
 void testOpacityLayersRetainBackdropForEffects() {
-    auto layer = new_shared<CABackdropEffectLayer>(BackdropEffect::glass());
+    auto layer = new_shared<CABackdropEffectLayer>(UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect());
     layer->setBounds(NXRect(0, 0, 240, 120));
     layer->setOpacity(0.5f);
 
@@ -154,7 +154,7 @@ half4 main(float2 xy) {
 }
 
 void testBackdropFilterCacheTracksGeometry() {
-    auto layer = new_shared<CABackdropEffectLayer>(BackdropEffect::glass());
+    auto layer = new_shared<CABackdropEffectLayer>(UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect());
     layer->setBounds(NXRect(0, 0, 340, 140));
     layer->setCornerRadius(36);
 
@@ -192,7 +192,7 @@ void testBackdropFilterCacheTracksGeometry() {
     expect(scaledFilter.get() != roundedFilter.get(),
            "backdrop content-scale changes rebuild the image filter");
 
-    auto changedEffect = BackdropEffect::glass();
+    auto changedEffect = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
     changedEffect.setUniform("saturation", 0.9f);
     layer->setEffect(changedEffect);
     layer->draw(&canvas);
@@ -444,7 +444,7 @@ GlassSamples renderGlassSamples(
         interiorPaint
     );
 
-    const auto glass = BackdropEffect::glass();
+    const auto glass = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
     BackdropEffect reflectionOnly(glass.shaderSource(), "content", 16, 0);
     reflectionOnly.setUniform("refraction", 0.0f);
     reflectionOnly.setUniform("curve", 0.0f);
@@ -517,7 +517,7 @@ SkColor renderRadiusClampedReflectionSample() {
         interiorPaint
     );
 
-    const auto glass = BackdropEffect::glass();
+    const auto glass = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
     BackdropEffect reflectionOnly(glass.shaderSource(), "content", 16, 0);
     reflectionOnly.setUniform("refraction", 0.0f);
     reflectionOnly.setUniform("curve", 0.0f);
@@ -576,7 +576,7 @@ std::pair<SkColor, SkColor> renderDefaultGlassRefractionSamples() {
         redPaint
     );
 
-    auto layer = new_shared<CABackdropEffectLayer>(BackdropEffect::glass());
+    auto layer = new_shared<CABackdropEffectLayer>(UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect());
     layer->setBounds(NXRect(0, 0, lensWidth, lensHeight));
     layer->setCornerRadius(lensHeight * 0.5f);
 
@@ -621,7 +621,7 @@ RefractionSeamSamples renderLargeGlassDiagonalSeamSamples() {
         redPaint
     );
 
-    const auto glass = BackdropEffect::glass();
+    const auto glass = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
     BackdropEffect refractionOnly(glass.shaderSource(), "content", 64, 0);
     refractionOnly.setUniform("refraction", 0.90f);
     refractionOnly.setUniform("curve", 0.55f);
@@ -712,7 +712,7 @@ void testGlassBackdropReadsStayInsideDeclaredRadius() {
         "glass clamps retuned reflection reads to its declared backdrop radius"
     );
 
-    auto glass = BackdropEffect::glass();
+    auto glass = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
     bool rejectedAutomaticUniform = false;
     try {
         glass.setUniform("maximumSampleRadius", 8.0f);

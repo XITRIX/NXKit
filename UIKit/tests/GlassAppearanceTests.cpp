@@ -1,3 +1,4 @@
+#include <UIGlassEffect.h>
 #include <BackdropEffectView.h>
 #include <DispatchQueue.h>
 #include <CABasicAnimation.h>
@@ -12,10 +13,10 @@ using namespace NXKit;
 namespace NXKit {
 class GlassAppearanceTestHarness {
 public:
-    static std::shared_ptr<UITraitCollection> traits(UIUserInterfaceStyle style) {
+    static std::shared_ptr<UITraitCollection> traits(UIUserInterfaceStyle style, NXFloat scale = 2) {
         auto result = std::make_shared<UITraitCollection>();
         result->_userInterfaceStyle = style;
-        result->_displayScale = 2;
+        result->_displayScale = scale;
         return result;
     }
 };
@@ -38,7 +39,37 @@ public:
         _traitCollection = GlassAppearanceTestHarness::traits(style);
         setFrame({0, 0, 480, 320});
     }
+    void setDisplayScale(NXFloat scale) {
+        const auto previous = _traitCollection;
+        _traitCollection = GlassAppearanceTestHarness::traits(previous->userInterfaceStyle(), scale);
+        traitCollectionDidChange(previous);
+    }
 };
+
+void testBackingScale() {
+    auto root = new_shared<TraitRoot>(UIUserInterfaceStyle::light);
+    auto view = new_shared<BackdropEffectView>();
+    auto custom = new_shared<BackdropEffectView>(UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect());
+    root->addSubview(view); root->addSubview(custom);
+    expect(view->layer()->contentsScale() == 2 && custom->layer()->contentsScale() == 2,
+        "glass and custom backdrop filters inherit Retina backing resolution");
+    auto animation = std::make_shared<CABasicAnimation>("bounds");
+    animation->duration = 1; animation->fromValue = NXRect(0,0,52,52); animation->toValue = NXRect(0,0,80,80);
+    view->layer()->add(animation,"bounds");
+    root->setDisplayScale(3);
+    expect(view->layer()->contentsScale() == 3 && view->layer()->presentationOrSelf()->contentsScale() == 3,
+        "display-scale changes update active presentation filters immediately");
+    expect(custom->layer()->contentsScale() == 3, "custom backdrop resolution follows screen changes");
+    view->layer()->setContentsScale(1.5f);
+    root->setDisplayScale(3);
+    view->setFrame({0,0,52,52});
+    expect(view->layer()->contentsScale() == 1.5f, "same-screen traits and layout retain an explicit layer scale override");
+    root->setDisplayScale(0);
+    expect(view->layer()->contentsScale() == 1, "invalid screen scale resolves to a finite one-point filter");
+    auto other = new_shared<TraitRoot>(UIUserInterfaceStyle::dark);
+    other->addSubview(view);
+    expect(view->layer()->contentsScale() == 2, "reparenting adopts the new screen's filter resolution");
+}
 
 void testOptInGlassAppearance() {
     using Style = UIUserInterfaceStyle;
@@ -150,6 +181,7 @@ void testOptInGlassAppearance() {
 
 }
 int main() {
+    testBackingScale();
     testOptInGlassAppearance();
     if (failures) return 1;
     std::cout << "Glass appearance tests passed\n";

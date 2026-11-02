@@ -99,7 +99,7 @@ private:
 // Compact shows the list alone; activating an item opens its controller via
 // show(). Returning to regular restores the same selected controller in place.
 // An unspecified size class retains the regular layout.
-class NXTabBarController : public UIViewController {
+class NXTabBarController : public UIViewController, public UITabBarControllerInterface {
 public:
     using ViewControllerSection = std::vector<std::shared_ptr<UIViewController>>;
     using ViewControllerSections = std::vector<ViewControllerSection>;
@@ -110,19 +110,19 @@ public:
 
     std::weak_ptr<NXTabBarControllerDelegate> delegate;
 
-    [[nodiscard]] std::vector<std::shared_ptr<UIViewController>> viewControllers() const;
+    [[nodiscard]] std::vector<std::shared_ptr<UIViewController>> viewControllers() const override;
     [[nodiscard]] const ViewControllerSections& viewControllerSections() const { return _viewControllers; }
-    void setViewControllers(ViewControllerSection controllers);
+    void setViewControllers(ViewControllerSection controllers) override;
     void setViewControllerSections(ViewControllerSections controllers);
 
-    [[nodiscard]] std::optional<size_t> selectedIndex() const;
-    bool setSelectedIndex(size_t index);
+    [[nodiscard]] std::optional<size_t> selectedIndex() const override;
+    bool setSelectedIndex(size_t index) override;
 
     [[nodiscard]] std::optional<IndexPath> selectedIndexPath() const { return _selectedIndexPath; }
     bool setSelectedIndexPath(const IndexPath& indexPath);
 
-    [[nodiscard]] std::shared_ptr<UIViewController> selectedViewController() const;
-    bool setSelectedViewController(const std::shared_ptr<UIViewController>& viewController);
+    [[nodiscard]] std::shared_ptr<UIViewController> selectedViewController() const override;
+    bool setSelectedViewController(const std::shared_ptr<UIViewController>& viewController) override;
 
     std::shared_ptr<NXTabBar> tabBar();
 

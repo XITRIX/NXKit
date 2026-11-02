@@ -4,18 +4,32 @@ add_definitions(
         -DSK_TRIVIAL_ABI=[[clang::trivial_abi]]
 )
 
+option(UIKIT_BUILD_UIKIT "Build Apple-styled UIKit components" ON)
+option(UIKIT_BUILD_NXKIT "Build Nintendo-styled NXKit components" ON)
+option(NXKIT_BUILD_TESTS "Build NXKit regression tests" OFF)
+option(UIKITCORE_BUILD_TESTS "Build UIKitCore regression tests" ${NXKIT_BUILD_TESTS})
+option(UIKIT_BUILD_TESTS "Build UIKit regression tests" ${NXKIT_BUILD_TESTS})
+if (UIKITCORE_BUILD_TESTS OR UIKIT_BUILD_TESTS OR NXKIT_BUILD_TESTS)
+    enable_testing()
+endif ()
+
 add_subdirectory(UIKitCore)
-add_subdirectory(NXKit)
+if (UIKIT_BUILD_UIKIT)
+    add_subdirectory(UIKit)
+endif ()
+if (UIKIT_BUILD_NXKIT)
+    add_subdirectory(NXKit)
+endif ()
 
 # The checked-in Skia archives are built with is_debug=false. Skia's public
 # inline ref-counting code changes with SK_DEBUG/SK_RELEASE, so every consumer
 # of those headers must use the same mode or an app-defined SkRefCnt subclass
 # can cross the static-library boundary with incompatible disposal semantics.
-target_compile_definitions(XITRIXUIKit PUBLIC SK_RELEASE)
+target_compile_definitions(UIKitCore PUBLIC SK_RELEASE)
 
 list(APPEND platform_libs yogacore tinyxml2)
-target_include_directories(XITRIXUIKit PUBLIC ${EXTERN_PATH}/yoga)
-target_include_directories(XITRIXUIKit PUBLIC ${EXTERN_PATH}/tinyxml2)
+target_include_directories(UIKitCore PUBLIC ${EXTERN_PATH}/yoga)
+target_include_directories(UIKitCore PUBLIC ${EXTERN_PATH}/tinyxml2)
 
 # APPLE
 if (APPLE)
@@ -63,13 +77,13 @@ elseif (PLATFORM_SWITCH)
 
         list(APPEND platform_libs SDL3::SDL3)
 
-        target_include_directories(XITRIXUIKit PRIVATE
+        target_include_directories(UIKitCore PRIVATE
                 ${EXTERN_PATH}/skia/third_party/externals/dawn
                 ${EXTERN_PATH}/skia/third_party/externals/dawn/include
                 ${SKIA_SWITCH_OUT_DIR}/gen/third_party/dawn/include
         )
 
-        target_link_libraries(XITRIXUIKit PUBLIC
+        target_link_libraries(UIKitCore PUBLIC
                 ${SKIA_SWITCH_OUT_DIR}/libskia.a
                 ${SKIA_SWITCH_OUT_DIR}/libskparagraph.a
                 ${SKIA_SWITCH_OUT_DIR}/libskshaper.a
@@ -93,7 +107,7 @@ elseif (PLATFORM_SWITCH)
         )
 endif ()
 
-target_include_directories(XITRIXUIKit PUBLIC
+target_include_directories(UIKitCore PUBLIC
         ${EXTERN_PATH}/skia
         ${EXTERN_PATH}/libromfs/lib/include
 )
@@ -109,4 +123,11 @@ if (APPLE)
             "-framework CoreText")
 endif ()
 
-target_link_libraries(XITRIXUIKit PUBLIC fmt ${platform_libs})
+target_link_libraries(UIKitCore PUBLIC fmt ${platform_libs})
+
+if (UIKIT_BUILD_TESTS AND TARGET Xitrix::UIKit AND TARGET NXKit)
+    add_executable(UIKitModuleCompositionTests UIKit/tests/ModuleCompositionTests.cpp
+        UIKitCore/lib/UIApplicationMain.cpp)
+    target_link_libraries(UIKitModuleCompositionTests PRIVATE Xitrix::UIKit NXKit)
+    add_test(NAME UIKitModuleCompositionTests COMMAND UIKitModuleCompositionTests)
+endif ()

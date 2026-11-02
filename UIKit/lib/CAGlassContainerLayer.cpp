@@ -1,3 +1,4 @@
+#include <UIGlassEffect.h>
 #include "CAGlassContainerLayer.hpp"
 #include "CABackdropEffectLayer.hpp"
 #include "GlassShadow.hpp"
@@ -17,7 +18,7 @@ struct MaterialUniform { std::string type, name; int count; };
 const std::vector<MaterialUniform>& materialUniforms() {
     static const auto uniforms = [] {
         std::vector<MaterialUniform> result;
-        const auto source = BackdropEffect::glass().shaderSource();
+        const auto source = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect().shaderSource();
         const std::regex declaration("uniform (float[234]?) ([A-Za-z0-9_]+);");
         for (auto i = std::sregex_iterator(source.begin(), source.end(), declaration); i != std::sregex_iterator(); ++i) {
             const std::string type = (*i)[1], name = (*i)[2];
@@ -34,7 +35,7 @@ void replaceAll(std::string& text, const std::string& from, const std::string& t
 }
 std::string shaderSource(size_t count) {
     const auto n = std::to_string(count);
-    auto source = BackdropEffect::glass().shaderSource();
+    auto source = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect().shaderSource();
     // Shading runs in each item's actual local coordinates and with its exact
     // material. Discrete choices such as clear/regular and tintMode must never
     // pass through intermediate values at an ownership boundary.

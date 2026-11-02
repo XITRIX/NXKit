@@ -11,11 +11,10 @@
 
 namespace NXKit {
 
-class CABackdropEffectLayer;
-class UIGlassEffect;
+namespace Internal { class BackdropShader; }
 
 /**
- Describes an SkSL effect that samples the pixels behind a BackdropEffectView.
+ Describes an SkSL effect that samples pixels behind a CABackdropLayer.
 
  The shader must declare a child shader whose name matches backdropShaderName().
  NXKit supplies that child with the optionally blurred live backdrop. An
@@ -49,14 +48,6 @@ public:
         NXFloat backdropBlurRadius = 0
     );
 
-    /**
-     A rounded liquid-glass lens with refraction, chromatic dispersion, tint,
-     and a thin white perimeter reflection with localized backdrop-colored
-     highlights. Its light frost and neutral body follow the native clear
-     material. Install UIGlassEffect for adaptive regular styling and input.
-     */
-    static BackdropEffect glass();
-
     [[nodiscard]] const std::string& shaderSource() const { return _shaderSource; }
     [[nodiscard]] const std::string& backdropShaderName() const { return _backdropShaderName; }
     [[nodiscard]] NXFloat maximumSampleRadius() const { return _maximumSampleRadius; }
@@ -75,14 +66,9 @@ public:
     void removeUniform(const std::string& name);
 
 private:
-    friend class CABackdropEffectLayer;
-    friend class UIGlassEffect;
+    friend class Internal::BackdropShader;
 
     static bool isAutomaticUniform(const std::string& name);
-    static BackdropEffect glassShaderEffect(
-        NXFloat maximumSampleRadius,
-        NXFloat backdropBlurRadius
-    );
     void setFloatUniform(const std::string& name, std::vector<NXFloat> value);
 
     std::string _shaderSource;

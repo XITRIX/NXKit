@@ -339,6 +339,9 @@ void NXTabBarController::setViewControllerSections(ViewControllerSections contro
         attachConfiguredChildren();
         updateTabSelection();
         removeUnconfiguredChildren(previousViewControllers);
+    } else {
+        attachConfiguredChildren();
+        removeUnconfiguredChildren(previousViewControllers);
     }
 }
 
