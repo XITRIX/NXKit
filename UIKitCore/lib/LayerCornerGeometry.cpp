@@ -211,6 +211,12 @@ float2 lensNormalDirection(float2 p,float2 halfDim,float r) {
     }
     return q.x>q.y ? float2(direction.x,0.0) : float2(0.0,direction.y);
 }
+// Continuous geometry computes both distance and its normal through the same
+// powers and roots. Reuse that result when a material needs both quantities.
+float3 roundedBoxSample(float2 p,float2 halfDim,float r) {
+    if(cornerCurve>0.5&&r>0.0)return continuousCornerSample(p,halfDim);
+    return float3(circularBoxSDF(p,halfDim,r),lensNormalDirection(p,halfDim,r));
+}
 )SKSL";
 }
 }

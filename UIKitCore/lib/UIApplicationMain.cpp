@@ -5,6 +5,7 @@
 #include <tools/SharedBase.hpp>
 #include <DispatchQueue.h>
 #include <SkiaCtx.h>
+#include "RenderPerformance.hpp"
 
 namespace NXKit {
 
@@ -33,19 +34,14 @@ bool applicationRunLoop() {
     keyWindow->updateTraitsFromPlatform();
 
     UIView::animateIfNeeded(currentTime);
-    keyWindow->drawAndLayoutTreeIfNeeded();
-
-    // Update pacing even on a clean frame. Otherwise the last 120 Hz touch
-    // frame leaves an idle screen polling its entire tree at 120 Hz forever.
-    SkiaCtx::_main->setTargetFrameRate(UIView::maximumAnimationFrameRate());
-
-    static NXSize lastSize;
-
-    if (!CALayer::layerTreeIsDirty && lastSize == size) {
-//        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        SkiaCtx::_main->sleepForNextFrame();
-        return true;
+    {
+        Internal::RenderPerformanceScope timer(Internal::RenderPerformance::current ? &Internal::RenderPerformance::current->layoutMs : nullptr);
+        keyWindow->drawAndLayoutTreeIfNeeded();
     }
+
+    // Resolve pacing after callbacks and animations. Rendering is continuous,
+    // including when layout and the retained layer tree have not changed.
+    SkiaCtx::_main->setTargetFrameRate(UIView::maximumAnimationFrameRate());
 
     const auto surface = SkiaCtx::_main->getBackbufferSurface();
     if (!surface) {
@@ -55,7 +51,6 @@ bool applicationRunLoop() {
     }
 
     CALayer::layerTreeIsDirty = false;
-    lastSize = size;
 
     const auto canvas = surface->getCanvas();
     canvas->clear(SK_ColorTRANSPARENT);
@@ -64,11 +59,17 @@ bool applicationRunLoop() {
     canvas->scale(scale, scale);
 
     UITraitCollection::setCurrent(keyWindow->traitCollection());
-    keyWindow->layer()->presentationOrSelf()->skiaRender(canvas);
+    {
+        Internal::RenderPerformanceScope timer(Internal::RenderPerformance::current ? &Internal::RenderPerformance::current->renderMs : nullptr);
+        keyWindow->layer()->presentationOrSelf()->skiaRender(canvas);
+    }
     canvas->restore();
 
-    SkiaCtx::_main->flushAndSubmit(surface);
-    SkiaCtx::_main->swapBuffers();
+    {
+        Internal::RenderPerformanceScope timer(Internal::RenderPerformance::current ? &Internal::RenderPerformance::current->submitMs : nullptr);
+        SkiaCtx::_main->flushAndSubmit(surface);
+        SkiaCtx::_main->swapBuffers();
+    }
     SkiaCtx::_main->sleepForNextFrame();
 
     return true;

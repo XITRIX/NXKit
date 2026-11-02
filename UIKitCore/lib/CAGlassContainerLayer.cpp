@@ -55,7 +55,6 @@ std::string shaderSource(size_t count) {
         "half4 groupSharp(float2 xy) { return sharpContent.eval(groupXY(xy)); }\n";
     replaceAll(source, "content.eval(", "groupBackdrop(");
     replaceAll(source, "sharpContent.eval(", "groupSharp(");
-    replaceAll(source, "float2 normal = lensNormalDirection(p, halfDim, r);", "float2 normal = materialNormal;");
     source.insert(source.find("const float SMOOTH_EDGE_PX"), declarations + backdrop);
     const std::string itemFunction = R"SKSL(
 float3 itemDistanceINDEX(float2 xy) {
@@ -65,8 +64,9 @@ float3 itemDistanceINDEX(float2 xy) {
     cornerTop=material_cornerTop[INDEX]; cornerTopCircle=material_cornerTopCircle[INDEX];
     cornerRight=material_cornerRight[INDEX]; cornerRightCircle=material_cornerRightCircle[INDEX];
     float r = min(g.z, min(g.x, g.y) * 0.5);
-    float d = boxRoundedSDF(p, g.xy * 0.5, r);
-    float2 n = lensNormalDirection(p, g.xy * 0.5, r);
+    float3 surface = roundedBoxSample(p, g.xy * 0.5, r);
+    float d = surface.x;
+    float2 n = surface.yz;
     float2 gradient = float2(inverseX[INDEX].x * n.x + inverseY[INDEX].x * n.y,
                             inverseX[INDEX].y * n.x + inverseY[INDEX].y * n.y);
     float magnitude = max(length(gradient), 0.0001);
@@ -177,7 +177,7 @@ half4 main(float2 filterXY) {
             // Transform the active source's touch into this owner's local
             // geometry; source and material can be different group members.
             "interactionIntensity = groupInteraction; interactionLocation = float2(dot(inverseX[" + index + "].xyz,float3(groupTouch,1)),dot(inverseY[" + index + "].xyz,float3(groupTouch,1)));\n"
-            "half4 color = referenceGlass(localXY,lensSize*0.5,min(cornerRadius,min(lensSize.x,lensSize.y)*0.5),localXY-lensCenter,sceneDistance/localMetric);\n"
+            "half4 color = referenceGlass(localXY,lensSize*0.5,min(cornerRadius,min(lensSize.x,lensSize.y)*0.5),localXY-lensCenter,sceneDistance/localMetric,materialNormal);\n"
             "result += half(weights[" + index + "] * itemAlpha[" + index + "]) * (color-original); }\n";
     }
     main += "half4 color = mix(original,result,half(coverage)); return half4(max(color.rgb-original.rgb*half(shadow*(1-coverage))-contourLoss*half(1-coverage),half3(0)),color.a+half(shadow*(1-coverage))*(1-color.a)); }\n";

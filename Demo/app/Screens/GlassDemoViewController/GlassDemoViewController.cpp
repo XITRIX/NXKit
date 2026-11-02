@@ -2,6 +2,7 @@
 #include "GlassDemoScene.hpp"
 #include "LensDemoStage.hpp"
 #include "GlassScreenViewController.hpp"
+#include "GlassStressView.hpp"
 #include <algorithm>
 
 using namespace NXKit;
@@ -156,6 +157,9 @@ void GlassDemoViewController::loadView() {
     const auto weak=weak_from_base<GlassDemoViewController>();
     _contentContainer->addSubview(button("Full-screen iOS layout",[weak] {
         if(auto self=weak.lock()) self->show(new_shared<GlassScreenViewController>(),self);
+    }));
+    _contentContainer->addSubview(button("Glass stress · 96 cards / nested scrolls",[weak] {
+        if (auto self=weak.lock()) self->show(new_shared<GlassStressViewController>(),self);
     }));
     _contentContainer->addSubview(button("Interactive tab bar",[weak] {
         if (auto self=weak.lock()) self->show(new_shared<LensDemoViewController>(true),self);

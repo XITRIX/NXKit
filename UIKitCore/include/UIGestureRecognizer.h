@@ -41,6 +41,7 @@ public:
     void setEnabled(bool enabled);
 
     UIGestureRecognizerState state() { return _state; }
+    [[nodiscard]] virtual std::size_t numberOfTouches() const;
     void setState(UIGestureRecognizerState state);
 
     std::weak_ptr<UIView> view() { return _view; }

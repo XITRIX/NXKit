@@ -287,10 +287,9 @@ half3 sampleReflection(
 
 // The reference's paraxial lens, calibrated against the native UIKit fixture
 // in Demo/GlassComparison. Analytic SDF normals replace its geometry texture.
-half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
+half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf, float2 normal) {
     float pixelWidth = 1.0 / max(contentScale, 1.0);
     float distanceInside = max(-sdf, 0.0);
-    float2 normal = lensNormalDirection(p, halfDim, r);
     float2 lightDirection = specLightDirection / max(length(specLightDirection), 0.0001);
     // A quarter-circle bevel: the XY normal goes from horizontal at the rim
     // to zero on the flat face. Fade before the rounded SDF's medial axis.
@@ -357,7 +356,10 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
         chromaDifference -= half3(toBrightness(chromaDifference));
         pixel.rgb += chromaDifference*pixel.a*0.5;
     }
-    half4 background = sampleSharpBackdrop(xy, xy);
+    // The host clip owns coverage in normal glass rendering. A fully covered
+    // result never uses this unshifted sharp sample, except for empty input.
+    half4 background = half4(0);
+    if (pixel.a <= 0.0 || externalShapeCoverage <= 0.5) background = sampleSharpBackdrop(xy, xy);
     if (pixel.a <= 0.0) pixel = background;
     pixel.rgb /= max(pixel.a, 0.0001);
     float transmittedLuma = toBrightness(pixel.rgb);
@@ -468,6 +470,7 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     // A single press overlay: stacking the fallback's additive glow and the
     // native button overlay together produced a milky white plate on touch.
     float glow = clamp(interactionIntensity, 0.0, 1.0);
+    if (glow > 0.0) {
     float glowRadius = max(1.0, min(lensSize.x, lensSize.y) * 1.6);
     float sheen = 1.0 - smoothstep(0.0, glowRadius, length(xy - interactionLocation));
     // Native held-minus-settled samples separate regular neutral and tinted
@@ -496,6 +499,7 @@ half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
     half3 colorPress = mix(half3(toBrightness(restingResult)),restingResult,mix(1.03,1.06,lightAppearance))*pressGain;
     colorPress += half3(neutralPress*mix(7.0/255.0,11.5/255.0,lightAppearance));
     result = mix(result,mix(restingResult,colorPress,glow),platterPress);
+    }
     float alpha = externalShapeCoverage > 0.5 ? 1.0 : clamp(0.5 - sdf / pixelWidth, 0.0, 1.0);
     return mix(background, half4(clamp(result, 0.0, 1.0) * pixel.a, pixel.a), alpha);
 }
@@ -506,17 +510,18 @@ half4 main(float2 filterXY) {
     float r = min(cornerRadius, min(halfDim.x, halfDim.y));
 
     float2 p = xy - lensCenter;
-    float sdf = boxRoundedSDF(p, halfDim, r);
+    float3 surface = roundedBoxSample(p, halfDim, r);
+    float sdf = surface.x;
 
     if (sdf > SMOOTH_EDGE_PX) {
         return content.eval(filterXY);
     }
 
     if (referenceAppearance > 0.5) {
-        return referenceGlass(xy, halfDim, r, p, sdf);
+        return referenceGlass(xy, halfDim, r, p, sdf, surface.yz);
     }
 
-    float2 normal = lensNormalDirection(p, halfDim, r);
+    float2 normal = surface.yz;
 
     // Normal-based refraction through the rounded SDF lens.
     float2 sampleXY = xy;
@@ -596,6 +601,7 @@ half4 main(float2 filterXY) {
 
     float alpha = externalShapeCoverage > 0.5 ? 1.0
         : 1.0 - smoothstep(-SMOOTH_EDGE_PX * 0.5, SMOOTH_EDGE_PX * 0.5, sdf);
+    if (alpha >= 1.0) return pixel;
     half4 background = sampleBackdrop(xy, xy);
     return mix(background, pixel, alpha);
 }

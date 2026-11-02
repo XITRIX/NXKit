@@ -12,6 +12,12 @@ onStateChanged(onStateChanged)
 
 UIGestureRecognizer::~UIGestureRecognizer() = default;
 
+std::size_t UIGestureRecognizer::numberOfTouches() const {
+    return std::count_if(_allTouches.begin(),_allTouches.end(),[](const auto& touch) {
+        return touch->phase()!=UITouchPhase::ended&&touch->phase()!=UITouchPhase::cancelled;
+    });
+}
+
 void UIGestureRecognizer::setEnabled(bool enabled) {
     if (_isEnabled == enabled) return;
 
@@ -104,6 +110,16 @@ void UIGestureRecognizer::_touchesBegan(std::vector<std::shared_ptr<UITouch>> to
     if (!recognitionCondition()) return;
 
     touchesBegan(touches, event);
+
+    // An already recognized continuous gesture also owns later fingers. They
+    // must not start a child control's tap while the first finger is scrolling.
+    if (_state == UIGestureRecognizerState::began
+        || _state == UIGestureRecognizerState::changed) {
+        cancelOtherGestureRecognizersThatShouldNotRecognizeSimultaneously();
+        if (_cancelsTouchesInView)
+            for (const auto& touch : touches)
+                touch->_hasBeenCancelledByAGestureRecognizer = true;
+    }
 
     // Check touche's hasBeenCancelledByAGestureRecognizer in case
     // gesture has been deinited by action in touchBegan

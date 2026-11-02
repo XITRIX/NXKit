@@ -6,9 +6,11 @@
 #include <Screens/TestScrollController/TestScrollController.hpp>
 #include <Screens/NavigationTestViewController/NavigationTestViewController.hpp>
 #include <Screens/GlassDemoViewController/GlassDemoViewController.hpp>
+#include <Screens/GlassDemoViewController/GlassStressView.hpp>
 #include <Screens/ControllerTestViewController/ControllerTestViewController.hpp>
 // #include <TextViewController/TextViewController.hpp>
 #include <romfs/romfs.hpp>
+#include <cstdlib>
 
 namespace NXKit {
 
@@ -28,6 +30,13 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
         .identifier = "NXKit.application.exit",
         .priority = -100,
     }.registerOn(window);
+
+    // Direct launch for Instruments/Metal captures without navigating the Demo.
+    if (const auto stress = std::getenv("NXKIT_GLASS_STRESS"); stress && std::string(stress) == "1") {
+        window->setRootViewController(new_shared<GlassStressViewController>());
+        window->makeKeyAndVisible();
+        return true;
+    }
 
     auto vc = new_shared<IBTestController>();
     auto vc1 = new_shared<TestViewController>();

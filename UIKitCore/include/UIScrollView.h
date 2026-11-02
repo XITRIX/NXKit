@@ -17,6 +17,7 @@
 #include <functional>
 
 namespace NXKit {
+namespace Internal { struct ScrollMotion; }
 
 class UIScrollView;
 class UIScrollViewDelegate {
@@ -96,6 +97,9 @@ public:
     UIScrollViewDecelerationRate decelerationRate() const { return _decelerationRate; }
     void setDecelerationRate(UIScrollViewDecelerationRate decelerationRate) { _decelerationRate = decelerationRate; }
     [[nodiscard]] bool isDecelerating() const { return _isDecelerating; }
+    [[nodiscard]] bool isDragging() const { return _isDragging; }
+    [[nodiscard]] bool isTracking() const { return _isTracking; }
+    [[nodiscard]] std::shared_ptr<UIPanGestureRecognizer> panGestureRecognizer() const { return _panGestureRecognizer; }
 
     [[nodiscard]] bool showsVerticalScrollIndicator() const {
         return _showsVerticalScrollIndicator;
@@ -152,7 +156,12 @@ public:
 private:
     std::shared_ptr<UIPanGestureRecognizer> _panGestureRecognizer;
     bool _isDecelerating = false;
+    bool _isDragging = false, _isTracking = false;
+    bool _caughtDeceleration = false;
+    bool _consumePanActivationMovement = false;
+    bool _rebaseElasticPanTranslation = false;
     NXPoint weightedAverageVelocity;
+    NXPoint _previousPanVelocity;
     NXPoint _initialContentOffset;
     UIScrollViewDecelerationRate _decelerationRate = UIScrollViewDecelerationRate::normal;
 
@@ -166,6 +175,11 @@ private:
     UIScrollViewContentInsetAdjustmentBehavior _contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes;
 
     std::shared_ptr<TimerAnimation> _timerAnimation;
+    std::unique_ptr<Internal::ScrollMotion> _scrollMotion;
+    std::uint64_t _scrollAnimationGeneration=0;
+    NXRect _lastScrollLimits;
+    NXSize _lastScrollViewport;
+    bool _hasScrollGeometry=false;
     UIEdgeInsets _lastSafeAreaInsets;
     UIEdgeInsets _contentInset;
     NXSize _contentSize;
@@ -234,9 +248,15 @@ private:
     void cancelDecelerationAnimations();
 
     void bounceWithVelocity(NXPoint velocity);
+    void startScrollMotion(NXPoint velocity, bool predictInitialFrame = false);
+    void applyContentOffset(NXPoint offset,bool animated=false);
+    void applyMotionOffset(NXPoint offset);
+    void reconcileScrollGeometry();
+    NXPoint uncompressedOffset(NXPoint offset);
 
     friend class UIScrollViewFocusTestHarness;
     friend class UIScrollViewIndicatorTestHarness;
+    friend class UIScrollViewPhysicsTestHarness;
 };
 
 }

@@ -3,6 +3,7 @@
 //
 
 #include "CALayer.h"
+#include "RenderPerformance.hpp"
 #include <UIView.h>
 #include <CATransaction.h>
 #include <tools/Tools.hpp>
@@ -276,6 +277,7 @@ void CALayer::removeFromSuperlayer() {
 void CALayer::draw(SkCanvas* context) {}
 
 void CALayer::skiaRender(SkCanvas* canvas) {
+    if (Internal::RenderPerformance::current) ++Internal::RenderPerformance::current->layers;
     if (_lensSourceOwners) {
         std::erase_if(*_lensSourceOwners, [](const auto& owner) { return owner.expired(); });
         for (const auto& weakOwner : *_lensSourceOwners) if (const auto owner = weakOwner.lock()) {
@@ -315,6 +317,15 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     // canvas contents is required for backdrop effects such as CABlurLayer to
     // keep seeing the pixels behind this layer.
     const auto localBounds = SkRect::MakeWH(_bounds.width(), _bounds.height());
+    // Only a clipped layer bounds all of its descendants' output. An
+    // unclipped parent's children, shadows or backdrop effects can still be
+    // visible outside its own bounds, so it must always be traversed.
+    if (_masksToBounds && canvas->quickReject(localBounds)) {
+        if (Internal::RenderPerformance::current) ++Internal::RenderPerformance::current->rejected;
+        canvas->restore();
+        canvas->restore();
+        return;
+    }
     const bool needsCornerShape = _masksToBounds || _backgroundColor.has_value()
         || (_shadowColor && _shadowColor->a() > 0 && _shadowOpacity > 0)
         || (_borderColor && _borderWidth > 0);
@@ -469,10 +480,19 @@ void CALayer::renderSublayers(SkCanvas* canvas) {
         bool operator()(const std::shared_ptr<CALayer>& a, const std::shared_ptr<CALayer>& b) const { return a->_zPosition < b->_zPosition; }
     } sortByZPos;
 
-    auto sortedSublayers = _sublayers;
+    auto* metrics = Internal::RenderPerformance::current;
+    const auto sortedSublayers = [&] {
+        Internal::RenderPerformanceScope timer(metrics ? &metrics->sortMs : nullptr);
+        // Preserve the retained snapshot across custom drawing callbacks, but
+        // avoid stable_sort's scratch allocation for ordinary insertion order.
+        auto children = _sublayers;
+        if (!std::is_sorted(children.begin(), children.end(), sortByZPos)) {
+            if (metrics) ++metrics->sorts;
+            std::stable_sort(children.begin(), children.end(), sortByZPos);
+        }
+        return children;
+    }();
 
-    // Could be resource consuming, better to change approach
-    std::stable_sort(sortedSublayers.begin(), sortedSublayers.end(), sortByZPos);
     for (const auto& sublayer: sortedSublayers) {
         sublayer->presentationOrSelf()->skiaRender(canvas);
     }

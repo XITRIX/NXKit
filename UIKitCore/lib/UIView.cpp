@@ -1,3 +1,4 @@
+#include "RenderPerformance.hpp"
 #include <UIView.h>
 #include <UIViewController.h>
 #include <UIWindow.h>
@@ -347,6 +348,7 @@ void UIView::removeFromSuperview() {
 }
 
 void UIView::drawAndLayoutTreeIfNeeded() {
+    if (Internal::RenderPerformance::current) ++Internal::RenderPerformance::current->views;
     auto visibleLayer = layer()->presentationOrSelf();
 
     if (visibleLayer->isHidden() || visibleLayer->opacity() < 0.01f) { return; }
@@ -755,12 +757,13 @@ int UIView::maximumAnimationFrameRate() {
 }
 
 void UIView::completePendingAnimations() {
-    for (auto& layer: layersWithAnimations) {
+    // Completing an animation removes its layer from the live registry and may
+    // run callbacks that add animations. Retain this invocation's membership.
+    const auto layers = layersWithAnimations;
+    for (const auto& layer : layers) {
         timeval now;
         gettimeofday(&now, nullptr);
-        // FIXME: incorrect logic
         layer->animateAt(Timer(timevalInMilliseconds(now) + 1000000000));
-//        $0.animate(at: Timer(startingAt: NSDate.distantFuture.timeIntervalSinceNow));
     }
 }
 

@@ -9,6 +9,7 @@
 //
 
 #include <UIScrollView.h>
+#include "ScrollDynamics.hpp"
 #include <CATransaction.h>
 #include <DispatchQueue.h>
 #include <UIWindow.h>
@@ -128,6 +129,16 @@ bool isDirectionalFocusHeading(UIFocusHeading heading) {
 
 UIScrollView::UIScrollView(const NXRect frame): UIView(frame) {
     _panGestureRecognizer = new_shared<UIPanGestureRecognizer>();
+    _panGestureRecognizer->_shouldBegin = [weak = weak_from_base<UIScrollView>()](NXPoint travel) {
+        const auto self = weak.lock();
+        if (!self || !self->isScrollEnabled()) return false;
+        const auto size = self->contentSize();
+        const auto viewport = self->bounds().size;
+        const auto inset = self->effectiveContentInsets();
+        const bool horizontal = self->bounceHorizontally() || size.width + inset.left + inset.right > viewport.width;
+        const bool vertical = self->bounceVertically() || size.height + inset.top + inset.bottom > viewport.height;
+        return std::abs(travel.x) > std::abs(travel.y) ? horizontal : vertical;
+    };
     _panGestureRecognizer->onStateChanged = [this](auto){ onPanGestureStateChanged(); };
     addGestureRecognizer(_panGestureRecognizer);
     setClipsToBounds(true);
@@ -648,22 +659,25 @@ void UIScrollView::addSubview(const std::shared_ptr<UIView> &view) {
 }
 
 void UIScrollView::setContentOffset(NXPoint offset, bool animated) {
-    if (offset == contentOffset()) return;
-
-    // Cancel deceleration animations only when contentOffset gets set without animations.
-    // Otherwise we might cancel any "bounds" animations which are not iniated from velocity scrolling.
-    if (_isDecelerating && UIView::currentAnimationPrototype == nullptr) {
-        cancelDecelerationAnimations();
-    }
-
-    setBounds(NXRect(offset, bounds().size));
+    if(!std::isfinite(offset.x)||!std::isfinite(offset.y))throw std::invalid_argument("Scroll offset must be finite");
+    // Programmatic changes cancel the old physics even when the value is equal.
+    cancelDecelerationAnimations();
+    applyContentOffset(offset,animated);
+    if(_isDragging||_isTracking)
+        _initialContentOffset=uncompressedOffset(contentOffset())+_panGestureRecognizer->translationInView(shared_from_this());
+}
+void UIScrollView::applyContentOffset(NXPoint offset,bool animated) {
+    if(offset==contentOffset())return;
+    setBounds(NXRect(offset,bounds().size));
     layoutScrollIndicatorsIfNeeded();
-
-    // otherwise everything subscribing to scrollViewDidScroll is implicitly animated from velocity scroll
-    CATransaction::begin();
-    CATransaction::setDisableActions(!animated);
-    if (!delegate.expired()) delegate.lock()->scrollViewDidScroll(shared_from_base<UIScrollView>());
+    CATransaction::begin();CATransaction::setDisableActions(!animated);
+    if(const auto target=delegate.lock())target->scrollViewDidScroll(shared_from_base<UIScrollView>());
     CATransaction::commit();
+}
+void UIScrollView::applyMotionOffset(NXPoint offset) {
+    const auto traits=traitCollection();const auto scale=traits?std::max(1.f,traits->displayScale()):1.f;
+    offset={std::round(offset.x*scale)/scale,std::round(offset.y*scale)/scale};
+    applyContentOffset(offset);
 }
 
 void UIScrollView::setScrollEnabled(bool scrollEnabled) {
@@ -820,8 +834,9 @@ void UIScrollView::setBounceVertically(bool bounceVertically) {
 void UIScrollView::safeAreaInsetsDidChange() {
     const auto delta = _lastSafeAreaInsets - safeAreaInsets();
     _lastSafeAreaInsets = safeAreaInsets();
-    const auto target = getBoundsCheckedContentOffset(contentOffset() + NXPoint(delta.left, delta.top));
-    setContentOffset(target, false);
+    if(_contentInsetAdjustmentBehavior!=UIScrollViewContentInsetAdjustmentBehavior::never)
+        applyContentOffset(contentOffset()+NXPoint(delta.left,delta.top));
+    reconcileScrollGeometry();
     layoutScrollIndicatorsIfNeeded();
 }
 
@@ -951,65 +966,74 @@ bool UIScrollView::shouldBounceVertically() const {
     return _bounceVertically;
 }
 
-void UIScrollView::onPan() {
-    const auto translation = _panGestureRecognizer->translationInView(shared_from_this());
-//    _panGestureRecognizer->setTranslation(NXPoint(), shared_from_this());
-
-    const auto panGestureVelocity = _panGestureRecognizer->velocityIn(shared_from_this());
-    weightedAverageVelocity = weightedAverageVelocity * 0.2 + panGestureVelocity * 0.8;
-
-    // auto offset = contentOffsetBounds();
-    const auto rubberBand = RubberBand(0.55f, frame().size, contentOffsetBounds());
-
-    const NXPoint clamped = getBoundsCheckedContentOffset(_initialContentOffset - translation);
-    NXPoint target = rubberBand.clamp(_initialContentOffset - translation);
-
-    if (!shouldBounceHorizontally()) {
-        target.x = clamped.x;
-    }
-    if (!shouldBounceVertically()) {
-        target.y = clamped.y;
-    }
-
-    setContentOffset(target, false);
-
-//    auto newOffset = getBoundsCheckedContentOffset(_initialContentOffset - translation);
-//    setContentOffset(newOffset, false);
+NXPoint UIScrollView::uncompressedOffset(NXPoint offset) {
+    const auto limits=contentOffsetBounds();const auto size=bounds().size;
+    const auto invert=[](NXFloat value,NXFloat low,NXFloat high,NXFloat dimension) {
+        const auto bound=std::clamp(value,low,high);const auto delta=value-bound;
+        if(delta==0||dimension<=0)return value;
+        const double distance=std::min<double>(std::abs(delta),dimension*.9999);
+        return NXFloat(bound+std::copysign(distance*dimension/(.55*(dimension-distance)),delta));
+    };
+    return {invert(offset.x,limits.minX(),limits.maxX(),size.width),invert(offset.y,limits.minY(),limits.maxY(),size.height)};
 }
-
+void UIScrollView::onPan() {
+    auto translation=_panGestureRecognizer->translationInView(shared_from_this());
+    if(_rebaseElasticPanTranslation) {
+        const auto anchor=getBoundsCheckedContentOffset(_initialContentOffset);
+        translation+=anchor-_initialContentOffset;
+        _panGestureRecognizer->setTranslation(translation,shared_from_this());
+        _initialContentOffset=anchor;
+        _rebaseElasticPanTranslation=false;
+    }
+    const auto velocity=_panGestureRecognizer->velocityIn(shared_from_this());
+    weightedAverageVelocity=_previousPanVelocity*.75f+velocity*.25f;
+    _previousPanVelocity=velocity;
+    if(_consumePanActivationMovement) {
+        // UIKit consumes the activation packet before moving scroll content.
+        _consumePanActivationMovement=false;
+        _panGestureRecognizer->setTranslation({},shared_from_this());
+        _initialContentOffset=uncompressedOffset(contentOffset());
+        return;
+    }
+    const auto raw=_initialContentOffset-translation;
+    auto target=RubberBand(.55f,bounds().size,contentOffsetBounds()).clamp(raw);
+    const auto clamped=getBoundsCheckedContentOffset(raw);
+    if(!shouldBounceHorizontally())target.x=clamped.x;
+    if(!shouldBounceVertically())target.y=clamped.y;
+    applyMotionOffset(target);
+}
 void UIScrollView::onPanGestureStateChanged() {
-    switch (_panGestureRecognizer->state()) {
-        case UIGestureRecognizerState::possible: {
-            cancelDeceleratingIfNeccessary();
-            break;
-        }
-        case UIGestureRecognizerState::began: {
-            _initialContentOffset = contentOffset();
-            showScrollIndicators();
-            break;
-        }
-        case UIGestureRecognizerState::changed: {
-            if (!delegate.expired()) delegate.lock()->scrollViewWillBeginDragging(shared_from_base<UIScrollView>());
-            onPan();
-            break;
-        }
-        case UIGestureRecognizerState::ended: {
-            startDeceleratingIfNecessary();
-            weightedAverageVelocity = NXPoint();
-            break;
-        }
-        case UIGestureRecognizerState::cancelled:
-        case UIGestureRecognizerState::failed: {
-            hideScrollIndicators();
-            weightedAverageVelocity = NXPoint();
-            break;
-        }
-            // XXX: Spring back with animation:
-            //case .ended, .cancelled:
-            //if contentOffset.x < _contentInset.left {
-            //    setContentOffset(CGNXPoint(x: _contentInset.left, y: contentOffset.y), animated: true)
-            //}
-        default: break;
+    switch(_panGestureRecognizer->state()) {
+    case UIGestureRecognizerState::possible: {
+        _isTracking=true;weightedAverageVelocity={};_previousPanVelocity={};
+        const bool wasDecelerating=_isDecelerating;_caughtDeceleration=wasDecelerating;
+        cancelDeceleratingIfNeccessary();
+        if(wasDecelerating)_panGestureRecognizer->setState(UIGestureRecognizerState::began);
+        break;
+    }
+    case UIGestureRecognizerState::began: {
+        _isDragging=true;_consumePanActivationMovement=!_caughtDeceleration;
+        _initialContentOffset=uncompressedOffset(contentOffset())+_panGestureRecognizer->translationInView(shared_from_this());
+        _rebaseElasticPanTranslation=_caughtDeceleration&&contentOffset()!=getBoundsCheckedContentOffset(contentOffset());
+        weightedAverageVelocity=_panGestureRecognizer->velocityIn(shared_from_this());_previousPanVelocity=weightedAverageVelocity;showScrollIndicators();
+        if(const auto target=delegate.lock())target->scrollViewWillBeginDragging(shared_from_base<UIScrollView>());
+        break;
+    }
+    case UIGestureRecognizerState::changed:onPan();break;
+    case UIGestureRecognizerState::ended: {
+        const bool wasDragging=_isDragging;_isDragging=false;_isTracking=false;
+        startDeceleratingIfNecessary();weightedAverageVelocity={};
+        if(wasDragging)if(const auto target=delegate.lock())target->scrollViewDidEndDragging(shared_from_base<UIScrollView>(),_isDecelerating);
+        break;
+    }
+    case UIGestureRecognizerState::cancelled:
+    case UIGestureRecognizerState::failed: {
+        const bool wasDragging=_isDragging;_isDragging=false;_isTracking=false;weightedAverageVelocity={};
+        if(contentOffset()!=getBoundsCheckedContentOffset(contentOffset()))bounceWithVelocity({});
+        else {cancelDecelerationAnimations();hideScrollIndicators();}
+        if(wasDragging)if(const auto target=delegate.lock())target->scrollViewDidEndDragging(shared_from_base<UIScrollView>(),_isDecelerating);
+        break;
+    }
     }
 }
 
@@ -1198,146 +1222,79 @@ void UIScrollView::scheduleScrollIndicatorHide(double delay) {
 }
 
 void UIScrollView::startDeceleratingIfNecessary() {
-    // Only animate if instantaneous velocity is large enough
-    // Otherwise we could animate after scrolling quickly, pausing for a few seconds, then letting go
-    auto velocity = weightedAverageVelocity * -1.0f;
-    constexpr NXFloat maximumDecelerationVelocity = 12000.0f;
-    velocity.x = std::clamp(velocity.x, -maximumDecelerationVelocity, maximumDecelerationVelocity);
-    velocity.y = std::clamp(velocity.y, -maximumDecelerationVelocity, maximumDecelerationVelocity);
-
-    const auto scrollableOffsetBounds = contentOffsetBounds();
-    if (scrollableOffsetBounds.height() <= 0 && !shouldBounceVertically()) {
-        velocity.y = 0;
-    }
-    if (scrollableOffsetBounds.width() <= 0 && !shouldBounceHorizontally()) {
-        velocity.x = 0;
-    }
-
-    auto decelerationRate = _decelerationRate.rawValue();
-    auto threshold = 0.5f / traitCollection()->displayScale();// layer()->contentsScale();
-
-    auto parameters = DecelerationTimingParameters(contentOffset(),velocity, decelerationRate, threshold);
-
-    auto destination = parameters.destination();
-    auto clippedDestination = getBoundsCheckedContentOffset(destination);
-    const bool isHorizontallyClipped = destination.x != clippedDestination.x;
-    const bool isVerticallyClipped = destination.y != clippedDestination.y;
-    const bool isClipped = isHorizontallyClipped || isVerticallyClipped;
-    const bool shouldBounceAtDestination =
-        (isHorizontallyClipped && shouldBounceHorizontally())
-        || (isVerticallyClipped && shouldBounceVertically());
-
-    float duration;
-    if (isClipped) {
-        duration = parameters.durationTo(clippedDestination);
-    } else {
-        duration = parameters.duration();
-    }
-
-    _isDecelerating = true;
-    _timerAnimation = std::make_shared<TimerAnimation>(duration, [this, parameters](float, const double time) {
-        setContentOffset(parameters.valueAt(time), false);
-    }, [
-        this,
-        parameters,
-        duration,
-        clippedDestination,
-        shouldBounceAtDestination
-    ](bool) {
-        auto settledOffset = contentOffset();
-        if (!shouldBounceHorizontally()) {
-            settledOffset.x = clippedDestination.x;
-        }
-        if (!shouldBounceVertically()) {
-            settledOffset.y = clippedDestination.y;
-        }
-        setContentOffset(settledOffset, false);
-
-        _isDecelerating = shouldBounceAtDestination;
-
-        if (shouldBounceAtDestination) {
-            auto velocity = parameters.velocityAt(duration);
-            if (!shouldBounceHorizontally()) {
-                velocity.x = 0;
-            }
-            if (!shouldBounceVertically()) {
-                velocity.y = 0;
-            }
-            bounceWithVelocity(velocity);
-        } else {
-            hideScrollIndicators();
-        }
-    });
-//    auto nonBoundsCheckedScrollAnimationDistance = weightedAverageVelocity * dampingFactor; // hand-tuned
-//    auto targetOffset = contentOffset() - nonBoundsCheckedScrollAnimationDistance;// getBoundsCheckedContentOffset(contentOffset() - nonBoundsCheckedScrollAnimationDistance);
-//    auto distanceToBoundsCheckedTarget = contentOffset() - targetOffset;
-
-//    auto velocityIsLargeEnoughToDecelerate = (velocity.magnitude() > 10);
-//    auto willDecelerate = (velocityIsLargeEnoughToDecelerate && distanceToBoundsCheckedTarget.magnitude() > 0.0);
-//
-//    if (!delegate.expired()) delegate.lock()->scrollViewDidEndDragging(shared_from_base<UIScrollView>(), willDecelerate);
-//    if (!willDecelerate) { hideScrollIndicators(); return; }
-//
-//    // https://ariya.io/2011/10/flick-list-with-its-momentum-scrolling-and-deceleration
-//    // TODO: This value should be calculated from `self.decelerationRate` instead
-//    // But actually we want to redo this function to avoid `UIView.animate` entirely,
-//    // in which case we wouldn't need an animationTime at all.
-//    auto animationTimeConstant = 0.325f * dampingFactor;
-//
-//    // This calculation is a weird approximation but it's close enough for now...
-//    auto animationTime = logf(distanceToBoundsCheckedTarget.magnitude()) * animationTimeConstant;
-//
-//    UIViewAnimationOptions options = UIViewAnimationOptions(UIViewAnimationOptions::beginFromCurrentState | UIViewAnimationOptions::customEaseOut | UIViewAnimationOptions::allowUserInteraction);
-//    UIView::animate(
-//                    animationTime,
-//                    0,
-//                    options,
-//                    [this, targetOffset]() {
-//                        _isDecelerating = true;
-//                        setContentOffset(targetOffset, false);
-//                    },
-//                    [this](bool) {
-//                        _isDecelerating = false;
-//                    }
-//    );
+    auto velocity=weightedAverageVelocity*-1.f;
+    // Native willEndDragging reports zero below its fling threshold. A slow
+    // release should not resurrect an old high-speed sample.
+    const auto releaseVelocity=_panGestureRecognizer->velocityIn(shared_from_this());
+    if(std::abs(releaseVelocity.x)<250)velocity.x=0;
+    if(std::abs(releaseVelocity.y)<250)velocity.y=0;
+    const auto limits=contentOffsetBounds();const auto offset=contentOffset();
+    // The rubber-band derivative describes outward drag compression, not the
+    // release momentum of a reversed swipe. Keep inward velocity in points/s.
+    // Native edge return does not inherit an outward release kick.
+    if((offset.x<=limits.minX()&&velocity.x<0)||(offset.x>=limits.maxX()&&velocity.x>0))velocity.x=0;
+    if((offset.y<=limits.minY()&&velocity.y<0)||(offset.y>=limits.maxY()&&velocity.y>0))velocity.y=0;
+    startScrollMotion(velocity,true);
 }
-
-
-void UIScrollView::bounceWithVelocity(NXPoint velocity) {
-    auto restOffset = getBoundsCheckedContentOffset(contentOffset());
-    auto displacement = contentOffset() - restOffset;
-    auto threshold = 0.5f / traitCollection()->displayScale(); //layer()->contentsScale();
-    auto spring = Spring(1, 100, 1);
-
-    auto parameters = SpringTimingParameters(spring, displacement,velocity, threshold);
-
-    auto duration = parameters.duration();
-    _timerAnimation = std::make_shared<TimerAnimation>(duration, [this, restOffset, parameters](auto, float time){
-        setContentOffset(restOffset + parameters.valueAt(time), false);
-        CALayer::requestFramerate(120);
-    }, [this](bool) {
-        _isDecelerating = false;
-        hideScrollIndicators();
-    });
-}
-
-void UIScrollView::cancelDeceleratingIfNeccessary() {
-    if (!_isDecelerating) { return; }
-
-    // Get the presentation value from the current animation
-    if (_timerAnimation) _timerAnimation->invalidate();
-    setContentOffset(visibleContentOffset(), false);
+void UIScrollView::startScrollMotion(NXPoint velocity,bool predictInitialFrame) {
     cancelDecelerationAnimations();
-    _isDecelerating = false;
+    const auto limits=contentOffsetBounds();const auto offset=contentOffset();
+    const auto scale=traitCollection()?std::max(1.f,traitCollection()->displayScale()):1.f;
+    const auto k=-1000*std::log(std::clamp(double(_decelerationRate.rawValue()),.001,.999999));
+    if(limits.width()<=0&&!shouldBounceHorizontally())velocity.x=0;
+    if(limits.height()<=0&&!shouldBounceVertically())velocity.y=0;
+    auto motion=std::make_unique<Internal::ScrollMotion>();
+    motion->x.begin(offset.x,std::clamp(velocity.x,-12000.f,12000.f),limits.minX(),limits.maxX(),shouldBounceHorizontally(),k,.5/scale);
+    motion->y.begin(offset.y,std::clamp(velocity.y,-12000.f,12000.f),limits.minY(),limits.maxY(),shouldBounceVertically(),k,.5/scale);
+    if(!motion->active()){applyContentOffset(motion->position());hideScrollIndicators();return;}
+    if(predictInitialFrame&&offset==getBoundsCheckedContentOffset(offset)) {
+        // UIKit exposes the next display frame immediately at lift-off. Keep
+        // the physical clock unchanged, including if another finger catches it.
+        const auto context=SkiaCtx::main();
+        motion->initialFrame=1.0/std::max(1,context?context->screenFrameRate():60);
+    }
+    _scrollMotion=std::move(motion);_isDecelerating=true;
+    const auto generation=_scrollAnimationGeneration;const auto weak=weak_from_base<UIScrollView>();
+    _timerAnimation=std::make_shared<TimerAnimation>(60,[weak,generation](float,double elapsed) {
+        const auto self=weak.lock();if(!self||self->_scrollAnimationGeneration!=generation||!self->_scrollMotion)return;
+        self->_scrollMotion->advanceTo(elapsed);const auto point=self->_scrollMotion->presentationPosition();const bool finished=!self->_scrollMotion->active();
+        if(finished)self->applyContentOffset(point);
+        else self->applyMotionOffset(point);
+        // didScroll may replace/remove the animation. Never complete its replacement.
+        if(self->_scrollAnimationGeneration!=generation)return;
+        if(finished){self->cancelDecelerationAnimations();self->hideScrollIndicators();}
+    });
+    if(_scrollMotion->initialFrame>0)applyMotionOffset(_scrollMotion->presentationPosition());
 }
-
+void UIScrollView::bounceWithVelocity(NXPoint velocity) {startScrollMotion(velocity);}
+void UIScrollView::cancelDeceleratingIfNeccessary() {
+    if(!_isDecelerating)return;
+    const auto point=visibleContentOffset();cancelDecelerationAnimations();applyContentOffset(point);
+}
 void UIScrollView::cancelDecelerationAnimations() {
-//    if (!layer()->animations.isEmpty) {
-//        layer.removeAnimation(forKey: "bounds")
-//        horizontalScrollIndicator.layer.removeAnimation(forKey: "position")
-//        verticalScrollIndicator.layer.removeAnimation(forKey: "position")
-//    }
+    ++_scrollAnimationGeneration;
+    if(_timerAnimation)_timerAnimation->invalidate();
+    _timerAnimation.reset();_scrollMotion.reset();_isDecelerating=false;
     layer()->removeAnimation("bounds");
+}
+void UIScrollView::reconcileScrollGeometry() {
+    const auto limits=contentOffsetBounds();const auto size=bounds().size;
+    if(_hasScrollGeometry&&limits==_lastScrollLimits&&size==_lastScrollViewport)return;
+    const bool resized=_hasScrollGeometry&&size!=_lastScrollViewport;
+    _lastScrollLimits=limits;_lastScrollViewport=size;_hasScrollGeometry=true;
+    if(_isDragging||_isTracking) {
+        // UIKit clamps an elastic offset when its viewport geometry changes.
+        // Rebase the raw gesture anchor too, so subsequent movement is continuous.
+        applyContentOffset(getBoundsCheckedContentOffset(contentOffset()));
+        _initialContentOffset=uncompressedOffset(contentOffset())+_panGestureRecognizer->translationInView(shared_from_this());
+    } else if(_isDecelerating) {
+        if(resized&&contentOffset()!=getBoundsCheckedContentOffset(contentOffset())) {
+            cancelDecelerationAnimations();
+            applyContentOffset(getBoundsCheckedContentOffset(contentOffset()));
+            hideScrollIndicators();return;
+        }
+        const auto velocity=_scrollMotion?_scrollMotion->velocity():NXPoint();startScrollMotion(velocity);
+    } else applyContentOffset(getBoundsCheckedContentOffset(contentOffset()));
 }
 
 bool UIScrollView::applyXMLAttribute(const std::string& name, const std::string& value) {
@@ -1394,7 +1351,7 @@ bool UIScrollView::applyXMLAttribute(const std::string& name, const std::string&
 
 void UIScrollView::layoutSubviews() {
     UIView::layoutSubviews();
-    setContentOffset(getBoundsCheckedContentOffset(contentOffset()), false);
+    reconcileScrollGeometry();
     layoutScrollIndicatorsIfNeeded();
 
     if (_focusTrackingMode == UIScrollViewFocusTrackingMode::natural) {

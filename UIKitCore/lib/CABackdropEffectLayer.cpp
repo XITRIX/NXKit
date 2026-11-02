@@ -1,3 +1,4 @@
+#include "RenderPerformance.hpp"
 #include "CABackdropEffectLayer.hpp"
 #include "CAGlassContainerLayer.hpp"
 #include "GlassAppearance.hpp"
@@ -419,6 +420,9 @@ void CABackdropEffectLayer::renderSublayers(SkCanvas* canvas) {
 }
 
 void CABackdropEffectLayer::draw(SkCanvas* context) {
+    auto* metrics = Internal::RenderPerformance::current;
+    if (metrics) ++metrics->glass;
+    Internal::RenderPerformanceScope timer(metrics ? &metrics->glassMs : nullptr);
     if (CAGlassContainerLayer::contains(this)) return;
     const auto layerBounds = bounds();
     if (!_runtimeEffect
@@ -484,8 +488,9 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
 half4 main(float2 pixelXY) {
     float2 xy=pixelXY/max(scale,1.0), halfDim=size*0.5, p=xy-halfDim;
     float r=min(cornerRadius,min(halfDim.x,halfDim.y));
-    float d=boxRoundedSDF(p,halfDim,r);
-    float2 normal=lensNormalDirection(p,halfDim,r);
+    float3 surface=roundedBoxSample(p,halfDim,r);
+    float d=surface.x;
+    float2 normal=surface.yz;
     half4 original=scene.eval(pixelXY);
     // Read beyond the already drawn material's AA footprint. Subtract only
     // the backdrop contribution: otherwise black backgrounds incorrectly lose

@@ -39,6 +39,7 @@ add_library(XITRIXUIKit
         lib/IndexPath.cpp
         lib/CGImage.cpp
         lib/CADisplayLink.cpp
+        lib/RenderPerformance.hpp
         lib/CALayer.cpp
         lib/LayerCornerGeometry.cpp
         lib/LayerCornerGeometry.hpp

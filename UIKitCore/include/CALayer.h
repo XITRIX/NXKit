@@ -211,14 +211,8 @@ private:
     NXFloat _shadowRadius;
     NXFloat _shadowOpacity = 1;
 
-    /**
-     Indicates whether a layer somewhere has changed since the last render pass.
-
-     The current implementation of this is quite simple and doesn't check whether the layer is actually in
-     the layer hierarchy or not. In theory this means that we're wasting render passes if users frequently
-     update layers that aren't in the tree. In practice it's not expected that UIKit users would do that
-     often enough for us to care about it.
-    **/
+    // Tracks retained-tree mutations for diagnostics. The application now
+    // presents every paced frame, even when this flag remains false.
     static bool layerTreeIsDirty;
     static void setLayerTreeIsDirty();
 

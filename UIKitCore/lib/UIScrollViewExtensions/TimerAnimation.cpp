@@ -28,18 +28,24 @@ void TimerAnimation::invalidate() {
 }
 
 void TimerAnimation::handleFrame() {
+    advanceTo((Timer() - firstFrameTimestamp) / 1000);
+}
+
+void TimerAnimation::advanceTo(double elapsed) {
     if (!_running) return;
+    // A scroll callback can cancel this timer or replace it with edge return.
+    // Keep the current invocation alive until it has left its own members.
+    const auto lifetime=weak_from_this().lock();
 
     // Touch-driven scrolling already gets a 120 Hz boost from active input.
     // Deceleration runs after the touch ends, so request it explicitly here.
     CALayer::requestFramerate(120);
 
-    auto elapsed = (Timer() - firstFrameTimestamp) / 1000;
     if (elapsed >= duration) {
-        animations(1, duration);
         _running = false;
-        completion(true);
         displayLink.invalidate();
+        animations(1, duration);
+        completion(true);
     } else {
         animations(elapsed / duration, elapsed);
     }
