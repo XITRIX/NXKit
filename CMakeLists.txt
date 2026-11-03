@@ -67,20 +67,14 @@ if (APPLE)
         )
     endif ()
 elseif (PLATFORM_SWITCH)
-        set(SKIA_SWITCH_OUT_DIR ${EXTERN_PATH}/skia/out/horizon)
-        if (NOT EXISTS "${SKIA_SWITCH_OUT_DIR}/libskia.a")
-            message(FATAL_ERROR "Graphite/Dawn Skia archive is missing: ${SKIA_SWITCH_OUT_DIR}/libskia.a")
-        endif ()
-        if (NOT EXISTS "${SKIA_SWITCH_OUT_DIR}/libdawn_combined.a")
-            message(FATAL_ERROR "Dawn archive is missing: ${SKIA_SWITCH_OUT_DIR}/libdawn_combined.a")
-        endif ()
+        include(${EXTERN_PATH}/cmake/SwitchVulkan.cmake)
+        set(SKIA_SWITCH_OUT_DIR ${NXKIT_SWITCH_SKIA_OUT})
 
         list(APPEND platform_libs SDL3::SDL3)
 
         target_include_directories(UIKitCore PRIVATE
-                ${EXTERN_PATH}/skia/third_party/externals/dawn
-                ${EXTERN_PATH}/skia/third_party/externals/dawn/include
-                ${SKIA_SWITCH_OUT_DIR}/gen/third_party/dawn/include
+                ${EXTERN_PATH}/skia/include/third_party/vulkan
+                ${EXTERN_PATH}/skia/third_party/externals/vulkanmemoryallocator/include
         )
 
         target_link_libraries(UIKitCore PUBLIC
@@ -91,7 +85,7 @@ elseif (PLATFORM_SWITCH)
                 ${SKIA_SWITCH_OUT_DIR}/libskunicode_icu.a
                 ${SKIA_SWITCH_OUT_DIR}/libicu.a
                 ${SKIA_SWITCH_OUT_DIR}/libskcms.a
-                ${SKIA_SWITCH_OUT_DIR}/libdawn_combined.a
+                ${NXKIT_SWITCH_NVK_ROOT}/lib/libvulkan.a
                 freetype
                 harfbuzz
                 expat
@@ -99,10 +93,8 @@ elseif (PLATFORM_SWITCH)
                 png
                 bz2
                 z
-                EGL
-                glapi
-                GLESv2
                 drm_nouveau
+                zstd
                 nx
         )
 endif ()

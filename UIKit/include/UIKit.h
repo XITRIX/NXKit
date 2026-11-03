@@ -12,3 +12,6 @@
 #include <UITabBarView.h>
 #include <UITabBar.h>
 #include <UITabBarController.h>
+
+#include <UINavigationBar.h>
+#include <UINavigationController.h>

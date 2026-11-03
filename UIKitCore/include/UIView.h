@@ -13,6 +13,7 @@
 #include <tinyxml2.h>
 
 namespace NXKit {
+namespace Internal { class ViewAppearanceAccess; }
 
 #define REGISTER_XIB_ATTRIBUTE(strname, parcer, setter) \
 if (name == #strname) { \
@@ -191,6 +192,7 @@ protected:
     // while retaining the host's inherited traits.
     virtual std::shared_ptr<UITraitCollection> traitsForSubviews() const { return traitCollection(); }
 private:
+    friend class Internal::ViewAppearanceAccess;
     friend class UIViewController;
     friend class UIFocusSystem;
     friend class UIScrollView;

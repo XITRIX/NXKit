@@ -2,6 +2,7 @@
 
 #include <UIView.h>
 #include <UITabBarItem.h>
+#include <UINavigationItem.h>
 #include <UINavigationControllerInterface.h>
 #include <UITabBarControllerInterface.h>
 #include <UIViewControllerTransitioning.h>
@@ -53,6 +54,7 @@ public:
 
     std::string title() { return _title; }
     void setTitle(std::string title);
+    [[nodiscard]] std::shared_ptr<UINavigationItem> navigationItem();
     [[nodiscard]] std::shared_ptr<UITabBarItem> tabBarItem();
     void setTabBarItem(const std::shared_ptr<UITabBarItem>& item);
 
@@ -120,6 +122,7 @@ private:
     struct TabBarItemObserver { std::weak_ptr<void> owner; std::function<void()> changed; };
     std::vector<TabBarItemObserver> _tabBarItemObservers;
     std::shared_ptr<UITabBarItem> _tabBarItem;
+    std::shared_ptr<UINavigationItem> _navigationItem;
     bool _ownsDefaultTabBarItem = false;
     UIEdgeInsets _containerSafeAreaInsets;
     void invalidateContainerSafeAreaInsets();

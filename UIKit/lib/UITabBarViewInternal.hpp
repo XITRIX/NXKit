@@ -14,6 +14,9 @@ struct TabBarViewState {
     size_t _selected = 0, _dragStart = 0;
     float _position = 0, _selectionStep = 1;
     std::vector<NXKit::NXFloat> _selectionCenters;
+    std::vector<NXKit::NXFloat> _itemContentWidths;
+    std::vector<NXKit::NXFloat> _itemWidths,_itemLefts;
+    NXKit::NXFloat _minimumItemWidth=0;
     std::weak_ptr<NXKit::UITouch> _trackingTouch;
     NXKit::NXPoint _lastContact;
     NXKit::NXFloat _grabOffsetX = 0;

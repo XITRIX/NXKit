@@ -1,4 +1,5 @@
 #include "../AppleSystemFont.hpp"
+#include "../MetalPipelineCache.hpp"
 #include <platforms/macos/SkiaCtx_macos.h>
 
 #include "include/core/SkColorSpace.h"
@@ -94,6 +95,9 @@ void SkiaCtx_macos::initContext() {
 
     skgpu::graphite::ContextOptions options;
     options.fRequireOrderedRecordings = true;
+    _pipelineCache=std::make_shared<Internal::MetalPipelineCache>(device.get());
+    backendContext.fPipelineCache=_pipelineCache;
+    _pipelineCache->configure(backendContext,options);
     context = skgpu::graphite::ContextFactory::MakeMetal(backendContext, options);
     if (!context) {
         NSLog(@"Failed to create Graphite Metal context");
@@ -129,6 +133,8 @@ void SkiaCtx_macos::destroyContext() {
         context->freeGpuResources();
     }
     context.reset();
+
+    _pipelineCache.reset();
 
     if (auto layer = NX_OBJC_BRIDGE(CAMetalLayer*, metalLayer())) {
         layer.device = nil;

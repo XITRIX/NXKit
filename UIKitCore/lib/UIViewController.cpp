@@ -1,5 +1,6 @@
 #include <UIViewController.h>
 #include "BarItemAccess.hpp"
+#include "NavigationItemAccess.hpp"
 #include <UIPresentationController.h>
 #include <UIPress.h>
 #include <UIWindow.h>
@@ -1066,6 +1067,7 @@ std::shared_ptr<UITabBarControllerInterface> UIViewController::tabBarController(
 
 void UIViewController::setTitle(std::string title) {
     _title = std::move(title);
+    if (_navigationItem) Internal::NavigationItemAccess::defaultTitle(*_navigationItem,_title);
     if (_tabBarItem && _ownsDefaultTabBarItem)
         Internal::BarItemAccess::setDefaultTitle(*_tabBarItem, _title);
 }
@@ -1102,4 +1104,9 @@ void UIViewController::setTabBarItem(const std::shared_ptr<UITabBarItem>& item) 
 
 void UIViewController::invalidateContainerSafeAreaInsets() {
     if (_view) _view->setNeedsUpdateSafeAreaInsets();
+}
+
+std::shared_ptr<UINavigationItem> UIViewController::navigationItem() {
+    if(!_navigationItem) { _navigationItem=std::make_shared<UINavigationItem>(); Internal::NavigationItemAccess::defaultTitle(*_navigationItem,_title); }
+    return _navigationItem;
 }

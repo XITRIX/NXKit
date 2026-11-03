@@ -27,7 +27,8 @@ UIWindow::UIWindow() {
     _focusSystem->_rootWindow = weak_from_base<UIWindow>();
 
     setBackgroundColor(UIColor::systemBackground);
-    setTintColor(UIColor::systemBlue);
+    // UIView supplies the default tint. Keep it inherited so component kits
+    // can distinguish an application's explicit tint from that default.
 
 //    yoga->setEnabled(false);
 }

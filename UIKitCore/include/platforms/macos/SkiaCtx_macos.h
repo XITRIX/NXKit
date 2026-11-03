@@ -9,6 +9,7 @@
 #import <SDL3/SDL.h>
 
 namespace NXKit {
+namespace Internal { class MetalPipelineCache; }
 
 class SkiaCtx_macos: public SkiaCtx_sdlBase {
 public:
@@ -26,6 +27,7 @@ protected:
     bool platformRunLoop(std::function<bool ()> loop) override;
 
 private:
+    std::shared_ptr<Internal::MetalPipelineCache> _pipelineCache;
     std::unique_ptr<skgpu::graphite::Context> context;
     std::unique_ptr<skgpu::graphite::Recorder> recorder;
     sk_sp<SkSurface> surface;

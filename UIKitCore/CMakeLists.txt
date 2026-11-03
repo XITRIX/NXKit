@@ -42,6 +42,12 @@ add_library(UIKitCore
         lib/LayerCornerGeometry.hpp
         include/CALayerCornerCurve.h
         lib/YGLayout.cpp
+        include/UIBarButtonItem.h
+        lib/UIBarButtonItem.cpp
+        include/UINavigationItem.h
+        lib/UINavigationItem.cpp
+        lib/NavigationItemAccess.hpp
+        lib/ViewAppearanceAccess.hpp
         lib/UIBarItem.cpp
         lib/UITabBarItem.cpp
         include/UIBarItem.h
@@ -102,6 +108,8 @@ target_include_directories(UIKitCore PUBLIC include PRIVATE lib)
 
 
 if (APPLE)
+    include(${CMAKE_CURRENT_LIST_DIR}/../cmake/NXKitMetalCache.cmake)
+    nxkit_configure_metal_cache(UIKitCore "${CMAKE_CURRENT_LIST_DIR}/..")
     target_sources(UIKitCore PRIVATE
             lib/platforms/SkiaCtx_sdlBase.cpp
             lib/platforms/apple/AppleSystemFont.mm

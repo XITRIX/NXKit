@@ -9,11 +9,14 @@
 #include "include/core/SkSurface.h"
 #ifdef __APPLE__
 #include "include/ports/SkFontMgr_mac_ct.h"
+#include "platforms/apple/AppleSystemFont.hpp"
 #endif
 #include <iostream>
 #include <cmath>
 #include <limits>
 #include <stdexcept>
+#include <fstream>
+#include <filesystem>
 
 using namespace NXKit;
 namespace NXKit {
@@ -37,15 +40,18 @@ void expect(bool value,const char* message) {if(!value){++failures;std::cerr<<"F
 template<class F> bool rejects(F action) {try{action();return false;}catch(const std::invalid_argument&){return true;}catch(const std::logic_error&){return true;}}
 class Context final:public SkiaCtx {
 public:
-    NXKit::NXSize size{390,844};float scale=1;bool dark=false;
+    NXKit::NXSize size{390,844};float scale=1;bool dark=false;UIEdgeInsets safe{44,0,34,0};
     Context() {
 #ifdef __APPLE__
         fontMgr=SkFontMgr_New_CoreText(nullptr);
 #endif
     }
+#ifdef __APPLE__
+    sk_sp<SkTypeface> getDefaultTypeface(const SkFontStyle& style=SkFontStyle(),NXFloat size=17)const override{return Internal::appleSystemTypeface(style,size);}
+#endif
     NXKit::NXSize getSize() override{return size;}
     float getScaleFactor() override{return scale;}
-    UIEdgeInsets deviceSafeAreaInsets() override{return {44,0,34,0};}
+    UIEdgeInsets deviceSafeAreaInsets() override{return safe;}
     UIUserInterfaceStyle getThemeMode() override{return dark?UIUserInterfaceStyle::dark:UIUserInterfaceStyle::light;}
     sk_sp<SkSurface> getBackbufferSurface() override{return nullptr;}
     void swapBuffers() override{}
@@ -150,6 +156,17 @@ void barCases(const std::shared_ptr<Context>& ctx) {
     expect(std::abs(state._lens->frame().midX()-labelCenter.x)<.01f
            &&std::abs(control->frame().midX()-labelCenter.x)<.01f,
            "wide tab layout keeps selection, caption and touch cell centers aligned");
+    for(const NXFloat width:{360.f,388.f,520.f,1000.f})for(const auto index:{size_t(0),size_t(3)}) {
+        bar->setFrame({0,150,width,62});bar->setSelectedItem(index==0?a:d);bar->layoutIfNeeded();
+        const auto lens=state._lens->frame();
+        const auto edge=index==0?lens.minX():width-lens.maxX();
+        expect(edge>=3.99f&&(width>388||std::abs(edge-4)<.01f)
+               &&lens.minY()==4&&lens.height()==54,
+               "first and last selection lenses keep the native phone inset and fit wider platters");
+        const auto caption=state._normalLabels[index];
+        const auto center=caption->convertToView({caption->bounds().width()*.5f,0},bar);
+        expect(std::abs(center.x-lens.midX())<.01f,"captions remain centered inside the inset selection lens");
+    }
     bar->setItems({});bar->layoutIfNeeded();
     expect(!bar->selectedItem()&&!bar->point({5,5},nullptr),"empty bar has no selection or invisible hit surface");
     bar->setItems({a});bar->setFrame({0,0,0,0});bar->layoutIfNeeded();
@@ -196,11 +213,19 @@ void controllerCases(const std::shared_ptr<Context>& ctx) {
     expect(rejects([&]{a->setTabBarItem(b->tabBarItem());})&&a->tabBarItem()==replacement,
            "sharing an item between contained controllers is rejected before mutation");
     a->setAdditionalSafeAreaInsets({0,0,7,0});frame();
-    expect(a->view()->safeAreaInsets().bottom>=127&&a->additionalSafeAreaInsets().bottom==7,
+    expect(a->view()->safeAreaInsets().bottom==90&&a->additionalSafeAreaInsets().bottom==7,
            "floating bar reserves content safe area without overwriting application insets");
+    struct Placement {NXFloat safeBottom,gap,contentInset;};
+    for(const auto expected:{Placement{0,8,70},Placement{21,8,70},Placement{34,21,83},Placement{60,47,109}}) {
+        ctx->safe.bottom=expected.safeBottom;window->setNeedsLayout();frame();
+        expect(bar->frame().maxY()==ctx->size.height-expected.gap
+               &&a->view()->safeAreaInsets().bottom==expected.contentInset+7,
+               "floating chrome and content reservations adapt without doubling the device inset");
+    }
+    ctx->safe.bottom=34;window->setNeedsLayout();frame();
     const auto barFrame=bar->frame();ctx->size={844,390};frame();
-    expect(bar->frame().width()>barFrame.width()&&bar->frame().maxY()<=390-34,
-           "tabBar mode remains a bottom bar when width and orientation change");
+    expect(bar->frame().width()==barFrame.width()&&bar->frame().midX()==422&&bar->frame().maxY()==390-21,
+           "three-tab mode retains its natural centered width when orientation changes");
     ctx->size={390,844};frame();
     expect(!tabs->setSelectedIndex(30)&&tabs->selectedViewController()==a,"invalid selection leaves state unchanged");
     expect(rejects([&]{tabs->setViewControllers({a,a});})&&tabs->viewControllers().size()==3,
@@ -228,11 +253,80 @@ void controllerCases(const std::shared_ptr<Context>& ctx) {
     std::weak_ptr<UITabBarController> weak=tabs;delegate->onDid=nullptr;delegate->onShould=nullptr;
     tabs.reset();expect(weak.expired()&&!bar->delegate(),"retaining a bar does not retain its controller or delegate");
 }
+void variantCases(const std::shared_ptr<Context>& ctx,const std::string& reportPath,const std::string& images) {
+    std::ofstream report;if(!reportPath.empty())report.open(reportPath);
+    if(report)report<<"{\"records\":[";bool comma=false;
+    const char* titles[]={"Home","Favorites","Library","Settings","Search"};
+    const char* symbols[]={"house.fill","star.fill","books.vertical.fill","slider.horizontal.3","magnifyingglass"};
+    auto rect=[](std::ostream& out,NXRect r){out<<'['<<r.minX()<<','<<r.minY()<<','<<r.width()<<','<<r.height()<<']';};
+    for(const NXFloat width:{320.f,360.f,390.f,402.f,430.f})for(bool dark:{false,true})for(size_t count:{2,3,4,5}) {
+        ctx->size={width,874};ctx->safe={62,0,34,0};ctx->scale=3;ctx->dark=dark;
+        auto tabs=new_shared<UITabBarController>();std::vector<std::shared_ptr<UIViewController>> controllers;
+        for(size_t i=0;i<count;++i){auto c=new_shared<Screen>();c->setTitle(titles[i]);c->setTabBarItem(std::make_shared<UITabBarItem>(titles[i],UIImage::systemImageNamed(symbols[i],28,400,3),i));controllers.push_back(c);}
+        tabs->setViewControllers(controllers);auto window=windowFor(tabs);auto bar=tabs->tabBar();
+        const NXKit::NXPoint body{width*.5f,400};
+        auto passive=new_shared<UITouch>(9000,body,Timer());auto passiveEvent=UIGestureRecognizerTestHarness::event(window,passive);
+        UIGestureRecognizerTestHarness::send(window,passiveEvent,passive,UITouchPhase::began,body,0);
+        UIGestureRecognizerTestHarness::send(window,passiveEvent,passive,UITouchPhase::ended,body,16);
+        auto& state=Internal::TabBarViewAccess::state(*bar);
+        const NXFloat platterWidth=count==2?188:(count==3?274:width-42);
+        expect(std::abs(bar->frame().width()-platterWidth)<.01f&&bar->frame().midX()==width*.5f,
+               "two and three tabs hug their content; four and five fill the phone platter");
+        for(size_t selected=0;selected<count;++selected) {
+            tabs->setSelectedIndex(selected);tabs->selectedViewController()->view()->setBackgroundColor(UIColor::systemGroupedBackground);settle();frame();
+            const auto lens=state._lens->frame();
+            NXFloat nativeWidth=count<4?94:(count==4?platterWidth/4+5:std::max(79.333333f,platterWidth/5+5));
+            if(count==4&&width==320)nativeWidth=selected==1?85.349544f:81.550152f;
+            if(count==4&&width==360)nativeWidth=85.333333f;
+            if(count==5&&width==320)nativeWidth=selected==1?72.666667f:69.333333f;
+            if(count==5&&width==360)nativeWidth=selected==1?80.829268f:77.292683f;
+            if(count==5&&width==390)nativeWidth=selected==1?87.121951f:83.219512f;
+            if(std::abs(lens.width()-nativeWidth)>.34f)std::cerr<<"variant "<<width<<'/'<<count<<'/'<<selected<<" lens "<<lens.width()<<" expected "<<nativeWidth<<'\n';
+            expect(std::abs(lens.width()-nativeWidth)<.34f,"tab selection width matches the native count and compression regime");
+            expect(std::abs(lens.midX()-state._controls[selected]->frame().midX())<.01f,
+                   "selection and hit cell centers remain aligned for every tab");
+            if(selected==0)expect(std::abs(lens.minX()-4)<.01f,"first selection has a four-point leading inset");
+            if(selected+1==count)expect(std::abs(platterWidth-lens.maxX()-4)<.01f,"last selection has a four-point trailing inset");
+            if(report){if(comma)report<<',';comma=true;report<<"{\"width\":"<<width<<",\"count\":"<<count<<",\"selected\":"<<selected<<",\"dark\":"<<(dark?"true":"false")<<",\"platter\":";rect(report,bar->frame());report<<",\"lens\":";rect(report,{bar->frame().origin+lens.origin,lens.size});report<<",\"childBottom\":"<<tabs->selectedViewController()->view()->safeAreaInsets().bottom<<'}';}
+            if(!images.empty()&&(selected==0||selected+1==count)) {
+                const auto name=std::to_string(int(width))+"-"+std::to_string(count)+"-"+(selected==0?"first":"last")+"-"+(dark?"dark":"light");
+                auto surface=SkSurfaces::Raster(SkImageInfo::MakeN32Premul(int(width*2),1748));surface->getCanvas()->scale(2,2);surface->getCanvas()->clear(dark?SK_ColorBLACK:SkColorSetRGB(242,242,247));
+                UITraitCollection::setCurrent(window->traitCollection());window->layer()->skiaRender(surface->getCanvas());
+                SkBitmap pixels;pixels.allocN32Pixels(int(width*2),1748);surface->readPixels(pixels,0,0);
+                std::ofstream out(images+"/"+name+".ppm",std::ios::binary);out<<"P6\n"<<pixels.width()<<' '<<pixels.height()<<"\n255\n";
+                for(int y=0;y<pixels.height();++y)for(int x=0;x<pixels.width();++x){const auto color=pixels.getColor(x,y);const unsigned char rgb[]={uint8_t(SkColorGetR(color)),uint8_t(SkColorGetG(color)),uint8_t(SkColorGetB(color))};out.write(reinterpret_cast<const char*>(rgb),3);}
+            }
+        }
+        tabs->setSelectedIndex(0);settle();frame();
+        const auto lastControl=state._controls.back();
+        const auto last=lastControl->convertToView({lastControl->bounds().width()*.5f,31},window);
+        auto touch=new_shared<UITouch>(10000+count,last,Timer());auto event=UIGestureRecognizerTestHarness::event(window,touch);
+        UIGestureRecognizerTestHarness::send(window,event,touch,UITouchPhase::began,last,0);
+        UIGestureRecognizerTestHarness::send(window,event,touch,UITouchPhase::ended,last,32);
+        Internal::TabBarViewAccess::advance(*bar,2);settle();frame();
+        expect(tabs->selectedIndex()==count-1&&std::abs(state._lens->frame().maxX()-(platterWidth-4))<.01f,
+               "routed last-tab taps preserve selection and the trailing lens inset for every count");
+        const auto firstControl=state._controls.front();
+        const auto first=firstControl->convertToView({firstControl->bounds().width()*.5f,31},window);
+        auto drag=new_shared<UITouch>(11000+count,last,Timer());auto dragEvent=UIGestureRecognizerTestHarness::event(window,drag);
+        UIGestureRecognizerTestHarness::send(window,dragEvent,drag,UITouchPhase::began,last,0);
+        UIGestureRecognizerTestHarness::send(window,dragEvent,drag,UITouchPhase::moved,(last+first)*.5f,16);
+        UIGestureRecognizerTestHarness::send(window,dragEvent,drag,UITouchPhase::moved,first,32);
+        UIGestureRecognizerTestHarness::send(window,dragEvent,drag,UITouchPhase::ended,first,48);
+        Internal::TabBarViewAccess::advance(*bar,2);settle();frame();
+        expect(tabs->selectedIndex()==0&&std::abs(state._lens->frame().minX()-4)<.01f,
+               "routed drags return to the first tab and restore its leading lens inset");
+        window->setRootViewController(nullptr);UIApplication::shared->delegate->window.reset();
+    }
+    if(report)report<<"]}\n";
 }
-int main() {
+}
+int main(int argc,char** argv) {
     auto ctx=std::make_shared<Context>();SkiaCtx::_main=ctx;
     UIApplication::shared=new_shared<UIApplication>();UIApplication::shared->delegate=std::make_shared<UIApplicationDelegate>();
     barCases(ctx);controllerCases(ctx);settle();
+    if(argc>2)std::filesystem::create_directories(argv[2]);
+    variantCases(ctx,argc>1?argv[1]:"",argc>2?argv[2]:"");
     UIApplication::shared.reset();SkiaCtx::_main.reset();
     if(!failures)std::cout<<"UITabBarView and UITabBarController regressions passed\n";
     return failures?1:0;

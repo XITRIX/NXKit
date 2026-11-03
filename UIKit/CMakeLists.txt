@@ -1,4 +1,10 @@
 add_library(XITRIXUIKit
+        include/UINavigationBar.h
+        include/UINavigationController.h
+        lib/UINavigationBar.cpp
+        lib/UINavigationBarInternal.hpp
+        lib/NavigationBarMotion.hpp
+        lib/UINavigationController.cpp
         include/UIKit.h
         include/UIKitRegistration.h
         include/UIButton.h
@@ -33,6 +39,10 @@ target_link_libraries(XITRIXUIKit PUBLIC UIKitCore)
 option(UIKIT_BUILD_TESTS "Build UIKit regression tests" OFF)
 if (UIKIT_BUILD_TESTS)
     enable_testing()
+    add_executable(UIKitNavigationTests tests/UINavigationTests.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib/UIApplicationMain.cpp)
+    target_include_directories(UIKitNavigationTests PRIVATE lib ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib)
+    target_link_libraries(UIKitNavigationTests PRIVATE Xitrix::UIKit)
+    add_test(NAME UIKitNavigationTests COMMAND UIKitNavigationTests)
     add_executable(UIKitTabBarControllerTests tests/UITabBarControllerTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib/UIApplicationMain.cpp)
     target_include_directories(UIKitTabBarControllerTests PRIVATE lib)

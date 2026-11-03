@@ -58,26 +58,45 @@ git submodule update --init --recursive
 ```
 
 Skia must first be compiled with Graphite. Apple platforms use Graphite's native
-Metal backend; Nintendo Switch uses Graphite through Dawn's OpenGL ES
-compatibility backend.
+Metal backend; Nintendo Switch uses Graphite's native Vulkan backend and the
+statically linked Horizon NVK driver. Dawn is not part of the Switch renderer.
 
 ### Switch:
 ```shell
-bin/gn gen out/horizon --args='is_official_build=false target_cpu="arm64" target_os="horizon" skia_enable_graphite=true skia_enable_ganesh=false skia_use_dawn=true skia_use_gl=false skia_use_metal=false skia_use_vulkan=false is_trivial_abi=true is_debug=false'
-ninja -C out/horizon skia skparagraph
+# Run from the NXKit repository root:
+python3 scripts/switch/fetch_nvk.py
+sh scripts/switch/build_skia.sh
 ```
+
+The wrapper uses Skia's checked-in `tools/build-horizon.sh`. Set `DEVKITPRO` to
+a complete SDK with Switch portlibs (verification uses `/opt/devkitpro`). See
+[the Skia upgrade and recovery notes](docs/skia-upgrade/README.md) for the upstream
+base, the single Switch-support commit, and preserved local changes. Rebuild
+platform-specific Skia archives whenever updating its headers.
+
+Apple builds also require NXKit's maintained Graphite cache/sampling patch.
+From the repository root, run `python3 scripts/apple/apply_skia_patches.py`
+before rebuilding the macOS/iOS Skia archives below. The Demo now compiles its
+standard Metal shader catalog and GPU pipelines during the app build; install
+Apple's compiler with `xcodebuild -downloadComponent MetalToolchain` if needed.
+See [Metal shader baking and verification](docs/navigation/pipeline-cache/README.md).
 
 ### iOS:
 ```shell
-bin/gn gen out/ios-arm64 --args='is_official_build=false target_cpu="arm64" target_os="ios" ios_min_target="15.0" skia_enable_graphite=true skia_enable_ganesh=false skia_use_gl=false skia_use_metal=true is_trivial_abi=true is_debug=false'
+bin/gn gen out/ios-arm64 --args='is_official_build=false target_cpu="arm64" target_os="ios" ios_min_target="15.0" skia_enable_graphite=true skia_enable_ganesh=false skia_use_gl=false skia_use_metal=true is_trivial_abi=true is_debug=false skia_use_partition_alloc=false'
 ninja -C out/ios-arm64 skia skparagraph
 ```
 
 ### macOS:
 ```shell
-bin/gn gen out/mac-arm64 --args='is_official_build=false target_cpu="arm64" skia_enable_graphite=true skia_enable_ganesh=false skia_use_gl=false skia_use_metal=true is_trivial_abi=true is_debug=false'
+bin/gn gen out/mac-arm64 --args='is_official_build=false target_cpu="arm64" skia_enable_graphite=true skia_enable_ganesh=false skia_use_gl=false skia_use_metal=true is_trivial_abi=true is_debug=false skia_use_partition_alloc=false'
 ninja -C out/mac-arm64 skia skparagraph
 ```
+
+Keep `skia_use_partition_alloc=false` for these embedded Apple builds. NXKit's
+CMake targets use Skia's ordinary pointer implementation, without Chromium's
+allocator headers or `SK_USE_PARTITION_ALLOC` definition. Build Skia and its
+consumers with matching release and trivial-ABI settings.
 
 To build project:
 
@@ -87,6 +106,36 @@ cmake -S Demo -B Demo/build/switch -DPLATFORM_SWITCH=ON
 cmake --build Demo/build/switch --target ThorVGApp.nro -j
 nxlink Demo/build/switch/ThorVGApp.nro
 ```
+
+The NVK SDK is pinned and checksum-verified inside `Submodules/nvk-switch`;
+it does not replace the system devkitPro installation. Switch Skia archives
+live in `Submodules/skia/out/horizon-vulkan`. Both paths can be overridden with
+`NXKIT_SWITCH_NVK_ROOT` and `NXKIT_SWITCH_SKIA_OUT`.
+
+To compile the Demo's GPU pipelines ahead of interactive use, leave the Switch
+in an nxlink-capable homebrew launcher with FTP enabled, then run:
+
+```sh
+cmake -S Demo -B Demo/build/switch -DPLATFORM_SWITCH=ON \
+    -DNXKIT_SWITCH_ADDRESS=192.168.1.148
+export NXKIT_SWITCH_FTP_USER=your-ftp-user
+export NXKIT_SWITCH_FTP_PASSWORD='your-ftp-password'
+cmake --build Demo/build/switch --target ThorVGApp.switch-shaders -j8
+```
+
+This target compiles pipelines on the Switch GPU, retrieves the native Vulkan
+cache, and rebuilds the NRO with that cache bundled. Its distributable output
+is `Demo/build/switch/switch-package/`. Later ordinary NRO builds embed an
+available matching cache automatically. Shader/Skia/driver changes invalidate
+the cache and require another bake. Runtime cache growth is saved on orderly
+exit, without SD writes during frame submission.
+
+Skia generates pipeline combinations dynamically; standalone shader-source
+compilation cannot cover arbitrary application effects or scene graphs. The
+bake fixture covers the Demo gallery, grouped glass, lifted/resting lens
+states, stress screen, tabs, text and XML screen. New effects or combinations
+must be exercised by the fixture. See [Switch Vulkan and shader compilation](docs/switch-vulkan/README.md)
+for architecture, cache compatibility, validation and remaining limitations.
 
 ### iOS:
 ```shell

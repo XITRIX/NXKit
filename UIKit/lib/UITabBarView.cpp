@@ -77,6 +77,7 @@ public:
 };
 class TabControl final : public UIControl {
 public:
+    bool point(NXPoint p,UIEvent*) override {return bounds().insetBy({0,4,0,4}).contains(p);}
     bool canBecomeFocused() override { return isEnabled() && UIControl::canBecomeFocused(); }
     std::function<void(bool)> onHighlight;
     void willChangeHighlight(bool highlighted) override { if (onHighlight) onHighlight(highlighted); }
@@ -411,6 +412,9 @@ void UITabBarView::refreshItems() {
         UIColor::systemPink,UIColor::systemBrown,UIColor::tint};
     _state->_lens->setContentVibrancyEnabled(std::any_of(std::begin(semantic),std::end(semantic),
         [&](const auto& value) { return value == color; }));
+    auto sizing=new_shared<UILabel>();sizing->setFontSize(17);sizing->setFontWeight(500);
+    _state->_itemContentWidths.assign(_state->_count,81);
+    _state->_minimumItemWidth=0;
     for (size_t i = 0; i < _state->_count; ++i) {
         const auto& item = _state->items[i];
         _state->_controls[i]->setEnabled(item->isEnabled());
@@ -427,6 +431,13 @@ void UITabBarView::refreshItems() {
         _state->badges[i]->setHidden(!item->badgeValue());
         _state->badges[i]->setBackgroundColor(item->badgeColor().value_or(UIColor::systemRed));
         _state->badgeLabels[i]->setText(item->badgeValue().value_or(""));
+        if(SkiaCtx::main()) {
+            // Cache font-dependent sizing outside the 120Hz lens layout path.
+            sizing->setText(item->title());
+            _state->_itemContentWidths[i]=std::max(81.0f,sizing->sizeThatFits({10000,100}).width+15);
+            _state->_minimumItemWidth=std::max(_state->_minimumItemWidth,
+                _state->_selectedLabels[i]->sizeThatFits({10000,100}).width+(_state->_count>=5?34:40));
+        }
     }
     _state->_lens->setHidden(!_state->hasSelection || !_state->_count);
     arrange(); setNeedsLayout();
@@ -480,7 +491,11 @@ void UITabBarView::traitCollectionDidChange(std::shared_ptr<UITraitCollection> p
     UIView::traitCollectionDidChange(std::move(previous)); if (_state) refreshItems();
 }
 void UITabBarView::layoutSubviews() { UIView::layoutSubviews(); arrange(); }
-NXSize UITabBarView::sizeThatFits(NXSize size) { return {std::max(0.0f,size.width),62}; }
+NXSize UITabBarView::sizeThatFits(NXSize size) {
+    // Native phone bars with fewer than four items hug their 86pt item pitch.
+    const auto available=std::max(0.0f,size.width);
+    return {_state->_count<4?std::min(available,16.0f+86*_state->_count):available,62};
+}
 bool UITabBarView::point(NXPoint p, UIEvent*) {
     p = p - bounds().origin;
     const auto size = bounds().size;
@@ -506,37 +521,55 @@ void UITabBarView::arrange() {
     s._selectedHost->setFrame({0,0,w,h}); s._selectedContent->setFrame({0,0,w,h});
     if (!s._count) { s._lens->setHidden(true); return; }
     const auto slot=w/s._count;
-    const auto itemWidth=std::max(0.0f,std::min(116.0f,slot+5));
-    s._selectionStep = slot;
+    const auto inset=std::min(4.0f,w*.5f);
+    const auto available=std::max(0.0f,w-2*inset);
+    auto& widths=s._itemWidths;auto& left=s._itemLefts;
+    widths.resize(s._count);left.resize(s._count);
+    if(s._count>=4&&slot<70&&w>=28) {
+        // Narrow UIKit layouts compress content proportionally, retaining
+        // 20pt cell padding/overlap. Longer titles receive wider cells.
+        NXFloat total=0;for(const auto width:s._itemContentWidths)total+=width;
+        NXFloat x=inset;
+        for(size_t i=0;i<s._count;++i){widths[i]=std::min(available,20+(w-28)*s._itemContentWidths[i]/std::max(1.0f,total));left[i]=x;x+=widths[i]-20;}
+    } else {
+        const auto preferredWidth=s._count<4?94.0f:std::max(slot+5,s._minimumItemWidth);
+        const auto width=std::max(0.0f,std::min(preferredWidth,available));
+        const auto step=s._count>1?(available-width)/(s._count-1):0;
+        for(size_t i=0;i<s._count;++i){widths[i]=width;left[i]=s._count>1?inset+i*step:(w-width)*.5f;}
+    }
     s._selectionCenters.resize(s._count);
     for (size_t i=0;i<s._count;++i)
-        s._selectionCenters[i]=(i+.5f)*slot;
+        s._selectionCenters[i]=left[i]+widths[i]*.5f;
+    s._selectionStep=s._count>1?s._selectionCenters[1]-s._selectionCenters[0]:0;
     const auto a=std::min(s._count-1,size_t(std::max(0.0f,s._position)));
     const auto b=std::min(s._count-1,a+1); const auto t=s._position-float(a);
     const auto center=s._selectionCenters[a]*(1-t)+s._selectionCenters[b]*t;
     const auto growth=s._lifted?16.0f:0.0f;
-    const auto lensWidth=std::max(0.0f,itemWidth+growth);
+    const auto lensWidth=std::max(0.0f,widths[a]*(1-t)+widths[b]*t+growth);
     const auto lensHeight=std::max(0.0f,std::min(56.0f,h-8)+growth);
     s._lens->setFrame({center-lensWidth*.5f,(h-lensHeight)*.5f,lensWidth,lensHeight});
     s._selectionFill->setFrame(s._lens->restingBackgroundView()->bounds());
     for (size_t i=0;i<s._count;++i) {
+        const auto itemWidth=widths[i];
         const auto centerX=s._selectionCenters[i];
         auto itemLayer=s._selectedItems[i]->layer(); itemLayer->setAnchorPoint({0,0});
         itemLayer->setBounds({0,0,w,h}); itemLayer->setPosition({0,0});
         const auto zoom=s._lifted?1.16f:1.f;
         s._selectedItems[i]->setTransform({zoom,0,0,zoom,(1-zoom)*centerX,(1-zoom)*h*.5f});
-        s._controls[i]->setFrame({i*slot,0,slot,h}); s._controls[i]->layer()->setCornerRadius(h*.5f);
+        const auto itemLeft=centerX-itemWidth*.5f;
+        s._controls[i]->setFrame({itemLeft,0,itemWidth,h}); s._controls[i]->layer()->setCornerRadius(h*.5f);
         for (bool selected : {false,true}) {
             const auto& icon=selected?s._selectedSymbols[i]:s._normalSymbols[i];
             const auto& label=selected?s._selectedLabels[i]:s._normalLabels[i];
-            const auto offset=selected?0:i*slot;
+            const auto offset=selected?0:itemLeft;
             const auto image=selected&&s.items[i]->selectedImage()?s.items[i]->selectedImage():s.items[i]->image();
             const auto original=image?image->size():NXSize{};
             const auto iconHeight=std::min(28.0f,std::max(0.0f,h-32));
             const auto ratio=original.height>0?std::min(1.0f,iconHeight/original.height):0;
-            const auto width=std::min(slot,std::max(0.0f,original.width*ratio));
-            icon->setFrame({centerX-offset-width*.5f,8,width,std::min(iconHeight,original.height*ratio)});
-            label->setFrame({i*slot-offset,h-23,slot,14});
+            const auto width=std::min(itemWidth,std::max(0.0f,original.width*ratio));
+            const auto imageHeight=std::min(iconHeight,original.height*ratio);
+            icon->setFrame({centerX-offset-width*.5f,(h-14-imageHeight)*.5f,width,imageHeight});
+            label->setFrame({centerX-offset-itemWidth*.5f,h-23,itemWidth,12});
         }
         const auto textSize=SkiaCtx::main()?s.badgeLabels[i]->sizeThatFits({1000,16}):NXSize(8,16);
         const auto badgeWidth=std::min(slot,std::max(16.0f,textSize.width+8));

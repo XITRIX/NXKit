@@ -106,6 +106,19 @@ void tabMetadata() {
            "resetting tab metadata recreates the default item without loading content");
 }
 
+void navigationMetadata() {
+    auto screen=new_shared<UIViewController>();screen->setTitle("Root");
+    const auto item=screen->navigationItem();screen->setTitle("Changed");
+    expect(item->title()=="Changed"&&!screen->viewIsLoaded(),"Core navigation metadata follows titles without loading views");
+    item->setTitle("Explicit");screen->setTitle("Other");
+    expect(item->title()=="Explicit","explicit navigation title takes precedence");
+    auto button=std::make_shared<UIBarButtonItem>(UIAction("Action"));
+    item->setRightBarButtonItems({button});button->setEnabled(false);button->setWidth(80);
+    expect(item->rightBarButtonItem()==button&&!button->isEnabled()&&button->width()==80,"Core bar button metadata is independently usable");
+    bool invalid=false;try{item->setLeftBarButtonItems({button});}catch(const std::invalid_argument&){invalid=true;}
+    expect(invalid&&item->leftBarButtonItems().empty(),"duplicate navigation buttons reject before mutation");
+}
+
 void genericBackdrop() {
     BackdropEffect effect(R"(
         uniform shader content;
@@ -138,6 +151,7 @@ int main() {
     discovery();
     neutralControl();
     tabMetadata();
+    navigationMetadata();
     genericBackdrop();
     if (!failures) std::cout << "Core module boundary tests passed\n";
     return failures ? 1 : 0;

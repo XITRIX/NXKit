@@ -675,7 +675,11 @@ void CALayer::animateAt(Timer currentTime) {
         auto animationProgress = animation.second->progressFor(currentTime);
         update(presentation, animation.second, animationProgress);
 
-        if (animationProgress == 1 && animation.second->isRemovedOnCompletion) {
+        // Timing functions may overshoot, cross 1 early, or return to their
+        // starting value (a pulse). Completion is a time boundary, not a value.
+        const auto elapsed = currentTime - animation.second->creationTime;
+        const auto end = (animation.second->delay + std::max(0.0, animation.second->duration)) * 1000;
+        if (elapsed >= end && animation.second->isRemovedOnCompletion) {
             removeAnimation(animation.first);
             if (animation.second->animationGroup)
                 animation.second->animationGroup->animationDidStop(true);

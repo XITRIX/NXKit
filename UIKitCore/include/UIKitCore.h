@@ -10,6 +10,8 @@
 #include <DispatchQueue.h>
 #include <IndexPath.h>
 #include <UIBarItem.h>
+#include <UIBarButtonItem.h>
+#include <UINavigationItem.h>
 #include <UITabBarItem.h>
 #include <UITabBarControllerMode.h>
 #include <UIApplicationDelegate.h>

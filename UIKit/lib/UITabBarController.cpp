@@ -194,13 +194,17 @@ void UITabBarController::updateLayout() {
     if (!_tabBar || !_contentView) return;
     const auto bounds=view()->bounds();
     const auto safe=view()->safeAreaInsets();
-    const auto width=std::max(0.0f,bounds.width()-safe.left-safe.right-32);
-    const auto height=_controllers.empty()?0.0f:std::min(62.0f,std::max(0.0f,bounds.height()-safe.top-safe.bottom-24));
-    const auto barWidth=std::min(1000.0f,width);
+    const auto width=std::max(0.0f,bounds.width()-safe.left-safe.right-42);
+    // Native floating platters overlap the home-indicator safe area by 13pt.
+    // With a 34pt device inset, the 62pt platter ends 21pt above the edge.
+    const auto bottomGap=std::max(8.0f,safe.bottom-13);
+    const auto height=_controllers.empty()?0.0f:std::min(62.0f,std::max(0.0f,bounds.height()-safe.top-bottomGap));
+    const auto barWidth=std::min(520.0f,_tabBar->sizeThatFits({width,height}).width);
     _contentView->setFrame(bounds);
     _tabBar->setFrame({bounds.origin.x+safe.left+(bounds.width()-safe.left-safe.right-barWidth)*.5f,
-        bounds.maxY()-safe.bottom-12-height,barWidth,height});
-    _reservedInsets={0,0,_controllers.empty()?0.0f:std::min(std::max(0.0f,bounds.height()-safe.bottom),height+24),0};
+        bounds.maxY()-bottomGap-height,barWidth,height});
+    // Reserve only the part above the inherited safe area, exactly once.
+    _reservedInsets={0,0,_controllers.empty()?0.0f:std::max(0.0f,height+bottomGap-safe.bottom),0};
     for (const auto& child:_controllers)
         Internal::ViewControllerContainerAccess::setChildSafeAreaInsets(shared_from_this(),child,_reservedInsets);
     if (_displayed) _displayed->view()->setFrame(_contentView->bounds());

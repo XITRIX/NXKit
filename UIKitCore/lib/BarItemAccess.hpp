@@ -1,10 +1,12 @@
 #pragma once
 #include <UIBarItem.h>
+#include <UIBarButtonItem.h>
 #include <algorithm>
 
 namespace NXKit::Internal {
 class BarItemAccess {
 public:
+    static std::optional<UIBarButtonSystemItem> systemItem(const UIBarButtonItem& item) { return item._systemItem; }
     static void observe(UIBarItem& item, const std::shared_ptr<void>& owner,
                         std::function<void()> changed) {
         std::erase_if(item._observers, [&](const auto& observer) {

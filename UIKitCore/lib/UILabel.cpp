@@ -100,7 +100,7 @@ NXSize UILabel::sizeThatFits(NXSize size) {
 
 void UILabel::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previousTraitCollection) {
     UIView::traitCollectionDidChange(previousTraitCollection);
-    if (!previousTraitCollection || previousTraitCollection->displayScale() != traitCollection()->displayScale())
+    if (!previousTraitCollection || !traitCollection() || previousTraitCollection->displayScale() != traitCollection()->displayScale())
         invalidateIntrinsicContentSize();
     setNeedsDisplay();
 }

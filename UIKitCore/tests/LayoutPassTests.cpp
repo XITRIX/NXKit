@@ -157,6 +157,12 @@ void animatedBitmap(const std::shared_ptr<Context>& context){
     auto change=new_shared<CABasicAnimation>("contentsScale");change->duration=1;change->fromValue=1.f;change->toValue=3.f;density->add(change,"contentsScale");density->animateAt(Timer(500));
     const auto intermediate=density->presentationOrSelf()->contentsScale();density->setContentsScale(4);
     expect(intermediate>1&&intermediate<3&&density->presentationOrSelf()->contentsScale()==intermediate,"live bitmap density updates preserve an explicitly animated presentation scale");density->removeAllAnimations();
+    auto pulse=new_shared<CABasicAnimation>("opacity");pulse->duration=1;pulse->delay=.1;pulse->fromValue=1.f;pulse->toValue=.5f;
+    pulse->timingFunction=new_shared<CAMediaTimingFunction>([](double x){if(x>=.49&&x<=.51)return 1.;return x<.5?x*2:(1-x)*2;});density->add(pulse,"opacity");
+    auto at=[&](double ms){auto time=pulse->creationTime;const auto us=time.startTime.tv_usec+long(ms*1000);time.startTime.tv_sec+=us/1000000;time.startTime.tv_usec=us%1000000;density->animateAt(time);};
+    at(600);expect(density->presentation()&&std::abs(density->presentation()->opacity()-.5f)<.00001f,"a timing curve crossing one does not finish before its duration");
+    at(900);expect(density->presentation()&&density->presentation()->opacity()>.5f,"a pulse continues through its return phase");
+    at(1101);expect(!density->presentation()&&density->opacity()==1,"a pulse returning to zero completes by elapsed time and restores its model value");
 }
 void explicitSubtree(){
     auto root=new_shared<UIView>(NXRect(0,0,200,100));root->setAutolayoutEnabled(true);

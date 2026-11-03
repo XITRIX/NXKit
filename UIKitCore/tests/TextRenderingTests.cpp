@@ -1,6 +1,7 @@
 #include "../../UIKitCore/lib/platforms/apple/AppleSystemFont.hpp"
 // Actual UILabel raster versus native UILabel; the custom-font cases share file bytes.
 #include <UILabel.h>
+#include "RobotoTestFontManager.hpp"
 #include <UITextView.h>
 #include <SkiaCtx.h>
 #include "../../UIKitCore/lib/FontTracking.hpp"
@@ -31,27 +32,11 @@ public:
 };
 }
 namespace {
-// Resolve the same registered Roboto file through Core Text, including the
-// actual Skia Core Text rasterizer. No alternate font engine or fake bold.
-class RobotoManager final : public SkFontMgr {
-    sk_sp<SkFontMgr> base=SkFontMgr_New_CoreText(nullptr);
-    int onCountFamilies() const override { return 1; }
-    void onGetFamilyName(int,SkString* name) const override { *name=SkString("Roboto"); }
-    sk_sp<SkFontStyleSet> onCreateStyleSet(int) const override { return base->matchFamily("Roboto"); }
-    sk_sp<SkFontStyleSet> onMatchFamily(const char*) const override { return base->matchFamily("Roboto"); }
-    sk_sp<SkTypeface> onMatchFamilyStyle(const char*,const SkFontStyle& s) const override { return base->matchFamilyStyle("Roboto",s); }
-    sk_sp<SkTypeface> onMatchFamilyStyleCharacter(const char*,const SkFontStyle& s,const char* langs[],int count,SkUnichar c) const override { return base->matchFamilyStyleCharacter("Roboto",s,langs,count,c); }
-    sk_sp<SkTypeface> onMakeFromData(sk_sp<SkData> d,int i) const override { return base->makeFromData(std::move(d),i); }
-    sk_sp<SkTypeface> onMakeFromStreamIndex(std::unique_ptr<SkStreamAsset> s,int i) const override { return base->makeFromStream(std::move(s),i); }
-    sk_sp<SkTypeface> onMakeFromStreamArgs(std::unique_ptr<SkStreamAsset> s,const SkFontArguments& a) const override { return base->makeFromStream(std::move(s),a); }
-    sk_sp<SkTypeface> onMakeFromFile(const char* p,int i) const override { return base->makeFromFile(p,i); }
-    sk_sp<SkTypeface> onLegacyMakeTypeface(const char*,SkFontStyle s) const override { return base->matchFamilyStyle("Roboto",s); }
-};
 class Context final : public SkiaCtx {
 public:
     bool custom = false;
     sk_sp<SkTypeface> getDefaultTypeface(const SkFontStyle& style = SkFontStyle(), NXFloat size = 17) const override { return custom ? SkiaCtx::getDefaultTypeface(style,size) : Internal::appleSystemTypeface(style,size); }
-    void useCustom(bool custom) { this->custom=custom; fontMgr=custom?sk_sp<SkFontMgr>(sk_make_sp<RobotoManager>()):SkFontMgr_New_CoreText(nullptr); }
+    void useCustom(bool custom) { this->custom=custom; fontMgr=custom?Internal::makeRobotoTestFontManager():SkFontMgr_New_CoreText(nullptr); }
     NXKit::NXSize getSize() override { return {400,592}; }
     sk_sp<SkSurface> getBackbufferSurface() override { return nullptr; }
     void swapBuffers() override {}

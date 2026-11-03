@@ -1,0 +1,225 @@
+diff --git a/include/gpu/graphite/mtl/MtlBackendContext.h b/include/gpu/graphite/mtl/MtlBackendContext.h
+index de04713cec..86bbf8845b 100644
+--- a/include/gpu/graphite/mtl/MtlBackendContext.h
++++ b/include/gpu/graphite/mtl/MtlBackendContext.h
+@@ -14,18 +14,37 @@
+ 
+ #import <CoreFoundation/CoreFoundation.h>
+ #include <memory>
++#include <string_view>
+ 
+ class SkContext;
+ struct SkContextOptions;
+ 
+ namespace skgpu::graphite {
+ 
++// Client-owned shader-library and binary-pipeline cache. Callbacks may run on
++// compilation workers; implementations must be thread safe. CF return values
++// carry one owning reference. The Context retains the cache for its lifetime.
++class SK_API MtlPipelineCache {
++public:
++    virtual ~MtlPipelineCache() = default;
++    virtual sk_cfp<CFTypeRef> loadLibrary(std::string_view msl) = 0;
++    virtual bool allowsRuntimeCompilation() const { return true; }
++    virtual void didCompileLibrary(std::string_view msl, CFTypeRef library) = 0;
++    virtual sk_cfp<CFTypeRef> makeRenderPipeline(CFTypeRef device,
++                                               CFTypeRef descriptor,
++                                               sk_cfp<CFTypeRef>* error) = 0;
++};
++
++// Linking this symbol also detects stale prebuilt Skia archives.
++SK_API int MetalPipelineCacheVersion();
++
+ // The MtlBackendContext contains all of the base Metal objects needed by the graphite Metal
+ // backend. The client will create this object and pass it into the Context::MakeMetal factory call
+ // when setting up Skia.
+ struct SK_API MtlBackendContext {
+     sk_cfp<CFTypeRef> fDevice;
+     sk_cfp<CFTypeRef> fQueue;
++    std::shared_ptr<MtlPipelineCache> fPipelineCache;
+ };
+ 
+ namespace ContextFactory {
+diff --git a/src/core/SkImageFilterTypes.cpp b/src/core/SkImageFilterTypes.cpp
+index ae3b79c094..3e49d8f5c6 100644
+--- a/src/core/SkImageFilterTypes.cpp
++++ b/src/core/SkImageFilterTypes.cpp
+@@ -1346,6 +1346,9 @@ sk_sp<SkShader> FilterResult::asShader(const Context& ctx,
+     SkBlendMode colorFilterMode;
+     SkEnumBitMask<BoundsAnalysis> analysis = this->analyzeBounds(sampleBounds,
+                                                                  BoundsScope::kShaderOnly);
++    if ((flags & ShaderFlags::kStableRuntimeSampling) && fTileMode == SkTileMode::kDecal) {
++        analysis |= BoundsAnalysis::kRequiresDecalInLayerSpace;
++    }
+ 
+     SkSamplingOptions sampling = xtraSampling;
+     const bool needsResolve =
+@@ -1382,6 +1385,10 @@ sk_sp<SkShader> FilterResult::asShader(const Context& ctx,
+                     BoundsAnalysis::kDstBoundsNotCovered | BoundsAnalysis::kRequiresShaderTiling;
+             analysis = resolved.analyzeBounds(sampleBounds, BoundsScope::kShaderOnly);
+             SkASSERT(!(analysis & ~kExpectedAnalysis));
++            if ((flags & ShaderFlags::kStableRuntimeSampling) &&
++                resolved.fTileMode == SkTileMode::kDecal) {
++                analysis |= BoundsAnalysis::kRequiresDecalInLayerSpace;
++            }
+             return resolved.getAnalyzedShaderView(ctx, sampling, analysis);
+         }
+     } else {
+diff --git a/src/core/SkImageFilterTypes.h b/src/core/SkImageFilterTypes.h
+index 6010654f75..216cf94668 100644
+--- a/src/core/SkImageFilterTypes.h
++++ b/src/core/SkImageFilterTypes.h
+@@ -826,6 +826,9 @@ public:
+         // how to sample any input FilterResults, so their sampling options should not be converted
+         // to nearest-neighbor even if they appeared pixel-aligned with the output surface.
+         kNonTrivialSampling = 1 << 1,
++        // Keep an explicit decal node even when bounds analysis could elide
++        // it. Animated runtime-filter inputs then share one pipeline graph.
++        kStableRuntimeSampling = 1 << 2,
+         // TODO: Add option to convey that the output can carry input tiling forward to make a
+         // smaller backing surface somehow. May not be a flag and just args passed to eval().
+     };
+diff --git a/src/effects/imagefilters/SkRuntimeImageFilter.cpp b/src/effects/imagefilters/SkRuntimeImageFilter.cpp
+index 38dc72cd9a..539ea46a28 100644
+--- a/src/effects/imagefilters/SkRuntimeImageFilter.cpp
++++ b/src/effects/imagefilters/SkRuntimeImageFilter.cpp
+@@ -268,7 +268,7 @@ skif::FilterResult SkRuntimeImageFilter::onFilterImage(const skif::Context& ctx)
+         actualInputBounds.join(childOutput.layerBounds());
+         builder.add(std::move(childOutput),
+                     inputCtx.desiredOutput(),
+-                    ShaderFlags::kNonTrivialSampling);
++                    ShaderFlags::kNonTrivialSampling | ShaderFlags::kStableRuntimeSampling);
+     }
+ 
+     std::optional<skif::LayerSpace<SkIRect>> explicitOutput;
+diff --git a/src/gpu/graphite/QueueManager.cpp b/src/gpu/graphite/QueueManager.cpp
+index 9fb6d679e2..e7f08806ce 100644
+--- a/src/gpu/graphite/QueueManager.cpp
++++ b/src/gpu/graphite/QueueManager.cpp
+@@ -218,6 +218,10 @@ InsertStatus QueueManager::addRecording(const InsertRecordingInfo& info, Context
+         std::string failureMsg;
+         const bool validPipelines = info.fRecording->priv().taskList()->visitPipelines(
+                 [&failureMsg](const GraphicsPipeline* pipeline) {
++                    if (!pipeline) {
++                        failureMsg = "Pipeline creation failed before producing a pipeline object";
++                        return false;
++                    }
+                     if (auto failure = pipeline->didAsyncCompilationFail()) {
+                         failureMsg = *failure;
+                         return false;
+diff --git a/src/gpu/graphite/mtl/MtlGraphicsPipeline.mm b/src/gpu/graphite/mtl/MtlGraphicsPipeline.mm
+index 15816e9446..826ed9801e 100644
+--- a/src/gpu/graphite/mtl/MtlGraphicsPipeline.mm
++++ b/src/gpu/graphite/mtl/MtlGraphicsPipeline.mm
+@@ -398,6 +398,10 @@ static MTLBlendOperation blend_equation_to_mtl_blend_op(skgpu::BlendEquation equ
+     (*psoDescriptor).label = labelName;
+     (*psoDescriptor).vertexFunction = [vsLibrary newFunctionWithName: vsFuncName];
+     (*psoDescriptor).fragmentFunction = [fsLibrary newFunctionWithName: fsFuncName];
++    if (sharedContext->pipelineCache()) {
++        (*psoDescriptor).vertexFunction.label = vsLibrary.label;
++        (*psoDescriptor).fragmentFunction.label = fsLibrary.label;
++    }
+ 
+     // TODO: I *think* this gets cleaned up by the pipelineDescriptor?
+     (*psoDescriptor).vertexDescriptor = create_vertex_descriptor(appendStepFunc,
+@@ -424,10 +428,18 @@ static MTLBlendOperation blend_equation_to_mtl_blend_op(skgpu::BlendEquation equ
+         (*psoDescriptor).depthAttachmentPixelFormat = MTLPixelFormatInvalid;
+     }
+ 
+-    NSError* error;
+-    sk_cfp<id<MTLRenderPipelineState>> pso(
+-            [sharedContext->device() newRenderPipelineStateWithDescriptor:psoDescriptor.get()
+-                                                                    error:&error]);
++    NSError* error = nil;
++    sk_cfp<CFTypeRef> cachedError;
++    sk_cfp<id<MTLRenderPipelineState>> pso;
++    if (auto* cache = sharedContext->pipelineCache()) {
++        auto native = cache->makeRenderPipeline((CFTypeRef)sharedContext->device(),
++                                                (CFTypeRef)psoDescriptor.get(), &cachedError);
++        pso.reset((id<MTLRenderPipelineState>)native.release());
++        error = (NSError*)cachedError.get();
++    } else {
++        pso.reset([sharedContext->device() newRenderPipelineStateWithDescriptor:psoDescriptor.get()
++                                                                        error:&error]);
++    }
+     if (!pso) {
+         SKIA_LOG_E("Render pipeline creation failure:\n%s", error.debugDescription.UTF8String);
+         return nullptr;
+diff --git a/src/gpu/graphite/mtl/MtlGraphiteUtils.mm b/src/gpu/graphite/mtl/MtlGraphiteUtils.mm
+index 26860ef28d..d3e394d4fd 100644
+--- a/src/gpu/graphite/mtl/MtlGraphiteUtils.mm
++++ b/src/gpu/graphite/mtl/MtlGraphiteUtils.mm
+@@ -67,6 +67,15 @@
+                                                std::string_view msl,
+                                                ShaderErrorHandler* errorHandler) {
+     TRACE_EVENT0("skia.shaders", "driver_compile_shader");
++    if (auto* cache = sharedContext->pipelineCache()) {
++        auto library = cache->loadLibrary(msl);
++        if (library) return sk_cfp<id<MTLLibrary>>((id<MTLLibrary>)library.release());
++        if (!cache->allowsRuntimeCompilation()) {
++            std::string source(msl);
++            errorHandler->compileError(source.c_str(), "Required precompiled Metal library missing", true);
++            return nil;
++        }
++    }
+     NSString* nsSource = [[NSString alloc] initWithBytesNoCopy:const_cast<char*>(msl.data())
+                                                         length:msl.size()
+                                                       encoding:NSUTF8StringEncoding
+@@ -95,6 +104,9 @@
+                                                      encoding:NSUTF8StringEncoding
+                                                  freeWhenDone:NO];
+     compiledLibrary.get().label = nsLabel;
++    if (auto* cache = sharedContext->pipelineCache()) {
++        cache->didCompileLibrary(msl, (CFTypeRef)compiledLibrary.get());
++    }
+     return compiledLibrary;
+ }
+ 
+diff --git a/src/gpu/graphite/mtl/MtlSharedContext.h b/src/gpu/graphite/mtl/MtlSharedContext.h
+index a28d1cf69d..0b60985bf9 100644
+--- a/src/gpu/graphite/mtl/MtlSharedContext.h
++++ b/src/gpu/graphite/mtl/MtlSharedContext.h
+@@ -39,6 +39,7 @@ public:
+     skgpu::MtlMemoryAllocator* memoryAllocator() const { return fMemoryAllocator.get(); }
+ 
+     id<MTLDevice> device() const { return fDevice.get(); }
++    MtlPipelineCache* pipelineCache() const { return fPipelineCache.get(); }
+ 
+     const MtlCaps& mtlCaps() const { return static_cast<const MtlCaps&>(*this->caps()); }
+ 
+@@ -74,6 +75,7 @@ private:
+     sk_sp<skgpu::MtlMemoryAllocator> fMemoryAllocator;
+ 
+     sk_cfp<id<MTLDevice>> fDevice;
++    std::shared_ptr<MtlPipelineCache> fPipelineCache;
+ 
+     // In the current Graphite class structure 'fDepthStencilStates' would more appropriately
+     // go in a new MtlGlobalCache class. However, GlobalCache may go away as a concept, in
+diff --git a/src/gpu/graphite/mtl/MtlSharedContext.mm b/src/gpu/graphite/mtl/MtlSharedContext.mm
+index 167e5214a0..324758adc1 100644
+--- a/src/gpu/graphite/mtl/MtlSharedContext.mm
++++ b/src/gpu/graphite/mtl/MtlSharedContext.mm
+@@ -21,6 +21,8 @@
+ 
+ namespace skgpu::graphite {
+ 
++int MetalPipelineCacheVersion() { return 1; }
++
+ sk_sp<SharedContext> MtlSharedContext::Make(const MtlBackendContext& context,
+                                             const ContextOptions& options) {
+     if (@available(macOS 12, iOS 15.0, tvOS 15.0, *)) {
+@@ -46,11 +48,13 @@
+         return nullptr;
+     }
+ 
+-    return sk_sp<SharedContext>(new MtlSharedContext(std::move(device),
++    auto shared = sk_sp<MtlSharedContext>(new MtlSharedContext(std::move(device),
+                                                      std::move(memoryAllocator),
+                                                      std::move(caps),
+                                                      options.fExecutor,
+                                                      options.fUserDefinedKnownRuntimeEffects));
++    shared->fPipelineCache = context.fPipelineCache;
++    return shared;
+ }
+ 
+ MtlSharedContext::MtlSharedContext(sk_cfp<id<MTLDevice>> device,
