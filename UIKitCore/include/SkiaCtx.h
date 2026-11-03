@@ -20,6 +20,7 @@
 namespace skgpu::graphite {
 class Context;
 class Recorder;
+struct InsertRecordingInfo;
 }
 
 namespace NXKit {
@@ -70,6 +71,10 @@ protected:
             skgpu::graphite::Context* context) const;
     bool finishGraphiteWork(skgpu::graphite::Context* context,
                             skgpu::graphite::Recorder* recorder) const;
+    // Platform presentation may supply acquire/present semaphores and a final
+    // texture state without duplicating common backdrop-read submission.
+    bool flushAndSubmitFrame(sk_sp<SkSurface> surface,
+                             skgpu::graphite::InsertRecordingInfo& insertInfo);
     virtual skgpu::graphite::Context* graphiteContext() = 0;
     virtual skgpu::graphite::Recorder* graphiteRecorder() = 0;
 

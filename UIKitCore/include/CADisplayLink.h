@@ -13,9 +13,12 @@ namespace NXKit {
 
         void invalidate();
     private:
-        bool isRunning = true;
-        std::function<void()> func;
-        static std::vector<CADisplayLink*> activeLinks;
+        struct Invocation {
+            bool isRunning = true;
+            std::shared_ptr<std::function<void()>> func;
+        };
+        std::shared_ptr<Invocation> invocation;
+        static std::vector<std::shared_ptr<Invocation>> activeLinks;
         friend class DispatchQueue;
     };
 

@@ -15,6 +15,7 @@
 #include <UIScrollViewExtensions/UIScrollViewDecelerationRate.h>
 #include <cstdint>
 #include <functional>
+#include <tools/DragSmoother.hpp>
 
 namespace NXKit {
 namespace Internal { struct ScrollMotion; }
@@ -101,6 +102,11 @@ public:
     [[nodiscard]] bool isTracking() const { return _isTracking; }
     [[nodiscard]] std::shared_ptr<UIPanGestureRecognizer> panGestureRecognizer() const { return _panGestureRecognizer; }
 
+    // Portable extension: frame-based visual following for coarse touch input.
+    // Defaults on for Switch, off elsewhere. Pan translation/velocity stay raw.
+    [[nodiscard]] bool isDragSmoothingEnabled() const { return _dragSmoothingEnabled; }
+    void setDragSmoothingEnabled(bool enabled);
+
     [[nodiscard]] bool showsVerticalScrollIndicator() const {
         return _showsVerticalScrollIndicator;
     }
@@ -155,6 +161,18 @@ public:
 
 private:
     std::shared_ptr<UIPanGestureRecognizer> _panGestureRecognizer;
+#ifdef __SWITCH__
+    bool _dragSmoothingEnabled = true;
+#else
+    bool _dragSmoothingEnabled = false;
+#endif
+    DragSmoother _dragSmoother;
+    std::unique_ptr<CADisplayLink> _dragDisplayLink;
+    Timer _dragFrameTime;
+    std::uint64_t _dragGeneration = 0;
+    void followDragOffset(NXPoint offset, NXPoint velocity);
+    void advanceDragSmoothing(double seconds);
+    void stopDragSmoothing();
     bool _isDecelerating = false;
     bool _isDragging = false, _isTracking = false;
     bool _caughtDeceleration = false;

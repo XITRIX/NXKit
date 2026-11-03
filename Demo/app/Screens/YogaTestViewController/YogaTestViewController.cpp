@@ -1,5 +1,6 @@
 #include <Screens/YogaTestViewController/YogaTestViewController.hpp>
 #include "romfs/romfs.hpp"
+#include "DragPresentation.hpp"
 
 using namespace NXKit;
 
@@ -174,24 +175,30 @@ void YogaTestViewController::loadView() {
     blur->addSubview(dragMeViewLabel);
 
     auto panGesture = new_shared<UIPanGestureRecognizer>();
-    panGesture->onStateChanged = [this](auto gesture) {
+    auto drag = std::make_shared<DragPresentation>(blur, [weak = std::weak_ptr<UIView>(blur)](NXPoint point) {
+        if (const auto view = weak.lock()) { view->yoga()->setPosition(point); view->setNeedsLayout(); }
+    });
+    panGesture->onStateChanged = [this, drag](auto gesture) {
         auto panGesture = std::static_pointer_cast<UIPanGestureRecognizer>(gesture);
-        static NXPoint initial;
         auto _view = panGesture->view().lock();
         if (!_view) return;
 
         switch (panGesture->state()) {
             case UIGestureRecognizerState::began: {
-                initial = _view->frame().origin;
+                drag->begin();
                 break;
             }
             case UIGestureRecognizerState::changed: {
                 auto translation = panGesture->translationInView(view());
 
-                _view->yoga()->setPosition({ initial.x + translation.x, initial.y + translation.y });
-                _view->setNeedsLayout();
+                drag->update(drag->origin() + translation, panGesture->velocityIn(view()));
                 break;
             }
+            case UIGestureRecognizerState::possible:
+            case UIGestureRecognizerState::cancelled:
+            case UIGestureRecognizerState::failed:
+                drag->stop();
+                break;
             default:
                 break;
         }

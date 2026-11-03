@@ -14,6 +14,13 @@ add_library(XITRIXUIKit
         lib/GlassShader.cpp
         lib/LensMaterial.cpp
         lib/LensView.cpp
+        include/UITabBarController.h
+        lib/UITabBarController.cpp
+        include/UITabBarView.h
+        include/UITabBar.h
+        lib/UITabBarView.cpp
+        lib/UITabBarViewInternal.hpp
+        lib/TabSelectionMaterial.hpp
         lib/UIButton.cpp
         lib/UIGlassEffect.cpp
         lib/UIKitRegistration.cpp
@@ -26,6 +33,11 @@ target_link_libraries(XITRIXUIKit PUBLIC UIKitCore)
 option(UIKIT_BUILD_TESTS "Build UIKit regression tests" OFF)
 if (UIKIT_BUILD_TESTS)
     enable_testing()
+    add_executable(UIKitTabBarControllerTests tests/UITabBarControllerTests.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib/UIApplicationMain.cpp)
+    target_include_directories(UIKitTabBarControllerTests PRIVATE lib)
+    target_link_libraries(UIKitTabBarControllerTests PRIVATE Xitrix::UIKit)
+    add_test(NAME UIKitTabBarControllerTests COMMAND UIKitTabBarControllerTests)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib)
     add_executable(NXKitGestureRecognizerTests
             tests/UIGestureRecognizerTests.cpp

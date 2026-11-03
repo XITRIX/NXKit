@@ -661,6 +661,7 @@ void UIScrollView::addSubview(const std::shared_ptr<UIView> &view) {
 void UIScrollView::setContentOffset(NXPoint offset, bool animated) {
     if(!std::isfinite(offset.x)||!std::isfinite(offset.y))throw std::invalid_argument("Scroll offset must be finite");
     // Programmatic changes cancel the old physics even when the value is equal.
+    stopDragSmoothing();
     cancelDecelerationAnimations();
     applyContentOffset(offset,animated);
     if(_isDragging||_isTracking)
@@ -680,10 +681,64 @@ void UIScrollView::applyMotionOffset(NXPoint offset) {
     applyContentOffset(offset);
 }
 
+void UIScrollView::setDragSmoothingEnabled(bool enabled) {
+    if (_dragSmoothingEnabled == enabled) return;
+    _dragSmoothingEnabled = enabled;
+    // Keep the visible position when changing policy during a drag.
+    stopDragSmoothing();
+    if (_isDragging || _isTracking)
+        _initialContentOffset = uncompressedOffset(contentOffset()) +
+                               _panGestureRecognizer->translationInView(shared_from_this());
+}
+
+void UIScrollView::stopDragSmoothing() {
+    const bool wasFollowing = bool(_dragDisplayLink);
+    ++_dragGeneration;
+    _dragDisplayLink.reset();
+    if (wasFollowing && !_isDragging && !_isTracking && !_isDecelerating)
+        hideScrollIndicators();
+}
+
+void UIScrollView::followDragOffset(NXPoint offset, NXPoint velocity) {
+    if (!_dragDisplayLink) {
+        _dragSmoother.reset(contentOffset());
+        _dragFrameTime = Timer();
+        _dragDisplayLink = std::make_unique<CADisplayLink>([weak = weak_from_base<UIScrollView>()] {
+            if (const auto self = weak.lock()) {
+                const Timer now;
+                const auto seconds = std::max(0.0, (now - self->_dragFrameTime) / 1000);
+                self->_dragFrameTime = now;
+                self->advanceDragSmoothing(seconds);
+            }
+        });
+    }
+    _dragSmoother.setTarget(offset, velocity);
+    CALayer::requestFramerate(60);
+}
+
+void UIScrollView::advanceDragSmoothing(double seconds) {
+    if (!_dragDisplayLink) return;
+    if (!window() || isHidden() || !_isScrollEnabled) {
+        stopDragSmoothing();
+        return;
+    }
+    CALayer::requestFramerate(60);
+    const auto generation = _dragGeneration;
+    const auto offset = _dragSmoother.advance(seconds);
+    const bool settled = _dragSmoother.isSettled();
+    // Retain fractional positions; pixel snapping would reintroduce stepping.
+    applyContentOffset(offset);
+    // A didScroll callback may replace this drag with another operation.
+    if (_dragGeneration == generation && settled) {
+        stopDragSmoothing();
+    }
+}
+
 void UIScrollView::setScrollEnabled(bool scrollEnabled) {
     if (_isScrollEnabled == scrollEnabled) return;
 
     _isScrollEnabled = scrollEnabled;
+    if (!scrollEnabled) stopDragSmoothing();
     _panGestureRecognizer->setEnabled(scrollEnabled);
     if (scrollEnabled) return;
 
@@ -1000,11 +1055,13 @@ void UIScrollView::onPan() {
     const auto clamped=getBoundsCheckedContentOffset(raw);
     if(!shouldBounceHorizontally())target.x=clamped.x;
     if(!shouldBounceVertically())target.y=clamped.y;
-    applyMotionOffset(target);
+    if (_dragSmoothingEnabled) followDragOffset(target, velocity);
+    else applyMotionOffset(target);
 }
 void UIScrollView::onPanGestureStateChanged() {
     switch(_panGestureRecognizer->state()) {
     case UIGestureRecognizerState::possible: {
+        stopDragSmoothing();
         _isTracking=true;weightedAverageVelocity={};_previousPanVelocity={};
         const bool wasDecelerating=_isDecelerating;_caughtDeceleration=wasDecelerating;
         cancelDeceleratingIfNeccessary();
@@ -1022,12 +1079,22 @@ void UIScrollView::onPanGestureStateChanged() {
     case UIGestureRecognizerState::changed:onPan();break;
     case UIGestureRecognizerState::ended: {
         const bool wasDragging=_isDragging;_isDragging=false;_isTracking=false;
-        startDeceleratingIfNecessary();weightedAverageVelocity={};
+        const auto velocity = _panGestureRecognizer->velocityIn(shared_from_this());
+        const bool settle = _dragDisplayLink && std::abs(velocity.x) < 250 &&
+            std::abs(velocity.y) < 250 &&
+            contentOffset() == getBoundsCheckedContentOffset(contentOffset()) &&
+            _dragSmoother.target() == getBoundsCheckedContentOffset(_dragSmoother.target());
+        if (!settle) {
+            stopDragSmoothing();
+            startDeceleratingIfNecessary();
+        }
+        weightedAverageVelocity={};
         if(wasDragging)if(const auto target=delegate.lock())target->scrollViewDidEndDragging(shared_from_base<UIScrollView>(),_isDecelerating);
         break;
     }
     case UIGestureRecognizerState::cancelled:
     case UIGestureRecognizerState::failed: {
+        stopDragSmoothing();
         const bool wasDragging=_isDragging;_isDragging=false;_isTracking=false;weightedAverageVelocity={};
         if(contentOffset()!=getBoundsCheckedContentOffset(contentOffset()))bounceWithVelocity({});
         else {cancelDecelerationAnimations();hideScrollIndicators();}
@@ -1237,6 +1304,7 @@ void UIScrollView::startDeceleratingIfNecessary() {
     startScrollMotion(velocity,true);
 }
 void UIScrollView::startScrollMotion(NXPoint velocity,bool predictInitialFrame) {
+    stopDragSmoothing();
     cancelDecelerationAnimations();
     const auto limits=contentOffsetBounds();const auto offset=contentOffset();
     const auto scale=traitCollection()?std::max(1.f,traitCollection()->displayScale()):1.f;
@@ -1281,6 +1349,7 @@ void UIScrollView::reconcileScrollGeometry() {
     const auto limits=contentOffsetBounds();const auto size=bounds().size;
     if(_hasScrollGeometry&&limits==_lastScrollLimits&&size==_lastScrollViewport)return;
     const bool resized=_hasScrollGeometry&&size!=_lastScrollViewport;
+    stopDragSmoothing();
     _lastScrollLimits=limits;_lastScrollViewport=size;_hasScrollGeometry=true;
     if(_isDragging||_isTracking) {
         // UIKit clamps an elastic offset when its viewport geometry changes.
@@ -1333,6 +1402,7 @@ bool UIScrollView::applyXMLAttribute(const std::string& name, const std::string&
     }
 
     REGISTER_XIB_ATTRIBUTE(scrollEnabled, valueToBool, setScrollEnabled)
+    REGISTER_XIB_ATTRIBUTE(dragSmoothingEnabled, valueToBool, setDragSmoothingEnabled)
     REGISTER_XIB_ATTRIBUTE(bounceVertically, valueToBool, setBounceVertically)
     REGISTER_XIB_ATTRIBUTE(bounceHorizontally, valueToBool, setBounceHorizontally)
     REGISTER_XIB_ATTRIBUTE(

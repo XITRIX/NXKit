@@ -1,6 +1,7 @@
 #include <Screens/TestViewController/TestViewController.hpp>
 #include <romfs/romfs.hpp>
 
+#include "DragPresentation.hpp"
 using namespace NXKit;
 
 void animateCube(std::shared_ptr<UIView> view) {
@@ -157,26 +158,28 @@ void TestViewController::loadView() {
     blur->setMask(dragMeViewLabel);
 
     auto panGesture = new_shared<UIPanGestureRecognizer>();
-    panGesture->onStateChanged = [this](auto gesture) {
+    auto drag = std::make_shared<DragPresentation>(blur);
+    panGesture->onStateChanged = [this, drag](auto gesture) {
         auto panGesture = std::static_pointer_cast<UIPanGestureRecognizer>(gesture);
-        static NXPoint initial;
         auto _view = panGesture->view().lock();
         if (!_view) return;
 
         switch (panGesture->state()) {
             case UIGestureRecognizerState::began: {
-                initial = _view->frame().origin;
+                drag->begin();
                 break;
             }
             case UIGestureRecognizerState::changed: {
                 auto translation = panGesture->translationInView(view());
 
-                auto frame = _view->frame();
-                frame.origin.x = initial.x + translation.x;
-                frame.origin.y = initial.y + translation.y;
-                _view->setFrame(frame);
+                drag->update(drag->origin() + translation, panGesture->velocityIn(view()));
                 break;
             }
+            case UIGestureRecognizerState::possible:
+            case UIGestureRecognizerState::cancelled:
+            case UIGestureRecognizerState::failed:
+                drag->stop();
+                break;
             default:
                 break;
         }
@@ -201,23 +204,26 @@ void TestViewController::loadView() {
     glass->addSubview(glassLabel);
 
     auto glassPanGesture = new_shared<UIPanGestureRecognizer>();
-    glassPanGesture->onStateChanged = [this](auto gesture) {
+    auto glassDrag = std::make_shared<DragPresentation>(glass);
+    glassPanGesture->onStateChanged = [this, glassDrag](auto gesture) {
         const auto pan = std::static_pointer_cast<UIPanGestureRecognizer>(gesture);
-        static NXPoint initial;
         const auto glassView = pan->view().lock();
         if (!glassView) return;
 
         switch (pan->state()) {
             case UIGestureRecognizerState::began:
-                initial = glassView->frame().origin;
+                glassDrag->begin();
                 break;
             case UIGestureRecognizerState::changed: {
                 const auto translation = pan->translationInView(view());
-                auto frame = glassView->frame();
-                frame.origin = initial + translation;
-                glassView->setFrame(frame);
+                glassDrag->update(glassDrag->origin() + translation, pan->velocityIn(view()));
                 break;
             }
+            case UIGestureRecognizerState::possible:
+            case UIGestureRecognizerState::cancelled:
+            case UIGestureRecognizerState::failed:
+                glassDrag->stop();
+                break;
             default:
                 break;
         }

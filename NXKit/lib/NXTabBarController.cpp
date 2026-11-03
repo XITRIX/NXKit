@@ -1,4 +1,6 @@
 #include <NXTabBarController.h>
+#include "BarItemAccess.hpp"
+#include "ViewControllerContainerAccess.hpp"
 #include <NXResponderAction.h>
 #include <NXNavigationController.h>
 #include <DispatchQueue.h>
@@ -219,7 +221,7 @@ bool NXTabBar::setSelectedIndexPath(const IndexPath& indexPath) {
 }
 
 bool NXTabBar::activateItemAt(const IndexPath& indexPath) {
-    if (!contains(indexPath)) {
+    if (!contains(indexPath) || !_buttons[size_t(indexPath.section())][size_t(indexPath.item())]->isEnabled()) {
         return false;
     }
     if (_selectionHandler && !_selectionHandler(indexPath)) {
@@ -283,6 +285,7 @@ std::vector<std::shared_ptr<UIViewController>> NXTabBarController::viewControlle
 
 void NXTabBarController::validateViewControllers(const ViewControllerSections& controllers) {
     std::unordered_set<const UIViewController*> uniqueControllers;
+    std::unordered_set<const UITabBarItem*> uniqueItems;
     for (const auto& section : controllers) {
         for (const auto& controller : section) {
             if (!controller) {
@@ -290,6 +293,8 @@ void NXTabBarController::validateViewControllers(const ViewControllerSections& c
                     "NXTabBarController does not accept null view controllers"
                 );
             }
+            if (!uniqueItems.insert(controller->tabBarItem().get()).second)
+                throw std::invalid_argument("Tab view controllers require distinct tab bar items");
             if (!uniqueControllers.insert(controller.get()).second) {
                 throw std::invalid_argument(
                     "NXTabBarController does not accept duplicate view controllers"
@@ -343,6 +348,7 @@ void NXTabBarController::setViewControllerSections(ViewControllerSections contro
         attachConfiguredChildren();
         removeUnconfiguredChildren(previousViewControllers);
     }
+    observeTabBarItems();
 }
 
 bool NXTabBarController::contains(const IndexPath& indexPath) const {
@@ -571,12 +577,24 @@ void NXTabBarController::reloadTabBarItems() {
         NXTabBar::ItemSection sectionTitles;
         sectionTitles.reserve(section.size());
         for (const auto& viewController : section) {
-            sectionTitles.push_back(viewController->title());
+            sectionTitles.push_back(viewController->tabBarItem()->title());
         }
         titles.push_back(std::move(sectionTitles));
     }
 
-    _tabBar->setItems(std::move(titles));
+    // Metadata changes should preserve live buttons and controller focus.
+    const bool sameShape=_tabBar->_buttons.size()==titles.size()
+        && std::equal(titles.begin(),titles.end(),_tabBar->_buttons.begin(),
+            [](const auto& items,const auto& buttons) { return items.size()==buttons.size(); });
+    if (sameShape) _tabBar->_items=std::move(titles);
+    else _tabBar->setItems(std::move(titles));
+    for (size_t section=0;section<_viewControllers.size();++section)
+        for (size_t item=0;item<_viewControllers[section].size();++item) {
+            const bool enabled=_viewControllers[section][item]->tabBarItem()->isEnabled();
+            _tabBar->_buttons[section][item]->setText(_tabBar->_items[section][item]);
+            _tabBar->_buttons[section][item]->setEnabled(enabled);
+            _tabBar->_buttons[section][item]->setAlpha(enabled?1:.4f);
+        }
     restoreTabBarSelection();
 }
 
@@ -618,7 +636,7 @@ void NXTabBarController::removeUnconfiguredChildren(
 bool NXTabBarController::handleUserSelection(const IndexPath& indexPath) {
     updateAdaptivePresentation();
     const auto candidate = viewControllerAt(indexPath);
-    if (!candidate) {
+    if (!candidate || !candidate->tabBarItem()->isEnabled()) {
         restoreTabBarSelection();
         return false;
     }
@@ -632,7 +650,8 @@ bool NXTabBarController::handleUserSelection(const IndexPath& indexPath) {
 
     // A delegate is allowed to mutate the controller list. Revalidate the request
     // after the callback before committing the selection.
-    if (viewControllerAt(indexPath) != candidate || !setSelectedIndexPath(indexPath)) {
+    if (viewControllerAt(indexPath) != candidate || !candidate->tabBarItem()->isEnabled()
+        || !setSelectedIndexPath(indexPath)) {
         restoreTabBarSelection();
         return false;
     }
@@ -908,4 +927,32 @@ void NXTabBarController::updateAdaptivePresentation() {
     // their dismissal on the main queue too, without replacing the tab's own
     // presentation delegate. Each drain schedules at most one later check.
     if (_compactController && _compactNavigation.expired()) scheduleAdaptivePresentation();
+}
+
+void NXTabBarController::setMode(Mode mode) {
+    if (mode != Mode::automatic && mode != Mode::tabSidebar)
+        throw std::invalid_argument("NXTabBarController currently supports automatic and tabSidebar modes");
+    _mode = mode;
+}
+
+void NXTabBarController::observeTabBarItems() {
+    const auto weak=weak_from_base<NXTabBarController>();
+    for (const auto& child:viewControllers()) {
+        const auto item=child->tabBarItem();
+        Internal::ViewControllerContainerAccess::observeTabBarItem(*child,shared_from_this(),
+            [weak,child=std::weak_ptr<UIViewController>(child)] {
+                if (const auto self=weak.lock()) {
+                    if (const auto value=child.lock();value && self->indexPathOf(value)) {
+                        self->observeTabBarItems(); self->reloadTabBarItems();
+                    }
+                }
+            });
+        Internal::BarItemAccess::observe(*item,shared_from_this(),
+            [weak,child=std::weak_ptr<UIViewController>(child),item=std::weak_ptr<UITabBarItem>(item)] {
+                if (const auto self=weak.lock()) {
+                    if (const auto value=child.lock();value && self->indexPathOf(value)
+                        && value->tabBarItem()==item.lock()) self->reloadTabBarItems();
+                }
+            });
+    }
 }

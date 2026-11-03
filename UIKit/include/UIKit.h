@@ -8,3 +8,7 @@
 #include <UIGlassEffect.h>
 #include <UIGlassContainerEffect.h>
 #include <UIKitRegistration.h>
+
+#include <UITabBarView.h>
+#include <UITabBar.h>
+#include <UITabBarController.h>

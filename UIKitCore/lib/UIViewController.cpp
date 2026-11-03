@@ -1,4 +1,5 @@
 #include <UIViewController.h>
+#include "BarItemAccess.hpp"
 #include <UIPresentationController.h>
 #include <UIPress.h>
 #include <UIWindow.h>
@@ -379,6 +380,8 @@ void UIViewController::removeFromParent() {
     if (auto spt = _parent.lock()) {
         spt->_children.erase(std::remove(spt->_children.begin(), spt->_children.end(), shared_from_this()), spt->_children.end());
         this->_parent.reset();
+        _containerSafeAreaInsets = {};
+        invalidateContainerSafeAreaInsets();
         didMoveToParent(nullptr);
     }
 }
@@ -1059,4 +1062,44 @@ std::shared_ptr<UITabBarControllerInterface> UIViewController::tabBarController(
         }
     }
     return nullptr;
+}
+
+void UIViewController::setTitle(std::string title) {
+    _title = std::move(title);
+    if (_tabBarItem && _ownsDefaultTabBarItem)
+        Internal::BarItemAccess::setDefaultTitle(*_tabBarItem, _title);
+}
+
+std::shared_ptr<UITabBarItem> UIViewController::tabBarItem() {
+    if (!_tabBarItem) {
+        _tabBarItem = std::make_shared<UITabBarItem>();
+        _ownsDefaultTabBarItem = true;
+        Internal::BarItemAccess::setDefaultTitle(*_tabBarItem, _title);
+    }
+    return _tabBarItem;
+}
+
+void UIViewController::setTabBarItem(const std::shared_ptr<UITabBarItem>& item) {
+    if (_tabBarItem == item) return;
+    if (item) {
+        if (const auto parent = _parent.lock()) {
+            if (const auto tabs = std::dynamic_pointer_cast<UITabBarControllerInterface>(parent)) {
+                for (const auto& other : tabs->viewControllers()) {
+                    if (other.get() != this && other->tabBarItem() == item)
+                        throw std::invalid_argument("Tab controllers require distinct tab bar items");
+                }
+            }
+        }
+    }
+    _tabBarItem = item;
+    _ownsDefaultTabBarItem = false;
+    std::erase_if(_tabBarItemObservers, [](const auto& observer) { return observer.owner.expired(); });
+    const auto observers = _tabBarItemObservers;
+    for (const auto& observer : observers) {
+        if (const auto owner = observer.owner.lock()) observer.changed();
+    }
+}
+
+void UIViewController::invalidateContainerSafeAreaInsets() {
+    if (_view) _view->setNeedsUpdateSafeAreaInsets();
 }

@@ -143,6 +143,19 @@ bool SkiaCtx::finishGraphiteWork(skgpu::graphite::Context* context,
 }
 
 void SkiaCtx::flushAndSubmit(sk_sp<SkSurface> surface) {
+    skgpu::graphite::InsertRecordingInfo insertInfo;
+    flushAndSubmitFrame(std::move(surface), insertInfo);
+}
+
+bool SkiaCtx::flushAndSubmitFrame(sk_sp<SkSurface> surface,
+                                  skgpu::graphite::InsertRecordingInfo& insertInfo) {
+    const auto cancelSubmission = [&insertInfo] {
+        if (insertInfo.fFinishedWithStatsProc)
+            insertInfo.fFinishedWithStatsProc(insertInfo.fFinishedContext,
+                                             skgpu::CallbackResult::kFailed, {});
+        else if (insertInfo.fFinishedProc)
+            insertInfo.fFinishedProc(insertInfo.fFinishedContext, skgpu::CallbackResult::kFailed);
+    };
     const auto cancelReads = [this] {
         auto reads = std::move(_backdropReads);
         _backdropReads.clear();
@@ -152,28 +165,31 @@ void SkiaCtx::flushAndSubmit(sk_sp<SkSurface> surface) {
     auto* recorder = graphiteRecorder();
     if (!surface || !context || !recorder) {
         cancelReads();
-        return;
+        cancelSubmission();
+        return false;
     }
 
     auto recording = recorder->snap();
     if (!recording) {
         SkDebugf("Graphite failed to snap the frame recording.\n");
         cancelReads();
-        return;
+        cancelSubmission();
+        return false;
     }
 
-    skgpu::graphite::InsertRecordingInfo insertInfo;
     insertInfo.fRecording = recording.get();
     auto status = context->insertRecording(insertInfo);
     if (status != skgpu::graphite::InsertStatus::kSuccess) {
         SkDebugf("Graphite failed to insert the frame recording: %s\n",
                  status.message().c_str());
         cancelReads();
-        return;
+        return false;
     }
 
     submitBackdropReads();
     if (!context->submit(skgpu::graphite::SyncToCpu::kNo)) {
         SkDebugf("Graphite failed to submit the frame.\n");
+        return false;
     }
+    return true;
 }

@@ -94,10 +94,20 @@ elseif (PLATFORM_SWITCH)
     add_definitions( -DPLATFORM_SWITCH )
     set(DEVKITPRO $ENV{DEVKITPRO} CACHE BOOL "DEVKITPRO")
     set(__SWITCH__ ON)
-    set(CMAKE_C_FLAGS "-I${DEVKITPRO}/libnx/include -I${DEVKITPRO}/portlibs/switch/include -D__SWITCH__")
-    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
+    # Let devkitPro initialize the compiler flags, including -mtp=soft and
+    # -ftls-model=local-exec. Overriding CMAKE_*_FLAGS here hides the cached
+    # platform defaults on reconfigure and makes thread_local access use the
+    # unsupported TPIDR_EL0 register instead of libnx's thread pointer.
     include(${DEVKITPRO}/cmake/Switch.cmake REQUIRED)
-    # message("${DEVKITPRO}/portlibs/switch/include")
+    foreach(lang IN ITEMS C CXX)
+        list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES
+                "${DEVKITPRO}/libnx/include"
+                "${DEVKITPRO}/portlibs/switch/include")
+        list(REMOVE_DUPLICATES CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES)
+        set(CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES
+                "${CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES}"
+                CACHE STRING "Switch system include directories" FORCE)
+    endforeach()
 endif ()
 
 if (USE_GLES)

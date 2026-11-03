@@ -9,9 +9,11 @@
 #include <Screens/GlassDemoViewController/GlassDemoViewController.hpp>
 #include <Screens/GlassDemoViewController/GlassStressView.hpp>
 #include <Screens/ControllerTestViewController/ControllerTestViewController.hpp>
+#include <Screens/TabBarDemoController/TabBarDemoController.hpp>
 // #include <TextViewController/TextViewController.hpp>
 #include <romfs/romfs.hpp>
 #include <cstdlib>
+#include "SwitchShaderBake.hpp"
 
 namespace NXKit {
 
@@ -19,6 +21,13 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     registerUIKitViews();
     DEFAULT_ROMFS_REGISTRATION
     window = new_shared<UIWindow>();
+#ifdef __SWITCH__
+    if (switchShaderBakeRequested()) {
+        window->setRootViewController(makeSwitchShaderBakeController());
+        window->makeKeyAndVisible();
+        return true;
+    }
+#endif
     NXResponderAction {
         .button = NXActionButton::b,
         .isEnabled = true,
@@ -51,7 +60,8 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     std::vector<std::shared_ptr<UIViewController>> vcs1 = {
         vc,
         vc1,
-        glassDemoController
+        glassDemoController,
+        new_shared<TabBarDemoController>()
     };
     std::vector<std::shared_ptr<UIViewController>> vcs2 = { vc2, vc3 };
     std::vector<std::shared_ptr<UIViewController>> navigationTests = {
@@ -76,6 +86,11 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
 //    window->setBackgroundColor(UIColor::systemBackground);
     window->setBackgroundColor(UIColor::secondarySystemBackground);
     window->setTintColor(UIColorThemed(UIColor::systemBlue, UIColor::systemTeal, "_tint"));
+#ifdef __SWITCH__
+    installSwitchExitTest([weakTabs = std::weak_ptr<NXTabBarController>(tbvc)](size_t index) {
+        if (const auto tabs = weakTabs.lock()) tabs->setSelectedIndex(index);
+    });
+#endif
 //    window->setTintColor(UIColorThemed(UIColor::systemTeal, UIColor::systemTeal));
 
     return true;

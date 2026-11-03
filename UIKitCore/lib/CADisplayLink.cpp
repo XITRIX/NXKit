@@ -3,10 +3,12 @@
 #include <algorithm>
 
 namespace NXKit {
-    std::vector<CADisplayLink*> CADisplayLink::activeLinks;
+    std::vector<std::shared_ptr<CADisplayLink::Invocation>> CADisplayLink::activeLinks;
 
-    CADisplayLink::CADisplayLink(std::function<void()> func): func(std::move(func)) {
-        activeLinks.push_back(this);
+    CADisplayLink::CADisplayLink(std::function<void()> func)
+        : invocation(std::make_shared<Invocation>()) {
+        invocation->func = std::make_shared<std::function<void()>>(std::move(func));
+        activeLinks.push_back(invocation);
     }
 
     CADisplayLink::~CADisplayLink() {
@@ -14,9 +16,10 @@ namespace NXKit {
     }
 
     void CADisplayLink::invalidate() {
-        if (!isRunning) return;
+        if (!invocation->isRunning) return;
 
-        isRunning = false;
-        activeLinks.erase(std::remove(activeLinks.begin(), activeLinks.end(), this), activeLinks.end());
+        invocation->isRunning = false;
+        invocation->func.reset();
+        std::erase(activeLinks, invocation);
     }
 }

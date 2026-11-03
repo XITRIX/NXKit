@@ -189,7 +189,9 @@ void UIGestureRecognizer::addTouch(std::shared_ptr<UITouch> touch) {
 }
 
 void UIGestureRecognizer::removeTouch(std::shared_ptr<UITouch> touch) {
-    _allTouches.erase(std::remove(_allTouches.begin(), _allTouches.end(), touch));
+    // A callback can disable/reset this recognizer before terminal delivery
+    // removes the touch. Erasing an absent touch must be harmless.
+    std::erase(_allTouches, touch);
 }
 
 void UIGestureRecognizer::resetCurrentAttemptIfNeeded() {

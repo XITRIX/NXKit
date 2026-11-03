@@ -1,6 +1,7 @@
 #pragma once
 
 #include <UIView.h>
+#include <UITabBarItem.h>
 #include <UINavigationControllerInterface.h>
 #include <UITabBarControllerInterface.h>
 #include <UIViewControllerTransitioning.h>
@@ -11,6 +12,7 @@
 namespace NXKit {
 
 class UIPresentationController;
+namespace Internal { class ViewControllerContainerAccess; }
 
 class UIViewController: public UIResponder, public UITraitEnvironment, public UIFocusEnvironment, public enable_shared_from_this<UIViewController> {
 public:
@@ -50,7 +52,9 @@ public:
 
 
     std::string title() { return _title; }
-    void setTitle(std::string title) { _title = std::move(title); }
+    void setTitle(std::string title);
+    [[nodiscard]] std::shared_ptr<UITabBarItem> tabBarItem();
+    void setTabBarItem(const std::shared_ptr<UITabBarItem>& item);
 
     void addChild(const std::shared_ptr<UIViewController>& child);
     virtual void willMoveToParent(const std::shared_ptr<UIViewController>& parent);
@@ -111,6 +115,15 @@ public:
     std::shared_ptr<UIFocusEnvironment> parentFocusEnvironment() override;
 
 private:
+    friend class UIView;
+    friend class Internal::ViewControllerContainerAccess;
+    struct TabBarItemObserver { std::weak_ptr<void> owner; std::function<void()> changed; };
+    std::vector<TabBarItemObserver> _tabBarItemObservers;
+    std::shared_ptr<UITabBarItem> _tabBarItem;
+    bool _ownsDefaultTabBarItem = false;
+    UIEdgeInsets _containerSafeAreaInsets;
+    void invalidateContainerSafeAreaInsets();
+
     enum class PendingModalOperationKind {
         present,
         dismiss,

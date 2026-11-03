@@ -89,6 +89,23 @@ void neutralControl() {
            && control->layer()->zPosition() == 4, "core focus does not install a kit's shadow or elevation");
 }
 
+void tabMetadata() {
+    auto screen=new_shared<UIViewController>(); screen->setTitle("Default");
+    const auto item=screen->tabBarItem();
+    expect(item && item->title()=="Default" && item->isEnabled() && item->tag()==0
+           && !item->image() && !item->selectedImage() && !item->badgeValue() && !item->badgeColor(),
+           "Core supplies style-independent tab item defaults without loading a view");
+    screen->setTitle("Changed"); expect(item->title()=="Changed","default tab title follows its controller");
+    item->setTitle("Explicit"); screen->setTitle("Ignored");
+    expect(item->title()=="Explicit","an explicit item title takes precedence");
+    item->setEnabled(false); item->setTag(9); item->setBadgeValue("2");
+    expect(!item->isEnabled() && item->tag()==9 && item->badgeValue()=="2",
+           "tab metadata remains independently mutable in Core");
+    screen->setTabBarItem(nullptr);
+    expect(screen->tabBarItem()!=item && screen->tabBarItem()->title()=="Ignored" && !screen->viewIsLoaded(),
+           "resetting tab metadata recreates the default item without loading content");
+}
+
 void genericBackdrop() {
     BackdropEffect effect(R"(
         uniform shader content;
@@ -120,6 +137,7 @@ void genericBackdrop() {
 int main() {
     discovery();
     neutralControl();
+    tabMetadata();
     genericBackdrop();
     if (!failures) std::cout << "Core module boundary tests passed\n";
     return failures ? 1 : 0;

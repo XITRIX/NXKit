@@ -21,6 +21,7 @@ add_libromfs(${PROJECT_NAME} ${PROJECT_RESOURCES})
 
 add_executable(${PROJECT_NAME}
         app/main.cpp
+        app/SwitchShaderBake.cpp
         app/AppDelegate.cpp
         app/Screens/TestViewController/TestViewController.cpp
         app/Screens/YogaTestViewController/YogaTestViewController.cpp
@@ -35,6 +36,7 @@ add_executable(${PROJECT_NAME}
         app/Screens/GlassDemoViewController/GlassScreenViewController.cpp
         app/Screens/GlassDemoViewController/LensDemoStage.cpp
         app/Screens/ControllerTestViewController/ControllerTestViewController.cpp
+        app/Screens/TabBarDemoController/TabBarDemoController.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -47,3 +49,14 @@ target_link_libraries(${PROJECT_NAME}
         Xitrix::UIKit
         NXKit
 )
+
+if(PLATFORM_SWITCH)
+    set(NXKIT_SWITCH_ADDRESS "" CACHE STRING "Switch IP for shader compilation and deployment")
+    add_custom_target(${PROJECT_NAME}.switch-shaders
+        COMMAND "${NXKIT_HOST_PYTHON}" "${UIKIT_PATH}/scripts/switch/bake_shaders.py"
+                --build-dir "${CMAKE_BINARY_DIR}" --address "${NXKIT_SWITCH_ADDRESS}"
+                --nxlink "$ENV{DEVKITPRO}/tools/bin/nxlink" --target "${PROJECT_NAME}"
+        DEPENDS ${PROJECT_NAME}.nro
+        USES_TERMINAL VERBATIM
+        COMMENT "Compiling Switch Vulkan pipelines on the target and bundling the cache")
+endif()

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <UITabBarControllerMode.h>
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -13,6 +14,8 @@ class UIViewController;
 class UITabBarControllerInterface {
 public:
     virtual ~UITabBarControllerInterface() = default;
+    [[nodiscard]] virtual UITabBarControllerMode mode() const = 0;
+    virtual void setMode(UITabBarControllerMode mode) = 0;
     [[nodiscard]] virtual std::vector<std::shared_ptr<UIViewController>> viewControllers() const = 0;
     virtual void setViewControllers(std::vector<std::shared_ptr<UIViewController>> controllers) = 0;
     [[nodiscard]] virtual std::optional<std::size_t> selectedIndex() const = 0;

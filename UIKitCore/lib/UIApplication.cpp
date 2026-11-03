@@ -10,6 +10,21 @@
 
 using namespace NXKit;
 
+namespace {
+Timer touchSampleTime(Uint64 timestamp) {
+    // SDL timestamps describe sampling, not when a queued event is drained.
+    // Map its monotonic clock into Timer's existing wall-clock domain.
+    const auto now = SDL_GetTicksNS();
+    const double age = timestamp && now >= timestamp ? double(now - timestamp) / 1e6 : 0;
+    Timer sample(-age);
+    // Timer's offset constructor can leave tv_usec above one second. Keep a
+    // canonical timeval for consumers that inspect/compare its public fields.
+    sample.startTime.tv_sec += sample.startTime.tv_usec / 1000000;
+    sample.startTime.tv_usec %= 1000000;
+    return sample;
+}
+}
+
 std::shared_ptr<UIApplication> UIApplication::shared = nullptr;
 
 UIApplication::UIApplication() {
@@ -42,21 +57,25 @@ UIApplication::~UIApplication() {
 }
 
 void UIApplication::finishActivePressEvent(
-    const std::shared_ptr<UIPressesEvent>& event,
+    std::shared_ptr<UIPressesEvent> event,
     UIPressPhase phase
 ) {
     if (!event) {
         return;
     }
+    bool finished = false;
     for (const auto& press : event->allPresses()) {
         if (!press || press->phase() != UIPressPhase::began) {
             continue;
         }
         press->_timestamp = Timer();
         press->_phase = phase;
+        finished = true;
     }
-    sendEvent(event);
+    // Detach before callbacks: an action can quit, cancel all held inputs or
+    // replace the same physical source. Keep this event alive independently.
     std::erase(UIPressesEvent::activePressesEvents, event);
+    if (finished) sendEvent(event);
 }
 
 void UIApplication::cancelGamepadPresses(SDL_JoystickID gamepadID) {
@@ -78,24 +97,25 @@ void UIApplication::cancelGamepadPresses(SDL_JoystickID gamepadID) {
         _gamepadAxisPresses.end(),
         collect
     );
-    for (const auto& event : events) {
-        finishActivePressEvent(event, UIPressPhase::cancelled);
-    }
     std::erase_if(_gamepadButtonPresses, [gamepadID](const auto& entry) {
         return entry.first.first == gamepadID;
     });
     std::erase_if(_gamepadAxisPresses, [gamepadID](const auto& entry) {
         return entry.first.first == gamepadID;
     });
+    for (const auto& event : events) {
+        finishActivePressEvent(event, UIPressPhase::cancelled);
+    }
 }
 
 void UIApplication::cancelAllActivePresses() {
-    const auto activeEvents = UIPressesEvent::activePressesEvents;
+    auto activeEvents = std::move(UIPressesEvent::activePressesEvents);
+    UIPressesEvent::activePressesEvents.clear();
+    _gamepadButtonPresses.clear();
+    _gamepadAxisPresses.clear();
     for (const auto& event : activeEvents) {
         finishActivePressEvent(event, UIPressPhase::cancelled);
     }
-    _gamepadButtonPresses.clear();
-    _gamepadAxisPresses.clear();
 }
 
 UIGamepadKey UIApplication::mapGamepadButtonEventToUIGamepadKey(SDL_GamepadButtonEvent event) {
@@ -317,7 +337,7 @@ UIPressType UIApplication::mapGamepadInputToUIPressType(UIGamepadInputType key) 
 void UIApplication::handleEventsIfNeeded() {
     auto e = SDL_Event();
 
-    while (SDL_PollEvent(&e)) {
+    while (!quitRequested && SDL_PollEvent(&e)) {
         handleSDLEvent(e);
     }
 
@@ -440,7 +460,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             auto renderSize = screenSize;
             auto fingerPoint = NXPoint(renderSize.width * e.tfinger.x, renderSize.height * e.tfinger.y);
 //                printf("Touch id: %llu Begin, X:%f - Y:%f\n", e.tfinger.fingerID, fingerPoint.x, fingerPoint.y);
-            auto touch = new_shared<UITouch>(e.tfinger.fingerID, fingerPoint, Timer());
+            auto touch = new_shared<UITouch>(e.tfinger.fingerID, fingerPoint, touchSampleTime(e.tfinger.timestamp));
             auto event = std::shared_ptr<UIEvent>(new UIEvent(touch));
             UIEvent::activeEvents.push_back(event);
             sendEvent(event);
@@ -466,18 +486,11 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
 
             if (!event || !touch) return;
 
-            auto previousTimestamp = touch->timestamp();
-            auto newTimestamp = Timer();
-
             touch->updateAbsoluteLocation(fingerPoint);
-            touch->_timestamp = newTimestamp;
+            touch->_timestamp = touchSampleTime(e.tfinger.timestamp);
             touch->_phase = UITouchPhase::moved;
 
-            // Timer::operator- returns milliseconds.
-            // SDL can emit back-to-back motion events with unrealistically tiny deltas, so drop samples below 5 ms.
-            if ((newTimestamp - previousTimestamp) > 5.0) {
-                sendEvent(event);
-            }
+            sendEvent(event);
 
             break;
         }
@@ -499,7 +512,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
 
             if (!event || !touch) return;
 
-            touch->_timestamp = Timer();
+            touch->_timestamp = touchSampleTime(e.tfinger.timestamp);
             touch->_phase = e.type == SDL_EVENT_FINGER_CANCELED
                 ? UITouchPhase::cancelled
                 : UITouchPhase::ended;
@@ -515,6 +528,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             // Simulate touch
             auto touchEvent = SDL_Event();
             touchEvent.type = SDL_EVENT_FINGER_DOWN;
+            touchEvent.tfinger.timestamp = e.button.timestamp;
 
             auto renderSize = screenSize;
             touchEvent.tfinger.x = float(e.button.x) / renderSize.width;
@@ -529,6 +543,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             // Simulate touch
             auto touchEvent = SDL_Event();
             touchEvent.type = SDL_EVENT_FINGER_MOTION;
+            touchEvent.tfinger.timestamp = e.motion.timestamp;
 
             auto renderSize = screenSize;
             touchEvent.tfinger.x = e.motion.x / renderSize.width;
@@ -543,6 +558,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
             // Simulate touch
             auto touchEvent = SDL_Event();
             touchEvent.type = SDL_EVENT_FINGER_UP;
+            touchEvent.tfinger.timestamp = e.button.timestamp;
 
             auto renderSize = screenSize;
             touchEvent.tfinger.x = float(e.button.x) / renderSize.width;
@@ -619,8 +635,9 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
                         mapGamepadButtonEventToUIGamepadKey(e.gbutton);
                 }
             }
-            finishActivePressEvent(active->second, UIPressPhase::ended);
+            auto event = active->second;
             _gamepadButtonPresses.erase(active);
+            finishActivePressEvent(std::move(event), UIPressPhase::ended);
 
             break;
         }
@@ -644,14 +661,13 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
                     activePress->_gamepadKey = gamepadKey;
                     break;
                 }
-                finishActivePressEvent(
-                    active->second,
-                    UIPressPhase::ended
-                );
+                auto event = active->second;
                 _gamepadAxisPresses.erase(active);
+                finishActivePressEvent(std::move(event), UIPressPhase::ended);
             }
 
-            if (!gamepadKey || !gamepadKey->isPressed()) {
+            if (quitRequested || _gamepadAxisPresses.contains(controlKey)
+                || !gamepadKey || !gamepadKey->isPressed()) {
                 break;
             }
 
@@ -767,11 +783,7 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
 
             if (!event || !press) return;
 
-            press->_timestamp = Timer();
-            press->_phase = UIPressPhase::ended;
-
-            sendEvent(event);
-            UIPressesEvent::activePressesEvents.erase(std::remove(UIPressesEvent::activePressesEvents.begin(), UIPressesEvent::activePressesEvents.end(), event), UIPressesEvent::activePressesEvents.end());
+            finishActivePressEvent(std::move(event), UIPressPhase::ended);
 
             break;
 
@@ -829,9 +841,9 @@ void UIApplication::handleSDLEvent(SDL_Event e) {
 }
 
 void UIApplication::handleSDLQuit() {
+    quitRequested = true;
     cancelAllActivePresses();
     UIEvent::activeEvents.clear();
-    quitRequested = true;
 }
 
  void UIApplication::sendEvent(const std::shared_ptr<UIEvent>& event) const {

@@ -1,4 +1,5 @@
 #include "GlassDemoScene.hpp"
+#include "../../DragPresentation.hpp"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -138,16 +139,20 @@ void GlassDemoScene::layoutSubviews() {
 void GlassDemoScene::makeDraggable(const std::shared_ptr<BackdropEffectView>& item) {
     auto pan=new_shared<UIPanGestureRecognizer>();
     const auto weakScene=weak_from_base<GlassDemoScene>();
-    auto origin=std::make_shared<NXPoint>();
-    pan->onStateChanged=[weakScene,origin](const auto& gesture) {
+    auto drag=std::make_shared<DragPresentation>(item);
+    pan->onStateChanged=[weakScene,drag](const auto& gesture) {
         const auto scene=weakScene.lock(); if (!scene) return;
         auto pan=std::static_pointer_cast<UIPanGestureRecognizer>(gesture); const auto item=pan->view().lock(); if (!item) return;
-        if (pan->state()==UIGestureRecognizerState::began) *origin=item->frame().origin;
+        if (pan->state()==UIGestureRecognizerState::began) drag->begin();
         if (pan->state()==UIGestureRecognizerState::changed) {
-            auto frame=item->frame(); frame.origin=*origin+pan->translationInView(scene);
+            auto frame=item->frame(); frame.origin=drag->origin()+pan->translationInView(scene);
             frame.origin.x=std::clamp(frame.origin.x,0.0f,720-frame.width());
-            frame.origin.y=std::clamp(frame.origin.y,0.0f,440-frame.height()); item->setFrame(frame);
+            frame.origin.y=std::clamp(frame.origin.y,0.0f,440-frame.height());
+            drag->update(frame.origin, pan->velocityIn(scene));
         }
+        if (pan->state()==UIGestureRecognizerState::possible ||
+            pan->state()==UIGestureRecognizerState::cancelled ||
+            pan->state()==UIGestureRecognizerState::failed) drag->stop();
     };
     item->addGestureRecognizer(pan);
 }

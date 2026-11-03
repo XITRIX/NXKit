@@ -51,7 +51,7 @@ private:
     static UIPressType mapGamepadInputToUIPressType(UIGamepadInputType key);
     void sendPressRepeatsIfNeeded(const Timer& timestamp);
     void finishActivePressEvent(
-        const std::shared_ptr<UIPressesEvent>& event,
+        std::shared_ptr<UIPressesEvent> event,
         UIPressPhase phase
     );
     void cancelGamepadPresses(SDL_JoystickID gamepadID);

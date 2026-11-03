@@ -19,6 +19,9 @@ public:
  static void step(const std::shared_ptr<UIScrollView>& s,double t){auto timer=s->_timerAnimation;if(timer)timer->advanceTo(t);}
  static void stepTimer(const std::shared_ptr<TimerAnimation>& timer,double t){timer->advanceTo(t);}
  static void start(const std::shared_ptr<UIScrollView>& s,NXPoint velocity){s->startScrollMotion(velocity);}
+ static void dragFrame(const std::shared_ptr<UIScrollView>& s,double seconds){s->advanceDragSmoothing(seconds);}
+ static bool following(const std::shared_ptr<UIScrollView>& s){return bool(s->_dragDisplayLink);}
+ static bool indicatorsShown(const std::shared_ptr<UIScrollView>& s){return s->_scrollIndicatorsShown;}
 };
 class UIGestureRecognizerTestHarness {
 public:
@@ -40,7 +43,7 @@ struct Fixture {
  std::shared_ptr<UIWindow> window=new_shared<UIWindow>();
  std::shared_ptr<UIScrollView> scroll=new_shared<UIScrollView>();
  std::map<int,std::shared_ptr<UITouch>> touches;
- Fixture(){window->setFrame({0,0,1000,1400});auto controller=new_shared<UIViewController>();window->setRootViewController(controller);window->makeKeyAndVisible();scroll->setFrame({20,100,350,500});scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::never);scroll->setContentSize({350,1600});scroll->setBounceVertically(true);controller->view()->addSubview(scroll);window->drawAndLayoutTreeIfNeeded();}
+ Fixture(){scroll->setDragSmoothingEnabled(false);window->setFrame({0,0,1000,1400});auto controller=new_shared<UIViewController>();window->setRootViewController(controller);window->makeKeyAndVisible();scroll->setFrame({20,100,350,500});scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::never);scroll->setContentSize({350,1600});scroll->setBounceVertically(true);controller->view()->addSubview(scroll);window->drawAndLayoutTreeIfNeeded();}
  void send(int id,UITouchPhase phase,NXPoint p,double seconds){Timer stamp;stamp.startTime.tv_sec=1000+long(seconds);stamp.startTime.tv_usec=long((seconds-std::floor(seconds))*1e6);auto& touch=touches[id];if(!touch)touch=new_shared<UITouch>(id,p,stamp);UIGestureRecognizerTestHarness::update(touch,phase,p,stamp,window);auto event=new_shared<UIEvent>();UIGestureRecognizerTestHarness::append(event,touch);window->sendEvent(event);if(phase==UITouchPhase::ended||phase==UITouchPhase::cancelled)touches.erase(id);}
  void begin(int id,float y,double t){send(id,UITouchPhase::began,{150,y},t);}void move(int id,float y,double t){send(id,UITouchPhase::moved,{150,y},t);}void end(int id,float y,double t){send(id,UITouchPhase::ended,{150,y},t);}
 };
@@ -137,5 +140,95 @@ void axisDynamics(){
  a.begin(20,-1600,0,100,false,2,.001);a.advance(.5);near(a.position,0,.001,"non-bouncing axis stops at collision");expect(!a.active,"non-bouncing collision terminates");
  Internal::ScrollMotion motion;motion.x.begin(90,1000,0,100,true,2,.001);motion.y.begin(100,100,0,1000,true,2,.001);motion.advanceTo(.1);expect(motion.x.spring&&!motion.y.spring&&motion.y.position>100,"diagonal collision does not bounce other axis");
 }
+
+void dragFollower() {
+ DragSmoother a,b;a.reset({});a.setTarget({4,0});b=a;
+ const auto first=a.advance(1.0/120);
+ expect(first.x>0&&first.x<4,"coarse sample produces fractional visual motion");
+ a.advance(1.0/120);b.advance(1.0/60);
+ near(a.position().x,b.position().x,.0001,"following is independent of frame subdivision");
+ auto last=a.position().x;
+ for(int i=0;i<60;++i){auto p=a.advance(1.0/120);expect(p.x>=last&&p.x<=4,"follower never overshoots or reverses");last=p.x;}
+ expect(a.isSettled()&&a.position().x==4,"stationary finger converges exactly without prediction drift");
+ a.setTarget({-4,0});expect(a.advance(.01).x<4,"direction reversal responds on next frame");
+ DragSmoother slow,fast;slow.reset({});fast.reset({});slow.setTarget({100,0},{});fast.setTarget({100,0},{1000,0});
+ expect(fast.advance(.01).x>slow.advance(.01).x,"fast motion uses less latency");
+ bool invalid=false;try{a.advance(-1);}catch(const std::invalid_argument&){invalid=true;}expect(invalid,"invalid frame duration rejected");
+ a.reset({10000000,0});a.setTarget({10000004,0});for(int i=0;i<120;++i)a.advance(1.0/120);
+ expect(a.isSettled(),"large content coordinates converge despite float precision");
+ const auto large=std::numeric_limits<NXFloat>::max();a.reset({-large,0});a.setTarget({large,0});
+ expect(std::isfinite(a.advance(.01).x),"finite endpoint interpolation cannot overflow");
 }
-int main(){SkiaCtx::_main=std::make_shared<Context>();UIApplication::shared=new_shared<UIApplication>();SDL_InitSubSystem(SDL_INIT_EVENTS);multiTouch();catching();regrabAndGeometry();fractionalRestingEdge();timerReentrancy();recognizerSemantics();lateContactCancellation();inwardReleaseContinuesScrolling();axisDynamics();UIApplication::shared.reset();SkiaCtx::_main.reset();SDL_QuitSubSystem(SDL_INIT_EVENTS);std::cout<<"Scroll physics failures: "<<failures<<'\n';return failures?1:0;}
+
+void smoothScrollDrag() {
+ Fixture f;f.scroll->setDragSmoothingEnabled(true);f.scroll->setContentOffset({0,300},false);
+ f.begin(1,350,0);f.move(1,330,.02);f.move(1,326,.04);f.move(1,322,.08);
+ near(f.scroll->contentOffset().y,300,.001,"raw touch target does not jump displayed content");
+ near(f.scroll->panGestureRecognizer()->translationInView(f.scroll).y,-4,.001,"smoothing preserves measured pan translation");
+ UIScrollViewPhysicsTestHarness::dragFrame(f.scroll,1.0/120);
+ const auto visible=f.scroll->contentOffset().y;
+ expect(visible>300&&visible<304&&std::abs(visible-std::round(visible))>.001,"scroll follows at subpixel positions");
+ f.end(1,322,.10);
+ expect(!f.scroll->isDragging()&&!f.scroll->isDecelerating(),"slow release does not invent fling velocity");
+ UIScrollViewPhysicsTestHarness::dragFrame(f.scroll,.5);
+ near(f.scroll->contentOffset().y,304,.001,"slow release finishes pending measured distance smoothly");
+ expect(!UIScrollViewPhysicsTestHarness::following(f.scroll),"settled drag releases frame callback");
+ expect(!UIScrollViewPhysicsTestHarness::indicatorsShown(f.scroll),"settled release hides scroll indicators");
+
+ f.begin(2,350,1);f.move(2,330,1.02);f.move(2,326,1.04);f.move(2,300,1.08);
+ f.scroll->setContentOffset({0,700},false);UIScrollViewPhysicsTestHarness::dragFrame(f.scroll,.5);
+ near(f.scroll->contentOffset().y,700,.001,"programmatic offset cancels pending drag target");
+ f.move(2,296,1.12);UIScrollViewPhysicsTestHarness::dragFrame(f.scroll,.5);
+ near(f.scroll->contentOffset().y,704,.001,"pan anchor rebases after programmatic move");
+ f.move(2,292,1.16);auto delegate=std::make_shared<Delegate>();f.scroll->delegate=delegate;
+ delegate->onScroll=[&]{f.scroll->setContentOffset({0,600},false);};
+ UIScrollViewPhysicsTestHarness::dragFrame(f.scroll,.01);delegate->onScroll={};
+ UIScrollViewPhysicsTestHarness::dragFrame(f.scroll,.5);
+ near(f.scroll->contentOffset().y,600,.001,"didScroll replacement cancels old follower reentrantly");
+ f.move(2,288,1.20);f.scroll->setScrollEnabled(false);
+ expect(!UIScrollViewPhysicsTestHarness::following(f.scroll),"disabling scrolling cancels follower");
+
+ Fixture removed;removed.scroll->setDragSmoothingEnabled(true);
+ removed.begin(1,250,0);removed.move(1,270,.02);removed.move(1,274,.04);removed.move(1,278,.08);
+ auto before=removed.scroll->contentOffset();removed.scroll->removeFromSuperview();
+ UIScrollViewPhysicsTestHarness::dragFrame(removed.scroll,.5);
+ expect(removed.scroll->contentOffset()==before&&!UIScrollViewPhysicsTestHarness::following(removed.scroll),"removed scroll view stops pending motion");
+
+ Fixture fling;fling.scroll->setDragSmoothingEnabled(true);fling.scroll->setContentOffset({0,300},false);
+ fling.begin(1,350,0);fling.move(1,330,.02);fling.move(1,326,.04);fling.move(1,200,.06);
+ const auto releaseVelocity=fling.scroll->panGestureRecognizer()->velocityIn(fling.scroll);
+ UIScrollViewPhysicsTestHarness::dragFrame(fling.scroll,.001);
+ const auto releaseOffset=fling.scroll->contentOffset().y;
+ near(fling.scroll->panGestureRecognizer()->velocityIn(fling.scroll).y,releaseVelocity.y,.001,"visual interpolation leaves release velocity unchanged");
+ fling.end(1,200,.07);
+ expect(fling.scroll->isDecelerating()&&!UIScrollViewPhysicsTestHarness::following(fling.scroll),"fast release hands off to physics without a competing follower");
+ expect(fling.scroll->contentOffset().y>=releaseOffset&&fling.scroll->contentOffset().y<426,"inertia begins from displayed content rather than snapping to raw drag target");
+
+ Fixture resized;resized.scroll->setDragSmoothingEnabled(true);
+ resized.begin(1,250,0);resized.move(1,270,.02);resized.move(1,274,.04);resized.move(1,278,.08);
+ resized.scroll->setFrame({20,100,350,400});resized.scroll->layoutIfNeeded();
+ expect(!UIScrollViewPhysicsTestHarness::following(resized.scroll),"viewport change discards stale drag target");
+ expect(resized.scroll->applyXMLAttribute("dragSmoothingEnabled","false")&&!resized.scroll->isDragSmoothingEnabled(),"XML exposes smoothing policy");
+}
+
+void queuedTouchSamples() {
+ struct Samples: UIView {
+  std::vector<Timer> times;
+  void touchesMoved(std::set<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent>)override {
+   times.push_back((*touches.begin())->timestamp());
+  }
+ };
+ Fixture f;auto samples=new_shared<Samples>();samples->setFrame({500,100,300,600});f.window->addSubview(samples);
+ SDL_Delay(20);const auto now=SDL_GetTicksNS();
+ SDL_Event event{};event.type=SDL_EVENT_FINGER_DOWN;event.tfinger.fingerID=777;
+ event.tfinger.x=.65f;event.tfinger.y=.25f;event.tfinger.timestamp=now-16000000;
+ SDL_PushEvent(&event);
+ for(int i=0;i<3;++i){event.type=SDL_EVENT_FINGER_MOTION;event.tfinger.y-=.004f;event.tfinger.timestamp=now-(12000000-i*4000000);SDL_PushEvent(&event);}
+ UIApplication::shared->handleEventsIfNeeded();
+ expect(samples->times.size()==3,"queued motion packets are all delivered, including intervals below 5ms");
+ for(const auto& time:samples->times)expect(time.startTime.tv_usec>=0&&time.startTime.tv_usec<1000000,"sample timestamps keep canonical timeval fields");
+ if(samples->times.size()==3)near(float(samples->times[2]-samples->times[1]),4,.5,"velocity uses sample timing instead of event-drain timing");
+ event.type=SDL_EVENT_FINGER_UP;event.tfinger.timestamp=now;SDL_PushEvent(&event);UIApplication::shared->handleEventsIfNeeded();
+}
+}
+int main(){SkiaCtx::_main=std::make_shared<Context>();UIApplication::shared=new_shared<UIApplication>();SDL_InitSubSystem(SDL_INIT_EVENTS);multiTouch();catching();regrabAndGeometry();fractionalRestingEdge();timerReentrancy();recognizerSemantics();lateContactCancellation();inwardReleaseContinuesScrolling();axisDynamics();dragFollower();smoothScrollDrag();queuedTouchSamples();UIApplication::shared.reset();SkiaCtx::_main.reset();SDL_QuitSubSystem(SDL_INIT_EVENTS);std::cout<<"Scroll physics failures: "<<failures<<'\n';return failures?1:0;}

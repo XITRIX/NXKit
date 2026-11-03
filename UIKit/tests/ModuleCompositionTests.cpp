@@ -96,6 +96,12 @@ int main() {
     tabs->setViewControllers({first, second});
     expect(!temporary->tabBarController() && first->tabBarController() == tabs,
            "unloaded tab replacement restores actual associations");
+    expect(tabs->mode()==UITabBarControllerMode::automatic,"NX tabs default to automatic sidebar mode");
+    tabs->setMode(UITabBarControllerMode::tabSidebar);
+    bool invalidMode=false;
+    try { tabs->setMode(UITabBarControllerMode::tabBar); } catch(const std::invalid_argument&) { invalidMode=true; }
+    expect(invalidMode&&tabs->mode()==UITabBarControllerMode::tabSidebar,"NX rejects unsupported tabBar mode atomically");
+    tabs->setMode(UITabBarControllerMode::automatic);
     auto focusWindow = new_shared<UIWindow>();
     focusWindow->setFrame({0,0,1280,720});
     UIApplication::shared->delegate->window = focusWindow;
@@ -104,6 +110,17 @@ int main() {
     expect(applicationRunLoop(), "mixed-kit hierarchy lays out");
     expect(first->tabBarController() == tabs && first->navigationController() == focusNavigationController,
            "NX containers expose shared capabilities through actual containment");
+    focusWindow->focusSystem()->requestFocusUpdate(tabs->tabBar());
+    const auto focusedBeforeMetadata=focusWindow->focusSystem()->focusedItem().lock();
+    first->tabBarItem()->setTitle("Shared title");
+    expect(tabs->tabBar()->items()[0][0]=="Shared title","NX sidebar follows shared tab item titles live");
+    expect(focusedBeforeMetadata && focusWindow->focusSystem()->focusedItem().lock()==focusedBeforeMetadata,
+           "live NX item title updates preserve the focused sidebar button");
+    first->tabBarItem()->setEnabled(false);
+    expect(!tabs->tabBar()->activateItemAt(IndexPath(0,0)),"NX sidebar rejects disabled shared items");
+    first->tabBarItem()->setEnabled(true);
+    first->setTabBarItem(std::make_shared<UITabBarItem>("Replacement",nullptr,1));
+    expect(tabs->tabBar()->items()[0][0]=="Replacement","NX sidebar observes item replacement");
     auto tabInterface = first->tabBarController();
     if (tabInterface) {
         expect(tabInterface->setSelectedIndex(1) && tabInterface->selectedViewController() == second,
@@ -198,6 +215,17 @@ int main() {
                "pop detaches shared navigation association");
     }
     tabInterface.reset(); navigation.reset();
+    auto appleTabs=new_shared<UITabBarController>();
+    auto appleFirst=new_shared<UIViewController>(),appleSecond=new_shared<UIViewController>();
+    appleTabs->setViewControllers({appleFirst,appleSecond});
+    tabs->setViewControllers({appleTabs});
+    expect(applicationRunLoop(),"Apple tab controller lays out within NX tab and navigation containers");
+    expect(appleFirst->tabBarController()==appleTabs
+           && appleFirst->navigationController()==focusNavigationController,
+           "nested mixed containers expose the nearest tab capability and enclosing navigation");
+    expect(appleFirst->tabBarController()->setSelectedIndex(1)
+           && appleTabs->tabBar()->selectedItem()==appleSecond->tabBarItem(),
+           "shared selection updates the nested Apple controller and its managed bar");
     focusWindow->setRootViewController(nullptr);
     UIApplication::shared.reset(); SkiaCtx::_main.reset();
     if (!failures) std::cout << "UIKit/NXKit composition tests passed\n";

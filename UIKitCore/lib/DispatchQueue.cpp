@@ -52,10 +52,15 @@ void DispatchQueue::performAll() {
     // Display links drive UI state. A background queue must only drain its
     // own work, never run the main display links on its worker thread.
     if (_tag == "main") {
-        std::vector<CADisplayLink*> linksCopy = CADisplayLink::activeLinks;
-        for (auto link: linksCopy) {
-            if (link->isRunning)
-                link->func();
+        const auto linksCopy = CADisplayLink::activeLinks;
+        for (const auto& link: linksCopy) {
+            if (link->isRunning) {
+                // A callback can destroy itself, another display link, or a
+                // whole view subtree. Keep both its scheduling token and the
+                // current callable alive independently of CADisplayLink.
+                const auto callback = link->func;
+                if (callback && *callback) (*callback)();
+            }
         }
     }
 

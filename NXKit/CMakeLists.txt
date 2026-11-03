@@ -30,7 +30,7 @@ else ()
     )
 endif ()
 
-target_include_directories(NXKit PUBLIC include PRIVATE lib)
+target_include_directories(NXKit PUBLIC include PRIVATE lib ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib)
 
 add_library(Xitrix::NXKit ALIAS NXKit)
 

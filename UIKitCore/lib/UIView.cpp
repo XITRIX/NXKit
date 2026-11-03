@@ -220,6 +220,7 @@ void UIView::updateSafeAreaInsets() {
 
     if (!_parentController.expired()) {
         newSafeArea += _parentController.lock()->additionalSafeAreaInsets();
+        newSafeArea += _parentController.lock()->_containerSafeAreaInsets;
     }
 
     setSafeAreaInsets(newSafeArea);

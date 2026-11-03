@@ -39,6 +39,7 @@ private:
 
     bool initContext();
     bool configureSurface();
+    void destroySwapchain();
 };
 
 }

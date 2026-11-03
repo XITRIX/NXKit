@@ -34,6 +34,7 @@ public:
 class NXTabBarButton: public NXControl {
 public:
     NXTabBarButton();
+    bool canBecomeFocused() override { return isEnabled() && NXControl::canBecomeFocused(); }
 
     void didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationCoordinator* coordinator) override;
     void setSelected(bool selected) override;
@@ -99,8 +100,13 @@ private:
 // Compact shows the list alone; activating an item opens its controller via
 // show(). Returning to regular restores the same selected controller in place.
 // An unspecified size class retains the regular layout.
+// automatic resolves to tabSidebar; explicit tabBar is currently unsupported.
 class NXTabBarController : public UIViewController, public UITabBarControllerInterface {
 public:
+    using Mode = UITabBarControllerMode;
+    [[nodiscard]] Mode mode() const override { return _mode; }
+    void setMode(Mode mode) override;
+
     using ViewControllerSection = std::vector<std::shared_ptr<UIViewController>>;
     using ViewControllerSections = std::vector<ViewControllerSection>;
 
@@ -150,6 +156,7 @@ private:
 
     static void validateViewControllers(const ViewControllerSections& controllers);
     void attachConfiguredChildren();
+    void observeTabBarItems();
     void removeUnconfiguredChildren(
         const std::vector<std::shared_ptr<UIViewController>>& previousViewControllers
     );
@@ -166,6 +173,7 @@ private:
     void returnToTabContainer(const std::shared_ptr<UIViewController>& controller);
     std::shared_ptr<NXNavigationController> enclosingNavigationController();
 
+    Mode _mode = Mode::automatic;
     std::shared_ptr<UIViewController> _embeddedViewController;
     std::shared_ptr<UIViewController> _compactController;
     std::weak_ptr<NXNavigationController> _compactNavigation;

@@ -27,6 +27,7 @@ add_library(UIKitCore
         lib/CABackdropLayer.cpp
         include/CABackdropLayer.h
         include/UIKitCore.h
+        include/tools/DragSmoother.hpp
         include/UINavigationControllerInterface.h
         include/UITabBarControllerInterface.h
         lib/DispatchQueue.cpp
@@ -41,6 +42,13 @@ add_library(UIKitCore
         lib/LayerCornerGeometry.hpp
         include/CALayerCornerCurve.h
         lib/YGLayout.cpp
+        lib/UIBarItem.cpp
+        lib/UITabBarItem.cpp
+        include/UIBarItem.h
+        include/UITabBarItem.h
+        include/UITabBarControllerMode.h
+        lib/BarItemAccess.hpp
+        lib/ViewControllerContainerAccess.hpp
         lib/UIAction.cpp
         lib/UIApplication.cpp
         lib/UIApplicationDelegateImpl.cpp
@@ -113,6 +121,10 @@ if (APPLE)
 elseif (PLATFORM_SWITCH)
     target_sources(UIKitCore PRIVATE
             lib/platforms/switch/SkiaCtx_switch.cpp
+            lib/platforms/switch/SwitchPipelineCache.cpp
+            lib/platforms/switch/SwitchPipelineCache.hpp
+            lib/platforms/switch/SwitchCacheFormat.hpp
+            lib/platforms/switch/SwitchCacheFile.hpp
             lib/platforms/switch/switch_wrapper.c
     )
 endif ()
@@ -120,7 +132,14 @@ endif ()
 option(UIKITCORE_BUILD_TESTS "Build UIKitCore regression tests" OFF)
 if (UIKITCORE_BUILD_TESTS)
     enable_testing()
+    add_executable(NXKitPressLifecycleTests tests/UIApplicationPressLifecycleTests.cpp)
+    target_link_libraries(NXKitPressLifecycleTests PRIVATE UIKitCore)
+    add_test(NAME NXKitPressLifecycleTests COMMAND NXKitPressLifecycleTests)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+    add_executable(NXKitSwitchCacheFormatTests tests/SwitchCacheFormatTests.cpp)
+    add_test(NAME NXKitSwitchCacheFormatTests COMMAND NXKitSwitchCacheFormatTests)
+    add_executable(NXKitSwitchCacheFileTests tests/SwitchCacheFileTests.cpp)
+    add_test(NAME NXKitSwitchCacheFileTests COMMAND NXKitSwitchCacheFileTests)
     add_executable(UIKitCoreModuleBoundaryTests tests/ModuleBoundaryTests.cpp)
     target_link_libraries(UIKitCoreModuleBoundaryTests PRIVATE UIKitCore)
     add_test(NAME UIKitCoreModuleBoundaryTests COMMAND UIKitCoreModuleBoundaryTests)
