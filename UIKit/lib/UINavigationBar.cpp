@@ -66,8 +66,9 @@ UINavigationBar::UINavigationBar(NXRect frame):UIView(frame),_state(std::make_un
     UIGlassContainerEffect effect;effect.setSpacing(12);_state->glass=new_shared<GlassContainerView>(effect);addSubview(_state->glass);
     _state->title=new_shared<UILabel>();_state->title->setFontSize(17);_state->title->setFontWeight(600);
     _state->title->setTextAlignment(NSTextAlignment::center);_state->title->setUserInteractionEnabled(false);
-    _state->titleInk=new_shared<Internal::NavigationInkView>();_state->titleInk->setUserInteractionEnabled(false);addSubview(_state->titleInk);_state->titleInk->addSubview(_state->title);
+    _state->titleInk=new_shared<Internal::NavigationInkView>();_state->titleInk->setUserInteractionEnabled(false);insertSubviewBelow(_state->titleInk,_state->glass);_state->titleInk->addSubview(_state->title);
     _state->backButton=std::make_shared<UIBarButtonItem>();
+    _state->backButton->setIdentifier("UIKit.navigationBar.back");
 }
 UINavigationBar::~UINavigationBar()=default;
 auto UINavigationBar::items() const -> std::vector<std::shared_ptr<UINavigationItem>> {return _state->items;}
@@ -101,9 +102,10 @@ void UINavigationBar::install(std::vector<std::shared_ptr<UINavigationItem>> val
     refresh(animated,direction);
 }
 void UINavigationBar::refresh(bool animated,int direction) {
-    if(!_state||_state->refreshing)return;
+    if(!_state||_state->refreshing||_state->interactiveSource)return;
     _state->refreshing=true;
     struct RefreshGuard {bool& flag;~RefreshGuard(){flag=false;}} guard{_state->refreshing};
+    const auto handoff=_state->interactiveHandoff;_state->interactiveHandoff=-1;
     const auto weak=weak_from_base<UINavigationBar>();const auto top=topItem();
     const auto generation=++_state->generation;const bool animate=animated&&window();
     const bool stackTransition=direction!=0&&top!=_state->renderedItem.lock();_state->renderedItem=top;
@@ -144,7 +146,10 @@ void UINavigationBar::refresh(bool animated,int direction) {
     auto configureSide=[&](Internal::NavigationSide& side,const auto& values,bool rightSide) {
         auto old=side.buttons;side.buttons.clear();auto previous=side.groups;side.groups.clear();side.backgrounds.clear();std::shared_ptr<UIView> fallbackReceiver;
         for(const auto& item:values) {
-            auto found=std::find_if(old.begin(),old.end(),[&](const auto& entry){return entry->item==item||(item->identifier()&&entry->item->identifier()==item->identifier());});
+            // Automatic Back is one persistent semantic item. An application
+            // identifier must never let a custom action adopt its presentation.
+            const bool back=item==_state->backButton;
+            auto found=std::find_if(old.begin(),old.end(),[&](const auto& entry){return entry->back==back&&(entry->item==item||(item->identifier()&&entry->item->identifier()==item->identifier()));});
             std::shared_ptr<Internal::NavigationButton> entry;
             if(found!=old.end()){entry=*found;old.erase(found);}else {
                 entry=std::make_shared<Internal::NavigationButton>();entry->control=new_shared<BarControl>();
@@ -187,7 +192,7 @@ void UINavigationBar::refresh(bool animated,int direction) {
         // as observed when one shared capsule divides into multiple capsules.
         std::vector<size_t> order;for(size_t i=0;i<side.groups.size();++i)order.push_back(i);if(rightSide)std::reverse(order.begin(),order.end());
         for(auto index:order) {
-            auto& group=side.groups[index];int best=-1,score=-1;
+            auto& group=side.groups[index];int best=-1,score=-1,priority=-1;
             for(size_t i=0;i<previous.size();++i)if(previous[i].view&&previous[i].hiddenBackground==group.hiddenBackground) {
                 // A surviving visual-leading member keeps its capsule. If
                 // that member was removed, UIKit falls back to the first item
@@ -198,7 +203,8 @@ void UINavigationBar::refresh(bool animated,int direction) {
                 if(!survives(preferred))for(const auto& entry:previous[i].buttons)if(survives(entry)){preferred=entry;break;}
                 if(survives(preferred)&&std::find(group.buttons.begin(),group.buttons.end(),preferred)==group.buttons.end())continue;
                 int shared=0;for(const auto& a:group.buttons)for(const auto& b:previous[i].buttons)shared+=a==b;
-                if(shared>score||(shared==score&&rightSide)){score=shared;best=int(i);}
+                const int expanded=handoff>=0&&before.at(previous[i].view).frame.width()>previous[i].view->frame().width()+.5f;
+                if(shared>score||(shared==score&&(expanded>priority||(expanded==priority&&rightSide)))){score=shared;priority=expanded;best=int(i);}
             }
             if(best>=0){group.view=previous[best].view;
                 const auto& prior=previous[best];const auto visual=rightSide?prior.buttons.back():prior.buttons.front();
@@ -224,12 +230,12 @@ void UINavigationBar::refresh(bool animated,int direction) {
     configureSide(_state->left,left,false);configureSide(_state->right,right,true);
     if(_state->customTitle!=(top?top->titleView():nullptr)) {
         if(_state->customTitle)_state->customTitle->removeFromSuperview();_state->customTitle=top?top->titleView():nullptr;
-        if(_state->customTitle){if(_state->customTitle.get()==this||isDescendantOf(_state->customTitle))throw std::invalid_argument("Title view forms a cycle");addSubview(_state->customTitle);}
+        if(_state->customTitle){if(_state->customTitle.get()==this||isDescendantOf(_state->customTitle))throw std::invalid_argument("Title view forms a cycle");insertSubviewBelow(_state->customTitle,_state->glass);}
     }
     const auto oldTitle=_state->title;const auto oldTitleInk=_state->titleInk;
     if(oldTitle->text()!=(top?top->title():"")||(animate&&stackTransition)) {
         auto title=new_shared<UILabel>();title->setFontSize(17);title->setFontWeight(600);title->setTextAlignment(NSTextAlignment::center);title->setUserInteractionEnabled(false);
-        title->setText(top?top->title():"");_state->titleInk=new_shared<Internal::NavigationInkView>();_state->titleInk->setUserInteractionEnabled(false);addSubview(_state->titleInk);_state->titleInk->addSubview(title);_state->title=title;retiring.push_back(oldTitleInk);
+        title->setText(top?top->title():"");_state->titleInk=new_shared<Internal::NavigationInkView>();_state->titleInk->setUserInteractionEnabled(false);insertSubviewBelow(_state->titleInk,_state->glass);_state->titleInk->addSubview(title);_state->title=title;retiring.push_back(oldTitleInk);
     }
     _state->title->setHidden(bool(_state->customTitle));
     const bool nextBack=!_state->left.buttons.empty()&&_state->left.buttons.front()->back;
@@ -289,12 +295,12 @@ void UINavigationBar::refresh(bool animated,int direction) {
     if(stackTransition) {
         _state->title->setAlpha(1);_state->title->setTransform(NXAffineTransform::identity);_state->title->setFrame(titleTarget);
         const auto width=bounds().width();
-        const auto incoming=NXAffineTransform::translationBy(direction<0?-width*.3f:width,0);
+        const auto incoming=NXAffineTransform::translationBy(direction<0?-width*.3f*(handoff<0?1:1-handoff):width,0);
         const auto outgoing=NXAffineTransform::translationBy(direction<0?width:-width*.3f,0);
         UIView::performWithoutAnimation([&]{_state->titleInk->setTransform(NXAffineTransform::identity);oldTitleInk->setTransform(outgoing);});
         for(const auto& host:{_state->titleInk,oldTitleInk}) {
             auto slide=Internal::navigationAnimation("transform");slide->duration=Internal::navigationContentDuration;
-            slide->fromValue=NXTransform3DMakeAffineTransform(host==oldTitleInk?NXAffineTransform::identity:incoming);
+            slide->fromValue=NXTransform3DMakeAffineTransform(host==oldTitleInk?(handoff<0?NXAffineTransform::identity:NXAffineTransform::translationBy(width*handoff,0)):incoming);
             slide->toValue=NXTransform3DMakeAffineTransform(host==oldTitleInk?outgoing:NXAffineTransform::identity);
             slide->timingFunction=new_shared<CAMediaTimingFunction>([](double fraction){return fraction>=1?1.:Internal::navigationContentProgress(fraction*Internal::navigationContentDuration);});
             host->layer()->add(slide,"transform");
@@ -305,7 +311,7 @@ void UINavigationBar::refresh(bool animated,int direction) {
         const auto clipped=direction<0?_state->titleInk:oldTitleInk;
         const auto height=bounds().height();clipped->setClipsToBounds(true);
         UIView::performWithoutAnimation([&]{clipped->layer()->setAnchorPoint({0,0});clipped->layer()->setPosition({0,0});clipped->setBounds({0,0,direction<0?width:width*.3f,height});});
-        auto wipe=Internal::navigationAnimation("bounds");wipe->duration=Internal::navigationContentDuration;wipe->fromValue=NXRect{0,0,direction<0?width*.3f:width,height};wipe->toValue=NXRect{0,0,direction<0?width:width*.3f,height};wipe->timingFunction=new_shared<CAMediaTimingFunction>([](double fraction){return fraction>=1?1.:Internal::navigationContentProgress(fraction*Internal::navigationContentDuration);});clipped->layer()->add(wipe,"bounds");
+        auto wipe=Internal::navigationAnimation("bounds");wipe->duration=Internal::navigationContentDuration;wipe->fromValue=NXRect{0,0,direction<0?NXFloat(width*(handoff<0?.3:.3+.7*handoff)):width,height};wipe->toValue=NXRect{0,0,direction<0?width:width*.3f,height};wipe->timingFunction=new_shared<CAMediaTimingFunction>([](double fraction){return fraction>=1?1.:Internal::navigationContentProgress(fraction*Internal::navigationContentDuration);});clipped->layer()->add(wipe,"bounds");
         auto gate=Internal::navigationAnimation("opacity");gate->fromValue=1.f;gate->toValue=1.f;gate->duration=Internal::navigationContentDuration;
         gate->animationGroup=new_shared<UIViewAnimationGroup>(animationOptions,[weak,generation](bool){if(const auto bar=weak.lock();bar&&bar->_state->generation==generation)bar->_state->transitioning=false;});_state->titleInk->layer()->add(gate,"navigationInputGate");
     } else {
@@ -392,29 +398,31 @@ void UINavigationBar::refresh(bool animated,int direction) {
     }
     if(leadingChange&&nextBack) {
         const auto back=_state->left.groups.front().view;const auto rest=targets.at(back).frame;
-        back->layer()->removeAllAnimations();
+        if(handoff<0)back->layer()->removeAllAnimations();
+        else {back->layer()->removeAnimation("transform");back->layer()->removeAnimation("opacity");}
         // Inflating about the leading/top edge preserves UIKit's back anchor.
         auto pulse=Internal::navigationAnimation("transform");pulse->duration=.97;pulse->fromValue=NXTransform3D::identity;
         auto inflated=NXAffineTransform::scale(2);inflated.tX=rest.width()*.5f;inflated.tY=rest.height()*.5f;
         pulse->toValue=NXTransform3DMakeAffineTransform(inflated);pulse->timingFunction=new_shared<CAMediaTimingFunction>([](double f){return Internal::navigationLeadingInflation(f*.97);});back->layer()->add(pulse,"transform");
-        if(leadingAppears) {
+        if(leadingAppears&&handoff<0) {
             auto drift=Internal::navigationAnimation("position");drift->duration=.97;drift->fromValue=NXPoint{rest.midX(),rest.midY()};drift->toValue=NXPoint{rest.midX()+7,rest.midY()};drift->timingFunction=new_shared<CAMediaTimingFunction>([](double f){return Internal::navigationLeadingDisplacement(f*.97)/7;});back->layer()->add(drift,"position");
         }
         const auto backInk=_state->left.buttons.front()->ink;
         auto blur=Internal::navigationAnimation("navigationInkBlur");blur->duration=.55;blur->fromValue=0.f;blur->toValue=8.f;blur->timingFunction=new_shared<CAMediaTimingFunction>([](double f){return Internal::navigationCurve(f*.55,{{0,0},{.1,0},{.15,.25},{.2,1},{.3,1},{.4,.4},{.475,0},{.55,0}});});backInk->layer()->add(blur,"navigationInkBlur");
         if(leadingAppears)for(size_t i=1;i<_state->left.groups.size();++i) {
             const auto& group=_state->left.groups[i];const auto glass=group.view;const auto target=targets.at(glass).frame;
+            const auto revealOffset=(rootLeadingChange||handoff>=0)?.2:0.;
             glass->layer()->removeAllAnimations();
-            auto travel=Internal::navigationAnimation("position");travel->duration=.97;travel->fromValue=NXPoint{rest.midX(),target.midY()};travel->toValue=NXPoint{target.midX(),target.midY()};travel->timingFunction=new_shared<CAMediaTimingFunction>([rootLeadingChange](double f){return Internal::navigationLeadingTravel(f*.97+(rootLeadingChange?.2:0));});glass->layer()->add(travel,"position");
+            auto travel=Internal::navigationAnimation("position");travel->duration=.97;travel->fromValue=NXPoint{handoff<0?rest.midX():before.at(back).frame.midX(),target.midY()};travel->toValue=NXPoint{target.midX(),target.midY()};travel->timingFunction=new_shared<CAMediaTimingFunction>([revealOffset](double f){return Internal::navigationLeadingTravel(f*.97+revealOffset);});glass->layer()->add(travel,"position");
             glass->setAlpha(1);
-            auto shape=Internal::navigationAnimation("transform");shape->duration=.97;shape->fromValue=NXTransform3DMakeAffineTransform(NXAffineTransform::scale(collapsedLeadingScale));shape->toValue=NXTransform3D::identity;shape->timingFunction=new_shared<CAMediaTimingFunction>([rootLeadingChange](double f){return std::max(0.,Internal::navigationLeadingReveal(f*.97+(rootLeadingChange?.2:0)));});glass->layer()->add(shape,"transform");
+            auto shape=Internal::navigationAnimation("transform");shape->duration=.97;shape->fromValue=NXTransform3DMakeAffineTransform(NXAffineTransform::scale(collapsedLeadingScale));shape->toValue=NXTransform3D::identity;shape->timingFunction=new_shared<CAMediaTimingFunction>([revealOffset](double f){return std::max(0.,Internal::navigationLeadingReveal(f*.97+revealOffset));});glass->layer()->add(shape,"transform");
             for(const auto& button:group.buttons) {
                 button->ink->layer()->removeAllAnimations();button->ink->setAlpha(1);
-                Internal::navigationInkBlur(button->ink,8,0,.28,rootLeadingChange?.07:.27);
+                Internal::navigationInkBlur(button->ink,8,0,.28,revealOffset>0?.07:.27);
                 // Ink must not accumulate on Back before its own surface
                 // emerges. Its reveal is independent of material opacity.
                 auto reveal=Internal::navigationAnimation("opacity");reveal->duration=.55;reveal->fromValue=0.f;reveal->toValue=1.f;
-                reveal->timingFunction=new_shared<CAMediaTimingFunction>([rootLeadingChange](double f){return std::clamp(Internal::navigationLeadingReveal(f*.55+(rootLeadingChange?.2:0)),0.,1.);});
+                reveal->timingFunction=new_shared<CAMediaTimingFunction>([revealOffset](double f){return std::clamp(Internal::navigationLeadingReveal(f*.55+revealOffset),0.,1.);});
                 button->ink->layer()->add(reveal,"opacity");
             }
         }
@@ -433,7 +441,7 @@ void UINavigationBar::arrange() {
             const auto padding=4.f;NXFloat width=2*padding;
             for(const auto& entry:group.buttons) {
                 const auto item=entry->item;const auto image=entry->image->image();
-                entry->width=item->width()>0?item->width():(entry->custom?std::max(36.f,entry->custom->sizeThatFits({1000,44}).width):(entry->back?36.f:(image?(group.buttons.size()==1?36.f:std::max(36.f,image->size().width+14)):std::max(36.f,std::ceil(entry->label->sizeThatFits({1000,44}).width*3)/3+24))));
+                entry->width=item->width()>0?item->width():(entry->custom?std::max(36.f,entry->custom->sizeThatFits({1000,44}).width):(entry->back?36.f:(image?(group.buttons.size()==1?36.f:std::max(36.f,image->size().width+12)):std::max(36.f,std::ceil(entry->label->sizeThatFits({1000,44}).width*3)/3+24))));
                 width+=entry->width;
             }
             width+=std::max(0,int(group.buttons.size())-1)*16;
@@ -477,3 +485,100 @@ void UINavigationBar::traitCollectionDidChange(std::shared_ptr<UITraitCollection
 NXSize UINavigationBar::sizeThatFits(NXSize size){return {std::max(0.0f,size.width),traitCollection()&&traitCollection()->verticalSizeClass()==UIUserInterfaceSizeClass::compact?44.0f:54.0f};}
 bool UINavigationBar::point(NXPoint p,UIEvent*) {return bounds().contains(p)&&bool(topItem());}
 std::vector<std::shared_ptr<UIFocusEnvironment>> UINavigationBar::preferredFocusEnvironments(){std::vector<std::shared_ptr<UIFocusEnvironment>> views;for(const auto* side:{&_state->left,&_state->right})for(const auto& entry:side->buttons)if(entry->control->canBecomeFocused())views.push_back(entry->control);return views;}
+
+namespace {
+// Layout-only copies never reparent application-owned custom views into the
+// measuring bar. They preserve UIKit grouping metadata and intrinsic sizes.
+std::shared_ptr<UINavigationItem> previewItem(const std::shared_ptr<UINavigationItem>& source,std::map<const UIBarButtonItem*,std::shared_ptr<UIBarButtonItem>>& originals) {
+    auto result=std::make_shared<UINavigationItem>(source->title());
+    result->setHidesBackButton(source->hidesBackButton());result->setLeftItemsSupplementBackButton(source->leftItemsSupplementBackButton());
+    auto copy=[&](const auto& items) {
+        std::vector<std::shared_ptr<UIBarButtonItem>> result;
+        for(const auto& item:items) {
+            auto clone=Internal::BarItemAccess::systemItem(*item)?std::make_shared<UIBarButtonItem>(*Internal::BarItemAccess::systemItem(*item)):std::make_shared<UIBarButtonItem>();
+            clone->setTitle(item->title());clone->setImage(item->image());clone->setIdentifier(item->identifier());clone->setStyle(item->style());clone->setWidth(item->width());clone->setSharesBackground(item->sharesBackground());clone->setHidesSharedBackground(item->hidesSharedBackground());
+            if(const auto custom=item->customView())clone->setCustomView(new_shared<UIView>(NXRect{{},custom->sizeThatFits({1000,44})}));
+            originals.emplace(clone.get(),item);
+            result.push_back(clone);
+        }
+        return result;
+    };
+    result->setLeftBarButtonItems(copy(source->leftBarButtonItems()));result->setRightBarButtonItems(copy(source->rightBarButtonItems()));
+    if(const auto custom=source->titleView())result->setTitleView(new_shared<UIView>(NXRect{{},custom->sizeThatFits({1000,44})}));
+    return result;
+}
+bool sameInteractiveButton(const std::shared_ptr<Internal::NavigationButton>& a,const std::shared_ptr<Internal::NavigationButton>& b) {
+    if(a->back||b->back)return a->back&&b->back;
+    return a->item==b->item||(a->item->identifier()&&a->item->identifier()==b->item->identifier());
+}
+void interactiveProperty(const std::shared_ptr<UIView>& view,const char* key,AnimatableProperty from,AnimatableProperty to,double span) {
+    auto animation=Internal::navigationAnimation(key);animation->duration=span;animation->fromValue=std::move(from);animation->toValue=std::move(to);animation->timingFunction=new_shared<CAMediaTimingFunction>([](double f){return f;});view->layer()->add(animation,key);
+}
+}
+void Internal::NavigationBarAccess::beginInteractivePop(UINavigationBar& bar,std::vector<std::shared_ptr<UINavigationItem>> items,double span) {
+    auto& s=*bar._state;
+    // Finish the previous operation's optical tail before capturing this one.
+    // Its source metadata is unchanged; no target styling is installed yet.
+    bar.refresh(false);
+    auto measure=new_shared<UINavigationBar>(bar.bounds());std::map<const UIBarButtonItem*,std::shared_ptr<UIBarButtonItem>> originals;
+    std::vector<std::shared_ptr<UINavigationItem>> copies;for(const auto& item:items)copies.push_back(previewItem(item,originals));measure->setItems(std::move(copies));measure->layoutIfNeeded();
+    for(auto* side:{&measure->_state->left,&measure->_state->right})for(const auto& button:side->buttons)if(const auto found=originals.find(button->item.get());found!=originals.end())button->item=found->second;
+    const auto& destination=*measure->_state;
+    for(const auto& pair:{std::pair{&s.left,&destination.left},std::pair{&s.right,&destination.right}}) {
+        const auto matches=[&](const auto& a,const auto& b) {
+            if(sameInteractiveButton(a,b))return true;
+            if(a->back||b->back||a->spacer||b->spacer||a->item->identifier()||b->item->identifier())return false;
+            const auto ordinal=[](const auto* side,const auto& button){size_t index=0;for(const auto& entry:side->buttons){if(entry==button)return index;if(!entry->back&&!entry->spacer)++index;}return index;};
+            return ordinal(pair.first,a)==ordinal(pair.second,b);
+        };
+        std::unordered_set<const UIView*> claimed;
+        std::vector<const NavigationSide::Group*> ordered;for(const auto& group:pair.first->groups)ordered.push_back(&group);
+        if(pair.first==&s.right)std::reverse(ordered.begin(),ordered.end());
+        std::stable_sort(ordered.begin(),ordered.end(),[](const auto* a,const auto* b){const auto priority=[](const auto* group){return group->tint.has_value()||!group->buttons.front()->item->sharesBackground();};return priority(a)>priority(b);});
+        for(const auto* current:ordered) {
+            const auto& group=*current;
+            const auto before=group.view->frame();NXRect extent;bool found=false;
+            for(const auto& target:pair.second->groups) {
+                if(claimed.contains(target.view.get()))continue;
+                bool shared=false;for(const auto& a:group.buttons)for(const auto& b:target.buttons)shared|=matches(a,b);
+                // New supplemental leading material starts inside Back and
+                // emerges only after commitment. During tracking Back widens.
+                if(pair.first==&s.left&&group.buttons.front()->back) {
+                    bool existing=false;for(const auto& old:pair.first->groups)for(const auto& a:old.buttons)for(const auto& b:target.buttons)existing|=matches(a,b);
+                    shared|=!existing;
+                }
+                if(!shared)continue;claimed.insert(target.view.get());
+                const auto frame=target.view->frame();if(!found){extent=frame;found=true;}else {const auto left=std::min(extent.minX(),frame.minX()),right=std::max(extent.maxX(),frame.maxX());extent={left,0,right-left,44};}
+            }
+            if(!found)continue;
+            const NXRect preview{(before.minX()+extent.minX())*.5f,0,(before.width()+extent.width())*.5f,44};
+            interactiveProperty(group.view,"position",NXPoint{before.midX(),before.midY()},NXPoint{preview.midX(),preview.midY()},span);
+            interactiveProperty(group.view,"bounds",NXRect{{},before.size},NXRect{{},preview.size},span);
+            for(const auto& button:group.buttons) {
+                const auto old=button->control->frame();NXFloat targetX=before.minX()+old.midX();
+                for(const auto& target:pair.second->groups)for(const auto& entry:target.buttons)if(matches(button,entry))targetX=target.view->frame().minX()+entry->control->frame().midX();
+                const auto local=old.midX()+(targetX-before.minX()-old.midX())*.5f-(preview.minX()-before.minX());
+                interactiveProperty(button->control,"position",NXPoint{old.midX(),old.midY()},NXPoint{local,old.midY()},span);
+            }
+        }
+    }
+    s.interactiveSource=s.items;s.items=std::move(items);++s.revision;s.transitioning=true;
+    auto incoming=new_shared<Internal::NavigationInkView>();incoming->setUserInteractionEnabled(false);incoming->setFrame(bar.bounds());incoming->setClipsToBounds(true);
+    auto title=new_shared<UILabel>();title->setText(bar.topItem()?bar.topItem()->title():"");title->setFontSize(17);title->setFontWeight(600);title->setTextAlignment(NSTextAlignment::center);title->setFrame(destination.title->frame());incoming->addSubview(title);
+    const auto targetCustom=bar.topItem()?bar.topItem()->titleView():nullptr;
+    if(targetCustom){title->setHidden(true);if(targetCustom!=s.customTitle){incoming->addSubview(targetCustom);targetCustom->setFrame(destination.customTitle->frame());}}
+    bar.insertSubviewBelow(incoming,s.titleInk);s.interactiveTitle=incoming;
+    const auto width=bar.bounds().width(),height=bar.bounds().height();
+    UIView::performWithoutAnimation([&]{incoming->layer()->setAnchorPoint({0,0});incoming->layer()->setPosition({0,0});});
+    interactiveProperty(incoming,"transform",NXTransform3DMakeAffineTransform(NXAffineTransform::translationBy(-width*.3f,0)),NXTransform3D::identity,span);
+    interactiveProperty(incoming,"bounds",NXRect{0,0,width*.3f,height},NXRect{0,0,width,height},span);
+    interactiveProperty(s.titleInk,"transform",NXTransform3D::identity,NXTransform3DMakeAffineTransform(NXAffineTransform::translationBy(width,0)),span);
+    if(s.customTitle&&s.customTitle!=targetCustom){const auto base=s.customTitle->transform();auto end=base;end.tX+=width;interactiveProperty(s.customTitle,"transform",NXTransform3DMakeAffineTransform(base),NXTransform3DMakeAffineTransform(end),span);}
+}
+void Internal::NavigationBarAccess::endInteractivePop(UINavigationBar& bar,bool commit,double progress) {
+    auto& s=*bar._state;if(!s.interactiveSource)return;
+    const auto source=std::move(*s.interactiveSource);s.interactiveSource.reset();
+    if(s.interactiveTitle){s.interactiveTitle->removeFromSuperview();s.interactiveTitle.reset();}
+    if(commit){s.interactiveHandoff=progress;bar.refresh(true,-1);}
+    else {s.items=source;++s.revision;bar.refresh(false);}
+}

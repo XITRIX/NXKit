@@ -13,6 +13,7 @@
 
 #include <tools/SharedBase.hpp>
 #include <optional>
+#include <array>
 #include <vector>
 #include <map>
 
@@ -160,6 +161,10 @@ public:
     void skiaRender(SkCanvas* canvas);
 protected:
     virtual void renderSublayers(SkCanvas* canvas);
+    // Uniform material shaders use the configured radius; uneven material
+    // outlines are clipped by the owning layer's exact per-corner path.
+    NXFloat renderingCornerRadius() const;
+    bool hasCornerConfiguration() const { return _configuredCornerRadii.has_value(); }
 
     // Additional visual-only motion, composed with the application's transform.
     virtual NXAffineTransform renderingTransform() const { return NXAffineTransform::identity; }
@@ -169,6 +174,7 @@ protected:
 
 private:
     friend class UIView;
+    friend class Internal::LayerAnimationTimeline;
     friend class CAGlassContainerLayer;
     friend class Internal::LensLayer;
     friend class LensView;
@@ -201,6 +207,8 @@ private:
     NXFloat _zPosition = 0.0;
     NXRect _bounds;
     NXFloat _cornerRadius = 0;
+    std::optional<std::array<NXFloat,4>> _configuredCornerRadii;
+    void setConfiguredCornerRadii(const std::array<NXFloat,4>& radii);
     CALayerCornerCurve _cornerCurve = CALayerCornerCurve::continuous;
     std::optional<UIColor> _backgroundColor;
     NXFloat _borderWidth = 0;

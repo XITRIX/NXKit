@@ -1,6 +1,7 @@
 #include "IOSWindowGeometry.hpp"
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
+#import <objc/message.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -83,6 +84,7 @@ namespace NXKit::Internal {
 struct IOSWindowGeometry::Impl {
     __weak UIWindow* window;
     NXWindowGeometryObserver* observer;
+    UIView* cornerProbe;
     std::shared_ptr<GeometryState> state = std::make_shared<GeometryState>();
 };
 
@@ -102,9 +104,20 @@ IOSWindowGeometry::IOSWindowGeometry(void* nativeWindow): _impl(std::make_unique
     [root.view addSubview:observer.view];
     [observer didMoveToParentViewController:root];
     _impl->observer = observer;
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 260000
+    if (@available(iOS 26.0, *)) {
+        auto probe = [[UIView alloc] initWithFrame:root.view.bounds];
+        probe.backgroundColor = UIColor.clearColor;
+        probe.userInteractionEnabled = NO;
+        probe.cornerConfiguration = [UICornerConfiguration configurationWithRadius:UICornerRadius.containerConcentricRadius];
+        [root.view addSubview:probe];
+        _impl->cornerProbe = probe;
+    }
+#endif
 }
 
 IOSWindowGeometry::~IOSWindowGeometry() {
+    [_impl->cornerProbe removeFromSuperview];
     auto observer = _impl->observer;
     if (!observer) return;
     observer->state.reset();
@@ -139,6 +152,28 @@ IOSWindowFrame IOSWindowGeometry::sample() {
     frame.bottom = NXFloat(insets.bottom); frame.right = NXFloat(insets.right);
     const auto scale = window.screen.nativeScale;
     frame.scale = std::isfinite(scale) && scale > 0 ? NXFloat(scale) : 1;
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 260000
+    if (@available(iOS 26.0, *)) {
+        auto probe = _impl->cornerProbe;
+        [UIView performWithoutAnimation:^{ probe.frame = window.rootViewController.view.bounds; }];
+        [probe layoutIfNeeded];
+        const UIRectCorner corners[] = {UIRectCornerTopLeft, UIRectCornerTopRight, UIRectCornerBottomLeft, UIRectCornerBottomRight};
+        for (size_t i=0;i<4;++i) {
+            const auto radius = [probe effectiveRadiusForCorner:corners[i]];
+            frame.cornerRadii[i] = std::isfinite(radius) ? NXFloat(std::max(0.0,radius)) : 0;
+        }
+    } else
+#endif
+    {
+        // Explicit pre-iOS-26 compatibility path. Query this window's screen,
+        // never UIScreen.mainScreen (external displays may be square).
+        const auto selector = NSSelectorFromString(@"_displayCornerRadius");
+        auto screen = window.screen;
+        if ([screen respondsToSelector:selector]) {
+            const auto radius = reinterpret_cast<CGFloat(*)(id,SEL)>(objc_msgSend)(screen,selector);
+            if (std::isfinite(radius) && radius>0) frame.cornerRadii.fill(NXFloat(radius));
+        }
+    }
     frame.transitioning = state.transitioning;
     return frame;
 }

@@ -153,6 +153,52 @@ SkPath layerCornerPath(NXSize size,NXFloat radius,CALayerCornerCurve curve) {
     cache.push_front({size,radius,curve,buildCornerPath(size,radius,curve)});
     if(cache.size()>128)cache.pop_back();return cache.front().path;
 }
+SkPath layerCornerPath(NXSize size, const std::array<NXFloat,4>& radii, CALayerCornerCurve curve) {
+    if (!valid(size)) return {};
+    if (radii[0]==radii[1] && radii[0]==radii[2] && radii[0]==radii[3])
+        return layerCornerPath(size,radii[0],curve);
+    struct Entry {NXSize size;std::array<NXFloat,4> radii;CALayerCornerCurve curve;SkPath path;};
+    thread_local std::list<Entry> cache;
+    for(auto it=cache.begin();it!=cache.end();++it)if(it->size==size&&it->radii==radii&&it->curve==curve) {
+        cache.splice(cache.begin(),cache,it);return cache.front().path;
+    }
+    SkPathBuilder path;
+    const int order[] = {1,3,2,0};
+    path.moveTo(size.width*.5f,0);
+    for (int side=0;side<4;++side) {
+        const auto radius=clampedRadius(size,radii[order[side]]);
+        const bool reverse=side==1||side==3;
+        const float sx=side<2?1:-1,sy=side==0||side==3?-1:1;
+        const auto map=[&](SkPoint p) {return SkPoint::Make(size.width*.5f+sx*p.x(),size.height*.5f+sy*p.y());};
+        if (radius<.0001f) {
+            path.lineTo(map({size.width*.5f,size.height*.5f}));
+        } else if (curve==CALayerCornerCurve::circular) {
+            constexpr float k=.55228475f;
+            const float hx=size.width*.5f,hy=size.height*.5f;
+            const Cubic b{{hx-radius,hy},{hx-radius+k*radius,hy},{hx,hy-radius+k*radius},{hx,hy-radius}};
+            path.lineTo(map(reverse?b.q:b.p));
+            path.cubicTo(map(reverse?b.c2:b.c1),map(reverse?b.c1:b.c2),map(reverse?b.p:b.q));
+        } else {
+            const auto data=layerCornerShaderData(size,radius);
+            const auto top=octantCubics(unpack(data[0],data[1]));
+            const auto right=octantCubics(unpack(data[2],data[3]));
+            const auto c=(size.width-size.height)*.5f;
+            const auto mt=[&](SkPoint p){return SkPoint::Make(p.x(),p.y()-c);};
+            const auto mr=[&](SkPoint p){return SkPoint::Make(p.y()+c,p.x());};
+            std::vector<Cubic> quadrant;
+            for(const auto& b:top)quadrant.push_back({mt(b.p),mt(b.c1),mt(b.c2),mt(b.q)});
+            for(auto it=right.rbegin();it!=right.rend();++it)quadrant.push_back({mr(it->q),mr(it->c2),mr(it->c1),mr(it->p)});
+            const auto add=[&](const Cubic& b){path.cubicTo(map(reverse?b.c2:b.c1),map(reverse?b.c1:b.c2),map(reverse?b.p:b.q));};
+            if(reverse)for(auto it=quadrant.rbegin();it!=quadrant.rend();++it)add(*it);
+            else for(const auto& b:quadrant)add(b);
+        }
+        path.lineTo(side==0?SkPoint::Make(size.width,size.height*.5f):side==1?SkPoint::Make(size.width*.5f,size.height):side==2?SkPoint::Make(0,size.height*.5f):SkPoint::Make(size.width*.5f,0));
+    }
+    path.close();
+    cache.push_front({size,radii,curve,path.detach()});
+    if(cache.size()>128)cache.pop_back();
+    return cache.front().path;
+}
 NXFloat layerCornerDistance(NXPoint p,NXSize size,NXFloat radius,CALayerCornerCurve curve) {
     if(!valid(size)||!std::isfinite(p.x)||!std::isfinite(p.y))return std::numeric_limits<NXFloat>::infinity();
     radius=clampedRadius(size,radius);

@@ -31,7 +31,7 @@ void CABlurLayer::draw(SkCanvas* context) {
     context->save();
 
     SkRect rect = SkRect::MakeXYWH(0, 0, bounds().width(), bounds().height());
-    if (!masksToBounds()) context->clipPath(Internal::layerCornerPath(bounds().size, cornerRadius(), cornerCurve()), true);
+    if (!masksToBounds() && !hasCornerConfiguration()) context->clipPath(Internal::layerCornerPath(bounds().size, cornerRadius(), cornerCurve()), true);
 //    // Make a separate layer using the blur filter, clipped to the middle rectangle's bounds
     SkCanvas::SaveLayerRec slr(&rect, &blurPaint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
     context->saveLayer(slr);

@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <cstdint>
 #include <tools/SharedBase.hpp>
 
 namespace NXKit {
@@ -26,6 +27,8 @@ class UIEvent;
 class UIGestureRecognizer;
 class UIGestureRecognizerDelegate {
 public:
+    virtual ~UIGestureRecognizerDelegate() = default;
+    virtual bool gestureRecognizerShouldBegin(std::shared_ptr<UIGestureRecognizer>) { return true; }
     virtual bool gestureRecognizerShouldRecognizeSimultaneouslyWith(std::shared_ptr<UIGestureRecognizer> gestureRecognizer, std::shared_ptr<UIGestureRecognizer> otherGestureRecognizer) { return false; }
 };
 
@@ -70,6 +73,10 @@ public:
 
 protected:
     virtual void reset();
+    // Framework recognizers retain their action when applications observe the
+    // public callback. Ordinary recognizers only deliver onStateChanged.
+    virtual void didChangeState() {}
+    void notifyStateChanged();
 
     UIGestureRecognizerState _state = UIGestureRecognizerState::possible;
     
@@ -77,6 +84,7 @@ private:
     bool _isEnabled = true;
     bool _cancelsTouchesInView = true;
     bool _didResetCurrentAttempt = false;
+    std::uint64_t _resetGeneration = 0;
     std::weak_ptr<UIView> _view;
     std::vector<std::shared_ptr<UITouch>> _allTouches;
 

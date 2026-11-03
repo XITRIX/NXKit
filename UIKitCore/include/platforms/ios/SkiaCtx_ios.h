@@ -24,6 +24,7 @@ public:
     void swapBuffers() override;
 
     UIEdgeInsets deviceSafeAreaInsets() override;
+    std::array<NXFloat,4> windowCornerRadii() override;
 
     NXKit::UIUserInterfaceStyle getThemeMode() override;
     std::pair<NXKit::UIUserInterfaceSizeClass, NXKit::UIUserInterfaceSizeClass> getSizeClasses() override;

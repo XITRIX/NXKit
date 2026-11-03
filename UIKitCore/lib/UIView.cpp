@@ -9,6 +9,7 @@
 #include <tools/IBTools.h>
 
 #include <utility>
+#include <cmath>
 
 using namespace NXKit;
 
@@ -50,6 +51,14 @@ void UIView::applyXMLAttributes(tinyxml2::XMLElement* element, std::map<std::str
 }
 
 bool UIView::applyXMLAttribute(const std::string& name, const std::string& value) {
+    if (name == "cornerConfiguration") {
+        if (value == "containerConcentric") setCornerConfiguration(UICornerConfiguration::corners(UICornerRadius::containerConcentric()));
+        else if (value == "capsule") setCornerConfiguration(UICornerConfiguration::capsule());
+        else if (const auto radius=valueToFloat(value); radius && std::isfinite(*radius) && *radius>=0)
+            setCornerConfiguration(UICornerConfiguration::corners(UICornerRadius::fixed(*radius)));
+        else return false;
+        return true;
+    }
     if (name == "cornerCurve") {
         if (value == "continuous") _layer->setCornerCurve(CALayerCornerCurve::continuous);
         else if (value == "circular") _layer->setCornerCurve(CALayerCornerCurve::circular);
@@ -118,6 +127,7 @@ void UIView::setFrame(NXRect frame) {
         updateSafeAreaInsetsInChilds();
     }
     _layer->setFrame(frame);
+    updateCornerConfigurationTree();
     setNeedsUpdateSafeAreaInsets();
 }
 
@@ -129,6 +139,7 @@ void UIView::setBounds(NXRect bounds) {
         updateSafeAreaInsetsInChilds();
     }
     _layer->setBounds(bounds);
+    updateCornerConfigurationTree();
 }
 
 void UIView::setHidden(bool hidden) {
@@ -299,6 +310,7 @@ std::shared_ptr<UIWindow> UIView::window() {
 void UIView::setSuperview(const std::shared_ptr<UIView>& superview) {
     const auto previousTraitCollection = _traitCollection;
     _superview = superview;
+    updateCornerConfigurationTree();
 
     if (superview) {
         _traitCollection = superview->traitsForSubviews();
@@ -876,6 +888,7 @@ void UIView::layoutTreeIfNeeded(bool includeHidden, bool resolveRoot) {
             return;
         }
     }
+    updateCornerConfigurationTree();
     _isLayingOut = true;
     const auto previousTraits = UITraitCollection::current();
     const auto previousTint = UIColor::_currentTint;

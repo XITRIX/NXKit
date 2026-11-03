@@ -8,6 +8,7 @@
 #include <CATransaction.h>
 #include <tools/Tools.hpp>
 #include <utility>
+#include <algorithm>
 
 #include "include/core/SkRRect.h"
 #include "LayerCornerGeometry.hpp"
@@ -59,6 +60,7 @@ CALayer::CALayer(CALayer* layer) {
     _backgroundColor = layer->_backgroundColor;
     _isHidden = layer->_isHidden;
     _cornerRadius = layer->_cornerRadius;
+    _configuredCornerRadii = layer->_configuredCornerRadii;
     _cornerCurve = layer->_cornerCurve;
     _borderWidth = layer->_borderWidth;
     _borderColor = layer->_borderColor;
@@ -163,6 +165,23 @@ void CALayer::setZPosition(NXKit::NXFloat zPosition) {
     _zPosition = zPosition;
 }
 
+namespace {
+constexpr std::array<const char*,4> configuredCornerKeys = {
+    "configuredCornerRadius.topLeft", "configuredCornerRadius.topRight",
+    "configuredCornerRadius.bottomLeft", "configuredCornerRadius.bottomRight"
+};
+}
+void CALayer::setConfiguredCornerRadii(const std::array<NXFloat,4>& radii) {
+    const auto old = _configuredCornerRadii.value_or(std::array<NXFloat,4>{_cornerRadius,_cornerRadius,_cornerRadius,_cornerRadius});
+    for (size_t i=0;i<4;++i) if (old[i] != radii[i]) onWillSet(configuredCornerKeys[i]);
+    _configuredCornerRadii = radii;
+    if (_presentation) {
+        if (!_presentation->_configuredCornerRadii) _presentation->_configuredCornerRadii = old;
+        for (size_t i=0;i<4;++i) if (!animations.contains(configuredCornerKeys[i]))
+            (*_presentation->_configuredCornerRadii)[i] = radii[i];
+    }
+    if (old != radii) setNeedsDisplay();
+}
 void CALayer::setCornerRadius(NXFloat cornerRadius) {
     if (_cornerRadius == cornerRadius) return;
     onWillSet("cornerRadius");
@@ -279,6 +298,10 @@ void CALayer::removeFromSuperlayer() {
     super->setLayerTreeDirtyIfNeeded();
 }
 
+NXFloat CALayer::renderingCornerRadius() const {
+    if (!_configuredCornerRadii) return _cornerRadius;
+    return *std::min_element(_configuredCornerRadii->begin(),_configuredCornerRadii->end());
+}
 void CALayer::draw(SkCanvas* context) {}
 
 void CALayer::skiaRender(SkCanvas* canvas) {
@@ -331,11 +354,12 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         canvas->restore();
         return;
     }
-    const bool needsCornerShape = _masksToBounds || _backgroundColor.has_value()
+    const bool needsCornerShape = _configuredCornerRadii.has_value() || _masksToBounds || _backgroundColor.has_value()
         || (_shadowColor && _shadowColor->a() > 0 && _shadowOpacity > 0)
         || (_borderColor && _borderWidth > 0);
     const auto cornerShape = needsCornerShape
-        ? Internal::layerCornerPath(_bounds.size, _cornerRadius, _cornerCurve) : SkPath();
+        ? (_configuredCornerRadii ? Internal::layerCornerPath(_bounds.size, *_configuredCornerRadii, _cornerCurve)
+                                  : Internal::layerCornerPath(_bounds.size, _cornerRadius, _cornerCurve)) : SkPath();
     if (_mask) {
         SkCanvas::SaveLayerRec maskedContent(
             &localBounds,
@@ -396,6 +420,11 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         else canvas->drawPath(cornerShape, paint);
     }
 
+    // A corner configuration rounds the layer's own output even when its
+    // descendants may overflow. clipsToBounds controls descendants separately.
+    const bool clipsOwnOutput = _configuredCornerRadii.has_value() && !_masksToBounds;
+    if (clipsOwnOutput) { canvas->save(); canvas->clipPath(cornerShape,true); }
+
     // Contents
     if (_contents && _bounds.size.valid() && _bounds.size != NXSize()) {
         auto contentsGravity = ContentsGravityTransformation(this);
@@ -427,6 +456,7 @@ void CALayer::skiaRender(SkCanvas* canvas) {
     }
 
     draw(canvas);
+    if (clipsOwnOutput) canvas->restore();
 
     renderSublayers(canvas);
 
@@ -659,6 +689,8 @@ std::optional<AnimatableProperty> CALayer::value(std::string forKeyPath) {
     if (forKeyPath == "contentsScale") return _contentsScale;
     if (forKeyPath == "scaleModifier") return _scaleModifier;
     if (forKeyPath == "cornerRadius") return _cornerRadius;
+    for (size_t i=0;i<4;++i) if (forKeyPath == configuredCornerKeys[i])
+        return _configuredCornerRadii ? (*_configuredCornerRadii)[i] : _cornerRadius;
     return std::nullopt;
 }
 
@@ -679,7 +711,7 @@ void CALayer::animateAt(Timer currentTime) {
         // starting value (a pulse). Completion is a time boundary, not a value.
         const auto elapsed = currentTime - animation.second->creationTime;
         const auto end = (animation.second->delay + std::max(0.0, animation.second->duration)) * 1000;
-        if (elapsed >= end && animation.second->isRemovedOnCompletion) {
+        if (!animation.second->_interactiveElapsed && elapsed >= end && animation.second->isRemovedOnCompletion) {
             removeAnimation(animation.first);
             if (animation.second->animationGroup)
                 animation.second->animationGroup->animationDidStop(true);
@@ -822,6 +854,16 @@ void CALayer::update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABa
         if (!end.has_value()) end = this->_opacity;
 
         presentation->setOpacity(start.value() + (end.value() - start.value()) * progress);
+    }
+    for (size_t i=0;i<4;++i) if (keyPath == configuredCornerKeys[i]) {
+        const auto start = any_optional_cast<float>(fromValue);
+        if (!start) return;
+        const auto end = any_optional_cast<float>(animation->toValue).value_or(
+            _configuredCornerRadii ? (*_configuredCornerRadii)[i] : _cornerRadius);
+        if (!presentation->_configuredCornerRadii)
+            presentation->_configuredCornerRadii = std::array<NXFloat,4>{_cornerRadius,_cornerRadius,_cornerRadius,_cornerRadius};
+        (*presentation->_configuredCornerRadii)[i] = std::max(0.f,*start + (end-*start)*progress);
+        return;
     }
     if (keyPath == "cornerRadius") {
         auto start = any_optional_cast<float>(fromValue);

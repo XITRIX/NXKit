@@ -89,7 +89,7 @@ void UIPanGestureRecognizer::touchesMoved(std::vector<std::shared_ptr<UITouch>> 
         if(_minimumTouches==1)_translation={};
         setState(UIGestureRecognizerState::began);
     } else if(state()==UIGestureRecognizerState::began)setState(UIGestureRecognizerState::changed);
-    else if(state()==UIGestureRecognizerState::changed)onStateChanged(shared_from_this());
+    else if(state()==UIGestureRecognizerState::changed)notifyStateChanged();
 }
 void UIPanGestureRecognizer::touchesEnded(std::vector<std::shared_ptr<UITouch>> changed,std::shared_ptr<UIEvent> event) {
     UIGestureRecognizer::touchesEnded(changed,event);if(changed.empty())return;

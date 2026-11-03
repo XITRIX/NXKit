@@ -288,3 +288,9 @@ std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx() {
 sk_sp<SkTypeface> SkiaCtx_ios::getDefaultTypeface(const SkFontStyle& style, NXFloat pointSize) const {
     return Internal::appleSystemTypeface(style, pointSize);
 }
+
+std::array<NXFloat,4> SkiaCtx_ios::windowCornerRadii() {
+    auto radii = _frameGeometry ? _frameGeometry->cornerRadii : std::array<NXFloat,4>{};
+    for (auto& radius : radii) radius *= _extraScaleFactor;
+    return radii;
+}

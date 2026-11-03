@@ -58,6 +58,7 @@ public:
 #endif
     NXKit::NXSize getSize()override{return size;}
     float getScaleFactor()override{return density;}
+    std::array<NXFloat,4> windowCornerRadii()override{return {62,54,46,38};}
     UIEdgeInsets deviceSafeAreaInsets()override{return {62,0,34,0};}
     UIUserInterfaceStyle getThemeMode()override{return dark?UIUserInterfaceStyle::dark:UIUserInterfaceStyle::light;}
     sk_sp<SkSurface> getBackbufferSurface()override{return nullptr;}
@@ -412,6 +413,54 @@ void navigationInk(const std::shared_ptr<UIWindow>& window,const std::shared_ptr
     }
     window->setRootViewController(nullptr);ctx->dark=originalDark;ctx->density=originalDensity;frame();settle();
 }
+void stableBack(const std::shared_ptr<UIWindow>& window,const std::shared_ptr<Context>& ctx) {
+    const auto originalDark=ctx->dark;const auto originalDensity=ctx->density;const auto originalSize=ctx->size;
+    for(const NXKit::NXSize size:{NXKit::NXSize{402,874},NXKit::NXSize{844,390}})for(float density:{1.f,2.f,3.f})for(bool dark:{false,true})for(bool supplemented:{false,true}) {
+        ctx->size=size;ctx->density=density;ctx->dark=dark;
+        auto root=new_shared<Screen>("Root"),source=new_shared<Screen>("Source");
+        auto configureLeading=[&](const auto& screen){if(supplemented){auto star=std::make_shared<UIBarButtonItem>(UIImage::systemImageNamed("star",20,400,density),UIBarButtonItemStyle::plain);star->setIdentifier("stable.leading");screen->navigationItem()->setLeftItemsSupplementBackButton(true);screen->navigationItem()->setLeftBarButtonItem(star);}};
+        configureLeading(source);
+        auto nav=new_shared<UINavigationController>(root);nav->setViewControllers({root,source},false);
+        window->setRootViewController(nav);window->makeKeyAndVisible();window->drawAndLayoutTreeIfNeeded();frame();settle();
+        auto bar=nav->navigationBar();auto& state=Internal::NavigationBarAccess::state(*bar);
+        const auto back=state.left.buttons.front();const auto glass=state.left.groups.front().view;
+        const auto item=back->item;const auto ink=back->ink;const auto control=back->control;
+        const auto identifier=item->identifier();
+        expect(identifier.has_value(),"automatic Back has an explicit stable identifier");
+        const auto bounds=glass->layer()->bounds();const auto position=glass->layer()->position();
+        const auto controlBounds=control->layer()->bounds();const auto controlPosition=control->layer()->position();
+        auto inspect=[&] {
+            expect(state.left.buttons.front()==back&&state.left.groups.front().view==glass&&back->control==control&&back->ink==ink&&back->item==item&&item->identifier()==identifier,"unchanged Back retains item, control, ink and glass identity");
+            const auto material=glass->layer()->presentationOrSelf(),button=control->layer()->presentationOrSelf();
+            const auto soft=std::dynamic_pointer_cast<Internal::NavigationInkLayer>(ink->layer()->presentationOrSelf());
+            expect(material->bounds()==bounds&&material->position()==position&&material->transform()==NXTransform3D::identity&&material->opacity()==1,"unchanged Back glass never moves, resizes, pulses or fades");
+            expect(button->bounds()==controlBounds&&button->position()==controlPosition&&button->transform()==NXTransform3D::identity&&ink->layer()->presentationOrSelf()->opacity()==1&&soft&&soft->blur()==0,"unchanged Back glyph stays sharp and stationary");
+        };
+        for(int cycle=0;cycle<3;++cycle) {
+            auto target=new_shared<Screen>(cycle%2?"Short":"A longer title with different trailing items");
+            configureLeading(target);
+            target->navigationItem()->setRightBarButtonItems(groupingItems(cycle%2?"prominent":"pair"));
+            for(bool pop:{false,true}) {
+                const auto origin=Timer();if(pop)nav->popViewController(true);else nav->pushViewController(target,true);
+                inspect();
+                for(int i=0;i<=132;++i) {
+                    auto now=origin;const auto micros=origin.startTime.tv_usec+i*1000000L/120;now.startTime.tv_sec+=micros/1000000;now.startTime.tv_usec=micros%1000000;
+                    std::function<void(const std::shared_ptr<CALayer>&)> tick=[&](const auto& layer){const auto children=layer->sublayers();layer->animateAt(now);for(const auto& child:children)tick(child);};tick(window->layer());DispatchQueueTestHarness::pump();inspect();
+                }
+                settle();inspect();
+            }
+        }
+        int invoked=0;auto custom=std::make_shared<UIBarButtonItem>("Custom",UIBarButtonItemStyle::plain,UIAction("Custom",[&]{++invoked;}));custom->setIdentifier(identifier);
+        auto replacement=new_shared<Screen>("Custom leading");replacement->navigationItem()->setLeftBarButtonItem(custom);nav->pushViewController(replacement,false);
+        const auto customControl=state.left.buttons.front()->control;
+        expect(customControl!=control&&!state.left.buttons.front()->back,"a custom identifier cannot reuse automatic Back's control");
+        customControl->performPrimaryAction();expect(invoked==1&&nav->topViewController()==replacement,"a colliding custom identifier keeps its own action");
+        nav->popViewController(false);
+        expect(state.left.buttons.front()->back&&state.left.buttons.front()->item==item&&item->identifier()==identifier&&state.left.buttons.front()->control!=customControl,"Back keeps its semantic identity after a custom leading replacement");
+        window->setRootViewController(nullptr);settle();
+    }
+    ctx->dark=originalDark;ctx->density=originalDensity;ctx->size=originalSize;frame();
+}
 }
 int main(int argc,char**argv){
     auto ctx=std::make_shared<Context>();if(argc>3)ctx->dark=std::string(argv[3])=="dark";SkiaCtx::_main=ctx;UIApplication::shared=new_shared<UIApplication>();UIApplication::shared->delegate=std::make_shared<UIApplicationDelegate>();
@@ -441,6 +490,10 @@ int main(int argc,char**argv){
     operation="push";const auto background=state.right.backgrounds.front();const auto oldWidth=background->frame().width();
     const auto transform=NXAffineTransform::scale(.97f);a->view()->setTransform(transform);
     const auto motionOrigin=Timer();nav->pushViewController(b,true);expect(nav->topViewController()==b&&nav->visibleViewController()==b&&a->disappearances==0,"animated push updates stack before appearance completion");
+    for(const auto& screen:{a,b}) {
+        const auto host=screen->view()->superview().lock();
+        expect(host->clipsToBounds()&&host->effectiveRadius(UIRectCorner::topLeft)==62&&host->effectiveRadius(UIRectCorner::bottomRight)==38,"animated push cards preserve independent screen corners");
+    }
     expect(state.right.backgrounds.front()==background&&background->layer()->presentation(),"morph retains and animates the trailing glass carrier");
     expect(background->frame().width()<oldWidth&&background->layer()->presentation()->bounds().width()>background->frame().width(),"presentation width starts at the outgoing shared capsule");
     auto sampleMotion=[&](Timer origin,std::vector<Motion>& output){
@@ -455,10 +508,13 @@ int main(int argc,char**argv){
     };
     sampleMotion(motionOrigin,motion);
     capture("push-immediate");settle();capture("pushed");if(argc>2)snapshot(window,std::string(argv[2])+"/pushed.ppm",2);
+    expect(!b->view()->superview().lock()->clipsToBounds()&&b->view()->superview().lock()->effectiveRadius(UIRectCorner::allCorners)==0,"push completion clears temporary card styling");
     expect(a->view()->transform()==transform&&a->disappearances==1&&b->appearances==1,"container transitions preserve content transforms and balance appearance");
     a->view()->setTransform(NXAffineTransform::identity);
     operation="push-prominent";nav->pushViewController(c,true);settle();capture("editor");
-    operation="pop";expect(nav->popViewController(true)==c,"pop returns its removed controller");capture("pop-immediate");settle();capture("popped");
+    operation="pop";expect(nav->popViewController(true)==c,"pop returns its removed controller");capture("pop-immediate");
+    for(const auto& screen:{b,c})expect(screen->view()->superview().lock()->clipsToBounds()&&screen->view()->superview().lock()->effectiveRadius(UIRectCorner::topLeft)==62,"animated pop clips both moving cards");
+    settle();capture("popped");
     expect(c->parent().expired()&&b->navigationController()==nav,"completed pop detaches only removed children");
     const auto popLeft=state.left.backgrounds.front()->frame(),popRight=state.right.backgrounds.front()->frame();
     operation="pop-root";const auto popOrigin=Timer();nav->popToRootViewController(true);sampleMotion(popOrigin,popMotion);settle();capture("root-restored");expect(!nav->popViewController(false),"a navigation controller preserves its root");
@@ -523,6 +579,6 @@ int main(int argc,char**argv){
     for(float scale:{1.f,2.f,3.f})for(bool dark:{false,true}){ctx->density=scale;ctx->dark=dark;frame();bar->drawAndLayoutTreeIfNeeded();expect(bar->traitCollection()->displayScale()==scale,"bar inherits density and theme");}
     ctx->size={844,390};frame();expect(bar->frame().width()==844&&bar->sizeThatFits({844,390}).height==44,"compact-height layout uses the inline compact bar");
     window->setRootViewController(nullptr);UIApplication::shared->delegate->window.reset();std::weak_ptr<UINavigationController> weak=nav;nav.reset();expect(weak.expired()&&!bar->delegate(),"retaining a managed bar does not retain its controller");
-    UIApplication::shared->delegate->window=window;grouping(window,ctx,argc>4?argv[4]:nullptr,argc>5?argv[5]:nullptr);opticalMotion(window,ctx);navigationInk(window,ctx);UIApplication::shared->delegate->window.reset();
+    UIApplication::shared->delegate->window=window;grouping(window,ctx,argc>4?argv[4]:nullptr,argc>5?argv[5]:nullptr);opticalMotion(window,ctx);navigationInk(window,ctx);stableBack(window,ctx);UIApplication::shared->delegate->window.reset();
     UIApplication::shared.reset();SkiaCtx::_main.reset();if(!failures)std::cout<<"UIKit navigation tests passed\n";return failures?1:0;
 }

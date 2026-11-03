@@ -5,8 +5,10 @@
 #include <Timer.h>
 #include <string>
 #include <optional>
+#include <functional>
 
 namespace NXKit {
+namespace Internal { class LayerAnimationTimeline; }
 
 class CAAction {};
 
@@ -37,6 +39,10 @@ public:
     float progressFor(Timer currentTime);
 
 private:
+    friend class CALayer;
+    friend class Internal::LayerAnimationTimeline;
+    // Private interactive timeline; absent for ordinary time-based animations.
+    std::function<double(Timer)> _interactiveElapsed;
     float ease(float x);
 };
 

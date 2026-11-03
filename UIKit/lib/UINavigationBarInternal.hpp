@@ -43,10 +43,15 @@ struct NavigationBarState {
     bool transitioning=false;
     bool refreshing=false;
     size_t revision=0,generation=0;
+    std::optional<std::vector<std::shared_ptr<UINavigationItem>>> interactiveSource;
+    std::shared_ptr<UIView> interactiveTitle;
+    double interactiveHandoff=-1;
 };
 class NavigationBarAccess {
 public:
     static auto& state(UINavigationBar& bar) {return *bar._state;}
     static void setItems(UINavigationBar& bar,std::vector<std::shared_ptr<UINavigationItem>> items,bool animated,int direction) {bar.install(std::move(items),animated,direction);}
+    static void beginInteractivePop(UINavigationBar&,std::vector<std::shared_ptr<UINavigationItem>>,double span);
+    static void endInteractivePop(UINavigationBar&,bool commit,double progress);
 };
 }

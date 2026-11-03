@@ -40,7 +40,11 @@ add_library(UIKitCore
         lib/CALayer.cpp
         lib/LayerCornerGeometry.cpp
         lib/LayerCornerGeometry.hpp
+        include/UICornerRadius.h
+        include/UICornerConfiguration.h
+        include/UIRectCorner.h
         include/CALayerCornerCurve.h
+        lib/LayerAnimationTimeline.hpp
         lib/YGLayout.cpp
         include/UIBarButtonItem.h
         lib/UIBarButtonItem.cpp
@@ -48,6 +52,7 @@ add_library(UIKitCore
         lib/UINavigationItem.cpp
         lib/NavigationItemAccess.hpp
         lib/ViewAppearanceAccess.hpp
+        lib/ViewCornerAccess.hpp
         lib/UIBarItem.cpp
         lib/UITabBarItem.cpp
         include/UIBarItem.h
@@ -86,6 +91,7 @@ add_library(UIKitCore
         lib/UITraitCollection.cpp
         lib/UITraitEnvironment.cpp
         lib/UIView.cpp
+        lib/UIViewCorners.cpp
         lib/UIViewAnimationGroup.cpp
         lib/UIViewAnimationOptions.cpp
         lib/UIViewController.cpp
@@ -140,6 +146,9 @@ endif ()
 option(UIKITCORE_BUILD_TESTS "Build UIKitCore regression tests" OFF)
 if (UIKITCORE_BUILD_TESTS)
     enable_testing()
+    add_executable(NXKitCornerConfigurationTests tests/CornerConfigurationTests.cpp)
+    target_link_libraries(NXKitCornerConfigurationTests PRIVATE UIKitCore)
+    add_test(NAME NXKitCornerConfigurationTests COMMAND NXKitCornerConfigurationTests)
     add_executable(NXKitPressLifecycleTests tests/UIApplicationPressLifecycleTests.cpp)
     target_link_libraries(NXKitPressLifecycleTests PRIVATE UIKitCore)
     add_test(NAME NXKitPressLifecycleTests COMMAND NXKitPressLifecycleTests)

@@ -30,6 +30,7 @@ CABasicAnimation::CABasicAnimation(CABasicAnimation* animation) {
     animationGroup = animation->animationGroup;
     isRemovedOnCompletion = animation->isRemovedOnCompletion;
     timingFunction = animation->timingFunction;
+    _interactiveElapsed = animation->_interactiveElapsed;
 }
 
 bool CABasicAnimation::wasCreatedInUIAnimateBlock() {
@@ -37,7 +38,7 @@ bool CABasicAnimation::wasCreatedInUIAnimateBlock() {
 }
 
 float CABasicAnimation::progressFor(Timer currentTime) {
-    auto elapsedTimeMinusDelayInMs = float(currentTime - creationTime) - (delay * 1000);
+    auto elapsedTimeMinusDelayInMs = float(_interactiveElapsed ? _interactiveElapsed(currentTime) : currentTime - creationTime) - (delay * 1000);
 
     // prevents a division by zero when animating with duration: 0
     if (duration <= 0) {

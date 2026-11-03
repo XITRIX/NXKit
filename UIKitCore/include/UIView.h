@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CALayer.h"
+#include <UICornerConfiguration.h>
+#include <UIRectCorner.h>
 #include <YGLayout.h>
 #include <UIEdgeInsets.h>
 #include <UITraitEnvironment.h>
@@ -13,7 +15,7 @@
 #include <tinyxml2.h>
 
 namespace NXKit {
-namespace Internal { class ViewAppearanceAccess; }
+namespace Internal { class ViewAppearanceAccess; class ViewCornerAccess; }
 
 #define REGISTER_XIB_ATTRIBUTE(strname, parcer, setter) \
 if (name == #strname) { \
@@ -68,10 +70,16 @@ public:
     void setClipsToBounds(bool clipsToBounds) { _layer->setMasksToBounds(clipsToBounds); }
     [[nodiscard]] bool clipsToBounds() const { return _layer->masksToBounds(); }
 
-    void setTransform(NXAffineTransform transform) { _layer->setAffineTransform(transform); }
+    /// iOS 26 corner configuration. Does not enable clipsToBounds automatically.
+    void setCornerConfiguration(const UICornerConfiguration& configuration);
+    UICornerConfiguration cornerConfiguration() const;
+    NXFloat effectiveRadius(UIRectCorner corner) const;
+    NXFloat effectiveRadiusForCorner(UIRectCorner corner) const { return effectiveRadius(corner); }
+
+    void setTransform(NXAffineTransform transform);
     [[nodiscard]] NXAffineTransform transform() const { return _layer->affineTransform(); }
 
-    void setTransform3D(NXTransform3D transform) { _layer->setTransform(transform); }
+    void setTransform3D(NXTransform3D transform);
     NXTransform3D transform3D() const { return _layer->transform(); }
 
     void setBackgroundColor(const std::optional<UIColor>& backgroundColor) { _layer->setBackgroundColor(backgroundColor); }
@@ -193,6 +201,7 @@ protected:
     virtual std::shared_ptr<UITraitCollection> traitsForSubviews() const { return traitCollection(); }
 private:
     friend class Internal::ViewAppearanceAccess;
+    friend class Internal::ViewCornerAccess;
     friend class UIViewController;
     friend class UIFocusSystem;
     friend class UIScrollView;
@@ -203,6 +212,10 @@ private:
     friend bool applicationRunLoop();
     friend void renderApplicationFrame();
 
+    std::optional<UICornerConfiguration> _cornerConfiguration;
+    std::array<NXFloat,4> resolvedCornerRadii() const;
+    void updateCornerConfigurationTree();
+    void clearCornerConfiguration();
     std::shared_ptr<YGLayout> _yoga;
     std::vector<std::shared_ptr<UIGestureRecognizer>> _gestureRecognizers;
     std::vector<std::shared_ptr<UIView>> _subviews;

@@ -11,6 +11,7 @@ namespace NXKit::Internal {
 // Parameter reconstruction adapted from Flutter's BSD-licensed implementation;
 // see licenses/Flutter-BSD-3-Clause.txt and the corner comparison report.
 SkPath layerCornerPath(NXSize size, NXFloat radius, CALayerCornerCurve curve);
+SkPath layerCornerPath(NXSize size, const std::array<NXFloat,4>& radii, CALayerCornerCurve curve);
 NXFloat layerCornerDistance(NXPoint centeredPoint, NXSize size, NXFloat radius, CALayerCornerCurve curve);
 
 using LayerCornerShaderData = std::array<std::array<NXFloat,4>,4>;

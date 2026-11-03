@@ -41,6 +41,17 @@ void UIGestureRecognizer::setEnabled(bool enabled) {
 void UIGestureRecognizer::setState(UIGestureRecognizerState state) {
     if (_state == state) return;
 
+    // Ask before recognition cancels competing gestures or content touches.
+    if (_state == UIGestureRecognizerState::possible &&
+        (state == UIGestureRecognizerState::began || state == UIGestureRecognizerState::ended)) {
+        if (const auto target = delegate.lock()) {
+            const auto generation = _resetGeneration;
+            const auto allowed = target->gestureRecognizerShouldBegin(shared_from_this());
+            if (!_isEnabled || _state != UIGestureRecognizerState::possible || _resetGeneration != generation) return;
+            if (!allowed) state = UIGestureRecognizerState::failed;
+        }
+    }
+
     const auto previousState = _state;
     _state = state;
     if (state == UIGestureRecognizerState::ended
@@ -63,7 +74,12 @@ void UIGestureRecognizer::setState(UIGestureRecognizerState state) {
         }
     }
 
-    onStateChanged(shared_from_this());
+    notifyStateChanged();
+}
+
+void UIGestureRecognizer::notifyStateChanged() {
+    didChangeState();
+    if (onStateChanged) onStateChanged(shared_from_this());
 }
 
 bool UIGestureRecognizer::canPrevent(
@@ -109,11 +125,13 @@ void UIGestureRecognizer::_touchesBegan(std::vector<std::shared_ptr<UITouch>> to
 
     if (!recognitionCondition()) return;
 
+    const bool wasRecognizing = _state == UIGestureRecognizerState::began
+        || _state == UIGestureRecognizerState::changed;
     touchesBegan(touches, event);
 
     // An already recognized continuous gesture also owns later fingers. They
     // must not start a child control's tap while the first finger is scrolling.
-    if (_state == UIGestureRecognizerState::began
+    if (wasRecognizing || _state == UIGestureRecognizerState::began
         || _state == UIGestureRecognizerState::changed) {
         cancelOtherGestureRecognizersThatShouldNotRecognizeSimultaneously();
         if (_cancelsTouchesInView)
@@ -126,7 +144,7 @@ void UIGestureRecognizer::_touchesBegan(std::vector<std::shared_ptr<UITouch>> to
     if (touches.back()->_hasBeenCancelledByAGestureRecognizer) return;
 
     if (firstTouch && _state == UIGestureRecognizerState::possible)
-        onStateChanged(shared_from_this());
+        notifyStateChanged();
 }
 
 void UIGestureRecognizer::_touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
@@ -197,6 +215,7 @@ void UIGestureRecognizer::removeTouch(std::shared_ptr<UITouch> touch) {
 void UIGestureRecognizer::resetCurrentAttemptIfNeeded() {
     if (_didResetCurrentAttempt) return;
     reset();
+    ++_resetGeneration;
     _didResetCurrentAttempt = true;
 }
 

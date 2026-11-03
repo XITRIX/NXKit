@@ -5,6 +5,7 @@
 
 namespace NXKit {
 class UIViewController;
+class UIGestureRecognizer;
 
 /** Portable navigation capability. Method names follow UINavigationController;
     bars, appearance and implementation-specific delegates belong to each kit. */
@@ -20,5 +21,9 @@ public:
     virtual std::vector<std::shared_ptr<UIViewController>> popToRootViewController(bool animated) = 0;
     [[nodiscard]] virtual std::shared_ptr<UIViewController> topViewController() const = 0;
     [[nodiscard]] virtual std::shared_ptr<UIViewController> visibleViewController() const = 0;
+    /** Optional leading-edge pop gesture, installed on the container's view.
+        Enable/disable it through UIGestureRecognizer::setEnabled(). Console
+        containers default to no installed gesture. */
+    [[nodiscard]] virtual std::shared_ptr<UIGestureRecognizer> interactivePopGestureRecognizer() { return nullptr; }
 };
 }

@@ -60,3 +60,13 @@ if(PLATFORM_SWITCH)
         USES_TERMINAL VERBATIM
         COMMENT "Compiling Switch Vulkan pipelines on the target and bundling the cache")
 endif()
+
+if(APPLE)
+    option(NXKIT_BUILD_METAL_SHADERS "Build and embed standard UI Metal pipelines offline" ON)
+    set(NXKIT_METAL_SHADER_HARVEST "${UIKIT_PATH}/shaders/apple/catalog" CACHE PATH
+        "Source catalog exported by the Metal shader harness")
+    if(NXKIT_BUILD_METAL_SHADERS)
+        include(${UIKIT_PATH}/cmake/NXKitMetalCache.cmake)
+        nxkit_target_metal_shaders(${PROJECT_NAME} "${NXKIT_METAL_SHADER_HARVEST}")
+    endif()
+endif()

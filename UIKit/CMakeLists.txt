@@ -43,6 +43,14 @@ if (UIKIT_BUILD_TESTS)
     target_include_directories(UIKitNavigationTests PRIVATE lib ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib)
     target_link_libraries(UIKitNavigationTests PRIVATE Xitrix::UIKit)
     add_test(NAME UIKitNavigationTests COMMAND UIKitNavigationTests)
+    if(APPLE)
+        add_executable(UIKitInteractiveNavigationTests tests/InteractiveNavigationTests.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib/UIApplicationMain.cpp)
+        target_include_directories(UIKitInteractiveNavigationTests PRIVATE lib ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib)
+        target_link_libraries(UIKitInteractiveNavigationTests PRIVATE Xitrix::UIKit)
+        add_test(NAME UIKitInteractiveNavigationTests COMMAND UIKitInteractiveNavigationTests)
+    endif()
+
     add_executable(UIKitTabBarControllerTests tests/UITabBarControllerTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib/UIApplicationMain.cpp)
     target_include_directories(UIKitTabBarControllerTests PRIVATE lib)

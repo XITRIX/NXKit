@@ -10,6 +10,9 @@ function(nxkit_configure_metal_cache target root)
         "${root}/Submodules/skia/src/core/SkImageFilterTypes.h"
         "${root}/Submodules/skia/src/effects/imagefilters/SkRuntimeImageFilter.cpp"
         "${root}/Submodules/skia/include/gpu/graphite/mtl/MtlBackendContext.h")
+    # CONFIGURE_DEPENDS on a glob detects additions/removals, not content edits.
+    # Recompute the catalog ABI when an existing shader-generating input changes.
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${inputs})
     set(signature "NXKit-Metal-v1-language2.3")
     foreach(input IN LISTS inputs)
         file(SHA256 "${input}" digest)

@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <UICornerRadius.h>
+#include <UICornerConfiguration.h>
+#include <UIRectCorner.h>
 #include <CALayerCornerCurve.h>
 #include <BackdropEffect.h>
 #include <CABackdropLayer.h>

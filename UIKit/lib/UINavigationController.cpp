@@ -1,6 +1,10 @@
 #include <UINavigationController.h>
 #include <UIWindow.h>
 #include <UIPress.h>
+#include <UIPanGestureRecognizer.h>
+#include <UITouch.h>
+#include "LayerAnimationTimeline.hpp"
+#include "ViewCornerAccess.hpp"
 #include "UINavigationBarInternal.hpp"
 #include "NavigationBarMotion.hpp"
 #include "ViewControllerContainerAccess.hpp"
@@ -9,6 +13,79 @@
 #include <unordered_set>
 using namespace NXKit;
 namespace {bool contains(const auto& controllers,const auto& controller){return std::find(controllers.begin(),controllers.end(),controller)!=controllers.end();}}
+namespace {
+// The public capability returns UIGestureRecognizer, as UIKit does. Keeping
+// edge admission here avoids exporting a partial UIScreenEdgePan API in Core.
+class NavigationPopGesture final : public UIPanGestureRecognizer {
+    std::function<bool()> allowed;
+    std::function<void(std::shared_ptr<UIGestureRecognizer>)> action;
+    NXPoint start;
+    NXPoint lastLocation;
+    Timer lastMovement;
+    NXFloat release=0;
+    bool admitted=false;
+public:
+    NavigationPopGesture(std::function<bool()> eligible,std::function<void(std::shared_ptr<UIGestureRecognizer>)> handler):allowed(std::move(eligible)),action(std::move(handler)){setMaximumNumberOfTouches(1);}
+    void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent> event) override {
+        const bool active=state()==UIGestureRecognizerState::began||state()==UIGestureRecognizerState::changed;
+        UIPanGestureRecognizer::touchesBegan(touches,event);
+        if(active){setState(UIGestureRecognizerState::cancelled);return;}
+        const auto host=view().lock();
+        if(touches.size()!=1||!host||!allowed()){setState(UIGestureRecognizerState::failed);return;}
+        start=touches.front()->locationIn(host);lastLocation=touches.front()->absoluteLocation();lastMovement=touches.front()->timestamp();admitted=start.x>=host->bounds().minX()&&start.x<=host->bounds().minX()+24;
+        if(!admitted)setState(UIGestureRecognizerState::failed);
+    }
+    void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent> event) override {
+        if(!touches.empty()&&touches.front()->absoluteLocation()!=lastLocation){lastLocation=touches.front()->absoluteLocation();lastMovement=touches.front()->timestamp();}
+        if(state()==UIGestureRecognizerState::possible&&!touches.empty()) {
+            const auto delta=touches.front()->locationIn(view().lock())-start;
+            if(std::max(std::abs(delta.x),std::abs(delta.y))>=10&&(delta.x<=0||std::abs(delta.y)>=delta.x||!allowed())){setState(UIGestureRecognizerState::failed);return;}
+        }
+        UIPanGestureRecognizer::touchesMoved(touches,event);
+    }
+    void touchesEnded(std::vector<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent> event) override {
+        release=touches.empty()||touches.front()->timestamp()-lastMovement>100?0:velocityIn(view().lock()).x;
+        UIPanGestureRecognizer::touchesEnded(touches,event);
+    }
+    NXFloat releaseVelocity() const{return release;}
+    bool canBePreventedBy(const std::shared_ptr<UIGestureRecognizer>& other) const override {
+        // Content is visited first by UIWindow. An eligible edge gesture must
+        // retain a chance to recognize before a horizontal scroll cancels it.
+        return admitted&&_state==UIGestureRecognizerState::possible?false:UIPanGestureRecognizer::canBePreventedBy(other);
+    }
+protected:
+    void didChangeState() override {action(shared_from_this());}
+    void reset() override {UIPanGestureRecognizer::reset();admitted=false;}
+};
+// Resolve the stationary host before translating it. The entire controller
+// travels as a card with the window's corners, including during a reversal.
+void beginNavigationCard(const std::shared_ptr<UIView>& host) {
+    UIView::performWithoutAnimation([&]{
+        host->setCornerConfiguration(UICornerConfiguration::corners(UICornerRadius::containerConcentric()));
+        const auto fixed=[&](UIRectCorner corner){return UICornerRadius::fixed(host->effectiveRadius(corner));};
+        host->setCornerConfiguration(UICornerConfiguration::corners(fixed(UIRectCorner::topLeft),fixed(UIRectCorner::topRight),
+            fixed(UIRectCorner::bottomLeft),fixed(UIRectCorner::bottomRight)));
+        host->setClipsToBounds(true);
+    });
+}
+void endNavigationCard(const std::shared_ptr<UIView>& host) {
+    if (!host) return;
+    Internal::ViewCornerAccess::clearConfiguration(*host);
+    host->setClipsToBounds(false);
+}
+constexpr double interactiveSpan=.97;
+}
+struct UINavigationController::InteractivePop {
+    std::vector<std::shared_ptr<UIViewController>> original;
+    std::shared_ptr<UIViewController> source,target;
+    std::shared_ptr<UIView> sourceHost,targetHost,dimming;
+    std::unique_ptr<Internal::LayerAnimationTimeline> timeline;
+    NXFloat width=0;
+    struct End {bool commit;NXFloat velocity;bool animated;};
+    std::optional<End> pendingEnd;
+    bool starting=true,ending=false,finishImmediately=false,settling=false,commit=false;
+};
+UINavigationController::~UINavigationController()=default;
 UINavigationController::UINavigationController() {
     const auto weak=weak_from_base<UINavigationController>();
     registerAction(UIResponderAction {
@@ -58,6 +135,8 @@ void UINavigationController::loadView() {
     _bar=new_shared<UINavigationBar>();root->addSubview(_bar);
     auto& state=Internal::NavigationBarAccess::state(*_bar);state.owner=shared_from_this();state.delegate=shared_from_base<UINavigationController>();
     state.backAction=[weak=weak_from_base<UINavigationController>()]{if(const auto self=weak.lock();self&&!self->_updating)self->popViewController(true);};
+    auto gesture=new_shared<NavigationPopGesture>([weak=weak_from_base<UINavigationController>()]{const auto self=weak.lock();return self&&self->canBeginInteractivePop();},[weak=weak_from_base<UINavigationController>()](const auto& recognizer){if(const auto self=weak.lock())self->handlePopGesture(recognizer);});
+    _popGesture=gesture;root->addGestureRecognizer(gesture);
     setView(root);
 }
 void UINavigationController::viewDidLoad(){_updating=true;layout();mount(0,false,{});}
@@ -94,12 +173,13 @@ void UINavigationController::mount(int direction,bool animated,std::vector<std::
     }
     if(_visible&&next)if(const auto window=view()->window())window->focusSystem()->requestFocusUpdate(next);
     std::shared_ptr<UIView> dimming;
-    if(animate) {dimming=new_shared<UIView>();dimming->setUserInteractionEnabled(false);dimming->setBackgroundColor(UIColor::black);dimming->setFrame(bounds);(direction<0?nextView:oldView)->addSubview(dimming);dimming->setAlpha(direction<0?0:.1f);}
+    if(animate) {beginNavigationCard(oldView);beginNavigationCard(nextView);dimming=new_shared<UIView>();dimming->setUserInteractionEnabled(false);dimming->setBackgroundColor(UIColor::black);dimming->setFrame(bounds);(direction<0?nextView:oldView)->addSubview(dimming);dimming->setAlpha(direction<0?0:.1f);}
     const auto weak=weak_from_base<UINavigationController>();const auto visible=_visible;
     auto completion=[weak,previous,next,oldView,nextView,dimming,removed=std::move(removed),visible,animated](bool) {
         const auto self=weak.lock();if(!self)return;
         if(oldView&&oldView!=nextView){oldView->removeFromSuperview();if(previous&&previous->viewIsLoaded())previous->view()->removeFromSuperview();}
         if(dimming)dimming->removeFromSuperview();
+        endNavigationCard(oldView);endNavigationCard(nextView);
         self->_outgoingHost.reset();
         if(nextView)nextView->setTransform(NXAffineTransform::identity);
         for(const auto& child:removed)if(!contains(self->_controllers,child))child->removeFromParent();
@@ -127,11 +207,12 @@ void UINavigationController::finish() {
 }
 void UINavigationController::layout() {
     if(!_bar||!_content)return;const auto bounds=view()->bounds();const auto safe=view()->safeAreaInsets();
+    if(_interactive&&_interactive->width!=bounds.width())endInteractivePop(false,0,false);
     _content->setFrame(bounds);if(_displayedHost)_displayedHost->setFrame(_content->bounds());if(_outgoingHost)_outgoingHost->setFrame(_content->bounds());const auto height=_bar->sizeThatFits(bounds.size).height;_bar->setFrame({bounds.origin.x,_barHidden?-height:bounds.origin.y+safe.top,bounds.width(),height});_bar->setHidden(_barHidden);
     for(const auto& child:_controllers){Internal::ViewControllerContainerAccess::setChildSafeAreaInsets(shared_from_this(),child,{_barHidden?0.0f:height,0,0,0});if(child->viewIsLoaded())child->view()->setFrame(_content->bounds());}
 }
 void UINavigationController::setNavigationBarHidden(bool hidden,bool animated) {
-    if(_barHidden==hidden)return;_barHidden=hidden;if(!viewIsLoaded())return;
+    if(_barHidden==hidden)return;if(_interactive)endInteractivePop(false,0,false);_barHidden=hidden;if(!viewIsLoaded())return;
     if(!animated){layout();_bar->setAlpha(1);return;}
     _bar->setHidden(false);_bar->setAlpha(hidden?1:0);
     UIView::animate(.25,0,UIViewAnimationOptions(beginFromCurrentState|allowUserInteraction),[&]{layout();_bar->setHidden(false);_bar->setAlpha(hidden?0:1);},[weak=weak_from_base<UINavigationController>()](bool){if(const auto self=weak.lock()){self->layout();self->_bar->setAlpha(1);}});
@@ -139,8 +220,113 @@ void UINavigationController::setNavigationBarHidden(bool hidden,bool animated) {
 void UINavigationController::show(const std::shared_ptr<UIViewController>& controller,const std::shared_ptr<UIResponder>&){pushViewController(controller,true);}
 void UINavigationController::viewWillAppear(bool animated){_appearanceTransition=true;if(_displayed){_displayed->viewWillAppear(animated);if(const auto target=delegate())target->navigationControllerWillShow(shared_from_base<UINavigationController>(),_displayed,animated);}}
 void UINavigationController::viewDidAppear(bool animated){if(_displayed){if(const auto target=delegate())target->navigationControllerDidShow(shared_from_base<UINavigationController>(),_displayed,animated);_displayed->viewDidAppear(animated);}_visible=true;_appearanceTransition=false;if(!_updating)finish();}
-void UINavigationController::viewWillDisappear(bool animated){_appearanceTransition=true;if(_displayed)_displayed->viewWillDisappear(animated);}
+void UINavigationController::viewWillDisappear(bool animated){_appearanceTransition=true;if(_interactive)endInteractivePop(false,0,false);if(_displayed)_displayed->viewWillDisappear(animated);}
 void UINavigationController::viewDidDisappear(bool animated){if(_displayed)_displayed->viewDidDisappear(animated);_visible=false;_appearanceTransition=false;if(!_updating)finish();}
 void UINavigationController::viewDidLayoutSubviews(){layout();}
 void UINavigationController::viewSafeAreaInsetsDidChange(){if(viewIsLoaded())view()->setNeedsLayout();}
 std::vector<std::shared_ptr<UIFocusEnvironment>> UINavigationController::preferredFocusEnvironments(){std::vector<std::shared_ptr<UIFocusEnvironment>> result;if(_displayed)result.push_back(_displayed);if(_bar)result.push_back(_bar);return result;}
+
+std::shared_ptr<UIGestureRecognizer> UINavigationController::interactivePopGestureRecognizer() {loadViewIfNeeded();return _popGesture;}
+bool UINavigationController::canBeginInteractivePop() {
+    if(!_visible||_updating||_appearanceTransition||_controllers.size()<2||!_content||!std::isfinite(_content->bounds().width())||_content->bounds().width()<=0||presentedViewController())return false;
+    const auto item=_controllers.back()->navigationItem();
+    return !item->hidesBackButton()&&(item->leftBarButtonItems().empty()||item->leftItemsSupplementBackButton());
+}
+void UINavigationController::handlePopGesture(const std::shared_ptr<UIGestureRecognizer>& gesture) {
+    const auto pan=std::static_pointer_cast<UIPanGestureRecognizer>(gesture);
+    switch(gesture->state()) {
+    case UIGestureRecognizerState::began:if(canBeginInteractivePop())beginInteractivePop();break;
+    case UIGestureRecognizerState::changed:
+        if(_interactive&&!_interactive->settling)_interactive->timeline->seek(pan->translationInView(view()).x/_interactive->width);
+        break;
+    case UIGestureRecognizerState::ended:
+        if(_interactive&&!_interactive->settling){const auto velocity=std::static_pointer_cast<NavigationPopGesture>(gesture)->releaseVelocity();const auto p=_interactive->timeline->progress();endInteractivePop(velocity>=-100&&(p>.5||p+velocity/_interactive->width*.2>.5),velocity);}
+        break;
+    case UIGestureRecognizerState::cancelled:if(_interactive&&!_interactive->settling)endInteractivePop(false,0);break;
+    default:break;
+    }
+}
+void UINavigationController::beginInteractivePop() {
+    _updating=true;_interactive=std::make_shared<InteractivePop>();const auto transition=_interactive;auto& state=*transition;
+    state.original=_controllers;state.source=_controllers.back();state.target=_controllers[_controllers.size()-2];state.sourceHost=_displayedHost;state.width=_content->bounds().width();
+    _controllers.pop_back();_displayed=state.target;_outgoingHost=state.sourceHost;
+    state.targetHost=new_shared<UIView>(_content->bounds());_displayedHost=state.targetHost;
+    _content->insertSubviewBelow(state.targetHost,state.sourceHost);state.targetHost->addSubview(state.target->view());state.target->view()->setFrame(_content->bounds());
+    state.dimming=new_shared<UIView>(_content->bounds());state.dimming->setUserInteractionEnabled(false);state.dimming->setBackgroundColor(UIColor::black);state.targetHost->addSubview(state.dimming);
+    beginNavigationCard(state.sourceHost);beginNavigationCard(state.targetHost);
+    // Loading/mounting application content can start its own animations. Take
+    // the baseline afterwards so those never inherit our reversible clock.
+    state.timeline=std::make_unique<Internal::LayerAnimationTimeline>(view()->layer(),interactiveSpan);
+    std::vector<std::shared_ptr<UINavigationItem>> items;for(const auto& child:_controllers)items.push_back(child->navigationItem());
+    Internal::NavigationBarAccess::beginInteractivePop(*_bar,std::move(items),interactiveSpan);
+    UIView::performWithoutAnimation([&]{state.sourceHost->setTransform(NXAffineTransform::translationBy(state.width,0));state.targetHost->setTransform(NXAffineTransform::identity);state.dimming->setAlpha(0);});
+    const auto linear=new_shared<CAMediaTimingFunction>([](double f){return f;});
+    for(const auto& host:{state.sourceHost,state.targetHost}) {
+        auto slide=Internal::navigationAnimation("transform");slide->duration=interactiveSpan;slide->timingFunction=linear;
+        slide->fromValue=NXTransform3DMakeAffineTransform(host==state.sourceHost?NXAffineTransform::identity:NXAffineTransform::translationBy(-state.width*.3f,0));
+        slide->toValue=NXTransform3DMakeAffineTransform(host==state.sourceHost?NXAffineTransform::translationBy(state.width,0):NXAffineTransform::identity);host->layer()->add(slide,"transform");
+    }
+    auto dim=Internal::navigationAnimation("opacity");dim->duration=interactiveSpan;dim->timingFunction=linear;dim->fromValue=.1f;dim->toValue=0.f;state.dimming->layer()->add(dim,"opacity");
+    state.timeline->capture(view()->layer());state.timeline->seek(0);
+    state.source->willMoveToParent(nullptr);if(_interactive!=transition)return;
+    state.source->viewWillDisappear(true);if(_interactive!=transition)return;
+    state.target->viewWillAppear(true);if(_interactive!=transition)return;
+    if(const auto target=delegate())target->navigationControllerWillShow(shared_from_base<UINavigationController>(),state.target,true);
+    if(_interactive!=transition)return;
+    state.starting=false;
+    if(const auto end=state.pendingEnd)endInteractivePop(end->commit,end->velocity,end->animated);
+}
+void UINavigationController::endInteractivePop(bool commit,NXFloat velocity,bool animated) {
+    if(!_interactive)return;
+    const auto transition=_interactive;auto& state=*transition;
+    if(state.starting){state.pendingEnd=InteractivePop::End{commit,velocity,animated};return;}
+    if(state.ending){state.finishImmediately|=!animated;return;}
+    if(state.settling){if(!animated)finishInteractivePop(state.commit);return;}
+    state.settling=true;state.commit=commit;state.ending=true;
+    if(_interactive.get()!=&state)return;
+    if(commit)Internal::NavigationBarAccess::endInteractivePop(*_bar,true,state.timeline->progress());
+    state.ending=false;
+    if(!animated||state.finishImmediately){finishInteractivePop(commit);return;}
+    const auto progress=state.timeline->progress(),distance=std::abs((commit?1.:0.)-progress);
+    const auto duration=.5;
+    // Bound the release tangent so the return cannot move farther away before
+    // it follows the finger's final direction. Geometry and bar share this clock.
+    const auto direction=commit?1.:-1.;const auto speed=std::clamp(double(velocity/state.width)*direction,0.,3*distance/duration)*direction;
+    state.timeline->settle(commit?1:0,speed,duration,[duration,speed,delta=(commit?1.:0.)-progress](double f){
+        if(f>=1)return 1.;const auto t=f*duration,decay=.86*25,frequency=25*std::sqrt(1-.86*.86);
+        const auto tangent=std::abs(delta)>.00001?speed/delta:0.;
+        return 1-std::exp(-decay*t)*(std::cos(frequency*t)+(decay-tangent)/frequency*std::sin(frequency*t));
+    });
+    auto gate=Internal::navigationAnimation("opacity");gate->duration=duration;gate->fromValue=1.f;gate->toValue=1.f;
+    gate->animationGroup=new_shared<UIViewAnimationGroup>(UIViewAnimationOptions(allowUserInteraction|preferredFramesPerSecond120),[weak=weak_from_base<UINavigationController>(),commit](bool){if(const auto self=weak.lock())self->finishInteractivePop(commit);});
+    _content->layer()->add(gate,"interactivePopCompletion");
+}
+void UINavigationController::finishInteractivePop(bool commit) {
+    if(!_interactive)return;
+    auto state=std::move(_interactive);_content->layer()->removeAnimation("interactivePopCompletion");
+    state->timeline->discard();
+    state->dimming->removeFromSuperview();
+    if(commit) {
+        state->source->view()->removeFromSuperview();state->sourceHost->removeFromSuperview();state->source->removeFromParent();
+        state->targetHost->setTransform(NXAffineTransform::identity);_displayed=state->target;
+    }else {
+        _controllers=state->original;_displayed=state->source;_displayedHost=state->sourceHost;
+        state->target->view()->removeFromSuperview();state->targetHost->removeFromSuperview();state->sourceHost->setTransform(NXAffineTransform::identity);
+        Internal::NavigationBarAccess::endInteractivePop(*_bar,false,0);
+        state->source->didMoveToParent(shared_from_this());
+    }
+    endNavigationCard(state->sourceHost);endNavigationCard(state->targetHost);
+    _outgoingHost.reset();
+    const auto shown=commit?state->target:state->source;
+    if(commit){state->source->viewDidDisappear(true);state->target->viewDidAppear(true);}
+    else {
+        // UIKit 27 reconciles a cancelled appearance transaction after the
+        // visual return, with the original logical stack already restored.
+        state->target->viewWillDisappear(true);state->target->viewDidDisappear(true);
+        state->source->viewWillAppear(true);state->source->viewDidAppear(true);
+        if(const auto target=delegate())target->navigationControllerWillShow(shared_from_base<UINavigationController>(),shown,true);
+    }
+    if(const auto window=view()->window())window->focusSystem()->requestFocusUpdate(shown);
+    if(const auto target=delegate())target->navigationControllerDidShow(shared_from_base<UINavigationController>(),shown,true);
+    finish();
+}

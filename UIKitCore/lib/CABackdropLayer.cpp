@@ -38,7 +38,7 @@ void CABackdropLayer::draw(SkCanvas* canvas) {
     if (!std::isfinite(size.width) || !std::isfinite(size.height)
         || size.width <= 0 || size.height <= 0) return;
     auto filter = Internal::BackdropShader::makeFilter(
-        _state->effect, _state->runtime, size, cornerRadius(), cornerCurve(), contentsScale()
+        _state->effect, _state->runtime, size, renderingCornerRadius(), cornerCurve(), contentsScale()
     );
     if (!filter) return;
     SkPaint paint;
@@ -47,8 +47,8 @@ void CABackdropLayer::draw(SkCanvas* canvas) {
         ? std::max<NXFloat>(1, contentsScale()) : 1;
     const auto rect = SkRect::MakeWH(size.width * scale, size.height * scale);
     canvas->save();
-    if (!masksToBounds()) canvas->clipPath(
-        Internal::layerCornerPath(size, cornerRadius(), cornerCurve()), true
+    if (!masksToBounds() && !hasCornerConfiguration()) canvas->clipPath(
+        Internal::layerCornerPath(size, renderingCornerRadius(), cornerCurve()), true
     );
     canvas->scale(1 / scale, 1 / scale);
     canvas->saveLayer(SkCanvas::SaveLayerRec(

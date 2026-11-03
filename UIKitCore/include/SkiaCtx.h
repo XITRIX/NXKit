@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL_video.h>
 #include <functional>
+#include <array>
 #include <memory>
 #include <optional>
 #include <cmath>
@@ -44,6 +45,9 @@ public:
     virtual void setTargetFrameRate(int frameRate) { targetFrameRate = frameRate; }
 
     virtual UIEdgeInsets deviceSafeAreaInsets() { return {}; }
+
+    /// Platform window corners in NXKit logical points: TL, TR, BL, BR.
+    virtual std::array<NXFloat,4> windowCornerRadii() { return {}; }
 
     /** Native UIKit overrides this with window traits. Other platforms use
      logical window points: regular width >= 600, regular height >= 480.
