@@ -5,6 +5,7 @@
 #include <UIApplication.h>
 #include <SkiaCtx.h>
 #include <BackdropEffectView.h>
+#include "CABackdropEffectLayer.hpp"
 #include <DispatchQueue.h>
 #include <SDL3/SDL.h>
 #include "include/core/SkSurface.h"
@@ -39,10 +40,12 @@ Classes classes(const std::shared_ptr<UITraitCollection>& traits) {
 class Context final:public SkiaCtx {
 public:
     NXSize size{390,844};float scale=2;UIUserInterfaceStyle style=UIUserInterfaceStyle::light;
+    NXFloat glassTintAmount=UITraitCollection::defaultGlassTintAmount;
     std::optional<Classes> nativeClasses;
     NXSize getSize() override { return size; }
     float getScaleFactor() override { return scale; }
     UIUserInterfaceStyle getThemeMode() override { return style; }
+    NXFloat getGlassTintAmount() override { return glassTintAmount; }
     Classes getSizeClasses() override { return nativeClasses.value_or(SkiaCtx::getSizeClasses()); }
     sk_sp<SkSurface> getBackbufferSurface() override { return nullptr; }
     void swapBuffers() override {}
@@ -178,6 +181,7 @@ void testRunLoop(const std::shared_ptr<Context>& ctx) {
 }
 
 void testGlass(const std::shared_ptr<Context>& ctx) {
+    ctx->glassTintAmount=.25f;
     auto window=new_shared<UIWindow>();auto controller=new_shared<ProbeController>();window->setRootViewController(controller);window->makeKeyAndVisible();
     UIGlassEffect effect;effect.setAdaptsAppearanceToBackdrop(true);auto glass=new_shared<BackdropEffectView>(effect);glass->setFrame({0,0,120,64});
     auto ink=new_shared<ProbeView>();glass->addSubview(ink);controller->root->addSubview(glass);
@@ -186,15 +190,63 @@ void testGlass(const std::shared_ptr<Context>& ctx) {
     sample();sample();expect(ink->traitCollection()->userInterfaceStyle()==UIUserInterfaceStyle::dark,"small opt-in glass establishes a content appearance override");
     ctx->size={900,700};SizeClassTestHarness::refresh(window);sample();sample();
     expect(classes(ink->traitCollection())==Classes{Class::regular,Class::regular}
-        && ink->traitCollection()->userInterfaceStyle()==UIUserInterfaceStyle::dark,"glass appearance copies retain updated size classes");
-    window->setRootViewController(nullptr);
+        && ink->traitCollection()->userInterfaceStyle()==UIUserInterfaceStyle::dark
+        && ink->traitCollection()->glassTintAmount()==.25f,"glass appearance copies retain updated size classes and the inherited glass preference");
+    window->setRootViewController(nullptr);ctx->glassTintAmount=.5f;
+}
+
+void testGlassPreference(const std::shared_ptr<Context>& ctx) {
+    const auto app=UIApplication::shared;
+    expect(UITraitCollection().glassTintAmount()==.5f && !app->overrideGlassTintAmount(),
+           "the portable default preserves the current glass material without an app override");
+    for(const auto amount : {0.f,.25f,.5f,.75f,1.f}) {
+        auto traits=UITraitCollection::traitCollectionWithGlassTintAmount(amount);
+        expect(traits->glassTintAmount()==amount && traits->copy()->glassTintAmount()==amount,
+               "standalone preference traits and their copies preserve the full slider range");
+    }
+    for(const auto invalid : {-1.f,1.01f,std::numeric_limits<float>::infinity(),std::numeric_limits<float>::quiet_NaN()}) {
+        bool traitRejected=false,appRejected=false;
+        try { (void)UITraitCollection::traitCollectionWithGlassTintAmount(invalid); } catch(const std::invalid_argument&) { traitRejected=true; }
+        try { app->setOverrideGlassTintAmount(invalid); } catch(const std::invalid_argument&) { appRejected=true; }
+        expect(traitRejected && appRejected && !app->overrideGlassTintAmount(),"invalid settings cannot corrupt the effective preference");
+    }
+    ctx->glassTintAmount=.75f;
+    auto window=new_shared<UIWindow>();auto controller=new_shared<ProbeController>();
+    window->setRootViewController(controller);window->makeKeyAndVisible();
+    auto mask=new_shared<ProbeView>();controller->leaf->setMask(mask);
+    auto glass=new_shared<BackdropEffectView>();glass->setFrame({0,0,120,64});controller->root->addSubview(glass);
+    const auto before=window->traitCollection();
+    expect(before->glassTintAmount()==.75f && controller->leaf->traitCollection()->glassTintAmount()==.75f,
+           "initial views and controllers inherit the system preference before display");
+    app->setOverrideGlassTintAmount(.1f);
+    expect(app->glassTintAmount()==.1f && applicationRunLoop(),"an app setting overrides the backend before the next layout");
+    expect(controller->traitCollection()->glassTintAmount()==.1f && controller->leaf->traitCollection()->glassTintAmount()==.1f
+        && mask->traitCollection()->glassTintAmount()==.1f && glass->traitCollection()->glassTintAmount()==.1f,
+           "the application override propagates through controllers, ordinary views, masks and glass");
+    expect(std::static_pointer_cast<CABackdropEffectLayer>(glass->layer())->effect().uniform("glassTintAmount")->front()==.1f,
+           "an existing glass view invalidates its resolved material when only the preference changes");
+    expect(before->glassTintAmount()==.75f && controller->previous->glassTintAmount()==.75f,
+           "previous trait snapshots remain immutable after changing the preference");
+    auto late=new_shared<ProbeController>();controller->addChild(late);late->loadViewIfNeeded();
+    expect(late->leaf->traitCollection()->glassTintAmount()==.1f,"late children inherit an existing application override");
+    ctx->glassTintAmount=1;const auto notifications=controller->notifications;
+    expect(applicationRunLoop() && controller->notifications==notifications,"system changes cannot overwrite an explicit app setting");
+    app->setOverrideGlassTintAmount(std::nullopt);
+    expect(applicationRunLoop() && controller->leaf->traitCollection()->glassTintAmount()==1,"clearing the override follows the latest system value");
+    ctx->glassTintAmount=0;
+    expect(applicationRunLoop() && controller->leaf->traitCollection()->glassTintAmount()==0,"live system changes propagate without a resize event");
+    ctx->glassTintAmount=std::numeric_limits<float>::quiet_NaN();
+    expect(applicationRunLoop() && controller->leaf->traitCollection()->glassTintAmount()==.5f,"an unavailable system value safely restores the original material");
+    auto other=new_shared<InheritedRoot>(UITraitCollection::traitCollectionWithGlassTintAmount(.9f));other->addSubview(controller->leaf);
+    expect(controller->leaf->traitCollection()->glassTintAmount()==.9f,"reparenting adopts the new environment's glass preference");
+    window->setRootViewController(nullptr);ctx->glassTintAmount=.5f;
 }
 }
 int main() {
     auto previousContext=SkiaCtx::_main;auto previousApplication=UIApplication::shared;auto previousCurrent=UITraitCollection::current();
     auto ctx=std::make_shared<Context>();SkiaCtx::_main=ctx;UIApplication::shared=new_shared<UIApplication>();
     expect(SDL_InitSubSystem(SDL_INIT_EVENTS),"event subsystem initializes for frame integration tests");
-    testPolicy(*ctx);testInheritance(ctx);testRunLoop(ctx);testGlass(ctx);
+    testPolicy(*ctx);testInheritance(ctx);testRunLoop(ctx);testGlass(ctx);testGlassPreference(ctx);
     SDL_QuitSubSystem(SDL_INIT_EVENTS);
     UIApplication::shared=previousApplication;SkiaCtx::_main=previousContext;UITraitCollection::setCurrent(previousCurrent);
     if (failures) return 1;

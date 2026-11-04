@@ -33,7 +33,7 @@ float blurRecoveryAt(float t) {
     // anchors with monotone cubic Hermite segments instead of straight lines.
     constexpr float stops[]={0,.50f,.65f,.80f,.90f,1};
     constexpr float values[]={0,0,.08f,.35f,.70f,1};
-    constexpr auto tangents=[] {
+    constexpr auto tangents=[=] {
         std::array<float,6> result{};
         for(int i=1;i<5;++i) {
             const auto left=(values[i]-values[i-1])/(stops[i]-stops[i-1]);

@@ -7,6 +7,7 @@
 #include "GlassInteraction.hpp"
 
 #include "include/core/SkRefCnt.h"
+#include <array>
 #include <functional>
 #include <optional>
 
@@ -26,7 +27,7 @@ public:
 
     void setEffect(const BackdropEffect& effect);
     void setEffect(const UIBlurEffect& effect);
-    [[nodiscard]] BackdropEffect effect() const { return _effect; }
+    [[nodiscard]] BackdropEffect effect() const { return *_effect; }
 
     void setGlassInteraction(const Internal::GlassInteraction& interaction);
 
@@ -45,9 +46,18 @@ private:
     static sk_sp<SkRuntimeEffect> compile(const BackdropEffect& effect);
     static void validateUniforms(const BackdropEffect& effect, const SkRuntimeEffect& runtimeEffect);
     sk_sp<SkImageFilter> imageFilterForCurrentState();
+    std::shared_ptr<const BackdropEffect> resolvedEffect(NXSize size);
     void invalidateImageFilterCache();
+    struct ResolvedMaterial {
+        NXSize size;
+        BackdropEffect effect;
+    };
+    // Immutable descriptions are shared by model/presentation copies.
+    // A grouped member can resolve both its own size and the group's shared
+    // material size. Keep both so steady grouping does not churn the cache.
+    std::array<std::shared_ptr<const ResolvedMaterial>, 2> _resolvedMaterials;
 
-    BackdropEffect _effect;
+    std::shared_ptr<const BackdropEffect> _effect;
     std::optional<UIBlurEffect> _variableBlur;
     sk_sp<SkRuntimeEffect> _runtimeEffect;
     sk_sp<SkImageFilter> _cachedImageFilter;

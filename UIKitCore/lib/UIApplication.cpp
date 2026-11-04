@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
 using namespace NXKit;
 
@@ -26,6 +27,20 @@ Timer touchSampleTime(Uint64 timestamp) {
 }
 
 std::shared_ptr<UIApplication> UIApplication::shared = nullptr;
+
+void UIApplication::setOverrideGlassTintAmount(std::optional<NXFloat> amount) {
+    if (amount && (!std::isfinite(*amount) || *amount < 0 || *amount > 1))
+        throw std::invalid_argument("Glass tint amount must be finite and between 0 and 1");
+    _overrideGlassTintAmount = amount;
+}
+
+NXFloat UIApplication::glassTintAmount() const {
+    if (_overrideGlassTintAmount) return *_overrideGlassTintAmount;
+    const auto context = SkiaCtx::main();
+    const auto amount = context ? context->getGlassTintAmount() : UITraitCollection::defaultGlassTintAmount;
+    return std::isfinite(amount) && amount >= 0 && amount <= 1
+        ? amount : UITraitCollection::defaultGlassTintAmount;
+}
 
 UIApplication::UIApplication() {
 //    // TODO: Replace with Bunbles

@@ -27,6 +27,7 @@ public:
     std::array<NXFloat,4> windowCornerRadii() override;
 
     NXKit::UIUserInterfaceStyle getThemeMode() override;
+    NXFloat getGlassTintAmount() override;
     std::pair<NXKit::UIUserInterfaceSizeClass, NXKit::UIUserInterfaceSizeClass> getSizeClasses() override;
 //    void setTargetFrameRate(int frameRate) override;
 

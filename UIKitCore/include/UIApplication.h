@@ -8,6 +8,7 @@
 
 #include <map>
 #include <utility>
+#include <optional>
 
 namespace NXKit {
 
@@ -26,6 +27,15 @@ public:
 
     std::shared_ptr<UIApplicationDelegate> delegate;
     std::weak_ptr<UIWindow> keyWindow;
+
+    /** Portable extension: application-wide Liquid Glass preference (0...1).
+     nullopt follows the system on supported Apple platforms, otherwise the
+     original NXKit material. Applications own persistence of their setting.
+     Set on the main thread; inherited traits update before the next frame's
+     layout, including controllers and views created after the override. */
+    std::optional<NXFloat> overrideGlassTintAmount() const { return _overrideGlassTintAmount; }
+    void setOverrideGlassTintAmount(std::optional<NXFloat> amount);
+    NXFloat glassTintAmount() const;
 
     void startHandlingLifecycleEvents();
     void handleEventsIfNeeded();
@@ -65,6 +75,7 @@ private:
 
     bool lifecycleEventWatchInstalled = false;
     bool quitRequested = false;
+    std::optional<NXFloat> _overrideGlassTintAmount;
 
     friend class UIApplicationPressRepeatTestHarness;
 };

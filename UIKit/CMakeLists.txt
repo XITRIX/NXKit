@@ -134,6 +134,7 @@ if (UIKIT_BUILD_TESTS)
     add_test(NAME NXKitCornerRenderingTests COMMAND NXKitCornerRenderingTests)
 
     add_executable(NXKitTraitCollectionTests tests/UITraitCollectionTests.cpp)
+    target_include_directories(NXKitTraitCollectionTests PRIVATE lib)
     target_link_libraries(NXKitTraitCollectionTests PRIVATE Xitrix::UIKit)
     add_test(NAME NXKitTraitCollectionTests COMMAND NXKitTraitCollectionTests)
 

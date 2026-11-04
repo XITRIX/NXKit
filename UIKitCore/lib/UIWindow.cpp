@@ -201,10 +201,13 @@ void UIWindow::updateTraitsFromPlatform() {
     if (!context) return;
     const auto [horizontal, vertical] = context->getSizeClasses();
     const auto style = context->getThemeMode();
+    const auto glassTintAmount = UIApplication::shared
+        ? UIApplication::shared->glassTintAmount() : UITraitCollection::defaultGlassTintAmount;
     const auto scale = context->getScaleFactor();
     if (_traitCollection && _traitCollection->horizontalSizeClass() == horizontal
         && _traitCollection->verticalSizeClass() == vertical
         && _traitCollection->userInterfaceStyle() == style
+        && _traitCollection->glassTintAmount() == glassTintAmount
         && _traitCollection->displayScale() == scale) return;
 
     const auto previous = _traitCollection;
@@ -212,6 +215,7 @@ void UIWindow::updateTraitsFromPlatform() {
     next->_horizontalSizeClass = horizontal;
     next->_verticalSizeClass = vertical;
     next->_userInterfaceStyle = style;
+    next->_glassTintAmount = glassTintAmount;
     next->_displayScale = scale;
     _traitCollection = next;
     // Match the key window's current environment before delivering callbacks;

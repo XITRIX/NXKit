@@ -4,6 +4,7 @@
 #include <UITraitCollection.h>
 #include "GlassInteraction.hpp"
 #include "GlassAppearance.hpp"
+#include "CABackdropEffectLayer.hpp"
 
 #include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
@@ -28,8 +29,8 @@ public:
     static BackdropEffect resolve(UIGlassEffect::Style style, NXSize size) {
         return resolve(UIGlassEffect(style),size,false);
     }
-    static BackdropEffect resolve(const UIGlassEffect& effect, NXSize size, bool dark) {
-        auto traits=std::make_shared<UITraitCollection>();
+    static BackdropEffect resolve(const UIGlassEffect& effect, NXSize size, bool dark, NXFloat amount=.5f) {
+        auto traits=UITraitCollection::traitCollectionWithGlassTintAmount(amount);
         traits->_userInterfaceStyle=dark ? UIUserInterfaceStyle::dark : UIUserInterfaceStyle::light;
         return effect._backdropEffect(size,traits);
     }
@@ -141,7 +142,7 @@ void bindMaterial(SkRuntimeEffectBuilder& builder, const BackdropEffect& glass,
         "tint", "tintMode", "edge", "specStrength", "specFallbackStrength", "specBrightFallbackStrength",
         "specLightDirection", "specDirectionalPower", "specWidthPx", "reflectionSamplePx",
         "reflectionSpreadPx", "brightBackdropShade", "referenceAppearance", "bodyMode",
-        "backdropLuma", "edgeAbsorption", "adaptiveTint", "bodyCompression", "neutralDetail", "materialFrost"
+        "backdropLuma", "edgeAbsorption", "adaptiveTint", "bodyCompression", "neutralDetail", "materialFrost", "glassTintAmount"
     }) {
         const auto components = glass.uniform(name);
         if (components) builder.uniform(name).set(components->data(), components->size());
@@ -284,6 +285,60 @@ void testNativeTint() {
         const auto override=GlassMaterialTestHarness::resolve(glass,{160,70},dark);
         expect(override.uniform("tintMode")->front()==0 && override.uniform("tint")->back()==0,"explicit opacity overrides retain the low-level tint path");
     }
+}
+
+void testGlassTintPreference() {
+    for(const bool dark : {false,true}) for(const auto style : {UIGlassEffect::Style::regular,UIGlassEffect::Style::clear}) {
+        for(const bool tinted : {false,true}) {
+            UIGlassEffect glass(style);
+            if(tinted) glass.setTintColor(UIColor(0,122,255));
+            int previousTransmission=1000;
+            for(const auto amount : {0.f,.25f,.5f,.75f,1.f}) {
+                const auto effect=GlassMaterialTestHarness::resolve(glass,{160,64},dark,amount);
+                expect(effect.uniform("glassTintAmount")->front()==amount,"the inherited preference reaches the material uniform");
+                const auto black=renderResolvedBody(effect,{160,64},SK_ColorBLACK);
+                const auto white=renderResolvedBody(effect,{160,64},SK_ColorWHITE);
+                const int transmission=std::abs(int(SkColorGetR(white))-int(SkColorGetR(black)))
+                    +std::abs(int(SkColorGetG(white))-int(SkColorGetG(black)))
+                    +std::abs(int(SkColorGetB(white))-int(SkColorGetB(black)));
+                expect(transmission<=previousTransmission+3,"tinting continuously reduces backdrop transmission in both styles/themes, including colored glass");
+                previousTransmission=transmission;
+                expect(SkColorGetA(black)==255 && SkColorGetA(white)==255,"glass preferences change the body rather than fading the view");
+                if(amount==1 && !tinted) expect(transmission>100,"native fully tinted glass still transmits backdrop color");
+            }
+            glass.setFrostRadius(7);
+            expect(GlassMaterialTestHarness::resolve(glass,{160,64},dark,0).backdropBlurRadius()==7,
+                   "an explicit frost override retains its value at the clear endpoint");
+        }
+        UIGlassEffect blue(style),red(style);
+        blue.setTintColor(UIColor(0,0,255,0));red.setTintColor(UIColor(255,0,0,0));
+        for(const auto amount : {.75f,1.f}) {
+            const auto a=renderResolvedBody(GlassMaterialTestHarness::resolve(blue,{160,64},dark,amount),{160,64},SK_ColorWHITE);
+            const auto b=renderResolvedBody(GlassMaterialTestHarness::resolve(red,{160,64},dark,amount),{160,64},SK_ColorWHITE);
+            expect(a==b,"increasing glass tint cannot reveal the hidden RGB of a fully transparent custom tint");
+        }
+    }
+}
+
+void testNativeGlassTintControls() {
+    struct Control { float amount; bool dark,clear,tinted; int width,height,r,g,b,nr,ng,nb; };
+    const Control controls[] = {
+#include "fixtures/GlassTintReference.inc"
+    };
+    int maximumError=0;
+    double totalError=0;
+    for(const auto& c:controls) {
+        UIGlassEffect effect(c.clear?UIGlassEffect::Style::clear:UIGlassEffect::Style::regular);
+        if(c.tinted) effect.setTintColor(UIColor(0,122,255));
+        const NXSize size(c.width,c.height);
+        const auto pixel=renderResolvedBody(GlassMaterialTestHarness::resolve(effect,size,c.dark,c.amount),size,SkColorSetRGB(c.r,c.g,c.b));
+        const int error=std::max({std::abs(int(SkColorGetR(pixel))-c.nr),std::abs(int(SkColorGetG(pixel))-c.ng),std::abs(int(SkColorGetB(pixel))-c.nb)});
+        maximumError=std::max(maximumError,error);
+        totalError+=std::abs(int(SkColorGetR(pixel))-c.nr)+std::abs(int(SkColorGetG(pixel))-c.ng)+std::abs(int(SkColorGetB(pixel))-c.nb);
+        if(error>16) std::cerr<<"Native glass residual "<<c.amount<<" dark="<<c.dark<<" clear="<<c.clear<<" tinted="<<c.tinted<<" background="<<c.r<<','<<c.g<<','<<c.b<<" error="<<error<<'\n';
+        expect(error<=16,"the preference/style/color matrix stays within measured native material tolerance");
+    }
+    std::cout<<"Native preference controls: "<<std::size(controls)<<", mean channel error "<<totalError/(3*std::size(controls))<<", max "<<maximumError<<'\n';
 }
 
 void testNativeOpticalControls() {
@@ -436,6 +491,8 @@ void testMaterial() {
     runtime = result.effect;
     testNativeTint();
     testNativeOpticalControls();
+    testGlassTintPreference();
+    testNativeGlassTintControls();
     const auto clearBody = renderDefaultBody(UIGlassEffect::Style::clear, {132, 56});
     const auto smallBody = renderDefaultBody(UIGlassEffect::Style::regular, {132, 56});
     const auto largeBody = renderDefaultBody(UIGlassEffect::Style::regular, {320, 240});
@@ -515,6 +572,20 @@ void testMaterial() {
 }
 
 int main() {
+    {
+        auto description = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
+        auto layer = new_shared<CABackdropEffectLayer>(description);
+        const auto snapshot = std::static_pointer_cast<CABackdropEffectLayer>(layer->copy());
+        const auto original = snapshot->effect().uniform("luminosity");
+        description.setUniform("luminosity", .75f);
+        layer->setEffect(description);
+        expect(snapshot->effect().uniform("luminosity") == original,
+               "a presentation snapshot retains its original immutable material when the model changes");
+        auto returned = layer->effect();
+        returned.setUniform("luminosity", .25f);
+        expect(layer->effect().uniform("luminosity")->front() == .75f,
+               "editing a returned material description cannot mutate a shared render snapshot");
+    }
     testMotion();
     testAppearancePolicy();
     testMaterial();

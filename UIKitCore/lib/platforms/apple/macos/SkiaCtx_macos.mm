@@ -1,4 +1,5 @@
 #include "../AppleSystemFont.hpp"
+#include "../AppleGlassPreference.hpp"
 #include "../MetalPipelineCache.hpp"
 #include <platforms/macos/SkiaCtx_macos.h>
 
@@ -148,6 +149,10 @@ void SkiaCtx_macos::destroyContext() {
 //float SkiaCtx_macos::getScaleFactor() {
 //    return NSApplication.sharedApplication.keyWindow.backingScaleFactor;
 //}
+
+NXFloat SkiaCtx_macos::getGlassTintAmount() {
+    return Internal::appleGlassTintAmount().value_or(UITraitCollection::defaultGlassTintAmount);
+}
 
 UIUserInterfaceStyle SkiaCtx_macos::getThemeMode() {
     auto isDark= [[NSUserDefaults.standardUserDefaults stringForKey: @"AppleInterfaceStyle"]  isEqual: @"Dark"];

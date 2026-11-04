@@ -1,6 +1,7 @@
 #include <UIGlassEffect.h>
 #include "CAGlassContainerLayer.hpp"
 #include "CABackdropEffectLayer.hpp"
+#include "BackdropShader.hpp"
 #include "GlassShadow.hpp"
 #include "GlassRim.hpp"
 #include "LayerCornerGeometry.hpp"
@@ -190,7 +191,7 @@ struct CAGlassContainerLayer::Item {
     std::shared_ptr<CABackdropEffectLayer> layer;
     SkMatrix matrix, inverse;
     NXFloat alpha;
-    BackdropEffect material;
+    std::shared_ptr<const BackdropEffect> material;
 };
 CAGlassContainerLayer::CAGlassContainerLayer(const UIGlassContainerEffect& effect): _effect(effect) {}
 CAGlassContainerLayer::CAGlassContainerLayer(CAGlassContainerLayer* layer):
@@ -239,7 +240,7 @@ void CAGlassContainerLayer::collect(const std::shared_ptr<CALayer>& model, const
     if (glass && glass->_glassMaterial && std::isfinite(size.width) && std::isfinite(size.height)
         && size.width > 0 && size.height > 0) {
         items.push_back({glass, matrix, inverse, alpha,
-            glass->_glassMaterial->_backdropEffect(size, glass->_glassTraits)});
+            glass->resolvedEffect(size)});
     }
     matrix.preTranslate(-layer->bounds().origin.x, -layer->bounds().origin.y);
     auto children = layer->sublayers();
@@ -271,7 +272,7 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
     for (auto& item : items) {
         const auto& effect = *item.layer->_glassMaterial;
         if (effect.style() == UIGlassEffect::Style::regular && !effect.tintColor())
-            item.material = effect._backdropEffect({sharedMaterialSize, sharedMaterialSize}, item.layer->_glassTraits);
+            item.material = item.layer->resolvedEffect({sharedMaterialSize, sharedMaterialSize});
     }
     if (!_runtime || _runtimeCount != items.size()) {
         // Reuse the program across containers and membership changes. All
@@ -309,12 +310,12 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
             std::isfinite(layer->cornerRadius()) ? std::max(0.0f, layer->cornerRadius()) : 0,
             layer->cornerCurve() == CALayerCornerCurve::continuous ? 1.0f : 0.0f});
         alphas.push_back(item.alpha);
-        const auto appearance = item.material.uniform("backdropLuma");
-        const auto body=item.material.uniform("bodyMode");
-        const bool casts=!layer->shadowColor() && appearance && body && body->front()<.5f && layer->shadowOpacity()>0 && item.alpha>0;
+        const auto appearance = Internal::BackdropShader::uniformValues(*item.material, "backdropLuma");
+        const auto body=Internal::BackdropShader::uniformValues(*item.material, "bodyMode");
+        const bool casts=!layer->shadowColor() && !appearance.empty() && !body.empty() && body.front()<.5f && layer->shadowOpacity()>0 && item.alpha>0;
         shadows.push_back(casts?std::max(0.0f,layer->shadowOpacity())*item.alpha:0);
         if(casts) {
-            const auto native=Internal::glassShadow(size,appearance->front()<.5f);
+            const auto native=Internal::glassShadow(size,appearance.front()<.5f);
             const auto matrixNorm=std::sqrt(forward.getScaleX()*forward.getScaleX()+forward.getSkewX()*forward.getSkewX()+forward.getSkewY()*forward.getSkewY()+forward.getScaleY()*forward.getScaleY());
             if(native.sigma*matrixNorm>dominantElevation) {
                 dominantElevation=native.sigma*matrixNorm; elevationSigma=native.sigma;
@@ -328,8 +329,8 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
         const double a = forward.getScaleX(), b = forward.getSkewX(), c = forward.getSkewY(), d = forward.getScaleY();
         const double squareNorm = a*a+b*b+c*c+d*d, determinant = a*d-b*c;
         const auto stretch = std::sqrt((squareNorm + std::sqrt(std::max(0.0,squareNorm*squareNorm-4*determinant*determinant)))*.5);
-        maximumRadius = std::max(maximumRadius, static_cast<NXFloat>(item.material.maximumSampleRadius() * stretch));
-        const auto blur = item.material.backdropBlurRadius() * scale;
+        maximumRadius = std::max(maximumRadius, static_cast<NXFloat>(item.material->maximumSampleRadius() * stretch));
+        const auto blur = item.material->backdropBlurRadius() * scale;
         inputs.push_back(blur > 0 ? SkImageFilters::Blur(blur * std::hypot(forward.getScaleX(),forward.getSkewX()), blur * std::hypot(forward.getSkewY(),forward.getScaleY()), SkTileMode::kClamp, nullptr) : nullptr);
         childNames.push_back("backdrop" + std::to_string(i));
         canvas->save(); canvas->concat(item.matrix); layer->observeBackdrop(canvas); canvas->restore();
@@ -353,11 +354,11 @@ void CAGlassContainerLayer::draw(SkCanvas* canvas) {
             else if (u.name == "interactionLocation") {
                 const auto location = SkPoint::Make(item.layer->_interaction->location.x, item.layer->_interaction->location.y);
                 values.insert(values.end(), {location.x(), location.y()});
-            } else if (u.name == "maximumSampleRadius") values.push_back(item.material.maximumSampleRadius());
+            } else if (u.name == "maximumSampleRadius") values.push_back(item.material->maximumSampleRadius());
             else {
-                const auto uniform = item.material.uniform(u.name);
-                if (!uniform || uniform->size() != u.count) throw std::logic_error("Missing glass material uniform " + u.name);
-                values.insert(values.end(), uniform->begin(), uniform->end());
+                const auto uniform = Internal::BackdropShader::uniformValues(*item.material, u.name);
+                if (uniform.size() != u.count) throw std::logic_error("Missing glass material uniform " + u.name);
+                values.insert(values.end(), uniform.begin(), uniform.end());
             }
         }
         if (_runtime->findUniform("material_" + u.name))

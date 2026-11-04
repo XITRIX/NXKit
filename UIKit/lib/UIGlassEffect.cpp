@@ -263,6 +263,37 @@ BackdropEffect UIGlassEffect::_backdropEffect(
         : UIUserInterfaceStyle::unspecified;
     const bool hasNativeTint = _tintColor && !_tintOpacity;
     auto parameters = styleDefaults(_style, size, interfaceStyle, hasNativeTint);
+    const auto glassTintAmount = traits ? traits->glassTintAmount() : UITraitCollection::defaultGlassTintAmount;
+    // iOS 27 framebuffer controls: the slider changes regular material density,
+    // not view alpha. Clear style retains its body and explicit colors survive
+    // at every position. Keep caller-specified optical overrides below intact.
+    const bool dark = interfaceStyle == UIUserInterfaceStyle::dark;
+    const auto increasedTint = std::max<NXFloat>(0, (glassTintAmount - 0.5f) * 2);
+    // Measured 4-point stripe transmission uses a small, continuous kernel
+    // for clear/colored glass. Neutral regular retains its wider context blur
+    // plus detail lane; the preference progressively suppresses that lane.
+    if (_style == Style::clear || hasNativeTint) {
+        const auto firstHalf = std::min<NXFloat>(1, glassTintAmount * 2);
+        parameters.frostRadius = interpolate(0.4f, 1.0f, firstHalf);
+        if (glassTintAmount > 0.5f)
+            parameters.frostRadius = interpolate(1.0f, 1.65f, increasedTint);
+    } else if (glassTintAmount < 0.5f) {
+        parameters.frostRadius = glassTintAmount <= 0.25f
+            ? interpolate(0.7f, 1.1f, glassTintAmount * 4)
+            : interpolate(1.1f, parameters.frostRadius, (glassTintAmount - 0.25f) * 4);
+    }
+    if (_style == Style::regular && !hasNativeTint) {
+        if (dark && increasedTint > 0) {
+            const auto first = std::min<NXFloat>(1, increasedTint * 2);
+            const auto second = std::max<NXFloat>(0, increasedTint * 2 - 1);
+            parameters.contrast *= interpolate(1, 0.735f, first) * interpolate(1, 0.721f, second);
+            parameters.saturation *= interpolate(1, 1.025f, first) * interpolate(1, 0.961f, second);
+            parameters.tintOpacity = interpolate(parameters.tintOpacity, 0.113f, first);
+            parameters.tintOpacity = interpolate(parameters.tintOpacity, 0.129f, second);
+        } else if (!dark) {
+            parameters.tintOpacity += (glassTintAmount - 0.5f) * (glassTintAmount < 0.5f ? 0.24f : 0.36f);
+        }
+    }
 
     parameters.maximumSampleRadius = _maximumSampleRadius.value_or(
         parameters.maximumSampleRadius
@@ -349,8 +380,15 @@ BackdropEffect UIGlassEffect::_backdropEffect(
     effect.setUniform("edgeAbsorption", _edgeAbsorption.value_or(0.035f));
     const auto bodySize = std::clamp((std::min(size.width, size.height) - 52.0f) / 68.0f, 0.0f, 1.0f);
     effect.setUniform("adaptiveTint", 0.0f);
-    effect.setUniform("bodyCompression", _style == Style::regular && !_tintColor && !_tintOpacity
-        ? interpolate(0.30563f, 0.55112f, bodySize) : 0.153f);
-    effect.setUniform("neutralDetail", _style == Style::regular && !_tintColor ? 0.5f : 0.0f);
+    auto bodyCompression = _style == Style::regular && !_tintColor && !_tintOpacity
+        ? interpolate(0.30563f, 0.55112f, bodySize) : 0.153f;
+    if (_style == Style::regular && dark && !_tintColor && !_tintOpacity) {
+        bodyCompression = interpolate(bodyCompression, 0.477f, std::min<NXFloat>(1, increasedTint * 2));
+        bodyCompression = interpolate(bodyCompression, 0.835f, std::max<NXFloat>(0, increasedTint * 2 - 1));
+    }
+    effect.setUniform("bodyCompression", bodyCompression);
+    effect.setUniform("neutralDetail", _style == Style::regular && !_tintColor
+        ? 0.5f * std::pow(1 - increasedTint, 1.5f) : 0.0f);
+    effect.setUniform("glassTintAmount", glassTintAmount);
     return effect;
 }

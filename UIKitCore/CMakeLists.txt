@@ -129,6 +129,7 @@ if (APPLE)
             lib/platforms/SkiaCtx_sdlBase.cpp
             lib/platforms/apple/AppleSystemFont.mm
             lib/platforms/apple/AppleSystemImage.mm
+            lib/platforms/apple/AppleGlassPreference.mm
     )
     if (PLATFORM_DESKTOP)
         target_sources(UIKitCore PRIVATE
@@ -155,6 +156,12 @@ endif ()
 option(UIKITCORE_BUILD_TESTS "Build UIKitCore regression tests" OFF)
 if (UIKITCORE_BUILD_TESTS)
     enable_testing()
+    if(APPLE AND PLATFORM_DESKTOP)
+        add_executable(NXKitAppleGlassPreferenceTests tests/AppleGlassPreferenceTests.mm)
+        target_include_directories(NXKitAppleGlassPreferenceTests PRIVATE lib/platforms/apple)
+        target_link_libraries(NXKitAppleGlassPreferenceTests PRIVATE UIKitCore)
+        add_test(NAME NXKitAppleGlassPreferenceTests COMMAND NXKitAppleGlassPreferenceTests)
+    endif()
     add_executable(NXKitFramePacingTests tests/FramePacingTests.cpp)
     target_link_libraries(NXKitFramePacingTests PRIVATE UIKitCore)
     add_test(NAME NXKitFramePacingTests COMMAND NXKitFramePacingTests)

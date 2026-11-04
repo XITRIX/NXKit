@@ -3,7 +3,9 @@
 #include "LensDemoStage.hpp"
 #include "GlassScreenViewController.hpp"
 #include "GlassStressView.hpp"
+#include "GlassAppearanceSettings.hpp"
 #include <algorithm>
+#include <cmath>
 
 using namespace NXKit;
 using namespace NXKit::yoga::literals;
@@ -38,6 +40,45 @@ std::shared_ptr<UIButton> button(const std::string& title, std::function<void()>
     });
     view->primaryAction=UIAction(title,std::move(action)); return view;
 }
+class GlassAppearanceSettingsController final : public UIViewController {
+public:
+    GlassAppearanceSettingsController() { setTitle("Glass appearance"); }
+    void loadView() override {
+        _scroll=new_shared<UIScrollView>();_scroll->setBackgroundColor(UIColor::systemBackground);
+        _scroll->configureLayout([](const auto& layout){layout->setAlignItems(YGAlignCenter);});
+        _content=new_shared<UIView>();updateGlassContent(_scroll,_content);
+        _status=new_shared<UILabel>();_status->setFontSize(20);_status->setAutolayoutEnabled(true);_content->addSubview(_status);
+        auto detail=new_shared<UILabel>();detail->setFontSize(17);detail->setTextColor(UIColor::secondaryLabel);
+        detail->setAutolayoutEnabled(true);
+        detail->setText("Applies to all Demo screens and is saved for this app. Follow system uses Apple's glass preference on 27+, or the original NXKit material elsewhere.");
+        _content->addSubview(detail);
+        const auto weak=weak_from_base<GlassAppearanceSettingsController>();
+        const auto apply=[weak](std::optional<NXFloat> amount){DemoGlassSettings::set(amount);if(auto self=weak.lock())self->updateStatus();};
+        _content->addSubview(button("Follow system",[apply]{apply(std::nullopt);}));
+        for(const auto amount : {0.f,.25f,.5f,.75f,1.f})
+            _content->addSubview(button(std::to_string(int(amount*100))+"% tinted",[apply,amount]{apply(amount);}));
+        _scroll->addSubview(_content);setView(_scroll);updateStatus();
+    }
+    void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previous) override {
+        UIViewController::traitCollectionDidChange(std::move(previous));updateStatus();
+    }
+    void viewDidLayoutSubviews() override {
+        UIViewController::viewDidLayoutSubviews();updateGlassContent(_scroll,_content);updateStatus();
+    }
+    void viewSafeAreaInsetsDidChange() override {
+        UIViewController::viewSafeAreaInsetsDidChange();updateGlassContent(_scroll,_content);
+    }
+private:
+    void updateStatus() {
+        if(!_status) return;
+        const auto app=UIApplication::shared;
+        _status->setText(std::string(app->overrideGlassTintAmount()?"App override: ":"System: ")
+            +std::to_string(int(std::lround(app->glassTintAmount()*100)))+"% tinted");
+    }
+    std::shared_ptr<UIScrollView> _scroll;
+    std::shared_ptr<UIView> _content;
+    std::shared_ptr<UILabel> _status;
+};
 class LensDemoViewController final : public UIViewController {
 public:
     explicit LensDemoViewController(bool tabBarOnly = false):_tabBarOnly(tabBarOnly) {
@@ -160,6 +201,9 @@ void GlassDemoViewController::loadView() {
     }));
     _contentContainer->addSubview(button("Glass stress · 96 cards / nested scrolls",[weak] {
         if (auto self=weak.lock()) self->show(new_shared<GlassStressViewController>(),self);
+    }));
+    _contentContainer->addSubview(button("Glass appearance · app settings",[weak] {
+        if(auto self=weak.lock()) self->show(new_shared<GlassAppearanceSettingsController>(),self);
     }));
     _contentContainer->addSubview(button("Interactive tab bar",[weak] {
         if (auto self=weak.lock()) self->show(new_shared<LensDemoViewController>(true),self);

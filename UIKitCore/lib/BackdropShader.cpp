@@ -115,6 +115,11 @@ void BackdropShader::validate(
     }
 }
 
+std::span<const NXFloat> BackdropShader::uniformValues(const BackdropEffect& effect, const std::string& name) {
+    const auto found = effect._uniforms.find(name);
+    return found == effect._uniforms.end() ? std::span<const NXFloat>() : found->second;
+}
+
 sk_sp<SkImageFilter> BackdropShader::makeFilter(
     const BackdropEffect& effect, const sk_sp<SkRuntimeEffect>& runtimeEffect,
     NXSize layerSize, NXFloat radius, CALayerCornerCurve curve, NXFloat scale,

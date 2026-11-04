@@ -47,16 +47,17 @@ struct CABackdropEffectLayer::AppearanceObservation {
 
 CABackdropEffectLayer::CABackdropEffectLayer(const BackdropEffect& effect):
     CALayer(),
-    _effect(effect),
+    _effect(std::make_shared<const BackdropEffect>(effect)),
     _runtimeEffect(compile(effect)),
     _interaction(std::make_shared<Internal::GlassInteraction>()),
     _appearanceObservation(std::make_shared<AppearanceObservation>())
 {
-    validateUniforms(_effect, *_runtimeEffect);
+    validateUniforms(*_effect, *_runtimeEffect);
 }
 
 CABackdropEffectLayer::CABackdropEffectLayer(CABackdropEffectLayer* layer):
     CALayer(layer),
+    _resolvedMaterials(layer->_resolvedMaterials),
     _effect(layer->_effect),
     _variableBlur(layer->_variableBlur),
     _runtimeEffect(layer->_runtimeEffect),
@@ -207,15 +208,15 @@ void CABackdropEffectLayer::validateUniforms(const BackdropEffect& effect,
 
 void CABackdropEffectLayer::setEffect(const BackdropEffect& effect) {
     const auto canReuseRuntimeEffect = _runtimeEffect
-        && effect.shaderSource() == _effect.shaderSource()
-        && effect.backdropShaderName() == _effect.backdropShaderName();
+        && effect.shaderSource() == _effect->shaderSource()
+        && effect.backdropShaderName() == _effect->backdropShaderName();
     auto runtimeEffect = canReuseRuntimeEffect
         ? _runtimeEffect
         : compile(effect);
     validateUniforms(effect, *runtimeEffect);
 
     _variableBlur.reset();
-    _effect = effect;
+    _effect = std::make_shared<const BackdropEffect>(effect);
     _glassMaterial.reset();
     _glassTraits.reset();
     _runtimeEffect = std::move(runtimeEffect);
@@ -246,6 +247,20 @@ void CABackdropEffectLayer::setEffect(const UIBlurEffect& effect) {
 void CABackdropEffectLayer::invalidateImageFilterCache() {
     _cachedImageFilter.reset();
     _hasCachedFilterState = false;
+    _resolvedMaterials = {};
+}
+
+std::shared_ptr<const BackdropEffect> CABackdropEffectLayer::resolvedEffect(NXSize size) {
+    if (!_glassMaterial) return _effect;
+    for (const auto& material : _resolvedMaterials)
+        if (material && material->size == size) return {material, &material->effect};
+    auto material = std::make_shared<const ResolvedMaterial>(ResolvedMaterial{
+        size, _glassMaterial->_backdropEffect(size, _glassTraits)});
+    _resolvedMaterials[1] = std::move(_resolvedMaterials[0]);
+    _resolvedMaterials[0] = std::move(material);
+    // The alias retains the immutable description's owning cache entry even
+    // if a later resize replaces that entry during this frame.
+    return {_resolvedMaterials[0], &_resolvedMaterials[0]->effect};
 }
 
 sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
@@ -264,10 +279,9 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
         return _cachedImageFilter;
     }
 
-    const auto effect = _glassMaterial
-        ? _glassMaterial->_backdropEffect(layerSize, _glassTraits) : _effect;
+    const auto effect = resolvedEffect(layerSize);
     auto imageFilter = _variableBlur ? Internal::progressiveBlurFilter(*_variableBlur,layerSize,layerContentsScale) : Internal::BackdropShader::makeFilter(
-        effect, _runtimeEffect, layerSize, layerCornerRadius, cornerCurve(),
+        *effect, _runtimeEffect, layerSize, layerCornerRadius, cornerCurve(),
         layerContentsScale, _interaction->glow(), _interaction->location
     );
     if (!imageFilter) {
@@ -353,16 +367,15 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
     // separate from the clipped body and automatic elevation, with one shared
     // distance/normal law also used by glass containers. It must never enter
     // the input sampled for the refraction above.
-    const auto contourEffect = _glassMaterial
-        ? _glassMaterial->_backdropEffect(layerBounds.size,_glassTraits) : _effect;
+    const auto contourEffect = resolvedEffect(layerBounds.size);
     const auto scalar = [&](const char* name,float fallback) {
-        const auto value=contourEffect.uniform(name);
-        return value && !value->empty() ? value->front() : fallback;
+        const auto value=Internal::BackdropShader::uniformValues(*contourEffect, name);
+        return !value.empty() ? value.front() : fallback;
     };
-    const auto light=contourEffect.uniform("specLightDirection");
+    const auto light=Internal::BackdropShader::uniformValues(*contourEffect, "specLightDirection");
     const float contourStrength=scalar("edge",0)*scalar("edgeAbsorption",0)/0.035f;
     if (scalar("referenceAppearance",0)>.5f && scalar("bodyMode",1)<.5f
-        && contourStrength>0 && scalar("specWidthPx",0)>0 && light && light->size()==2) {
+        && contourStrength>0 && scalar("specWidthPx",0)>0 && light.size()==2) {
         static thread_local const auto runtime=[] {
             auto source=std::string("uniform shader scene; uniform float2 size, light; uniform float cornerRadius, cornerCurve, scale, dark, power, width, strength;\n")
                 +Internal::layerCornerShaderUniforms+Internal::glassShadowGeometrySource()+Internal::glassRimSource
@@ -389,7 +402,7 @@ half4 main(float2 pixelXY) {
         }();
         SkRuntimeEffectBuilder builder(runtime);
         const float size[]={layerBounds.width(),layerBounds.height()};
-        builder.uniform("size").set(size,2);builder.uniform("light").set(light->data(),2);
+        builder.uniform("size").set(size,2);builder.uniform("light").set(light.data(),2);
         builder.uniform("cornerRadius")=cornerRadius();
         builder.uniform("cornerCurve")=cornerCurve()==CALayerCornerCurve::continuous?1.0f:0.0f;
         Internal::bindLayerCornerGeometry(builder, *runtime, layerBounds.size, cornerRadius());
@@ -411,10 +424,10 @@ half4 main(float2 pixelXY) {
     // Native regular glass casts one inverse-clipped elevation field. Sample
     // the backdrop first so this layer never refracts its own shadow. Clear
     // glass has no default shadow; an explicit app shadow retains precedence.
-    const auto material = _effect.uniform("referenceAppearance");
-    const auto appearance = _effect.uniform("backdropLuma");
-    const auto body = _effect.uniform("bodyMode");
-    if (material && material->front()>0.5f && appearance && body && body->front()<0.5f
+    const auto material = Internal::BackdropShader::uniformValues(*_effect, "referenceAppearance");
+    const auto appearance = Internal::BackdropShader::uniformValues(*_effect, "backdropLuma");
+    const auto body = Internal::BackdropShader::uniformValues(*_effect, "bodyMode");
+    if (!material.empty() && material.front()>0.5f && !appearance.empty() && !body.empty() && body.front()<0.5f
         && !shadowColor() && shadowOpacity()>0) {
         static thread_local const auto runtime=[] {
             auto source=std::string("uniform float2 shadowSize; uniform float cornerRadius, cornerCurve, shadowSigma, shadowOpacity; uniform float2 shadowOffset;\n")
@@ -424,7 +437,7 @@ half4 main(float2 pixelXY) {
             if(!compiled.effect) throw std::runtime_error("Glass shadow shader: "+std::string(compiled.errorText.c_str()));
             return compiled.effect;
         }();
-        const auto parameters=Internal::glassShadow(layerBounds.size,appearance->front()<0.5f);
+        const auto parameters=Internal::glassShadow(layerBounds.size,appearance.front()<0.5f);
         SkRuntimeEffectBuilder builder(runtime);
         const float size[]={layerBounds.width(),layerBounds.height()},offset[]={0,parameters.offset};
         builder.uniform("shadowSize").set(size,2); builder.uniform("shadowOffset").set(offset,2);

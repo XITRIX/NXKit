@@ -6,6 +6,8 @@
 #include <DispatchQueue.h>
 #include <SkiaCtx.h>
 #include "RenderPerformance.hpp"
+#include <cstdlib>
+#include <string_view>
 
 namespace NXKit {
 
@@ -40,9 +42,18 @@ void renderApplicationFrame() {
         keyWindow->displayTreeIfNeeded();
     }
 
-    // Resolve pacing after callbacks and animations. Rendering is continuous,
-    // including when layout and the retained layer tree have not changed.
+    // Polling, layout and animation delivery still run while idle. Avoid
+    // acquiring a drawable or submitting GPU work when the retained tree is
+    // unchanged; the platform keeps displaying its last presented frame.
     SkiaCtx::_main->setTargetFrameRate(UIView::maximumAnimationFrameRate());
+    static const bool continuous = [] {
+        const auto enabled = [](const char* name) {
+            const auto value = std::getenv(name);
+            return value && std::string_view(value) == "1";
+        };
+        return enabled("NXKIT_CONTINUOUS_RENDERING") || enabled("NXKIT_UNCAPPED");
+    }();
+    if (!continuous && !CALayer::layerTreeIsDirty) return;
 
     const auto surface = SkiaCtx::_main->getBackbufferSurface();
     if (!surface) {
@@ -75,7 +86,10 @@ void renderApplicationFrame() {
 bool applicationRunLoop() {
     CALayer::maxFramerateRequired = 0;
     if (!SkiaCtx::_main->_immediateResizeFrame) {
-        SkiaCtx::_main->_immediateResizeFrame = [] { renderApplicationFrame(); };
+        SkiaCtx::_main->_immediateResizeFrame = [] {
+            CALayer::layerTreeIsDirty = true;
+            renderApplicationFrame();
+        };
     }
     UIApplication::shared->handleEventsIfNeeded();
     if (UIApplication::shared->isQuitRequested()) return false;

@@ -63,6 +63,9 @@ public:
 
     virtual UIUserInterfaceStyle getThemeMode() { return UIUserInterfaceStyle::light; }
 
+    /// System Liquid Glass preference. Unsupported platforms keep the original material.
+    virtual NXFloat getGlassTintAmount() { return UITraitCollection::defaultGlassTintAmount; }
+
     void setExtraScaleFactor(NXFloat extraScaleFactor) { _extraScaleFactor = extraScaleFactor; }
 
     virtual bool platformRunLoop(std::function<bool()> loop) = 0;

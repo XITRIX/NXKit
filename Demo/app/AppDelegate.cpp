@@ -14,11 +14,13 @@
 #include <romfs/romfs.hpp>
 #include <cstdlib>
 #include "SwitchShaderBake.hpp"
+#include "GlassAppearanceSettings.hpp"
 
 namespace NXKit {
 
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplication* application, std::map<std::string, std::any> launchOptions) {
     registerUIKitViews();
+    DemoGlassSettings::restore();
     DEFAULT_ROMFS_REGISTRATION
     window = new_shared<UIWindow>();
 #ifdef __SWITCH__

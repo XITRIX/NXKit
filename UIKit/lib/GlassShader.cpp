@@ -80,6 +80,7 @@ uniform float edgeAbsorption;
 uniform float adaptiveTint;
 uniform float bodyCompression;
 uniform float neutralDetail;
+uniform float glassTintAmount;
 // Resolved frost bounds the secondary kernels, including explicit zero frost.
 uniform float materialFrost;
 uniform float contentScale;
@@ -143,11 +144,16 @@ float3 nativeTintColor(float3 color, float3 transmitted) {
             float luma = clamp(amount - 0.15 * chroma * 4.0 * amount * (1.0 - amount), 0.0, 1.0);
             float knee = mix(0.54, 0.24, size);
             float response = (1.0 - exp(-luma / knee)) / (1.0 - exp(-1.0 / knee)) * mix(1.0, 0.61, size);
+            // Native dark regular tint retains its accent, reducing only the
+            // transmitted backdrop contribution above the midpoint.
+            response *= mix(1.0, 0.46, max(0.0, (glassTintAmount - 0.5) * 2.0));
             float3 base = color - color * (1.0 - color) * 0.02;
             return base * (1.0 - 0.02 * response) + (1.0 - base) * (0.12 + 0.09 * red) * response;
         }
         amount = pow(clamp(amount - 0.263 * chroma * 4.0 * amount * (1.0 - amount), 0.0, 1.0), 1.14);
-        float base = 0.4 - 0.235 * red;
+        float preferenceBase = glassTintAmount <= 0.5
+            ? 0.3 + 0.2 * glassTintAmount : 0.4 + 0.3 * (glassTintAmount - 0.5);
+        float base = preferenceBase * (1.0 - 0.5875 * red);
         amount = base + (1.0 - base) * amount;
         gain = 0.395 + 0.50 * red - 0.045 * green;
         bias = -0.014 - 0.043 * red + 0.022 * green;

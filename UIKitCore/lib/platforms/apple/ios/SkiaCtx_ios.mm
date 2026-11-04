@@ -1,4 +1,5 @@
 #include "../AppleSystemFont.hpp"
+#include "../AppleGlassPreference.hpp"
 #include "../MetalPipelineCache.hpp"
 #include "IOSWindowGeometry.hpp"
 #include <CALayer.h>
@@ -169,6 +170,10 @@ float SkiaCtx_ios::getScaleFactor() {
     // display density by dividing those two different geometry snapshots.
     if (_frameGeometry) return _frameGeometry->scale / _extraScaleFactor;
     return SkiaCtx_sdlBase::getScaleFactor() / _extraScaleFactor;
+}
+
+NXFloat SkiaCtx_ios::getGlassTintAmount() {
+    return Internal::appleGlassTintAmount().value_or(UITraitCollection::defaultGlassTintAmount);
 }
 
 NXKit::UIUserInterfaceStyle SkiaCtx_ios::getThemeMode() {

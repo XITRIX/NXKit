@@ -22,6 +22,7 @@ public:
 //    float getScaleFactor() override;
     void swapBuffers() override;
     UIUserInterfaceStyle getThemeMode() override;
+    NXFloat getGlassTintAmount() override;
 
 protected:
     bool platformRunLoop(std::function<bool ()> loop) override;

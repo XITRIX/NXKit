@@ -43,6 +43,12 @@ enum class UIGlassEffectStyle {
  Refraction and body frost can be tuned independently, and the perimeter
  uses localized directional light; clear retains its sub-point hairline.
  `backdropEffect()` exposes the resolved material as a portable rendering extension.
+ The inherited `UITraitCollection::glassTintAmount` preference changes frost
+ and regular-style material density independently of view/content opacity.
+ Clear style retains its color response; explicit tint colors survive every
+ preference position. Explicit optical overrides retain precedence. The body
+ transfer is calibrated against iOS 27.1 framebuffer controls; optical rims
+ and textured blur remain approximations.
  */
 class UIGlassEffect {
 public:
