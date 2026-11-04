@@ -46,6 +46,7 @@ struct NavigationBarState {
     std::optional<std::vector<std::shared_ptr<UINavigationItem>>> interactiveSource;
     std::shared_ptr<UIView> interactiveTitle;
     std::shared_ptr<UILabel> interactiveTitleLabel;
+    std::weak_ptr<UIView> interactiveRetiringTitle;
     double interactiveHandoff=-1;
 };
 class NavigationBarAccess {

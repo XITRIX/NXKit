@@ -12,11 +12,16 @@
 #include "LayerAnimationTimeline.hpp"
 #include "platforms/apple/AppleSystemFont.hpp"
 #include "include/ports/SkFontMgr_mac_ct.h"
+#include "include/core/SkSurface.h"
+#include "include/core/SkBitmap.h"
+#include "include/core/SkStream.h"
+#include "include/encode/SkPngEncoder.h"
 #include <iostream>
 #include <cmath>
 #include <vector>
 #include <fstream>
 #include <cstdlib>
+#include <filesystem>
 using namespace NXKit;
 namespace NXKit {
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplication*,std::map<std::string,std::any>){return true;}
@@ -137,11 +142,30 @@ void titleSettlement(const std::shared_ptr<Context>& context) {
         input.send(UITouchPhase::ended,{finger,300},850);
         expect((commit?bar.titleInk:bar.interactiveTitle)==incoming,"releasing a pop preserves the incoming title carrier");
         const auto origin=Timer();
-        for(int frame=0;frame<60;++frame) {
+        // Include the natural completion boundary and the material retirement
+        // tail. Forcing all animations to finish at frame 59 hides a title
+        // returning to its model position between these two clocks.
+        for(int frame=0;frame<=144;++frame) {
             auto now=origin;const auto us=origin.startTime.tv_usec+frame*1000000L/120;
             now.startTime.tv_sec+=us/1000000;now.startTime.tv_usec=us%1000000;
             std::function<void(const std::shared_ptr<CALayer>&)> tick=[&](const auto& layer){const auto children=layer->sublayers();layer->animateAt(now);for(const auto& child:children)tick(child);};
             tick(f.window->layer());
+            DispatchQueueTestHarness::pump();
+            if(frame>=60) {
+                expect(f.nav->topViewController()==(commit?f.target:f.source),"natural completion selects the intended controller before the material tail ends");
+                expect(commit?outgoing->superview().expired():incoming->superview().expired(),"natural completion detaches the obsolete title before its animation can reveal its model pose");
+                expect(bar.titleInk==(commit?incoming:outgoing)&&bar.titleInk->superview().lock()==f.nav->navigationBar(),"exactly the destination title carrier remains attached after natural completion");
+                expect(close(translation(bar.titleInk),0),"the settled title remains stationary through the material cleanup tail");
+                if(const auto destination=std::getenv("NXKIT_NAVIGATION_POP_COMPLETION_PICTURES");destination&&custom==0&&density==3&&commit&&progress==.55f&&(frame==60||frame==72||frame==96||frame==120)) {
+                    f.window->drawAndLayoutTreeIfNeeded();
+                    auto surface=SkSurfaces::Raster(SkImageInfo::MakeN32Premul(402*3,54*3));auto canvas=surface->getCanvas();
+                    UITraitCollection::setCurrent(f.window->traitCollection());canvas->clear(UIColor::systemBackground.raw());canvas->scale(3,3);canvas->translate(0,-f.nav->navigationBar()->frame().minY());f.nav->navigationBar()->layer()->skiaRender(canvas);
+                    const std::filesystem::path directory=destination;std::filesystem::create_directories(directory);
+                    SkFILEWStream file((directory/((dark?"dark-":"light-")+std::to_string(frame)+".png")).c_str());SkBitmap image;image.allocN32Pixels(402*3,54*3);surface->readPixels(image,0,0);
+                    expect(SkPngEncoder::Encode(&file,image.pixmap(),{}),"post-gesture title comparison encodes successfully");
+                }
+                continue;
+            }
             expect(std::abs(translation(outgoing)-x(f.source))<.02f,"outgoing title stays attached to its screen on every release frame");
             expect(std::abs(translation(incoming)-x(f.target))<.02f,"incoming title keeps destination parallax throughout settlement");
             const auto expectedWidth=402*(.3f+.7f*x(f.source)/402);

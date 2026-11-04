@@ -53,6 +53,7 @@ When borrowing an algorithm or porting code, check its license, preserve require
 
 - Reproduce semantics, state transitions, lifecycle ordering, defaults, and edge cases—not just UIKit class names.
 - Keep application-specific assets, strings, dimensions, and navigation behavior out of `UIKitCore`.
+- Never hardcode layout geometry for layout components. Derive it from current bounds, safe-area insets, intrinsic sizes, and the actual attached elements. Scroll pockets must follow their scroll view's live safe area and associated edge-container geometry; do not add fixed extensions or assume a navigation-bar height from a reference device.
 - Do not expose a public API until its behavior is usable. If a necessary API must land incrementally, mark it clearly as incomplete and update `UIKIT_API_PROGRESS.md`.
 - A declaration with an empty implementation is a stub, not implemented functionality.
 - Prefer portable UIKit concepts. Do not add iOS-only shell APIs unless a supported platform genuinely needs them.

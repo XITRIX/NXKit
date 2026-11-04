@@ -117,6 +117,7 @@ void UINavigationBar::refresh(bool animated,int direction) {
     // Retired material must not keep participating in a later SDF union.
     for(const auto& weak:_state->retiring)if(const auto view=weak.lock())view->removeFromSuperview();
     _state->retiring.clear();
+    _state->interactiveRetiringTitle.reset();
     struct Pose {NXRect frame;NXFloat alpha;};
     std::map<std::shared_ptr<UIView>,Pose> before;
     auto presentedFrame=[&](const std::shared_ptr<UIView>& view) {
@@ -238,6 +239,7 @@ void UINavigationBar::refresh(bool animated,int direction) {
         // Retain those exact animations on the content's reversible clock;
         // only the glass/ink grouping changes to its committed appearance.
         _state->titleInk=_state->interactiveTitle;_state->title=_state->interactiveTitleLabel;
+        _state->interactiveRetiringTitle=oldTitleInk;
         retiring.push_back(oldTitleInk);
     }else if(oldTitle->text()!=(top?top->title():"")||(animate&&stackTransition)) {
         auto title=new_shared<UILabel>();title->setFontSize(17);title->setFontWeight(600);title->setTextAlignment(NSTextAlignment::center);title->setUserInteractionEnabled(false);
@@ -594,7 +596,12 @@ void Internal::NavigationBarAccess::endInteractivePop(UINavigationBar& bar,bool 
 }
 void Internal::NavigationBarAccess::finishInteractivePop(UINavigationBar& bar) {
     auto& s=*bar._state;
+    // The title slide ends with the interactive content clock, before the
+    // independent glass retirement tail. Its model transform is the source
+    // pose, so keeping it attached after discarding that slide flashes it back.
+    if(const auto outgoing=s.interactiveRetiringTitle.lock())outgoing->removeFromSuperview();
+    s.interactiveRetiringTitle.reset();
     // At rest, restore the ordinary titleView hierarchy without changing the
-    // application's transform or frame. Both carriers have reached identity.
+    // application's transform or frame. The visible carrier is at identity.
     if(s.customTitle&&s.customTitle->superview().lock()==s.titleInk)bar.insertSubviewBelow(s.customTitle,s.glass);
 }

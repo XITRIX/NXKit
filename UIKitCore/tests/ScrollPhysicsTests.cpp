@@ -74,6 +74,10 @@ void catching(){
  f.begin(2,500,2);f.move(2,470,2.02);f.move(2,400,2.04);f.move(2,399,2.4);f.move(2,398,2.6);f.move(2,397,2.8);f.end(2,397,3);expect(!f.scroll->isDecelerating(),"slow release discards previous fling speed");
 }
 void regrabAndGeometry(){
+ Fixture held;held.begin(1,250,0);held.move(1,280,.02);held.move(1,350,.04);held.move(1,450,.06);
+ held.scroll->setFrame({20,100,350,300});held.scroll->layoutIfNeeded();held.end(1,450,.5);
+ expect(!held.scroll->isDecelerating(),"lifting after a viewport clamp cannot revive the pre-resize swipe velocity");
+ near(held.scroll->contentOffset().y,0,.001,"a held viewport clamp stays at its edge on release");
  Fixture f;f.scroll->setContentOffset({0,-110},false);UIScrollViewPhysicsTestHarness::start(f.scroll,{0,-200});UIScrollViewPhysicsTestHarness::step(f.scroll,.05);auto oldTimer=UIScrollViewPhysicsTestHarness::timer(f.scroll);float p=f.scroll->contentOffset().y;
  f.begin(1,300,0);near(f.scroll->contentOffset().y,p,.001,"bounce catch preserves stretched position");f.move(1,301,.02);near(f.scroll->contentOffset().y,p,.7,"first move does not apply rubber band twice");f.move(1,360,.04);expect(f.scroll->contentOffset().y<p-10,"regrab continues smoothly outward");float continued=f.scroll->contentOffset().y;UIScrollViewPhysicsTestHarness::stepTimer(oldTimer,6);near(f.scroll->contentOffset().y,continued,.001,"cancelled spring cannot overwrite a new drag");
  f.scroll->setFrame({20,100,350,300});f.scroll->layoutIfNeeded();near(f.scroll->contentOffset().y,0,.001,"viewport resize clamps elastic drag like UIKit");f.move(1,361,.06);near(f.scroll->contentOffset().y,0,.7,"post-resize raw gesture anchor follows new geometry");f.end(1,361,.1);UIScrollViewPhysicsTestHarness::step(f.scroll,8);near(f.scroll->contentOffset().y,0,.001,"resized pull settles");
@@ -133,6 +137,40 @@ void inwardReleaseContinuesScrolling(){
  Internal::ScrollAxisMotion a,b;a.begin(-40,2400,0,1100,true,2,.001);b=a;a.advance(.3);for(int i=0;i<30;++i)b.advance(.01);
  expect(!a.spring&&a.position>0&&a.velocity>0,"crossing spring hands off inward position and velocity to free flight");
  near(a.position,b.position,.001,"elastic-to-free handoff is independent of frame subdivision");near(a.velocity,b.velocity,.001,"elastic-to-free handoff preserves frame-independent velocity");
+}
+void outwardReleaseKeepsMomentum(){
+ for(bool horizontal:{false,true})for(bool trailing:{false,true}) {
+  Fixture f;f.scroll->setContentSize({1600,1600});f.scroll->setBounceHorizontally(true);f.scroll->layoutIfNeeded();
+  const float boundary=trailing?(horizontal?1250.f:1100.f):0.f;
+  const float direction=trailing?1.f:-1.f;
+  auto point=[&](float value){return horizontal?NXPoint{value,200}:NXPoint{150,value};};
+  f.scroll->setContentOffset(horizontal?NXPoint{boundary-direction*50,300}:NXPoint{300,boundary-direction*50},false);
+  const float origin=horizontal?190:350;
+  f.send(1,UITouchPhase::began,point(origin),0);
+  for(int i=1;i<=5;++i)f.send(1,UITouchPhase::moved,point(origin-direction*30*i),.02*i);
+  const auto stretch=[&]{return direction*((horizontal?f.scroll->contentOffset().x:f.scroll->contentOffset().y)-boundary);};
+  const auto released=stretch();expect(released>0&&released<50,"fast swipe reaches modest overscroll before lift-off");
+  f.send(1,UITouchPhase::ended,point(origin-direction*150),.11);
+  float peak=released;
+  for(int i=1;i<=120;++i){UIScrollViewPhysicsTestHarness::step(f.scroll,i/120.);peak=std::max(peak,stretch());}
+  expect(peak>released+10,"outward release preserves momentum beyond every edge instead of hitting a wall");
+  UIScrollViewPhysicsTestHarness::step(f.scroll,3);
+  near(stretch(),0,.001,"outward fling returns exactly to its own edge");
+  expect(!f.scroll->isDecelerating(),"outward edge fling terminates after its return");
+ }
+ for(bool horizontal:{false,true})for(bool trailing:{false,true})for(bool bounces:{false,true}) {
+  Fixture f;f.scroll->setContentSize({1600,1600});f.scroll->setBounceHorizontally(bounces);f.scroll->setBounceVertically(bounces);f.scroll->layoutIfNeeded();
+  const float boundary=trailing?(horizontal?1250.f:1100.f):0.f,direction=trailing?1.f:-1.f;
+  auto point=[&](float value){return horizontal?NXPoint{value,200}:NXPoint{150,value};};
+  const float origin=horizontal?190:350;
+  f.scroll->setContentOffset(horizontal?NXPoint{boundary+direction*100,300}:NXPoint{300,boundary+direction*100},false);
+  f.send(1,UITouchPhase::began,point(origin),0);
+  for(int i=1;i<=5;++i)f.send(1,UITouchPhase::moved,point(origin-direction*10*i),.02*i);
+  const auto stretch=[&]{return direction*((horizontal?f.scroll->contentOffset().x:f.scroll->contentOffset().y)-boundary);};
+  const auto released=stretch();f.send(1,UITouchPhase::ended,point(origin-direction*50),.6);
+  if(!bounces)expect(!f.scroll->isDecelerating(),"a non-bouncing release at the boundary stops immediately");
+  for(int i=1;i<=120;++i){UIScrollViewPhysicsTestHarness::step(f.scroll,i/120.);expect(stretch()<=released+.5f,"a gentle deep pull stays passive instead of reviving its cached velocity");}
+ }
 }
 void axisDynamics(){
  Internal::ScrollAxisMotion a,b;a.begin(20,1600,0,100,true,2,.001);b=a;a.advance(1);for(int i=0;i<100;++i)b.advance(.01);near(a.position,b.position,.001,"edge impact and return are independent of frame subdivision");near(a.velocity,b.velocity,.001,"spring velocity independent of frame subdivision");
@@ -231,4 +269,4 @@ void queuedTouchSamples() {
  event.type=SDL_EVENT_FINGER_UP;event.tfinger.timestamp=now;SDL_PushEvent(&event);UIApplication::shared->handleEventsIfNeeded();
 }
 }
-int main(){SkiaCtx::_main=std::make_shared<Context>();UIApplication::shared=new_shared<UIApplication>();SDL_InitSubSystem(SDL_INIT_EVENTS);multiTouch();catching();regrabAndGeometry();fractionalRestingEdge();timerReentrancy();recognizerSemantics();lateContactCancellation();inwardReleaseContinuesScrolling();axisDynamics();dragFollower();smoothScrollDrag();queuedTouchSamples();UIApplication::shared.reset();SkiaCtx::_main.reset();SDL_QuitSubSystem(SDL_INIT_EVENTS);std::cout<<"Scroll physics failures: "<<failures<<'\n';return failures?1:0;}
+int main(){SkiaCtx::_main=std::make_shared<Context>();UIApplication::shared=new_shared<UIApplication>();SDL_InitSubSystem(SDL_INIT_EVENTS);multiTouch();catching();regrabAndGeometry();fractionalRestingEdge();timerReentrancy();recognizerSemantics();lateContactCancellation();inwardReleaseContinuesScrolling();outwardReleaseKeepsMomentum();axisDynamics();dragFollower();smoothScrollDrag();queuedTouchSamples();UIApplication::shared.reset();SkiaCtx::_main.reset();SDL_QuitSubSystem(SDL_INIT_EVENTS);std::cout<<"Scroll physics failures: "<<failures<<'\n';return failures?1:0;}

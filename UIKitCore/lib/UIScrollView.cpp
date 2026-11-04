@@ -1298,11 +1298,20 @@ void UIScrollView::startDeceleratingIfNecessary() {
     if(std::abs(releaseVelocity.x)<250)velocity.x=0;
     if(std::abs(releaseVelocity.y)<250)velocity.y=0;
     const auto limits=contentOffsetBounds();const auto offset=contentOffset();
-    // The rubber-band derivative describes outward drag compression, not the
-    // release momentum of a reversed swipe. Keep inward velocity in points/s.
-    // Native edge return does not inherit an outward release kick.
-    if((offset.x<=limits.minX()&&velocity.x<0)||(offset.x>=limits.maxX()&&velocity.x>0))velocity.x=0;
-    if((offset.y<=limits.minY()&&velocity.y<0)||(offset.y>=limits.maxY()&&velocity.y>0))velocity.y=0;
+    // A stretched edge already has a return component. Native outward releases
+    // retain the excess momentum: the spring's t*exp(-omega*t) coefficient is
+    // max(omega*stretch, releaseSpeed), rather than always losing that speed.
+    // This also keeps ordinary held pulls passive, without expiring the cached
+    // velocity of a strong fling. Inward releases retain their original speed.
+    const auto outward=[](NXFloat speed,NXFloat position,NXFloat low,NXFloat high,bool bounces) {
+        if(!bounces&&((position<=low&&speed<0)||(position>=high&&speed>0)))return 0.f;
+        const auto stretch=position-std::clamp(position,low,high);
+        if(stretch*speed<=0)return speed;
+        return NXFloat(std::copysign(std::max(0.,std::abs(double(speed))-
+            Internal::ScrollAxisMotion::impactFrequency*std::abs(double(stretch))),speed));
+    };
+    velocity={outward(velocity.x,offset.x,limits.minX(),limits.maxX(),shouldBounceHorizontally()),
+              outward(velocity.y,offset.y,limits.minY(),limits.maxY(),shouldBounceVertically())};
     startScrollMotion(velocity,true);
 }
 void UIScrollView::startScrollMotion(NXPoint velocity,bool predictInitialFrame) {
@@ -1356,6 +1365,9 @@ void UIScrollView::reconcileScrollGeometry() {
     if(_isDragging||_isTracking) {
         // UIKit clamps an elastic offset when its viewport geometry changes.
         // Rebase the raw gesture anchor too, so subsequent movement is continuous.
+        // The clamped/rebased content has no remaining drag velocity. A hold
+        // followed by lift must not fling using a pre-resize movement sample.
+        weightedAverageVelocity={};_previousPanVelocity={};
         applyContentOffset(getBoundsCheckedContentOffset(contentOffset()));
         _initialContentOffset=uncompressedOffset(contentOffset())+_panGestureRecognizer->translationInView(shared_from_this());
     } else if(_isDecelerating) {

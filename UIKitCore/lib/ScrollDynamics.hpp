@@ -9,6 +9,9 @@ namespace NXKit::Internal {
 // Analytical exponential flight and elastic edge return. Native
 // calibration, replay errors and remaining differences: docs/scroll-physics.
 struct ScrollAxisMotion {
+    // Separate from the passive pull return: measured free-flight edge impacts
+    // peak at hitVelocity / (e * 11), independently at both content boundaries.
+    static constexpr double impactFrequency = 11;
     double position = 0, velocity = 0;
     double minimum = 0, maximum = 0, target = 0;
     double omega = 12.1, damping = 24.2, threshold = .1666667, rate = 2.00200267;
@@ -28,7 +31,10 @@ struct ScrollAxisMotion {
         target = std::clamp(p, low, high);
         omega = 12.1;
         damping = 2 * omega;
-        if (spring && high > low && (p - target) * v < 0) {
+        if (spring && (p - target) * v > 0) {
+            omega = impactFrequency;
+            damping = 2 * omega;
+        } else if (spring && high > low && (p - target) * v < 0) {
             // Inward release is less damped than a passive edge return. Values
             // are calibrated against the retained top/bottom UIKit reversals.
             omega = 13.2;
@@ -69,7 +75,7 @@ struct ScrollAxisMotion {
                 }
                 spring = true;
                 target = bound;
-                omega = 12.1;
+                omega = impactFrequency;
                 damping = 2 * omega;
             } else {
                 position = end;
