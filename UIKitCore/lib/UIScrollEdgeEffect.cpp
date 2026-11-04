@@ -2,7 +2,7 @@
 #include <stdexcept>
 using namespace NXKit;
 void UIScrollEdgeEffect::setStyle(UIScrollEdgeEffectStyle style) {
-    if(style!=UIScrollEdgeEffectStyle::automatic&&style!=UIScrollEdgeEffectStyle::soft&&style!=UIScrollEdgeEffectStyle::hard)
+    if(style!=UIScrollEdgeEffectStyle::automatic&&style!=UIScrollEdgeEffectStyle::soft&&style!=UIScrollEdgeEffectStyle::hard&&style!=UIScrollEdgeEffectStyle::none)
         throw std::invalid_argument("Unknown scroll edge effect style");
     if(_style==style)return;_style=style;if(_invalidate)_invalidate();
 }

@@ -18,7 +18,7 @@ NXRect navigationScrollPocketMaterialRect(UIViewController& controller,
     if (!scroll) return {};
     const auto effect = edge == NSDirectionalRectEdge::top
         ? scroll->topEdgeEffect() : scroll->bottomEdgeEffect();
-    if (!effect || effect->isHidden()) return {};
+    if (!effect || effect->isHidden() || effect->style() == UIScrollEdgeEffectStyle::none) return {};
 
     // An explicitly selected view must still belong to this screen. Hidden or
     // removed content never lends a material to the navigation controller.

@@ -448,6 +448,15 @@ void testSharedScrollEdgeMaterials() {
     scroll->topEdgeEffect()->setHidden(false);
     scroll->topEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::soft);
     expect(topRect().height() == 88, "NX soft requests fall back to its hard material");
+    scroll->topEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::none);
+    expect(topRect().height() == 0 && bottomRect().height() == 73,
+        "explicit none removes only its NX material while automatic bottom stays hard");
+    scroll->topEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::automatic);
+    scroll->bottomEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::none);
+    expect(topRect().height() == 88 && bottomRect().height() == 0,
+        "explicit none disables the shared NX bottom material independently");
+    scroll->bottomEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::automatic);
+    expect(bottomRect().height() == 73, "restoring NX automatic restores its hard bottom material");
     scroll->setContentOffset({0, 1800 + safe.bottom - 720}, false);
     expect(bottomRect().height() == 0, "bottom material disappears at the trailing content boundary");
     scroll->setHidden(true);

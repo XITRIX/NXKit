@@ -26,6 +26,12 @@ void states() {
     expect(edge(scene,0).visible&&edge(scene,0).strength>0&&edge(scene,0).strength<1,
         "entering the current safe area begins a gradual edge response");
     scroll->setContentOffset({120,180},false);
+    expect(edge(scene,0).visible&&edge(scene,0).style==UIScrollEdgeEffectStyle::soft
+        &&!edge(scene,2).visible&&edge(scene,2).style==UIScrollEdgeEffectStyle::none,
+        "UIKit automatic keeps the top soft and disables the bottom material");
+    expect(scroll->bottomEdgeEffect()->style()==UIScrollEdgeEffectStyle::automatic
+        &&!scroll->bottomEdgeEffect()->isHidden(),"UIKit resolves automatic without mutating Core edge metadata");
+    scroll->bottomEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::soft);
     expect(edge(scene,0).visible&&edge(scene,2).visible&&!edge(scene,1).visible&&!edge(scene,3).visible,"side safe insets alone do not invent horizontal edge chrome");
     scene.screen->installSideChrome();settle(scene.window);
     expect(edge(scene,1).visible&&edge(scene,3).visible,"side container interactions activate the corresponding horizontal edges");
@@ -51,8 +57,10 @@ void liveGeometry(const std::shared_ptr<Context>& context) {
             const auto top=edge(scene,0),bottom=edge(scene,2);
             expect(top.visible&&top.safeExtent==safe.top&&top.effectExtent==safe.top,
                 label+": top pocket follows the scroll view safe area in every style");
-            expect(bottom.visible&&bottom.safeExtent==safe.bottom&&bottom.effectExtent==safe.bottom,
-                label+": bottom pocket follows the scroll view safe area in every style");
+            expect(style==UIScrollEdgeEffectStyle::automatic
+                ? !bottom.visible&&bottom.style==UIScrollEdgeEffectStyle::none
+                : bottom.visible&&bottom.safeExtent==safe.bottom&&bottom.effectExtent==safe.bottom,
+                label+": automatic bottom is none; explicit bottom styles follow the live safe area");
         }
     };
     verify("initial bars");
@@ -78,7 +86,7 @@ void liveGeometry(const std::shared_ptr<Context>& context) {
     context->size={402,874};context->safe={62,0,34,0};
 }
 void associatedContainerGeometry() {
-    Scene scene;const auto scroll=scene.screen->scroll;
+    Scene scene;const auto scroll=scene.screen->scroll;scroll->bottomEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::soft);
     scroll->setContentOffset({120,180},false);
     const auto size=scroll->bounds().size;
     std::array<std::shared_ptr<UIView>,4> containers;
@@ -107,7 +115,7 @@ void associatedContainerGeometry() {
     }
 }
 void selection() {
-    Scene scene(true,false);scene.screen->scroll->setContentOffset({120,180},false);
+    Scene scene(true,false);scene.screen->scroll->bottomEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::soft);scene.screen->scroll->setContentOffset({120,180},false);
     expect(!edge(scene,0).visible,"automatic discovery follows the first child chain only");
     scene.screen->setContentScrollView(scene.screen->scroll,NSDirectionalRectEdge::all);
     expect(edge(scene,0).visible&&edge(scene,2).visible,"manual selection supports scroll content behind a preceding sibling");
@@ -139,9 +147,40 @@ double difference(const SkBitmap& a,const SkBitmap& b,NXRect points,NXFloat scal
     for(int y=std::lround(points.minY()*scale);y<std::lround(points.maxY()*scale);++y)for(int x=std::lround(points.minX()*scale);x<std::lround(points.maxX()*scale);++x){const auto p=a.getColor(x,y),q=b.getColor(x,y);result+=std::abs(int(SkColorGetR(p))-int(SkColorGetR(q)))+std::abs(int(SkColorGetG(p))-int(SkColorGetG(q)))+std::abs(int(SkColorGetB(p))-int(SkColorGetB(q)));++count;}
     return result/(3*count);
 }
+void noneDisablesRendering(const std::shared_ptr<Context>& context) {
+    for(bool dark:{false,true}) {
+        context->dark=dark;
+        Scene scene;const auto scroll=scene.screen->scroll;
+        scroll->setContentOffset({120,180},false);
+        scene.screen->installSideChrome();settle(scene.window);
+        scene.navigation->navigationBar()->setAlpha(0);scene.tabs->tabBar()->setAlpha(0);
+        const std::array effects{scroll->topEdgeEffect(),scroll->leftEdgeEffect(),scroll->bottomEdgeEffect(),scroll->rightEdgeEffect()};
+        for(const auto& effect:effects)effect->setStyle(UIScrollEdgeEffectStyle::none);
+        for(int index=0;index<4;++index)expect(!edge(scene,index).visible,"none disables every physical edge even with attached chrome");
+        const auto none=render(scene.window);
+        for(const auto& effect:effects){effect->setStyle(UIScrollEdgeEffectStyle::soft);effect->setHidden(true);}
+        const auto hidden=render(scene.window);
+        expect(difference(none,hidden,{0,0,402,874})==0,"none renders exactly like hidden: no blur, tint, divider or content fade");
+        effects[2]->setHidden(false);
+        const auto soft=render(scene.window);
+        expect(edge(scene,2).visible&&difference(none,soft,{40,800,320,50})>1,
+            "an explicit soft bottom restores visible filtering after none");
+        effects[2]->setStyle(UIScrollEdgeEffectStyle::hard);
+        expect(edge(scene,2).visible&&edge(scene,2).style==UIScrollEdgeEffectStyle::hard,
+            "an explicit hard bottom remains supported");
+        effects[2]->setStyle(UIScrollEdgeEffectStyle::none);
+        expect(difference(none,render(scene.window),{0,0,402,874})==0,
+            "switching an active pocket to none removes cached blur and fading immediately");
+        effects[2]->setStyle(UIScrollEdgeEffectStyle::soft);effects[2]->setHidden(true);
+        expect(!edge(scene,2).visible,"hidden still suppresses an explicitly selected style");
+        effects[2]->setHidden(false);effects[2]->setStyle(UIScrollEdgeEffectStyle::automatic);
+        expect(!edge(scene,2).visible,"restoring UIKit automatic returns the bottom to none");
+    }
+    context->dark=false;
+}
 void runtimeSelectionMatchesInitialSelection() {
     SkBitmap late,initial;
-    {Scene scene(true,false);scene.screen->scroll->setContentOffset({120,180},false);render(scene.window);
+    {Scene scene(true,false);scene.screen->scroll->bottomEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::soft);scene.screen->scroll->setContentOffset({120,180},false);render(scene.window);
         scene.screen->setContentScrollView(scene.screen->scroll,NSDirectionalRectEdge::all);late=render(scene.window);}
     {Scene scene(true,true);scene.screen->scroll->setContentOffset({120,180},false);initial=render(scene.window);}
     expect(difference(late,initial,{40,20,320,150})<.5,
@@ -149,7 +188,7 @@ void runtimeSelectionMatchesInitialSelection() {
 }
 void runtimeHierarchyMatchesInitialDiscovery() {
     SkBitmap changed,initial;
-    {Scene scene(true,false);scene.screen->scroll->setContentOffset({120,180},false);render(scene.window);
+    {Scene scene(true,false);scene.screen->scroll->bottomEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::soft);scene.screen->scroll->setContentOffset({120,180},false);render(scene.window);
         scene.screen->view()->subviews().front()->removeFromSuperview();changed=render(scene.window);}
     {Scene scene;scene.screen->scroll->setContentOffset({120,180},false);initial=render(scene.window);}
     expect(difference(changed,initial,{40,20,320,150})<.5,
@@ -310,7 +349,7 @@ void pocketKernelNarrowsWithGradient() {
 }
 void pocketFadeHasSoftTail(const std::shared_ptr<Context>& context) {
     context->dark=true;context->scale=3;
-    Scene scene;const auto scroll=scene.screen->scroll;
+    Scene scene;const auto scroll=scene.screen->scroll;scroll->bottomEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::soft);
     scroll->subviews().front()->removeFromSuperview();
     scene.screen->view()->setBackgroundColor(UIColor::black);scroll->setBackgroundColor(UIColor::black);
     auto white=new_shared<UIView>(NXRect{{},scroll->contentSize()});white->setBackgroundColor(UIColor::white);scroll->addSubview(white);
@@ -454,6 +493,7 @@ void adaptiveGlassKeepsLiveBackdropObservation() {
     UIGlassEffect effect;effect.setAdaptsAppearanceToBackdrop(true);
     auto glass=new_shared<BackdropEffectView>(effect);glass->setFrame({180,420,120,64});scroll->addSubview(glass);
     auto ink=new_shared<UIView>(NXRect{20,20,8,8});ink->setBackgroundColor(UIColor::label);glass->addSubview(ink);
+    scroll->bottomEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::soft);
     expect(edge(scene,0).visible&&edge(scene,2).visible,"adaptive glass fixture keeps both vertical scroll edge effects active");
     for(int frame=0;frame<3;++frame)render(scene.window);
     expect(ink->traitCollection()->userInterfaceStyle()==UIUserInterfaceStyle::dark,
@@ -478,7 +518,7 @@ void traits(const std::shared_ptr<Context>& context) {
 }
 int main(){
     auto context=std::make_shared<Context>();SkiaCtx::_main=context;UIApplication::shared=new_shared<UIApplication>();UIApplication::shared->delegate=std::make_shared<UIApplicationDelegate>();
-    states();liveGeometry(context);associatedContainerGeometry();selection();screenOwnership();runtimeSelectionMatchesInitialSelection();runtimeHierarchyMatchesInitialDiscovery();variableBlur();sparseContentHasNoInnerBoundaryMatte();contentCallbacksRunOncePerFrame();constantPocketMask(context);mountedMaskTracksSafeArea();strongerPocketBlur();pocketKernelNarrowsWithGradient();pocketFadeHasSoftTail(context);titleBandBlur(context);progressiveKernelProfile();kernelReferenceImages();adaptiveGlassKeepsLiveBackdropObservation();traits(context);
+    states();noneDisablesRendering(context);liveGeometry(context);associatedContainerGeometry();selection();screenOwnership();runtimeSelectionMatchesInitialSelection();runtimeHierarchyMatchesInitialDiscovery();variableBlur();sparseContentHasNoInnerBoundaryMatte();contentCallbacksRunOncePerFrame();constantPocketMask(context);mountedMaskTracksSafeArea();strongerPocketBlur();pocketKernelNarrowsWithGradient();pocketFadeHasSoftTail(context);titleBandBlur(context);progressiveKernelProfile();kernelReferenceImages();adaptiveGlassKeepsLiveBackdropObservation();traits(context);
     UIApplication::shared.reset();SkiaCtx::_main.reset();
     if(!failures)std::cout<<"Scroll edge effects: "<<checks<<" checks passed\n";return failures?1:0;
 }

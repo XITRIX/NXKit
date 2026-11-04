@@ -32,8 +32,8 @@ void GlassScreenView::addItem() { if(_added<30) ++_added; rebuild(); }
 void GlassScreenView::cycleAccent() { _accent=(_accent+1)%3; rebuild(); }
 void GlassScreenView::cycleBackdrop() { _backdrop=(_backdrop+1)%3; rebuild(); }
 void GlassScreenView::cycleScrollEdgeStyle() {
-    _scrollEdgeStyle=(_scrollEdgeStyle+1)%3;
-    const auto style=std::array{UIScrollEdgeEffectStyle::automatic,UIScrollEdgeEffectStyle::soft,UIScrollEdgeEffectStyle::hard}[_scrollEdgeStyle];
+    _scrollEdgeStyle=(_scrollEdgeStyle+1)%4;
+    const auto style=std::array{UIScrollEdgeEffectStyle::automatic,UIScrollEdgeEffectStyle::soft,UIScrollEdgeEffectStyle::hard,UIScrollEdgeEffectStyle::none}[_scrollEdgeStyle];
     _scroll->topEdgeEffect()->setStyle(style);_scroll->bottomEdgeEffect()->setStyle(style);
     rebuild();
 }
@@ -76,7 +76,7 @@ void GlassScreenView::rebuild() {
     };
     section("Appearance",{{"background","Background",std::array{"System","Blue","Coral"}[_backdrop],[weak]{if(auto self=weak.lock())self->cycleBackdrop();}},
         {"accent","Accent color",std::array{"Blue","Pink","Mint"}[_accent],[weak]{if(auto self=weak.lock())self->cycleAccent();}},
-        {"scroll-edge-style","Scroll edge",std::array{"Automatic","Soft","Hard"}[_scrollEdgeStyle],[weak]{if(auto self=weak.lock())self->cycleScrollEdgeStyle();}}});
+        {"scroll-edge-style","Scroll edge",std::array{"Automatic","Soft","Hard","None"}[_scrollEdgeStyle],[weak]{if(auto self=weak.lock())self->cycleScrollEdgeStyle();}}});
     section("Collection",{{"add-row","Add item","",[weak]{if(auto self=weak.lock())self->addItem();}},
         {"sort","Sort order",_reversed?"Descending":"Ascending",[weak]{if(auto self=weak.lock())self->toggleOrder();}},
         {"reset","Reset demo","",[weak]{if(auto self=weak.lock())self->reset();}}},"Use + to add an item. More shows additional details.");

@@ -188,6 +188,16 @@ void edgeEffectMetadata() {
     expect(edges[1]->style() == UIScrollEdgeEffectStyle::hard
            && edges[2]->style() == UIScrollEdgeEffectStyle::automatic && !edges[2]->isHidden(),
            "individual edge mutations are independent");
+    scroll->drawAndLayoutTreeIfNeeded();
+    edges[2]->setStyle(UIScrollEdgeEffectStyle::none);
+    expect(edges[2]->style() == UIScrollEdgeEffectStyle::none && !edges[2]->isHidden()
+           && scroll->layer()->needsDisplay(), "none invalidates without changing independent visibility");
+    scroll->drawAndLayoutTreeIfNeeded();
+    edges[2]->setStyle(UIScrollEdgeEffectStyle::none);
+    expect(!scroll->layer()->needsDisplay(), "repeated none style does not invalidate");
+    edges[2]->setStyle(UIScrollEdgeEffectStyle::automatic);
+    expect(edges[2]->style() == UIScrollEdgeEffectStyle::automatic && !edges[2]->isHidden(),
+           "automatic can be restored after explicitly disabling an edge");
     std::weak_ptr<UIScrollView> owner = scroll;
     scroll.reset();
     expect(owner.expired(), "retaining edge metadata does not retain its scroll view");

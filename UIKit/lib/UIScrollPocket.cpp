@@ -69,7 +69,7 @@ sk_sp<SkShader> profileGradient(NXSize size,int edge,NXFloat extent,float outer,
     }
     return SkShaders::LinearGradient(points,SkGradient(SkGradient::Colors(SkSpan(colors),SkSpan(stops),SkTileMode::kClamp),{}));
 }
-bool isSoft(const Internal::ScrollPocketSnapshot& state){return state.style!=UIScrollEdgeEffectStyle::hard;}
+bool isSoft(const Internal::ScrollPocketSnapshot& state){return state.style==UIScrollEdgeEffectStyle::soft;}
 }
 Internal::ScrollPocketSnapshot Internal::scrollPocketSnapshot(UIViewController& controller,const std::shared_ptr<UIView>& host,int edge) {
     ScrollPocketSnapshot result;if(!host||edge<0||edge>3||!controller.viewIsLoaded())return result;
@@ -81,7 +81,11 @@ Internal::ScrollPocketSnapshot Internal::scrollPocketSnapshot(UIViewController& 
     while(ancestor&&ancestor!=controller.view())ancestor=ancestor->superview().lock();
     if(!ancestor)return result;
     for(auto node=std::static_pointer_cast<UIView>(scroll);node;node=node->superview().lock())if(node->isHidden()||node->alpha()<=0)return result;
-    const auto effect=effectFor(scroll,edge);if(effect->isHidden())return result;
+    const auto effect=effectFor(scroll,edge);
+    result.style=effect->style();
+    if(result.style==UIScrollEdgeEffectStyle::automatic)
+        result.style=edge==2?UIScrollEdgeEffectStyle::none:UIScrollEdgeEffectStyle::soft;
+    if(effect->isHidden()||result.style==UIScrollEdgeEffectStyle::none)return result;
     const auto size=scroll->bounds().size;const auto content=scroll->contentSize();
     if(!finite(size.width)||!finite(size.height)||!finite(content.width)||!finite(content.height)
        ||size.width<=0||size.height<=0||content.width<=0||content.height<=0)return result;
@@ -105,7 +109,7 @@ Internal::ScrollPocketSnapshot Internal::scrollPocketSnapshot(UIViewController& 
         content.height+extent-size.height-offset.y,content.width+extent-size.width-offset.x};
     const auto distance=distances[edge];if(!finite(distance)||distance<=0)return result;
     result.scroll=scroll;result.viewport={origin,size};result.safeExtent=extent;
-    result.strength=std::clamp(distance/extent,0.f,1.f);result.style=effect->style();
+    result.strength=std::clamp(distance/extent,0.f,1.f);
     result.effectExtent=extent;
     result.visible=true;return result;
 }

@@ -4,8 +4,11 @@
 
 namespace NXKit {
 class UIScrollView;
-// Value-enum translation of UIScrollEdgeEffect.Style's three singleton values.
-enum class UIScrollEdgeEffectStyle { automatic, soft, hard };
+// Value-enum translation of UIKit's singleton styles. `none` is a portable
+// extension: disable the material without changing the independent hidden flag.
+// Kits resolve automatic appearance; UIKit uses none at the bottom, soft at
+// other attached edges, while NXKit uses its shared hard material.
+enum class UIScrollEdgeEffectStyle { automatic, soft, hard, none };
 
 /** Properties of one UIScrollView edge. The owning component kit supplies its
     appearance; Core keeps this metadata independently usable. */
