@@ -379,60 +379,48 @@ void UIView::displayTreeIfNeeded() {
 
     if (visibleLayer->isHidden() || visibleLayer->opacity() < 0.01f) { return; }
 
-    const auto previousTraitCollection = UITraitCollection::current();
-    const auto currentTraitCollection = traitCollection();
-    if (currentTraitCollection) {
-        UITraitCollection::setCurrent(currentTraitCollection);
-    }
-
-    auto tint = tintColor();
-
-    auto oldTint = UIColor::_currentTint;
-    UIColor::_currentTint = tint;
-
-    if (_contentMode == UIViewContentMode::redraw) {
-        if (visibleLayer->contents() && ((visibleLayer->contents()->size() / visibleLayer->contentsScale()) != visibleLayer->bounds().size || visibleLayer->scaleModifier() != layer()->scaleModifier()))
-        {
-            setNeedsDisplay();
+    // Clean views still visit descendants (which may invalidate themselves),
+    // but need no drawing environment. Copying dynamic UIColor functions and
+    // resolving inherited tints here used to dominate clean-frame CPU work.
+    const bool redrawContents = _contentMode == UIViewContentMode::redraw
+        && visibleLayer->contents()
+        && ((visibleLayer->contents()->size() / visibleLayer->contentsScale()) != visibleLayer->bounds().size
+            || visibleLayer->scaleModifier() != layer()->scaleModifier());
+    if (redrawContents) setNeedsDisplay();
+    if (visibleLayer->_needsDisplay || _needsDisplay) {
+        const auto previousTraits = UITraitCollection::current();
+        const auto previousTint = UIColor::_currentTint;
+        const auto traits = traitCollection();
+        const auto tint = tintColor();
+        struct Restore {
+            std::shared_ptr<UITraitCollection> traits;
+            UIColor tint;
+            ~Restore() { UITraitCollection::setCurrent(traits); UIColor::_currentTint = tint; }
+        } restore{previousTraits, previousTint};
+        if (traits) UITraitCollection::setCurrent(traits);
+        UIColor::_currentTint = tint;
+        if (visibleLayer->_needsDisplay) {
+            visibleLayer->_needsDisplay = false;
+            visibleLayer->display();
+        }
+        // A layer delegate may change the current drawing environment.
+        if (traits) UITraitCollection::setCurrent(traits);
+        UIColor::_currentTint = tint;
+        if (_needsDisplay) {
+            _needsDisplay = false;
+            draw();
         }
     }
 
-    if (currentTraitCollection) {
-        UITraitCollection::setCurrent(currentTraitCollection);
-    }
-    UIColor::_currentTint = tint;
-
-    if (visibleLayer->_needsDisplay) {
-        visibleLayer->_needsDisplay = false;
-        visibleLayer->display();
-    }
-
-    if (currentTraitCollection) {
-        UITraitCollection::setCurrent(currentTraitCollection);
-    }
-    UIColor::_currentTint = tint;
-
-    if (_needsDisplay) {
-        _needsDisplay = false;
-        draw();
-    }
-
-    if (currentTraitCollection) {
-        UITraitCollection::setCurrent(currentTraitCollection);
-    }
-    UIColor::_currentTint = tint;
-
     const auto subviews = _subviews;
     for (const auto& subview: subviews) {
-        if (subview->superview().lock().get() == this)
+        if (subview->_superview.lock().get() == this)
             subview->displayTreeIfNeeded();
     }
     if (_mask) {
         _mask->displayTreeIfNeeded();
     }
 
-    UIColor::_currentTint = oldTint;
-    UITraitCollection::setCurrent(previousTraitCollection);
 }
 
 void UIView::setMask(const std::shared_ptr<UIView>& mask) {
@@ -513,7 +501,7 @@ void UIView::setTintColor(std::optional<UIColor> tintColor) {
 
 UIColor UIView::tintColor() const {
     if (_tintColor.has_value() && _tintColor != UIColor::tint) return _tintColor.value();
-    if (!superview().expired()) return superview().lock()->tintColor();
+    if (const auto parent = _superview.lock()) return parent->tintColor();
     return UIColor::systemBlue;
 }
 
@@ -889,21 +877,33 @@ void UIView::layoutTreeIfNeeded(bool includeHidden, bool resolveRoot) {
             return;
         }
     }
-    updateCornerConfigurationTree();
+    // Geometry setters eagerly update descendants. The layout walk visits
+    // those descendants itself, so refresh only this view here; recursively
+    // walking the subtree at every node repeats the same work at every depth.
+    if (_cornerConfiguration) {
+        const auto radii = resolvedCornerRadii();
+        if (_layer->_configuredCornerRadii != radii) {
+            _layer->setConfiguredCornerRadii(radii);
+            setNeedsLayout();
+        }
+    }
     _isLayingOut = true;
-    const auto previousTraits = UITraitCollection::current();
-    const auto previousTint = UIColor::_currentTint;
     struct Restore {
         UIView* view;
-        std::shared_ptr<UITraitCollection> traits;
-        UIColor tint;
-        ~Restore() { view->_isLayingOut = false; UITraitCollection::setCurrent(traits); UIColor::_currentTint = tint; }
-    } restore{this, previousTraits, previousTint};
+        ~Restore() { view->_isLayingOut = false; }
+    } restore{this};
     // A callback may change Yoga styles, safe areas or already visited views.
     // Finish those changes before drawing. Bound pathological callbacks that
     // unconditionally invalidate themselves; retain their dirty state.
     for (int pass = 0; pass < 8; ++pass) {
         if (_needsLayout || _needsUpdateSafeAreaInsets || _needsUpdateLayoutMargins) {
+            const auto previousTraits = UITraitCollection::current();
+            const auto previousTint = UIColor::_currentTint;
+            struct RestoreEnvironment {
+                std::shared_ptr<UITraitCollection> traits;
+                UIColor tint;
+                ~RestoreEnvironment() { UITraitCollection::setCurrent(traits); UIColor::_currentTint = tint; }
+            } environment{previousTraits, previousTint};
             if (const auto traits = traitCollection()) UITraitCollection::setCurrent(traits);
             UIColor::_currentTint = tintColor();
             updateSafeAreaInsetsIfNeeded();
@@ -915,7 +915,7 @@ void UIView::layoutTreeIfNeeded(bool includeHidden, bool resolveRoot) {
         }
         const auto subviews = _subviews;
         for (const auto& subview : subviews) {
-            if (subview->superview().lock().get() == this)
+            if (subview->_superview.lock().get() == this)
                 subview->layoutTreeIfNeeded(includeHidden, false);
         }
         const auto mask = _mask;

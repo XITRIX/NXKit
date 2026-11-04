@@ -43,7 +43,9 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     }.registerOn(window);
 
     // Direct launch for Instruments/Metal captures without navigating the Demo.
-    if (const auto stress = std::getenv("NXKIT_GLASS_STRESS"); stress && std::string(stress) == "1") {
+    const auto stress = std::getenv("NXKIT_GLASS_STRESS");
+    const auto stressReplay = std::getenv("NXKIT_GLASS_STRESS_REPLAY");
+    if ((stress && std::string(stress) == "1") || (stressReplay && std::string(stressReplay) == "1")) {
         window->setRootViewController(new_shared<GlassStressViewController>());
         window->makeKeyAndVisible();
         return true;

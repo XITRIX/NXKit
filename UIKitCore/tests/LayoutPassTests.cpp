@@ -177,11 +177,43 @@ void displayScale(){
     auto child=new_shared<UIView>();child->setAutolayoutEnabled(true);child->configureLayout([](const auto& y){y->setSize({10.25f,10.25f});y->setAlignSelf(YGAlignFlexStart);});root->addSubview(child);
     for(float scale:{1.f,2.f,3.f,2.f}){root->scale(scale);root->layoutIfNeeded();expect(near(child->bounds().width(),std::ceil(10.25f*scale)/scale),"Yoga measured-node rounding follows the current display scale, including a return to 2x");}
 }
+class EnvironmentProbe final : public UIView {
+public:
+    int draws=0;
+    UIColor observedTint;
+    std::shared_ptr<UITraitCollection> observedTraits;
+    std::function<void()> action;
+    void draw() override {
+        ++draws;observedTint=UIColor(static_cast<int>(UIColor::tint.raw()));observedTraits=UITraitCollection::current();
+        if(action)action();
+    }
+};
+void cleanDisplayEnvironment(){
+    auto root=new_shared<UIView>();auto first=new_shared<EnvironmentProbe>(),second=new_shared<EnvironmentProbe>();
+    root->setTintColor(UIColor::red);second->setTintColor(UIColor::green);root->addSubview(first);root->addSubview(second);
+    root->drawAndLayoutTreeIfNeeded();
+    const auto firstDraws=first->draws,secondDraws=second->draws;
+    root->drawAndLayoutTreeIfNeeded();
+    expect(first->draws==firstDraws&&second->draws==secondDraws,"clean traversals preserve retained drawings");
+    const auto savedTint=UIColor::tint.raw();const auto savedTraits=UITraitCollection::current();
+    first->action=[&]{second->setNeedsDisplay();UITraitCollection::setCurrent(std::make_shared<UITraitCollection>());};
+    first->setNeedsDisplay();root->drawAndLayoutTreeIfNeeded();
+    expect(first->observedTint.raw()==UIColor::red.raw()&&second->observedTint.raw()==UIColor::green.raw(),"dirty descendants of a clean parent resolve independent drawing tints");
+    expect(second->draws==secondDraws+1,"draw callbacks can invalidate a later clean sibling in the same frame");
+    expect(UIColor::tint.raw()==savedTint&&UITraitCollection::current()==savedTraits,"drawing callbacks restore their caller's environment");
+    root->setTintColor(UIColor::blue);root->drawAndLayoutTreeIfNeeded();
+    expect(first->observedTint.raw()==UIColor::blue.raw()&&second->observedTint.raw()==UIColor::green.raw(),"inherited tint changes repaint affected descendants");
+    auto parent=new_shared<UIView>(NXRect(0,0,200,200));auto child=new_shared<UIView>(NXRect(10,10,180,180));
+    parent->setCornerConfiguration(UICornerConfiguration::corners(UICornerRadius::fixed(50)));
+    child->setCornerConfiguration(UICornerConfiguration::corners(UICornerRadius::containerConcentric()));parent->addSubview(child);
+    parent->layoutIfNeeded();parent->layer()->setBounds({5,5,200,200});parent->layoutIfNeeded();
+    expect(near(child->effectiveRadius(UIRectCorner::topLeft),45),"layout refreshes concentric geometry after direct layer changes");
+}
 }
 int main(){
     expect(NXRect(0,0,10,20)!=NXRect(0,0,11,20)&&!(NXRect(0,0,10,20)!=NXRect(0,0,10,20)),"rectangle inequality detects size changes instead of equality");
     auto context=std::make_shared<Context>();SkiaCtx::_main=context;UIApplication::shared=new_shared<UIApplication>();UIApplication::shared->delegate=std::make_shared<UIApplicationDelegate>();
-    explicitSubtree();displayScale();firstPaintAndResize(context);environmentAndMutation(context);animatedBitmap(context);
+    explicitSubtree();displayScale();cleanDisplayEnvironment();firstPaintAndResize(context);environmentAndMutation(context);animatedBitmap(context);
     UIApplication::shared.reset();SkiaCtx::_main.reset();
     if(!failures)std::cout<<"Layout pass tests passed\n";return failures?1:0;
 }
