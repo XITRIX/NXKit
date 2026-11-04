@@ -18,6 +18,7 @@ public:
     void addItem();
     void cycleAccent();
     void cycleBackdrop();
+    void cycleScrollEdgeStyle();
     void toggleDetails();
     void toggleOrder();
     void reset();
@@ -33,7 +34,7 @@ private:
     void rebuild();
     void arrange();
     size_t _selectedTab=0;
-    int _added = 0, _accent = 0, _backdrop = 0;
+    int _added = 0, _accent = 0, _backdrop = 0, _scrollEdgeStyle = 0;
     bool _details = false, _reversed = false;
     NXKit::NXFloat _topInset = -1;
     std::set<int> _completed;

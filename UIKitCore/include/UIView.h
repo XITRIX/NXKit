@@ -10,6 +10,7 @@
 #include <UIResponder.h>
 #include <UIFocus.h>
 #include <UIEvent.h>
+#include <UIInteraction.h>
 #include <UINib.h>
 #include <set>
 #include <tinyxml2.h>
@@ -100,6 +101,14 @@ public:
 
     void addGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& gestureRecognizer);
     [[nodiscard]] std::vector<std::shared_ptr<UIGestureRecognizer>>* gestureRecognizers()  { return &_gestureRecognizers; }
+
+    /** The view owns its interactions; the returned array is a snapshot. An
+        interaction belongs to at most one view. Reentrant callback mutations
+        are applied after the current willMove/didMove callback pair finishes. */
+    [[nodiscard]] std::vector<std::shared_ptr<UIInteraction>> interactions() const { return _interactions; }
+    void setInteractions(std::vector<std::shared_ptr<UIInteraction>> interactions);
+    void addInteraction(const std::shared_ptr<UIInteraction>& interaction);
+    void removeInteraction(const std::shared_ptr<UIInteraction>& interaction);
 
     virtual void addSubview(const std::shared_ptr<UIView>& view);
     void insertSubviewAt(const std::shared_ptr<UIView>& view, int index);
@@ -218,6 +227,9 @@ private:
     void clearCornerConfiguration();
     std::shared_ptr<YGLayout> _yoga;
     std::vector<std::shared_ptr<UIGestureRecognizer>> _gestureRecognizers;
+    std::vector<std::shared_ptr<UIInteraction>> _interactions;
+    void addInteractionNow(const std::shared_ptr<UIInteraction>& interaction);
+    void removeInteractionNow(const std::shared_ptr<UIInteraction>& interaction);
     std::vector<std::shared_ptr<UIView>> _subviews;
     std::weak_ptr<UIView> _superview;
     std::shared_ptr<CALayer> _layer;

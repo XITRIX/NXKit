@@ -56,6 +56,7 @@ private:
     std::weak_ptr<UITabBarControllerDelegate> _delegate;
     std::shared_ptr<UITabBar> _tabBar;
     std::shared_ptr<UIView> _contentView;
+    std::shared_ptr<UIView> _displayedHost;
     std::shared_ptr<UIViewController> _displayed;
     std::deque<std::function<void()>> _pending;
     bool _updating = false, _visible = false, _appearanceTransition = false;

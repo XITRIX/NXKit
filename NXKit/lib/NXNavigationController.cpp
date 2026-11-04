@@ -1,6 +1,6 @@
 #include <NXNavigationController.h>
 
-#include <UIBlurView.h>
+#include "NXNavigationScrollPocket.hpp"
 #include <UIImageView.h>
 #include <UILabel.h>
 #include <UIWindow.h>
@@ -67,7 +67,14 @@ void NXNavigationController::loadView() {
     rootView->setBackgroundColor(UIColor::systemBackground);
     rootView->setAutolayoutEnabled(true);
 
-    auto navigationBar = new_shared<UIBlurView>();
+    const auto weakNavigation = weak_from_base<NXNavigationController>();
+    auto navigationMaterial = new_shared<Internal::NavigationScrollPocketLayer>([weakNavigation]() {
+        const auto navigation = weakNavigation.lock();
+        const auto screen = navigation ? navigation->topViewController() : nullptr;
+        return screen ? Internal::navigationScrollPocketMaterialRect(
+            *screen, navigation->_navigationBar, NSDirectionalRectEdge::top) : NXRect{};
+    });
+    auto navigationBar = new_shared<UIView>(NXRect{}, navigationMaterial);
     navigationBar->setAutolayoutEnabled(true);
     navigationBar->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
         layout->setPositionType(YGPositionTypeAbsolute);
@@ -167,7 +174,13 @@ void NXNavigationController::loadView() {
 
     rootView->addSubview(_contentView);
 
-    auto toolbar = new_shared<UIBlurView>();
+    auto toolbarMaterial = new_shared<Internal::NavigationScrollPocketLayer>([weakNavigation]() {
+        const auto navigation = weakNavigation.lock();
+        const auto screen = navigation ? navigation->topViewController() : nullptr;
+        return screen ? Internal::navigationScrollPocketMaterialRect(
+            *screen, navigation->_toolbar, NSDirectionalRectEdge::bottom) : NXRect{};
+    });
+    auto toolbar = new_shared<UIView>(NXRect{}, toolbarMaterial);
     toolbar->setAutolayoutEnabled(true);
     toolbar->configureLayout([](const std::shared_ptr<YGLayout>& layout) {
         layout->setPositionType(YGPositionTypeAbsolute);

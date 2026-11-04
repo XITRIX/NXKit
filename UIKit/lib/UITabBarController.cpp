@@ -2,6 +2,7 @@
 #include <UIWindow.h>
 #include "UITabBarViewInternal.hpp"
 #include "ViewControllerContainerAccess.hpp"
+#include "UIScrollPocket.hpp"
 #include <algorithm>
 #include <stdexcept>
 #include <unordered_set>
@@ -178,9 +179,13 @@ void UITabBarController::updateDisplayedController() {
     const auto nextView=next?next->view():nullptr;
     if (_visible && previous) previous->viewWillDisappear(false);
     if (previous && previous->viewIsLoaded()) previous->view()->removeFromSuperview();
+    if (_displayedHost) _displayedHost->removeFromSuperview();
+    _displayedHost=next?Internal::makeScrollPocketHost(next):nullptr;
     if (next) {
-        _contentView->addSubview(nextView); nextView->setFrame(_contentView->bounds());
+        _contentView->addSubview(_displayedHost);_displayedHost->setFrame(_contentView->bounds());
+        _displayedHost->addSubview(nextView);nextView->setFrame(_contentView->bounds());
         Internal::ViewControllerContainerAccess::setChildSafeAreaInsets(shared_from_this(),next,_reservedInsets);
+        Internal::updateScrollPocketHost(_displayedHost);
     }
     if (_visible && next) next->viewWillAppear(false);
     if (_visible && previous) previous->viewDidDisappear(false);
@@ -208,6 +213,7 @@ void UITabBarController::updateLayout() {
     for (const auto& child:_controllers)
         Internal::ViewControllerContainerAccess::setChildSafeAreaInsets(shared_from_this(),child,_reservedInsets);
     if (_displayed) _displayed->view()->setFrame(_contentView->bounds());
+    if (_displayedHost) {_displayedHost->setFrame(_contentView->bounds());Internal::updateScrollPocketHost(_displayedHost);}
 }
 void UITabBarController::viewDidLayoutSubviews() { runUpdate([this] { updateLayout(); }); }
 void UITabBarController::viewSafeAreaInsetsDidChange() { if (viewIsLoaded()) view()->setNeedsLayout(); }

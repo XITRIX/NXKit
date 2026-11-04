@@ -345,6 +345,7 @@ void UIView::insertSubviewBelow(const std::shared_ptr<UIView>& view, const std::
 }
 
 void UIView::removeFromSuperview() {
+    const auto self = shared_from_this();
     auto superview = this->_superview.lock();
     if (!superview) return;
 
@@ -361,7 +362,7 @@ void UIView::removeFromSuperview() {
         superview->_mask = nullptr;
     } else {
         _layer->removeFromSuperlayer();
-        superview->_subviews.erase(std::remove(superview->_subviews.begin(), superview->_subviews.end(), shared_from_this()), superview->_subviews.end());
+        superview->_subviews.erase(std::remove(superview->_subviews.begin(), superview->_subviews.end(), self), superview->_subviews.end());
     }
     this->setSuperview(nullptr);
     superview->setNeedsLayout();

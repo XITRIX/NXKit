@@ -1,5 +1,6 @@
 #include "RenderPerformance.hpp"
 #include "BackdropShader.hpp"
+#include "ProgressiveBlur.hpp"
 #include "CABackdropEffectLayer.hpp"
 #include "CAGlassContainerLayer.hpp"
 #include "GlassAppearance.hpp"
@@ -11,6 +12,9 @@
 #include <DispatchQueue.h>
 #include <SkiaCtx.h>
 #include "include/core/SkSurface.h"
+#include "src/core/SkCanvasPriv.h"
+#include "src/core/SkDevice.h"
+#include "src/core/SkSpecialImage.h"
 
 #include "include/core/SkRRect.h"
 #include "include/core/SkM44.h"
@@ -54,6 +58,7 @@ CABackdropEffectLayer::CABackdropEffectLayer(const BackdropEffect& effect):
 CABackdropEffectLayer::CABackdropEffectLayer(CABackdropEffectLayer* layer):
     CALayer(layer),
     _effect(layer->_effect),
+    _variableBlur(layer->_variableBlur),
     _runtimeEffect(layer->_runtimeEffect),
     _cachedImageFilter(layer->_cachedImageFilter),
     _cachedFilterSize(layer->_cachedFilterSize),
@@ -114,15 +119,35 @@ void CABackdropEffectLayer::observeBackdrop(SkCanvas* context) {
         });
         return;
     }
-    auto* surface = context->getSurface();
-    if (!surface) return;
-    const auto area = context->getTotalMatrix().mapRect(SkRect::MakeWH(size.width, size.height));
-    if (!area.isFinite()) return;
+    // A content mask or opacity group may have an offscreen device. The
+    // canvas' root surface omits siblings drawn into that current group.
+    auto* device = SkCanvasPriv::TopDevice(context);
+    if (!device) return;
+    const auto toDevice = SkMatrix::Concat(device->globalToDevice().asM33(), context->getTotalMatrix());
+    const auto area = toDevice.mapRect(SkRect::MakeWH(size.width, size.height));
+    if (!area.isFinite() || area.isEmpty()) return;
     SkIRect pixels;
     area.roundOut(&pixels);
-    if (!pixels.intersect(SkIRect::MakeWH(surface->width(), surface->height()))) return;
-    auto image = surface->makeImageSnapshot(pixels);
+    if (!pixels.intersect(device->bounds()) || !pixels.intersect(device->devClipBounds())) return;
+    // Freeze the prefix before drawing the glass. Graphite enqueues a texture
+    // copy here; the existing eight-pixel async readback never waits for GPU work.
+    const auto snapshot = device->snapSpecial(pixels, true);
+    if (!snapshot) return;
+    auto image = snapshot->asImage();
     if (!image) return;
+    const auto subset = snapshot->subset();
+    if (subset != image->bounds()) {
+        // Graphite's internal snapshots may use an approximate backing texture.
+        // Crop its valid subset on the same backend so padding never influences
+        // luminance; do not rasterize or synchronously read a GPU image.
+        auto cropped = device->makeSurface(image->imageInfo().makeDimensions(subset.size()), device->surfaceProps());
+        if (!cropped) return;
+        cropped->getCanvas()->drawImageRect(image, SkRect::Make(subset),
+            SkRect::MakeWH(subset.width(), subset.height()), SkSamplingOptions(), nullptr,
+            SkCanvas::kStrict_SrcRectConstraint);
+        image = cropped->makeImageSnapshot();
+        if (!image) return;
+    }
     state->pending = true;
     const auto complete = [state, generation, size](std::optional<NXFloat> luminance) {
         DispatchQueue::main()->async([state, generation, size, luminance] {
@@ -189,6 +214,7 @@ void CABackdropEffectLayer::setEffect(const BackdropEffect& effect) {
         : compile(effect);
     validateUniforms(effect, *runtimeEffect);
 
+    _variableBlur.reset();
     _effect = effect;
     _glassMaterial.reset();
     _glassTraits.reset();
@@ -197,6 +223,7 @@ void CABackdropEffectLayer::setEffect(const BackdropEffect& effect) {
     if (const auto activePresentation = presentation()) {
         const auto backdropPresentation = std::static_pointer_cast<CABackdropEffectLayer>(activePresentation);
         backdropPresentation->_effect = _effect;
+        backdropPresentation->_variableBlur.reset();
         backdropPresentation->_glassMaterial.reset();
         backdropPresentation->_glassTraits.reset();
         backdropPresentation->_runtimeEffect = _runtimeEffect;
@@ -207,6 +234,13 @@ void CABackdropEffectLayer::setEffect(const BackdropEffect& effect) {
 
 std::shared_ptr<CALayer> CABackdropEffectLayer::copy() {
     return new_shared<CABackdropEffectLayer>(this);
+}
+
+void CABackdropEffectLayer::setEffect(const UIBlurEffect& effect) {
+    setEffect(BackdropEffect("uniform shader content; uniform float filterScale; half4 main(float2 p){return content.eval(p);}"));
+    _variableBlur=effect;
+    if(const auto active=presentation())std::static_pointer_cast<CABackdropEffectLayer>(active)->_variableBlur=effect;
+    invalidateImageFilterCache();setNeedsDisplay();
 }
 
 void CABackdropEffectLayer::invalidateImageFilterCache() {
@@ -232,7 +266,7 @@ sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
 
     const auto effect = _glassMaterial
         ? _glassMaterial->_backdropEffect(layerSize, _glassTraits) : _effect;
-    auto imageFilter = Internal::BackdropShader::makeFilter(
+    auto imageFilter = _variableBlur ? Internal::progressiveBlurFilter(*_variableBlur,layerSize,layerContentsScale) : Internal::BackdropShader::makeFilter(
         effect, _runtimeEffect, layerSize, layerCornerRadius, cornerCurve(),
         layerContentsScale, _interaction->glow(), _interaction->location
     );
@@ -288,13 +322,16 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
 
     SkPaint effectPaint;
     effectPaint.setAntiAlias(true);
+    // Variable blur replaces sampled backdrop pixels. Source-over would add
+    // translucent pixels twice even for a zero-radius/transparent mask.
+    if(_variableBlur)effectPaint.setBlendMode(SkBlendMode::kSrc);
     effectPaint.setImageFilter(std::move(imageFilter));
 
     // RuntimeShader image filters force a translate-only CTM in Skia. Render
     // opt-in shaders in pixel coordinates instead of making Skia rasterize a
     // one-point grid and upscale it on Retina displays. Their filterScale
     // uniform maps optical distances back to local points inside the shader.
-    const auto filterScale = findUniform(*_runtimeEffect, "filterScale")
+    const auto filterScale = (_variableBlur || findUniform(*_runtimeEffect, "filterScale"))
         && std::isfinite(contentsScale())
         ? std::max<NXFloat>(1, contentsScale()) : 1.0f;
     const auto filterRect = SkRect::MakeWH(rect.width() * filterScale, rect.height() * filterScale);

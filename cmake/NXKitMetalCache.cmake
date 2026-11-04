@@ -4,6 +4,9 @@ function(nxkit_configure_metal_cache target root)
         "${root}/UIKit/lib/*.cpp" "${root}/UIKit/lib/*.hpp"
         "${root}/UIKitCore/lib/*Shader*" "${root}/UIKitCore/lib/*Corner*")
     list(APPEND inputs
+        "${root}/UIKitCore/lib/CALayer.cpp"
+        "${root}/UIKitCore/include/CALayer.h"
+        "${root}/UIKitCore/lib/LayerContentMask.hpp"
         "${root}/Submodules/skia/src/gpu/graphite/mtl/MtlGraphiteUtils.mm"
         "${root}/Submodules/skia/src/gpu/graphite/mtl/MtlGraphicsPipeline.mm"
         "${root}/Submodules/skia/src/core/SkImageFilterTypes.cpp"

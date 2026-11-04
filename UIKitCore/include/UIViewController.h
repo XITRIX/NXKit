@@ -6,14 +6,17 @@
 #include <UINavigationControllerInterface.h>
 #include <UITabBarControllerInterface.h>
 #include <UIViewControllerTransitioning.h>
+#include <NSDirectionalRectEdge.h>
 
+#include <array>
 #include <deque>
 #include <utility>
 
 namespace NXKit {
 
 class UIPresentationController;
-namespace Internal { class ViewControllerContainerAccess; }
+class UIScrollView;
+namespace Internal { class ViewControllerContainerAccess; class ViewControllerContentScrollAccess; }
 
 class UIViewController: public UIResponder, public UITraitEnvironment, public UIFocusEnvironment, public enable_shared_from_this<UIViewController> {
 public:
@@ -50,6 +53,16 @@ public:
         follow actual containment, exclude self, and do not retain ancestors. */
     [[nodiscard]] std::shared_ptr<UINavigationControllerInterface> navigationController() const;
     [[nodiscard]] std::shared_ptr<UITabBarControllerInterface> tabBarController() const;
+
+    /** Selects the scroll view observed by containing bars for one or more edges.
+        A null value restores automatic discovery. This reference is non-owning. */
+    void setContentScrollView(const std::shared_ptr<UIScrollView>& scrollView,
+                              NSDirectionalRectEdge edge = NSDirectionalRectEdge::all);
+    /** Returns the explicit selection for a single edge, or null for automatic
+        discovery. Override and return nullptr directly to disable observation
+        for an edge; return the base result to preserve its automatic fallback. */
+    [[nodiscard]] virtual std::shared_ptr<UIScrollView> contentScrollViewForEdge(
+        NSDirectionalRectEdge edge);
 
 
     std::string title() { return _title; }
@@ -119,6 +132,9 @@ public:
 private:
     friend class UIView;
     friend class Internal::ViewControllerContainerAccess;
+    friend class Internal::ViewControllerContentScrollAccess;
+    std::array<std::weak_ptr<UIScrollView>, 4> _contentScrollViews;
+    std::array<std::uint64_t, 4> _contentScrollViewGetterGeneration {};
     struct TabBarItemObserver { std::weak_ptr<void> owner; std::function<void()> changed; };
     std::vector<TabBarItemObserver> _tabBarItemObservers;
     std::shared_ptr<UITabBarItem> _tabBarItem;

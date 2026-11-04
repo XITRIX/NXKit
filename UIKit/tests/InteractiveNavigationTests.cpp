@@ -15,6 +15,8 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <fstream>
+#include <cstdlib>
 using namespace NXKit;
 namespace NXKit {
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplication*,std::map<std::string,std::any>){return true;}
@@ -105,6 +107,56 @@ void tracking(bool commit,bool cancellation=false) {
     // Reusing the very same recognizer after a cancellation must work.
     input.send(UITouchPhase::ended,{114,300},1400);recognizer->setEnabled(true);recognizer->onStateChanged={};
 }
+void titleSettlement(const std::shared_ptr<Context>& context) {
+    struct Release {float progress,velocity;bool commit;};
+    std::ofstream trace;if(const auto path=std::getenv("NXKIT_NAVIGATION_TITLE_TRACE")){trace.open(path);trace<<"dark,scale,custom_titles,progress,velocity,frame,source_content,source_title,target_content,target_title,reveal_width\n";}
+    for(bool dark:{false,true})for(float density:{1.f,2.f,3.f})for(int custom:{0,1,2,3})for(auto release:{Release{.25f,0,false},Release{.55f,0,true},Release{.8f,0,true},Release{.4f,600,true},Release{.6f,-200,false}}) {
+        const auto [progress,velocity,commit]=release;
+        context->dark=dark;context->density=density;
+        Fixture f;settle();
+        const auto sourceCustom=custom&1?new_shared<UIView>(NXRect{0,0,80,30}):nullptr;
+        const auto targetCustom=custom&2?new_shared<UIView>(NXRect{0,0,100,32}):nullptr;
+        const auto applicationTransform=NXAffineTransform::scale(.9f);
+        for(const auto& title:{sourceCustom,targetCustom})if(title)title->setTransform(applicationTransform);
+        if(sourceCustom)f.source->navigationItem()->setTitleView(sourceCustom);
+        if(targetCustom)f.target->navigationItem()->setTitleView(targetCustom);
+        auto& bar=Internal::NavigationBarAccess::state(*f.nav->navigationBar());
+        const auto outgoing=bar.titleInk;
+        UIGestureRecognizerTestHarness input(f.window);
+        input.send(UITouchPhase::moved,{14,300},50);
+        const auto finger=14+402*progress;
+        input.send(UITouchPhase::moved,{finger,300},250);
+        const auto incoming=bar.interactiveTitle;
+        auto translation=[](const auto& view){return NXTransform3DGetAffineTransform(view->layer()->presentationOrSelf()->transform()).tX;};
+        expect(close(translation(outgoing),x(f.source))&&close(translation(incoming),x(f.target)),"both titles track their own content while held");
+        // Cover a paused release, a forward flick below half, and a backwards
+        // release above half. The same title/content relation must hold for all.
+        input.send(UITouchPhase::moved,{finger,300},600);
+        if(velocity){input.send(UITouchPhase::moved,{finger-velocity*.1f,300},700);input.send(UITouchPhase::moved,{finger-velocity*.05f,300},750);}
+        input.send(UITouchPhase::moved,{finger,300},800);
+        input.send(UITouchPhase::ended,{finger,300},850);
+        expect((commit?bar.titleInk:bar.interactiveTitle)==incoming,"releasing a pop preserves the incoming title carrier");
+        const auto origin=Timer();
+        for(int frame=0;frame<60;++frame) {
+            auto now=origin;const auto us=origin.startTime.tv_usec+frame*1000000L/120;
+            now.startTime.tv_sec+=us/1000000;now.startTime.tv_usec=us%1000000;
+            std::function<void(const std::shared_ptr<CALayer>&)> tick=[&](const auto& layer){const auto children=layer->sublayers();layer->animateAt(now);for(const auto& child:children)tick(child);};
+            tick(f.window->layer());
+            expect(std::abs(translation(outgoing)-x(f.source))<.02f,"outgoing title stays attached to its screen on every release frame");
+            expect(std::abs(translation(incoming)-x(f.target))<.02f,"incoming title keeps destination parallax throughout settlement");
+            const auto expectedWidth=402*(.3f+.7f*x(f.source)/402);
+            expect(std::abs(incoming->layer()->presentationOrSelf()->bounds().width()-expectedWidth)<.02f,"title reveal boundary shares the content settling clock");
+            if(sourceCustom)expect(sourceCustom->superview().lock()==outgoing&&sourceCustom->transform()==applicationTransform,"custom outgoing title travels once with its carrier and preserves its transform");
+            if(targetCustom)expect(targetCustom->superview().lock()==incoming&&targetCustom->transform()==applicationTransform,"custom incoming title remains on its destination carrier until settlement");
+            if(trace)trace<<dark<<','<<density<<','<<custom<<','<<progress<<','<<velocity<<','<<frame<<','<<x(f.source)<<','<<translation(outgoing)<<','<<x(f.target)<<','<<translation(incoming)<<','<<incoming->layer()->presentationOrSelf()->bounds().width()<<'\n';
+        }
+        settle();
+        expect(f.nav->topViewController()==(commit?f.target:f.source),"title settlement keeps the intended commit/cancel outcome");
+        const auto visibleCustom=commit?targetCustom:sourceCustom;
+        if(visibleCustom)expect(visibleCustom->superview().lock()==f.nav->navigationBar()&&visibleCustom->transform()==applicationTransform,"settled custom title restores the ordinary bar hierarchy and application transform");
+    }
+    context->dark=false;context->density=3;
+}
 class Veto:public UIGestureRecognizerDelegate {bool gestureRecognizerShouldBegin(std::shared_ptr<UIGestureRecognizer>)override{return false;}};
 class DisableOnBegin:public UIGestureRecognizerDelegate {public:bool reenable=false;bool gestureRecognizerShouldBegin(std::shared_ptr<UIGestureRecognizer> gesture)override{gesture->setEnabled(false);if(reenable)gesture->setEnabled(true);return true;}};
 void admission() {
@@ -175,7 +227,7 @@ void interruptions() {
 }
 }
 int main(){auto ctx=std::make_shared<Context>();SkiaCtx::_main=ctx;UIApplication::shared=new_shared<UIApplication>();UIApplication::shared->delegate=std::make_shared<UIApplicationDelegate>();
-    tracking(false);tracking(true);tracking(false,true);admission();preview();independentApplicationAnimation();rootBoundary();interruptions();
+    tracking(false);tracking(true);tracking(false,true);titleSettlement(ctx);admission();preview();independentApplicationAnimation();rootBoundary();interruptions();
     UIApplication::shared->keyWindow.reset();UIApplication::shared->delegate->window.reset();UIApplication::shared.reset();SkiaCtx::_main.reset();
     if(!failures)std::cout<<"Interactive navigation tests passed\n";return failures?1:0;
 }

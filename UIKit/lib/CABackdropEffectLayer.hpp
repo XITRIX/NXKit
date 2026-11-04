@@ -3,6 +3,7 @@
 #include <BackdropEffect.h>
 #include <CALayer.h>
 #include <UIGlassEffect.h>
+#include <private/UIBlurEffect.h>
 #include "GlassInteraction.hpp"
 
 #include "include/core/SkRefCnt.h"
@@ -24,6 +25,7 @@ public:
     std::shared_ptr<CALayer> copy() override;
 
     void setEffect(const BackdropEffect& effect);
+    void setEffect(const UIBlurEffect& effect);
     [[nodiscard]] BackdropEffect effect() const { return _effect; }
 
     void setGlassInteraction(const Internal::GlassInteraction& interaction);
@@ -46,6 +48,7 @@ private:
     void invalidateImageFilterCache();
 
     BackdropEffect _effect;
+    std::optional<UIBlurEffect> _variableBlur;
     sk_sp<SkRuntimeEffect> _runtimeEffect;
     sk_sp<SkImageFilter> _cachedImageFilter;
     NXSize _cachedFilterSize;

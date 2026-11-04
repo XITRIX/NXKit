@@ -7,6 +7,9 @@
 #include <UICornerRadius.h>
 #include <UICornerConfiguration.h>
 #include <UIRectCorner.h>
+#include <UIRectEdge.h>
+#include <UIInteraction.h>
+#include <NSDirectionalRectEdge.h>
 #include <CALayerCornerCurve.h>
 #include <BackdropEffect.h>
 #include <CABackdropLayer.h>
@@ -24,6 +27,7 @@
 #include <UILabel.h>
 #include <UIPanGestureRecognizer.h>
 #include <UIScrollView.h>
+#include <UIScrollEdgeEffect.h>
 #include <UITapGestureRecognizer.h>
 #include <UITextView.h>
 #include <UIUserInterfaceSizeClass.h>

@@ -43,8 +43,12 @@ add_library(UIKitCore
         include/UICornerRadius.h
         include/UICornerConfiguration.h
         include/UIRectCorner.h
+        include/UIRectEdge.h
+        include/UIInteraction.h
+        include/NSDirectionalRectEdge.h
         include/CALayerCornerCurve.h
         lib/LayerAnimationTimeline.hpp
+        lib/LayerContentMask.hpp
         lib/YGLayout.cpp
         include/UIBarButtonItem.h
         lib/UIBarButtonItem.cpp
@@ -84,6 +88,8 @@ add_library(UIKitCore
         lib/UIPressesEvent.cpp
         lib/UIResponder.cpp
         lib/UIScrollView.cpp
+        include/UIScrollEdgeEffect.h
+        lib/UIScrollEdgeEffect.cpp
         lib/UITapGestureRecognizer.cpp
         lib/UITextView.cpp
         lib/UITouch.cpp
@@ -91,10 +97,13 @@ add_library(UIKitCore
         lib/UITraitCollection.cpp
         lib/UITraitEnvironment.cpp
         lib/UIView.cpp
+        lib/UIViewInteractions.cpp
         lib/UIViewCorners.cpp
         lib/UIViewAnimationGroup.cpp
         lib/UIViewAnimationOptions.cpp
         lib/UIViewController.cpp
+        lib/UIViewControllerScroll.cpp
+        lib/ViewControllerContentScrollAccess.hpp
         lib/UIPresentationController.cpp
         lib/UIWindow.cpp
         lib/NXAffineTransform.cpp
@@ -146,6 +155,17 @@ endif ()
 option(UIKITCORE_BUILD_TESTS "Build UIKitCore regression tests" OFF)
 if (UIKITCORE_BUILD_TESTS)
     enable_testing()
+    add_executable(NXKitContentScrollViewTests tests/ContentScrollViewTests.cpp)
+    target_include_directories(NXKitContentScrollViewTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+    target_link_libraries(NXKitContentScrollViewTests PRIVATE UIKitCore)
+    add_test(NAME NXKitContentScrollViewTests COMMAND NXKitContentScrollViewTests)
+    add_executable(NXKitLayerContentMaskTests tests/LayerContentMaskTests.cpp)
+    target_include_directories(NXKitLayerContentMaskTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+    target_link_libraries(NXKitLayerContentMaskTests PRIVATE UIKitCore)
+    add_test(NAME NXKitLayerContentMaskTests COMMAND NXKitLayerContentMaskTests)
+    add_executable(NXKitViewInteractionTests tests/UIViewInteractionTests.cpp)
+    target_link_libraries(NXKitViewInteractionTests PRIVATE UIKitCore)
+    add_test(NAME NXKitViewInteractionTests COMMAND NXKitViewInteractionTests)
     add_executable(NXKitCornerConfigurationTests tests/CornerConfigurationTests.cpp)
     target_link_libraries(NXKitCornerConfigurationTests PRIVATE UIKitCore)
     add_test(NAME NXKitCornerConfigurationTests COMMAND NXKitCornerConfigurationTests)

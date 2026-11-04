@@ -1,4 +1,7 @@
 #include <NXNavigationController.h>
+#include "../lib/NXNavigationScrollPocket.hpp"
+#include <UIScrollView.h>
+#include <UIScrollEdgeEffect.h>
 #include <NXResponderAction.h>
 #include <NXTabBarController.h>
 #include <CABasicAnimation.h>
@@ -400,12 +403,105 @@ private:
     std::shared_ptr<PresentationStats> _stats;
 };
 
+void testSharedScrollEdgeMaterials() {
+    auto screen = new_shared<UIViewController>();
+    auto scroll = new_shared<UIScrollView>();
+    scroll->setContentSize({1280, 1800});
+    scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::always);
+    screen->setView(scroll);
+    auto navigation = new_shared<NXNavigationController>(screen);
+    auto host = new_shared<UIView>(NXRect{0, 0, 1280, 720});
+    host->addSubview(navigation->view());
+    navigation->view()->setFrame({0, 0, 1280, 720});
+    host->layoutIfNeeded();
+    const auto bars = navigation->view()->subviews();
+    expect(bars.size() == 3, "navigation keeps content and two shared bars");
+    if (bars.size() != 3) return;
+    const auto top = bars[1], bottom = bars[2];
+    const auto topMaterial = top->layer(), bottomMaterial = bottom->layer();
+    expect(bool(std::dynamic_pointer_cast<Internal::NavigationScrollPocketLayer>(topMaterial))
+        && bool(std::dynamic_pointer_cast<Internal::NavigationScrollPocketLayer>(bottomMaterial)),
+        "both navigation and toolbar own the scroll edge material");
+    auto topRect = [&] { return Internal::navigationScrollPocketMaterialRect(
+        *screen, top, NSDirectionalRectEdge::top); };
+    auto bottomRect = [&] { return Internal::navigationScrollPocketMaterialRect(
+        *screen, bottom, NSDirectionalRectEdge::bottom); };
+    const auto safe = scroll->safeAreaInsets();
+    expect(safe.top == 88 && safe.bottom == 73, "NX bars contribute their safe strips");
+    scroll->setContentOffset({0, -safe.top}, false);
+    expect(topRect().height() == 0, "top material is absent at the leading content boundary");
+    expect(bottomRect().height() == 73, "bottom material covers only the toolbar safe strip");
+    scroll->setContentOffset({0, 40 - safe.top}, false);
+    expect(topRect().height() == 88, "top material appears after content enters its safe strip");
+    auto offsetAnimation = new_shared<CABasicAnimation>("bounds");
+    offsetAnimation->fromValue = NXRect({0, -safe.top - 20}, scroll->bounds().size);
+    offsetAnimation->toValue = scroll->bounds();
+    offsetAnimation->duration = 1000;
+    scroll->layer()->add(offsetAnimation, "bounds");
+    scroll->layer()->animateAt(Timer());
+    expect(topRect().height() == 0,
+        "material activation follows the visible scroll presentation instead of its final model offset");
+    scroll->layer()->removeAllAnimations();
+    expect(topRect().height() == 88, "ending an offset animation resumes model edge state");
+    scroll->topEdgeEffect()->setHidden(true);
+    expect(topRect().height() == 0, "edge metadata can hide the shared top material");
+    scroll->topEdgeEffect()->setHidden(false);
+    scroll->topEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::soft);
+    expect(topRect().height() == 88, "NX soft requests fall back to its hard material");
+    scroll->setContentOffset({0, 1800 + safe.bottom - 720}, false);
+    expect(bottomRect().height() == 0, "bottom material disappears at the trailing content boundary");
+    scroll->setHidden(true);
+    expect(topRect().height() == 0, "hidden content never supplies the shared material");
+    scroll->setHidden(false);
+
+    auto plain = new_shared<UIViewController>();
+    navigation->pushViewController(plain, false);
+    navigation->view()->layoutIfNeeded();
+    expect(top->layer() == topMaterial && bottom->layer() == bottomMaterial,
+        "pushing reuses both material layers instead of adding per-screen blur");
+    expect(Internal::navigationScrollPocketMaterialRect(*plain, top,
+        NSDirectionalRectEdge::top).height() == 0,
+        "a non-scroll screen has no inherited scroll edge material");
+    navigation->popViewController(false);
+    navigation->view()->layoutIfNeeded();
+    expect(top->layer() == topMaterial && topRect().height() > 0,
+        "popping restores the source edge state using the original shared layer");
+    scroll->setContentSize({1280, 0});
+    expect(topRect().height() == 0 && bottomRect().height() == 0,
+        "empty content disables both materials");
+
+    auto custom = new_shared<UIViewController>();
+    auto wrapper = new_shared<UIView>();
+    wrapper->addSubview(new_shared<UIView>());
+    auto customScroll = new_shared<UIScrollView>(NXRect{100, 0, 800, 720});
+    customScroll->setContentSize({800, 1800});
+    customScroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::always);
+    wrapper->addSubview(customScroll);
+    custom->setView(wrapper);
+    navigation->pushViewController(custom, false);
+    navigation->view()->layoutIfNeeded();
+    customScroll->setContentOffset({0, 40 - customScroll->safeAreaInsets().top}, false);
+    expect(Internal::navigationScrollPocketMaterialRect(*custom, top,
+        NSDirectionalRectEdge::top).height() == 0,
+        "NX automatic discovery does not search arbitrary later sibling views");
+    custom->setContentScrollView(customScroll, NSDirectionalRectEdge::top);
+    const auto customRect = Internal::navigationScrollPocketMaterialRect(
+        *custom, top, NSDirectionalRectEdge::top);
+    expect(customRect.minX() == 100 && customRect.width() == 800 && customRect.height() == 88,
+        "an explicit custom scroll selection clips material to its actual safe-area intersection");
+    customScroll->removeFromSuperview();
+    expect(Internal::navigationScrollPocketMaterialRect(*custom, top,
+        NSDirectionalRectEdge::top).height() == 0,
+        "detaching an explicitly selected scroll view stops lending its material");
+}
+
 } // namespace
 
 int main() {
     // makeKeyAndVisible now completes initial layout before appearance. Supply
     // the font service used by navigation chrome's intrinsic measurements.
     SkiaCtx::_main = std::make_shared<NavigationTestContext>();
+    testSharedScrollEdgeMaterials();
     auto yogaRoot = new_shared<UIView>();
     yogaRoot->setAutolayoutEnabled(true);
     yogaRoot->setFrame(NXRect(0, 0, 320, 180));

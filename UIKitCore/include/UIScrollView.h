@@ -10,10 +10,12 @@
 #include <UIView.h>
 #include <CADisplayLink.h>
 #include <UIPanGestureRecognizer.h>
+#include <UIScrollEdgeEffect.h>
 #include <UIScrollViewExtensions/DecelerationTimingParameters.h>
 #include <UIScrollViewExtensions/TimerAnimation.h>
 #include <UIScrollViewExtensions/UIScrollViewDecelerationRate.h>
 #include <cstdint>
+#include <array>
 #include <functional>
 #include <tools/DragSmoother.hpp>
 
@@ -66,6 +68,11 @@ public:
 
     UIScrollView(NXRect frame = NXRect());
     ~UIScrollView() override;
+
+    [[nodiscard]] std::shared_ptr<UIScrollEdgeEffect> topEdgeEffect() const { return _edgeEffects[0]; }
+    [[nodiscard]] std::shared_ptr<UIScrollEdgeEffect> leftEdgeEffect() const { return _edgeEffects[1]; }
+    [[nodiscard]] std::shared_ptr<UIScrollEdgeEffect> bottomEdgeEffect() const { return _edgeEffects[2]; }
+    [[nodiscard]] std::shared_ptr<UIScrollEdgeEffect> rightEdgeEffect() const { return _edgeEffects[3]; }
 
     void addSubview(const std::shared_ptr<UIView> &view) override;
     bool applyXMLAttribute(const std::string& name, const std::string& value) override;
@@ -186,6 +193,7 @@ private:
     bool _bounceHorizontally = false;
     bool _bounceVertically = false;
     bool _isScrollEnabled = true;
+    std::array<std::shared_ptr<UIScrollEdgeEffect>,4> _edgeEffects;
 
     bool shouldBounceHorizontally() const;
     bool shouldBounceVertically() const;

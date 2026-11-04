@@ -8,6 +8,7 @@
 #include "UINavigationBarInternal.hpp"
 #include "NavigationBarMotion.hpp"
 #include "ViewControllerContainerAccess.hpp"
+#include "UIScrollPocket.hpp"
 #include <algorithm>
 #include <stdexcept>
 #include <unordered_set>
@@ -162,10 +163,10 @@ void UINavigationController::mount(int direction,bool animated,std::vector<std::
     if(next==previous) {for(const auto& child:removed)child->removeFromParent();finish();return;}
     _displayed=next;
     const auto oldView=_displayedHost;
-    const auto nextView=next?new_shared<UIView>():nullptr;
+    const auto nextView=next?Internal::makeScrollPocketHost(next):nullptr;
     _outgoingHost=oldView;_displayedHost=nextView;
     const auto bounds=_content->bounds();
-    if(nextView){nextView->setFrame(bounds);if(direction<0&&oldView)_content->insertSubviewBelow(nextView,oldView);else _content->addSubview(nextView);nextView->addSubview(next->view());next->view()->setFrame(bounds);}
+    if(nextView){nextView->setFrame(bounds);if(direction<0&&oldView)_content->insertSubviewBelow(nextView,oldView);else _content->addSubview(nextView);nextView->addSubview(next->view());next->view()->setFrame(bounds);Internal::updateScrollPocketHost(nextView);}
     if(_visible) {
         if(previous)previous->viewWillDisappear(animated);
         if(next)next->viewWillAppear(animated);
@@ -210,6 +211,7 @@ void UINavigationController::layout() {
     if(_interactive&&_interactive->width!=bounds.width())endInteractivePop(false,0,false);
     _content->setFrame(bounds);if(_displayedHost)_displayedHost->setFrame(_content->bounds());if(_outgoingHost)_outgoingHost->setFrame(_content->bounds());const auto height=_bar->sizeThatFits(bounds.size).height;_bar->setFrame({bounds.origin.x,_barHidden?-height:bounds.origin.y+safe.top,bounds.width(),height});_bar->setHidden(_barHidden);
     for(const auto& child:_controllers){Internal::ViewControllerContainerAccess::setChildSafeAreaInsets(shared_from_this(),child,{_barHidden?0.0f:height,0,0,0});if(child->viewIsLoaded())child->view()->setFrame(_content->bounds());}
+    Internal::updateScrollPocketHost(_displayedHost);Internal::updateScrollPocketHost(_outgoingHost);
 }
 void UINavigationController::setNavigationBarHidden(bool hidden,bool animated) {
     if(_barHidden==hidden)return;if(_interactive)endInteractivePop(false,0,false);_barHidden=hidden;if(!viewIsLoaded())return;
@@ -250,8 +252,9 @@ void UINavigationController::beginInteractivePop() {
     _updating=true;_interactive=std::make_shared<InteractivePop>();const auto transition=_interactive;auto& state=*transition;
     state.original=_controllers;state.source=_controllers.back();state.target=_controllers[_controllers.size()-2];state.sourceHost=_displayedHost;state.width=_content->bounds().width();
     _controllers.pop_back();_displayed=state.target;_outgoingHost=state.sourceHost;
-    state.targetHost=new_shared<UIView>(_content->bounds());_displayedHost=state.targetHost;
+    state.targetHost=Internal::makeScrollPocketHost(state.target);state.targetHost->setFrame(_content->bounds());_displayedHost=state.targetHost;
     _content->insertSubviewBelow(state.targetHost,state.sourceHost);state.targetHost->addSubview(state.target->view());state.target->view()->setFrame(_content->bounds());
+    Internal::updateScrollPocketHost(state.targetHost);
     state.dimming=new_shared<UIView>(_content->bounds());state.dimming->setUserInteractionEnabled(false);state.dimming->setBackgroundColor(UIColor::black);state.targetHost->addSubview(state.dimming);
     beginNavigationCard(state.sourceHost);beginNavigationCard(state.targetHost);
     // Loading/mounting application content can start its own animations. Take
@@ -307,6 +310,7 @@ void UINavigationController::finishInteractivePop(bool commit) {
     state->timeline->discard();
     state->dimming->removeFromSuperview();
     if(commit) {
+        Internal::NavigationBarAccess::finishInteractivePop(*_bar);
         state->source->view()->removeFromSuperview();state->sourceHost->removeFromSuperview();state->source->removeFromParent();
         state->targetHost->setTransform(NXAffineTransform::identity);_displayed=state->target;
     }else {

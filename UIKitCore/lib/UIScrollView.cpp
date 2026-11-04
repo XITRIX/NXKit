@@ -128,6 +128,8 @@ bool isDirectionalFocusHeading(UIFocusHeading heading) {
 } // namespace
 
 UIScrollView::UIScrollView(const NXRect frame): UIView(frame) {
+    const auto invalidate=[weak=weak_from_base<UIScrollView>()]{if(const auto scroll=weak.lock())scroll->layer()->setNeedsDisplay();};
+    for(auto& edge:_edgeEffects)edge=std::shared_ptr<UIScrollEdgeEffect>(new UIScrollEdgeEffect(invalidate));
     _panGestureRecognizer = new_shared<UIPanGestureRecognizer>();
     _panGestureRecognizer->_shouldBegin = [weak = weak_from_base<UIScrollView>()](NXPoint travel) {
         const auto self = weak.lock();

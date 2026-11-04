@@ -20,6 +20,7 @@
 namespace NXKit {
 
 namespace Internal { class LensLayer; }
+namespace Internal { class LayerContentMask; class LayerContentMaskAccess; }
 
 class CALayerDelegate {
 public:
@@ -175,6 +176,7 @@ protected:
 private:
     friend class UIView;
     friend class Internal::LayerAnimationTimeline;
+    friend class Internal::LayerContentMaskAccess;
     friend class CAGlassContainerLayer;
     friend class Internal::LensLayer;
     friend class LensView;
@@ -192,6 +194,7 @@ private:
     std::weak_ptr<CALayer> _superlayer;
     std::vector<std::shared_ptr<CALayer>> _sublayers;
     std::shared_ptr<CALayer> _mask;
+    std::vector<std::weak_ptr<Internal::LayerContentMask>> _contentMasks;
 
     bool _isHidden = false;
     bool _needsDisplay = true;

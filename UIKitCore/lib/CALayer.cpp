@@ -3,6 +3,9 @@
 //
 
 #include "CALayer.h"
+#include "LayerContentMask.hpp"
+#include "include/core/SkPictureRecorder.h"
+#include "include/core/SkPicture.h"
 #include "RenderPerformance.hpp"
 #include <UIView.h>
 #include <CATransaction.h>
@@ -20,6 +23,31 @@
 #include "include/effects/SkImageFilters.h"
 
 using namespace NXKit;
+
+namespace {
+// Traversal state belongs to the render call, never to the retained layer.
+// Preserve the virtual renderSublayers hook used by material/animation layers.
+struct ContentMaskFrame {
+    static thread_local const ContentMaskFrame* current;
+    const ContentMaskFrame* previous=current;
+    const CALayer* layer;
+    SkCanvas* canvas;
+    std::vector<std::shared_ptr<Internal::LayerContentMask>> localProviders;
+    const std::vector<std::shared_ptr<Internal::LayerContentMask>>* providers=nullptr;
+    ContentMaskFrame(const CALayer* value,SkCanvas* target,
+                     const std::vector<std::weak_ptr<Internal::LayerContentMask>>& local)
+        :layer(value),canvas(target) {
+        if(previous&&previous->canvas==canvas)providers=previous->providers;
+        for(const auto& weak:local)if(const auto mask=weak.lock();mask&&mask->affectsSubtree()) {
+            if(localProviders.empty()&&providers)localProviders=*providers;
+            localProviders.push_back(mask);providers=&localProviders;
+        }
+        current=this;
+    }
+    ~ContentMaskFrame(){current=previous;}
+};
+thread_local const ContentMaskFrame* ContentMaskFrame::current=nullptr;
+}
 
 bool CALayer::layerTreeIsDirty = true;
 void CALayer::setLayerTreeIsDirty() {
@@ -70,6 +98,7 @@ CALayer::CALayer(CALayer* layer) {
     _shadowRadius = layer->_shadowRadius;
     _shadowOpacity = layer->_shadowOpacity;
     _mask = layer->_mask;
+    _contentMasks = layer->_contentMasks;
     _masksToBounds = layer->_masksToBounds;
     _contents = layer->_contents; // XXX: we should make a copy here
     _contentsScale = layer->_contentsScale;
@@ -305,6 +334,7 @@ NXFloat CALayer::renderingCornerRadius() const {
 void CALayer::draw(SkCanvas* context) {}
 
 void CALayer::skiaRender(SkCanvas* canvas) {
+    const ContentMaskFrame maskFrame(this,canvas,_contentMasks);
     if (Internal::RenderPerformance::current) ++Internal::RenderPerformance::current->layers;
     if (_lensSourceOwners) {
         std::erase_if(*_lensSourceOwners, [](const auto& owner) { return owner.expired(); });
@@ -508,31 +538,52 @@ void CALayer::skiaRender(SkCanvas* canvas) {
 }
 
 void CALayer::renderSublayers(SkCanvas* canvas) {
-    canvas->save();
-    canvas->concat(CATransform3DMakeTranslation(-_bounds.origin.x, -_bounds.origin.y, 0).toSkM44());
-
-    struct {
-        bool operator()(const std::shared_ptr<CALayer>& a, const std::shared_ptr<CALayer>& b) const { return a->_zPosition < b->_zPosition; }
-    } sortByZPos;
-
-    auto* metrics = Internal::RenderPerformance::current;
-    const auto sortedSublayers = [&] {
-        Internal::RenderPerformanceScope timer(metrics ? &metrics->sortMs : nullptr);
-        // Preserve the retained snapshot across custom drawing callbacks, but
-        // avoid stable_sort's scratch allocation for ordinary insertion order.
-        auto children = _sublayers;
-        if (!std::is_sorted(children.begin(), children.end(), sortByZPos)) {
-            if (metrics) ++metrics->sorts;
-            std::stable_sort(children.begin(), children.end(), sortByZPos);
+    std::vector<std::shared_ptr<Internal::LayerContentMask>> masks;
+    const auto frame=ContentMaskFrame::current;
+    if(frame&&frame->layer==this&&frame->canvas==canvas&&frame->providers)
+        for(const auto& mask:*frame->providers)if(mask->active(*this))masks.push_back(mask);
+    for(const auto& weak:_contentMasks)
+        if(const auto mask=weak.lock();mask&&!mask->affectsSubtree()&&mask->active(*this))masks.push_back(mask);
+    const auto viewport=SkRect::MakeWH(_bounds.width(),_bounds.height());
+    const auto sortByZPos=[](const auto& a,const auto& b){return a->_zPosition<b->_zPosition;};
+    auto* metrics=Internal::RenderPerformance::current;
+    const auto sortedSublayers=[&] {
+        Internal::RenderPerformanceScope timer(metrics?&metrics->sortMs:nullptr);
+        // Retain the snapshot across custom drawing callbacks.
+        auto children=_sublayers;
+        if(!std::is_sorted(children.begin(),children.end(),sortByZPos)) {
+            if(metrics)++metrics->sorts;
+            std::stable_sort(children.begin(),children.end(),sortByZPos);
         }
         return children;
     }();
-
-    for (const auto& sublayer: sortedSublayers) {
-        sublayer->presentationOrSelf()->skiaRender(canvas);
+    const auto renderChildren=[&](SkCanvas* target) {
+        target->save();
+        target->concat(CATransform3DMakeTranslation(-_bounds.origin.x,-_bounds.origin.y,0).toSkM44());
+        for(const auto& sublayer:sortedSublayers)sublayer->presentationOrSelf()->skiaRender(target);
+        target->restore();
+    };
+    if(!masks.empty()) {
+        canvas->save();canvas->clipRect(viewport);
+        for(const auto& mask:masks)mask->drawBackdrop(canvas,*this);
+        canvas->restore();
+        canvas->save();
+        for(const auto& mask:masks) {
+            auto shader=mask->contentShader(*this);
+            if(!shader) {
+                SkPictureRecorder recorder;mask->draw(recorder.beginRecording(viewport),*this);
+                const auto picture=recorder.finishRecordingAsPicture();
+                shader=picture->makeShader(SkTileMode::kClamp,SkTileMode::kClamp,SkFilterMode::kLinear,nullptr,&viewport);
+            }
+            canvas->clipShader(std::move(shader));
+        }
+        // Src interpolates the complete child result with its backdrop without
+        // adding translucent pixels twice. Initialization preserves nested blur.
+        SkPaint restore;restore.setBlendMode(SkBlendMode::kSrc);
+        canvas->saveLayer(SkCanvas::SaveLayerRec(&viewport,&restore,SkCanvas::kInitWithPrevious_SaveLayerFlag));
     }
-    canvas->restore();
-
+    renderChildren(canvas);
+    if(!masks.empty()){canvas->restore();canvas->restore();}
 }
 
 NXRect CALayer::getFrame() {

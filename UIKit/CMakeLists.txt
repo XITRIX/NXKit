@@ -14,6 +14,13 @@ add_library(XITRIXUIKit
         include/GlassContainerView.h
         include/LensView.h
         lib/BackdropEffectView.cpp
+        include/private/UIBlurEffect.h
+        lib/ProgressiveBlur.hpp
+        lib/ProgressiveBlur.cpp
+        lib/UIScrollPocket.hpp
+        lib/UIScrollPocket.cpp
+        include/UIScrollEdgeElementContainerInteraction.h
+        lib/UIScrollEdgeElementContainerInteraction.cpp
         lib/CABackdropEffectLayer.cpp
         lib/CAGlassContainerLayer.cpp
         lib/GlassContainerView.cpp
@@ -39,6 +46,12 @@ target_link_libraries(XITRIXUIKit PUBLIC UIKitCore)
 option(UIKIT_BUILD_TESTS "Build UIKit regression tests" OFF)
 if (UIKIT_BUILD_TESTS)
     enable_testing()
+    if(APPLE)
+        add_executable(UIKitScrollEdgeEffectsTests tests/ScrollEdgeEffectsTests.cpp)
+        target_include_directories(UIKitScrollEdgeEffectsTests PRIVATE lib ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib)
+        target_link_libraries(UIKitScrollEdgeEffectsTests PRIVATE Xitrix::UIKit)
+        add_test(NAME UIKitScrollEdgeEffectsTests COMMAND UIKitScrollEdgeEffectsTests)
+    endif()
     add_executable(UIKitNavigationTests tests/UINavigationTests.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib/UIApplicationMain.cpp)
     target_include_directories(UIKitNavigationTests PRIVATE lib ${CMAKE_CURRENT_SOURCE_DIR}/../UIKitCore/lib)
     target_link_libraries(UIKitNavigationTests PRIVATE Xitrix::UIKit)

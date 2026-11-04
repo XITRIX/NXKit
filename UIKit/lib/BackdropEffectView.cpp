@@ -64,6 +64,14 @@ BackdropEffectView::BackdropEffectView(const BackdropEffect& effect):
     UIView(NXRect(), new_shared<CABackdropEffectLayer>(effect))
 { _updateDisplayScale(); }
 
+BackdropEffectView::BackdropEffectView(const UIBlurEffect& effect):
+    BackdropEffectView(BackdropEffect("uniform shader content; half4 main(float2 p){return content.eval(p);}")) {setEffect(effect);}
+
+void BackdropEffectView::setEffect(const UIBlurEffect& effect) {
+    _backdropEffectLayer()->setEffect(effect);_glassEffect.reset();_hasResolvedGlass=false;
+    _configureAppearance();_configureInteraction();
+}
+
 BackdropEffectView::BackdropEffectView(const UIGlassEffect& effect):
     UIView(
         NXRect(),

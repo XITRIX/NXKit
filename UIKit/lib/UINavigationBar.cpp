@@ -229,11 +229,17 @@ void UINavigationBar::refresh(bool animated,int direction) {
     };
     configureSide(_state->left,left,false);configureSide(_state->right,right,true);
     if(_state->customTitle!=(top?top->titleView():nullptr)) {
-        if(_state->customTitle)_state->customTitle->removeFromSuperview();_state->customTitle=top?top->titleView():nullptr;
-        if(_state->customTitle){if(_state->customTitle.get()==this||isDescendantOf(_state->customTitle))throw std::invalid_argument("Title view forms a cycle");insertSubviewBelow(_state->customTitle,_state->glass);}
+        if(_state->customTitle&&handoff<0)_state->customTitle->removeFromSuperview();_state->customTitle=top?top->titleView():nullptr;
+        if(_state->customTitle){if(_state->customTitle.get()==this||isDescendantOf(_state->customTitle))throw std::invalid_argument("Title view forms a cycle");if(handoff<0)insertSubviewBelow(_state->customTitle,_state->glass);}
     }
     const auto oldTitle=_state->title;const auto oldTitleInk=_state->titleInk;
-    if(oldTitle->text()!=(top?top->title():"")||(animate&&stackTransition)) {
+    if(handoff>=0&&_state->interactiveTitle) {
+        // The gesture already owns both title carriers and their reveal mask.
+        // Retain those exact animations on the content's reversible clock;
+        // only the glass/ink grouping changes to its committed appearance.
+        _state->titleInk=_state->interactiveTitle;_state->title=_state->interactiveTitleLabel;
+        retiring.push_back(oldTitleInk);
+    }else if(oldTitle->text()!=(top?top->title():"")||(animate&&stackTransition)) {
         auto title=new_shared<UILabel>();title->setFontSize(17);title->setFontWeight(600);title->setTextAlignment(NSTextAlignment::center);title->setUserInteractionEnabled(false);
         title->setText(top?top->title():"");_state->titleInk=new_shared<Internal::NavigationInkView>();_state->titleInk->setUserInteractionEnabled(false);insertSubviewBelow(_state->titleInk,_state->glass);_state->titleInk->addSubview(title);_state->title=title;retiring.push_back(oldTitleInk);
     }
@@ -294,24 +300,26 @@ void UINavigationBar::refresh(bool animated,int direction) {
     _state->glass->layer()->add(retirement,"navigationRetirement");
     if(stackTransition) {
         _state->title->setAlpha(1);_state->title->setTransform(NXAffineTransform::identity);_state->title->setFrame(titleTarget);
-        const auto width=bounds().width();
-        const auto incoming=NXAffineTransform::translationBy(direction<0?-width*.3f*(handoff<0?1:1-handoff):width,0);
-        const auto outgoing=NXAffineTransform::translationBy(direction<0?width:-width*.3f,0);
-        UIView::performWithoutAnimation([&]{_state->titleInk->setTransform(NXAffineTransform::identity);oldTitleInk->setTransform(outgoing);});
-        for(const auto& host:{_state->titleInk,oldTitleInk}) {
-            auto slide=Internal::navigationAnimation("transform");slide->duration=Internal::navigationContentDuration;
-            slide->fromValue=NXTransform3DMakeAffineTransform(host==oldTitleInk?(handoff<0?NXAffineTransform::identity:NXAffineTransform::translationBy(width*handoff,0)):incoming);
-            slide->toValue=NXTransform3DMakeAffineTransform(host==oldTitleInk?outgoing:NXAffineTransform::identity);
-            slide->timingFunction=new_shared<CAMediaTimingFunction>([](double fraction){return fraction>=1?1.:Internal::navigationContentProgress(fraction*Internal::navigationContentDuration);});
-            host->layer()->add(slide,"transform");
+        if(handoff<0) {
+            const auto width=bounds().width();
+            const auto incoming=NXAffineTransform::translationBy(direction<0?-width*.3f:width,0);
+            const auto outgoing=NXAffineTransform::translationBy(direction<0?width:-width*.3f,0);
+            UIView::performWithoutAnimation([&]{_state->titleInk->setTransform(NXAffineTransform::identity);oldTitleInk->setTransform(outgoing);});
+            for(const auto& host:{_state->titleInk,oldTitleInk}) {
+                auto slide=Internal::navigationAnimation("transform");slide->duration=Internal::navigationContentDuration;
+                slide->fromValue=NXTransform3DMakeAffineTransform(host==oldTitleInk?NXAffineTransform::identity:incoming);
+                slide->toValue=NXTransform3DMakeAffineTransform(host==oldTitleInk?outgoing:NXAffineTransform::identity);
+                slide->timingFunction=new_shared<CAMediaTimingFunction>([](double fraction){return fraction>=1?1.:Internal::navigationContentProgress(fraction*Internal::navigationContentDuration);});
+                host->layer()->add(slide,"transform");
+            }
+            // Titles follow the same moving visibility boundary as their content:
+            // pushing wipes away the outgoing title, popping reveals the incoming
+            // one. A center cross-fade leaves unrelated titles superimposed.
+            const auto clipped=direction<0?_state->titleInk:oldTitleInk;
+            const auto height=bounds().height();clipped->setClipsToBounds(true);
+            UIView::performWithoutAnimation([&]{clipped->layer()->setAnchorPoint({0,0});clipped->layer()->setPosition({0,0});clipped->setBounds({0,0,direction<0?width:width*.3f,height});});
+            auto wipe=Internal::navigationAnimation("bounds");wipe->duration=Internal::navigationContentDuration;wipe->fromValue=NXRect{0,0,direction<0?width*.3f:width,height};wipe->toValue=NXRect{0,0,direction<0?width:width*.3f,height};wipe->timingFunction=new_shared<CAMediaTimingFunction>([](double fraction){return fraction>=1?1.:Internal::navigationContentProgress(fraction*Internal::navigationContentDuration);});clipped->layer()->add(wipe,"bounds");
         }
-        // Titles follow the same moving visibility boundary as their content:
-        // pushing wipes away the outgoing title, popping reveals the incoming
-        // one. A center cross-fade leaves unrelated titles superimposed.
-        const auto clipped=direction<0?_state->titleInk:oldTitleInk;
-        const auto height=bounds().height();clipped->setClipsToBounds(true);
-        UIView::performWithoutAnimation([&]{clipped->layer()->setAnchorPoint({0,0});clipped->layer()->setPosition({0,0});clipped->setBounds({0,0,direction<0?width:width*.3f,height});});
-        auto wipe=Internal::navigationAnimation("bounds");wipe->duration=Internal::navigationContentDuration;wipe->fromValue=NXRect{0,0,direction<0?NXFloat(width*(handoff<0?.3:.3+.7*handoff)):width,height};wipe->toValue=NXRect{0,0,direction<0?width:width*.3f,height};wipe->timingFunction=new_shared<CAMediaTimingFunction>([](double fraction){return fraction>=1?1.:Internal::navigationContentProgress(fraction*Internal::navigationContentDuration);});clipped->layer()->add(wipe,"bounds");
         auto gate=Internal::navigationAnimation("opacity");gate->fromValue=1.f;gate->toValue=1.f;gate->duration=Internal::navigationContentDuration;
         gate->animationGroup=new_shared<UIViewAnimationGroup>(animationOptions,[weak,generation](bool){if(const auto bar=weak.lock();bar&&bar->_state->generation==generation)bar->_state->transitioning=false;});_state->titleInk->layer()->add(gate,"navigationInputGate");
     } else {
@@ -567,18 +575,26 @@ void Internal::NavigationBarAccess::beginInteractivePop(UINavigationBar& bar,std
     auto title=new_shared<UILabel>();title->setText(bar.topItem()?bar.topItem()->title():"");title->setFontSize(17);title->setFontWeight(600);title->setTextAlignment(NSTextAlignment::center);title->setFrame(destination.title->frame());incoming->addSubview(title);
     const auto targetCustom=bar.topItem()?bar.topItem()->titleView():nullptr;
     if(targetCustom){title->setHidden(true);if(targetCustom!=s.customTitle){incoming->addSubview(targetCustom);targetCustom->setFrame(destination.customTitle->frame());}}
-    bar.insertSubviewBelow(incoming,s.titleInk);s.interactiveTitle=incoming;
+    bar.insertSubviewBelow(incoming,s.titleInk);s.interactiveTitle=incoming;s.interactiveTitleLabel=title;
     const auto width=bar.bounds().width(),height=bar.bounds().height();
     UIView::performWithoutAnimation([&]{incoming->layer()->setAnchorPoint({0,0});incoming->layer()->setPosition({0,0});});
     interactiveProperty(incoming,"transform",NXTransform3DMakeAffineTransform(NXAffineTransform::translationBy(-width*.3f,0)),NXTransform3D::identity,span);
     interactiveProperty(incoming,"bounds",NXRect{0,0,width*.3f,height},NXRect{0,0,width,height},span);
     interactiveProperty(s.titleInk,"transform",NXTransform3D::identity,NXTransform3DMakeAffineTransform(NXAffineTransform::translationBy(width,0)),span);
-    if(s.customTitle&&s.customTitle!=targetCustom){const auto base=s.customTitle->transform();auto end=base;end.tX+=width;interactiveProperty(s.customTitle,"transform",NXTransform3DMakeAffineTransform(base),NXTransform3DMakeAffineTransform(end),span);}
+    // Move a distinct custom title with its carrier too. Its application-owned
+    // transform remains untouched, and it cannot acquire a second slide clock.
+    if(s.customTitle&&s.customTitle!=targetCustom)s.titleInk->addSubview(s.customTitle);
 }
 void Internal::NavigationBarAccess::endInteractivePop(UINavigationBar& bar,bool commit,double progress) {
     auto& s=*bar._state;if(!s.interactiveSource)return;
     const auto source=std::move(*s.interactiveSource);s.interactiveSource.reset();
-    if(s.interactiveTitle){s.interactiveTitle->removeFromSuperview();s.interactiveTitle.reset();}
     if(commit){s.interactiveHandoff=progress;bar.refresh(true,-1);}
-    else {s.items=source;++s.revision;bar.refresh(false);}
+    else {if(s.interactiveTitle)s.interactiveTitle->removeFromSuperview();s.items=source;++s.revision;bar.refresh(false);finishInteractivePop(bar);}
+    s.interactiveTitle.reset();s.interactiveTitleLabel.reset();
+}
+void Internal::NavigationBarAccess::finishInteractivePop(UINavigationBar& bar) {
+    auto& s=*bar._state;
+    // At rest, restore the ordinary titleView hierarchy without changing the
+    // application's transform or frame. Both carriers have reached identity.
+    if(s.customTitle&&s.customTitle->superview().lock()==s.titleInk)bar.insertSubviewBelow(s.customTitle,s.glass);
 }

@@ -5,6 +5,8 @@ add_library(NXKit
         lib/NXControllerIconResolver.cpp
         lib/NXNavigationItem.cpp
         lib/NXNavigationController.cpp
+        lib/NXNavigationScrollPocket.cpp
+        lib/NXNavigationScrollPocket.hpp
         lib/NXResponderAction.cpp
         lib/NXSeparatorView.cpp
         lib/NXTabBarController.cpp

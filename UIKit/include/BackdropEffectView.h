@@ -8,6 +8,7 @@ namespace NXKit {
 
 enum class UITouchPhase;
 class CABackdropEffectLayer;
+class UIBlurEffect;
 
 /**
  A view that applies an SkSL effect to the already-rendered content behind it.
@@ -22,6 +23,7 @@ public:
     BackdropEffectView();
     explicit BackdropEffectView(const BackdropEffect& effect);
     explicit BackdropEffectView(const UIGlassEffect& effect);
+    explicit BackdropEffectView(const UIBlurEffect& effect);
     ~BackdropEffectView() override;
 
     void setFrame(NXRect frame) override;
@@ -36,6 +38,8 @@ public:
      */
     void setEffect(const BackdropEffect& effect);
     void setEffect(const UIGlassEffect& effect);
+    // Private variable-blur extension; include private/UIBlurEffect.h explicitly.
+    void setEffect(const UIBlurEffect& effect);
     [[nodiscard]] BackdropEffect effect() const;
     [[nodiscard]] std::optional<UIGlassEffect> glassEffect() const { return _glassEffect; }
     /** Visual-only touch deformation in local points, shared by presentation

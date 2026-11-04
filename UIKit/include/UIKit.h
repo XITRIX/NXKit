@@ -1,4 +1,5 @@
 #pragma once
+#include <UIScrollEdgeElementContainerInteraction.h>
 
 #include <UIKitCore.h>
 #include <BackdropEffectView.h>
