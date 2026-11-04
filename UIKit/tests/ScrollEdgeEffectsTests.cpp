@@ -308,6 +308,33 @@ void pocketKernelNarrowsWithGradient() {
     expect(std::isfinite(outer)&&outer>1&&middle/outer>.12&&middle/outer<.38,
         "mounted ScrollPocket narrows its blur kernel with gradient alpha instead of fading a uniform blur");
 }
+void pocketFadeHasSoftTail(const std::shared_ptr<Context>& context) {
+    context->dark=true;context->scale=3;
+    Scene scene;const auto scroll=scene.screen->scroll;
+    scroll->subviews().front()->removeFromSuperview();
+    scene.screen->view()->setBackgroundColor(UIColor::black);scroll->setBackgroundColor(UIColor::black);
+    auto white=new_shared<UIView>(NXRect{{},scroll->contentSize()});white->setBackgroundColor(UIColor::white);scroll->addSubview(white);
+    scroll->setContentOffset({120,180},false);
+    scene.navigation->navigationBar()->setAlpha(0);scene.tabs->tabBar()->setAlpha(0);
+    // Measure attenuation alone, without convolution or colored reference cells.
+    scene.screen->view()->superview().lock()->subviews().back()->setHidden(true);
+    const auto image=render(scene.window,3);
+    for(int index : {0,2}) {
+        const auto snapshot=edge(scene,index);const auto extent=snapshot.effectExtent;
+        const auto value=[&](float t) {
+            const auto y=index==0?t*extent:scroll->bounds().height()-t*extent;
+            return int(SkColorGetR(image.getColor(200*3,std::clamp(int(y*3),0,image.height()-1))));
+        };
+        int largestStep=0;
+        for(int distance=1;distance<int(extent);++distance)
+            largestStep=std::max(largestStep,value(distance/extent)-value((distance-1)/extent));
+        expect((largestStep-1)*extent/255<2,
+            "soft attenuation avoids a concentrated high-slope band at edge "+std::to_string(index));
+        expect(value(.875f)<254&&value(.99f)>=254,
+            "soft attenuation eases into full clarity at the live boundary instead of finishing abruptly early");
+    }
+    context->dark=false;context->scale=2;
+}
 void titleBandBlur(const std::shared_ptr<Context>& context) {
     const auto destination=std::getenv("NXKIT_SCROLL_POCKET_PICTURES");
     for(bool dark:{false,true})for(int scale:{1,2,3}) {
@@ -451,7 +478,7 @@ void traits(const std::shared_ptr<Context>& context) {
 }
 int main(){
     auto context=std::make_shared<Context>();SkiaCtx::_main=context;UIApplication::shared=new_shared<UIApplication>();UIApplication::shared->delegate=std::make_shared<UIApplicationDelegate>();
-    states();liveGeometry(context);associatedContainerGeometry();selection();screenOwnership();runtimeSelectionMatchesInitialSelection();runtimeHierarchyMatchesInitialDiscovery();variableBlur();sparseContentHasNoInnerBoundaryMatte();contentCallbacksRunOncePerFrame();constantPocketMask(context);mountedMaskTracksSafeArea();strongerPocketBlur();pocketKernelNarrowsWithGradient();titleBandBlur(context);progressiveKernelProfile();kernelReferenceImages();adaptiveGlassKeepsLiveBackdropObservation();traits(context);
+    states();liveGeometry(context);associatedContainerGeometry();selection();screenOwnership();runtimeSelectionMatchesInitialSelection();runtimeHierarchyMatchesInitialDiscovery();variableBlur();sparseContentHasNoInnerBoundaryMatte();contentCallbacksRunOncePerFrame();constantPocketMask(context);mountedMaskTracksSafeArea();strongerPocketBlur();pocketKernelNarrowsWithGradient();pocketFadeHasSoftTail(context);titleBandBlur(context);progressiveKernelProfile();kernelReferenceImages();adaptiveGlassKeepsLiveBackdropObservation();traits(context);
     UIApplication::shared.reset();SkiaCtx::_main.reset();
     if(!failures)std::cout<<"Scroll edge effects: "<<checks<<" checks passed\n";return failures?1:0;
 }

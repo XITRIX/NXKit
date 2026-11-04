@@ -28,6 +28,26 @@ Chrome findChrome(const std::shared_ptr<UIView>& root,int edge) {
 NXRect edgeRect(NXSize size,int edge,NXFloat extent) {
     switch(edge){case 0:return {0,0,size.width,extent};case 1:return {0,0,extent,size.height};case 2:return {0,size.height-extent,size.width,extent};default:return {size.width-extent,0,extent,size.height};}
 }
+float blurRecoveryAt(float t) {
+    // Preserve the established title-band kernel widths, but join their
+    // anchors with monotone cubic Hermite segments instead of straight lines.
+    constexpr float stops[]={0,.50f,.65f,.80f,.90f,1};
+    constexpr float values[]={0,0,.08f,.35f,.70f,1};
+    constexpr auto tangents=[] {
+        std::array<float,6> result{};
+        for(int i=1;i<5;++i) {
+            const auto left=(values[i]-values[i-1])/(stops[i]-stops[i-1]);
+            const auto right=(values[i+1]-values[i])/(stops[i+1]-stops[i]);
+            result[i]=left>0&&right>0?2*left*right/(left+right):0;
+        }
+        return result;
+    }();
+    int index=0;while(index<4&&t>stops[index+1])++index;
+    const auto width=stops[index+1]-stops[index];
+    const auto u=std::clamp((t-stops[index])/width,0.f,1.f),u2=u*u,u3=u2*u;
+    return (2*u3-3*u2+1)*values[index]+(u3-2*u2+u)*width*tangents[index]
+        +(-2*u3+3*u2)*values[index+1]+(u3-u2)*width*tangents[index+1];
+}
 sk_sp<SkShader> profileGradient(NXSize size,int edge,NXFloat extent,float outer,float inner,NXFloat scale,bool fadesContent) {
     SkPoint points[2];
     switch(edge){case 0:points[0]={0,0};points[1]={0,extent};break;
@@ -35,19 +55,19 @@ sk_sp<SkShader> profileGradient(NXSize size,int edge,NXFloat extent,float outer,
         case 2:points[0]={0,size.height};points[1]={0,size.height-extent};break;
         default:points[0]={size.width,0};points[1]={size.width-extent,0};}
     for(auto& point:points){point.fX*=scale;point.fY*=scale;}
-    // Content attenuation and kernel width have separate profiles. Reusing
-    // the fade's recovery made text almost sharp behind a centered bar title.
-    // The radius now starts growing immediately inside the live boundary and
-    // reaches a substantial width beneath chrome, with the same outer maximum.
-    const float fadeStops[]={0,.45f,.60f,.68f,.74f,.86f};
-    const float fadeRecovery[]={0,0,.30f,.70f,.88f,1};
-    const float blurStops[]={0,.50f,.65f,.80f,.90f,1};
-    const float blurRecovery[]={0,0,.08f,.35f,.70f,1};
-    const auto stops=fadesContent?fadeStops:blurStops;
-    const auto recovery=fadesContent?fadeRecovery:blurRecovery;
-    SkColor4f colors[6];
-    for(int i=0;i<6;++i)colors[i]={1,1,1,outer+(inner-outer)*recovery[i]};
-    return SkShaders::LinearGradient(points,SkGradient(SkGradient::Colors(SkSpan(colors),SkSpan(stops,6),SkTileMode::kClamp),{}));
+    // Bake easing into the cached gradient. This needs no additional effect
+    // pass or per-frame content analysis. Both ends flatten into their adjacent
+    // constant region; the attenuation tail now reaches the live inner bound.
+    // Kernel and attenuation remain separate so text beneath titles stays blurred.
+    std::array<float,33> stops;
+    std::array<SkColor4f,33> colors;
+    for(size_t i=0;i<stops.size();++i) {
+        const auto t=float(i)/float(stops.size()-1);stops[i]=t;
+        const auto u=std::clamp((t-.25f)/.75f,0.f,1.f);
+        const auto recovery=fadesContent?u*u*u*(u*(u*6-15)+10):blurRecoveryAt(t);
+        colors[i]={1,1,1,outer+(inner-outer)*recovery};
+    }
+    return SkShaders::LinearGradient(points,SkGradient(SkGradient::Colors(SkSpan(colors),SkSpan(stops),SkTileMode::kClamp),{}));
 }
 bool isSoft(const Internal::ScrollPocketSnapshot& state){return state.style!=UIScrollEdgeEffectStyle::hard;}
 }
