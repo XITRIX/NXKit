@@ -19,6 +19,7 @@
 #include <fstream>
 #include <cmath>
 #include <stdexcept>
+#include <filesystem>
 using namespace NXKit;
 namespace NXKit {
 bool applicationRunLoop();
@@ -32,11 +33,17 @@ static auto begin(const std::shared_ptr<UIWindow>& window,NXPoint point) {
 static void send(const std::shared_ptr<UIWindow>& window,const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>& event,UITouchPhase phase,NXPoint point) {
     touch->updateAbsoluteLocation(point);touch->_timestamp=Timer(80);touch->_phase=phase;window->sendEvent(event);
 }
+static void sendAt(const std::shared_ptr<UIWindow>& window,const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>& event,UITouchPhase phase,NXPoint point,Timer origin,int milliseconds) {
+    touch->updateAbsoluteLocation(point);const auto us=origin.startTime.tv_usec+milliseconds*1000L;origin.startTime.tv_sec+=us/1000000;origin.startTime.tv_usec=us%1000000;
+    touch->_timestamp=origin;touch->_phase=phase;window->sendEvent(event);
+}
 static void touch(const std::shared_ptr<UIWindow>& window) {
     auto touch=new_shared<UITouch>(9001,NXPoint{200,400},Timer());auto event=new_shared<UIEvent>();event->_allTouches.insert(touch);touch->_window=window;
     touch->_phase=UITouchPhase::began;window->sendEvent(event);touch->_phase=UITouchPhase::ended;window->sendEvent(event);
 }
 };
+class UIScrollViewPhysicsTestHarness {public:static void advance(const std::shared_ptr<UIScrollView>& scroll,double time){if(const auto timer=scroll->_timerAnimation)timer->advanceTo(time);}
+static void settle(const std::shared_ptr<UIScrollView>& scroll){if(const auto timer=scroll->_timerAnimation)timer->advanceTo(8);}};
 class GlassInteractionTestHarness {public:static void advance(const std::shared_ptr<BackdropEffectView>& view,double seconds){view->_advanceInteraction(seconds);}};
 class DispatchQueueTestHarness {public:static void pump(){DispatchQueue::main()->performAll();}};
 }
@@ -462,6 +469,104 @@ void stableBack(const std::shared_ptr<UIWindow>& window,const std::shared_ptr<Co
     ctx->dark=originalDark;ctx->density=originalDensity;ctx->size=originalSize;frame();
 }
 }
+namespace {
+class LargeTitleScreen:public UIViewController {
+public:
+    std::shared_ptr<UIScrollView> scroll;
+    explicit LargeTitleScreen(std::string name){setTitle(std::move(name));}
+    void loadView()override {
+        scroll=new_shared<UIScrollView>();scroll->setBounceVertically(true);scroll->setContentSize({402,2000});scroll->setBackgroundColor(UIColor::systemBackground);
+        for(int i=0;i<30;++i){auto label=new_shared<UILabel>();label->setText("Content row "+std::to_string(i));label->setFrame({20,NXFloat(i*50),360,44});scroll->addSubview(label);}setView(scroll);
+    }
+};
+void largeTitles(const std::shared_ptr<UIWindow>& window) {
+    auto root=new_shared<LargeTitleScreen>("Collection");auto nav=new_shared<UINavigationController>(root);
+    expect(!nav->navigationBar()->prefersLargeTitles(),"large titles opt in, matching UIKit's default");
+    nav->navigationBar()->setPrefersLargeTitles(true);window->setRootViewController(nav);window->makeKeyAndVisible();frame();
+    auto bar=nav->navigationBar();auto& state=Internal::NavigationBarAccess::state(*bar);
+    const auto range=state.accessories.expandedHeight();
+
+    expect(range==52&&bar->frame().height()==54+range,"large title adds its measured accessory extent");
+    const auto expanded=root->scroll->adjustedContentInset().top;
+    expect(root->scroll->contentOffset().y==-expanded,"initial content rests below the expanded title");
+    expect(state.title->isHidden()&&!state.largeTitleClip->isHidden(),"expanded title replaces inline title");
+    for(int i=0;i<=8;++i) {
+        const auto collapse=range*i/8;root->scroll->setContentOffset({0,-expanded+collapse},false);frame();
+        if(const auto directory=std::getenv("NXKIT_LARGE_TITLE_PICTURES");directory&&(i==0||i==4||i==8)){std::filesystem::create_directories(directory);snapshot(window,std::string(directory)+"/large-"+std::to_string(i)+".ppm",3);}
+
+        expect(std::abs(bar->frame().height()-(54+range-collapse))<.01,"accessory collapses one point for each point of content travel");
+        expect(std::abs(root->scroll->contentOffset().y-(-expanded+collapse))<.01,"changing bar safe area does not displace the scrolling content");
+    }
+    expect(!state.title->isHidden(),"fully collapsed bar reveals inline title");
+    struct ScrollDelegate:UIScrollViewDelegate {
+        int releases=0,scrolls=0;bool overrideDestination=false;NXFloat destination=0;
+        void scrollViewDidScroll(std::shared_ptr<UIScrollView>)override{++scrolls;}
+        void scrollViewWillEndDragging(std::shared_ptr<UIScrollView>,NXKit::NXPoint velocity,NXKit::NXPoint* target)override {
+            ++releases;expect(std::isfinite(velocity.y),"will-end-dragging exposes finite content velocity");
+            if(overrideDestination)target->y=destination;
+        }
+    };
+    auto observer=std::make_shared<ScrollDelegate>();root->scroll->delegate=observer;
+    for(float fraction:{.25f,.75f}) {
+        root->scroll->setContentOffset({0,-expanded+range*fraction},false);frame();
+        const auto origin=Timer();const auto input=UIGestureRecognizerTestHarness::begin(window,{200,500});
+        UIGestureRecognizerTestHarness::sendAt(window,input.first,input.second,UITouchPhase::moved,{200,489},origin,50);
+        UIGestureRecognizerTestHarness::sendAt(window,input.first,input.second,UITouchPhase::moved,{200,488},origin,250);
+        const auto releasedOffset=root->scroll->contentOffset().y;
+        UIGestureRecognizerTestHarness::sendAt(window,input.first,input.second,UITouchPhase::ended,{200,488},origin,300);
+        const auto destination=-expanded+(fraction<.5?0:range);const auto rate=fraction<.5?12.1:16.8;
+        for(double time:{.02,.05,.1,.2}) {
+            UIScrollViewPhysicsTestHarness::advance(root->scroll,time);frame();
+            const auto expected=destination+(releasedOffset-destination)*std::exp(-rate*time);
+            expect(std::abs(root->scroll->contentOffset().y-expected)<=.34,"container settling follows the measured asymmetric UIKit response at every sampled frame");
+        }
+        UIScrollViewPhysicsTestHarness::settle(root->scroll);frame();
+        expect(std::abs(bar->frame().height()-(fraction<.5?106:54))<.01,"partial drag settles to the nearest accessory boundary");
+    }
+    expect(observer->releases==2&&observer->scrolls>0&&root->scroll->delegate.lock()==observer,"container snapping preserves the application's public delegate and callbacks");
+    observer->overrideDestination=true;observer->destination=-expanded+range;
+    root->scroll->setContentOffset({0,-expanded+range*.2f},false);frame();
+    const auto origin=Timer();const auto input=UIGestureRecognizerTestHarness::begin(window,{200,500});
+    UIGestureRecognizerTestHarness::sendAt(window,input.first,input.second,UITouchPhase::moved,{200,489},origin,50);
+    UIGestureRecognizerTestHarness::sendAt(window,input.first,input.second,UITouchPhase::moved,{200,488},origin,250);
+    UIGestureRecognizerTestHarness::sendAt(window,input.first,input.second,UITouchPhase::ended,{200,488},origin,300);
+    UIScrollViewPhysicsTestHarness::settle(root->scroll);frame();
+    expect(bar->frame().height()==54,"the app may override the container's proposed target content offset");
+    auto automatic=new_shared<LargeTitleScreen>("Automatic");nav->pushViewController(automatic,false);frame();
+    expect(bar->frame().height()>54,"automatic inherits request even from a scrolled/collapsed predecessor");
+    automatic->navigationItem()->setLargeTitleDisplayMode(UINavigationItemLargeTitleDisplayMode::never);frame();
+    expect(bar->frame().height()==54,"never removes the out-of-line accessory");
+    auto inherited=new_shared<LargeTitleScreen>("Inherited");nav->pushViewController(inherited,false);frame();
+    expect(bar->frame().height()==54,"automatic inherits a previous never request");
+    inherited->navigationItem()->setLargeTitleDisplayMode(UINavigationItemLargeTitleDisplayMode::always);frame();
+    expect(bar->frame().height()>54,"always overrides a previous never request");
+    nav->popToRootViewController(false);frame();expect(bar->frame().height()==54,"pop restores the root's collapsed scroll state");
+    root->scroll->setContentOffset({0,-expanded},false);frame();expect(bar->frame().height()>54,"scrolling back restores the expanded title");
+    nav->setNavigationBarHidden(true);frame();expect(root->view()->safeAreaInsets().top==62,"hidden bar releases all accessory safe-area reservation");
+    nav->setNavigationBarHidden(false);frame();expect(bar->frame().height()>54,"showing the bar restores its accessory");
+    class LoadedPolicyScreen final:public LargeTitleScreen {
+    public:
+        LoadedPolicyScreen():LargeTitleScreen("Configured while loading"){}
+        void loadView()override {LargeTitleScreen::loadView();navigationItem()->setLargeTitleDisplayMode(UINavigationItemLargeTitleDisplayMode::never);navigationItem()->setRightBarButtonItem(std::make_shared<UIBarButtonItem>(UIBarButtonSystemItem::add));}
+    };
+    auto loadedPolicy=new_shared<LoadedPolicyScreen>();nav->pushViewController(loadedPolicy,true);frame();
+    expect(bar->frame().height()==54&&!state.accessories.expandedHeight(),"configuration made during loading determines the incoming accessory layout");
+    expect(state.titleInk->layer()->presentation()!=nullptr,"load-time navigation-item configuration does not erase the incoming title animation");
+    settle();nav->popViewController(false);frame();
+    auto manual=new_shared<UIViewController>();manual->setTitle("Manual selection");manual->navigationItem()->setLargeTitleDisplayMode(UINavigationItemLargeTitleDisplayMode::always);
+    auto content=new_shared<UIView>();content->addSubview(new_shared<UIView>());
+    auto first=new_shared<UIScrollView>(NXRect{0,0,402,874});first->setBounceVertically(true);first->setContentSize({402,1800});content->addSubview(first);manual->setView(content);manual->setContentScrollView(first,NSDirectionalRectEdge::top);
+    nav->pushViewController(manual,false);frame();
+    const auto firstTop=first->adjustedContentInset().top;first->setContentOffset({0,-firstTop+80},false);frame();
+    expect(bar->frame().height()==54,"explicit content-scroll selection coordinates a non-first branch");
+    auto replacement=new_shared<UIScrollView>(NXRect{0,0,402,874});replacement->setBounceVertically(true);replacement->setContentSize({402,1800});content->addSubview(replacement);manual->setContentScrollView(replacement,NSDirectionalRectEdge::top);frame();
+    expect(bar->frame().height()==106,"replacing the content scroll view resets to its own expanded resting position");
+    first->setContentOffset({0,-firstTop},false);frame();expect(bar->frame().height()==106,"the previous scroll view no longer controls navigation geometry");
+    replacement->setContentOffset({0,-replacement->adjustedContentInset().top+80},false);frame();expect(bar->frame().height()==54,"the new scroll view controls subsequent collapse");
+    manual->setContentScrollView(nullptr,NSDirectionalRectEdge::top);frame();expect(bar->frame().height()==106,"an obstructed automatic chain leaves a static expanded title after clearing manual selection");
+    expect(rejects([&]{root->navigationItem()->setLargeTitleDisplayMode(static_cast<UINavigationItemLargeTitleDisplayMode>(99));}),"invalid large-title modes are rejected");
+}
+}
 int main(int argc,char**argv){
     auto ctx=std::make_shared<Context>();if(argc>3)ctx->dark=std::string(argv[3])=="dark";SkiaCtx::_main=ctx;UIApplication::shared=new_shared<UIApplication>();UIApplication::shared->delegate=std::make_shared<UIApplicationDelegate>();
     auto a=new_shared<Screen>("Home"),b=new_shared<Screen>("Details"),c=new_shared<Screen>("Editor");
@@ -579,6 +684,6 @@ int main(int argc,char**argv){
     for(float scale:{1.f,2.f,3.f})for(bool dark:{false,true}){ctx->density=scale;ctx->dark=dark;frame();bar->drawAndLayoutTreeIfNeeded();expect(bar->traitCollection()->displayScale()==scale,"bar inherits density and theme");}
     ctx->size={844,390};frame();expect(bar->frame().width()==844&&bar->sizeThatFits({844,390}).height==44,"compact-height layout uses the inline compact bar");
     window->setRootViewController(nullptr);UIApplication::shared->delegate->window.reset();std::weak_ptr<UINavigationController> weak=nav;nav.reset();expect(weak.expired()&&!bar->delegate(),"retaining a managed bar does not retain its controller");
-    UIApplication::shared->delegate->window=window;grouping(window,ctx,argc>4?argv[4]:nullptr,argc>5?argv[5]:nullptr);opticalMotion(window,ctx);navigationInk(window,ctx);stableBack(window,ctx);UIApplication::shared->delegate->window.reset();
+    UIApplication::shared->delegate->window=window;grouping(window,ctx,argc>4?argv[4]:nullptr,argc>5?argv[5]:nullptr);opticalMotion(window,ctx);navigationInk(window,ctx);stableBack(window,ctx);ctx->size={402,874};ctx->density=3;ctx->dark=true;frame();largeTitles(window);UIApplication::shared->delegate->window.reset();
     UIApplication::shared.reset();SkiaCtx::_main.reset();if(!failures)std::cout<<"UIKit navigation tests passed\n";return failures?1:0;
 }

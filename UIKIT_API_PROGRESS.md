@@ -2,8 +2,18 @@
 
 This document tracks NXKit against the portable, application-facing core of Apple's UIKit. It is both a compatibility audit and an implementation roadmap.
 
-- Last audited: **2026-11-04**
-- NXKit revision: **working tree after `af6b8fc`**
+- Last audited: **2026-11-05**
+- NXKit revision: **working tree after `ba914f2`**
+
+Liquid Glass configuration research (2026-11-05): the isolated native probe and
+REA controlled replay export 18 iOS 27.0/24A434 profiles with 70 applied
+`glassBackground` filter inputs each, full SDF/color layer stacks, and 18 passing
+reversible input mutation checks. Regular glass retains blur at system tint 0;
+accent coloring is a separate layer/matrix path. These are reference data,
+not yet translated into the portable renderer's different parameterization.
+Generic CoreMaterial recipe files are not established as the Liquid Glass
+configuration. See `docs/liquid-glass-native-settings`; compatibility status
+does not change from this research alone.
 - UIKit-cross-platform reference: **[`ed2c290`](https://github.com/flowkey/UIKit-cross-platform/commit/ed2c290025f2dfd714ed945153069ca54e55a23e)**
 
 ## How to maintain this document
@@ -100,8 +110,8 @@ deferred. These tab APIs remain Partial pending the broader behavior listed belo
 
 | UIKit API or capability | Status | NXKit evidence and remaining work |
 | --- | --- | --- |
-| `UINavigationController` | Partial | UIKit now has its own concrete container over Core’s navigation capability: mutable stack, push/pop/pop-to/root, top/visible controllers, weak will/did-show delegate, child `show` routing, automatic Back and semantic menu/Back responder command, lazy visible views, eager containment, serialized/reentrant operations, selected-child appearance, focus/action gating, and live animated bar visibility with independent safe-area reservations. Content animates in container-owned hosts, preserving application transforms. A shared near-critical clock drives the native half-second content/title slide, 30% rear parallax, title wiping and rear-content dimming; the full Demo cycle is compared against fresh native containers. A public UIKit simulator oracle verifies lifecycle/delegate ordering, visible/top stack state, root-pop semantics, inline bar frame and safe areas; headless tests cover mutation validation, queued pop return values, metadata, focus/actions, 1×/2×/3× traits, compact height, independent ownership and nested Demo tabs. The full-screen iOS Demo now uses four real UIKit navigation stacks inside UITabBarController; its existing list is each stack’s root content. The enabled readonly `interactivePopGestureRecognizer()` drives a reversible leading-edge pop: content/title parallax and clipping follow translation, source glass previews half the destination extent with outgoing ink/tint retained, commitment hands off the expanded carrier to the spring/SDF/blur morph, and cancellation restores the original items and stack. Committed interactive pops now retain both existing title carriers and their reveal mask on the content timeline through release, preserving the release velocity/settling curve instead of restarting a standard title slide. Distinct custom title views travel inside those carriers and restore their ordinary hierarchy without changing application transforms. A 120-case regression now samples 17,400 frames over paused/flick/reversal outcomes, light/dark, 1×/2×/3× and ordinary/custom titles: 7,200 release frames plus 10,200 frames across natural completion and the material retirement tail. The outgoing title retires with interactive content completion, preventing it from reappearing at its model position when the gesture clock is discarded before the separate glass cleanup. The post-completion check fails 4,104 times before the cleanup fix and passes afterward; both navigation suites pass. See `docs/navigation/pop-title-settlement` and `docs/navigation/pop-title-completion`. Root/veto/direction checks, velocity-aware release, touch ownership, disabling/reset, second contact, resize, custom-view ownership, queued operations and cancellation callback timing have focused regressions. Thirty-two light/dark public UIKit recordings cover the eight arrangements; two further timed recordings verify callback/delegate ordering with the restored stack. Full-content/RTL pop, interruption of an already running automatic transition, transition-controller customization, large titles/search, toolbar and broad appearance APIs remain missing. See `docs/navigation/interactive`. NXNavigationController remains an independent console component. See `docs/navigation/README.md`. |
-| `UINavigationBar`, `UINavigationItem`, bar-button items | Partial | Core owns style-neutral UINavigationItem/UIBarButtonItem data, including sharesBackground and identifier; UIKit mounts each control inside its actual shared/separate glass group (76 native configurations and 20 transition endpoints; see grouping audit); UIViewController.navigationItem() is lazy/read-only and follows the controller title until explicitly overridden. UIKit’s inline bar supports validated standalone item stacks and push/pop delegates, title/custom title view, left/right arrays and single items, live titles/images/enabled state/width/tint/custom views, plain/prominent buttons, common system items, hidden shared backgrounds, supplemental/hidden automatic Back, template/native symbols with portable text fallbacks, and animated retained leading/trailing shared glass capsules. Right arrays are rightmost-first. Native UIKit comparison establishes a 54-point portrait reservation with 44-point controls, standalone last-item pop and veto return semantics; glyph/group geometry is compared separately from private optical fidelity. Container-owned bars guard item/delegate mutations. Custom Back metadata, full spacer/overflow/RTL policy, large titles, menus/search, UIBarAppearance and scroll-edge material behavior remain incomplete. The complete eight-arrangement native playground now covers all 288 push/pop/light/dark layout pairs and root boundaries, plus dense rendered-frame captures of the 32 normal cycle transitions. Retained Back, supplemental item delay/absorption, root-specific phasing, title/content travel and wiping, dense trailing title alignment, glass carrier selection after removal, two-item unwrapping and retained/reparented ink replacement are compared separately. Focused routed-input, SDF/gap, blur, timing, reentrant lifecycle and cleanup regressions accompany native/portable contact sheets and movies. See `docs/navigation/cycle`; the smaller `docs/navigation/motion` audit is historical calibration evidence. Residual shape/phase/tint/blur differences remain; exact native pixel parity is not claimed. |
+| `UINavigationController` | Partial | UIKit now has its own concrete container over Core’s navigation capability: mutable stack, push/pop/pop-to/root, top/visible controllers, weak will/did-show delegate, child `show` routing, automatic Back and semantic menu/Back responder command, lazy visible views, eager containment, serialized/reentrant operations, selected-child appearance, focus/action gating, and live animated bar visibility with independent safe-area reservations. Content animates in container-owned hosts, preserving application transforms. A shared near-critical clock drives the native half-second content/title slide, 30% rear parallax, title wiping and rear-content dimming; the full Demo cycle is compared against fresh native containers. A public UIKit simulator oracle verifies lifecycle/delegate ordering, visible/top stack state, root-pop semantics, inline bar frame and safe areas; headless tests cover mutation validation, queued pop return values, metadata, focus/actions, 1×/2×/3× traits, compact height, independent ownership and nested Demo tabs. The full-screen iOS Demo now uses four real UIKit navigation stacks inside UITabBarController; its existing list is each stack’s root content. The enabled readonly `interactivePopGestureRecognizer()` drives a reversible leading-edge pop: content/title parallax and clipping follow translation, source glass previews half the destination extent with outgoing ink/tint retained, commitment hands off the expanded carrier to the spring/SDF/blur morph, and cancellation restores the original items and stack. Committed interactive pops now retain both existing title carriers and their reveal mask on the content timeline through release, preserving the release velocity/settling curve instead of restarting a standard title slide. Distinct custom title views travel inside those carriers and restore their ordinary hierarchy without changing application transforms. A 120-case regression now samples 17,400 frames over paused/flick/reversal outcomes, light/dark, 1×/2×/3× and ordinary/custom titles: 7,200 release frames plus 10,200 frames across natural completion and the material retirement tail. The outgoing title retires with interactive content completion, preventing it from reappearing at its model position when the gesture clock is discarded before the separate glass cleanup. The post-completion check fails 4,104 times before the cleanup fix and passes afterward; both navigation suites pass. See `docs/navigation/pop-title-settlement` and `docs/navigation/pop-title-completion`. Root/veto/direction checks, velocity-aware release, touch ownership, disabling/reset, second contact, resize, custom-view ownership, queued operations and cancellation callback timing have focused regressions. Thirty-two light/dark public UIKit recordings cover the eight arrangements; two further timed recordings verify callback/delegate ordering with the restored stack. Full-content/RTL pop, interruption of an already running automatic transition, transition-controller customization, search, toolbar and broad appearance APIs remain missing. See `docs/navigation/interactive`. NXNavigationController remains an independent console component. See `docs/navigation/README.md`. |
+| `UINavigationBar`, `UINavigationItem`, bar-button items | Partial | Core owns style-neutral UINavigationItem/UIBarButtonItem data, including sharesBackground and identifier; UIKit mounts each control inside its actual shared/separate glass group (76 native configurations and 20 transition endpoints; see grouping audit); UIViewController.navigationItem() is lazy/read-only and follows the controller title until explicitly overridden. UIKit’s inline bar supports validated standalone item stacks and push/pop delegates, title/custom title view, left/right arrays and single items, live titles/images/enabled state/width/tint/custom views, plain/prominent buttons, common system items, hidden shared backgrounds, supplemental/hidden automatic Back, template/native symbols with portable text fallbacks, and animated retained leading/trailing shared glass capsules. Right arrays are rightmost-first. Native UIKit comparison establishes a 54-point portrait reservation with 44-point controls, standalone last-item pop and veto return semantics; glyph/group geometry is compared separately from private optical fidelity. Container-owned bars guard item/delegate mutations. Custom Back metadata, full spacer/overflow/RTL policy, menus/search, UIBarAppearance and scroll-edge material behavior remain incomplete. The complete eight-arrangement native playground now covers all 288 push/pop/light/dark layout pairs and root boundaries, plus dense rendered-frame captures of the 32 normal cycle transitions. Retained Back, supplemental item delay/absorption, root-specific phasing, title/content travel and wiping, dense trailing title alignment, glass carrier selection after removal, two-item unwrapping and retained/reparented ink replacement are compared separately. Focused routed-input, SDF/gap, blur, timing, reentrant lifecycle and cleanup regressions accompany native/portable contact sheets and movies. See `docs/navigation/cycle`; the smaller `docs/navigation/motion` audit is historical calibration evidence. Residual shape/phase/tint/blur differences remain; exact native pixel parity is not claimed. |
 | `UITabBarController`, `UITabBar` / `UITabBarView`, tab items | Partial | Core supplies `UIBarItem`/`UITabBarItem` metadata (title, image, tag, enabled, selected image, badge value/color), lazy `UIViewController::tabBarItem()`, and `UITabBarControllerMode::{automatic,tabBar,tabSidebar}`. UIKit owns the extracted item-driven `UITabBarView`, with `UITabBar` alias, standalone nullable selection, weak delegate, live items/images/badges/tints, touch/pan/focus input and retained glass/lens physics. Its concrete `UITabBarController` manages eager containment, lazy selected content, mutable/reordered controllers, preserved identity/state, silent programmatic selection, user veto/notification, balanced selected-child appearance, focus transfer and container-reserved safe areas independent of application additional insets. Callback mutations queue or revalidate; invalid lists/hierarchy/items reject before mutation. `automatic` uses `tabBar` in UIKit and existing `tabSidebar` in NXKit on every OS. Each rejects its unimplemented explicit mode. NX sidebar now consumes shared item titles/enabled state live, retaining grouped and compact list/navigation behavior (see `docs/ADAPTIVE_TABS.md`). `UIKitTabTests`, module-composition/Core metadata tests and retained tab/adaptive/lens regressions verify this subset; the Apple tabs Demo nests UIKit tabs inside NX containment. UIKit sidebar, More/customization, modern UITab groups, appearance APIs, accessibility, reduced-motion and native GPU/physical-device parity remain outstanding. |
 | `UIScreen`-like display information | Missing | Expose logical bounds, pixel scale, refresh rate/range, and display identity through a portable facade rather than requiring application code to access `SkiaCtx`. |
 | `IndexPath` | Partial | A two-component section/item value now has const access and equality and is exercised by tab-controller tests. Add ordering/hash, arbitrary components if needed, negative-component policy, and focused value tests before using it as the stable public list index type. |
@@ -564,3 +574,68 @@ Fresh offline archives for that navigation snapshot cover 34,994 strict
 full-screen automatic/interactive Metal frames with zero runtime library or
 pipeline compilations; current source/artifact hashes and the unrelated full
 Demo build errors are retained in `docs/navigation/stable-back/verification.json`.
+
+## Navigation-bar large titles (2026-11-04)
+
+Demo inset correction (2026-11-05): the fullscreen grouped list and large-title
+playground explicitly use `scrollableAxes` rather than `always`. They retain
+vertical navigation/tab safe-area adjustment while their full-width content no
+longer acquires a horizontal scroll range from landscape side insets. Existing
+Demo rotation regressions cover both lists. Core currently defaults to
+`scrollableAxes`; UIKit's distinct `automatic` inset policy remains unimplemented.
+
+`UINavigationBar.prefersLargeTitles` (default false) and
+`UINavigationItem.largeTitleDisplayMode` (Automatic/Always/Never; default Automatic)
+are implemented. Automatic inherits the preceding item's **request**, even when
+that screen has scrolled its large title closed. The newer Inline display mode,
+Dynamic Type, RTL and search integration remain unimplemented; these APIs stay
+Partial pending that broader coverage.
+
+UIKit owns an internal accessory-row layout with measured extents, collapse
+allocation and settling boundaries. A navigation controller coordinates those
+rows with its screen's automatically discovered or explicitly selected content
+scroll view. Visible safe-area reservation changes independently of the full
+scrollable accessory range. Container observation is weak, separate from the
+application's delegate and disabled for inline-only screens. Selection and
+hierarchy changes rebind observation. Per-screen extents/offsets survive push,
+pop, tab switches and cancelled edge pops; title rows share the existing
+reversible title/content animation clock. Scroll pockets follow the resulting
+live safe areas. No search-controller or palette API is exposed as a stub.
+
+Pop sequencing regression: title-carrier bounds now include their own visible
+accessory rows independently of the bar's changing safe-area reservation. A
+button pop to an expanded title reveals that row during the slide; a subsequent
+edge pop retains the outgoing row even when its carrier inherited clipping from
+the preceding gesture. Routed-input tests cover 32 combinations of first-pop
+method, second-pop commit/cancel, expanded/partially collapsed state, light/dark
+appearance and 2×/3× scale, including presentation samples and held-gesture layout.
+
+Core now delivers `scrollViewWillEndDragging(scrollView, velocity,
+NXPoint* targetContentOffset)` with UIKit's points-per-millisecond velocity,
+mutable destination, finite-value validation and reentrant-scroll protection.
+Applications can override the container's proposed destination. Targeted
+settling preserves unaffected axes and cannot turn an interior destination into
+a second free flight. Existing free-flight/rubber-band behavior is unchanged
+when no destination adjustment is made.
+
+A public UIKit fixture on iPhone 17 Pro / iOS 27.0 measures a 52-point expanded
+row above the existing 54-point portrait bar, point-for-point drag geometry and
+asymmetric release relaxation (12.1/s expansion; 16.8/s collapse). Retained touch
+traces and measured response errors are in `docs/navigation/large-titles`.
+The Full-screen iOS layout Demo adds **Navigation → Large titles** with
+Automatic, Always and Never push destinations. Existing collection/morphing
+screens keep their inline appearance. Native programmatic offset/property
+updates can defer expansion until another presentation; NXKit updates its
+retained layout immediately. Full native animation/pixel parity and physical
+large-title testing are not claimed.
+
+Verification: 11 focused regression executables pass, including 213 scroll-edge
+checks and all 27 Graphite Metal vertex-format round trips. Large-text rendering
+exercised `UShort4Normalized`; the offline descriptor exporter/loader now handles
+that format. macOS, iOS RelWithDebInfo and Switch NRO builds succeed. Fresh Apple
+bundles contain 162 libraries/129 pipelines under the final shader ABI. A strict
+Mac Graphite replay of 21,018 large-title/navigation/edge/ink-blur frames performs zero
+runtime library or pipeline compilations. Configuration supplied while a screen
+loads is applied before transition snapshots, and a mounting guard preserves
+ScrollPocket overlay ordering. See the retained verification and fidelity limits
+in `docs/navigation/large-titles`.

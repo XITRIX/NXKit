@@ -22,3 +22,14 @@ void UINavigationItem::setLeftBarButtonItem(std::shared_ptr<UIBarButtonItem> ite
 void UINavigationItem::setRightBarButtonItem(std::shared_ptr<UIBarButtonItem> item,bool animated) {setRightBarButtonItems(item?std::vector{item}:std::vector<std::shared_ptr<UIBarButtonItem>>{},animated);}
 void UINavigationItem::setHidesBackButton(bool hidden,bool animated) {_hidesBack=hidden;changed(animated);}
 void UINavigationItem::setLeftItemsSupplementBackButton(bool supplement) {_supplementsBack=supplement;changed();}
+
+void UINavigationItem::setLargeTitleDisplayMode(UINavigationItemLargeTitleDisplayMode mode) {
+    switch(mode) {
+    case UINavigationItemLargeTitleDisplayMode::automatic:
+    case UINavigationItemLargeTitleDisplayMode::always:
+    case UINavigationItemLargeTitleDisplayMode::never:break;
+    default:throw std::invalid_argument("Unknown large-title display mode");
+    }
+    if(_largeTitleDisplayMode==mode)return;
+    _largeTitleDisplayMode=mode;changed();
+}

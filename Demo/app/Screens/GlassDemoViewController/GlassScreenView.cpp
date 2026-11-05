@@ -20,7 +20,7 @@ class Row final : public UIControl {
 GlassScreenView::GlassScreenView() {
     _scroll=new_shared<UIScrollView>();
     _scroll->setBounceVertically(true);
-    _scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::never);
+    _scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes);
     addSubview(_scroll);
     _content=new_shared<UIView>(); _scroll->addSubview(_content);
     rebuild();
@@ -42,7 +42,7 @@ void GlassScreenView::toggleOrder() { _reversed=!_reversed; rebuild(); }
 void GlassScreenView::reset() { _added=_accent=_backdrop=_scrollEdgeStyle=0; _scroll->topEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::automatic);_scroll->bottomEdgeEffect()->setStyle(UIScrollEdgeEffectStyle::automatic);_details=_reversed=false; _completed.clear(); rebuild(); }
 void GlassScreenView::setScrollPosition(NXFloat value) {
     if(!std::isfinite(value)||_topInset<0) return;
-    const auto maximum=std::max(0.0f,_scroll->contentSize().height-_scroll->bounds().height()+_scroll->contentInset().bottom+_topInset);
+    const auto maximum=std::max(0.0f,_scroll->contentSize().height-_scroll->bounds().height()+_scroll->adjustedContentInset().bottom+_topInset);
     _scroll->setContentOffset({0,-_topInset+std::clamp(value,0.0f,maximum)},false);
 }
 void GlassScreenView::rebuild() {
@@ -80,7 +80,8 @@ void GlassScreenView::rebuild() {
     section("Collection",{{"add-row","Add item","",[weak]{if(auto self=weak.lock())self->addItem();}},
         {"sort","Sort order",_reversed?"Descending":"Ascending",[weak]{if(auto self=weak.lock())self->toggleOrder();}},
         {"reset","Reset demo","",[weak]{if(auto self=weak.lock())self->reset();}}},"Use + to add an item. More shows additional details.");
-    section("Navigation",{{"navigation-demo","Navigation morphing","Push ›",[weak]{if(auto self=weak.lock();self&&self->onNavigationDemo)self->onNavigationDemo();}}});
+    section("Navigation",{{"navigation-demo","Navigation morphing","Push ›",[weak]{if(auto self=weak.lock();self&&self->onNavigationDemo)self->onNavigationDemo();}},
+        {"large-title-demo","Large titles","Push ›",[weak]{if(auto self=weak.lock();self&&self->onLargeTitleDemo)self->onLargeTitleDemo();}}});
     std::vector<std::tuple<std::string,std::string,std::string,std::function<void()>>> items;
     for(int i=1;i<=8+_added;++i) { const auto item=_reversed?9+_added-i:i; items.push_back({"item-"+std::to_string(item),"Item "+std::to_string(item),_completed.contains(item)?"Done":"Open",[weak,item] { if(auto self=weak.lock()) { if(self->_completed.contains(item))self->_completed.erase(item);else self->_completed.insert(item);self->rebuild(); } }}); }
     section(std::string(titles[selectedTab()])+" collection",items);
@@ -91,10 +92,10 @@ void GlassScreenView::arrange() {
     const auto size=bounds().size; const auto safe=safeAreaInsets();
     _scroll->setFrame(bounds());
     const NXFloat top=safe.top;
-    const NXFloat oldPosition=_topInset<0?0:_scroll->contentOffset().y+_topInset;
-    _scroll->setContentInset({top,0,safe.bottom,0});
+    // Let UIScrollView coordinate changing bar safe areas. Reapplying a
+    // manual top inset/offset here would cancel every collapse/deceleration tick.
+    _topInset=top;
     _scroll->setVerticalScrollIndicatorInsets({top,0,safe.bottom,safe.right});
-    if(_topInset!=top) { _topInset=top; setScrollPosition(oldPosition); }
 }
 void GlassScreenView::layoutSubviews() { UIView::layoutSubviews(); if(_content->frame().width()!=bounds().width()) rebuild(); else arrange(); }
 void GlassScreenView::safeAreaInsetsDidChange() { UIView::safeAreaInsetsDidChange(); if(_scroll) rebuild(); }

@@ -14,7 +14,7 @@ inline NSString* metalPixelFormat(MTLPixelFormat value) {
 }
 inline NSString* metalVertexFormat(MTLVertexFormat value) {
 #define FORMAT(x) case MTLVertexFormat##x:return @#x
-    switch(value){FORMAT(Invalid);FORMAT(Float);FORMAT(Float2);FORMAT(Float3);FORMAT(Float4);FORMAT(Half);FORMAT(Half2);FORMAT(Half4);FORMAT(Int);FORMAT(Int2);FORMAT(Int3);FORMAT(Int4);FORMAT(UInt);FORMAT(UInt2);FORMAT(UInt3);FORMAT(UInt4);FORMAT(Char);FORMAT(Char2);FORMAT(Char4);FORMAT(UChar);FORMAT(UChar2);FORMAT(UChar4);FORMAT(UCharNormalized);FORMAT(UChar4Normalized);FORMAT(Short2);FORMAT(Short4);FORMAT(UShort2);FORMAT(UShort2Normalized);FORMAT(UShortNormalized);default:throw std::runtime_error("Unmapped Metal vertex format in shader harvest");}
+    switch(value){FORMAT(Invalid);FORMAT(Float);FORMAT(Float2);FORMAT(Float3);FORMAT(Float4);FORMAT(Half);FORMAT(Half2);FORMAT(Half4);FORMAT(Int);FORMAT(Int2);FORMAT(Int3);FORMAT(Int4);FORMAT(UInt);FORMAT(UInt2);FORMAT(UInt3);FORMAT(UInt4);FORMAT(Char);FORMAT(Char2);FORMAT(Char4);FORMAT(UChar);FORMAT(UChar2);FORMAT(UChar4);FORMAT(UCharNormalized);FORMAT(UChar4Normalized);FORMAT(Short2);FORMAT(Short4);FORMAT(UShort2);FORMAT(UShort2Normalized);FORMAT(UShort4Normalized);FORMAT(UShortNormalized);default:throw std::runtime_error("Unmapped Metal vertex format in shader harvest");}
 #undef FORMAT
 }
 inline NSString* metalBlendFactor(MTLBlendFactor value) {

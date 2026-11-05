@@ -669,10 +669,26 @@ void UIScrollView::setContentOffset(NXPoint offset, bool animated) {
     if(_isDragging||_isTracking)
         _initialContentOffset=uncompressedOffset(contentOffset())+_panGestureRecognizer->translationInView(shared_from_this());
 }
+void UIScrollView::synchronizeContainerInsets() {
+    // A container can change insets from inside an active layout callback.
+    // Resolve the ancestor chain now, while offset preservation is scoped,
+    // even if that layout walk cannot re-enter the controller's root view.
+    const auto resolve=[](auto&& self,const std::shared_ptr<UIView>& view)->void {
+        if(const auto parent=view->superview().lock())self(self,parent);
+        view->updateSafeAreaInsetsIfNeeded();
+    };
+    resolve(resolve,shared_from_this());
+}
+void UIScrollView::notifyContainers() {
+    std::erase_if(_containerObservers,[](const auto& entry){return entry.owner.expired();});
+    const auto observers=_containerObservers;
+    for(const auto& entry:observers)if(const auto owner=entry.owner.lock())if(entry.changed)entry.changed();
+}
 void UIScrollView::applyContentOffset(NXPoint offset,bool animated) {
     if(offset==contentOffset())return;
     setBounds(NXRect(offset,bounds().size));
     layoutScrollIndicatorsIfNeeded();
+    notifyContainers();
     CATransaction::begin();CATransaction::setDisableActions(!animated);
     if(const auto target=delegate.lock())target->scrollViewDidScroll(shared_from_base<UIScrollView>());
     CATransaction::commit();
@@ -891,7 +907,7 @@ void UIScrollView::setBounceVertically(bool bounceVertically) {
 void UIScrollView::safeAreaInsetsDidChange() {
     const auto delta = _lastSafeAreaInsets - safeAreaInsets();
     _lastSafeAreaInsets = safeAreaInsets();
-    if(_contentInsetAdjustmentBehavior!=UIScrollViewContentInsetAdjustmentBehavior::never)
+    if(!_coordinatedInsetChanges&&_contentInsetAdjustmentBehavior!=UIScrollViewContentInsetAdjustmentBehavior::never)
         applyContentOffset(contentOffset()+NXPoint(delta.left,delta.top));
     reconcileScrollGeometry();
     layoutScrollIndicatorsIfNeeded();
@@ -1012,6 +1028,9 @@ NXRect UIScrollView::contentOffsetBounds() {
         resBounds.size.height = (contentHeight + allInsects.top + allInsects.bottom) - bounds().height();
     }
 
+    // A collapsible container reserves a changing visible safe area while its
+    // full accessory range remains ordinary (uncompressed) scroll travel.
+    for(const auto& entry:_containerObservers)if(const auto owner=entry.owner.lock())if(entry.motionBounds)entry.motionBounds(resBounds);
     return resBounds;
 }
 
@@ -1088,7 +1107,8 @@ void UIScrollView::onPanGestureStateChanged() {
             _dragSmoother.target() == getBoundsCheckedContentOffset(_dragSmoother.target());
         if (!settle) {
             stopDragSmoothing();
-            startDeceleratingIfNecessary();
+            if(wasDragging)startDeceleratingIfNecessary();
+            else if(contentOffset()!=getBoundsCheckedContentOffset(contentOffset()))bounceWithVelocity({});
         }
         weightedAverageVelocity={};
         if(wasDragging)if(const auto target=delegate.lock())target->scrollViewDidEndDragging(shared_from_base<UIScrollView>(),_isDecelerating);
@@ -1312,9 +1332,23 @@ void UIScrollView::startDeceleratingIfNecessary() {
     };
     velocity={outward(velocity.x,offset.x,limits.minX(),limits.maxX(),shouldBounceHorizontally()),
               outward(velocity.y,offset.y,limits.minY(),limits.maxY(),shouldBounceVertically())};
-    startScrollMotion(velocity,true);
+    const auto rate=-1000*std::log(std::clamp(double(_decelerationRate.rawValue()),.001,.999999));
+    const auto project=[&](NXFloat p,NXFloat v,NXFloat low,NXFloat high){
+        return NXFloat(std::clamp(double(p)+(std::abs(v)>=10?std::copysign((std::abs(v)-10)/rate,v):0.),double(low),double(high)));
+    };
+    const NXPoint projected{project(offset.x,velocity.x,limits.minX(),limits.maxX()),project(offset.y,velocity.y,limits.minY(),limits.maxY())};
+    auto destination=projected;NXPoint settlingRate;const auto generation=_scrollAnimationGeneration;
+    const auto observers=_containerObservers;
+    for(const auto& entry:observers)if(const auto owner=entry.owner.lock())if(entry.willEndDragging)entry.willEndDragging(velocity/1000.f,destination,settlingRate);
+    const auto containerDestination=destination;
+    if(const auto target=delegate.lock())target->scrollViewWillEndDragging(shared_from_base<UIScrollView>(),velocity/1000.f,&destination);
+    // Application callbacks may start a different scroll or remove the view.
+    if(generation!=_scrollAnimationGeneration)return;
+    if(!std::isfinite(destination.x)||!std::isfinite(destination.y))destination=projected;
+    if(destination!=containerDestination)settlingRate={};
+    startScrollMotion(velocity,true,destination==projected?std::nullopt:std::optional(destination),settlingRate);
 }
-void UIScrollView::startScrollMotion(NXPoint velocity,bool predictInitialFrame) {
+void UIScrollView::startScrollMotion(NXPoint velocity,bool predictInitialFrame,std::optional<NXPoint> destination,NXPoint settlingRate) {
     stopDragSmoothing();
     cancelDecelerationAnimations();
     const auto limits=contentOffsetBounds();const auto offset=contentOffset();
@@ -1325,6 +1359,19 @@ void UIScrollView::startScrollMotion(NXPoint velocity,bool predictInitialFrame) 
     auto motion=std::make_unique<Internal::ScrollMotion>();
     motion->x.begin(offset.x,std::clamp(velocity.x,-12000.f,12000.f),limits.minX(),limits.maxX(),shouldBounceHorizontally(),k,.5/scale);
     motion->y.begin(offset.y,std::clamp(velocity.y,-12000.f,12000.f),limits.minY(),limits.maxY(),shouldBounceVertically(),k,.5/scale);
+    if(destination) {
+        const auto retarget=[](Internal::ScrollAxisMotion& axis,NXFloat target,NXFloat rate) {
+            const auto projected=std::clamp(axis.position+(std::abs(axis.velocity)>=10?std::copysign((std::abs(axis.velocity)-10)/axis.rate,axis.velocity):0.),axis.minimum,axis.maximum);
+            if(std::abs(double(target)-projected)<.0001)return;
+            axis.target=std::clamp(double(target),axis.minimum,axis.maximum);
+            axis.spring=true;axis.fixedTarget=true;axis.omega=12.1;
+            if(std::isfinite(rate)&&rate>0&&rate<100){axis.omega=rate;axis.velocity=(axis.target-axis.position)*rate;}
+            axis.damping=2*axis.omega;
+            axis.active=std::abs(axis.position-axis.target)>axis.threshold||std::abs(axis.velocity)>10;
+            if(!axis.active){axis.position=axis.target;axis.velocity=0;}
+        };
+        retarget(motion->x,destination->x,settlingRate.x);retarget(motion->y,destination->y,settlingRate.y);
+    }
     if(!motion->active()){applyContentOffset(motion->position());hideScrollIndicators();return;}
     if(predictInitialFrame&&offset==getBoundsCheckedContentOffset(offset)) {
         // UIKit exposes the next display frame immediately at lift-off. Keep
@@ -1359,6 +1406,14 @@ void UIScrollView::cancelDecelerationAnimations() {
 void UIScrollView::reconcileScrollGeometry() {
     const auto limits=contentOffsetBounds();const auto size=bounds().size;
     if(_hasScrollGeometry&&limits==_lastScrollLimits&&size==_lastScrollViewport)return;
+    if(_coordinatedInsetChanges) {
+        _lastScrollLimits=limits;_lastScrollViewport=size;_hasScrollGeometry=true;
+        if(_scrollMotion) {
+            _scrollMotion->x.minimum=limits.minX();_scrollMotion->x.maximum=limits.maxX();
+            _scrollMotion->y.minimum=limits.minY();_scrollMotion->y.maximum=limits.maxY();
+        }
+        return;
+    }
     const bool resized=_hasScrollGeometry&&size!=_lastScrollViewport;
     stopDragSmoothing();
     _lastScrollLimits=limits;_lastScrollViewport=size;_hasScrollGeometry=true;
@@ -1437,6 +1492,7 @@ void UIScrollView::layoutSubviews() {
     UIView::layoutSubviews();
     reconcileScrollGeometry();
     layoutScrollIndicatorsIfNeeded();
+    notifyContainers();
 
     if (_focusTrackingMode == UIScrollViewFocusTrackingMode::natural) {
         return;

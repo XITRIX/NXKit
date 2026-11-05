@@ -1,6 +1,7 @@
 #include "RenderPerformance.hpp"
 #include <UIView.h>
 #include <UIViewController.h>
+#include "ViewControllerContentScrollAccess.hpp"
 #include <UIWindow.h>
 #include <DispatchQueue.h>
 #include <CASpringAnimationPrototype.h>
@@ -936,7 +937,9 @@ void UIView::layoutSubviews() {
     updateSafeAreaInsets();
 
     if (!_parentController.expired()) {
-        _parentController.lock()->viewDidLayoutSubviews();
+        const auto controller=_parentController.lock();
+        controller->viewDidLayoutSubviews();
+        Internal::ViewControllerContentScrollAccess::changed(*controller);
     }
 }
 

@@ -137,6 +137,7 @@ private:
     std::array<std::uint64_t, 4> _contentScrollViewGetterGeneration {};
     struct TabBarItemObserver { std::weak_ptr<void> owner; std::function<void()> changed; };
     std::vector<TabBarItemObserver> _tabBarItemObservers;
+    std::vector<TabBarItemObserver> _contentScrollObservers;
     std::shared_ptr<UITabBarItem> _tabBarItem;
     std::shared_ptr<UINavigationItem> _navigationItem;
     bool _ownsDefaultTabBarItem = false;

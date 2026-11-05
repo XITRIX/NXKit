@@ -6,6 +6,7 @@
 #include <UIGlassEffect.h>
 #include <CABasicAnimation.h>
 #include <UITouch.h>
+#include <tools/IBTools.h>
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -71,6 +72,37 @@ UINavigationBar::UINavigationBar(NXRect frame):UIView(frame),_state(std::make_un
     _state->backButton->setIdentifier("UIKit.navigationBar.back");
 }
 UINavigationBar::~UINavigationBar()=default;
+bool UINavigationBar::prefersLargeTitles() const {return _state->prefersLargeTitles;}
+void UINavigationBar::setPrefersLargeTitles(bool prefers) {
+    if(_state->prefersLargeTitles==prefers)return;
+    _state->prefersLargeTitles=prefers;refresh();setNeedsLayout();
+    if(_state->metricsChanged)_state->metricsChanged();
+}
+bool Internal::NavigationBarAccess::requestsLargeTitle(const UINavigationBar& bar,const std::shared_ptr<UINavigationItem>& target) {
+    if(!target||!bar.prefersLargeTitles()||(bar.traitCollection()&&bar.traitCollection()->verticalSizeClass()==UIUserInterfaceSizeClass::compact))return false;
+    bool requested=true;
+    for(const auto& item:bar._state->items) {
+        if(item->largeTitleDisplayMode()==UINavigationItemLargeTitleDisplayMode::always)requested=true;
+        if(item->largeTitleDisplayMode()==UINavigationItemLargeTitleDisplayMode::never)requested=false;
+        if(item==target)return requested;
+    }
+    return target->largeTitleDisplayMode()!=UINavigationItemLargeTitleDisplayMode::never;
+}
+NXFloat Internal::NavigationBarAccess::inlineHeight(const UINavigationBar& bar) {
+    return bar.traitCollection()&&bar.traitCollection()->verticalSizeClass()==UIUserInterfaceSizeClass::compact?44.f:54.f;
+}
+NXFloat Internal::NavigationBarAccess::expandedAccessoryHeight(UINavigationBar& bar,const std::shared_ptr<UINavigationItem>& item) {
+    if(!requestsLargeTitle(bar,item))return 0;
+    // Typography metrics and row padding define the accessory, independently
+    // of a device's status bar, safe area or reference screenshot dimensions.
+    auto& state=*bar._state;
+    if(!state.largeTitleMeasure) {
+        state.largeTitleMeasure=new_shared<UILabel>();state.largeTitleMeasure->setFontSize(34);state.largeTitleMeasure->setFontWeight(700);state.largeTitleMeasure->setText("Ag");
+        state.largeTitleRowHeight=2*std::floor(state.largeTitleMeasure->sizeThatFits({10000,1000}).height/2)+12;
+    }
+    return state.largeTitleRowHeight;
+}
+
 auto UINavigationBar::items() const -> std::vector<std::shared_ptr<UINavigationItem>> {return _state->items;}
 auto UINavigationBar::topItem() const -> std::shared_ptr<UINavigationItem> {return _state->items.empty()?nullptr:_state->items.back();}
 auto UINavigationBar::backItem() const -> std::shared_ptr<UINavigationItem> {return _state->items.size()<2?nullptr:_state->items[_state->items.size()-2];}
@@ -98,7 +130,7 @@ std::shared_ptr<UINavigationItem> UINavigationBar::popNavigationItem(bool animat
 void UINavigationBar::install(std::vector<std::shared_ptr<UINavigationItem>> values,bool animated,int direction) {
     validate(values);_state->items=std::move(values);++_state->revision;
     const auto weak=weak_from_base<UINavigationBar>();
-    for(const auto& item:_state->items)Internal::NavigationItemAccess::observe(*item,shared_from_this(),[weak](bool animated){if(const auto bar=weak.lock())bar->refresh(animated);});
+    for(const auto& item:_state->items)Internal::NavigationItemAccess::observe(*item,shared_from_this(),[weak](bool animated){if(const auto bar=weak.lock()){bar->refresh(animated);if(bar->_state->metricsChanged)bar->_state->metricsChanged();}});
     refresh(animated,direction);
 }
 void UINavigationBar::refresh(bool animated,int direction) {
@@ -239,12 +271,24 @@ void UINavigationBar::refresh(bool animated,int direction) {
         // Retain those exact animations on the content's reversible clock;
         // only the glass/ink grouping changes to its committed appearance.
         _state->titleInk=_state->interactiveTitle;_state->title=_state->interactiveTitleLabel;
+        _state->largeTitle=_state->interactiveLargeTitle;_state->largeTitleClip=_state->interactiveLargeTitleClip;_state->largeTitleFittedWidth=-1;
         _state->interactiveRetiringTitle=oldTitleInk;
         retiring.push_back(oldTitleInk);
     }else if(oldTitle->text()!=(top?top->title():"")||(animate&&stackTransition)) {
         auto title=new_shared<UILabel>();title->setFontSize(17);title->setFontWeight(600);title->setTextAlignment(NSTextAlignment::center);title->setUserInteractionEnabled(false);
         title->setText(top?top->title():"");_state->titleInk=new_shared<Internal::NavigationInkView>();_state->titleInk->setUserInteractionEnabled(false);insertSubviewBelow(_state->titleInk,_state->glass);_state->titleInk->addSubview(title);_state->title=title;retiring.push_back(oldTitleInk);
     }
+    if(!_state->largeTitleClip||_state->largeTitleClip->superview().lock()!=_state->titleInk) {
+        _state->largeTitleFittedWidth=-1;
+        _state->largeTitleClip=new_shared<UIView>();_state->largeTitleClip->setClipsToBounds(true);_state->largeTitleClip->setUserInteractionEnabled(false);
+        _state->largeTitle=new_shared<UILabel>();_state->largeTitle->setFontSize(34);_state->largeTitle->setFontWeight(700);_state->largeTitle->setUserInteractionEnabled(false);
+        _state->largeTitleClip->addSubview(_state->largeTitle);_state->titleInk->addSubview(_state->largeTitleClip);
+    }
+    if(_state->largeTitleSource!=(top?top->title():"")){_state->largeTitleSource=top?top->title():"";_state->largeTitleFittedWidth=-1;}
+    _state->accessories.rows.clear();
+    const auto largeHeight=Internal::NavigationBarAccess::expandedAccessoryHeight(*this,top);
+    if(largeHeight>0)_state->accessories.rows.push_back({_state->largeTitleClip,largeHeight,0});
+    _state->largeTitleClip->setHidden(largeHeight<=0);
     _state->title->setHidden(bool(_state->customTitle));
     const bool nextBack=!_state->left.buttons.empty()&&_state->left.buttons.front()->back;
     const bool leadingChange=(retainedBack||nextBack)&&previousLeadingCount>0&&!_state->left.groups.empty()&&previousLeadingCount!=_state->left.groups.size();
@@ -318,7 +362,9 @@ void UINavigationBar::refresh(bool animated,int direction) {
             // pushing wipes away the outgoing title, popping reveals the incoming
             // one. A center cross-fade leaves unrelated titles superimposed.
             const auto clipped=direction<0?_state->titleInk:oldTitleInk;
-            const auto height=bounds().height();clipped->setClipsToBounds(true);
+            // The clipped title can be taller than the source bar (a pop to
+            // an expanded row). Reveal its own extent throughout the slide.
+            const auto height=clipped->bounds().height();clipped->setClipsToBounds(true);
             UIView::performWithoutAnimation([&]{clipped->layer()->setAnchorPoint({0,0});clipped->layer()->setPosition({0,0});clipped->setBounds({0,0,direction<0?width:width*.3f,height});});
             auto wipe=Internal::navigationAnimation("bounds");wipe->duration=Internal::navigationContentDuration;wipe->fromValue=NXRect{0,0,direction<0?width*.3f:width,height};wipe->toValue=NXRect{0,0,direction<0?width:width*.3f,height};wipe->timingFunction=new_shared<CAMediaTimingFunction>([](double fraction){return fraction>=1?1.:Internal::navigationContentProgress(fraction*Internal::navigationContentDuration);});clipped->layer()->add(wipe,"bounds");
         }
@@ -443,7 +489,12 @@ void UINavigationBar::refresh(bool animated,int direction) {
     setNeedsLayout();
 }
 void UINavigationBar::arrange() {
-    if(!_state)return;auto& s=*_state;s.titleInk->setFrame(bounds());const auto size=bounds().size;const auto safe=safeAreaInsets();s.glass->setFrame(bounds());
+    if(!_state)return;auto& s=*_state;const auto size=bounds().size;const auto safe=safeAreaInsets();s.glass->setFrame(bounds());
+    // During a transition the bar may already have the destination's shorter
+    // model bounds while this carrier still displays the outgoing large row.
+    // Keep its content extent independent of that reservation. In particular,
+    // a retained interactive reveal mask must not clip the next pop's title.
+    s.titleInk->setFrame({0,0,size.width,std::max(size.height,Internal::NavigationBarAccess::inlineHeight(*this)+s.accessories.visibleHeight(s.accessoryOffset))});
     const auto margin=16.f,available=std::max(0.f,size.width-safe.left-safe.right-2*margin);
     auto layoutSide=[&](Internal::NavigationSide& side,bool right,NXFloat budget) {
         NXFloat used=0;
@@ -480,6 +531,29 @@ void UINavigationBar::arrange() {
     // otherwise it centers the title, shifting only to clear leading content.
     const auto centered=std::clamp((size.width-titleWidth)*.5f,titleLeft,std::max(titleLeft,titleRight-titleWidth));
     s.title->setFrame({trailingCount>=3?titleLeft:centered,0,titleWidth,44});
+    s.accessories.arrange(size.width,Internal::NavigationBarAccess::inlineHeight(*this),s.accessoryOffset);
+    if(s.largeTitle&&!s.accessories.rows.empty()) {
+        const auto expanded=s.accessories.expandedHeight();
+        const auto consumed=std::clamp(s.accessoryOffset,0.f,expanded);
+        const auto width=std::max(0.f,size.width-safe.left-safe.right-2*margin);
+        if(s.largeTitleFittedWidth!=width) {
+            s.largeTitleFittedWidth=width;s.largeTitle->setText(s.largeTitleSource);
+            if(s.largeTitle->sizeThatFits({10000,1000}).width>width) {
+                // Keep the row one line without altering UINavigationItem's
+                // title. Truncate only at UTF-8 character boundaries.
+                std::vector<size_t> ends{0};
+                for(size_t i=1;i<=s.largeTitleSource.size();++i)if(i==s.largeTitleSource.size()||(static_cast<unsigned char>(s.largeTitleSource[i])&0xc0)!=0x80)ends.push_back(i);
+                size_t low=0,high=ends.size();
+                while(low+1<high){const auto mid=(low+high)/2;s.largeTitle->setText(s.largeTitleSource.substr(0,ends[mid])+"…");if(s.largeTitle->sizeThatFits({10000,1000}).width<=width)low=mid;else high=mid;}
+                s.largeTitle->setText(s.largeTitleSource.substr(0,ends[low])+"…");
+                if(s.largeTitle->sizeThatFits({10000,1000}).width>width)s.largeTitle->setText("");
+            }
+        }
+        s.largeTitle->setFrame({safe.left+margin,4-consumed,width,expanded-12});
+        const auto reveal=std::clamp((consumed-(expanded-12))/12,0.f,1.f);
+        s.title->setHidden(bool(s.customTitle)||reveal<=0);s.title->setAlpha(reveal);
+        if(s.customTitle)s.customTitle->setAlpha(reveal);
+    }else {s.title->setHidden(bool(s.customTitle));s.title->setAlpha(1);if(s.customTitle)s.customTitle->setAlpha(1);}
     if(s.customTitle){const auto w=std::min(room,s.customTitle->sizeThatFits({room,44}).width);s.customTitle->setFrame({std::clamp((size.width-w)*.5f,titleLeft,std::max(titleLeft,titleRight-w)),0,w,44});}
 }
 void UINavigationBar::activate(const std::shared_ptr<UIBarButtonItem>& item,bool back) {
@@ -489,10 +563,11 @@ void UINavigationBar::activate(const std::shared_ptr<UIBarButtonItem>& item,bool
     if(!present(_state->left)&&!present(_state->right))return;
     if(const auto action=item->primaryAction())action->perform();
 }
+bool UINavigationBar::applyXMLAttribute(const std::string& name,const std::string& value){if(UIView::applyXMLAttribute(name,value))return true;REGISTER_XIB_ATTRIBUTE(prefersLargeTitles,valueToBool,setPrefersLargeTitles)return false;}
 void UINavigationBar::layoutSubviews(){UIView::layoutSubviews();arrange();}
 void UINavigationBar::tintColorDidChange(){UIView::tintColorDidChange();if(_state)refresh();}
 void UINavigationBar::traitCollectionDidChange(std::shared_ptr<UITraitCollection> previous){UIView::traitCollectionDidChange(std::move(previous));if(_state)refresh();}
-NXSize UINavigationBar::sizeThatFits(NXSize size){return {std::max(0.0f,size.width),traitCollection()&&traitCollection()->verticalSizeClass()==UIUserInterfaceSizeClass::compact?44.0f:54.0f};}
+NXSize UINavigationBar::sizeThatFits(NXSize size){return {std::max(0.f,size.width),Internal::NavigationBarAccess::inlineHeight(*this)+_state->accessories.visibleHeight(_state->accessoryOffset)};}
 bool UINavigationBar::point(NXPoint p,UIEvent*) {return bounds().contains(p)&&bool(topItem());}
 std::vector<std::shared_ptr<UIFocusEnvironment>> UINavigationBar::preferredFocusEnvironments(){std::vector<std::shared_ptr<UIFocusEnvironment>> views;for(const auto* side:{&_state->left,&_state->right})for(const auto& entry:side->buttons)if(entry->control->canBecomeFocused())views.push_back(entry->control);return views;}
 
@@ -500,7 +575,7 @@ namespace {
 // Layout-only copies never reparent application-owned custom views into the
 // measuring bar. They preserve UIKit grouping metadata and intrinsic sizes.
 std::shared_ptr<UINavigationItem> previewItem(const std::shared_ptr<UINavigationItem>& source,std::map<const UIBarButtonItem*,std::shared_ptr<UIBarButtonItem>>& originals) {
-    auto result=std::make_shared<UINavigationItem>(source->title());
+    auto result=std::make_shared<UINavigationItem>(source->title());result->setLargeTitleDisplayMode(source->largeTitleDisplayMode());
     result->setHidesBackButton(source->hidesBackButton());result->setLeftItemsSupplementBackButton(source->leftItemsSupplementBackButton());
     auto copy=[&](const auto& items) {
         std::vector<std::shared_ptr<UIBarButtonItem>> result;
@@ -525,13 +600,13 @@ void interactiveProperty(const std::shared_ptr<UIView>& view,const char* key,Ani
     auto animation=Internal::navigationAnimation(key);animation->duration=span;animation->fromValue=std::move(from);animation->toValue=std::move(to);animation->timingFunction=new_shared<CAMediaTimingFunction>([](double f){return f;});view->layer()->add(animation,key);
 }
 }
-void Internal::NavigationBarAccess::beginInteractivePop(UINavigationBar& bar,std::vector<std::shared_ptr<UINavigationItem>> items,double span) {
+void Internal::NavigationBarAccess::beginInteractivePop(UINavigationBar& bar,std::vector<std::shared_ptr<UINavigationItem>> items,double span,NXFloat accessoryOffset) {
     auto& s=*bar._state;
     // Finish the previous operation's optical tail before capturing this one.
     // Its source metadata is unchanged; no target styling is installed yet.
     bar.refresh(false);
     auto measure=new_shared<UINavigationBar>(bar.bounds());std::map<const UIBarButtonItem*,std::shared_ptr<UIBarButtonItem>> originals;
-    std::vector<std::shared_ptr<UINavigationItem>> copies;for(const auto& item:items)copies.push_back(previewItem(item,originals));measure->setItems(std::move(copies));measure->layoutIfNeeded();
+    std::vector<std::shared_ptr<UINavigationItem>> copies;for(const auto& item:items)copies.push_back(previewItem(item,originals));measure->setPrefersLargeTitles(bar.prefersLargeTitles());measure->setItems(std::move(copies));measure->_state->accessoryOffset=accessoryOffset;measure->layoutIfNeeded();
     for(auto* side:{&measure->_state->left,&measure->_state->right})for(const auto& button:side->buttons)if(const auto found=originals.find(button->item.get());found!=originals.end())button->item=found->second;
     const auto& destination=*measure->_state;
     for(const auto& pair:{std::pair{&s.left,&destination.left},std::pair{&s.right,&destination.right}}) {
@@ -575,10 +650,17 @@ void Internal::NavigationBarAccess::beginInteractivePop(UINavigationBar& bar,std
     s.interactiveSource=s.items;s.items=std::move(items);++s.revision;s.transitioning=true;
     auto incoming=new_shared<Internal::NavigationInkView>();incoming->setUserInteractionEnabled(false);incoming->setFrame(bar.bounds());incoming->setClipsToBounds(true);
     auto title=new_shared<UILabel>();title->setText(bar.topItem()?bar.topItem()->title():"");title->setFontSize(17);title->setFontWeight(600);title->setTextAlignment(NSTextAlignment::center);title->setFrame(destination.title->frame());incoming->addSubview(title);
+    s.interactiveLargeTitle.reset();s.interactiveLargeTitleClip.reset();
+    title->setHidden(destination.title->isHidden());title->setAlpha(destination.title->alpha());
+    if(destination.largeTitleClip&&!destination.largeTitleClip->isHidden()) {
+        auto clip=new_shared<UIView>(destination.largeTitleClip->frame());clip->setClipsToBounds(true);clip->setUserInteractionEnabled(false);
+        auto large=new_shared<UILabel>();large->setFontSize(34);large->setFontWeight(700);large->setText(destination.largeTitle->text());large->setFrame(destination.largeTitle->frame());large->setUserInteractionEnabled(false);
+        clip->addSubview(large);incoming->addSubview(clip);s.interactiveLargeTitle=large;s.interactiveLargeTitleClip=clip;
+    }
     const auto targetCustom=bar.topItem()?bar.topItem()->titleView():nullptr;
     if(targetCustom){title->setHidden(true);if(targetCustom!=s.customTitle){incoming->addSubview(targetCustom);targetCustom->setFrame(destination.customTitle->frame());}}
     bar.insertSubviewBelow(incoming,s.titleInk);s.interactiveTitle=incoming;s.interactiveTitleLabel=title;
-    const auto width=bar.bounds().width(),height=bar.bounds().height();
+    const auto width=bar.bounds().width(),height=std::max(bar.bounds().height(),inlineHeight(bar)+destination.accessories.visibleHeight(accessoryOffset));
     UIView::performWithoutAnimation([&]{incoming->layer()->setAnchorPoint({0,0});incoming->layer()->setPosition({0,0});});
     interactiveProperty(incoming,"transform",NXTransform3DMakeAffineTransform(NXAffineTransform::translationBy(-width*.3f,0)),NXTransform3D::identity,span);
     interactiveProperty(incoming,"bounds",NXRect{0,0,width*.3f,height},NXRect{0,0,width,height},span);
@@ -592,7 +674,7 @@ void Internal::NavigationBarAccess::endInteractivePop(UINavigationBar& bar,bool 
     const auto source=std::move(*s.interactiveSource);s.interactiveSource.reset();
     if(commit){s.interactiveHandoff=progress;bar.refresh(true,-1);}
     else {if(s.interactiveTitle)s.interactiveTitle->removeFromSuperview();s.items=source;++s.revision;bar.refresh(false);finishInteractivePop(bar);}
-    s.interactiveTitle.reset();s.interactiveTitleLabel.reset();
+    s.interactiveTitle.reset();s.interactiveTitleLabel.reset();s.interactiveLargeTitle.reset();s.interactiveLargeTitleClip.reset();
 }
 void Internal::NavigationBarAccess::finishInteractivePop(UINavigationBar& bar) {
     auto& s=*bar._state;

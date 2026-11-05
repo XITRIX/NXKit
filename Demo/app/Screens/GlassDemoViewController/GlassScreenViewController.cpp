@@ -17,6 +17,31 @@ constexpr std::array explanations={
     "A leading favorite action supplements the automatic Back button. The trailing image pair still shares its glass.",
     "Add opts out of sharing its background. More remains a regular glass action, without a separator item.",
     "Add hides its glass background. More keeps its capsule; Back restores the previous arrangement."};
+class LargeTitleDemoView final:public UIScrollView {
+public:
+    explicit LargeTitleDemoView(std::function<void(UINavigationItemLargeTitleDisplayMode)> push) {
+        setBounceVertically(true);setBackgroundColor(UIColor::systemGroupedBackground);setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes);
+        const std::array modes={UINavigationItemLargeTitleDisplayMode::automatic,UINavigationItemLargeTitleDisplayMode::always,UINavigationItemLargeTitleDisplayMode::never};
+        const std::array names={"Push Automatic (inherits this screen)","Push Always","Push Never (inline title)"};
+        for(size_t i=0;i<3;++i) {
+            auto row=new_shared<UIButton>();row->setText(names[i]);row->primaryAction=UIAction(names[i],[push,mode=modes[i]]{push(mode);});addSubview(row);
+        }
+        for(size_t i=0;i<24;++i){auto label=new_shared<UILabel>();label->setText(i==0?"Scroll slowly and release halfway to test settling.":"Content row "+std::to_string(i));label->setTextColor(UIColor::secondaryLabel);addSubview(label);}
+    }
+    void layoutSubviews()override {
+        NXFloat y=8;for(const auto& row:subviews()){row->setFrame({16,y,std::max(0.f,bounds().width()-32),48});y+=52;}
+        setContentSize({bounds().width(),y});UIScrollView::layoutSubviews();
+    }
+};
+class LargeTitleDemoController final:public UIViewController {
+public:
+    explicit LargeTitleDemoController(UINavigationItemLargeTitleDisplayMode mode=UINavigationItemLargeTitleDisplayMode::always) {
+        setTitle(mode==UINavigationItemLargeTitleDisplayMode::never?"Inline title":mode==UINavigationItemLargeTitleDisplayMode::automatic?"Automatic title":"Large titles");navigationItem()->setLargeTitleDisplayMode(mode);
+    }
+    void loadView()override {
+        setView(new_shared<LargeTitleDemoView>([weak=weak_from_base<LargeTitleDemoController>()](auto mode){if(const auto self=weak.lock())if(const auto nav=self->navigationController())nav->pushViewController(new_shared<LargeTitleDemoController>(mode),true);}));
+    }
+};
 class NavigationDemoRow final : public UIControl {
     void willChangeHighlight(bool active) override {setBackgroundColor(active?std::optional<UIColor>(UIColor::systemFill):std::nullopt);}
 };
@@ -80,6 +105,7 @@ private:
 };
 }
 GlassNavigationDemoViewController::GlassNavigationDemoViewController(size_t arrangement):_arrangement(arrangement) {
+    navigationItem()->setLargeTitleDisplayMode(UINavigationItemLargeTitleDisplayMode::never);
     if(arrangement>=arrangementCount)throw std::out_of_range("Navigation demo arrangement");
     constexpr std::array barTitles={"Shared","Accent","Separated","Three items","Text","Leading","Unshared","Hidden glass"};setTitle(barTitles[arrangement]);
     const auto weak=weak_from_base<GlassNavigationDemoViewController>();
@@ -109,6 +135,7 @@ std::shared_ptr<UIControl> GlassNavigationDemoViewController::action(const std::
 void GlassNavigationDemoViewController::push(size_t arrangement){if(const auto nav=navigationController())nav->pushViewController(new_shared<GlassNavigationDemoViewController>(arrangement),true);}
 void GlassNavigationDemoViewController::recordAction(const std::string& name){loadViewIfNeeded();std::static_pointer_cast<NavigationMorphView>(view())->setStatus(name+" tapped · "+std::to_string(++_presses));}
 GlassListViewController::GlassListViewController(size_t tab):_tab(tab) {
+    navigationItem()->setLargeTitleDisplayMode(UINavigationItemLargeTitleDisplayMode::never);
     if(tab>=4)throw std::out_of_range("Demo tab index");setTitle(titles[tab]);
     const auto weak=weak_from_base<GlassListViewController>();
     auto close=std::make_shared<UIBarButtonItem>(UIImage::systemImageNamed("chevron.left",20,600,3),UIBarButtonItemStyle::plain,UIAction("Close",[weak]{if(const auto self=weak.lock();self&&self->onClose)self->onClose();}));
@@ -121,6 +148,7 @@ GlassListViewController::GlassListViewController(size_t tab):_tab(tab) {
 void GlassListViewController::loadView() {
     auto screen=new_shared<GlassScreenView>();screen->selectTab(_tab);
     screen->onAccentChanged=[weak=weak_from_base<GlassListViewController>()](UIColor){if(const auto self=weak.lock())self->updateAccent();};
+    screen->onLargeTitleDemo=[weak=weak_from_base<GlassListViewController>()]{if(const auto self=weak.lock())if(const auto nav=self->navigationController())nav->pushViewController(new_shared<LargeTitleDemoController>(),true);};
     screen->onNavigationDemo=[weak=weak_from_base<GlassListViewController>()]{if(const auto self=weak.lock())if(const auto nav=self->navigationController())nav->pushViewController(new_shared<GlassNavigationDemoViewController>(),true);};
     setView(screen);
 }
@@ -135,7 +163,7 @@ GlassScreenViewController::GlassScreenViewController() {
     setTitle("iOS screen layout");std::vector<std::shared_ptr<UIViewController>> tabs;
     for(size_t i=0;i<4;++i){auto root=new_shared<GlassListViewController>(i);
         root->onClose=[weak=weak_from_base<GlassScreenViewController>()]{if(const auto self=weak.lock())self->close();};
-        auto nav=new_shared<UINavigationController>(root);nav->setTitle(titles[i]);
+        auto nav=new_shared<UINavigationController>(root);nav->navigationBar()->setPrefersLargeTitles(true);nav->setTitle(titles[i]);
         auto image=UIImage::systemImageNamed(symbols[i],28,400,3);if(!image)image=UIImage::fromRes("img/moonlight_96.png",3);
         nav->setTabBarItem(std::make_shared<UITabBarItem>(titles[i],image,std::intptr_t(i)));tabs.push_back(nav);}
     setViewControllers(std::move(tabs));

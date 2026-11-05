@@ -29,7 +29,7 @@ void UIViewController::setContentScrollView(const std::shared_ptr<UIScrollView>&
     for (std::size_t index = 0; index < _contentScrollViews.size(); ++index) {
         if (mask & (1u << index)) _contentScrollViews[index] = scrollView;
     }
-    if (_view && mask) _view->setNeedsLayout();
+    if (_view && mask) {_view->setNeedsLayout();Internal::ViewControllerContentScrollAccess::changed(*this);}
 }
 
 std::shared_ptr<UIScrollView> UIViewController::contentScrollViewForEdge(NSDirectionalRectEdge edge) {

@@ -237,6 +237,78 @@ void rootBoundary() {
         input.send(UITouchPhase::cancelled,{114,300},500);settle();expect(custom->superview().lock()==f.nav->navigationBar()&&custom->transform()==transform,"cancel restores a reused custom title view");
     }
 }
+void largeTitleTransitions() {
+    for(bool commit:{false,true})for(bool destinationLarge:{false,true})for(bool sourceLarge:{false,true}) {
+        Fixture f;
+        auto addScroll=[](const auto& controller) {
+            auto scroll=new_shared<UIScrollView>(controller->view()->bounds());scroll->setBounceVertically(true);scroll->setContentSize({402,1800});controller->view()->addSubview(scroll);return scroll;
+        };
+        auto sourceScroll=addScroll(f.source);auto targetScroll=addScroll(f.target);
+        f.target->navigationItem()->setLargeTitleDisplayMode(destinationLarge?UINavigationItemLargeTitleDisplayMode::always:UINavigationItemLargeTitleDisplayMode::never);
+        f.source->navigationItem()->setLargeTitleDisplayMode(sourceLarge?UINavigationItemLargeTitleDisplayMode::always:UINavigationItemLargeTitleDisplayMode::never);
+        f.nav->navigationBar()->setPrefersLargeTitles(true);f.window->drawAndLayoutTreeIfNeeded();
+        const auto sourceHeight=f.nav->navigationBar()->frame().height();const auto sourceOffset=sourceScroll->contentOffset();
+        UIGestureRecognizerTestHarness input(f.window);input.send(UITouchPhase::moved,{14,300},50);input.send(UITouchPhase::moved,{190,300},250);
+        auto& state=Internal::NavigationBarAccess::state(*f.nav->navigationBar());
+        expect(state.interactiveTitle!=nullptr,"large/inline navigation shares the reversible title carrier timeline");
+        expect(bool(state.interactiveLargeTitle)==destinationLarge,"interactive destination carries its own large title row");
+        const auto expectedHeight=54.f+(destinationLarge?52.f:0);
+        const auto presented=f.nav->navigationBar()->layer()->presentationOrSelf()->bounds().height();
+        expect(close(presented,sourceHeight+(expectedHeight-sourceHeight)*(176.f/402)),"bar extent uses the same finger-controlled progress as screen translation");
+        if(commit)input.send(UITouchPhase::moved,{340,300},450);
+        input.send(commit?UITouchPhase::ended:UITouchPhase::cancelled,{commit?340.f:190.f,300},500);settle();f.window->drawAndLayoutTreeIfNeeded();
+        expect(f.nav->topViewController()==(commit?f.target:f.source),"large-title pop commits or restores the correct controller");
+        expect(close(f.nav->navigationBar()->frame().height(),commit?expectedHeight:sourceHeight),"large-title pop restores the destination bar extent");
+        if(!commit)expect(sourceScroll->contentOffset()==sourceOffset,"cancelled large-title pop preserves the source scroll position");
+        auto& final=Internal::NavigationBarAccess::state(*f.nav->navigationBar());
+        expect(final.largeTitleClip&&final.largeTitleClip->superview().lock()==final.titleInk,"the retained large title belongs to the final title carrier");
+    }
+}
+void successiveLargeTitlePops(const std::shared_ptr<Context>& ctx) {
+    for(bool dark:{false,true})for(float density:{2.f,3.f})for(float collapse:{0.f,26.f})
+    for(bool firstSwipe:{false,true})for(bool cancelSecond:{false,true}) {
+        ctx->dark=dark;ctx->density=density;
+        Fixture f;
+        for(const auto& screen:{f.root,f.target,f.source}) {
+            auto scroll=new_shared<UIScrollView>();scroll->setFrame(screen->view()->bounds());
+            scroll->setContentSize({402,1800});screen->view()->addSubview(scroll);
+            screen->navigationItem()->setLargeTitleDisplayMode(screen==f.target?UINavigationItemLargeTitleDisplayMode::always:UINavigationItemLargeTitleDisplayMode::never);
+        }
+        f.nav->setViewControllers({f.root,f.target},false);
+        auto bar=f.nav->navigationBar();bar->setPrefersLargeTitles(true);f.window->drawAndLayoutTreeIfNeeded();
+        auto scroll=std::dynamic_pointer_cast<UIScrollView>(f.target->view()->subviews().front());
+        scroll->setContentOffset({0,-scroll->adjustedContentInset().top+collapse},false);f.window->drawAndLayoutTreeIfNeeded();
+        const auto expandedHeight=bar->frame().height();
+        f.nav->pushViewController(f.source,true);settle();f.window->drawAndLayoutTreeIfNeeded();
+        auto& state=Internal::NavigationBarAccess::state(*bar);
+        if(firstSwipe) {
+            UIGestureRecognizerTestHarness input(f.window);input.send(UITouchPhase::moved,{14,300},50);input.send(UITouchPhase::moved,{340,300},250);input.send(UITouchPhase::ended,{340,300},300);
+        }else state.left.buttons.front()->control->performPrimaryAction();
+        // Sample the actual presentation mask, rather than only checking the
+        // final bar height: the old mask hid the entire incoming large row.
+        const auto origin=Timer();
+        for(int frame=0;frame<48;++frame) {
+            auto now=origin;const auto us=origin.startTime.tv_usec+frame*1000000L/120;now.startTime.tv_sec+=us/1000000;now.startTime.tv_usec=us%1000000;
+            std::function<void(const std::shared_ptr<CALayer>&)> tick=[&](const auto& layer){const auto children=layer->sublayers();layer->animateAt(now);for(const auto& child:children)tick(child);};tick(f.window->layer());DispatchQueueTestHarness::pump();
+            f.window->drawAndLayoutTreeIfNeeded();
+            expect(state.largeTitle&&!state.largeTitleClip->isHidden(),"inline-to-large pop installs its destination row before completion");
+            expect(state.titleInk->layer()->presentationOrSelf()->bounds().maxY()>=state.largeTitleClip->frame().maxY(),"button and gesture pop reveal masks include the destination large title during transition");
+        }
+        settle();f.window->drawAndLayoutTreeIfNeeded();
+        expect(f.nav->topViewController()==f.target,"first pop reaches the large-title screen");
+        const auto outgoing=state.titleInk;
+        UIGestureRecognizerTestHarness next(f.window);next.send(UITouchPhase::moved,{14,300},50);
+        for(float finger:{54.f,114.f,214.f,314.f}) {
+            next.send(UITouchPhase::moved,{finger,300},finger+100);
+            f.window->drawAndLayoutTreeIfNeeded();
+            expect(!state.largeTitleClip->isHidden()&&state.largeTitle->text()=="Target","consecutive swipe retains the outgoing large-title content");
+            expect(outgoing->layer()->presentationOrSelf()->bounds().maxY()>=state.largeTitleClip->frame().maxY(),"shrinking the bar on the next swipe cannot clip the outgoing large title");
+        }
+        next.send(cancelSecond?UITouchPhase::cancelled:UITouchPhase::ended,{314,300},500);settle();f.window->drawAndLayoutTreeIfNeeded();
+        expect(f.nav->topViewController()==(cancelSecond?f.target:f.root),"second swipe commits or cancels to the correct screen");
+        expect(close(bar->frame().height(),cancelSecond?expandedHeight:54),"second swipe restores the correct accessory extent");
+    }
+}
 void interruptions() {
     {Fixture f;UIGestureRecognizerTestHarness first(f.window);first.send(UITouchPhase::moved,{14,300},50);first.send(UITouchPhase::moved,{114,300},250);
         int actions=0;auto control=new_shared<UIControl>();control->setFrame({0,0,402,874});control->primaryAction=UIAction("Unexpected",[&]{++actions;});f.source->view()->addSubview(control);
@@ -251,7 +323,7 @@ void interruptions() {
 }
 }
 int main(){auto ctx=std::make_shared<Context>();SkiaCtx::_main=ctx;UIApplication::shared=new_shared<UIApplication>();UIApplication::shared->delegate=std::make_shared<UIApplicationDelegate>();
-    tracking(false);tracking(true);tracking(false,true);titleSettlement(ctx);admission();preview();independentApplicationAnimation();rootBoundary();interruptions();
+    tracking(false);tracking(true);tracking(false,true);titleSettlement(ctx);admission();preview();independentApplicationAnimation();rootBoundary();interruptions();largeTitleTransitions();successiveLargeTitlePops(ctx);
     UIApplication::shared->keyWindow.reset();UIApplication::shared->delegate->window.reset();UIApplication::shared.reset();SkiaCtx::_main.reset();
     if(!failures)std::cout<<"Interactive navigation tests passed\n";return failures?1:0;
 }

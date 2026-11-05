@@ -17,16 +17,20 @@
 #include <cstdint>
 #include <array>
 #include <functional>
+#include <optional>
 #include <tools/DragSmoother.hpp>
 
 namespace NXKit {
-namespace Internal { struct ScrollMotion; }
+namespace Internal { struct ScrollMotion; class ScrollViewContainerAccess; }
 
 class UIScrollView;
 class UIScrollViewDelegate {
 public:
     virtual void scrollViewWillBeginDragging(std::shared_ptr<UIScrollView> scrollView) {}
     virtual void scrollViewDidScroll(std::shared_ptr<UIScrollView> scrollView) {}
+    // Velocity is in points per millisecond, matching UIKit. The mutable
+    // destination is in content coordinates; applications may adjust either axis.
+    virtual void scrollViewWillEndDragging(std::shared_ptr<UIScrollView> scrollView, NXPoint velocity, NXPoint* targetContentOffset) {}
     virtual void scrollViewDidEndDragging(std::shared_ptr<UIScrollView> scrollView, bool willDecelerate) {}
 };
 
@@ -167,6 +171,17 @@ public:
     void setFocusTrackingMode(UIScrollViewFocusTrackingMode mode);
 
 private:
+    friend class Internal::ScrollViewContainerAccess;
+    struct ContainerObserver {
+        std::weak_ptr<void> owner;
+        std::function<void()> changed;
+        std::function<void(NXPoint,NXPoint&,NXPoint&)> willEndDragging;
+        std::function<void(NXRect&)> motionBounds;
+    };
+    std::vector<ContainerObserver> _containerObservers;
+    unsigned _coordinatedInsetChanges=0;
+    void notifyContainers();
+    void synchronizeContainerInsets();
     std::shared_ptr<UIPanGestureRecognizer> _panGestureRecognizer;
 #ifdef __SWITCH__
     bool _dragSmoothingEnabled = true;
@@ -274,7 +289,7 @@ private:
     void cancelDecelerationAnimations();
 
     void bounceWithVelocity(NXPoint velocity);
-    void startScrollMotion(NXPoint velocity, bool predictInitialFrame = false);
+    void startScrollMotion(NXPoint velocity, bool predictInitialFrame = false, std::optional<NXPoint> destination = std::nullopt, NXPoint settlingRate = {});
     void applyContentOffset(NXPoint offset,bool animated=false);
     void applyMotionOffset(NXPoint offset);
     void reconcileScrollGeometry();

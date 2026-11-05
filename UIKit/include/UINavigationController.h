@@ -10,8 +10,8 @@ public:
     virtual void navigationControllerWillShow(const std::shared_ptr<UINavigationController>&,const std::shared_ptr<UIViewController>&,bool) {}
     virtual void navigationControllerDidShow(const std::shared_ptr<UINavigationController>&,const std::shared_ptr<UIViewController>&,bool) {}
 };
-/** Inline Apple navigation container with a reversible leading-edge pop gesture.
-    Large titles and toolbar presentation are not yet implemented. Stack changes
+/** Apple navigation container with collapsible large titles and a reversible leading-edge pop gesture.
+    Toolbar presentation is not yet implemented. Stack changes
     are serialized, including changes requested during an interactive pop. */
 class UINavigationController : public UIViewController, public UINavigationControllerInterface, public UINavigationBarDelegate {
 public:
@@ -44,6 +44,8 @@ public:
     bool allowsActionDispatch() const override {return !_updating&&!_appearanceTransition&&UIViewController::allowsActionDispatch();}
     std::vector<std::shared_ptr<UIFocusEnvironment>> preferredFocusEnvironments() override;
 private:
+    struct ScrollLayout;
+    std::unique_ptr<ScrollLayout> _scrollLayout;
     struct Update {std::vector<std::shared_ptr<UIViewController>> controllers;bool animated;};
     std::vector<std::shared_ptr<UIViewController>> _controllers;
     std::deque<Update> _pending;
@@ -60,7 +62,7 @@ private:
     void apply(std::vector<std::shared_ptr<UIViewController>> controllers,bool animated);
     void mount(int direction,bool animated,std::vector<std::shared_ptr<UIViewController>> removed);
     void finish();
-    void layout();
+    void layout(bool scrolling=false);
     bool canBeginInteractivePop();
     void handlePopGesture(const std::shared_ptr<UIGestureRecognizer>& gesture);
     void beginInteractivePop();

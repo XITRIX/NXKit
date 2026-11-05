@@ -4,6 +4,9 @@
 #include <vector>
 namespace NXKit {
 namespace Internal { class NavigationItemAccess; }
+/** UIKit's out-of-line title policy. Automatic inherits the preceding item's
+    request (the first item requests a large title). Inline mode is not yet supported. */
+enum class UINavigationItemLargeTitleDisplayMode { automatic, always, never };
 /** Style-independent description of a navigation bar's content. */
 class UINavigationItem {
 public:
@@ -24,7 +27,10 @@ public:
     void setHidesBackButton(bool hidden,bool animated=false);
     [[nodiscard]] bool leftItemsSupplementBackButton() const { return _supplementsBack; }
     void setLeftItemsSupplementBackButton(bool supplement);
+    [[nodiscard]] UINavigationItemLargeTitleDisplayMode largeTitleDisplayMode() const { return _largeTitleDisplayMode; }
+    void setLargeTitleDisplayMode(UINavigationItemLargeTitleDisplayMode mode);
 private:
+    UINavigationItemLargeTitleDisplayMode _largeTitleDisplayMode=UINavigationItemLargeTitleDisplayMode::automatic;
     friend class Internal::NavigationItemAccess;
     struct Observer {std::weak_ptr<void> owner;std::function<void(bool)> changed;};
     std::vector<Observer> _observers;

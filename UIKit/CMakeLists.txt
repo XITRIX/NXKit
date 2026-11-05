@@ -4,6 +4,7 @@ add_library(XITRIXUIKit
         lib/UINavigationBar.cpp
         lib/UINavigationBarInternal.hpp
         lib/NavigationBarMotion.hpp
+        lib/NavigationBarAccessory.hpp
         lib/UINavigationController.cpp
         include/UIKit.h
         include/UIKitRegistration.h

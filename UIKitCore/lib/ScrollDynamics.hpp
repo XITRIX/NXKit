@@ -15,10 +15,11 @@ struct ScrollAxisMotion {
     double position = 0, velocity = 0;
     double minimum = 0, maximum = 0, target = 0;
     double omega = 12.1, damping = 24.2, threshold = .1666667, rate = 2.00200267;
-    bool bounces = false, spring = false, active = false;
+    bool bounces = false, spring = false, active = false, fixedTarget = false;
 
     void begin(double p, double v, double low, double high, bool bounce,
                double k, double tolerance) {
+        fixedTarget = false;
         position = p;
         velocity = v;
         minimum = low;
@@ -116,7 +117,7 @@ struct ScrollAxisMotion {
         // instant the elastic force ends; keep the crossing velocity and spend
         // the rest of this frame in ordinary deceleration, rather than pulling
         // the content back to the old spring target.
-        if (displacement * c < 0) {
+        if (!fixedTarget && displacement * c < 0) {
             const auto crossingTime = -displacement / c;
             if (crossingTime <= dt) {
                 resumeFreeFlight(c * std::exp(-omega * crossingTime), dt - crossingTime);

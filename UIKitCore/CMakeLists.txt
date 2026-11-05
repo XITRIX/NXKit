@@ -88,6 +88,7 @@ add_library(UIKitCore
         lib/UIPressesEvent.cpp
         lib/UIResponder.cpp
         lib/UIScrollView.cpp
+        lib/ScrollViewContainerAccess.hpp
         include/UIScrollEdgeEffect.h
         lib/UIScrollEdgeEffect.cpp
         lib/UITapGestureRecognizer.cpp
@@ -156,6 +157,14 @@ endif ()
 option(UIKITCORE_BUILD_TESTS "Build UIKitCore regression tests" OFF)
 if (UIKITCORE_BUILD_TESTS)
     enable_testing()
+    if(APPLE)
+        add_executable(NXKitMetalPipelineDescriptionTests tests/MetalPipelineDescriptionTests.mm)
+        target_include_directories(NXKitMetalPipelineDescriptionTests PRIVATE lib)
+        target_compile_options(NXKitMetalPipelineDescriptionTests PRIVATE -fobjc-arc)
+        target_link_libraries(NXKitMetalPipelineDescriptionTests PRIVATE "-framework Foundation" "-framework Metal")
+        add_test(NAME NXKitMetalPipelineDescriptionTests COMMAND NXKitMetalPipelineDescriptionTests)
+    endif()
+
     if(APPLE AND PLATFORM_DESKTOP)
         add_executable(NXKitAppleGlassPreferenceTests tests/AppleGlassPreferenceTests.mm)
         target_include_directories(NXKitAppleGlassPreferenceTests PRIVATE lib/platforms/apple)

@@ -9,9 +9,12 @@
 #include "NavigationBarMotion.hpp"
 #include "ViewControllerContainerAccess.hpp"
 #include "UIScrollPocket.hpp"
+#include "ScrollViewContainerAccess.hpp"
+#include "ViewControllerContentScrollAccess.hpp"
 #include <algorithm>
 #include <stdexcept>
 #include <unordered_set>
+#include <list>
 using namespace NXKit;
 namespace {bool contains(const auto& controllers,const auto& controller){return std::find(controllers.begin(),controllers.end(),controller)!=controllers.end();}}
 namespace {
@@ -86,8 +89,24 @@ struct UINavigationController::InteractivePop {
     std::optional<End> pendingEnd;
     bool starting=true,ending=false,finishImmediately=false,settling=false,commit=false;
 };
+struct UINavigationController::ScrollLayout {
+    struct Screen {
+        std::weak_ptr<UIViewController> controller;
+        std::weak_ptr<UIScrollView> scroll;
+        NXFloat range=0,visible=0,referenceInset=0;
+        bool ready=false;
+    };
+    std::list<Screen> screens;
+    std::weak_ptr<UIScrollView> observed;
+    bool layingOut=false,mounting=false;
+    Screen& screen(const std::shared_ptr<UIViewController>& controller) {
+        std::erase_if(screens,[](const auto& screen){return screen.controller.expired();});
+        for(auto& screen:screens)if(screen.controller.lock()==controller)return screen;
+        screens.push_back({controller});return screens.back();
+    }
+};
 UINavigationController::~UINavigationController()=default;
-UINavigationController::UINavigationController() {
+UINavigationController::UINavigationController():_scrollLayout(std::make_unique<ScrollLayout>()) {
     const auto weak=weak_from_base<UINavigationController>();
     registerAction(UIResponderAction {
         .identifier="UIKit.navigationController.back",
@@ -135,6 +154,7 @@ void UINavigationController::loadView() {
     _content=new_shared<UIView>();_content->setClipsToBounds(true);root->addSubview(_content);
     _bar=new_shared<UINavigationBar>();root->addSubview(_bar);
     auto& state=Internal::NavigationBarAccess::state(*_bar);state.owner=shared_from_this();state.delegate=shared_from_base<UINavigationController>();
+    state.metricsChanged=[weak=weak_from_base<UINavigationController>()]{if(const auto self=weak.lock()){if(self->_interactive)self->endInteractivePop(false,0,false);self->layout();}};
     state.backAction=[weak=weak_from_base<UINavigationController>()]{if(const auto self=weak.lock();self&&!self->_updating)self->popViewController(true);};
     auto gesture=new_shared<NavigationPopGesture>([weak=weak_from_base<UINavigationController>()]{const auto self=weak.lock();return self&&self->canBeginInteractivePop();},[weak=weak_from_base<UINavigationController>()](const auto& recognizer){if(const auto self=weak.lock())self->handlePopGesture(recognizer);});
     _popGesture=gesture;root->addGestureRecognizer(gesture);
@@ -151,22 +171,38 @@ void UINavigationController::apply(std::vector<std::shared_ptr<UIViewController>
         for(const auto& child:_controllers)if(child->parent().expired()){addChild(child);child->didMoveToParent(shared_from_this());}
         for(const auto& child:removed)child->willMoveToParent(nullptr);
         const auto direction=next==oldTop?0:(contains(previous,next)?-1:1);
-        if(viewIsLoaded()){layout();mount(direction,animated,std::move(removed));}
+        if(viewIsLoaded()){mount(direction,animated,std::move(removed));}
         else {for(const auto& child:removed)child->removeFromParent();finish();}
     }catch(...){_updating=false;_pending.clear();throw;}
 }
 void UINavigationController::mount(int direction,bool animated,std::vector<std::shared_ptr<UIViewController>> removed) {
     const auto next=topViewController(),previous=_displayed;
+    _scrollLayout->mounting=true;
+    struct MountGuard {bool& flag;~MountGuard(){flag=false;}} mounting{_scrollLayout->mounting};
+    // Resolve application configuration from loadView/viewDidLoad before
+    // taking the source/destination chrome snapshots for this transition.
+    if(next)next->loadViewIfNeeded();
     std::vector<std::shared_ptr<UINavigationItem>> items;for(const auto& child:_controllers)items.push_back(child->navigationItem());
     const bool animate=animated&&_visible&&previous&&next&&previous!=next&&_content->bounds().width()>0;
+    const auto previousBarFrame=_bar->frame();
+    if(next) {
+        auto& nextScrollState=_scrollLayout->screen(next);
+        const auto range=Internal::NavigationBarAccess::expandedAccessoryHeight(*_bar,next->navigationItem());
+        Internal::NavigationBarAccess::state(*_bar).accessoryOffset=nextScrollState.ready?std::max(0.f,range-nextScrollState.visible):0;
+    }
     Internal::NavigationBarAccess::setItems(*_bar,std::move(items),animated&&_visible,direction);
-    if(next==previous) {for(const auto& child:removed)child->removeFromParent();finish();return;}
+    if(next==previous) {_scrollLayout->mounting=false;layout();for(const auto& child:removed)child->removeFromParent();finish();return;}
     _displayed=next;
+    if(next)Internal::ViewControllerContentScrollAccess::observe(*next,shared_from_this(),[weak=weak_from_base<UINavigationController>(),child=std::weak_ptr<UIViewController>(next)] {
+        if(const auto self=weak.lock();self&&self->_displayed==child.lock()&&!self->_interactive)self->layout();
+    });
     const auto oldView=_displayedHost;
     const auto nextView=next?Internal::makeScrollPocketHost(next):nullptr;
     _outgoingHost=oldView;_displayedHost=nextView;
     const auto bounds=_content->bounds();
     if(nextView){nextView->setFrame(bounds);if(direction<0&&oldView)_content->insertSubviewBelow(nextView,oldView);else _content->addSubview(nextView);nextView->addSubview(next->view());next->view()->setFrame(bounds);Internal::updateScrollPocketHost(nextView);}
+    _scrollLayout->mounting=false;
+    layout();
     if(_visible) {
         if(previous)previous->viewWillDisappear(animated);
         if(next)next->viewWillAppear(animated);
@@ -175,6 +211,13 @@ void UINavigationController::mount(int direction,bool animated,std::vector<std::
     if(_visible&&next)if(const auto window=view()->window())window->focusSystem()->requestFocusUpdate(next);
     std::shared_ptr<UIView> dimming;
     if(animate) {beginNavigationCard(oldView);beginNavigationCard(nextView);dimming=new_shared<UIView>();dimming->setUserInteractionEnabled(false);dimming->setBackgroundColor(UIColor::black);dimming->setFrame(bounds);(direction<0?nextView:oldView)->addSubview(dimming);dimming->setAlpha(direction<0?0:.1f);}
+    if(animate&&previousBarFrame.height()!=_bar->frame().height()) {
+        auto resize=Internal::navigationAnimation("bounds");resize->duration=Internal::navigationContentDuration;
+        resize->fromValue=NXRect{{},previousBarFrame.size};resize->toValue=_bar->bounds();
+        resize->timingFunction=new_shared<CAMediaTimingFunction>([](double f){return f>=1?1.:Internal::navigationContentProgress(f*Internal::navigationContentDuration);});_bar->layer()->add(resize,"bounds");
+        auto position=Internal::navigationAnimation("position");position->duration=resize->duration;position->timingFunction=resize->timingFunction;
+        position->fromValue=NXPoint{previousBarFrame.midX(),previousBarFrame.midY()};position->toValue=_bar->layer()->position();_bar->layer()->add(position,"position");
+    }
     const auto weak=weak_from_base<UINavigationController>();const auto visible=_visible;
     auto completion=[weak,previous,next,oldView,nextView,dimming,removed=std::move(removed),visible,animated](bool) {
         const auto self=weak.lock();if(!self)return;
@@ -206,11 +249,88 @@ void UINavigationController::finish() {
     _updating=false;if(_appearanceTransition||_pending.empty())return;
     auto update=std::move(_pending.front());_pending.pop_front();apply(std::move(update.controllers),update.animated);
 }
-void UINavigationController::layout() {
-    if(!_bar||!_content)return;const auto bounds=view()->bounds();const auto safe=view()->safeAreaInsets();
+void UINavigationController::layout(bool scrolling) {
+    if(!_bar||!_content||_scrollLayout->layingOut||_scrollLayout->mounting)return;
+    _scrollLayout->layingOut=true;
+    struct Restore {bool& flag;~Restore(){flag=false;}} restore{_scrollLayout->layingOut};
+    const auto bounds=view()->bounds();const auto safe=view()->safeAreaInsets();
     if(_interactive&&_interactive->width!=bounds.width())endInteractivePop(false,0,false);
-    _content->setFrame(bounds);if(_displayedHost)_displayedHost->setFrame(_content->bounds());if(_outgoingHost)_outgoingHost->setFrame(_content->bounds());const auto height=_bar->sizeThatFits(bounds.size).height;_bar->setFrame({bounds.origin.x,_barHidden?-height:bounds.origin.y+safe.top,bounds.width(),height});_bar->setHidden(_barHidden);
-    for(const auto& child:_controllers){Internal::ViewControllerContainerAccess::setChildSafeAreaInsets(shared_from_this(),child,{_barHidden?0.0f:height,0,0,0});if(child->viewIsLoaded())child->view()->setFrame(_content->bounds());}
+    if(_interactive)return;
+    _content->setFrame(bounds);
+    if(_displayedHost)_displayedHost->setFrame(_content->bounds());
+    if(_outgoingHost)_outgoingHost->setFrame(_content->bounds());
+    const auto selected=_displayed;
+    auto scroll=selected&&!_barHidden&&Internal::NavigationBarAccess::expandedAccessoryHeight(*_bar,selected->navigationItem())>0?Internal::ViewControllerContentScrollAccess::resolvedContentScrollView(*selected,NSDirectionalRectEdge::top):nullptr;
+    if(const auto old=_scrollLayout->observed.lock();old!=scroll) {
+        if(old)Internal::ScrollViewContainerAccess::remove(*old,shared_from_this());
+        _scrollLayout->observed=scroll;
+        if(scroll) {
+            const auto weak=weak_from_base<UINavigationController>();
+            Internal::ScrollViewContainerAccess::observe(*scroll,shared_from_this(),[weak]{if(const auto self=weak.lock();self&&!self->_interactive)self->layout(true);},
+                [weak](NXPoint velocity,NXPoint& target,NXPoint& settlingRate) {
+                    const auto self=weak.lock();if(!self||self->_barHidden||self->_interactive||!self->_displayed)return;
+                    auto& screen=self->_scrollLayout->screen(self->_displayed);
+                    const auto proposed=target.y;
+                    target.y=Internal::NavigationBarAccess::state(*self->_bar).accessories.snap(target.y+screen.referenceInset,velocity.y)-screen.referenceInset;
+                    if(target.y!=proposed)if(const auto scroll=self->_scrollLayout->observed.lock()) {
+                        // Native held-release traces settle by exponential
+                        // relaxation: expansion is slower than contraction.
+                        // The public delegate still receives the finger velocity.
+                        settlingRate.y=target.y<scroll->contentOffset().y?12.1f:16.8f;
+                    }
+                },[weak](NXRect& limits) {
+                    const auto self=weak.lock();if(!self||self->_barHidden||!self->_displayed)return;
+                    const auto& screen=self->_scrollLayout->screen(self->_displayed);
+                    if(!screen.ready||screen.range<=0)return;
+                    const auto maximum=limits.maxY();limits.origin.y=std::min(limits.minY(),-screen.referenceInset);
+                    limits.size.height=std::max(0.f,maximum-limits.minY());
+                });
+        }
+    }
+    const auto inlineHeight=Internal::NavigationBarAccess::inlineHeight(*_bar);
+    NXFloat selectedVisible=0;
+    // Each screen retains its own inset and collapse position. A covered
+    // controller must not receive its successor's accessory geometry.
+    const auto children=_controllers;
+    for(const auto& child:children) {
+        auto& screen=_scrollLayout->screen(child);
+        const auto range=_barHidden?0:Internal::NavigationBarAccess::expandedAccessoryHeight(*_bar,child->navigationItem());
+        const bool changed=screen.range!=range;
+        auto childScroll=child->viewIsLoaded()?Internal::ViewControllerContentScrollAccess::resolvedContentScrollView(*child,NSDirectionalRectEdge::top):nullptr;
+        if(screen.scroll.lock()!=childScroll) {screen.scroll=childScroll;screen.ready=false;screen.visible=range;}
+        if(changed) {
+            const bool scrolled=screen.ready&&screen.range==0&&range>0&&childScroll&&childScroll->contentOffset().y+childScroll->adjustedContentInset().top>.5f;
+            screen.range=range;screen.visible=scrolled?0:range;screen.ready=scrolled;
+            if(scrolled)screen.referenceInset=childScroll->adjustedContentInset().top+range;
+        }
+        if(screen.ready&&childScroll&&child==selected&&!_interactive) {
+            screen.referenceInset=childScroll->adjustedContentInset().top+screen.range-screen.visible;
+            screen.visible=screen.range-std::clamp(childScroll->contentOffset().y+screen.referenceInset,0.f,screen.range);
+        }
+        const auto update=[&]{
+            Internal::ViewControllerContainerAccess::setChildSafeAreaInsets(shared_from_this(),child,{_barHidden?0.f:inlineHeight+screen.visible,0,0,0});
+            if(child->viewIsLoaded()&&child->view()->superview().lock()) {
+                child->view()->setFrame(_content->bounds());child->view()->layoutIfNeeded();
+            }
+        };
+        if(childScroll&&screen.ready&&!changed&&scrolling&&child==selected)Internal::ScrollViewContainerAccess::updateInsets(*childScroll,update);
+        else update();
+        if(_displayed!=selected){view()->setNeedsLayout();return;}
+        if(childScroll&&!screen.ready&&child->view()->superview().lock()) {
+            screen.referenceInset=childScroll->adjustedContentInset().top;
+            screen.ready=true;
+            const auto visible=screen.range-std::clamp(childScroll->contentOffset().y+screen.referenceInset,0.f,screen.range);
+            if(screen.visible!=visible){screen.visible=visible;Internal::ScrollViewContainerAccess::updateInsets(*childScroll,update);}
+        }
+        if(child==selected)selectedVisible=screen.visible;
+    }
+    if(selected) {
+        const auto& screen=_scrollLayout->screen(selected);
+        Internal::NavigationBarAccess::setAccessoryOffset(*_bar,screen.range-selectedVisible);
+    }
+    const auto height=inlineHeight+selectedVisible;
+    _bar->setFrame({bounds.origin.x,_barHidden?-height:bounds.origin.y+safe.top,bounds.width(),height});_bar->setHidden(_barHidden);
+    _bar->layoutIfNeeded();
     Internal::updateScrollPocketHost(_displayedHost);Internal::updateScrollPocketHost(_outgoingHost);
 }
 void UINavigationController::setNavigationBarHidden(bool hidden,bool animated) {
@@ -261,7 +381,19 @@ void UINavigationController::beginInteractivePop() {
     // the baseline afterwards so those never inherit our reversible clock.
     state.timeline=std::make_unique<Internal::LayerAnimationTimeline>(view()->layer(),interactiveSpan);
     std::vector<std::shared_ptr<UINavigationItem>> items;for(const auto& child:_controllers)items.push_back(child->navigationItem());
-    Internal::NavigationBarAccess::beginInteractivePop(*_bar,std::move(items),interactiveSpan);
+    const auto oldBarFrame=_bar->frame();
+    auto& targetMetrics=_scrollLayout->screen(state.target);
+    if(!targetMetrics.ready) {targetMetrics.range=Internal::NavigationBarAccess::expandedAccessoryHeight(*_bar,state.target->navigationItem());targetMetrics.visible=targetMetrics.range;}
+    Internal::NavigationBarAccess::beginInteractivePop(*_bar,std::move(items),interactiveSpan,targetMetrics.range-targetMetrics.visible);
+    const auto newHeight=Internal::NavigationBarAccess::inlineHeight(*_bar)+targetMetrics.visible;
+    UIView::performWithoutAnimation([&]{_bar->setFrame({oldBarFrame.minX(),oldBarFrame.minY(),oldBarFrame.width(),newHeight});});
+    const auto barLinear=new_shared<CAMediaTimingFunction>([](double f){return f;});
+    for(const auto* key:{"bounds","position"}) {
+        auto resize=Internal::navigationAnimation(key);resize->duration=interactiveSpan;resize->timingFunction=barLinear;
+        if(std::string(key)=="bounds"){resize->fromValue=NXRect{{},oldBarFrame.size};resize->toValue=_bar->bounds();}
+        else {resize->fromValue=NXPoint{oldBarFrame.midX(),oldBarFrame.midY()};resize->toValue=_bar->layer()->position();}
+        _bar->layer()->add(resize,key);
+    }
     UIView::performWithoutAnimation([&]{state.sourceHost->setTransform(NXAffineTransform::translationBy(state.width,0));state.targetHost->setTransform(NXAffineTransform::identity);state.dimming->setAlpha(0);});
     const auto linear=new_shared<CAMediaTimingFunction>([](double f){return f;});
     for(const auto& host:{state.sourceHost,state.targetHost}) {
@@ -287,7 +419,11 @@ void UINavigationController::endInteractivePop(bool commit,NXFloat velocity,bool
     if(state.settling){if(!animated)finishInteractivePop(state.commit);return;}
     state.settling=true;state.commit=commit;state.ending=true;
     if(_interactive.get()!=&state)return;
-    if(commit)Internal::NavigationBarAccess::endInteractivePop(*_bar,true,state.timeline->progress());
+    if(commit) {
+        const auto& metrics=_scrollLayout->screen(state.target);
+        Internal::NavigationBarAccess::state(*_bar).accessoryOffset=metrics.range-metrics.visible;
+        Internal::NavigationBarAccess::endInteractivePop(*_bar,true,state.timeline->progress());
+    }
     state.ending=false;
     if(!animated||state.finishImmediately){finishInteractivePop(commit);return;}
     const auto progress=state.timeline->progress(),distance=std::abs((commit?1.:0.)-progress);
@@ -321,6 +457,7 @@ void UINavigationController::finishInteractivePop(bool commit) {
     }
     endNavigationCard(state->sourceHost);endNavigationCard(state->targetHost);
     _outgoingHost.reset();
+    layout();
     const auto shown=commit?state->target:state->source;
     if(commit){state->source->viewDidDisappear(true);state->target->viewDidAppear(true);}
     else {

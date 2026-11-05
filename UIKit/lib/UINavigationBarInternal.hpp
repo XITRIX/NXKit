@@ -5,6 +5,7 @@
 #include <UIControl.h>
 #include <UILabel.h>
 #include <UIImageView.h>
+#include "NavigationBarAccessory.hpp"
 namespace NXKit::Internal {
 struct NavigationButton {
     std::shared_ptr<UIBarButtonItem> item;
@@ -35,6 +36,14 @@ struct NavigationBarState {
     std::shared_ptr<GlassContainerView> glass;
     std::shared_ptr<UILabel> title;
     std::shared_ptr<UIView> titleInk;
+    std::shared_ptr<UILabel> largeTitle,largeTitleMeasure;
+    NXFloat largeTitleRowHeight=0,largeTitleFittedWidth=-1;
+    std::string largeTitleSource;
+    std::shared_ptr<UIView> largeTitleClip;
+    NavigationBarAccessoryLayout accessories;
+    bool prefersLargeTitles=false;
+    NXFloat accessoryOffset=0;
+    std::function<void()> metricsChanged;
     std::weak_ptr<UINavigationItem> renderedItem;
     std::shared_ptr<UIView> customTitle;
     std::shared_ptr<UIBarButtonItem> backButton;
@@ -45,7 +54,8 @@ struct NavigationBarState {
     size_t revision=0,generation=0;
     std::optional<std::vector<std::shared_ptr<UINavigationItem>>> interactiveSource;
     std::shared_ptr<UIView> interactiveTitle;
-    std::shared_ptr<UILabel> interactiveTitleLabel;
+    std::shared_ptr<UILabel> interactiveTitleLabel,interactiveLargeTitle;
+    std::shared_ptr<UIView> interactiveLargeTitleClip;
     std::weak_ptr<UIView> interactiveRetiringTitle;
     double interactiveHandoff=-1;
 };
@@ -53,7 +63,11 @@ class NavigationBarAccess {
 public:
     static auto& state(UINavigationBar& bar) {return *bar._state;}
     static void setItems(UINavigationBar& bar,std::vector<std::shared_ptr<UINavigationItem>> items,bool animated,int direction) {bar.install(std::move(items),animated,direction);}
-    static void beginInteractivePop(UINavigationBar&,std::vector<std::shared_ptr<UINavigationItem>>,double span);
+    static bool requestsLargeTitle(const UINavigationBar& bar,const std::shared_ptr<UINavigationItem>& item);
+    static NXFloat inlineHeight(const UINavigationBar& bar);
+    static NXFloat expandedAccessoryHeight(UINavigationBar& bar,const std::shared_ptr<UINavigationItem>& item);
+    static void setAccessoryOffset(UINavigationBar& bar,NXFloat offset) {bar._state->accessoryOffset=offset;bar.arrange();}
+    static void beginInteractivePop(UINavigationBar&,std::vector<std::shared_ptr<UINavigationItem>>,double span,NXFloat accessoryOffset=0);
     static void endInteractivePop(UINavigationBar&,bool commit,double progress);
     static void finishInteractivePop(UINavigationBar&);
 };

@@ -12,8 +12,8 @@ public:
     virtual bool navigationBarShouldPopItem(const std::shared_ptr<UINavigationBar>&,const std::shared_ptr<UINavigationItem>&) {return true;}
     virtual void navigationBarDidPopItem(const std::shared_ptr<UINavigationBar>&,const std::shared_ptr<UINavigationItem>&) {}
 };
-/** Apple-style inline navigation bar with animated shared button backgrounds.
-    Large titles, appearance objects and search integration remain unimplemented. */
+/** Apple-style navigation bar with shared glass items and collapsible large titles.
+    Appearance objects and search integration remain unimplemented. */
 class UINavigationBar : public UIView {
 public:
     static std::shared_ptr<UIView> init() {return new_shared<UINavigationBar>();}
@@ -27,6 +27,9 @@ public:
     std::shared_ptr<UINavigationItem> popNavigationItem(bool animated);
     [[nodiscard]] std::shared_ptr<UINavigationBarDelegate> delegate() const;
     void setDelegate(std::shared_ptr<UINavigationBarDelegate> delegate);
+    [[nodiscard]] bool prefersLargeTitles() const;
+    void setPrefersLargeTitles(bool prefers);
+    bool applyXMLAttribute(const std::string& name,const std::string& value) override;
     void layoutSubviews() override;
     void tintColorDidChange() override;
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previous) override;
