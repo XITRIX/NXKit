@@ -1,0 +1,4 @@
+[
+  {"id":"filter-inputs-slider","hold":1.0,"dark":false,"filters":true},
+  {"id":"filter-inputs-switch","hold":1.0,"dark":false,"filters":true,"control":"switch"}
+]

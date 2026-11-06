@@ -1,0 +1,8 @@
+[
+  {"id":"phone-dark-black","phoneTabs":true,"target":"tabs","dark":true,"backgroundRGB":[0,0,0],"selected":2,"startNormalized":[0.606,0.37],"dx":12,"velocity":80,"holdBefore":1,"holdAfter":0.5,"snapshots":true},
+  {"id":"phone-light-gray","phoneTabs":true,"target":"tabs","dark":false,"backgroundRGB":[242,242,247],"selected":2,"startNormalized":[0.606,0.37],"dx":12,"velocity":80,"holdBefore":1,"holdAfter":0.5,"snapshots":true},
+  {"id":"phone-dark-blue","phoneTabs":true,"target":"tabs","dark":true,"backgroundRGB":[31,94,184],"selected":2,"startNormalized":[0.606,0.37],"dx":12,"velocity":80,"holdBefore":1,"holdAfter":0.5,"snapshots":true},
+  {"id":"phone-light-blue","phoneTabs":true,"target":"tabs","dark":false,"backgroundRGB":[31,94,184],"selected":2,"startNormalized":[0.606,0.37],"dx":12,"velocity":80,"holdBefore":1,"holdAfter":0.5,"snapshots":true},
+  {"id":"phone-dark-brown","phoneTabs":true,"target":"tabs","dark":true,"backgroundRGB":[75,47,15],"selected":2,"startNormalized":[0.606,0.37],"dx":12,"velocity":80,"holdBefore":1,"holdAfter":0.5,"snapshots":true},
+  {"id":"phone-light-brown","phoneTabs":true,"target":"tabs","dark":false,"backgroundRGB":[75,47,15],"selected":2,"startNormalized":[0.606,0.37],"dx":12,"velocity":80,"holdBefore":1,"holdAfter":0.5,"snapshots":true}
+]

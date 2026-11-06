@@ -1,0 +1,69 @@
+{
+  "abi": "cb64e4205e5561624c44c98d05f3364671aa722e75caf9923a7f66caaa948b3d",
+  "device": "Apple iOS simulator GPU",
+  "languageVersion": "metal2.3",
+  "os": "Version 27.0 (Build 24A434)",
+  "additionalRawStateCatalogs": [
+    {
+      "abi": "5f51a676286acb9a02622e5cf2f3e61eff601e336081c67a1f2944794ffa3d03",
+      "manifestSHA256": "363b915570a33978f44650bf9b63a56936ec691f92dff24bf244e556b74d8279",
+      "pipelineDescriptionSHA256": "9a6d786e617f39a1360537905bd05f0984f164d27d56b165b24463fdf3138a5f",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "27c8394abb40126ca17a7d869455bc6a63ce6b8481f0936a462a37c4ae4f996f",
+      "manifestSHA256": "9f3c42293b23267a11437dfc63207912ec8bf02726e64e9b0b2e2d7678747d82",
+      "pipelineDescriptionSHA256": "79ce8d827f3ccef35173712d63f3a8ca2e0fff40d3d7bc4b5398f5a9b47506ea",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "c78fc912ed8cbcd843e0748fc5211bf43317e162831f02232582f5427e07bdc4",
+      "manifestSHA256": "681bb1ee549355ad39805a899c18cda214c7034d55fa6525ffac6ba72fc06ae9",
+      "pipelineDescriptionSHA256": "bdfb2288f9e71f532f52470cea840042e9279e892d3e41d81413ab2b18469cad",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "f9a3f30f93bf6d307d19cce70f2919f64bfcaa6f265ebb49f4cb4bc0c76cf136",
+      "manifestSHA256": "c9fce5d709792ab3e83c94a1e635d8312bd600e59412149786e7bb99adeed88e",
+      "pipelineDescriptionSHA256": "7713dabaf9011788a4efb27bdd936e8a33182bc7cc8580612c9025dc69dc147b",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "cb0a46ba7dae63f64cbc04f85bb844a163c92c993fa6553a458fc4a046b284b6",
+      "manifestSHA256": "cf66dcb9218cafe4ac48decda65bd59d625854d9fdb464e23d6c1e27cbce6160",
+      "pipelineDescriptionSHA256": "117a54135576d56341ab823f8ac4f9900e84e222036512a1f3fe253aa98d8bc2",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "cb0a46ba7dae63f64cbc04f85bb844a163c92c993fa6553a458fc4a046b284b6",
+      "manifestSHA256": "afe0861369f31291591187df36f37387c7d05259a68fd6cc4d5fc0036618d5f0",
+      "pipelineDescriptionSHA256": "117a54135576d56341ab823f8ac4f9900e84e222036512a1f3fe253aa98d8bc2",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "9c5e50407a2ad83b12dbc1a8b5ccfedfe4721288e0aca41c27fb3496d731b06e",
+      "manifestSHA256": "1e40a81bf6f09271ca5c97b218f43e2ad8ae0c65f4cec3888fd5c4f8b9564e63",
+      "pipelineDescriptionSHA256": "117a54135576d56341ab823f8ac4f9900e84e222036512a1f3fe253aa98d8bc2",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "cb64e4205e5561624c44c98d05f3364671aa722e75caf9923a7f66caaa948b3d",
+      "manifestSHA256": "a45b352a8d4b941bcbbcce325bbc87952f01247e2c4d478a59256900e02801d5",
+      "pipelineDescriptionSHA256": "117a54135576d56341ab823f8ac4f9900e84e222036512a1f3fe253aa98d8bc2",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    }
+  ],
+  "coverage": {
+    "fixture": "Demo/GlassComparison/SimulatorGlassBlurTests.mm --slider-only",
+    "cases": 360,
+    "lens": {
+      "fixture": "SimulatorGlassBlurTests --lens-only",
+      "semanticCases": 48,
+      "boundedCases": 480,
+      "liftedCases": 48
+    },
+    "navigation": "MetalNavigationBenchmark --quick --passes 2 --catalog --interactive",
+    "freshLibraries": 51,
+    "freshPipelines": 37
+  }
+}

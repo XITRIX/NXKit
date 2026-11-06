@@ -1,0 +1,21 @@
+#import <XCTest/XCTest.h>
+#import <objc/message.h>
+#import <objc/runtime.h>
+@interface LiftUITests:XCTestCase @end
+@implementation LiftUITests
+- (void)contacts:(NSArray *)contacts at:(XCUICoordinate *)coordinate{
+    Class pathClass=NSClassFromString(@"XCPointerEventPath"),recordClass=NSClassFromString(@"XCSynthesizedEventRecord");
+    SEL initialize=NSSelectorFromString(@"initForTouchAtPoint:offset:"),lift=NSSelectorFromString(@"liftUpAtOffset:"),recordInit=NSSelectorFromString(@"initWithName:interfaceOrientation:"),add=NSSelectorFromString(@"addPointerEventPath:"),getter=NSSelectorFromString(@"eventSynthesizer"),send=NSSelectorFromString(@"synthesizeEvent:completion:");
+    for(NSArray *pair in @[@[pathClass?:NSObject.class,NSStringFromSelector(initialize)],@[pathClass?:NSObject.class,NSStringFromSelector(lift)],@[recordClass?:NSObject.class,NSStringFromSelector(recordInit)],@[recordClass?:NSObject.class,NSStringFromSelector(add)]]){Method method=class_getInstanceMethod(pair[0],NSSelectorFromString(pair[1]));XCTAssertNotEqual(method,NULL);NSLog(@"LIFT_EVENT_ABI %@ %@ %s",NSStringFromClass(pair[0]),pair[1],method?method_getTypeEncoding(method):"missing");}
+    id record=((id(*)(id,SEL,id,NSInteger))objc_msgSend)([recordClass alloc],recordInit,@"Native stationary slider contacts",UIInterfaceOrientationPortrait);
+    for(NSArray *contact in contacts){id path=((id(*)(id,SEL,CGPoint,double))objc_msgSend)([pathClass alloc],initialize,coordinate.screenPoint,[contact[0] doubleValue]);((void(*)(id,SEL,double))objc_msgSend)(path,lift,[contact[1] doubleValue]);((void(*)(id,SEL,id))objc_msgSend)(record,add,path);}
+    XCTAssertTrue([XCUIDevice.sharedDevice respondsToSelector:getter]);id synthesizer=((id(*)(id,SEL))objc_msgSend)(XCUIDevice.sharedDevice,getter);Method method=class_getInstanceMethod([synthesizer class],send);XCTAssertNotEqual(method,NULL);NSLog(@"LIFT_EVENT_ABI %@ %@ %s",NSStringFromClass([synthesizer class]),NSStringFromSelector(send),method?method_getTypeEncoding(method):"missing");
+    XCTestExpectation *done=[self expectationWithDescription:@"Real OS contact sequence completed"];((void(*)(id,SEL,id,id))objc_msgSend)(synthesizer,send,record,^(BOOL success,NSError *error){XCTAssertTrue(success);XCTAssertNil(error);[done fulfill];});[self waitForExpectations:@[done] timeout:15];
+}
+- (void)testLiftMotion{
+    self.continueAfterFailure=NO;NSURL *url=[[NSBundle bundleForClass:self.class] URLForResource:@"Cases" withExtension:@"json"];NSArray *cases=[NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:url] options:0 error:nil];
+    for(NSDictionary *configuration in cases){XCUIApplication *app=[[XCUIApplication alloc] initWithBundleIdentifier:@"org.nxkit.SliderLiftReference"];app.launchEnvironment=@{@"SLIDER_CASE":[[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:configuration options:0 error:nil] encoding:NSUTF8StringEncoding]};[app launch];XCUIElement *slider=app.sliders[@"slider"];XCTAssertTrue([slider waitForExistenceWithTimeout:10]);XCUICoordinate *center=[slider coordinateWithNormalizedOffset:CGVectorMake(.280833333333,.5)];
+        if(configuration[@"contacts"])[self contacts:configuration[@"contacts"] at:center];else if([configuration[@"tap"] boolValue])[center tap];else[center pressForDuration:[configuration[@"hold"] doubleValue]];
+        XCTNSPredicateExpectation *finished=[[XCTNSPredicateExpectation alloc] initWithPredicate:[NSPredicate predicateWithFormat:@"label == 'complete'"] object:app.staticTexts[@"status"]];XCTAssertEqual([XCTWaiter waitForExpectations:@[finished] timeout:8],XCTWaiterResultCompleted);NSLog(@"LIFT_CASE_COMPLETE %@",configuration[@"id"]);[app terminate];}
+}
+@end

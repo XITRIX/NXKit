@@ -1,0 +1,7910 @@
+{
+  "configuration" : {
+    "id" : "light",
+    "dark" : false
+  },
+  "cases" : [
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        63,
+        -2,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      100,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      100,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  7,
+                  100,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  100,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  -2,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              100,
+              20
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              100,
+              20
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          100,
+          20
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          100,
+          20
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        7,
+        100,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        100,
+        20
+      ],
+      "id" : "plain-100x20",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        32,
+        -2,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        -2,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        63,
+        4,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      100,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      100,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  12.5,
+                  100,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  100,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  4,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              100,
+              31
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              100,
+              31
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          100,
+          31
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          100,
+          31
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        12.5,
+        100,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        100,
+        31
+      ],
+      "id" : "plain-100x31",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        32,
+        4,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        4,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        63,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      100,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      100,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  100,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  100,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              100,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              100,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          100,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          100,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        100,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        100,
+        50
+      ],
+      "id" : "plain-100x50",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        32,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        63,
+        28,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      100,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      100,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  37,
+                  100,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  100,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  28,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              100,
+              80
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              100,
+              80
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          100,
+          80
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          100,
+          80
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        37,
+        100,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        100,
+        80
+      ],
+      "id" : "plain-100x80",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        32,
+        28,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        28,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        163,
+        -2,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      200,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      200,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  7,
+                  200,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  200,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  -2,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              200,
+              20
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              200,
+              20
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          200,
+          20
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          200,
+          20
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        7,
+        200,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        200,
+        20
+      ],
+      "id" : "plain-200x20",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        82,
+        -2,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        -2,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        163,
+        4,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      200,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      200,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  12.5,
+                  200,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  200,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  4,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              200,
+              31
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              200,
+              31
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          200,
+          31
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          200,
+          31
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        12.5,
+        200,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        200,
+        31
+      ],
+      "id" : "plain-200x31",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        82,
+        4,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        4,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        163,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      200,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      200,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  200,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  200,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              200,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              200,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          200,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          200,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        200,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        200,
+        50
+      ],
+      "id" : "plain-200x50",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        82,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        163,
+        28,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      200,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      200,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  37,
+                  200,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  200,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  28,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              200,
+              80
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              200,
+              80
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          200,
+          80
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          200,
+          80
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        37,
+        200,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        200,
+        80
+      ],
+      "id" : "plain-200x80",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        82,
+        28,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        28,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        -2,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  7,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  -2,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              20
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              20
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          20
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          20
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        7,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        20
+      ],
+      "id" : "plain-300x20",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        -2,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        -2,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        4,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  12.5,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  4,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              31
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              31
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          31
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          31
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        12.5,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        31
+      ],
+      "id" : "plain-300x31",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        4,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        4,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "plain-300x50",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        28,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  37,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  28,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              80
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              80
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          80
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          80
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        37,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        80
+      ],
+      "id" : "plain-300x80",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        28,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        28,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        403,
+        -2,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      440,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      440,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  7,
+                  440,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  440,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  -2,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              440,
+              20
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              440,
+              20
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          440,
+          20
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          440,
+          20
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        7,
+        440,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        440,
+        20
+      ],
+      "id" : "plain-440x20",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        202,
+        -2,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        -2,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        403,
+        4,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      440,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      440,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  12.5,
+                  440,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  440,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  4,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              440,
+              31
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              440,
+              31
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          440,
+          31
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          440,
+          31
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        12.5,
+        440,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        440,
+        31
+      ],
+      "id" : "plain-440x31",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        202,
+        4,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        4,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        403,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      440,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      440,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  440,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  440,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              440,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              440,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          440,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          440,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        440,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        440,
+        50
+      ],
+      "id" : "plain-440x50",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        202,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        403,
+        28,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      440,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      440,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  37,
+                  440,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  440,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  28,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              440,
+              80
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              440,
+              80
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          440,
+          80
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          440,
+          80
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        37,
+        440,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        440,
+        80
+      ],
+      "id" : "plain-440x80",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        202,
+        28,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        28,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  66,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "default",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "explicit-zero",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  263,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "explicit-one",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 1,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  66,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 0.5,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "disabled",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "enabled" : false,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  66,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "highlighted",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  66,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "selected",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 1,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      7
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      7
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      75,
+                      7
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      75,
+                      7
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  21.5,
+                  300,
+                  7
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  7
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        21.5,
+        300,
+        7
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "thumbless",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        15,
+        18,
+        20
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      271,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      271,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      77,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      77,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  29,
+                  22,
+                  271,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  271,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  88,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+
+                ],
+                "frame" : [
+                  0,
+                  15,
+                  18,
+                  20
+                ],
+                "alpha" : 1,
+                "class" : "UIImageView",
+                "bounds" : [
+                  0,
+                  0,
+                  18,
+                  20
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        29,
+        22,
+        271,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "min-image",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        146,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        29,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        226,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      263,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      263,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      75,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      75,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  263,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  263,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  57,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+
+                ],
+                "frame" : [
+                  274,
+                  13,
+                  26,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "UIImageView",
+                "bounds" : [
+                  0,
+                  0,
+                  26,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        263,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "max-image",
+      "maxImageRect" : [
+        274,
+        13,
+        26,
+        24
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        113,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        15,
+        18,
+        20
+      ],
+      "thumbAt1" : [
+        226,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      234,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      234,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      67.75,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      67.75,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  29,
+                  22,
+                  234,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  234,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  78,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+
+                ],
+                "frame" : [
+                  0,
+                  15,
+                  18,
+                  20
+                ],
+                "alpha" : 1,
+                "class" : "UIImageView",
+                "bounds" : [
+                  0,
+                  0,
+                  18,
+                  20
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+
+                ],
+                "frame" : [
+                  274,
+                  13,
+                  26,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "UIImageView",
+                "bounds" : [
+                  0,
+                  0,
+                  26,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        29,
+        22,
+        234,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "both-images",
+      "maxImageRect" : [
+        274,
+        13,
+        26,
+        24
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        128,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        29,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        270,
+        5,
+        30,
+        40
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      82.5,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      82.5,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          30,
+                          40
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          30,
+                          40
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIImageView",
+                    "bounds" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  68,
+                  5,
+                  30,
+                  40
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  30,
+                  40
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "thumb-image",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        135,
+        5,
+        30,
+        40
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        5,
+        30,
+        40
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        270,
+        5,
+        30,
+        40
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      82.5,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      82.5,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          30,
+                          40
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          30,
+                          40
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIImageView",
+                    "bounds" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  68,
+                  5,
+                  30,
+                  40
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  30,
+                  40
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "thumb-image-highlighted",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        135,
+        5,
+        30,
+        40
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        5,
+        30,
+        40
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        270,
+        5,
+        30,
+        40
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      82.5,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      82.5,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          30,
+                          40
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          30,
+                          40
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIImageView",
+                    "bounds" : [
+                      0,
+                      0,
+                      30,
+                      40
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  68,
+                  5,
+                  30,
+                  40
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  30,
+                  40
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 0.5,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "thumb-image-disabled",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        135,
+        5,
+        30,
+        40
+      ],
+      "enabled" : false,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        5,
+        30,
+        40
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        145,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      150,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      150,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  132,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 10,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "range",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        138,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "minimum" : -10,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 2,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "collapsed-range",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 2,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 2,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 2,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "min-above-max",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 2,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 2,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      0,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : -2,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "max-below-min",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : -2,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : -2,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  66,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "ticks",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    },
+    {
+      "style" : 0,
+      "minImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thumbAt1" : [
+        263,
+        13,
+        37,
+        24
+      ],
+      "tree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "children" : [
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      300,
+                      6
+                    ],
+                    "hidden" : false
+                  },
+                  {
+                    "children" : [
+
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      84.25,
+                      6
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  0,
+                  22,
+                  300,
+                  6
+                ],
+                "alpha" : 1,
+                "class" : "UIView",
+                "bounds" : [
+                  0,
+                  0,
+                  300,
+                  6
+                ],
+                "hidden" : false
+              },
+              {
+                "children" : [
+                  {
+                    "children" : [
+                      {
+                        "children" : [
+
+                        ],
+                        "frame" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "alpha" : 1,
+                        "class" : "UIView",
+                        "bounds" : [
+                          0,
+                          0,
+                          37,
+                          24
+                        ],
+                        "hidden" : false
+                      }
+                    ],
+                    "frame" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "alpha" : 1,
+                    "class" : "UIView",
+                    "bounds" : [
+                      0,
+                      0,
+                      37,
+                      24
+                    ],
+                    "hidden" : false
+                  }
+                ],
+                "frame" : [
+                  66,
+                  13,
+                  37,
+                  24
+                ],
+                "alpha" : 1,
+                "class" : "_UILiquidLensView",
+                "bounds" : [
+                  0,
+                  0,
+                  37,
+                  24
+                ],
+                "hidden" : false
+              }
+            ],
+            "frame" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "alpha" : 1,
+            "class" : "UIKit._UISliderGlassVisualElement",
+            "bounds" : [
+              0,
+              0,
+              300,
+              50
+            ],
+            "hidden" : false
+          }
+        ],
+        "frame" : [
+          80,
+          300,
+          300,
+          50
+        ],
+        "alpha" : 1,
+        "class" : "UISlider",
+        "bounds" : [
+          0,
+          0,
+          300,
+          50
+        ],
+        "hidden" : false
+      },
+      "maximum" : 1,
+      "currentMinImage" : [
+
+      ],
+      "currentThumbImage" : [
+
+      ],
+      "track" : [
+        0,
+        22,
+        300,
+        6
+      ],
+      "bounds" : [
+        0,
+        0,
+        300,
+        50
+      ],
+      "id" : "tinted",
+      "maxImageRect" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "continuous" : true,
+      "thumbAtHalf" : [
+        132,
+        13,
+        37,
+        24
+      ],
+      "enabled" : true,
+      "value" : 0.25,
+      "currentMaxImage" : [
+
+      ],
+      "intrinsic" : [
+        -1,
+        34
+      ],
+      "thumbAt0" : [
+        0,
+        13,
+        37,
+        24
+      ],
+      "minimum" : 0,
+      "sizeThatFits" : [
+        300,
+        34
+      ]
+    }
+  ],
+  "os" : "Version 27.0 (Build 24A434)",
+  "tickDefaults" : {
+    "tickPositions" : [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "allowsTickValuesOnly" : true,
+    "neutralValue" : 0,
+    "minimumEnabledValue" : 0,
+    "maximumEnabledValue" : 1
+  },
+  "scale" : 3
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "endpoint-drag-light",
+    "dark": false,
+    "edgeSweep": true
+  },
+  {
+    "id": "endpoint-drag-dark",
+    "dark": true,
+    "edgeSweep": true
+  }
+]

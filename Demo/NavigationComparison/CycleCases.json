@@ -1,0 +1,2018 @@
+[
+  {
+    "name": "push--1-0-light",
+    "source": -1,
+    "target": 0,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push--1-1-light",
+    "source": -1,
+    "target": 1,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push--1-2-light",
+    "source": -1,
+    "target": 2,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push--1-3-light",
+    "source": -1,
+    "target": 3,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push--1-4-light",
+    "source": -1,
+    "target": 4,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push--1-5-light",
+    "source": -1,
+    "target": 5,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push--1-6-light",
+    "source": -1,
+    "target": 6,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push--1-7-light",
+    "source": -1,
+    "target": 7,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-0-0-light",
+    "source": 0,
+    "target": 0,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-0-1-light",
+    "source": 0,
+    "target": 1,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-0-2-light",
+    "source": 0,
+    "target": 2,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-0-3-light",
+    "source": 0,
+    "target": 3,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-0-4-light",
+    "source": 0,
+    "target": 4,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-0-5-light",
+    "source": 0,
+    "target": 5,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-0-6-light",
+    "source": 0,
+    "target": 6,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-0-7-light",
+    "source": 0,
+    "target": 7,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-1-0-light",
+    "source": 1,
+    "target": 0,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-1-1-light",
+    "source": 1,
+    "target": 1,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-1-2-light",
+    "source": 1,
+    "target": 2,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-1-3-light",
+    "source": 1,
+    "target": 3,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-1-4-light",
+    "source": 1,
+    "target": 4,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-1-5-light",
+    "source": 1,
+    "target": 5,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-1-6-light",
+    "source": 1,
+    "target": 6,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-1-7-light",
+    "source": 1,
+    "target": 7,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-2-0-light",
+    "source": 2,
+    "target": 0,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-2-1-light",
+    "source": 2,
+    "target": 1,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-2-2-light",
+    "source": 2,
+    "target": 2,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-2-3-light",
+    "source": 2,
+    "target": 3,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-2-4-light",
+    "source": 2,
+    "target": 4,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-2-5-light",
+    "source": 2,
+    "target": 5,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-2-6-light",
+    "source": 2,
+    "target": 6,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-2-7-light",
+    "source": 2,
+    "target": 7,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-3-0-light",
+    "source": 3,
+    "target": 0,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-3-1-light",
+    "source": 3,
+    "target": 1,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-3-2-light",
+    "source": 3,
+    "target": 2,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-3-3-light",
+    "source": 3,
+    "target": 3,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-3-4-light",
+    "source": 3,
+    "target": 4,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-3-5-light",
+    "source": 3,
+    "target": 5,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-3-6-light",
+    "source": 3,
+    "target": 6,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-3-7-light",
+    "source": 3,
+    "target": 7,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-4-0-light",
+    "source": 4,
+    "target": 0,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-4-1-light",
+    "source": 4,
+    "target": 1,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-4-2-light",
+    "source": 4,
+    "target": 2,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-4-3-light",
+    "source": 4,
+    "target": 3,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-4-4-light",
+    "source": 4,
+    "target": 4,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-4-5-light",
+    "source": 4,
+    "target": 5,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-4-6-light",
+    "source": 4,
+    "target": 6,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-4-7-light",
+    "source": 4,
+    "target": 7,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-5-0-light",
+    "source": 5,
+    "target": 0,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-5-1-light",
+    "source": 5,
+    "target": 1,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-5-2-light",
+    "source": 5,
+    "target": 2,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-5-3-light",
+    "source": 5,
+    "target": 3,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-5-4-light",
+    "source": 5,
+    "target": 4,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-5-5-light",
+    "source": 5,
+    "target": 5,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-5-6-light",
+    "source": 5,
+    "target": 6,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-5-7-light",
+    "source": 5,
+    "target": 7,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-6-0-light",
+    "source": 6,
+    "target": 0,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-6-1-light",
+    "source": 6,
+    "target": 1,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-6-2-light",
+    "source": 6,
+    "target": 2,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-6-3-light",
+    "source": 6,
+    "target": 3,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-6-4-light",
+    "source": 6,
+    "target": 4,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-6-5-light",
+    "source": 6,
+    "target": 5,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-6-6-light",
+    "source": 6,
+    "target": 6,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-6-7-light",
+    "source": 6,
+    "target": 7,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-7-0-light",
+    "source": 7,
+    "target": 0,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-7-1-light",
+    "source": 7,
+    "target": 1,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-7-2-light",
+    "source": 7,
+    "target": 2,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-7-3-light",
+    "source": 7,
+    "target": 3,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-7-4-light",
+    "source": 7,
+    "target": 4,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-7-5-light",
+    "source": 7,
+    "target": 5,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-7-6-light",
+    "source": 7,
+    "target": 6,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "push-7-7-light",
+    "source": 7,
+    "target": 7,
+    "pop": false,
+    "dark": false
+  },
+  {
+    "name": "pop-0--1-light",
+    "source": 0,
+    "target": -1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-0-0-light",
+    "source": 0,
+    "target": 0,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-0-1-light",
+    "source": 0,
+    "target": 1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-0-2-light",
+    "source": 0,
+    "target": 2,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-0-3-light",
+    "source": 0,
+    "target": 3,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-0-4-light",
+    "source": 0,
+    "target": 4,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-0-5-light",
+    "source": 0,
+    "target": 5,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-0-6-light",
+    "source": 0,
+    "target": 6,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-0-7-light",
+    "source": 0,
+    "target": 7,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-1--1-light",
+    "source": 1,
+    "target": -1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-1-0-light",
+    "source": 1,
+    "target": 0,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-1-1-light",
+    "source": 1,
+    "target": 1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-1-2-light",
+    "source": 1,
+    "target": 2,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-1-3-light",
+    "source": 1,
+    "target": 3,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-1-4-light",
+    "source": 1,
+    "target": 4,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-1-5-light",
+    "source": 1,
+    "target": 5,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-1-6-light",
+    "source": 1,
+    "target": 6,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-1-7-light",
+    "source": 1,
+    "target": 7,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-2--1-light",
+    "source": 2,
+    "target": -1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-2-0-light",
+    "source": 2,
+    "target": 0,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-2-1-light",
+    "source": 2,
+    "target": 1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-2-2-light",
+    "source": 2,
+    "target": 2,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-2-3-light",
+    "source": 2,
+    "target": 3,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-2-4-light",
+    "source": 2,
+    "target": 4,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-2-5-light",
+    "source": 2,
+    "target": 5,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-2-6-light",
+    "source": 2,
+    "target": 6,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-2-7-light",
+    "source": 2,
+    "target": 7,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-3--1-light",
+    "source": 3,
+    "target": -1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-3-0-light",
+    "source": 3,
+    "target": 0,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-3-1-light",
+    "source": 3,
+    "target": 1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-3-2-light",
+    "source": 3,
+    "target": 2,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-3-3-light",
+    "source": 3,
+    "target": 3,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-3-4-light",
+    "source": 3,
+    "target": 4,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-3-5-light",
+    "source": 3,
+    "target": 5,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-3-6-light",
+    "source": 3,
+    "target": 6,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-3-7-light",
+    "source": 3,
+    "target": 7,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-4--1-light",
+    "source": 4,
+    "target": -1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-4-0-light",
+    "source": 4,
+    "target": 0,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-4-1-light",
+    "source": 4,
+    "target": 1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-4-2-light",
+    "source": 4,
+    "target": 2,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-4-3-light",
+    "source": 4,
+    "target": 3,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-4-4-light",
+    "source": 4,
+    "target": 4,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-4-5-light",
+    "source": 4,
+    "target": 5,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-4-6-light",
+    "source": 4,
+    "target": 6,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-4-7-light",
+    "source": 4,
+    "target": 7,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-5--1-light",
+    "source": 5,
+    "target": -1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-5-0-light",
+    "source": 5,
+    "target": 0,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-5-1-light",
+    "source": 5,
+    "target": 1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-5-2-light",
+    "source": 5,
+    "target": 2,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-5-3-light",
+    "source": 5,
+    "target": 3,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-5-4-light",
+    "source": 5,
+    "target": 4,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-5-5-light",
+    "source": 5,
+    "target": 5,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-5-6-light",
+    "source": 5,
+    "target": 6,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-5-7-light",
+    "source": 5,
+    "target": 7,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-6--1-light",
+    "source": 6,
+    "target": -1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-6-0-light",
+    "source": 6,
+    "target": 0,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-6-1-light",
+    "source": 6,
+    "target": 1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-6-2-light",
+    "source": 6,
+    "target": 2,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-6-3-light",
+    "source": 6,
+    "target": 3,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-6-4-light",
+    "source": 6,
+    "target": 4,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-6-5-light",
+    "source": 6,
+    "target": 5,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-6-6-light",
+    "source": 6,
+    "target": 6,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-6-7-light",
+    "source": 6,
+    "target": 7,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-7--1-light",
+    "source": 7,
+    "target": -1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-7-0-light",
+    "source": 7,
+    "target": 0,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-7-1-light",
+    "source": 7,
+    "target": 1,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-7-2-light",
+    "source": 7,
+    "target": 2,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-7-3-light",
+    "source": 7,
+    "target": 3,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-7-4-light",
+    "source": 7,
+    "target": 4,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-7-5-light",
+    "source": 7,
+    "target": 5,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-7-6-light",
+    "source": 7,
+    "target": 6,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "pop-7-7-light",
+    "source": 7,
+    "target": 7,
+    "pop": true,
+    "dark": false
+  },
+  {
+    "name": "push--1-0-dark",
+    "source": -1,
+    "target": 0,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push--1-1-dark",
+    "source": -1,
+    "target": 1,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push--1-2-dark",
+    "source": -1,
+    "target": 2,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push--1-3-dark",
+    "source": -1,
+    "target": 3,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push--1-4-dark",
+    "source": -1,
+    "target": 4,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push--1-5-dark",
+    "source": -1,
+    "target": 5,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push--1-6-dark",
+    "source": -1,
+    "target": 6,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push--1-7-dark",
+    "source": -1,
+    "target": 7,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-0-0-dark",
+    "source": 0,
+    "target": 0,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-0-1-dark",
+    "source": 0,
+    "target": 1,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-0-2-dark",
+    "source": 0,
+    "target": 2,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-0-3-dark",
+    "source": 0,
+    "target": 3,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-0-4-dark",
+    "source": 0,
+    "target": 4,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-0-5-dark",
+    "source": 0,
+    "target": 5,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-0-6-dark",
+    "source": 0,
+    "target": 6,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-0-7-dark",
+    "source": 0,
+    "target": 7,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-1-0-dark",
+    "source": 1,
+    "target": 0,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-1-1-dark",
+    "source": 1,
+    "target": 1,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-1-2-dark",
+    "source": 1,
+    "target": 2,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-1-3-dark",
+    "source": 1,
+    "target": 3,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-1-4-dark",
+    "source": 1,
+    "target": 4,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-1-5-dark",
+    "source": 1,
+    "target": 5,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-1-6-dark",
+    "source": 1,
+    "target": 6,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-1-7-dark",
+    "source": 1,
+    "target": 7,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-2-0-dark",
+    "source": 2,
+    "target": 0,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-2-1-dark",
+    "source": 2,
+    "target": 1,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-2-2-dark",
+    "source": 2,
+    "target": 2,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-2-3-dark",
+    "source": 2,
+    "target": 3,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-2-4-dark",
+    "source": 2,
+    "target": 4,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-2-5-dark",
+    "source": 2,
+    "target": 5,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-2-6-dark",
+    "source": 2,
+    "target": 6,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-2-7-dark",
+    "source": 2,
+    "target": 7,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-3-0-dark",
+    "source": 3,
+    "target": 0,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-3-1-dark",
+    "source": 3,
+    "target": 1,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-3-2-dark",
+    "source": 3,
+    "target": 2,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-3-3-dark",
+    "source": 3,
+    "target": 3,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-3-4-dark",
+    "source": 3,
+    "target": 4,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-3-5-dark",
+    "source": 3,
+    "target": 5,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-3-6-dark",
+    "source": 3,
+    "target": 6,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-3-7-dark",
+    "source": 3,
+    "target": 7,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-4-0-dark",
+    "source": 4,
+    "target": 0,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-4-1-dark",
+    "source": 4,
+    "target": 1,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-4-2-dark",
+    "source": 4,
+    "target": 2,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-4-3-dark",
+    "source": 4,
+    "target": 3,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-4-4-dark",
+    "source": 4,
+    "target": 4,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-4-5-dark",
+    "source": 4,
+    "target": 5,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-4-6-dark",
+    "source": 4,
+    "target": 6,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-4-7-dark",
+    "source": 4,
+    "target": 7,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-5-0-dark",
+    "source": 5,
+    "target": 0,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-5-1-dark",
+    "source": 5,
+    "target": 1,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-5-2-dark",
+    "source": 5,
+    "target": 2,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-5-3-dark",
+    "source": 5,
+    "target": 3,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-5-4-dark",
+    "source": 5,
+    "target": 4,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-5-5-dark",
+    "source": 5,
+    "target": 5,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-5-6-dark",
+    "source": 5,
+    "target": 6,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-5-7-dark",
+    "source": 5,
+    "target": 7,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-6-0-dark",
+    "source": 6,
+    "target": 0,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-6-1-dark",
+    "source": 6,
+    "target": 1,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-6-2-dark",
+    "source": 6,
+    "target": 2,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-6-3-dark",
+    "source": 6,
+    "target": 3,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-6-4-dark",
+    "source": 6,
+    "target": 4,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-6-5-dark",
+    "source": 6,
+    "target": 5,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-6-6-dark",
+    "source": 6,
+    "target": 6,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-6-7-dark",
+    "source": 6,
+    "target": 7,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-7-0-dark",
+    "source": 7,
+    "target": 0,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-7-1-dark",
+    "source": 7,
+    "target": 1,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-7-2-dark",
+    "source": 7,
+    "target": 2,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-7-3-dark",
+    "source": 7,
+    "target": 3,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-7-4-dark",
+    "source": 7,
+    "target": 4,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-7-5-dark",
+    "source": 7,
+    "target": 5,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-7-6-dark",
+    "source": 7,
+    "target": 6,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "push-7-7-dark",
+    "source": 7,
+    "target": 7,
+    "pop": false,
+    "dark": true
+  },
+  {
+    "name": "pop-0--1-dark",
+    "source": 0,
+    "target": -1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-0-0-dark",
+    "source": 0,
+    "target": 0,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-0-1-dark",
+    "source": 0,
+    "target": 1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-0-2-dark",
+    "source": 0,
+    "target": 2,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-0-3-dark",
+    "source": 0,
+    "target": 3,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-0-4-dark",
+    "source": 0,
+    "target": 4,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-0-5-dark",
+    "source": 0,
+    "target": 5,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-0-6-dark",
+    "source": 0,
+    "target": 6,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-0-7-dark",
+    "source": 0,
+    "target": 7,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-1--1-dark",
+    "source": 1,
+    "target": -1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-1-0-dark",
+    "source": 1,
+    "target": 0,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-1-1-dark",
+    "source": 1,
+    "target": 1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-1-2-dark",
+    "source": 1,
+    "target": 2,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-1-3-dark",
+    "source": 1,
+    "target": 3,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-1-4-dark",
+    "source": 1,
+    "target": 4,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-1-5-dark",
+    "source": 1,
+    "target": 5,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-1-6-dark",
+    "source": 1,
+    "target": 6,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-1-7-dark",
+    "source": 1,
+    "target": 7,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-2--1-dark",
+    "source": 2,
+    "target": -1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-2-0-dark",
+    "source": 2,
+    "target": 0,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-2-1-dark",
+    "source": 2,
+    "target": 1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-2-2-dark",
+    "source": 2,
+    "target": 2,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-2-3-dark",
+    "source": 2,
+    "target": 3,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-2-4-dark",
+    "source": 2,
+    "target": 4,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-2-5-dark",
+    "source": 2,
+    "target": 5,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-2-6-dark",
+    "source": 2,
+    "target": 6,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-2-7-dark",
+    "source": 2,
+    "target": 7,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-3--1-dark",
+    "source": 3,
+    "target": -1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-3-0-dark",
+    "source": 3,
+    "target": 0,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-3-1-dark",
+    "source": 3,
+    "target": 1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-3-2-dark",
+    "source": 3,
+    "target": 2,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-3-3-dark",
+    "source": 3,
+    "target": 3,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-3-4-dark",
+    "source": 3,
+    "target": 4,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-3-5-dark",
+    "source": 3,
+    "target": 5,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-3-6-dark",
+    "source": 3,
+    "target": 6,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-3-7-dark",
+    "source": 3,
+    "target": 7,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-4--1-dark",
+    "source": 4,
+    "target": -1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-4-0-dark",
+    "source": 4,
+    "target": 0,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-4-1-dark",
+    "source": 4,
+    "target": 1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-4-2-dark",
+    "source": 4,
+    "target": 2,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-4-3-dark",
+    "source": 4,
+    "target": 3,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-4-4-dark",
+    "source": 4,
+    "target": 4,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-4-5-dark",
+    "source": 4,
+    "target": 5,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-4-6-dark",
+    "source": 4,
+    "target": 6,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-4-7-dark",
+    "source": 4,
+    "target": 7,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-5--1-dark",
+    "source": 5,
+    "target": -1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-5-0-dark",
+    "source": 5,
+    "target": 0,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-5-1-dark",
+    "source": 5,
+    "target": 1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-5-2-dark",
+    "source": 5,
+    "target": 2,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-5-3-dark",
+    "source": 5,
+    "target": 3,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-5-4-dark",
+    "source": 5,
+    "target": 4,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-5-5-dark",
+    "source": 5,
+    "target": 5,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-5-6-dark",
+    "source": 5,
+    "target": 6,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-5-7-dark",
+    "source": 5,
+    "target": 7,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-6--1-dark",
+    "source": 6,
+    "target": -1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-6-0-dark",
+    "source": 6,
+    "target": 0,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-6-1-dark",
+    "source": 6,
+    "target": 1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-6-2-dark",
+    "source": 6,
+    "target": 2,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-6-3-dark",
+    "source": 6,
+    "target": 3,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-6-4-dark",
+    "source": 6,
+    "target": 4,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-6-5-dark",
+    "source": 6,
+    "target": 5,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-6-6-dark",
+    "source": 6,
+    "target": 6,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-6-7-dark",
+    "source": 6,
+    "target": 7,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-7--1-dark",
+    "source": 7,
+    "target": -1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-7-0-dark",
+    "source": 7,
+    "target": 0,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-7-1-dark",
+    "source": 7,
+    "target": 1,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-7-2-dark",
+    "source": 7,
+    "target": 2,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-7-3-dark",
+    "source": 7,
+    "target": 3,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-7-4-dark",
+    "source": 7,
+    "target": 4,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-7-5-dark",
+    "source": 7,
+    "target": 5,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-7-6-dark",
+    "source": 7,
+    "target": 6,
+    "pop": true,
+    "dark": true
+  },
+  {
+    "name": "pop-7-7-dark",
+    "source": 7,
+    "target": 7,
+    "pop": true,
+    "dark": true
+  }
+]

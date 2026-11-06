@@ -1,0 +1,6 @@
+[
+  {"id":"tap-light","tap":true,"dark":false},
+  {"id":"tap-dark","tap":true,"dark":true},
+  {"id":"interrupted-light","contacts":[[0,0.08],[0.14,0.5]],"dark":false},
+  {"id":"interrupted-dark","contacts":[[0,0.08],[0.14,0.5]],"dark":true}
+]

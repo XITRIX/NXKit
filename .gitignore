@@ -1,4 +1,101 @@
+# Local OS files
 .DS_Store
-build
-vcpkg_installed
-__pycache__
+
+# Build trees and generated CMake state (including standalone test builds)
+build/
+build-*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+Testing/
+compile_commands.json
+vcpkg_installed/
+/Submodules/nvk-switch/
+
+# Python capture/comparison script caches
+__pycache__/
+*.py[cod]
+
+# Local Apple build, test and profiling products; keep project configuration
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.app/
+*.xctest/
+*.dSYM/
+*.xcresult/
+*.trace/
+*.gputrace/
+/Demo/com.apple.DeveloperTools/
+
+# Disposable comparison reports, captures and profiling exports under docs.
+# Keep prose, probe sources, scripts and patches. Scope these rules to docs so
+# application artwork, Demo case JSON and shaders/apple/catalog stay visible.
+/docs/**/*.png
+/docs/**/*.jpg
+/docs/**/*.jpeg
+/docs/**/*.gif
+/docs/**/*.webp
+/docs/**/*.mp4
+/docs/**/*.mov
+/docs/**/*.ppm
+/docs/**/*.rgb
+/docs/**/*.bin
+/docs/**/*.log
+/docs/**/*.gz
+/docs/**/*.json
+/docs/**/*.jsonl
+/docs/**/*.csv
+/docs/**/*.txt
+/docs/**/*.html
+/docs/**/*.metal
+/docs/**/*.mtlp-json
+/docs/**/*.xml
+/docs/**/*.captured
+/docs/**/*.sb-*
+
+# Build/dependency declarations are sources even when placed beside reports.
+!/docs/**/CMakeLists.txt
+!/docs/**/requirements*.txt
+
+# Required runtime fixtures for the module and headless regression targets.
+!/docs/liquid-glass-interaction/uikit-reference.txt
+!/docs/liquid-glass-lens/interaction/native-reference.csv
+
+# NativeGlassProfileData and NativeGlassAccentData provenance checks.
+!/docs/liquid-glass-native-settings/profiles.json
+!/docs/liquid-glass-native-settings/verification.json
+!/docs/liquid-glass-native-settings/captures/*.json.gz
+!/docs/liquid-glass-native-settings/captures/*.layers.json
+!/docs/liquid-glass-native-settings/pass-semantics/all-styles-profiles.json
+!/docs/liquid-glass-native-settings/pass-semantics/all-styles/*.json.gz
+!/docs/liquid-glass-native-settings/pass-semantics/accent-palette/*.json.gz
+!/docs/liquid-glass-native-settings/pass-semantics/accent-palette.json
+
+# NativeGlassRefractionCoordinates consumes these eight captures and backgrounds.
+!/docs/liquid-glass-native-settings/pass-semantics/refraction/[xy]-background.png
+!/docs/liquid-glass-native-settings/pass-semantics/refraction/[xy]-identity.png
+!/docs/liquid-glass-native-settings/pass-semantics/refraction/[xy]-identity.json
+!/docs/liquid-glass-native-settings/pass-semantics/refraction/[xy]-inner.png
+!/docs/liquid-glass-native-settings/pass-semantics/refraction/[xy]-inner.json
+!/docs/liquid-glass-native-settings/pass-semantics/refraction/[xy]-inner-small.png
+!/docs/liquid-glass-native-settings/pass-semantics/refraction/[xy]-inner-small.json
+!/docs/liquid-glass-native-settings/pass-semantics/refraction/[xy]-inner-height.png
+!/docs/liquid-glass-native-settings/pass-semantics/refraction/[xy]-inner-height.json
+
+# Source measurements for regenerating the retained C++ regression tables.
+!/docs/liquid-glass-native-settings/pass-semantics/kernel-step/scanlines.json
+!/docs/liquid-glass-native-settings/pass-semantics/kernel-step-production/scanlines.json
+!/docs/liquid-glass-native-settings/pass-semantics/isolated-kernel/scanlines.json
+!/docs/liquid-glass-native-settings/color-transfer/holdout-*.json.gz
+!/docs/liquid-glass-native-settings/color-transfer/accent-holdouts.json
+!/docs/liquid-glass-lens/native-settings/captures/*.json.gz
+!/docs/liquid-glass-lens/tab-shadow/native/tab-shadow-*/inputs.csv
+!/docs/liquid-glass-lens/tab-shadow/native/tab-shadow-*/clock-fit.json
+!/docs/slider/native/final-geometry/light/geometry.json
+!/docs/slider/native/calibration/*/touches.json
+!/docs/slider/native/calibration/*/events.json
+!/docs/slider/native/velocity/velocity-*/touches.json
+!/docs/slider/native/velocity/velocity-*/events.json
+!/docs/slider/native/velocity/velocity-*/frames.json
+!/docs/slider/endpoints/native/**/geometry.json.gz

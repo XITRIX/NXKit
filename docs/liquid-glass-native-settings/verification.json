@@ -1,0 +1,65 @@
+{
+  "runtime": "iOS 27.0 (24A434)",
+  "geometry": {
+    "width": 280,
+    "height": 80,
+    "cornerRadius": 40,
+    "displayScale": 3
+  },
+  "coverage": {
+    "appearances": [
+      "light",
+      "dark"
+    ],
+    "requestedTint": [
+      "system",
+      "0",
+      "1"
+    ],
+    "styles": [
+      "regular",
+      "clear",
+      "tinted"
+    ],
+    "filterInputsPerStyle": 70,
+    "profileCount": 18
+  },
+  "files": {
+    "captures/dark-0.json.gz": "9a9177f78577b982e8235a263431bf310fbd15cf52fb71bcfa3bc424adf566a8",
+    "captures/dark-1.json.gz": "dcad3d0dbf106cd46726e25ff39bd317ad50b609d649c156455fec512bb9dfd7",
+    "captures/dark-system.json.gz": "e5e6320b130a4c74cfc6d65cfcc45c985012fa0131ba1ef48b6dff186ac2cf23",
+    "captures/light-0.json.gz": "842cbfae8e1b5acef0ec86acfb688f51e4939a62ee98fffcc0fbc2be8832afef",
+    "captures/light-1.json.gz": "6b23d68c376c1760ffe7d3d570a50c21d1c00047d40b26627c109abbe3070740",
+    "captures/light-system.json.gz": "a486c0b9b0873b58e122ee0ecdcd8384924b84b4946f1f195e2765c533019123",
+    "rea-runtime-evidence.json": "2589d476368f4f26e5b7444b9e61341fcf6fa37a921bc4dacd42874aa2cf26e1",
+    "profiles.json": "4bf837f35cacf4200d97b394db5e4fa0a1dea2aa120097359028dbf4d540fc63",
+    "native-example.png": "02b8d25d75690509b84fbea58c1e5b5085d10327d505c69a1f6ff47393e858ec",
+    "resources.json": "ae7ef733533e92e8a4981cf7432bc5e7f7562330b7ec0c99d06147b5867bdf33",
+    "rea-resource-evidence.json": "21ae340fedfe73029d11fcb84505513715e765ba73af659203eb198a87f8472e",
+    "binary-identities.json": "ddb4d9c541ed1fbaf2d0942f81310e2c4575fa102f02f25f1d102fd8b44e951e",
+    "README.md": "4236d6ca98741536a11ad91696a2a1a8394e1f27672c3ca4f9233664de987482"
+  },
+  "sources": {
+    "Demo/GlassComparison/SettingsProbe/build.py": "de5211247886541f69f0ad2cd2366e962642f1c0dfdc9c43b17bffc0c12e0f41",
+    "Demo/GlassComparison/SettingsProbe/capture.py": "4914521cc40266aef76fd4d263d80508d829d798dafb87c48d8738eaec258dd5",
+    "Demo/GlassComparison/SettingsProbe/decode.py": "1b2181e7bba645a9ffe1b09bd0bc8a7fb3233b6add0a55bb6ced06309447ae46",
+    "Demo/GlassComparison/SettingsProbe/Probe.m": "2baff8f9d42855a42c120324975b70621d9c50dec256d9271c5175556635b9ef"
+  },
+  "evidence": {
+    "runtimeCapture": "ev_a09b0b5ac66a2a8622fa23e817a59e7d0e0be4f754d3c8a9259f6d57b2c4f112",
+    "resourceInspection": "ev_e00854df8117e76d66bc69b174359a9714ce045a1ec85e79ad49b2f5828aa6bd"
+  },
+  "probeBinarySHA256": "29eed4ab73a899fbe74f0094db097690b81640f766a6c79ee7f6fd8381bfec7e",
+  "nativeBuildWarnings": "Scene delegate UIWindow nullability mismatch; no build errors",
+  "mutationChecks": {
+    "count": 18,
+    "passed": 18,
+    "renderResponseVerified": false
+  },
+  "reaLimitations": [
+    "Hopper startup timed out twice; no decompilation claim.",
+    "REA keyed-archive inventory unavailable; archives decoded as plist data by the checked-in decoder.",
+    "Runtime capture records driver/CLI processes and output hashes; the UIKit process is launched separately by CoreSimulator.",
+    "The inherited host environment is not recorded by REA."
+  ]
+}

@@ -1,0 +1,7 @@
+[
+  {"id":"filters-slider-light","hold":1.0,"dark":false,"filters":true},
+  {"id":"filters-slider-dark","hold":1.0,"dark":true,"filters":true},
+  {"id":"filters-switch-light","hold":1.0,"dark":false,"filters":true,"control":"switch"},
+  {"id":"filters-switch-dark","hold":1.0,"dark":true,"filters":true,"control":"switch"},
+  {"id":"minhang-tap-light","tap":true,"dark":false,"filters":true}
+]

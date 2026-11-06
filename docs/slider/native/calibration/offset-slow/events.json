@@ -1,0 +1,1038 @@
+[
+  {
+    "kind" : "begin",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      93,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 1,
+    "highlighted" : true,
+    "t" : 171114.65582070837
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      93.666666666666657,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171115.50306941671
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      94.333333333333314,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171115.51768483338
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      95.666666666666657,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171115.55090975005
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      97.666666666666657,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171115.6062936667
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      99,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171115.63426308337
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      100,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171115.65092275004
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      100.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171115.66755250003
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      106.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171115.88892837503
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      111.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171115.89171566672
+  },
+  {
+    "value" : 0.27888888120651245,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171115.89203004169
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.27888888120651245,
+    "after" : 0.27888888120651245,
+    "point" : [
+      117.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.27888888120651245,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171115.98665320838
+  },
+  {
+    "value" : 0.29777777194976807,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171115.98721475003
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.29777777194976807,
+    "after" : 0.29777777194976807,
+    "point" : [
+      118.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.29777777194976807,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.00089883336
+  },
+  {
+    "value" : 0.30111110210418701,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.00122700003
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.30111110210418701,
+    "after" : 0.30111110210418701,
+    "point" : [
+      119.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.30111110210418701,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.01888925003
+  },
+  {
+    "value" : 0.30444443225860596,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.01989275005
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.30444443225860596,
+    "after" : 0.30444443225860596,
+    "point" : [
+      120,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.30444443225860596,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.03523912505
+  },
+  {
+    "value" : 0.30666667222976685,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.03809258336
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.30666667222976685,
+    "after" : 0.30666667222976685,
+    "point" : [
+      121,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.30666667222976685,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.05192808338
+  },
+  {
+    "value" : 0.31000000238418579,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.05337383336
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.31000000238418579,
+    "after" : 0.31000000238418579,
+    "point" : [
+      122,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.31000000238418579,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.0676551667
+  },
+  {
+    "value" : 0.31333333253860474,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.06822100002
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.31333333253860474,
+    "after" : 0.31333333253860474,
+    "point" : [
+      126.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.31333333253860474,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.15460520837
+  },
+  {
+    "value" : 0.32888889312744141,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.15517520838
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.32888889312744141,
+    "after" : 0.32888889312744141,
+    "point" : [
+      127.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.32888889312744141,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.16794695836
+  },
+  {
+    "value" : 0.33222222328186035,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.16853854171
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.33222222328186035,
+    "after" : 0.33222222328186035,
+    "point" : [
+      128.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.33222222328186035,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.19097475003
+  },
+  {
+    "value" : 0.3355555534362793,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.19143458336
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.3355555534362793,
+    "after" : 0.3355555534362793,
+    "point" : [
+      130.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.3355555534362793,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.21768466671
+  },
+  {
+    "value" : 0.34222221374511719,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.21817691671
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.34222221374511719,
+    "after" : 0.34222221374511719,
+    "point" : [
+      131.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.34222221374511719,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.23425691671
+  },
+  {
+    "value" : 0.34555554389953613,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.23478195837
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.34555554389953613,
+    "after" : 0.34555554389953613,
+    "point" : [
+      133.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.34555554389953613,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.26755508338
+  },
+  {
+    "value" : 0.35111111402511597,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.26861237505
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.35111111402511597,
+    "after" : 0.35111111402511597,
+    "point" : [
+      136.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.35111111402511597,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.33487237504
+  },
+  {
+    "value" : 0.3611111044883728,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.33563070837
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.3611111044883728,
+    "after" : 0.3611111044883728,
+    "point" : [
+      137.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.3611111044883728,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.33604279169
+  },
+  {
+    "value" : 0.36444443464279175,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.33637637502
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.36444443464279175,
+    "after" : 0.36444443464279175,
+    "point" : [
+      138.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.36444443464279175,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.35156575002
+  },
+  {
+    "value" : 0.36777776479721069,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.35393654171
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.36777776479721069,
+    "after" : 0.36777776479721069,
+    "point" : [
+      139,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.36777776479721069,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.36763270837
+  },
+  {
+    "value" : 0.37000000476837158,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.36900162505
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.37000000476837158,
+    "after" : 0.37000000476837158,
+    "point" : [
+      149.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.37000000476837158,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.56045462503
+  },
+  {
+    "value" : 0.40444445610046387,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.56095745837
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.40444445610046387,
+    "after" : 0.40444445610046387,
+    "point" : [
+      150.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.40444445610046387,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.5685874167
+  },
+  {
+    "value" : 0.40777778625488281,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.57053812503
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.40777778625488281,
+    "after" : 0.40777778625488281,
+    "point" : [
+      159,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.40777778625488281,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.75013154172
+  },
+  {
+    "value" : 0.43666666746139526,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.7508820417
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.43666666746139526,
+    "after" : 0.43666666746139526,
+    "point" : [
+      160,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.43666666746139526,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.75168037505
+  },
+  {
+    "value" : 0.43999999761581421,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.75211191669
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.43999999761581421,
+    "after" : 0.43999999761581421,
+    "point" : [
+      160.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.43999999761581421,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.76763020837
+  },
+  {
+    "value" : 0.44222220778465271,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.76818325004
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.44222220778465271,
+    "after" : 0.44222220778465271,
+    "point" : [
+      162.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.44222220778465271,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.80025879171
+  },
+  {
+    "value" : 0.44777777791023254,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.80093362503
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.44777777791023254,
+    "after" : 0.44777777791023254,
+    "point" : [
+      163.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.44777777791023254,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.83425570838
+  },
+  {
+    "value" : 0.45222222805023193,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.83477150003
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.45222222805023193,
+    "after" : 0.45222222805023193,
+    "point" : [
+      164.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.45222222805023193,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.85193504169
+  },
+  {
+    "value" : 0.45555555820465088,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.85319012502
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.45555555820465088,
+    "after" : 0.45555555820465088,
+    "point" : [
+      169.33333333333331,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.45555555820465088,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.97480475003
+  },
+  {
+    "value" : 0.47111111879348755,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.97576220837
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.47111111879348755,
+    "after" : 0.47111111879348755,
+    "point" : [
+      170,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.47111111879348755,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171116.98464075004
+  },
+  {
+    "value" : 0.47333332896232605,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171116.98524441669
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.47333332896232605,
+    "after" : 0.47333332896232605,
+    "point" : [
+      170.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.47333332896232605,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171117.02072937504
+  },
+  {
+    "value" : 0.47555556893348694,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171117.02215558337
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.47555556893348694,
+    "after" : 0.47555556893348694,
+    "point" : [
+      171.66666666666666,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.47555556893348694,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171117.03443875004
+  },
+  {
+    "value" : 0.47888889908790588,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171117.03510045836
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.47888889908790588,
+    "after" : 0.47888889908790588,
+    "point" : [
+      172,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.47888889908790588,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171117.05128020837
+  },
+  {
+    "value" : 0.47999998927116394,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171117.05193708336
+  },
+  {
+    "kind" : "continue",
+    "before" : 0.47999998927116394,
+    "after" : 0.47999998927116394,
+    "point" : [
+      173,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.47999998927116394,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4,
+    "highlighted" : true,
+    "t" : 171117.13206300003
+  },
+  {
+    "value" : 0.48333331942558289,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : true,
+    "t" : 171117.13251558336
+  },
+  {
+    "value" : 0.48381105065345764,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : false,
+    "t" : 171118.10083454169
+  },
+  {
+    "value" : 0.48437640070915222,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : false,
+    "t" : 171118.13418395838
+  },
+  {
+    "value" : 0.48465597629547119,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : false,
+    "t" : 171118.15086950004
+  },
+  {
+    "value" : 0.48475143313407898,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : false,
+    "t" : 171118.16774295838
+  },
+  {
+    "value" : 0.48473274707794189,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : false,
+    "t" : 171118.36483320838
+  },
+  {
+    "value" : 0.48333331942558289,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 4096,
+    "highlighted" : false,
+    "t" : 171118.36749937505
+  },
+  {
+    "kind" : "end",
+    "value" : 0.48333331942558289
+  },
+  {
+    "value" : 0.48333331942558289,
+    "kind" : "action",
+    "tracking" : false,
+    "event" : 64,
+    "highlighted" : false,
+    "t" : 171118.65215137505
+  },
+  {
+    "value" : 0.48333331942558289,
+    "kind" : "action",
+    "tracking" : false,
+    "event" : 4096,
+    "highlighted" : false,
+    "t" : 171118.65217775005
+  }
+]

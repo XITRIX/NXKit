@@ -1,0 +1,16 @@
+[
+  {
+    "id": "tab-shadow-light",
+    "dark": false,
+    "control": "tab",
+    "filters": true,
+    "hold": 1
+  },
+  {
+    "id": "tab-shadow-dark",
+    "dark": true,
+    "control": "tab",
+    "filters": true,
+    "hold": 1
+  }
+]

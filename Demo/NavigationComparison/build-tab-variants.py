@@ -1,0 +1,11 @@
+"""Generate the native tab-variant oracle project: OUTPUT_DIRECTORY."""
+import hashlib,json,runpy,sys
+from pathlib import Path
+here=Path(__file__).resolve().parent
+out=Path(sys.argv[1]).resolve();out.mkdir(parents=True,exist_ok=True)
+(out/'cases.json').write_text('[{"name":"tab-variants"}]')
+sys.argv=[str(here.parent/'GlassComparison/build-interaction.py'),str(out),str(out/'cases.json')]
+runpy.run_path(sys.argv[0],run_name='__main__')
+project=out/'Interaction.xcodeproj/project.pbxproj'
+project.write_text(project.read_text().replace(str(here.parent/'GlassComparison/InteractionReference.m'),str(here/'TabVariantsReference.m')).replace('org.nxkit.GlassInteractionReference','org.nxkit.TabVariantsReference'))
+(out/'source-manifest.json').write_text(json.dumps({f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in [here/'TabVariantsReference.m',here/'build-tab-variants.py']},indent=2)+'\n')

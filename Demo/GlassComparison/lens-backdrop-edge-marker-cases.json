@@ -1,0 +1,374 @@
+[
+  {
+    "probe": "edges",
+    "background": "backdrop-edge-markers",
+    "lifted": true,
+    "width": 116,
+    "height": 56,
+    "liftInset": 0,
+    "centerX": 320.25,
+    "centerY": 38,
+    "contentSetup": "none",
+    "contentMode": 1,
+    "warps": true,
+    "base": "none",
+    "liftContainer": "content",
+    "backgroundMarkers": [
+      {
+        "center": [
+          360.25,
+          263
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          360.25,
+          313
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "center": [
+          305.25,
+          288
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          415.25,
+          288
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "center": [
+          312.57233047,
+          270.32233047
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          407.92766953,
+          270.32233047
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    ],
+    "id": "backdrop-edge-markers-d0-s0-none-lifted",
+    "dark": 0,
+    "style": 0,
+    "controlID": "backdrop-gray-d0-s0-none-lifted"
+  },
+  {
+    "probe": "edges",
+    "background": "backdrop-edge-markers",
+    "lifted": true,
+    "width": 116,
+    "height": 56,
+    "liftInset": 0,
+    "centerX": 320.25,
+    "centerY": 38,
+    "contentSetup": "none",
+    "contentMode": 1,
+    "warps": true,
+    "base": "none",
+    "liftContainer": "content",
+    "backgroundMarkers": [
+      {
+        "center": [
+          360.25,
+          263
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          360.25,
+          313
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "center": [
+          305.25,
+          288
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          415.25,
+          288
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "center": [
+          312.57233047,
+          270.32233047
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          407.92766953,
+          270.32233047
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    ],
+    "id": "backdrop-edge-markers-d0-s1-none-lifted",
+    "dark": 0,
+    "style": 1,
+    "controlID": "backdrop-gray-d0-s1-none-lifted"
+  },
+  {
+    "probe": "edges",
+    "background": "backdrop-edge-markers",
+    "lifted": true,
+    "width": 116,
+    "height": 56,
+    "liftInset": 0,
+    "centerX": 320.25,
+    "centerY": 38,
+    "contentSetup": "none",
+    "contentMode": 1,
+    "warps": true,
+    "base": "none",
+    "liftContainer": "content",
+    "backgroundMarkers": [
+      {
+        "center": [
+          360.25,
+          263
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          360.25,
+          313
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "center": [
+          305.25,
+          288
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          415.25,
+          288
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "center": [
+          312.57233047,
+          270.32233047
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          407.92766953,
+          270.32233047
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    ],
+    "id": "backdrop-edge-markers-d1-s0-none-lifted",
+    "dark": 1,
+    "style": 0,
+    "controlID": "backdrop-gray-d1-s0-none-lifted"
+  },
+  {
+    "probe": "edges",
+    "background": "backdrop-edge-markers",
+    "lifted": true,
+    "width": 116,
+    "height": 56,
+    "liftInset": 0,
+    "centerX": 320.25,
+    "centerY": 38,
+    "contentSetup": "none",
+    "contentMode": 1,
+    "warps": true,
+    "base": "none",
+    "liftContainer": "content",
+    "backgroundMarkers": [
+      {
+        "center": [
+          360.25,
+          263
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          360.25,
+          313
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "center": [
+          305.25,
+          288
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          415.25,
+          288
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      },
+      {
+        "center": [
+          312.57233047,
+          270.32233047
+        ],
+        "radius": 2,
+        "RGB": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "center": [
+          407.92766953,
+          270.32233047
+        ],
+        "radius": 2,
+        "RGB": [
+          255,
+          255,
+          255
+        ]
+      }
+    ],
+    "id": "backdrop-edge-markers-d1-s1-none-lifted",
+    "dark": 1,
+    "style": 1,
+    "controlID": "backdrop-gray-d1-s1-none-lifted"
+  }
+]

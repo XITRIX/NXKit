@@ -1,0 +1,135 @@
+[
+  {
+    "id": "slider-reversal",
+    "target": "slider",
+    "startNormalized": [
+      0.265,
+      0.5
+    ],
+    "value": 0.25,
+    "path": [
+      [
+        0.4,
+        0,
+        0
+      ],
+      [
+        0.8,
+        120,
+        0
+      ],
+      [
+        1.0,
+        120,
+        0
+      ],
+      [
+        1.4,
+        20,
+        0
+      ],
+      [
+        1.6,
+        20,
+        0
+      ],
+      [
+        1.9,
+        80,
+        0
+      ],
+      [
+        2.2,
+        80,
+        0
+      ]
+    ]
+  },
+  {
+    "id": "slider-fast-right",
+    "target": "slider",
+    "startNormalized": [
+      0.265,
+      0.5
+    ],
+    "value": 0.25,
+    "dx": 150,
+    "dy": 0,
+    "velocity": 700
+  },
+  {
+    "id": "slider-left-dark",
+    "target": "slider",
+    "dark": true,
+    "startNormalized": [
+      0.735,
+      0.5
+    ],
+    "value": 0.75,
+    "dx": -150,
+    "dy": 0,
+    "velocity": 200
+  },
+  {
+    "id": "tabs-reversal",
+    "target": "tabs",
+    "startNormalized": [
+      0.343,
+      0.275
+    ],
+    "selected": 0,
+    "path": [
+      [
+        0.4,
+        0,
+        0
+      ],
+      [
+        0.8,
+        160,
+        0
+      ],
+      [
+        1.0,
+        160,
+        0
+      ],
+      [
+        1.4,
+        35,
+        0
+      ],
+      [
+        1.7,
+        35,
+        0
+      ]
+    ]
+  },
+  {
+    "id": "slider-cancel",
+    "target": "slider",
+    "startNormalized": [
+      0.265,
+      0.5
+    ],
+    "value": 0.25,
+    "dx": 150,
+    "dy": 0,
+    "velocity": 200,
+    "cancelAt": 0.7
+  },
+  {
+    "id": "tabs-snapshots",
+    "target": "tabs",
+    "startNormalized": [
+      0.343,
+      0.275
+    ],
+    "selected": 0,
+    "dx": 140,
+    "dy": 0,
+    "velocity": 200,
+    "snapshots": true
+  }
+]

@@ -1,0 +1,4 @@
+[
+  {"id":"regrab-light","contacts":[[0,0.5],[0.62,1.0]],"dark":false},
+  {"id":"regrab-dark","contacts":[[0,0.5],[0.62,1.0]],"dark":true}
+]

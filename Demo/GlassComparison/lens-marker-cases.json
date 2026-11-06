@@ -1,0 +1,190 @@
+[
+  {
+    "probe": "edges",
+    "background": "gray",
+    "dark": 0,
+    "lifted": true,
+    "width": 116,
+    "height": 56,
+    "liftInset": 0,
+    "centerX": 320.25,
+    "centerY": 38,
+    "style": 0,
+    "contentSetup": "portal-only",
+    "contentMode": 1,
+    "warps": true,
+    "base": "regular",
+    "liftContainer": "content",
+    "id": "markers-visible-d0-s0",
+    "probePattern": "markers",
+    "markerRadius": 2,
+    "markerPoints": [
+      [
+        320.25,
+        18
+      ],
+      [
+        320.25,
+        58
+      ],
+      [
+        270.25,
+        38
+      ],
+      [
+        370.25,
+        38
+      ],
+      [
+        282.25,
+        22
+      ],
+      [
+        358.25,
+        22
+      ]
+    ],
+    "controlID": "edges-dark0-style0-none"
+  },
+  {
+    "probe": "edges",
+    "background": "gray",
+    "dark": 0,
+    "lifted": true,
+    "width": 116,
+    "height": 56,
+    "liftInset": 0,
+    "centerX": 320.25,
+    "centerY": 38,
+    "style": 1,
+    "contentSetup": "portal-only",
+    "contentMode": 1,
+    "warps": true,
+    "base": "regular",
+    "liftContainer": "content",
+    "id": "markers-visible-d0-s1",
+    "probePattern": "markers",
+    "markerRadius": 2,
+    "markerPoints": [
+      [
+        320.25,
+        18
+      ],
+      [
+        320.25,
+        58
+      ],
+      [
+        270.25,
+        38
+      ],
+      [
+        370.25,
+        38
+      ],
+      [
+        282.25,
+        22
+      ],
+      [
+        358.25,
+        22
+      ]
+    ],
+    "controlID": "edges-dark0-style1-none"
+  },
+  {
+    "probe": "edges",
+    "background": "gray",
+    "dark": 1,
+    "lifted": true,
+    "width": 116,
+    "height": 56,
+    "liftInset": 0,
+    "centerX": 320.25,
+    "centerY": 38,
+    "style": 0,
+    "contentSetup": "portal-only",
+    "contentMode": 1,
+    "warps": true,
+    "base": "regular",
+    "liftContainer": "content",
+    "id": "markers-visible-d1-s0",
+    "probePattern": "markers",
+    "markerRadius": 2,
+    "markerPoints": [
+      [
+        320.25,
+        18
+      ],
+      [
+        320.25,
+        58
+      ],
+      [
+        270.25,
+        38
+      ],
+      [
+        370.25,
+        38
+      ],
+      [
+        282.25,
+        22
+      ],
+      [
+        358.25,
+        22
+      ]
+    ],
+    "controlID": "edges-dark1-style0-none"
+  },
+  {
+    "probe": "edges",
+    "background": "gray",
+    "dark": 1,
+    "lifted": true,
+    "width": 116,
+    "height": 56,
+    "liftInset": 0,
+    "centerX": 320.25,
+    "centerY": 38,
+    "style": 1,
+    "contentSetup": "portal-only",
+    "contentMode": 1,
+    "warps": true,
+    "base": "regular",
+    "liftContainer": "content",
+    "id": "markers-visible-d1-s1",
+    "probePattern": "markers",
+    "markerRadius": 2,
+    "markerPoints": [
+      [
+        320.25,
+        18
+      ],
+      [
+        320.25,
+        58
+      ],
+      [
+        270.25,
+        38
+      ],
+      [
+        370.25,
+        38
+      ],
+      [
+        282.25,
+        22
+      ],
+      [
+        358.25,
+        22
+      ]
+    ],
+    "controlID": "edges-dark1-style1-none"
+  }
+]

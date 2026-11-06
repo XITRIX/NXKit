@@ -1,0 +1,86 @@
+[
+  {
+    "id": "phone-light-coral",
+    "phoneTabs": true,
+    "target": "tabs",
+    "dark": false,
+    "backgroundRGB": [
+      209,
+      71,
+      61
+    ],
+    "selected": 2,
+    "startNormalized": [
+      0.606,
+      0.37
+    ],
+    "dx": 12,
+    "velocity": 80,
+    "holdBefore": 1,
+    "holdAfter": 0.5,
+    "snapshots": true
+  },
+  {
+    "id": "phone-light-green",
+    "phoneTabs": true,
+    "target": "tabs",
+    "dark": false,
+    "backgroundRGB": [
+      0,
+      180,
+      100
+    ],
+    "selected": 2,
+    "startNormalized": [
+      0.606,
+      0.37
+    ],
+    "dx": 12,
+    "velocity": 80,
+    "holdBefore": 1,
+    "holdAfter": 0.5,
+    "snapshots": true
+  },
+  {
+    "id": "phone-dark-coral",
+    "phoneTabs": true,
+    "target": "tabs",
+    "dark": true,
+    "backgroundRGB": [
+      209,
+      71,
+      61
+    ],
+    "selected": 2,
+    "startNormalized": [
+      0.606,
+      0.37
+    ],
+    "dx": 12,
+    "velocity": 80,
+    "holdBefore": 1,
+    "holdAfter": 0.5,
+    "snapshots": true
+  },
+  {
+    "id": "phone-dark-green",
+    "phoneTabs": true,
+    "target": "tabs",
+    "dark": true,
+    "backgroundRGB": [
+      0,
+      180,
+      100
+    ],
+    "selected": 2,
+    "startNormalized": [
+      0.606,
+      0.37
+    ],
+    "dx": 12,
+    "velocity": 80,
+    "holdBefore": 1,
+    "holdAfter": 0.5,
+    "snapshots": true
+  }
+]

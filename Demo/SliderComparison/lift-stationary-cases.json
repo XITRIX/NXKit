@@ -1,0 +1,4 @@
+[
+  {"id":"stationary-light","hold":1.0,"dark":false},
+  {"id":"stationary-dark","hold":1.0,"dark":true}
+]

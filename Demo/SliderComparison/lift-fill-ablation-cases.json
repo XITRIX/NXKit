@@ -1,0 +1,4 @@
+[
+  {"id":"fill-ablation-light","dark":false,"hold":4.5,"filters":true,"ablation":true},
+  {"id":"fill-ablation-dark","dark":true,"hold":4.5,"filters":true,"ablation":true}
+]

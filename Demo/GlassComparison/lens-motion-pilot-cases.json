@@ -1,0 +1,38 @@
+[
+  {
+    "id": "slider-slow",
+    "target": "slider",
+    "startNormalized": [
+      0.265,
+      0.5
+    ],
+    "value": 0.25,
+    "dx": 150,
+    "dy": 0,
+    "velocity": 200
+  },
+  {
+    "id": "tabs-slow",
+    "target": "tabs",
+    "startNormalized": [
+      0.343,
+      0.275
+    ],
+    "selected": 0,
+    "dx": 140,
+    "dy": 0,
+    "velocity": 200
+  },
+  {
+    "id": "switch-slow",
+    "target": "switch",
+    "startNormalized": [
+      0.27,
+      0.5
+    ],
+    "on": false,
+    "dx": 25,
+    "dy": 0,
+    "velocity": 80
+  }
+]

@@ -1,0 +1,87 @@
+--- a/UIKitCore/lib/CALayer.cpp
++++ b/UIKitCore/lib/CALayer.cpp
+@@ -320,9 +319,0 @@
+-    // Only a clipped layer bounds all of its descendants' output. An
+-    // unclipped parent's children, shadows or backdrop effects can still be
+-    // visible outside its own bounds, so it must always be traversed.
+-    if (_masksToBounds && canvas->quickReject(localBounds)) {
+-        if (Internal::RenderPerformance::current) ++Internal::RenderPerformance::current->rejected;
+-        canvas->restore();
+-        canvas->restore();
+-        return;
+-    }
+@@ -483,0 +475 @@
++    if (metrics) ++metrics->sorts;
+@@ -486,2 +477,0 @@
+-        // Preserve the retained snapshot across custom drawing callbacks, but
+-        // avoid stable_sort's scratch allocation for ordinary insertion order.
+@@ -489,4 +479 @@
+-        if (!std::is_sorted(children.begin(), children.end(), sortByZPos)) {
+-            if (metrics) ++metrics->sorts;
+-            std::stable_sort(children.begin(), children.end(), sortByZPos);
+-        }
++        std::stable_sort(children.begin(), children.end(), sortByZPos);
+@@ -495,0 +483 @@
++    // Could be resource consuming, better to change approach
+--- a/UIKitCore/lib/BackdropEffect.cpp
++++ b/UIKitCore/lib/BackdropEffect.cpp
+@@ -290 +290 @@
+-half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf, float2 normal) {
++half4 referenceGlass(float2 xy, float2 halfDim, float r, float2 p, float sdf) {
+@@ -292,0 +293 @@
++    float2 normal = lensNormalDirection(p, halfDim, r);
+@@ -359,4 +360 @@
+-    // The host clip owns coverage in normal glass rendering. A fully covered
+-    // result never uses this unshifted sharp sample, except for empty input.
+-    half4 background = half4(0);
+-    if (pixel.a <= 0.0 || externalShapeCoverage <= 0.5) background = sampleSharpBackdrop(xy, xy);
++    half4 background = sampleSharpBackdrop(xy, xy);
+@@ -473 +470,0 @@
+-    if (glow > 0.0) {
+@@ -502 +498,0 @@
+-    }
+@@ -513,2 +509 @@
+-    float3 surface = roundedBoxSample(p, halfDim, r);
+-    float sdf = surface.x;
++    float sdf = boxRoundedSDF(p, halfDim, r);
+@@ -521,4 +516,4 @@
+-        return referenceGlass(xy, halfDim, r, p, sdf, surface.yz);
+-    }
+-
+-    float2 normal = surface.yz;
++        return referenceGlass(xy, halfDim, r, p, sdf);
++    }
++
++    float2 normal = lensNormalDirection(p, halfDim, r);
+@@ -604 +598,0 @@
+-    if (alpha >= 1.0) return pixel;
+--- a/UIKitCore/lib/LayerCornerGeometry.cpp
++++ b/UIKitCore/lib/LayerCornerGeometry.cpp
+@@ -214,6 +213,0 @@
+-// Continuous geometry computes both distance and its normal through the same
+-// powers and roots. Reuse that result when a material needs both quantities.
+-float3 roundedBoxSample(float2 p,float2 halfDim,float r) {
+-    if(cornerCurve>0.5&&r>0.0)return continuousCornerSample(p,halfDim);
+-    return float3(circularBoxSDF(p,halfDim,r),lensNormalDirection(p,halfDim,r));
+-}
+--- a/UIKitCore/lib/CAGlassContainerLayer.cpp
++++ b/UIKitCore/lib/CAGlassContainerLayer.cpp
+@@ -57,0 +58 @@
++    replaceAll(source, "float2 normal = lensNormalDirection(p, halfDim, r);", "float2 normal = materialNormal;");
+@@ -67,3 +68,2 @@
+-    float3 surface = roundedBoxSample(p, g.xy * 0.5, r);
+-    float d = surface.x;
+-    float2 n = surface.yz;
++    float d = boxRoundedSDF(p, g.xy * 0.5, r);
++    float2 n = lensNormalDirection(p, g.xy * 0.5, r);
+@@ -180 +180 @@
+-            "half4 color = referenceGlass(localXY,lensSize*0.5,min(cornerRadius,min(lensSize.x,lensSize.y)*0.5),localXY-lensCenter,sceneDistance/localMetric,materialNormal);\n"
++            "half4 color = referenceGlass(localXY,lensSize*0.5,min(cornerRadius,min(lensSize.x,lensSize.y)*0.5),localXY-lensCenter,sceneDistance/localMetric);\n"
+--- a/UIKitCore/lib/CABackdropEffectLayer.cpp
++++ b/UIKitCore/lib/CABackdropEffectLayer.cpp
+@@ -491,3 +491,2 @@
+-    float3 surface=roundedBoxSample(p,halfDim,r);
+-    float d=surface.x;
+-    float2 normal=surface.yz;
++    float d=boxRoundedSDF(p,halfDim,r);
++    float2 normal=lensNormalDirection(p,halfDim,r);

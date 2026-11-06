@@ -1,0 +1,40 @@
+[
+  {
+    "kind" : "begin",
+    "before" : 0.25,
+    "after" : 0.25,
+    "point" : [
+      84,
+      25
+    ],
+    "accepted" : true
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : true,
+    "event" : 1,
+    "highlighted" : true,
+    "t" : 171073.13915433336
+  },
+  {
+    "kind" : "end",
+    "value" : 0.25
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : false,
+    "event" : 128,
+    "highlighted" : false,
+    "t" : 171075.10147525003
+  },
+  {
+    "value" : 0.25,
+    "kind" : "action",
+    "tracking" : false,
+    "event" : 4096,
+    "highlighted" : false,
+    "t" : 171075.10150133338
+  }
+]

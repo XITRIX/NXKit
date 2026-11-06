@@ -1,0 +1,15 @@
+{
+  "response": 0.4,
+  "damping": 1,
+  "initialDecayVelocity": 0,
+  "fitScope": "Only interior retirement face-opacity samples; native completion clamps excluded. Alignment absorbs measured CA presentation commit phase, not a production delay.",
+  "alignmentSeconds": 0.016379604802895006,
+  "interiorSamples": 28,
+  "maximumNormalizedResidual": 0.00027974839182043354,
+  "rmsNormalizedResidual": 6.068490727690207e-05,
+  "rawTraceSHA256": "5f884efb479559ee44cb7a27075352002f0fed47d7ef9f45f5d3ea4aab4d79b3",
+  "compiledFixtureSources": {
+    "LiftReference.m": "b357c70f8fdfbdee697d4c10687638c341e25f376c803a5f6c11ef60574925bc",
+    "LiftUITests.m": "4f303d80dbce8856b2516674bbeb47bba38646eaf9814af3f5972e947bc008b2"
+  }
+}

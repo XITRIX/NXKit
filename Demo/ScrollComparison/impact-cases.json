@@ -1,0 +1,366 @@
+[
+  {
+    "id": "scroll-impact-top-flight",
+    "target": "scroll",
+    "offset": 500,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            100
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            400
+          ]
+        ],
+        "lift": 0.13
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-top-near",
+    "target": "scroll",
+    "offset": 300,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            100
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            400
+          ]
+        ],
+        "lift": 0.13
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-top-across",
+    "target": "scroll",
+    "offset": 200,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            100
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            400
+          ]
+        ],
+        "lift": 0.13
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-top-deep",
+    "target": "scroll",
+    "offset": 0,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            100
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            400
+          ]
+        ],
+        "lift": 0.13
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-bottom-flight",
+    "target": "scroll",
+    "offset": 600,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            400
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            100
+          ]
+        ],
+        "lift": 0.13
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-bottom-near",
+    "target": "scroll",
+    "offset": 800,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            400
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            100
+          ]
+        ],
+        "lift": 0.13
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-bottom-across",
+    "target": "scroll",
+    "offset": 900,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            400
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            100
+          ]
+        ],
+        "lift": 0.13
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-bottom-deep",
+    "target": "scroll",
+    "offset": 1100,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            400
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            100
+          ]
+        ],
+        "lift": 0.13
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-hold-40",
+    "target": "scroll",
+    "offset": 200,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            100
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            400
+          ]
+        ],
+        "lift": 0.16
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-hold-80",
+    "target": "scroll",
+    "offset": 200,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            100
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            400
+          ]
+        ],
+        "lift": 0.2
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-hold-120",
+    "target": "scroll",
+    "offset": 200,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            100
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            400
+          ]
+        ],
+        "lift": 0.24
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-hold-200",
+    "target": "scroll",
+    "offset": 200,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            100
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            400
+          ]
+        ],
+        "lift": 0.32
+      }
+    ]
+  },
+  {
+    "id": "scroll-impact-hold-400",
+    "target": "scroll",
+    "offset": 200,
+    "duration": 2.6,
+    "paths": [
+      {
+        "points": [
+          [
+            0,
+            150,
+            100
+          ],
+          [
+            0.06,
+            150,
+            250
+          ],
+          [
+            0.12,
+            150,
+            400
+          ]
+        ],
+        "lift": 0.52
+      }
+    ]
+  }
+]

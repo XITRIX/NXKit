@@ -1,0 +1,1 @@
+This was an intermediate experiment, not the final renderer. Tight input bounds showed no consistent GPU benefit (dark idle completion regressed 6%) and were removed. Its shader ABI was 2a60f0cc19fe0a54830b50379f67efa4312e132a5b94798f16bcd7708dd6c503. The retained final change shares immutable materials and keeps original sampling bounds.

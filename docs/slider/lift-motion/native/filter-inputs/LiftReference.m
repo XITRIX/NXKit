@@ -1,0 +1,88 @@
+// Native UIKit oracle: actual OS touches; no authored lens state or geometry.
+#import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
+#import <objc/runtime.h>
+
+static NSMutableArray *Touches,*Actions;
+static NSArray *LiftRect(CGRect r){return @[@(r.origin.x),@(r.origin.y),@(r.size.width),@(r.size.height)];}
+static NSArray *Transform(CATransform3D t){return @[@(t.m11),@(t.m12),@(t.m21),@(t.m22),@(t.m41),@(t.m42)];}
+static id Value(id value){if(!value)return NSNull.null;if([value isKindOfClass:NSNumber.class]||[value isKindOfClass:NSString.class])return value;if([value isKindOfClass:NSArray.class]){NSMutableArray *a=[NSMutableArray new];for(id v in value)[a addObject:Value(v)];return a;}return [value description];}
+static id Clean(id value){if([value isKindOfClass:NSNumber.class])return isfinite([value doubleValue])?value:NSNull.null;if([value isKindOfClass:NSDictionary.class]){NSMutableDictionary *d=[NSMutableDictionary new];for(id key in value)d[key]=Clean(value[key]);return d;}if([value isKindOfClass:NSArray.class]){NSMutableArray *a=[NSMutableArray new];for(id v in value)[a addObject:Clean(v)];return a;}return value;}
+static NSArray *Timing(CAMediaTimingFunction *function){if(!function)return @[];NSMutableArray *points=[NSMutableArray new];for(int i=0;i<4;i++){float p[2];[function getControlPointAtIndex:i values:p];[points addObject:@[@(p[0]),@(p[1])]];}return points;}
+// Bounded read-only diagnostics. CAFilter keys come from its own inputKeys;
+// backdrop getters are checked for an observed zero-argument runtime signature.
+static id ReadGetter(id object,NSString *name){SEL selector=NSSelectorFromString(name);NSMethodSignature *signature=[object methodSignatureForSelector:selector];if(!signature||signature.numberOfArguments!=2)return NSNull.null;NSInvocation *call=[NSInvocation invocationWithMethodSignature:signature];call.target=object;call.selector=selector;@try{[call invoke];const char *t=signature.methodReturnType;if(t[0]=='@'){__unsafe_unretained id value=nil;[call getReturnValue:&value];return value?:NSNull.null;}if(strcmp(t,@encode(double))==0){double value;[call getReturnValue:&value];return @(value);}if(strcmp(t,@encode(float))==0){float value;[call getReturnValue:&value];return @(value);}if(strcmp(t,@encode(BOOL))==0){BOOL value;[call getReturnValue:&value];return @(value);}if(strcmp(t,@encode(NSInteger))==0){NSInteger value;[call getReturnValue:&value];return @(value);}if(strcmp(t,@encode(NSUInteger))==0){NSUInteger value;[call getReturnValue:&value];return @(value);}}@catch(NSException *e){return @{ @"error":e.name };}return NSNull.null;}
+static NSArray *FilterInputs(NSArray *filters){NSMutableArray *rows=[NSMutableArray new];for(id filter in filters){NSMutableDictionary *d=[@{@"class":NSStringFromClass([filter class])} mutableCopy];@try{d[@"type"]=Value(ReadGetter(filter,@"type"));d[@"name"]=Value(ReadGetter(filter,@"name"));id keys=[filter valueForKey:@"inputKeys"];if([keys isKindOfClass:NSArray.class])for(NSString *key in keys)if([key isKindOfClass:NSString.class])d[key]=Value([filter valueForKey:key]);}@catch(NSException *e){d[@"error"]=e.name;}[rows addObject:d];}return rows;}
+static NSDictionary *Animation(CAAnimation *a){
+    NSMutableDictionary *d=[@{@"class":NSStringFromClass(a.class),@"beginTime":@(a.beginTime),@"duration":@(a.duration),@"speed":@(a.speed),@"timeOffset":@(a.timeOffset),@"removedOnCompletion":@(a.removedOnCompletion),@"fillMode":a.fillMode,@"timingFunction":Timing(a.timingFunction)} mutableCopy];
+    if([a isKindOfClass:CAPropertyAnimation.class]){CAPropertyAnimation *p=(id)a;d[@"keyPath"]=p.keyPath?:@"";d[@"additive"]=@(p.additive);d[@"cumulative"]=@(p.cumulative);}
+    if([a isKindOfClass:CABasicAnimation.class]){CABasicAnimation *b=(id)a;d[@"fromValue"]=Value(b.fromValue);d[@"toValue"]=Value(b.toValue);d[@"byValue"]=Value(b.byValue);}
+    if([a isKindOfClass:CASpringAnimation.class]){CASpringAnimation *s=(id)a;d[@"mass"]=@(s.mass);d[@"stiffness"]=@(s.stiffness);d[@"damping"]=@(s.damping);d[@"initialVelocity"]=@(s.initialVelocity);d[@"settlingDuration"]=@(s.settlingDuration);}
+    if([a isKindOfClass:CAKeyframeAnimation.class]){CAKeyframeAnimation *k=(id)a;d[@"values"]=Value(k.values);d[@"keyTimes"]=Value(k.keyTimes);d[@"calculationMode"]=k.calculationMode?:@"";}
+    if([a isKindOfClass:CAAnimationGroup.class]){NSMutableArray *children=[NSMutableArray new];for(CAAnimation *child in [(CAAnimationGroup *)a animations])[children addObject:Animation(child)];d[@"animations"]=children;}
+    return d;
+}
+
+@interface LiftWindow:UIWindow @end
+@implementation LiftWindow
+- (void)sendEvent:(UIEvent *)event{
+    for(UITouch *touch in event.allTouches)if(touch.phase!=UITouchPhaseStationary){CGPoint p=[touch locationInView:self.rootViewController.view];[Touches addObject:@{@"phase":@(touch.phase),@"timestamp":@(touch.timestamp),@"dispatchT":@(CACurrentMediaTime()),@"point":@[@(p.x),@(p.y)]}];if(touch.phase==UITouchPhaseBegan)[self.rootViewController performSelector:@selector(firstContact)];}
+    [super sendEvent:event];
+    for(UITouch *touch in event.allTouches)if(touch.phase==UITouchPhaseEnded||touch.phase==UITouchPhaseCancelled)[self.rootViewController performSelector:@selector(checkFinish) withObject:nil afterDelay:1.6];
+}
+@end
+@interface LiftSlider:UISlider @end
+@implementation LiftSlider
+- (BOOL)beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event{[Actions addObject:@{@"method":@"beginTracking-before",@"t":@(CACurrentMediaTime())}];BOOL answer=[super beginTrackingWithTouch:touch withEvent:event];[Actions addObject:@{@"method":@"beginTracking",@"t":@(CACurrentMediaTime()),@"accepted":@(answer)}];return answer;}
+- (void)endTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event{[Actions addObject:@{@"method":@"endTracking-before",@"t":@(CACurrentMediaTime())}];[super endTrackingWithTouch:touch withEvent:event];[Actions addObject:@{@"method":@"endTracking-after",@"t":@(CACurrentMediaTime())}];}
+@end
+@interface LiftController:UIViewController
+@property UIControl *slider;@property UILabel *status;@property NSDictionary *configuration;
+@property NSMutableArray *frames,*schema,*animations,*markers;@property NSMapTable *ids;@property NSMutableDictionary *animationSignatures;
+@property CADisplayLink *link;@property NSInteger frameID;@property BOOL touched,finished;
+@end
+@implementation LiftController
+- (void)viewDidLoad{
+    [super viewDidLoad];NSString *raw=NSProcessInfo.processInfo.environment[@"SLIDER_CASE"];self.configuration=raw?[NSJSONSerialization JSONObjectWithData:[raw dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil]:@{};
+    self.overrideUserInterfaceStyle=[self.configuration[@"dark"] boolValue]?UIUserInterfaceStyleDark:UIUserInterfaceStyleLight;self.view.backgroundColor=UIColor.systemBackgroundColor;
+    Touches=[NSMutableArray new];Actions=[NSMutableArray new];self.frames=[NSMutableArray new];self.schema=[NSMutableArray new];self.animations=[NSMutableArray new];self.ids=[NSMapTable weakToStrongObjectsMapTable];self.animationSignatures=[NSMutableDictionary new];
+    if([self.configuration[@"control"] isEqual:@"switch"])self.slider=[[UISwitch alloc] initWithFrame:CGRectMake(80,200,51,31)];else{LiftSlider *slider=[[LiftSlider alloc] initWithFrame:CGRectMake(80,200,300,50)];slider.value=.25;self.slider=slider;}self.slider.accessibilityIdentifier=@"slider";[self.view addSubview:self.slider];
+    for(NSNumber *type in @[@(UIControlEventTouchDown),@(UIControlEventTouchUpInside),@(UIControlEventTouchUpOutside),@(UIControlEventTouchCancel),@(UIControlEventValueChanged)]){__weak LiftController *weak=self;[self.slider addAction:[UIAction actionWithHandler:^(__kindof UIAction *a){LiftController *s=weak;[Actions addObject:@{@"event":type,@"t":@(CACurrentMediaTime()),@"tracking":@(s.slider.tracking),@"touchInside":@(s.slider.touchInside),@"highlighted":@(s.slider.highlighted),@"value":@([s controlValue])}];}] forControlEvents:type.unsignedLongLongValue];}
+    self.status=[[UILabel alloc] initWithFrame:CGRectMake(50,80,350,40)];self.status.accessibilityIdentifier=@"status";self.status.text=@"ready";[self.view addSubview:self.status];
+    self.markers=[NSMutableArray new];for(int i=0;i<16;i++){CALayer *bit=[CALayer layer];bit.frame=CGRectMake(80+i*8,320,8,12);bit.backgroundColor=UIColor.blackColor.CGColor;[self.view.layer addSublayer:bit];[self.markers addObject:bit];}
+    self.link=[CADisplayLink displayLinkWithTarget:self selector:@selector(sample:)];self.link.preferredFrameRateRange=CAFrameRateRangeMake(80,120,120);[self.link addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
+}
+- (void)firstContact{if(self.touched)return;self.touched=YES;if(self.frames.count>1){id previous=self.frames.lastObject;[self.frames removeAllObjects];[self.frames addObject:previous];}self.frameID=0;}
+- (double)controlValue{return [self.slider isKindOfClass:UISlider.class]?[(UISlider *)self.slider value]:([(UISwitch *)self.slider isOn]?1:0);}
+- (void)layers:(CALayer *)layer path:(NSString *)path rows:(NSMutableArray *)rows{
+    NSNumber *identity=[self.ids objectForKey:layer];if(!identity){identity=@(self.schema.count);[self.ids setObject:identity forKey:layer];id delegate=layer.delegate;[self.schema addObject:@{@"id":identity,@"path":path,@"class":NSStringFromClass(layer.class),@"delegateClass":delegate?NSStringFromClass([delegate class]):@"",@"name":layer.name?:@"",@"backgroundColor":Value(layer.backgroundColor?[UIColor colorWithCGColor:layer.backgroundColor]:nil)}];}
+    CALayer *p=layer.presentationLayer?:layer;
+    NSMutableDictionary *row=[@{@"id":identity,@"path":path,@"modelBounds":LiftRect(layer.bounds),@"modelFrame":LiftRect(layer.frame),@"modelPosition":@[@(layer.position.x),@(layer.position.y)],@"modelOpacity":@(layer.opacity),@"modelHidden":@(layer.hidden),@"modelTransform":Transform(layer.transform),@"presentationBounds":LiftRect(p.bounds),@"presentationFrame":LiftRect(p.frame),@"presentationPosition":@[@(p.position.x),@(p.position.y)],@"presentationOpacity":@(p.opacity),@"presentationHidden":@(p.hidden),@"presentationTransform":Transform(p.transform),@"cornerRadius":@(p.cornerRadius),@"shadowOpacity":@(p.shadowOpacity),@"shadowRadius":@(p.shadowRadius),@"shadowOffset":@[@(p.shadowOffset.width),@(p.shadowOffset.height)],@"modelMasksToBounds":@(layer.masksToBounds),@"zPosition":@(layer.zPosition),@"animationKeys":layer.animationKeys?:@[]} mutableCopy];
+    if([self.configuration[@"filters"] boolValue]){row[@"modelFilters"]=FilterInputs(layer.filters);row[@"presentationFilters"]=FilterInputs(p.filters);row[@"modelBackgroundFilters"]=FilterInputs(layer.backgroundFilters);row[@"presentationBackgroundFilters"]=FilterInputs(p.backgroundFilters);NSString *kind=NSStringFromClass(layer.class);if([kind containsString:@"Backdrop"]||[kind containsString:@"Portal"]){NSMutableDictionary *model=[NSMutableDictionary new],*presentation=[NSMutableDictionary new];for(NSString *key in @[@"scale",@"marginWidth",@"groupName",@"allowsInPlaceFiltering",@"captureOnly",@"sourceLayer"]){id a=ReadGetter(layer,key),b=ReadGetter(p,key);if([a isKindOfClass:CALayer.class])a=@{@"layerID":[self.ids objectForKey:a]?:NSNull.null,@"class":NSStringFromClass([a class])};if([b isKindOfClass:CALayer.class])b=@{@"layerID":[self.ids objectForKey:b]?:NSNull.null,@"class":NSStringFromClass([b class])};model[key]=Value(a);presentation[key]=Value(b);}row[@"readOnlyModel"]=model;row[@"readOnlyPresentation"]=presentation;}}
+    [rows addObject:row];
+    NSMutableSet *present=[NSMutableSet new];for(NSString *key in layer.animationKeys){CAAnimation *a=[layer animationForKey:key];NSDictionary *description=Animation(a);NSString *signature=description.description;NSString *slot=[NSString stringWithFormat:@"%@/%@",identity,key];[present addObject:slot];if(![self.animationSignatures[slot] isEqual:signature]){self.animationSignatures[slot]=signature;[self.animations addObject:@{@"t":@(CACurrentMediaTime()),@"layerID":identity,@"key":key,@"animation":description}];}}
+    NSString *prefix=[identity.stringValue stringByAppendingString:@"/"];for(NSString *slot in self.animationSignatures.allKeys)if([slot hasPrefix:prefix]&&![present containsObject:slot])[self.animationSignatures removeObjectForKey:slot];
+    NSInteger index=0;for(CALayer *child in layer.sublayers)[self layers:child path:[path stringByAppendingFormat:@".%ld",(long)index++] rows:rows];
+    if(layer.mask)[self layers:layer.mask path:[path stringByAppendingString:@".mask"] rows:rows];
+}
+- (void)sample:(CADisplayLink *)link{
+    if(self.finished)return;double t=CACurrentMediaTime();if(self.touched)self.frameID++;NSMutableArray *rows=[NSMutableArray new];[self layers:self.slider.layer path:@"slider" rows:rows];
+    [self.frames addObject:@{@"frameID":@(self.touched?self.frameID:-1),@"t":@(t),@"displayTimestamp":@(link.timestamp),@"targetTimestamp":@(link.targetTimestamp),@"layers":rows,@"tracking":@(self.slider.tracking),@"touchInside":@(self.slider.touchInside),@"highlighted":@(self.slider.highlighted),@"value":@([self controlValue])}];
+    [CATransaction begin];[CATransaction setDisableActions:YES];unsigned bits=self.touched?(0x8000|(unsigned)self.frameID):0;for(int i=0;i<16;i++)[(CALayer *)self.markers[i] setBackgroundColor:((bits>>i)&1)?UIColor.whiteColor.CGColor:UIColor.blackColor.CGColor];[CATransaction commit];
+}
+- (void)checkFinish{
+    NSDictionary *last=Touches.lastObject;if(!last||[last[@"phase"] integerValue]<3||CACurrentMediaTime()-[last[@"dispatchT"] doubleValue]<1.5)return;self.finished=YES;[self.link invalidate];
+    NSString *directory=[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask,YES).firstObject stringByAppendingPathComponent:self.configuration[@"id"]?:@"lift-default"];[[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:nil error:nil];
+    NSDictionary *trace=@{@"configuration":self.configuration,@"os":NSProcessInfo.processInfo.operatingSystemVersionString,@"scale":@(self.view.window.screen.scale),@"sliderFrameInRoot":LiftRect(self.slider.frame),@"cropInRoot":LiftRect(CGRectInset(self.slider.frame,-20,-30)),@"markerInRoot":@[@80,@320,@128,@12],@"touches":Touches,@"actions":Actions,@"schema":self.schema,@"frames":self.frames,@"animations":self.animations,@"note":@"Native UISlider responds to real XCTest OS touches. Dense public model/presentation layer sampling; no authored lens state. Marker ID correlates video to display callbacks, not a proven zero-latency CA compositor clock."};
+    [[NSJSONSerialization dataWithJSONObject:Clean(trace) options:0 error:nil] writeToFile:[directory stringByAppendingPathComponent:@"trace.json"] atomically:YES];self.status.text=@"complete";
+}
+@end
+@interface LiftScene:UIResponder<UIWindowSceneDelegate>@property(nonatomic,strong)UIWindow *window;@end
+@implementation LiftScene
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options{self.window=[[LiftWindow alloc] initWithWindowScene:(id)scene];self.window.rootViewController=[LiftController new];[self.window makeKeyAndVisible];}
+@end
+@interface LiftApp:UIResponder<UIApplicationDelegate>@end
+@implementation LiftApp
+- (UISceneConfiguration *)application:(UIApplication *)app configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options{UISceneConfiguration *c=[[UISceneConfiguration alloc] initWithName:@"Lift" sessionRole:session.role];c.delegateClass=LiftScene.class;return c;}
+@end
+int main(int argc,char **argv){@autoreleasepool{return UIApplicationMain(argc,argv,nil,NSStringFromClass(LiftApp.class));}}

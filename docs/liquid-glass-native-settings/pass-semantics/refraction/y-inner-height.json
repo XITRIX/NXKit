@@ -1,0 +1,529 @@
+{
+  "scale": 3,
+  "bounds": "{{0, 0}, {402, 874}}",
+  "os": "Version 27.0 (Build 24A434)",
+  "mutations": [
+    {
+      "inputInnerRefractionHeight": {
+        "after": "8",
+        "before": "16"
+      },
+      "inputBlurRadius": {
+        "after": "0",
+        "before": "5"
+      },
+      "inputBlurOpacity3": {
+        "after": "0",
+        "before": "1"
+      },
+      "inputFaceColorMatrixWhite": {
+        "after": "1",
+        "before": "1.125"
+      },
+      "inputBlurFillLightenOpacity": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputShadowOpacity": {
+        "after": "0",
+        "before": "0.04"
+      },
+      "inputBlurOpacity2": {
+        "after": "0",
+        "before": "0.5"
+      },
+      "inputFaceColorMatrixFillColor": {
+        "after": "<CGColor 0x1060e3cd0> [<CGColorSpace 0x1060d4420> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 0 0 0 0 )",
+        "before": "<CGColor 0x1060e3cd0> [<CGColorSpace 0x1060d4420> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 0 0 0 0 )"
+      },
+      "inputBlurOpacity1": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputFaceOpacity": {
+        "after": "1",
+        "before": "1"
+      },
+      "inputKeyFillHighlightAmount": {
+        "after": "0",
+        "before": "0.4"
+      },
+      "inputBleedOpacity": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputBlurFillRadius": {
+        "after": "0",
+        "before": "nil"
+      },
+      "inputRefractionOpacity": {
+        "after": "0",
+        "before": "0.6"
+      },
+      "__profile": {
+        "archiveBase64": "YnBsaXN0MDDUAAEAAgADAAQABQAGAAcAClgkdmVyc2lvblkkYXJjaGl2ZXJUJHRvcFgkb2JqZWN0cxIAAYagXxAPTlNLZXllZEFyY2hpdmVy0QAIAAlUcm9vdIABrxB7AAsADAAVABYAGgCsAK0ArgCvALAAsQCyALMAtAC1ALYAtwC4ALkAugC7ALwAvQC+AL8AwADBAMIAwwDEAMUAxgDHAMgAyQDKAMsAzADNAM4AzwDQANEA0gDTANQA1QDWANcA2ADZANoA2wDcAN0A3gDfAOAA4QDiAOMA5ADlAOYA5wDoAOkA6gDrAOwA7QDuAO8A8ADxAPIA8wD0APUA9gD3APgA+QD6APsBAQEJAQoBCwEMAQ0BDgEPARABEQESARMBFAEVARYBFwEYARkBGgEbARwBHQEjASgBKQEqASsBLAEtATABMQEyATMBNAE1ATYBOwFAVSRudWxs1AANAA4ADwAQABEAEQATABRcQ0FGaWx0ZXJUeXBlXENBRmlsdGVyTmFtZV5DQUZpbHRlcklucHV0c1YkY2xhc3OAAoACgAOAel8QD2dsYXNzQmFja2dyb3VuZNIAEAAXABgAGVRkaWN0gHmABNMAGwAcABAAHQBkAKtXTlMua2V5c1pOUy5vYmplY3RzrxBGAB4AHwAgACEAIgAjACQAJQAmACcAKAApACoAKwAsAC0ALgAvADAAMQAyADMANAA1ADYANwA4ADkAOgA7ADwAPQA+AD8AQABBAEIAQwBEAEUARgBHAEgASQBKAEsATABNAE4ATwBQAFEAUgBTAFQAVQBWAFcAWABZAFoAWwBcAF0AXgBfAGAAYQBiAGOABYAGgAeACIAJgAqAC4AMgA2ADoAPgBCAEYASgBOAFIAVgBaAF4AYgBmAGoAbgByAHYAegB+AIIAhgCKAI4AkgCWAJoAngCiAKYAqgCuALIAtgC6AL4AwgDGAMoAzgDSANYA2gDeAOIA5gDqAO4A8gD2APoA/gECAQYBCgEOARIBFgEaAR4BIgEmASq8QRgBlAGYAZwBoAGkAagBrAGwAawBsAG8AcABxAGsAcwBsAGwAdgBpAGsAeQBsAGoAfABsAH4AawBrAIEAggBrAIQAhQCGAGgAiACJAGgAgQCMAI0AawCPAGwAkQCBAJMAagCVAJYAaABsAGgAmgBoAJwAnQCeAJ8AoAChAKIAowCkAKUAawCnAKgAaABsgEuATIBNgE6AT4BQgFGAUoBRgFKAU4BUgFaAUYBXgFKAUoBYgE+AUYBZgFKAUIBagFKAW4BRgFGAXIBdgFGAXoBfgGCAToBhgGKAToBcgGOAZIBRgGWAUoBmgFyAZ4BQgGiAaYBOgFKAToBqgE6AbIBtgG6Ab4BwgHGAcoBzgHSAdYBRgHaAd4BOgFKAeF8QF2lucHV0Qmx1ckZpbGxCbHVyUmFkaXVzXxAaaW5wdXRCbHVyRmlsbE5vcm1hbE9wYWNpdHlfEBlpbnB1dEZhY2VDb2xvck1hdHJpeEJsYWNrXxAgaW5wdXRTaGFkb3dDb2xvck1hdHJpeFNhdHVyYXRpb25fEBFpbnB1dFNoYWRvd1JhZGl1c18QGmlucHV0T3V0ZXJSZWZyYWN0aW9uQW1vdW50XxAZaW5wdXRTaGFkb3dEaXN0YW5jZU9mZnNldF8QE2lucHV0QmxlZWREaXN0YW5jZTFfEBlpbnB1dFNEUkdyYWRpZW50RGlzdGFuY2UxXxASaW5wdXRCbHVyRGlzdGFuY2UzXxAQaW5wdXRCbGVlZEFtb3VudF8QEWlucHV0U2hhZG93T2Zmc2V0XxAZaW5wdXRSaW5nU2hhZG93Qmx1clJhZGl1c18QH2lucHV0U2hhZG93VmlicmFuY3lDb250cmlidXRpb25fEBppbnB1dEJsZWVkQ29sb3JNYXRyaXhXaGl0ZV8QFWlucHV0U0RSU2hhZG93T3BhY2l0eV8QEWlucHV0Qmx1ck9wYWNpdHkwXxAeaW5wdXRGYWNlQ29sb3JNYXRyaXhNYXhMdW1hU0RSXxAaaW5wdXRSaW5nU2hhZG93U3Ryb2tlV2lkdGhfEBFpbnB1dFNoYWRvd0Ftb3VudF8QGGlucHV0UmVmcmFjdGlvbkRpc3RhbmNlMF8QG2lucHV0Qmx1ckZpbGxMaWdodGVuT3BhY2l0eV8QGmlucHV0SW5uZXJSZWZyYWN0aW9uSGVpZ2h0XxAaaW5wdXRLZXlGaWxsSGlnaGxpZ2h0QW5nbGVfEBFpbnB1dEJsdXJPcGFjaXR5MV8QEGlucHV0QmxlZWRIZWlnaHRfEBVpbnB1dFNoYWRvd0JsdXJSYWRpdXNfEBhpbnB1dFJlZnJhY3Rpb25EaXN0YW5jZTFfEBVpbnB1dEJsZWVkRGFya2VuQmxlbmRfEBFpbnB1dEJsdXJPcGFjaXR5Ml8QEWlucHV0U2hhZG93SGVpZ2h0XxAeaW5wdXRLZXlGaWxsSGlnaGxpZ2h0U3ByZWFkU0RSXxAbaW5wdXRLZXlGaWxsSGlnaGxpZ2h0QW1vdW50XxAhaW5wdXRLZXlGaWxsSGlnaGxpZ2h0RWZmZWN0T2Zmc2V0XxARaW5wdXRCbHVyT3BhY2l0eTNfEBBpbnB1dE1heEhlYWRyb29tXxAXaW5wdXRTb3VyY2VTdWJsYXllck5hbWVfEBBpbnB1dEZhY2VPcGFjaXR5XxAVaW5wdXRDbGFtcFByZXNlcnZlSHVlXxAPaW5wdXRCbHVyUmFkaXVzXxAbaW5wdXRGYWNlQ29sb3JNYXRyaXhNYXhMdW1hXxAUaW5wdXRCbGVlZEJsdXJSYWRpdXNfEBVpbnB1dFJpbmdTaGFkb3dPZmZzZXRfEBFpbnB1dEJsZWVkT3BhY2l0eV8QGmlucHV0SW5uZXJSZWZyYWN0aW9uQW1vdW50XxAaaW5wdXRTRFJIb2xkaW5nVG9uZUVuYWJsZWRfEBJpbnB1dEJsdXJEaXN0YW5jZTBfEBppbnB1dE91dGVyUmVmcmFjdGlvbkhlaWdodFppbnB1dENsYW1wXxAbaW5wdXRLZXlGaWxsSGlnaGxpZ2h0U3ByZWFkXxAfaW5wdXRCbGVlZENvbG9yTWF0cml4U2F0dXJhdGlvbl8QG2lucHV0U2hhZG93Q29sb3JNYXRyaXhCbGFja18QGGlucHV0U0RSSG9sZGluZ1RvbmVXaGl0ZV8QHWlucHV0RmFjZUNvbG9yTWF0cml4RmlsbENvbG9yXxATaW5wdXRCbGVlZERpc3RhbmNlMF8QEmlucHV0U2hhZG93T3BhY2l0eV8QFmlucHV0UmluZ1NoYWRvd09wYWNpdHlfEBNpbnB1dFJpbmdTaGFkb3dNYXNrXxAeaW5wdXRLZXlGaWxsSGlnaGxpZ2h0Q29sb3JCaWFzXxASaW5wdXRCbHVyRGlzdGFuY2UxXxAfaW5wdXRTaGFkb3dDb2xvck1hdHJpeEZpbGxDb2xvcl8QG2lucHV0S2V5RmlsbEhpZ2hsaWdodEhlaWdodF8QGmlucHV0Qmx1ckZpbGxEYXJrZW5PcGFjaXR5XxAWaW5wdXRSZWZyYWN0aW9uT3BhY2l0eV8QGmlucHV0QmxlZWRDb2xvck1hdHJpeEJsYWNrXxAZaW5wdXRTRFJHcmFkaWVudERpc3RhbmNlMF8QHmlucHV0RmFjZUNvbG9yTWF0cml4U2F0dXJhdGlvbl8QGWlucHV0RmFjZUNvbG9yTWF0cml4V2hpdGVfEBtpbnB1dFNoYWRvd0NvbG9yTWF0cml4V2hpdGVfEBJpbnB1dEJsdXJEaXN0YW5jZTIiQQAAACI/AAAAIj4AAAAiP4AAACNAEAAAAAAAACNAMAAAAAAAACMAAAAAAAAAACIAAAAAI0A2ZmZmZmZm1AD8AP0A/gAQAP8A+QDyAQBUa2luZFV3aWR0aFZoZWlnaHQQAYBV0gECAQMBBAEFWiRjbGFzc25hbWVYJGNsYXNzZXNfEBRMS05TVmFsdWVDb2RpbmdQcm94eaMBBgEHAQhfEBRMS05TVmFsdWVDb2RpbmdQcm94eV1DQUNvZGluZ1Byb3h5WE5TT2JqZWN0I0AUAAAAAAAAIj8AAAAiPxmZmiO/8AAAAAAAACM/+SH7VEQtGCNANmZmZmZmZggiPwAAACM/9PGmxjjQPyM/2ZmZmZmZmiO/4RERERERESJGHDwAUkAwIkCgAAAiPxmZmiNAIAAAAAAAACPAQAAAAAAAACLCAAAAIj+ndrsjP/TxpsY40D/VAR4BHwEgASEAEAD5APkA+QD5ASJRclFiUWdRYYBr0gECAQMBJAElXxAUTEtDR0NvbG9yQ29kaW5nUHJveHmjASYBJwEIXxAUTEtDR0NvbG9yQ29kaW5nUHJveHldQ0FDb2RpbmdQcm94eSI9I9cKIj11wo8jP/AAAAAAAAAjv9MzMzMzMzMiv4AAANUBHgEfASABIQAQAPkA+QD5AS4BIiI+mZmagGsjP+EREREREREiP2ZmZiI/GZmaIj4AAAAiP6ZmZiI/kAAA0gECAQMBNwE4XxATTlNNdXRhYmxlRGljdGlvbmFyeaMBOQE6AQhfEBNOU011dGFibGVEaWN0aW9uYXJ5XE5TRGljdGlvbmFyedIBAgEDATwBPV8QGUxLTlNEaWN0aW9uYXJ5Q29kaW5nUHJveHmjAT4BPwEIXxAZTEtOU0RpY3Rpb25hcnlDb2RpbmdQcm94eV1DQUNvZGluZ1Byb3h50gECAQMBQQFCWENBRmlsdGVyogFBAQgACAAZACIALAAxADoAPwBRAFYAWwBdAVYBXAFtAXoBhwGWAZ0BnwGhAaMBpQG3AcABxQHHAckB1gHeAekCeAJ6AnwCfgKAAoIChAKGAogCigKMAo4CkAKSApQClgKYApoCnAKeAqACogKkAqYCqAKqAqwCrgKwArICtAK2ArgCugK8Ar4CwALCAsQCxgLIAsoCzALOAtAC0gLUAtYC2ALaAtwC3gLgAuIC5ALmAugC6gLsAu4C8ALyAvQC9gL4AvoC/AL+AwADAgMEA5MDlQOXA5kDmwOdA58DoQOjA6UDpwOpA6sDrQOvA7EDswO1A7cDuQO7A70DvwPBA8MDxQPHA8kDywPNA88D0QPTA9UD1wPZA9sD3QPfA+ED4wPlA+cD6QPrA+0D7wPxA/MD9QP3A/kD+wP9A/8EAQQDBAUEBwQJBAsEDQQPBBEEEwQVBBcEGQQbBB0EHwQhBDsEWAR0BJcEqwTIBOQE+gUWBSsFPgVSBW4FkAWtBcUF2QX6BhcGKwZGBmQGgQaeBrIGxQbdBvgHEAckBzgHWQd3B5sHrwfCB9wH7wgHCBkINwhOCGYIegiXCLQIyQjmCPEJDwkxCU8JagmKCaAJtQnOCeQKBQoaCjwKWgp3CpAKrQrJCuoLBgskCzkLPgtDC0gLTQtWC18LaAttC3YLhwuMC5ILmQubC50LpguxC7oL0QvYC+8L/QwGDA8MFAwZDCIMKww0DDUMOgxDDEwMVQxaDF0MYgxnDHAMeQx+DIMMjAyhDKMMpQynDKkMqwy0DMsM0gzpDPcM/A0BDQoNEw0YDS0NMg00DT0NQg1HDUwNUQ1WDV8NdQ18DZINnw2oDcQNyw3nDfUN/g4HAAAAAAAAAgIAAAAAAAABQwAAAAAAAAAAAAAAAAAADgw=",
+        "layerScale": "0.5"
+      },
+      "inputBlurOpacity0": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputFaceColorMatrixSaturation": {
+        "after": "1",
+        "before": "1.3"
+      },
+      "inputFaceColorMatrixMaxLuma": {
+        "after": "1",
+        "before": "0.6"
+      },
+      "inputRingShadowOpacity": {
+        "after": "0",
+        "before": "0.06"
+      },
+      "inputBlurFillDarkenOpacity": {
+        "after": "0",
+        "before": "0.9"
+      },
+      "inputFaceColorMatrixMaxLumaSDR": {
+        "after": "1",
+        "before": "0.6"
+      },
+      "inputOuterRefractionAmount": {
+        "after": "0",
+        "before": "16"
+      },
+      "inputFaceColorMatrixBlack": {
+        "after": "0",
+        "before": "0.125"
+      },
+      "inputBlurFillNormalOpacity": {
+        "after": "0",
+        "before": "0.5"
+      }
+    },
+    {
+      "inputInnerRefractionHeight": {
+        "after": "8",
+        "before": "20"
+      },
+      "inputBlurRadius": {
+        "after": "0",
+        "before": "5"
+      },
+      "inputBlurOpacity3": {
+        "after": "0",
+        "before": "1"
+      },
+      "inputFaceColorMatrixWhite": {
+        "after": "1",
+        "before": "1.125"
+      },
+      "inputBlurFillLightenOpacity": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputShadowOpacity": {
+        "after": "0",
+        "before": "0.3666666"
+      },
+      "inputBlurOpacity2": {
+        "after": "0",
+        "before": "0.5"
+      },
+      "inputFaceColorMatrixFillColor": {
+        "after": "<CGColor 0x1060e3cd0> [<CGColorSpace 0x1060d4420> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 0 0 0 0 )",
+        "before": "<CGColor 0x1060e3cd0> [<CGColorSpace 0x1060d4420> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 0 0 0 0 )"
+      },
+      "inputBlurOpacity1": {
+        "after": "0",
+        "before": "0.2333333"
+      },
+      "inputFaceOpacity": {
+        "after": "1",
+        "before": "1"
+      },
+      "inputKeyFillHighlightAmount": {
+        "after": "0",
+        "before": "0.4"
+      },
+      "inputBleedOpacity": {
+        "after": "0",
+        "before": "0.4666667"
+      },
+      "inputBlurFillRadius": {
+        "after": "0",
+        "before": "nil"
+      },
+      "inputRefractionOpacity": {
+        "after": "0",
+        "before": "0.6"
+      },
+      "__profile": {
+        "archiveBase64": "YnBsaXN0MDDUAAEAAgADAAQABQAGAAcAClgkdmVyc2lvblkkYXJjaGl2ZXJUJHRvcFgkb2JqZWN0cxIAAYagXxAPTlNLZXllZEFyY2hpdmVy0QAIAAlUcm9vdIABrxCAAAsADAAVABYAGgCsAK0ArgCvALAAsQCyALMAtAC1ALYAtwC4ALkAugC7ALwAvQC+AL8AwADBAMIAwwDEAMUAxgDHAMgAyQDKAMsAzADNAM4AzwDQANEA0gDTANQA1QDWANcA2ADZANoA2wDcAN0A3gDfAOAA4QDiAOMA5ADlAOYA5wDoAOkA6gDrAOwA7QDuAO8A8ADxAPIA8wD0APUA9gD3APgA+QD6APsBAQEJAQoBCwEMAQ0BDgEPARABEQESARMBFAEVARYBFwEYARkBGgEbARwBHQEeAR8BIAEhASIBKAEtAS4BLwEwATEBMgE1ATYBNwE4ATkBOgE7AUABRVUkbnVsbNQADQAOAA8AEAARABEAEwAUXENBRmlsdGVyVHlwZVxDQUZpbHRlck5hbWVeQ0FGaWx0ZXJJbnB1dHNWJGNsYXNzgAKAAoADgH9fEA9nbGFzc0JhY2tncm91bmTSABAAFwAYABlUZGljdIB+gATTABsAHAAQAB0AZACrV05TLmtleXNaTlMub2JqZWN0c68QRgAeAB8AIAAhACIAIwAkACUAJgAnACgAKQAqACsALAAtAC4ALwAwADEAMgAzADQANQA2ADcAOAA5ADoAOwA8AD0APgA/AEAAQQBCAEMARABFAEYARwBIAEkASgBLAEwATQBOAE8AUABRAFIAUwBUAFUAVgBXAFgAWQBaAFsAXABdAF4AXwBgAGEAYgBjgAWABoAHgAiACYAKgAuADIANgA6AD4AQgBGAEoATgBSAFYAWgBeAGIAZgBqAG4AcgB2AHoAfgCCAIYAigCOAJIAlgCaAJ4AogCmAKoArgCyALYAugC+AMIAxgDKAM4A0gDWANoA3gDiAOYA6gDuAPIA9gD6AP4BAgEGAQoBDgESARYBGgEeASIBJgEqvEEYAZQBmAGcAaABpAGoAawBsAGsAbABvAHAAcQBrAHMAbAB1AHYAdwBrAHkAbAB7AHwAfQBvAGsAawCBAIIAawCEAIUAhgBoAIgAiQBoAIEAjACNAG8AjwCQAJEAgQCTAJQAlQCWAGgAbABoAJoAaACcAJ0AngCfAKAAoQCiAKMApAClAGsApwCoAGgAbIBLgEyATYBOgE+AUIBRgFKAUYBSgFOAVIBWgFGAV4BSgFiAWYBagFGAW4BSgFyAXYBegFOAUYBRgF+AYIBRgGGAYoBjgE6AZIBlgE6AX4BmgGeAU4BogGmAaoBfgGuAbIBtgG6AToBSgE6Ab4BOgHGAcoBzgHSAdYB2gHeAeIB5gHqAUYB7gHyAToBSgH1fEBdpbnB1dEJsdXJGaWxsQmx1clJhZGl1c18QGmlucHV0Qmx1ckZpbGxOb3JtYWxPcGFjaXR5XxAZaW5wdXRGYWNlQ29sb3JNYXRyaXhCbGFja18QIGlucHV0U2hhZG93Q29sb3JNYXRyaXhTYXR1cmF0aW9uXxARaW5wdXRTaGFkb3dSYWRpdXNfEBppbnB1dE91dGVyUmVmcmFjdGlvbkFtb3VudF8QGWlucHV0U2hhZG93RGlzdGFuY2VPZmZzZXRfEBNpbnB1dEJsZWVkRGlzdGFuY2UxXxAZaW5wdXRTRFJHcmFkaWVudERpc3RhbmNlMV8QEmlucHV0Qmx1ckRpc3RhbmNlM18QEGlucHV0QmxlZWRBbW91bnRfEBFpbnB1dFNoYWRvd09mZnNldF8QGWlucHV0UmluZ1NoYWRvd0JsdXJSYWRpdXNfEB9pbnB1dFNoYWRvd1ZpYnJhbmN5Q29udHJpYnV0aW9uXxAaaW5wdXRCbGVlZENvbG9yTWF0cml4V2hpdGVfEBVpbnB1dFNEUlNoYWRvd09wYWNpdHlfEBFpbnB1dEJsdXJPcGFjaXR5MF8QHmlucHV0RmFjZUNvbG9yTWF0cml4TWF4THVtYVNEUl8QGmlucHV0UmluZ1NoYWRvd1N0cm9rZVdpZHRoXxARaW5wdXRTaGFkb3dBbW91bnRfEBhpbnB1dFJlZnJhY3Rpb25EaXN0YW5jZTBfEBtpbnB1dEJsdXJGaWxsTGlnaHRlbk9wYWNpdHlfEBppbnB1dElubmVyUmVmcmFjdGlvbkhlaWdodF8QGmlucHV0S2V5RmlsbEhpZ2hsaWdodEFuZ2xlXxARaW5wdXRCbHVyT3BhY2l0eTFfEBBpbnB1dEJsZWVkSGVpZ2h0XxAVaW5wdXRTaGFkb3dCbHVyUmFkaXVzXxAYaW5wdXRSZWZyYWN0aW9uRGlzdGFuY2UxXxAVaW5wdXRCbGVlZERhcmtlbkJsZW5kXxARaW5wdXRCbHVyT3BhY2l0eTJfEBFpbnB1dFNoYWRvd0hlaWdodF8QHmlucHV0S2V5RmlsbEhpZ2hsaWdodFNwcmVhZFNEUl8QG2lucHV0S2V5RmlsbEhpZ2hsaWdodEFtb3VudF8QIWlucHV0S2V5RmlsbEhpZ2hsaWdodEVmZmVjdE9mZnNldF8QEWlucHV0Qmx1ck9wYWNpdHkzXxAQaW5wdXRNYXhIZWFkcm9vbV8QF2lucHV0U291cmNlU3VibGF5ZXJOYW1lXxAQaW5wdXRGYWNlT3BhY2l0eV8QFWlucHV0Q2xhbXBQcmVzZXJ2ZUh1ZV8QD2lucHV0Qmx1clJhZGl1c18QG2lucHV0RmFjZUNvbG9yTWF0cml4TWF4THVtYV8QFGlucHV0QmxlZWRCbHVyUmFkaXVzXxAVaW5wdXRSaW5nU2hhZG93T2Zmc2V0XxARaW5wdXRCbGVlZE9wYWNpdHlfEBppbnB1dElubmVyUmVmcmFjdGlvbkFtb3VudF8QGmlucHV0U0RSSG9sZGluZ1RvbmVFbmFibGVkXxASaW5wdXRCbHVyRGlzdGFuY2UwXxAaaW5wdXRPdXRlclJlZnJhY3Rpb25IZWlnaHRaaW5wdXRDbGFtcF8QG2lucHV0S2V5RmlsbEhpZ2hsaWdodFNwcmVhZF8QH2lucHV0QmxlZWRDb2xvck1hdHJpeFNhdHVyYXRpb25fEBtpbnB1dFNoYWRvd0NvbG9yTWF0cml4QmxhY2tfEBhpbnB1dFNEUkhvbGRpbmdUb25lV2hpdGVfEB1pbnB1dEZhY2VDb2xvck1hdHJpeEZpbGxDb2xvcl8QE2lucHV0QmxlZWREaXN0YW5jZTBfEBJpbnB1dFNoYWRvd09wYWNpdHlfEBZpbnB1dFJpbmdTaGFkb3dPcGFjaXR5XxATaW5wdXRSaW5nU2hhZG93TWFza18QHmlucHV0S2V5RmlsbEhpZ2hsaWdodENvbG9yQmlhc18QEmlucHV0Qmx1ckRpc3RhbmNlMV8QH2lucHV0U2hhZG93Q29sb3JNYXRyaXhGaWxsQ29sb3JfEBtpbnB1dEtleUZpbGxIaWdobGlnaHRIZWlnaHRfEBppbnB1dEJsdXJGaWxsRGFya2VuT3BhY2l0eV8QFmlucHV0UmVmcmFjdGlvbk9wYWNpdHlfEBppbnB1dEJsZWVkQ29sb3JNYXRyaXhCbGFja18QGWlucHV0U0RSR3JhZGllbnREaXN0YW5jZTBfEB5pbnB1dEZhY2VDb2xvck1hdHJpeFNhdHVyYXRpb25fEBlpbnB1dEZhY2VDb2xvck1hdHJpeFdoaXRlXxAbaW5wdXRTaGFkb3dDb2xvck1hdHJpeFdoaXRlXxASaW5wdXRCbHVyRGlzdGFuY2UyIkEAAAAiPwAAACI+AAAAIj+AAAAjQC9VVVVVVVYjQD4AAAAAAAAjAAAAAAAAAAAiAAAAACNARQAAAAAAANQA/AD9AP4AEAD/APkA8gEAVGtpbmRVd2lkdGhWaGVpZ2h0EAGAVdIBAgEDAQQBBVokY2xhc3NuYW1lWCRjbGFzc2VzXxAUTEtOU1ZhbHVlQ29kaW5nUHJveHmjAQYBBwEIXxAUTEtOU1ZhbHVlQ29kaW5nUHJveHldQ0FDb2RpbmdQcm94eVhOU09iamVjdCNAFAAAAAAAACI/AAAAIj7u7u4iPrMzMyNAEAAAAAAAACO/8AAAAAAAACNANAAAAAAAACM/+SH7VEQtGCI+bu7uCCI/AAAAIz/08abGONA/Iz/ZmZmZmZmaI7/hERERERERIkYcPABSQDAiQKAAACI+szMzI0AgAAAAAAAAIj7u7u8jwE4AAAAAAAAiwnAAACNAOAAAAAAAACI/p3a7Iz/08abGONA/1QEjASQBJQEmABAA+QD5APkA+QEnUXJRYlFnUWGAcNIBAgEDASkBKl8QFExLQ0dDb2xvckNvZGluZ1Byb3h5owErASwBCF8QFExLQ0dDb2xvckNvZGluZ1Byb3h5XUNBQ29kaW5nUHJveHkiPru7uyI9dcKPIz/wAAAAAAAAI7/TMzMzMzMzIr+AAADVASMBJAElASYAEAD5APkA+QEzASciPpmZmoBwIz/hERERERERIj9mZmYiPxmZmiI+AAAAIj+mZmYiP5AAANIBAgEDATwBPV8QE05TTXV0YWJsZURpY3Rpb25hcnmjAT4BPwEIXxATTlNNdXRhYmxlRGljdGlvbmFyeVxOU0RpY3Rpb25hcnnSAQIBAwFBAUJfEBlMS05TRGljdGlvbmFyeUNvZGluZ1Byb3h5owFDAUQBCF8QGUxLTlNEaWN0aW9uYXJ5Q29kaW5nUHJveHldQ0FDb2RpbmdQcm94edIBAgEDAUYBR1hDQUZpbHRlcqIBRgEIAAgAGQAiACwAMQA6AD8AUQBWAFsAXQFgAWYBdwGEAZEBoAGnAakBqwGtAa8BwQHKAc8B0QHTAeAB6AHzAoIChAKGAogCigKMAo4CkAKSApQClgKYApoCnAKeAqACogKkAqYCqAKqAqwCrgKwArICtAK2ArgCugK8Ar4CwALCAsQCxgLIAsoCzALOAtAC0gLUAtYC2ALaAtwC3gLgAuIC5ALmAugC6gLsAu4C8ALyAvQC9gL4AvoC/AL+AwADAgMEAwYDCAMKAwwDDgOdA58DoQOjA6UDpwOpA6sDrQOvA7EDswO1A7cDuQO7A70DvwPBA8MDxQPHA8kDywPNA88D0QPTA9UD1wPZA9sD3QPfA+ED4wPlA+cD6QPrA+0D7wPxA/MD9QP3A/kD+wP9A/8EAQQDBAUEBwQJBAsEDQQPBBEEEwQVBBcEGQQbBB0EHwQhBCMEJQQnBCkEKwRFBGIEfgShBLUE0gTuBQQFIAU1BUgFXAV4BZoFtwXPBeMGBAYhBjUGUAZuBosGqAa8Bs8G5wcCBxoHLgdCB2MHgQelB7kHzAfmB/kIEQgjCEEIWAhwCIQIoQi+CNMI8Aj7CRkJOwlZCXQJlAmqCb8J2AnuCg8KJApGCmQKgQqaCrcK0wr0CxALLgtDC0gLTQtSC1cLYAtpC3ILdwuAC5ELlgucC6MLpQunC7ALuwvEC9sL4gv5DAcMEAwZDB4MIwwoDDEMOgxDDEwMUQxSDFcMYAxpDHIMdwx6DH8MhAyNDJIMmwygDKkMrgy3DMwMzgzQDNIM1AzWDN8M9gz9DRQNIg0nDSwNNQ0+DUMNWA1dDV8NaA1tDXINdw18DYENig2gDacNvQ3KDdMN7w32DhIOIA4pDjIAAAAAAAACAgAAAAAAAAFIAAAAAAAAAAAAAAAAAAAONw==",
+        "layerScale": "0.5"
+      },
+      "inputBlurOpacity0": {
+        "after": "0",
+        "before": "0.4666666"
+      },
+      "inputFaceColorMatrixSaturation": {
+        "after": "1",
+        "before": "1.3"
+      },
+      "inputFaceColorMatrixMaxLuma": {
+        "after": "1",
+        "before": "0.35"
+      },
+      "inputRingShadowOpacity": {
+        "after": "0",
+        "before": "0.06"
+      },
+      "inputBlurFillDarkenOpacity": {
+        "after": "0",
+        "before": "0.9"
+      },
+      "inputFaceColorMatrixMaxLumaSDR": {
+        "after": "1",
+        "before": "0.35"
+      },
+      "inputOuterRefractionAmount": {
+        "after": "0",
+        "before": "30"
+      },
+      "inputFaceColorMatrixBlack": {
+        "after": "0",
+        "before": "0.125"
+      },
+      "inputBlurFillNormalOpacity": {
+        "after": "0",
+        "before": "0.5"
+      }
+    },
+    {
+      "inputInnerRefractionHeight": {
+        "after": "8",
+        "before": "16"
+      },
+      "inputBlurRadius": {
+        "after": "0",
+        "before": "5"
+      },
+      "inputBlurOpacity3": {
+        "after": "0",
+        "before": "1"
+      },
+      "inputFaceColorMatrixWhite": {
+        "after": "1",
+        "before": "1.125"
+      },
+      "inputBlurFillLightenOpacity": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputShadowOpacity": {
+        "after": "0",
+        "before": "0.04"
+      },
+      "inputBlurOpacity2": {
+        "after": "0",
+        "before": "0.5"
+      },
+      "inputFaceColorMatrixFillColor": {
+        "after": "<CGColor 0x1060e3cd0> [<CGColorSpace 0x1060d4420> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 0 0 0 0 )",
+        "before": "<CGColor 0x1060e3cd0> [<CGColorSpace 0x1060d4420> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 0 0 0 0 )"
+      },
+      "inputBlurOpacity1": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputFaceOpacity": {
+        "after": "1",
+        "before": "1"
+      },
+      "inputKeyFillHighlightAmount": {
+        "after": "0",
+        "before": "0.4"
+      },
+      "inputBleedOpacity": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputBlurFillRadius": {
+        "after": "0",
+        "before": "nil"
+      },
+      "inputRefractionOpacity": {
+        "after": "0",
+        "before": "0.6"
+      },
+      "__profile": {
+        "archiveBase64": "YnBsaXN0MDDUAAEAAgADAAQABQAGAAcAClgkdmVyc2lvblkkYXJjaGl2ZXJUJHRvcFgkb2JqZWN0cxIAAYagXxAPTlNLZXllZEFyY2hpdmVy0QAIAAlUcm9vdIABrxB7AAsADAAVABYAGgCsAK0ArgCvALAAsQCyALMAtAC1ALYAtwC4ALkAugC7ALwAvQC+AL8AwADBAMIAwwDEAMUAxgDHAMgAyQDKAMsAzADNAM4AzwDQANEA0gDTANQA1QDWANcA2ADZANoA2wDcAN0A3gDfAOAA4QDiAOMA5ADlAOYA5wDoAOkA6gDrAOwA7QDuAO8A8ADxAPIA8wD0APUA9gD3APgA+QD6APsBAQEJAQoBCwEMAQ0BDgEPARABEQESARMBFAEVARYBFwEYARkBGgEbARwBHQEjASgBKQEqASsBLAEtATABMQEyATMBNAE1ATYBOwFAVSRudWxs1AANAA4ADwAQABEAEQATABRcQ0FGaWx0ZXJUeXBlXENBRmlsdGVyTmFtZV5DQUZpbHRlcklucHV0c1YkY2xhc3OAAoACgAOAel8QD2dsYXNzQmFja2dyb3VuZNIAEAAXABgAGVRkaWN0gHmABNMAGwAcABAAHQBkAKtXTlMua2V5c1pOUy5vYmplY3RzrxBGAB4AHwAgACEAIgAjACQAJQAmACcAKAApACoAKwAsAC0ALgAvADAAMQAyADMANAA1ADYANwA4ADkAOgA7ADwAPQA+AD8AQABBAEIAQwBEAEUARgBHAEgASQBKAEsATABNAE4ATwBQAFEAUgBTAFQAVQBWAFcAWABZAFoAWwBcAF0AXgBfAGAAYQBiAGOABYAGgAeACIAJgAqAC4AMgA2ADoAPgBCAEYASgBOAFIAVgBaAF4AYgBmAGoAbgByAHYAegB+AIIAhgCKAI4AkgCWAJoAngCiAKYAqgCuALIAtgC6AL4AwgDGAMoAzgDSANYA2gDeAOIA5gDqAO4A8gD2APoA/gECAQYBCgEOARIBFgEaAR4BIgEmASq8QRgBlAGYAZwBoAGkAagBrAGwAawBsAG8AcABxAGsAcwBsAGwAdgBpAGsAeQBsAGoAfABsAH4AawBrAIEAggBrAIQAhQCGAGgAiACJAGgAgQCMAI0AawCPAGwAkQCBAJMAagCVAJYAaABsAGgAmgBoAJwAnQCeAJ8AoAChAKIAowCkAKUAawCnAKgAaABsgEuATIBNgE6AT4BQgFGAUoBRgFKAU4BUgFaAUYBXgFKAUoBYgE+AUYBZgFKAUIBagFKAW4BRgFGAXIBdgFGAXoBfgGCAToBhgGKAToBcgGOAZIBRgGWAUoBmgFyAZ4BQgGiAaYBOgFKAToBqgE6AbIBtgG6Ab4BwgHGAcoBzgHSAdYBRgHaAd4BOgFKAeF8QF2lucHV0Qmx1ckZpbGxCbHVyUmFkaXVzXxAaaW5wdXRCbHVyRmlsbE5vcm1hbE9wYWNpdHlfEBlpbnB1dEZhY2VDb2xvck1hdHJpeEJsYWNrXxAgaW5wdXRTaGFkb3dDb2xvck1hdHJpeFNhdHVyYXRpb25fEBFpbnB1dFNoYWRvd1JhZGl1c18QGmlucHV0T3V0ZXJSZWZyYWN0aW9uQW1vdW50XxAZaW5wdXRTaGFkb3dEaXN0YW5jZU9mZnNldF8QE2lucHV0QmxlZWREaXN0YW5jZTFfEBlpbnB1dFNEUkdyYWRpZW50RGlzdGFuY2UxXxASaW5wdXRCbHVyRGlzdGFuY2UzXxAQaW5wdXRCbGVlZEFtb3VudF8QEWlucHV0U2hhZG93T2Zmc2V0XxAZaW5wdXRSaW5nU2hhZG93Qmx1clJhZGl1c18QH2lucHV0U2hhZG93VmlicmFuY3lDb250cmlidXRpb25fEBppbnB1dEJsZWVkQ29sb3JNYXRyaXhXaGl0ZV8QFWlucHV0U0RSU2hhZG93T3BhY2l0eV8QEWlucHV0Qmx1ck9wYWNpdHkwXxAeaW5wdXRGYWNlQ29sb3JNYXRyaXhNYXhMdW1hU0RSXxAaaW5wdXRSaW5nU2hhZG93U3Ryb2tlV2lkdGhfEBFpbnB1dFNoYWRvd0Ftb3VudF8QGGlucHV0UmVmcmFjdGlvbkRpc3RhbmNlMF8QG2lucHV0Qmx1ckZpbGxMaWdodGVuT3BhY2l0eV8QGmlucHV0SW5uZXJSZWZyYWN0aW9uSGVpZ2h0XxAaaW5wdXRLZXlGaWxsSGlnaGxpZ2h0QW5nbGVfEBFpbnB1dEJsdXJPcGFjaXR5MV8QEGlucHV0QmxlZWRIZWlnaHRfEBVpbnB1dFNoYWRvd0JsdXJSYWRpdXNfEBhpbnB1dFJlZnJhY3Rpb25EaXN0YW5jZTFfEBVpbnB1dEJsZWVkRGFya2VuQmxlbmRfEBFpbnB1dEJsdXJPcGFjaXR5Ml8QEWlucHV0U2hhZG93SGVpZ2h0XxAeaW5wdXRLZXlGaWxsSGlnaGxpZ2h0U3ByZWFkU0RSXxAbaW5wdXRLZXlGaWxsSGlnaGxpZ2h0QW1vdW50XxAhaW5wdXRLZXlGaWxsSGlnaGxpZ2h0RWZmZWN0T2Zmc2V0XxARaW5wdXRCbHVyT3BhY2l0eTNfEBBpbnB1dE1heEhlYWRyb29tXxAXaW5wdXRTb3VyY2VTdWJsYXllck5hbWVfEBBpbnB1dEZhY2VPcGFjaXR5XxAVaW5wdXRDbGFtcFByZXNlcnZlSHVlXxAPaW5wdXRCbHVyUmFkaXVzXxAbaW5wdXRGYWNlQ29sb3JNYXRyaXhNYXhMdW1hXxAUaW5wdXRCbGVlZEJsdXJSYWRpdXNfEBVpbnB1dFJpbmdTaGFkb3dPZmZzZXRfEBFpbnB1dEJsZWVkT3BhY2l0eV8QGmlucHV0SW5uZXJSZWZyYWN0aW9uQW1vdW50XxAaaW5wdXRTRFJIb2xkaW5nVG9uZUVuYWJsZWRfEBJpbnB1dEJsdXJEaXN0YW5jZTBfEBppbnB1dE91dGVyUmVmcmFjdGlvbkhlaWdodFppbnB1dENsYW1wXxAbaW5wdXRLZXlGaWxsSGlnaGxpZ2h0U3ByZWFkXxAfaW5wdXRCbGVlZENvbG9yTWF0cml4U2F0dXJhdGlvbl8QG2lucHV0U2hhZG93Q29sb3JNYXRyaXhCbGFja18QGGlucHV0U0RSSG9sZGluZ1RvbmVXaGl0ZV8QHWlucHV0RmFjZUNvbG9yTWF0cml4RmlsbENvbG9yXxATaW5wdXRCbGVlZERpc3RhbmNlMF8QEmlucHV0U2hhZG93T3BhY2l0eV8QFmlucHV0UmluZ1NoYWRvd09wYWNpdHlfEBNpbnB1dFJpbmdTaGFkb3dNYXNrXxAeaW5wdXRLZXlGaWxsSGlnaGxpZ2h0Q29sb3JCaWFzXxASaW5wdXRCbHVyRGlzdGFuY2UxXxAfaW5wdXRTaGFkb3dDb2xvck1hdHJpeEZpbGxDb2xvcl8QG2lucHV0S2V5RmlsbEhpZ2hsaWdodEhlaWdodF8QGmlucHV0Qmx1ckZpbGxEYXJrZW5PcGFjaXR5XxAWaW5wdXRSZWZyYWN0aW9uT3BhY2l0eV8QGmlucHV0QmxlZWRDb2xvck1hdHJpeEJsYWNrXxAZaW5wdXRTRFJHcmFkaWVudERpc3RhbmNlMF8QHmlucHV0RmFjZUNvbG9yTWF0cml4U2F0dXJhdGlvbl8QGWlucHV0RmFjZUNvbG9yTWF0cml4V2hpdGVfEBtpbnB1dFNoYWRvd0NvbG9yTWF0cml4V2hpdGVfEBJpbnB1dEJsdXJEaXN0YW5jZTIiQQAAACI/AAAAIj4AAAAiP4AAACNAEAAAAAAAACNAMAAAAAAAACMAAAAAAAAAACIAAAAAI0A2ZmZmZmZm1AD8AP0A/gAQAP8A+QDyAQBUa2luZFV3aWR0aFZoZWlnaHQQAYBV0gECAQMBBAEFWiRjbGFzc25hbWVYJGNsYXNzZXNfEBRMS05TVmFsdWVDb2RpbmdQcm94eaMBBgEHAQhfEBRMS05TVmFsdWVDb2RpbmdQcm94eV1DQUNvZGluZ1Byb3h5WE5TT2JqZWN0I0AUAAAAAAAAIj8AAAAiPxmZmiO/8AAAAAAAACM/+SH7VEQtGCNANmZmZmZmZggiPwAAACM/9PGmxjjQPyM/2ZmZmZmZmiO/4RERERERESJGHDwAUkAwIkCgAAAiPxmZmiNAIAAAAAAAACPAQAAAAAAAACLCAAAAIj+ndrsjP/TxpsY40D/VAR4BHwEgASEAEAD5APkA+QD5ASJRclFiUWdRYYBr0gECAQMBJAElXxAUTEtDR0NvbG9yQ29kaW5nUHJveHmjASYBJwEIXxAUTEtDR0NvbG9yQ29kaW5nUHJveHldQ0FDb2RpbmdQcm94eSI9I9cKIj11wo8jP/AAAAAAAAAjv9MzMzMzMzMiv4AAANUBHgEfASABIQAQAPkA+QD5AS4BIiI+mZmagGsjP+EREREREREiP2ZmZiI/GZmaIj4AAAAiP6ZmZiI/kAAA0gECAQMBNwE4XxATTlNNdXRhYmxlRGljdGlvbmFyeaMBOQE6AQhfEBNOU011dGFibGVEaWN0aW9uYXJ5XE5TRGljdGlvbmFyedIBAgEDATwBPV8QGUxLTlNEaWN0aW9uYXJ5Q29kaW5nUHJveHmjAT4BPwEIXxAZTEtOU0RpY3Rpb25hcnlDb2RpbmdQcm94eV1DQUNvZGluZ1Byb3h50gECAQMBQQFCWENBRmlsdGVyogFBAQgACAAZACIALAAxADoAPwBRAFYAWwBdAVYBXAFtAXoBhwGWAZ0BnwGhAaMBpQG3AcABxQHHAckB1gHeAekCeAJ6AnwCfgKAAoIChAKGAogCigKMAo4CkAKSApQClgKYApoCnAKeAqACogKkAqYCqAKqAqwCrgKwArICtAK2ArgCugK8Ar4CwALCAsQCxgLIAsoCzALOAtAC0gLUAtYC2ALaAtwC3gLgAuIC5ALmAugC6gLsAu4C8ALyAvQC9gL4AvoC/AL+AwADAgMEA5MDlQOXA5kDmwOdA58DoQOjA6UDpwOpA6sDrQOvA7EDswO1A7cDuQO7A70DvwPBA8MDxQPHA8kDywPNA88D0QPTA9UD1wPZA9sD3QPfA+ED4wPlA+cD6QPrA+0D7wPxA/MD9QP3A/kD+wP9A/8EAQQDBAUEBwQJBAsEDQQPBBEEEwQVBBcEGQQbBB0EHwQhBDsEWAR0BJcEqwTIBOQE+gUWBSsFPgVSBW4FkAWtBcUF2QX6BhcGKwZGBmQGgQaeBrIGxQbdBvgHEAckBzgHWQd3B5sHrwfCB9wH7wgHCBkINwhOCGYIegiXCLQIyQjmCPEJDwkxCU8JagmKCaAJtQnOCeQKBQoaCjwKWgp3CpAKrQrJCuoLBgskCzkLPgtDC0gLTQtWC18LaAttC3YLhwuMC5ILmQubC50LpguxC7oL0QvYC+8L/QwGDA8MFAwZDCIMKww0DDUMOgxDDEwMVQxaDF0MYgxnDHAMeQx+DIMMjAyhDKMMpQynDKkMqwy0DMsM0gzpDPcM/A0BDQoNEw0YDS0NMg00DT0NQg1HDUwNUQ1WDV8NdQ18DZINnw2oDcQNyw3nDfUN/g4HAAAAAAAAAgIAAAAAAAABQwAAAAAAAAAAAAAAAAAADgw=",
+        "layerScale": "0.5"
+      },
+      "inputBlurOpacity0": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputFaceColorMatrixSaturation": {
+        "after": "1",
+        "before": "1.3"
+      },
+      "inputFaceColorMatrixMaxLuma": {
+        "after": "1",
+        "before": "0.6"
+      },
+      "inputRingShadowOpacity": {
+        "after": "0",
+        "before": "0.06"
+      },
+      "inputBlurFillDarkenOpacity": {
+        "after": "0",
+        "before": "0.9"
+      },
+      "inputFaceColorMatrixMaxLumaSDR": {
+        "after": "1",
+        "before": "0.6"
+      },
+      "inputOuterRefractionAmount": {
+        "after": "0",
+        "before": "16"
+      },
+      "inputFaceColorMatrixBlack": {
+        "after": "0",
+        "before": "0.125"
+      },
+      "inputBlurFillNormalOpacity": {
+        "after": "0",
+        "before": "0.5"
+      }
+    },
+    {
+      "inputInnerRefractionHeight": {
+        "after": "8",
+        "before": "16"
+      },
+      "inputBlurRadius": {
+        "after": "0",
+        "before": "5"
+      },
+      "inputBlurOpacity3": {
+        "after": "0",
+        "before": "1"
+      },
+      "inputFaceColorMatrixWhite": {
+        "after": "1",
+        "before": "1.125"
+      },
+      "inputBlurFillLightenOpacity": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputShadowOpacity": {
+        "after": "0",
+        "before": "0.04"
+      },
+      "inputBlurOpacity2": {
+        "after": "0",
+        "before": "0.5"
+      },
+      "inputFaceColorMatrixFillColor": {
+        "after": "<CGColor 0x1060e3cd0> [<CGColorSpace 0x1060d4420> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 0 0 0 0 )",
+        "before": "<CGColor 0x1060e3cd0> [<CGColorSpace 0x1060d4420> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 0 0 0 0 )"
+      },
+      "inputBlurOpacity1": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputFaceOpacity": {
+        "after": "1",
+        "before": "1"
+      },
+      "inputKeyFillHighlightAmount": {
+        "after": "0",
+        "before": "0.4"
+      },
+      "inputBleedOpacity": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputBlurFillRadius": {
+        "after": "0",
+        "before": "nil"
+      },
+      "inputRefractionOpacity": {
+        "after": "0",
+        "before": "0.6"
+      },
+      "__profile": {
+        "archiveBase64": "YnBsaXN0MDDUAAEAAgADAAQABQAGAAcAClgkdmVyc2lvblkkYXJjaGl2ZXJUJHRvcFgkb2JqZWN0cxIAAYagXxAPTlNLZXllZEFyY2hpdmVy0QAIAAlUcm9vdIABrxB7AAsADAAVABYAGgCsAK0ArgCvALAAsQCyALMAtAC1ALYAtwC4ALkAugC7ALwAvQC+AL8AwADBAMIAwwDEAMUAxgDHAMgAyQDKAMsAzADNAM4AzwDQANEA0gDTANQA1QDWANcA2ADZANoA2wDcAN0A3gDfAOAA4QDiAOMA5ADlAOYA5wDoAOkA6gDrAOwA7QDuAO8A8ADxAPIA8wD0APUA9gD3APgA+QD6APsBAQEJAQoBCwEMAQ0BDgEPARABEQESARMBFAEVARYBFwEYARkBGgEbARwBHQEjASgBKQEqASsBLAEtATABMQEyATMBNAE1ATYBOwFAVSRudWxs1AANAA4ADwAQABEAEQATABRcQ0FGaWx0ZXJUeXBlXENBRmlsdGVyTmFtZV5DQUZpbHRlcklucHV0c1YkY2xhc3OAAoACgAOAel8QD2dsYXNzQmFja2dyb3VuZNIAEAAXABgAGVRkaWN0gHmABNMAGwAcABAAHQBkAKtXTlMua2V5c1pOUy5vYmplY3RzrxBGAB4AHwAgACEAIgAjACQAJQAmACcAKAApACoAKwAsAC0ALgAvADAAMQAyADMANAA1ADYANwA4ADkAOgA7ADwAPQA+AD8AQABBAEIAQwBEAEUARgBHAEgASQBKAEsATABNAE4ATwBQAFEAUgBTAFQAVQBWAFcAWABZAFoAWwBcAF0AXgBfAGAAYQBiAGOABYAGgAeACIAJgAqAC4AMgA2ADoAPgBCAEYASgBOAFIAVgBaAF4AYgBmAGoAbgByAHYAegB+AIIAhgCKAI4AkgCWAJoAngCiAKYAqgCuALIAtgC6AL4AwgDGAMoAzgDSANYA2gDeAOIA5gDqAO4A8gD2APoA/gECAQYBCgEOARIBFgEaAR4BIgEmASq8QRgBlAGYAZwBoAGkAagBrAGwAawBsAG8AcABxAGsAcwBsAGwAdgBpAGsAeQBsAGoAfABsAH4AawBrAIEAggBrAIQAhQCGAGgAiACJAGgAgQCMAI0AawCPAGwAkQCBAJMAagCVAJYAaABsAGgAmgBoAJwAnQCeAJ8AoAChAKIAowCkAKUAawCnAKgAaABsgEuATIBNgE6AT4BQgFGAUoBRgFKAU4BUgFaAUYBXgFKAUoBYgE+AUYBZgFKAUIBagFKAW4BRgFGAXIBdgFGAXoBfgGCAToBhgGKAToBcgGOAZIBRgGWAUoBmgFyAZ4BQgGiAaYBOgFKAToBqgE6AbIBtgG6Ab4BwgHGAcoBzgHSAdYBRgHaAd4BOgFKAeF8QF2lucHV0Qmx1ckZpbGxCbHVyUmFkaXVzXxAaaW5wdXRCbHVyRmlsbE5vcm1hbE9wYWNpdHlfEBlpbnB1dEZhY2VDb2xvck1hdHJpeEJsYWNrXxAgaW5wdXRTaGFkb3dDb2xvck1hdHJpeFNhdHVyYXRpb25fEBFpbnB1dFNoYWRvd1JhZGl1c18QGmlucHV0T3V0ZXJSZWZyYWN0aW9uQW1vdW50XxAZaW5wdXRTaGFkb3dEaXN0YW5jZU9mZnNldF8QE2lucHV0QmxlZWREaXN0YW5jZTFfEBlpbnB1dFNEUkdyYWRpZW50RGlzdGFuY2UxXxASaW5wdXRCbHVyRGlzdGFuY2UzXxAQaW5wdXRCbGVlZEFtb3VudF8QEWlucHV0U2hhZG93T2Zmc2V0XxAZaW5wdXRSaW5nU2hhZG93Qmx1clJhZGl1c18QH2lucHV0U2hhZG93VmlicmFuY3lDb250cmlidXRpb25fEBppbnB1dEJsZWVkQ29sb3JNYXRyaXhXaGl0ZV8QFWlucHV0U0RSU2hhZG93T3BhY2l0eV8QEWlucHV0Qmx1ck9wYWNpdHkwXxAeaW5wdXRGYWNlQ29sb3JNYXRyaXhNYXhMdW1hU0RSXxAaaW5wdXRSaW5nU2hhZG93U3Ryb2tlV2lkdGhfEBFpbnB1dFNoYWRvd0Ftb3VudF8QGGlucHV0UmVmcmFjdGlvbkRpc3RhbmNlMF8QG2lucHV0Qmx1ckZpbGxMaWdodGVuT3BhY2l0eV8QGmlucHV0SW5uZXJSZWZyYWN0aW9uSGVpZ2h0XxAaaW5wdXRLZXlGaWxsSGlnaGxpZ2h0QW5nbGVfEBFpbnB1dEJsdXJPcGFjaXR5MV8QEGlucHV0QmxlZWRIZWlnaHRfEBVpbnB1dFNoYWRvd0JsdXJSYWRpdXNfEBhpbnB1dFJlZnJhY3Rpb25EaXN0YW5jZTFfEBVpbnB1dEJsZWVkRGFya2VuQmxlbmRfEBFpbnB1dEJsdXJPcGFjaXR5Ml8QEWlucHV0U2hhZG93SGVpZ2h0XxAeaW5wdXRLZXlGaWxsSGlnaGxpZ2h0U3ByZWFkU0RSXxAbaW5wdXRLZXlGaWxsSGlnaGxpZ2h0QW1vdW50XxAhaW5wdXRLZXlGaWxsSGlnaGxpZ2h0RWZmZWN0T2Zmc2V0XxARaW5wdXRCbHVyT3BhY2l0eTNfEBBpbnB1dE1heEhlYWRyb29tXxAXaW5wdXRTb3VyY2VTdWJsYXllck5hbWVfEBBpbnB1dEZhY2VPcGFjaXR5XxAVaW5wdXRDbGFtcFByZXNlcnZlSHVlXxAPaW5wdXRCbHVyUmFkaXVzXxAbaW5wdXRGYWNlQ29sb3JNYXRyaXhNYXhMdW1hXxAUaW5wdXRCbGVlZEJsdXJSYWRpdXNfEBVpbnB1dFJpbmdTaGFkb3dPZmZzZXRfEBFpbnB1dEJsZWVkT3BhY2l0eV8QGmlucHV0SW5uZXJSZWZyYWN0aW9uQW1vdW50XxAaaW5wdXRTRFJIb2xkaW5nVG9uZUVuYWJsZWRfEBJpbnB1dEJsdXJEaXN0YW5jZTBfEBppbnB1dE91dGVyUmVmcmFjdGlvbkhlaWdodFppbnB1dENsYW1wXxAbaW5wdXRLZXlGaWxsSGlnaGxpZ2h0U3ByZWFkXxAfaW5wdXRCbGVlZENvbG9yTWF0cml4U2F0dXJhdGlvbl8QG2lucHV0U2hhZG93Q29sb3JNYXRyaXhCbGFja18QGGlucHV0U0RSSG9sZGluZ1RvbmVXaGl0ZV8QHWlucHV0RmFjZUNvbG9yTWF0cml4RmlsbENvbG9yXxATaW5wdXRCbGVlZERpc3RhbmNlMF8QEmlucHV0U2hhZG93T3BhY2l0eV8QFmlucHV0UmluZ1NoYWRvd09wYWNpdHlfEBNpbnB1dFJpbmdTaGFkb3dNYXNrXxAeaW5wdXRLZXlGaWxsSGlnaGxpZ2h0Q29sb3JCaWFzXxASaW5wdXRCbHVyRGlzdGFuY2UxXxAfaW5wdXRTaGFkb3dDb2xvck1hdHJpeEZpbGxDb2xvcl8QG2lucHV0S2V5RmlsbEhpZ2hsaWdodEhlaWdodF8QGmlucHV0Qmx1ckZpbGxEYXJrZW5PcGFjaXR5XxAWaW5wdXRSZWZyYWN0aW9uT3BhY2l0eV8QGmlucHV0QmxlZWRDb2xvck1hdHJpeEJsYWNrXxAZaW5wdXRTRFJHcmFkaWVudERpc3RhbmNlMF8QHmlucHV0RmFjZUNvbG9yTWF0cml4U2F0dXJhdGlvbl8QGWlucHV0RmFjZUNvbG9yTWF0cml4V2hpdGVfEBtpbnB1dFNoYWRvd0NvbG9yTWF0cml4V2hpdGVfEBJpbnB1dEJsdXJEaXN0YW5jZTIiQQAAACI/AAAAIj4AAAAiP4AAACNAEAAAAAAAACNAMAAAAAAAACMAAAAAAAAAACIAAAAAI0A2ZmZmZmZm1AD8AP0A/gAQAP8A+QDyAQBUa2luZFV3aWR0aFZoZWlnaHQQAYBV0gECAQMBBAEFWiRjbGFzc25hbWVYJGNsYXNzZXNfEBRMS05TVmFsdWVDb2RpbmdQcm94eaMBBgEHAQhfEBRMS05TVmFsdWVDb2RpbmdQcm94eV1DQUNvZGluZ1Byb3h5WE5TT2JqZWN0I0AUAAAAAAAAIj8AAAAiPxmZmiO/8AAAAAAAACM/+SH7VEQtGCNANmZmZmZmZggiPwAAACM/9PGmxjjQPyM/2ZmZmZmZmiO/4RERERERESJGHDwAUkAwIkCgAAAiPxmZmiNAIAAAAAAAACPAQAAAAAAAACLCAAAAIj+ndrsjP/TxpsY40D/VAR4BHwEgASEAEAD5APkA+QD5ASJRclFiUWdRYYBr0gECAQMBJAElXxAUTEtDR0NvbG9yQ29kaW5nUHJveHmjASYBJwEIXxAUTEtDR0NvbG9yQ29kaW5nUHJveHldQ0FDb2RpbmdQcm94eSI9I9cKIj11wo8jP/AAAAAAAAAjv9MzMzMzMzMiv4AAANUBHgEfASABIQAQAPkA+QD5AS4BIiI+mZmagGsjP+EREREREREiP2ZmZiI/GZmaIj4AAAAiP6ZmZiI/kAAA0gECAQMBNwE4XxATTlNNdXRhYmxlRGljdGlvbmFyeaMBOQE6AQhfEBNOU011dGFibGVEaWN0aW9uYXJ5XE5TRGljdGlvbmFyedIBAgEDATwBPV8QGUxLTlNEaWN0aW9uYXJ5Q29kaW5nUHJveHmjAT4BPwEIXxAZTEtOU0RpY3Rpb25hcnlDb2RpbmdQcm94eV1DQUNvZGluZ1Byb3h50gECAQMBQQFCWENBRmlsdGVyogFBAQgACAAZACIALAAxADoAPwBRAFYAWwBdAVYBXAFtAXoBhwGWAZ0BnwGhAaMBpQG3AcABxQHHAckB1gHeAekCeAJ6AnwCfgKAAoIChAKGAogCigKMAo4CkAKSApQClgKYApoCnAKeAqACogKkAqYCqAKqAqwCrgKwArICtAK2ArgCugK8Ar4CwALCAsQCxgLIAsoCzALOAtAC0gLUAtYC2ALaAtwC3gLgAuIC5ALmAugC6gLsAu4C8ALyAvQC9gL4AvoC/AL+AwADAgMEA5MDlQOXA5kDmwOdA58DoQOjA6UDpwOpA6sDrQOvA7EDswO1A7cDuQO7A70DvwPBA8MDxQPHA8kDywPNA88D0QPTA9UD1wPZA9sD3QPfA+ED4wPlA+cD6QPrA+0D7wPxA/MD9QP3A/kD+wP9A/8EAQQDBAUEBwQJBAsEDQQPBBEEEwQVBBcEGQQbBB0EHwQhBDsEWAR0BJcEqwTIBOQE+gUWBSsFPgVSBW4FkAWtBcUF2QX6BhcGKwZGBmQGgQaeBrIGxQbdBvgHEAckBzgHWQd3B5sHrwfCB9wH7wgHCBkINwhOCGYIegiXCLQIyQjmCPEJDwkxCU8JagmKCaAJtQnOCeQKBQoaCjwKWgp3CpAKrQrJCuoLBgskCzkLPgtDC0gLTQtWC18LaAttC3YLhwuMC5ILmQubC50LpguxC7oL0QvYC+8L/QwGDA8MFAwZDCIMKww0DDUMOgxDDEwMVQxaDF0MYgxnDHAMeQx+DIMMjAyhDKMMpQynDKkMqwy0DMsM0gzpDPcM/A0BDQoNEw0YDS0NMg00DT0NQg1HDUwNUQ1WDV8NdQ18DZINnw2oDcQNyw3nDfUN/g4HAAAAAAAAAgIAAAAAAAABQwAAAAAAAAAAAAAAAAAADgw=",
+        "layerScale": "0.5"
+      },
+      "inputBlurOpacity0": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputFaceColorMatrixSaturation": {
+        "after": "1",
+        "before": "1.3"
+      },
+      "inputFaceColorMatrixMaxLuma": {
+        "after": "1",
+        "before": "0.6"
+      },
+      "inputRingShadowOpacity": {
+        "after": "0",
+        "before": "0.06"
+      },
+      "inputBlurFillDarkenOpacity": {
+        "after": "0",
+        "before": "0.9"
+      },
+      "inputFaceColorMatrixMaxLumaSDR": {
+        "after": "1",
+        "before": "0.6"
+      },
+      "inputOuterRefractionAmount": {
+        "after": "0",
+        "before": "16"
+      },
+      "inputFaceColorMatrixBlack": {
+        "after": "0",
+        "before": "0.125"
+      },
+      "inputBlurFillNormalOpacity": {
+        "after": "0",
+        "before": "0.5"
+      }
+    },
+    {
+      "inputInnerRefractionHeight": {
+        "after": "8",
+        "before": "20"
+      },
+      "inputBlurRadius": {
+        "after": "0",
+        "before": "5"
+      },
+      "inputBlurOpacity3": {
+        "after": "0",
+        "before": "1"
+      },
+      "inputFaceColorMatrixWhite": {
+        "after": "1",
+        "before": "1.125"
+      },
+      "inputBlurFillLightenOpacity": {
+        "after": "0",
+        "before": "0"
+      },
+      "inputShadowOpacity": {
+        "after": "0",
+        "before": "0.6"
+      },
+      "inputBlurOpacity2": {
+        "after": "0",
+        "before": "0.5"
+      },
+      "inputFaceColorMatrixFillColor": {
+        "after": "<CGColor 0x1060e3cd0> [<CGColorSpace 0x1060d4420> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 0 0 0 0 )",
+        "before": "<CGColor 0x1060e3cd0> [<CGColorSpace 0x1060d4420> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 0 0 0 0 )"
+      },
+      "inputBlurOpacity1": {
+        "after": "0",
+        "before": "0.4"
+      },
+      "inputFaceOpacity": {
+        "after": "1",
+        "before": "1"
+      },
+      "inputKeyFillHighlightAmount": {
+        "after": "0",
+        "before": "0.4"
+      },
+      "inputBleedOpacity": {
+        "after": "0",
+        "before": "0.8"
+      },
+      "inputBlurFillRadius": {
+        "after": "0",
+        "before": "nil"
+      },
+      "inputRefractionOpacity": {
+        "after": "0",
+        "before": "0.6"
+      },
+      "__profile": {
+        "archiveBase64": "YnBsaXN0MDDUAAEAAgADAAQABQAGAAcAClgkdmVyc2lvblkkYXJjaGl2ZXJUJHRvcFgkb2JqZWN0cxIAAYagXxAPTlNLZXllZEFyY2hpdmVy0QAIAAlUcm9vdIABrxCAAAsADAAVABYAGgCsAK0ArgCvALAAsQCyALMAtAC1ALYAtwC4ALkAugC7ALwAvQC+AL8AwADBAMIAwwDEAMUAxgDHAMgAyQDKAMsAzADNAM4AzwDQANEA0gDTANQA1QDWANcA2ADZANoA2wDcAN0A3gDfAOAA4QDiAOMA5ADlAOYA5wDoAOkA6gDrAOwA7QDuAO8A8ADxAPIA8wD0APUA9gD3APgA+QD6APsBAQEJAQoBCwEMAQ0BDgEPARABEQESARMBFAEVARYBFwEYARkBGgEbARwBHQEeAR8BIAEhASIBKAEtAS4BLwEwATEBMgE1ATYBNwE4ATkBOgE7AUABRVUkbnVsbNQADQAOAA8AEAARABEAEwAUXENBRmlsdGVyVHlwZVxDQUZpbHRlck5hbWVeQ0FGaWx0ZXJJbnB1dHNWJGNsYXNzgAKAAoADgH9fEA9nbGFzc0JhY2tncm91bmTSABAAFwAYABlUZGljdIB+gATTABsAHAAQAB0AZACrV05TLmtleXNaTlMub2JqZWN0c68QRgAeAB8AIAAhACIAIwAkACUAJgAnACgAKQAqACsALAAtAC4ALwAwADEAMgAzADQANQA2ADcAOAA5ADoAOwA8AD0APgA/AEAAQQBCAEMARABFAEYARwBIAEkASgBLAEwATQBOAE8AUABRAFIAUwBUAFUAVgBXAFgAWQBaAFsAXABdAF4AXwBgAGEAYgBjgAWABoAHgAiACYAKgAuADIANgA6AD4AQgBGAEoATgBSAFYAWgBeAGIAZgBqAG4AcgB2AHoAfgCCAIYAigCOAJIAlgCaAJ4AogCmAKoArgCyALYAugC+AMIAxgDKAM4A0gDWANoA3gDiAOYA6gDuAPIA9gD6AP4BAgEGAQoBDgESARYBGgEeASIBJgEqvEEYAZQBmAGcAaABpAGoAawBsAGsAbABvAHAAcQBrAHMAbAB1AHYAdwBrAHkAbAB7AHwAfQBvAGsAawCBAIIAawCEAIUAhgBoAIgAiQBoAIEAjACNAG8AjwCQAJEAgQCTAJQAlQCWAGgAbABoAJoAaACcAJ0AngCfAKAAoQCiAKMApAClAGsApwCoAGgAbIBLgEyATYBOgE+AUIBRgFKAUYBSgFOAVIBWgFGAV4BSgFiAWYBagFGAW4BSgFyAXYBegFOAUYBRgF+AYIBRgGGAYoBjgE6AZIBlgE6AX4BmgGeAU4BogGmAaoBfgGuAbIBtgG6AToBSgE6Ab4BOgHGAcoBzgHSAdYB2gHeAeIB5gHqAUYB7gHyAToBSgH1fEBdpbnB1dEJsdXJGaWxsQmx1clJhZGl1c18QGmlucHV0Qmx1ckZpbGxOb3JtYWxPcGFjaXR5XxAZaW5wdXRGYWNlQ29sb3JNYXRyaXhCbGFja18QIGlucHV0U2hhZG93Q29sb3JNYXRyaXhTYXR1cmF0aW9uXxARaW5wdXRTaGFkb3dSYWRpdXNfEBppbnB1dE91dGVyUmVmcmFjdGlvbkFtb3VudF8QGWlucHV0U2hhZG93RGlzdGFuY2VPZmZzZXRfEBNpbnB1dEJsZWVkRGlzdGFuY2UxXxAZaW5wdXRTRFJHcmFkaWVudERpc3RhbmNlMV8QEmlucHV0Qmx1ckRpc3RhbmNlM18QEGlucHV0QmxlZWRBbW91bnRfEBFpbnB1dFNoYWRvd09mZnNldF8QGWlucHV0UmluZ1NoYWRvd0JsdXJSYWRpdXNfEB9pbnB1dFNoYWRvd1ZpYnJhbmN5Q29udHJpYnV0aW9uXxAaaW5wdXRCbGVlZENvbG9yTWF0cml4V2hpdGVfEBVpbnB1dFNEUlNoYWRvd09wYWNpdHlfEBFpbnB1dEJsdXJPcGFjaXR5MF8QHmlucHV0RmFjZUNvbG9yTWF0cml4TWF4THVtYVNEUl8QGmlucHV0UmluZ1NoYWRvd1N0cm9rZVdpZHRoXxARaW5wdXRTaGFkb3dBbW91bnRfEBhpbnB1dFJlZnJhY3Rpb25EaXN0YW5jZTBfEBtpbnB1dEJsdXJGaWxsTGlnaHRlbk9wYWNpdHlfEBppbnB1dElubmVyUmVmcmFjdGlvbkhlaWdodF8QGmlucHV0S2V5RmlsbEhpZ2hsaWdodEFuZ2xlXxARaW5wdXRCbHVyT3BhY2l0eTFfEBBpbnB1dEJsZWVkSGVpZ2h0XxAVaW5wdXRTaGFkb3dCbHVyUmFkaXVzXxAYaW5wdXRSZWZyYWN0aW9uRGlzdGFuY2UxXxAVaW5wdXRCbGVlZERhcmtlbkJsZW5kXxARaW5wdXRCbHVyT3BhY2l0eTJfEBFpbnB1dFNoYWRvd0hlaWdodF8QHmlucHV0S2V5RmlsbEhpZ2hsaWdodFNwcmVhZFNEUl8QG2lucHV0S2V5RmlsbEhpZ2hsaWdodEFtb3VudF8QIWlucHV0S2V5RmlsbEhpZ2hsaWdodEVmZmVjdE9mZnNldF8QEWlucHV0Qmx1ck9wYWNpdHkzXxAQaW5wdXRNYXhIZWFkcm9vbV8QF2lucHV0U291cmNlU3VibGF5ZXJOYW1lXxAQaW5wdXRGYWNlT3BhY2l0eV8QFWlucHV0Q2xhbXBQcmVzZXJ2ZUh1ZV8QD2lucHV0Qmx1clJhZGl1c18QG2lucHV0RmFjZUNvbG9yTWF0cml4TWF4THVtYV8QFGlucHV0QmxlZWRCbHVyUmFkaXVzXxAVaW5wdXRSaW5nU2hhZG93T2Zmc2V0XxARaW5wdXRCbGVlZE9wYWNpdHlfEBppbnB1dElubmVyUmVmcmFjdGlvbkFtb3VudF8QGmlucHV0U0RSSG9sZGluZ1RvbmVFbmFibGVkXxASaW5wdXRCbHVyRGlzdGFuY2UwXxAaaW5wdXRPdXRlclJlZnJhY3Rpb25IZWlnaHRaaW5wdXRDbGFtcF8QG2lucHV0S2V5RmlsbEhpZ2hsaWdodFNwcmVhZF8QH2lucHV0QmxlZWRDb2xvck1hdHJpeFNhdHVyYXRpb25fEBtpbnB1dFNoYWRvd0NvbG9yTWF0cml4QmxhY2tfEBhpbnB1dFNEUkhvbGRpbmdUb25lV2hpdGVfEB1pbnB1dEZhY2VDb2xvck1hdHJpeEZpbGxDb2xvcl8QE2lucHV0QmxlZWREaXN0YW5jZTBfEBJpbnB1dFNoYWRvd09wYWNpdHlfEBZpbnB1dFJpbmdTaGFkb3dPcGFjaXR5XxATaW5wdXRSaW5nU2hhZG93TWFza18QHmlucHV0S2V5RmlsbEhpZ2hsaWdodENvbG9yQmlhc18QEmlucHV0Qmx1ckRpc3RhbmNlMV8QH2lucHV0U2hhZG93Q29sb3JNYXRyaXhGaWxsQ29sb3JfEBtpbnB1dEtleUZpbGxIaWdobGlnaHRIZWlnaHRfEBppbnB1dEJsdXJGaWxsRGFya2VuT3BhY2l0eV8QFmlucHV0UmVmcmFjdGlvbk9wYWNpdHlfEBppbnB1dEJsZWVkQ29sb3JNYXRyaXhCbGFja18QGWlucHV0U0RSR3JhZGllbnREaXN0YW5jZTBfEB5pbnB1dEZhY2VDb2xvck1hdHJpeFNhdHVyYXRpb25fEBlpbnB1dEZhY2VDb2xvck1hdHJpeFdoaXRlXxAbaW5wdXRTaGFkb3dDb2xvck1hdHJpeFdoaXRlXxASaW5wdXRCbHVyRGlzdGFuY2UyIkEAAAAiPwAAACI+AAAAIj+AAAAjQDgAAAAAAAAjQEQAAAAAAAAjAAAAAAAAAAAiAAAAACNATAAAAAAAANQA/AD9AP4AEAD/APkA8gEAVGtpbmRVd2lkdGhWaGVpZ2h0EAGAVdIBAgEDAQQBBVokY2xhc3NuYW1lWCRjbGFzc2VzXxAUTEtOU1ZhbHVlQ29kaW5nUHJveHmjAQYBBwEIXxAUTEtOU1ZhbHVlQ29kaW5nUHJveHldQ0FDb2RpbmdQcm94eVhOU09iamVjdCNAFAAAAAAAACI/AAAAIj9MzM0iPrMzMyNAEAAAAAAAACO/8AAAAAAAACNANAAAAAAAACM/+SH7VEQtGCI+zMzNCCI/AAAAIz/08abGONA/Iz/ZmZmZmZmaI7/hERERERERIkYcPABSQDAiQKAAACI+szMzI0AgAAAAAAAAIj9MzM0jwE4AAAAAAAAiwqAAACNAQAAAAAAAACI/p3a7Iz/08abGONA/1QEjASQBJQEmABAA+QD5APkA+QEnUXJRYlFnUWGAcNIBAgEDASkBKl8QFExLQ0dDb2xvckNvZGluZ1Byb3h5owErASwBCF8QFExLQ0dDb2xvckNvZGluZ1Byb3h5XUNBQ29kaW5nUHJveHkiPxmZmiI9dcKPIz/wAAAAAAAAI7/TMzMzMzMzIr+AAADVASMBJAElASYAEAD5APkA+QEzASciPpmZmoBwIz/hERERERERIj9mZmYiPxmZmiI+AAAAIj+mZmYiP5AAANIBAgEDATwBPV8QE05TTXV0YWJsZURpY3Rpb25hcnmjAT4BPwEIXxATTlNNdXRhYmxlRGljdGlvbmFyeVxOU0RpY3Rpb25hcnnSAQIBAwFBAUJfEBlMS05TRGljdGlvbmFyeUNvZGluZ1Byb3h5owFDAUQBCF8QGUxLTlNEaWN0aW9uYXJ5Q29kaW5nUHJveHldQ0FDb2RpbmdQcm94edIBAgEDAUYBR1hDQUZpbHRlcqIBRgEIAAgAGQAiACwAMQA6AD8AUQBWAFsAXQFgAWYBdwGEAZEBoAGnAakBqwGtAa8BwQHKAc8B0QHTAeAB6AHzAoIChAKGAogCigKMAo4CkAKSApQClgKYApoCnAKeAqACogKkAqYCqAKqAqwCrgKwArICtAK2ArgCugK8Ar4CwALCAsQCxgLIAsoCzALOAtAC0gLUAtYC2ALaAtwC3gLgAuIC5ALmAugC6gLsAu4C8ALyAvQC9gL4AvoC/AL+AwADAgMEAwYDCAMKAwwDDgOdA58DoQOjA6UDpwOpA6sDrQOvA7EDswO1A7cDuQO7A70DvwPBA8MDxQPHA8kDywPNA88D0QPTA9UD1wPZA9sD3QPfA+ED4wPlA+cD6QPrA+0D7wPxA/MD9QP3A/kD+wP9A/8EAQQDBAUEBwQJBAsEDQQPBBEEEwQVBBcEGQQbBB0EHwQhBCMEJQQnBCkEKwRFBGIEfgShBLUE0gTuBQQFIAU1BUgFXAV4BZoFtwXPBeMGBAYhBjUGUAZuBosGqAa8Bs8G5wcCBxoHLgdCB2MHgQelB7kHzAfmB/kIEQgjCEEIWAhwCIQIoQi+CNMI8Aj7CRkJOwlZCXQJlAmqCb8J2AnuCg8KJApGCmQKgQqaCrcK0wr0CxALLgtDC0gLTQtSC1cLYAtpC3ILdwuAC5ELlgucC6MLpQunC7ALuwvEC9sL4gv5DAcMEAwZDB4MIwwoDDEMOgxDDEwMUQxSDFcMYAxpDHIMdwx6DH8MhAyNDJIMmwygDKkMrgy3DMwMzgzQDNIM1AzWDN8M9gz9DRQNIg0nDSwNNQ0+DUMNWA1dDV8NaA1tDXINdw18DYENig2gDacNvQ3KDdMN7w32DhIOIA4pDjIAAAAAAAACAgAAAAAAAAFIAAAAAAAAAAAAAAAAAAAONw==",
+        "layerScale": "0.25"
+      },
+      "inputBlurOpacity0": {
+        "after": "0",
+        "before": "0.8"
+      },
+      "inputFaceColorMatrixSaturation": {
+        "after": "1",
+        "before": "1.3"
+      },
+      "inputFaceColorMatrixMaxLuma": {
+        "after": "1",
+        "before": "0.35"
+      },
+      "inputRingShadowOpacity": {
+        "after": "0",
+        "before": "0.06"
+      },
+      "inputBlurFillDarkenOpacity": {
+        "after": "0",
+        "before": "0.9"
+      },
+      "inputFaceColorMatrixMaxLumaSDR": {
+        "after": "1",
+        "before": "0.35"
+      },
+      "inputOuterRefractionAmount": {
+        "after": "0",
+        "before": "40"
+      },
+      "inputFaceColorMatrixBlack": {
+        "after": "0",
+        "before": "0.125"
+      },
+      "inputBlurFillNormalOpacity": {
+        "after": "0",
+        "before": "0.5"
+      }
+    }
+  ],
+  "runID": "ce339438-55f9-4b58-bce6-3366be9466bb",
+  "changes": {
+    "inputInnerRefractionHeight": 8,
+    "inputBlurRadius": 0,
+    "inputBlurOpacity3": 0,
+    "inputFaceColorMatrixWhite": 1,
+    "inputBlurFillLightenOpacity": 0,
+    "inputBlurOpacity2": 0,
+    "inputShadowOpacity": 0,
+    "inputFaceColorMatrixFillColor": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "inputBlurOpacity1": 0,
+    "inputFaceOpacity": 1,
+    "inputKeyFillHighlightAmount": 0,
+    "inputBleedOpacity": 0,
+    "inputBlurFillRadius": 0,
+    "inputBlurOpacity0": 0,
+    "inputRefractionOpacity": 0,
+    "inputFaceColorMatrixSaturation": 1,
+    "inputFaceColorMatrixMaxLuma": 1,
+    "inputRingShadowOpacity": 0,
+    "inputBlurFillDarkenOpacity": 0,
+    "inputFaceColorMatrixMaxLumaSDR": 1,
+    "inputOuterRefractionAmount": 0,
+    "inputFaceColorMatrixBlack": 0,
+    "inputBlurFillNormalOpacity": 0
+  },
+  "requestedTint": ".5"
+}

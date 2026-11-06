@@ -50,6 +50,14 @@ target_link_libraries(${PROJECT_NAME}
         NXKit
 )
 
+option(NXKIT_BUILD_SIMULATOR_BENCHMARKS "Build Metal regression executables for simctl spawn" OFF)
+if(NXKIT_BUILD_SIMULATOR_BENCHMARKS)
+    if(NOT PLATFORM_IOS OR NOT PLATFORM MATCHES "^SIMULATOR")
+        message(FATAL_ERROR "Simulator benchmarks require PLATFORM_IOS=ON and PLATFORM=SIMULATORARM64")
+    endif()
+    include(GlassComparison/SimulatorTests.cmake)
+endif()
+
 if(PLATFORM_SWITCH)
     set(NXKIT_SWITCH_ADDRESS "" CACHE STRING "Switch IP for shader compilation and deployment")
     add_custom_target(${PROJECT_NAME}.switch-shaders
