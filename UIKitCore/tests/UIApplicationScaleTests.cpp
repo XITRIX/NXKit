@@ -10,6 +10,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <string_view>
+#include "RenderPerformance.hpp"
 
 using namespace NXKit;
 
@@ -63,7 +64,16 @@ public:
 };
 
 bool Context::platformRunLoop(std::function<bool()> loop) {
+    static int observed=0, observedPresents=0;
+    observed=0;observedPresents=0;
+    Internal::RenderPerformance::observer=[](const Internal::RenderPerformance& frame) {
+        ++observed;
+        if(frame.presented)++observedPresents;
+        expect(frame.frame>0 && frame.totalMs>=frame.layoutMs,"diagnostics report a complete frame interval");
+        expect(!Internal::RenderPerformance::current,"diagnostics restore the active metrics scope before observer delivery");
+    };
     expect(loop(), "first application frame runs");
+    expect(observed==1&&observedPresents==1,"diagnostics observe the first submitted application frame exactly once");
     const auto painted=presents;
     {
         CADisplayLink fast([] {CALayer::requestFramerate(120);});
@@ -74,6 +84,8 @@ bool Context::platformRunLoop(std::function<bool()> loop) {
     const auto enabled=[](const char* name){const auto value=std::getenv(name);return value&&std::string_view(value)=="1";};
     const auto continuous=enabled("NXKIT_CONTINUOUS_RENDERING")||enabled("NXKIT_UNCAPPED");
     expect(presents==painted+(continuous?2:0),"clean frames skip GPU presentation unless profiling requests continuous rendering");
+    expect(observed==3&&observedPresents==presents,"diagnostics distinguish idle iterations from submitted frames");
+    Internal::RenderPerformance::observer=nullptr;
     const auto idlePresents=presents,idleAcquires=acquisitions;
     for(int i=0;i<120;++i)expect(loop(),"idle event/dispatch loop keeps running");
     expect(presents==idlePresents+(continuous?120:0)&&acquisitions==idleAcquires+(continuous?120:0),

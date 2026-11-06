@@ -2,6 +2,8 @@
 #include "../AppleGlassPreference.hpp"
 #include "../MetalPipelineCache.hpp"
 #include "IOSWindowGeometry.hpp"
+#include "IOSFrameDiagnostics.hpp"
+#include "../../../RenderPerformance.hpp"
 #include <CALayer.h>
 #include <platforms/ios/SkiaCtx_ios.h>
 
@@ -20,10 +22,13 @@
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
 #include <QuartzCore/CATransaction.h>
+#include <QuartzCore/CAMediaTiming.h>
 #include <SDL3/SDL_metal.h>
 #include <UIKit/UIKit.h>
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <string_view>
 
 using namespace NXKit;
 
@@ -54,10 +59,10 @@ void configureMetalLayer(CAMetalLayer* layer, id<MTLDevice> device) {
         return;
     }
 
-    layer.device = device;
-    layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    layer.framebufferOnly = NO;
-    layer.contentsGravity = kCAGravityResize;
+    if (layer.device != device) layer.device = device;
+    if (layer.pixelFormat != MTLPixelFormatBGRA8Unorm) layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+    if (layer.framebufferOnly) layer.framebufferOnly = NO;
+    if (![layer.contentsGravity isEqualToString:kCAGravityResize]) layer.contentsGravity = kCAGravityResize;
 }
 
 }
@@ -100,10 +105,14 @@ void SkiaCtx_ios::initContext() {
 
     skgpu::graphite::MtlBackendContext backendContext = {};
     backendContext.fDevice.retain(device.get());
-    backendContext.fQueue.retain(queue.get());
+    backendContext.fQueue.reset(Internal::makeIOSDiagnosticQueue(queue.get()));
 
     skgpu::graphite::ContextOptions options;
     options.fRequireOrderedRecordings = true;
+    // Device profiling control: compare Graphite's raster path antialiasing
+    // with its default hardware MSAA. Normal app behavior is unchanged.
+    if(const auto value=std::getenv("NXKIT_RASTER_PATHS");value&&std::string_view(value)=="1")
+        options.fInternalMultisampleCount=skgpu::graphite::SampleCount::k1;
     _pipelineCache=std::make_shared<Internal::MetalPipelineCache>(device.get());
     backendContext.fPipelineCache=_pipelineCache;
     _pipelineCache->configure(backendContext,options);
@@ -226,12 +235,14 @@ sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
     // SDL/UIKit own the native view's frame and rotation transform. Changing
     // layer.frame here would overwrite the coordinator's animation endpoint.
     // The texture follows the probe's presented bounds instead, at native scale.
-    [CATransaction begin];
-    [CATransaction setDisableActions:YES];
-    layer.contentsScale = scale;
-    layer.contentsGravity = kCAGravityResize;
-    layer.drawableSize = CGSizeMake(drawableWidth, drawableHeight);
-    [CATransaction commit];
+    const auto drawableSize = CGSizeMake(drawableWidth, drawableHeight);
+    if (layer.contentsScale != scale || !CGSizeEqualToSize(layer.drawableSize, drawableSize)) {
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        if (layer.contentsScale != scale) layer.contentsScale = scale;
+        if (!CGSizeEqualToSize(layer.drawableSize, drawableSize)) layer.drawableSize = drawableSize;
+        [CATransaction commit];
+    }
     _size = size;
 
     auto currentDrawable = [layer nextDrawable];
@@ -240,6 +251,7 @@ sk_sp<SkSurface> SkiaCtx_ios::getBackbufferSurface() {
     }
 
     drawable.reset(CFRetain((__bridge CFTypeRef)currentDrawable));
+    Internal::observeIOSDrawable(drawable.get());
 
     auto backendTexture = skgpu::graphite::BackendTextures::MakeMetal(
             SkISize::Make(int(currentDrawable.texture.width), int(currentDrawable.texture.height)),
@@ -271,6 +283,24 @@ void SkiaCtx_ios::swapBuffers() {
     commandBuffer.label = @"Present";
     [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
+    if(const auto metrics=Internal::RenderPerformance::current;metrics&&_pipelineCache) {
+        const auto now=CACurrentMediaTime();
+        if(now-_diagnosticMemoryTime>=5) {
+            _diagnosticMemoryTime=now;
+            _diagnosticMemory={NX_OBJC_BRIDGE(id<MTLDevice>,device.get()).currentAllocatedSize,
+                context->currentBudgetedBytes()+recorder->currentBudgetedBytes(),
+                context->currentPurgeableBytes()+recorder->currentPurgeableBytes()};
+        }
+        metrics->metalAllocatedBytes=_diagnosticMemory[0];
+        metrics->graphiteBudgetedBytes=_diagnosticMemory[1];
+        metrics->graphitePurgeableBytes=_diagnosticMemory[2];
+        metrics->memorySampleTime=_diagnosticMemoryTime;
+        const auto stats=_pipelineCache->statistics();
+        metrics->metalLibraryCompiles=stats.libraryCompiles;
+        metrics->metalPipelineCompiles=stats.pipelineCompiles;
+        metrics->metalArchiveHits=stats.archiveHits;
+        Internal::observeIOSPipelineFailures(stats.failures);
+    }
 
     surface = nullptr;
     drawable.reset();

@@ -731,7 +731,7 @@ void UIScrollView::followDragOffset(NXPoint offset, NXPoint velocity) {
         });
     }
     _dragSmoother.setTarget(offset, velocity);
-    CALayer::requestFramerate(60);
+    CALayer::requestFramerate(120);
 }
 
 void UIScrollView::advanceDragSmoothing(double seconds) {
@@ -740,7 +740,9 @@ void UIScrollView::advanceDragSmoothing(double seconds) {
         stopDragSmoothing();
         return;
     }
-    CALayer::requestFramerate(60);
+    // A slow release may keep following the final measured position after
+    // the touch ends. Keep the same cadence through that settling interval.
+    CALayer::requestFramerate(120);
     const auto generation = _dragGeneration;
     const auto offset = _dragSmoother.advance(seconds);
     const bool settled = _dragSmoother.isSettled();

@@ -174,6 +174,19 @@ public:
         if(!controller||!host||!view)return false;
         for(int edge=0;edge<4;++edge){const auto snapshot=Internal::scrollPocketSnapshot(*controller,host,edge);if(snapshot.visible&&snapshot.scroll==view&&isSoft(snapshot))return true;}return false;
     }
+    std::optional<std::vector<SkRect>> affectedRegions(const CALayer& layer) const override {
+        std::vector<SkRect> regions;
+        const auto controller=state->controller.lock();const auto host=state->host.lock();
+        const auto view=std::dynamic_pointer_cast<UIScrollView>(layer.delegate.lock());
+        if(!controller||!host||!view)return regions;
+        for(int edge=0;edge<4;++edge) {
+            const auto snapshot=Internal::scrollPocketSnapshot(*controller,host,edge);
+            if(!snapshot.visible||snapshot.scroll!=view||!isSoft(snapshot))continue;
+            const auto rect=edgeRect(layer.bounds().size,edge,snapshot.effectExtent);
+            regions.push_back(SkRect::MakeXYWH(rect.minX(),rect.minY(),rect.width(),rect.height()));
+        }
+        return regions;
+    }
     sk_sp<SkShader> contentShader(const CALayer& layer) const override {
         std::array<sk_sp<SkShader>,4> next;
         const auto controller=state->controller.lock();const auto host=state->host.lock();const auto view=std::dynamic_pointer_cast<UIScrollView>(layer.delegate.lock());if(!controller||!host||!view)return SkShaders::Color(SK_ColorWHITE);

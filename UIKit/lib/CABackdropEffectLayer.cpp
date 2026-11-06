@@ -32,6 +32,25 @@
 using namespace NXKit;
 
 namespace {
+bool hasNativeExterior(const BackdropEffect& material, NXFloat shadowOpacity, bool explicitShadow) {
+    if(material.outputOutset()<=0) return false;
+    const auto highlight=material.uniform("nativeFilterHighlight");
+    const auto highlightColor=material.uniform("nativeFilterHighlightColor");
+    // The filter highlight occupies -height <= sdf + offset <= 0. A
+    // negative offset therefore places part of its band outside the host.
+    if(highlight && highlight->size()==4 && highlight->at(0)>0 && highlight->at(2)>0
+       && highlightColor && highlightColor->size()==3 && highlightColor->at(0)<0) return true;
+    if(explicitShadow || shadowOpacity<=0) return false;
+    for(const auto* name:{"nativeShadowShape","nativeShadowResponse"}) {
+        const auto value=material.uniform(name);
+        if(value && value->size()==4 && value->at(3)>0) return true;
+    }
+    return false;
+}
+}
+
+
+namespace {
 const SkRuntimeEffect::Uniform* findUniform(const SkRuntimeEffect& effect, const char* name) {
     return effect.findUniform(name);
 }
@@ -263,37 +282,68 @@ std::shared_ptr<const BackdropEffect> CABackdropEffectLayer::resolvedEffect(NXSi
     return {_resolvedMaterials[0], &_resolvedMaterials[0]->effect};
 }
 
-sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState() {
+sk_sp<SkImageFilter> CABackdropEffectLayer::imageFilterForCurrentState(SkCanvas* canvas) {
     const auto layerSize = bounds().size;
     const auto layerCornerRadius = cornerRadius();
     const auto layerContentsScale = contentsScale();
-    if (_cachedImageFilter
+    const bool framePyramid=resolvedEffect(layerSize)->backdropPyramid().has_value()
+        &&Internal::BackdropShader::canFreezePyramid(canvas,std::max<NXFloat>(1,layerContentsScale));
+    if(!framePyramid)canvas=nullptr;
+    if (!framePyramid && _cachedImageFilter
         && _hasCachedFilterState
         && _cachedFilterSize == layerSize
         && _cachedFilterCornerRadius == layerCornerRadius
         && _cachedFilterCornerCurve == cornerCurve()
         && _cachedFilterContentsScale == layerContentsScale
+        && _cachedGlassShadowOpacity == shadowOpacity()
+        && _cachedGlassHasExplicitShadow == shadowColor().has_value()
         && _cachedInteractionGlow == _interaction->glow()
         && _cachedInteractionLocation == _interaction->location)
     {
         return _cachedImageFilter;
     }
 
-    const auto effect = resolvedEffect(layerSize);
+    const auto material = resolvedEffect(layerSize);
+    std::optional<BackdropEffect> adjustedEffect;
+    if (shadowColor() || shadowOpacity() != 1) {
+        adjustedEffect = *material;
+        for (const auto* name : {"nativeShadowShape", "nativeShadowResponse"}) {
+            const auto value = adjustedEffect->uniform(name);
+            if (value && value->size() == 4) {
+                auto adjusted = *value;
+                adjusted[3] *= shadowColor() ? 0 : std::max<NXFloat>(0, shadowOpacity());
+                adjustedEffect->setUniform(name, adjusted);
+            }
+        }
+    }
+    if(material->uniform("nativeFaceBlack") && !hasNativeExterior(*material,shadowOpacity(),shadowColor().has_value())) {
+        if(!adjustedEffect) adjustedEffect=*material;
+        adjustedEffect->setOutputOutset(0);
+    }
+    const auto& effect = adjustedEffect ? *adjustedEffect : *material;
+    // Native radiusLOD starts at level one when its prefiltered initial
+    // reduction is active, including its nominally sharp sample. Generic
+    // backdrop programs retain the complete atlas by default.
     auto imageFilter = _variableBlur ? Internal::progressiveBlurFilter(*_variableBlur,layerSize,layerContentsScale) : Internal::BackdropShader::makeFilter(
-        *effect, _runtimeEffect, layerSize, layerCornerRadius, cornerCurve(),
-        layerContentsScale, _interaction->glow(), _interaction->location
+        effect, _runtimeEffect, layerSize, layerCornerRadius, cornerCurve(),
+        layerContentsScale, _interaction->glow(), _interaction->location,canvas,_glassMaterial.has_value()
     );
     if (!imageFilter) {
         invalidateImageFilterCache();
         return nullptr;
     }
 
+    // Frozen prefix/level images belong to this render only. Never retain a
+    // frame-specific atlas in the layer's reusable description/filter cache.
+    if(framePyramid)return imageFilter;
+
     _cachedImageFilter = std::move(imageFilter);
     _cachedFilterSize = layerSize;
     _cachedFilterCornerRadius = layerCornerRadius;
     _cachedFilterCornerCurve = cornerCurve();
     _cachedFilterContentsScale = layerContentsScale;
+    _cachedGlassShadowOpacity = shadowOpacity();
+    _cachedGlassHasExplicitShadow = shadowColor().has_value();
     _cachedInteractionGlow = _interaction->glow();
     _cachedInteractionLocation = _interaction->location;
     _hasCachedFilterState = true;
@@ -328,7 +378,7 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
     }
 
     observeBackdrop(context);
-    auto imageFilter = imageFilterForCurrentState();
+    auto imageFilter = imageFilterForCurrentState(context);
     if (!imageFilter) return;
 
     const auto rect = SkRect::MakeWH(layerBounds.width(), layerBounds.height());
@@ -348,12 +398,23 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
     const auto filterScale = (_variableBlur || findUniform(*_runtimeEffect, "filterScale"))
         && std::isfinite(contentsScale())
         ? std::max<NXFloat>(1, contentsScale()) : 1.0f;
-    const auto filterRect = SkRect::MakeWH(rect.width() * filterScale, rect.height() * filterScale);
+    auto outputRect = rect;
+    const auto resolvedMaterial = resolvedEffect(layerBounds.size);
+    const bool nativeMaterial = !Internal::BackdropShader::uniformValues(*resolvedMaterial, "nativeFaceBlack").empty();
+    const bool nativeExterior=nativeMaterial && hasNativeExterior(*resolvedMaterial,shadowOpacity(),shadowColor().has_value());
+    if (nativeExterior && !masksToBounds()) outputRect.outset(resolvedMaterial->outputOutset(), resolvedMaterial->outputOutset());
+    const auto filterRect = SkRect::MakeLTRB(outputRect.left() * filterScale, outputRect.top() * filterScale,
+        outputRect.right() * filterScale, outputRect.bottom() * filterScale);
+    if (nativeMaterial) effectPaint.setBlendMode(SkBlendMode::kSrc);
     context->save();
     // Apply coverage once in device space; the built-in shader supplies the
     // fully shaded material and shares this clip's continuous silhouette.
-    if (!masksToBounds()) context->clipPath(shape, true);
+    if (!masksToBounds() && !nativeExterior) context->clipPath(shape, true);
     context->scale(1.0f / filterScale, 1.0f / filterScale);
+    // saveLayer's bounds are an allocation hint, not an output clip. Native
+    // exterior materials replace pixels with kSrc; limit that replacement to
+    // their declared output before bounding the sharp backdrop input.
+    if (nativeExterior) context->clipRect(filterRect);
     SkCanvas::SaveLayerRec effectLayer(
         &filterRect,
         &effectPaint,
@@ -362,6 +423,11 @@ void CABackdropEffectLayer::draw(SkCanvas* context) {
     context->saveLayer(effectLayer);
     context->restore();
     context->restore();
+
+    // Native materials include their own merged-distance rim and shadow in
+    // the same original-backdrop pass. Never feed an old contour/shadow back
+    // into that result or paint the elevation twice.
+    if (nativeMaterial) return;
 
     // The native dark contour lies outside the material's coverage. Keep it
     // separate from the clipped body and automatic elevation, with one shared

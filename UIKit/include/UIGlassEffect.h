@@ -34,21 +34,25 @@ enum class UIGlassEffectStyle {
  shortest dimension. Appearance follows inherited light/dark traits
  unless the NXKit backdrop-appearance option is explicitly enabled.
 
- The material adapts liquid_glass_widgets' lens to NXKit's live backdrop,
- with lighting and tint calibrated against native UIKit gallery captures.
- Interactive effects add touch-following sheen, size-dependent spring inflation and centered stretch without altering the view's public geometry.
- Long neutral regular platters use a color-preserving pressed gain rather than
- the stronger white press veil of short buttons. This response is calibrated
- against native tab bars in both themes; it is an approximation of UIKit.
- Refraction and body frost can be tuned independently, and the perimeter
- uses localized directional light; clear retains its sub-point hairline.
- `backdropEffect()` exposes the resolved material as a portable rendering extension.
- The inherited `UITraitCollection::glassTintAmount` preference changes frost
- and regular-style material density independently of view/content opacity.
- Clear style retains its color response; explicit tint colors survive every
- preference position. Explicit optical overrides retain precedence. The body
- transfer is calibrated against iOS 27.1 framebuffer controls; optical rims
- and textured blur remain approximations.
+ The material translates captured iOS 27 glass profiles into portable Skia
+ passes: independent main/fill/bleed/shadow backdrop inputs, inner and outer
+ refraction, luminance/chroma transfer, accent matrices and eased distance
+ masks, SDF highlights, bleed, ring shadows and output coverage. Selection
+ follows the host's shortest dimension, inherited appearance and
+ `UITraitCollection::glassTintAmount`. Explicit optical overrides retain
+ precedence; `frostRadius` remains Gaussian sigma in view-local points.
+
+ Interactive effects add touch-following sheen, size-dependent spring inflation
+ and centered stretch without changing public view geometry. Long neutral
+ platters retain their independently measured color-preserving press response.
+ `backdropEffect()` exposes the resolved material as a rendering extension.
+
+ Profile values come from iOS 27.0/24A434 captures at seven sizes and five tint
+ preferences. This is a portable reconstruction, not Apple's private renderer:
+ native blur uses a non-Gaussian kernel, the portable SDF lighting/composition
+ laws are reconstructed, and rendering currently targets SDR. Native radius
+ conversion, interpolation and remaining differences are documented in
+ docs/liquid-glass-native-settings/full-translation.md.
  */
 class UIGlassEffect {
 public:
@@ -115,9 +119,9 @@ public:
     void setLuminosity(std::optional<NXFloat> value);
 
     /**
-     Optional custom tint hue. When unset, clear uses white; regular uses
-     `UIColor::systemBackground` in light appearance and a white veil in dark
-     appearance. A supplied color uses UIKit-like clear/regular vibrancy; its
+     Optional custom tint hue. When unset, the native neutral face profile
+     supplies the material's tone. A supplied color uses the style-specific
+     accent matrix independently of the glass tint preference; its
      alpha controls the contribution. An explicit tintOpacity override selects
      NXKit's low-level optical tint path and multiplies the color alpha.
      */

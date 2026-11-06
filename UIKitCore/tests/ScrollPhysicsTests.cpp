@@ -6,6 +6,8 @@
 #include <UIControl.h>
 #include <UIAction.h>
 #include <SDL3/SDL.h>
+#define SDL_MAIN_HANDLED
+#include <SDL3/SDL_main.h>
 #include <SkiaCtx.h>
 #include "ScrollDynamics.hpp"
 #include <cmath>
@@ -13,6 +15,7 @@
 #include <map>
 using namespace NXKit;
 namespace NXKit {
+bool applicationRunLoop();
 class UIScrollViewPhysicsTestHarness {
 public:
  static auto timer(const std::shared_ptr<UIScrollView>& s){return s->_timerAnimation;}
@@ -35,6 +38,8 @@ void expect(bool condition,const char* message){if(!condition){++failures;std::c
 void near(float a,float b,float tolerance,const char* message){if(!std::isfinite(a)||std::abs(a-b)>tolerance){expect(false,message);std::cerr<<"  actual "<<a<<" expected "<<b<<" tolerance "<<tolerance<<'\n';}}
 class Context final:public SkiaCtx {
 public:
+ int requestedFrameRate=0;
+ void setTargetFrameRate(int rate)override{requestedFrameRate=rate;SkiaCtx::setTargetFrameRate(rate);}
  NXSize getSize()override{return {1000,1400};}float getScaleFactor()override{return 3;}
  sk_sp<SkSurface> getBackbufferSurface()override{return nullptr;}void swapBuffers()override{}void sleepForNextFrame()override{}bool platformRunLoop(std::function<bool()>)override{return false;}
 protected:skgpu::graphite::Context* graphiteContext()override{return nullptr;}skgpu::graphite::Recorder* graphiteRecorder()override{return nullptr;}
@@ -268,5 +273,12 @@ void queuedTouchSamples() {
  if(samples->times.size()==3)near(float(samples->times[2]-samples->times[1]),4,.5,"velocity uses sample timing instead of event-drain timing");
  event.type=SDL_EVENT_FINGER_UP;event.tfinger.timestamp=now;SDL_PushEvent(&event);UIApplication::shared->handleEventsIfNeeded();
 }
+void slowReleaseCadence() {
+ Fixture f;f.scroll->setDragSmoothingEnabled(true);f.scroll->setContentOffset({0,300},false);
+ f.begin(1,350,0);f.move(1,330,.02);f.move(1,326,.04);f.move(1,322,.08);f.end(1,322,.10);
+ expect(UIScrollViewPhysicsTestHarness::following(f.scroll),"slow release retains a pending measured position");
+ applicationRunLoop();
+ expect(std::static_pointer_cast<Context>(SkiaCtx::main())->requestedFrameRate==120,"slow-release follower keeps high refresh after active touches end");
 }
-int main(){SkiaCtx::_main=std::make_shared<Context>();UIApplication::shared=new_shared<UIApplication>();SDL_InitSubSystem(SDL_INIT_EVENTS);multiTouch();catching();regrabAndGeometry();fractionalRestingEdge();timerReentrancy();recognizerSemantics();lateContactCancellation();inwardReleaseContinuesScrolling();outwardReleaseKeepsMomentum();axisDynamics();dragFollower();smoothScrollDrag();queuedTouchSamples();UIApplication::shared.reset();SkiaCtx::_main.reset();SDL_QuitSubSystem(SDL_INIT_EVENTS);std::cout<<"Scroll physics failures: "<<failures<<'\n';return failures?1:0;}
+}
+int main(){SDL_SetMainReady();SkiaCtx::_main=std::make_shared<Context>();UIApplication::shared=new_shared<UIApplication>();if(!SDL_InitSubSystem(SDL_INIT_EVENTS)){std::cerr<<SDL_GetError()<<'\n';return 1;}multiTouch();catching();regrabAndGeometry();fractionalRestingEdge();timerReentrancy();recognizerSemantics();lateContactCancellation();inwardReleaseContinuesScrolling();outwardReleaseKeepsMomentum();axisDynamics();dragFollower();smoothScrollDrag();queuedTouchSamples();slowReleaseCadence();UIApplication::shared.reset();SkiaCtx::_main.reset();SDL_QuitSubSystem(SDL_INIT_EVENTS);std::cout<<"Scroll physics failures: "<<failures<<'\n';return failures?1:0;}

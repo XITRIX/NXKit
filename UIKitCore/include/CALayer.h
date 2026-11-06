@@ -169,6 +169,9 @@ protected:
 
     // Additional visual-only motion, composed with the application's transform.
     virtual NXAffineTransform renderingTransform() const { return NXAffineTransform::identity; }
+    // Renderer-owned output such as an SDF material's shadow can extend its
+    // own drawing beyond configured corners. Explicit masks still clip it.
+    virtual NXFloat renderingOutset() const { return 0; }
 
     // Override to add new animatable
     virtual void update(std::shared_ptr<CALayer> presentation, std::shared_ptr<CABasicAnimation> animation, float progress);

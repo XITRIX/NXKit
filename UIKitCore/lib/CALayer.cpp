@@ -4,6 +4,7 @@
 
 #include "CALayer.h"
 #include "LayerContentMask.hpp"
+#include "LayerUniformPrefix.hpp"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkPicture.h"
 #include "RenderPerformance.hpp"
@@ -14,6 +15,10 @@
 #include <algorithm>
 
 #include "include/core/SkRRect.h"
+#include "include/core/SkRegion.h"
+#include "src/core/SkCanvasPriv.h"
+#include "src/core/SkDevice.h"
+#include "src/core/SkSpecialImage.h"
 #include "LayerCornerGeometry.hpp"
 #include <stdexcept>
 #include "include/core/SkBlurTypes.h"
@@ -416,8 +421,10 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         // opacity, then snap on when opacity reaches exactly one.
         SkPaint opacityPaint;
         opacityPaint.setAlphaf(_opacity);
+        auto drawingBounds = localBounds;
+        if (!_masksToBounds) drawingBounds.outset(renderingOutset(), renderingOutset());
         SkCanvas::SaveLayerRec opacityLayer(
-            &localBounds,
+            &drawingBounds,
             &opacityPaint,
             SkCanvas::kInitWithPrevious_SaveLayerFlag
         );
@@ -485,8 +492,10 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         canvas->restore();
     }
 
+    const bool extendsOwnOutput = clipsOwnOutput && renderingOutset() > 0;
+    if (extendsOwnOutput) canvas->restore();
     draw(canvas);
-    if (clipsOwnOutput) canvas->restore();
+    if (clipsOwnOutput && !extendsOwnOutput) canvas->restore();
 
     renderSublayers(canvas);
 
@@ -567,6 +576,73 @@ void CALayer::renderSublayers(SkCanvas* canvas) {
         canvas->save();canvas->clipRect(viewport);
         for(const auto& mask:masks)mask->drawBackdrop(canvas,*this);
         canvas->restore();
+        // A bounded analytic fade can be applied after drawing the children:
+        // restore the frozen prefix through the inverse mask with Src. Shader
+        // clip coverage interpolates old and new RGBA, including transparent
+        // backdrops. Children still draw exactly once and see the real prefix,
+        // so nested backdrop filters retain their original input.
+        auto* device=SkCanvasPriv::TopDevice(canvas);
+        // A fractional/curved outer clip must be applied once to the complete
+        // result, rather than once per child and again to the restored prefix.
+        bool bounded=_masksToBounds&&device&&device->isClipRect()&&!device->isClipAntiAliased()
+            &&device->devClipBounds()==device->bounds()
+            &&device->imageInfo().alphaType()!=kOpaque_SkAlphaType
+            &&device->surfaceProps().pixelGeometry()==kUnknown_SkPixelGeometry;
+        SkRegion affected;
+        sk_sp<SkShader> combined;
+        const auto toDevice=device?SkMatrix::Concat(device->globalToDevice().asM33(),canvas->getTotalMatrix()):SkMatrix::I();
+        // Isolation also defines the sampling boundary for descendant filters.
+        // Reuse the current device only when it has that exact boundary;
+        // embedded/clipped viewports keep their own isolated device.
+        bounded=bounded&&toDevice.rectStaysRect()&&toDevice.mapRect(viewport)==SkRect::Make(device->bounds());
+        if(bounded)for(const auto& mask:masks) {
+            const auto regions=mask->affectedRegions(*this);
+            auto shader=mask->contentShader(*this);
+            if(!regions||!shader){bounded=false;break;}
+            combined=combined?SkShaders::Blend(SkBlendMode::kDstIn,std::move(combined),std::move(shader)):std::move(shader);
+            for(auto rect:*regions) {
+                if(!rect.isFinite()){bounded=false;break;}
+                if(!rect.intersect(viewport))continue;
+                auto mapped=toDevice.mapRect(rect);
+                if(!mapped.isFinite()){bounded=false;break;}
+                SkIRect pixels;mapped.roundOut(&pixels);
+                if(pixels.intersect(device->bounds())&&pixels.intersect(device->devClipBounds()))
+                    affected.op(pixels,SkRegion::kUnion_Op);
+            }
+            if(!bounded)break;
+        }
+        struct Prefix {SkIRect pixels,subset;sk_sp<SkImage> image;};
+        std::vector<Prefix> prefixes;
+        const auto uniformPrefix=bounded?Internal::uniformLayerPrefix(device):nullptr;
+        if(bounded)for(SkRegion::Iterator it(affected);!it.done();it.next()) {
+            if(uniformPrefix){prefixes.push_back({it.rect(),{},nullptr});continue;}
+            const auto snapshot=device->snapSpecial(it.rect(),true);
+            auto image=snapshot?snapshot->asImage():nullptr;
+            if(!image){bounded=false;break;}
+            prefixes.push_back({it.rect(),snapshot->subset(),std::move(image)});
+        }
+        if(bounded) {
+            if(metrics) {
+                ++metrics->boundedMasks;
+                if(uniformPrefix)metrics->uniformMaskPrefixes+=prefixes.size();
+                for(const auto& prefix:prefixes)metrics->preservedMaskPixels+=uint64_t(prefix.pixels.width())*prefix.pixels.height();
+            }
+            renderChildren(canvas);
+            if(!prefixes.empty()) {
+                canvas->save();canvas->clipRect(viewport);
+                canvas->clipShader(SkShaders::Blend(SkBlendMode::kDstOut,SkShaders::Color(SK_ColorWHITE),std::move(combined)));
+                canvas->setMatrix(device->deviceToGlobal());
+                SkPaint restore;restore.setBlendMode(SkBlendMode::kSrc);
+                for(const auto& prefix:prefixes) {
+                    if(uniformPrefix){restore.setShader(uniformPrefix);canvas->drawRect(SkRect::Make(prefix.pixels),restore);}
+                    else canvas->drawImageRect(prefix.image,SkRect::Make(prefix.subset),SkRect::Make(prefix.pixels),
+                        SkSamplingOptions(),&restore,SkCanvas::kStrict_SrcRectConstraint);
+                }
+                canvas->restore();
+            }
+            return;
+        }
+        if(metrics)++metrics->isolatedMasks;
         canvas->save();
         for(const auto& mask:masks) {
             auto shader=mask->contentShader(*this);

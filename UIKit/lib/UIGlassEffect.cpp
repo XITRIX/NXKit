@@ -1,5 +1,6 @@
 #include <UIGlassEffect.h>
-#include "GlassShader.hpp"
+#include "NativeGlassShader.hpp"
+#include "NativeGlassLighting.hpp"
 
 #include <BackdropEffect.h>
 #include <UITraitCollection.h>
@@ -13,104 +14,10 @@
 using namespace NXKit;
 
 namespace {
-
-struct ResolvedGlassParameters {
-    NXFloat maximumSampleRadius;
-    NXFloat frostRadius;
-    NXFloat refraction;
-    NXFloat refractionDepth;
-    NXFloat dispersion;
-    NXFloat saturation;
-    NXFloat contrast;
-    NXFloat luminosity;
-    UIColor tintColor;
-    NXFloat tintOpacity;
-    NXFloat edgeStrength;
-    NXFloat specularStrength;
-    NXFloat darkBackdropSpecularStrength;
-    NXFloat brightBackdropSpecularStrength;
-    NXFloat lightAngle;
-    NXFloat specularDirectionalPower;
-    NXFloat specularWidth;
-    NXFloat reflectionSampleDistance;
-    NXFloat reflectionSpread;
-    NXFloat brightBackdropShade;
-};
-
-NXFloat smoothstep(NXFloat lower, NXFloat upper, NXFloat value) {
-    const auto progress = std::clamp((value - lower) / (upper - lower), 0.0f, 1.0f);
-    return progress * progress * (3.0f - 2.0f * progress);
-}
-
 NXFloat interpolate(NXFloat lower, NXFloat upper, NXFloat progress) {
     return lower + (upper - lower) * progress;
 }
 
-ResolvedGlassParameters styleDefaults(
-    UIGlassEffect::Style style,
-    NXSize size,
-    UIUserInterfaceStyle interfaceStyle,
-    bool hasNativeTint
-) {
-    if (style == UIGlassEffect::Style::clear) {
-        return {
-            .maximumSampleRadius = 64.0f,
-            .frostRadius = 2.0f,
-            .refraction = 0.55f,
-            .refractionDepth = 0.90f,
-            .dispersion = 0.01f,
-            .saturation = 1.0f,
-            .contrast = 1.04f,
-            .luminosity = 0.12f,
-            .tintColor = UIColor::white,
-            .tintOpacity = 0.0f,
-            .edgeStrength = 1.0f,
-            .specularStrength = 0.52f,
-            .darkBackdropSpecularStrength = 0.52f,
-            .brightBackdropSpecularStrength = 0.14f,
-            .lightAngle = interfaceStyle == UIUserInterfaceStyle::dark ? 90.0f : -90.0f,
-            .specularDirectionalPower = 3.0f,
-            .specularWidth = 0.8f,
-            .reflectionSampleDistance = 12.0f,
-            .reflectionSpread = 3.0f,
-            .brightBackdropShade = 0.0f,
-        };
-    }
-
-    // Matched gallery captures hold app appearance fixed while changing the
-    // backdrop. Regular glass retains a neutral body even on solid black.
-    const auto shortestDimension = std::max<NXFloat>(0, std::min(size.width, size.height));
-    const auto sizeAmount = smoothstep(64.0f, 160.0f, shortestDimension);
-    const bool dark = interfaceStyle == UIUserInterfaceStyle::dark;
-    const auto bodySize = std::clamp((shortestDimension - 52.0f) / 108.0f, 0.0f, 1.0f);
-    const auto darkSize = std::clamp((shortestDimension - 52.0f) / 68.0f, 0.0f, 1.0f);
-    return {
-        // Keep the declared backdrop extent at the proven cross-platform
-        // limit used by the existing glass renderer. The largest regular
-        // frost kernel still fits comfortably inside it.
-        .maximumSampleRadius = 64.0f,
-        .frostRadius = hasNativeTint ? interpolate(3.0f, 6.0f, sizeAmount)
-            : (dark ? 12.0f : interpolate(6.0f, 12.0f, sizeAmount)),
-        .refraction = interpolate(0.35f, 0.55f, sizeAmount),
-        .refractionDepth = interpolate(0.70f, 0.90f, sizeAmount),
-        .dispersion = 0.01f,
-        .saturation = dark ? interpolate(1.33764f, 1.34934f, darkSize) : interpolate(1.92f, 1.965f, bodySize),
-        .contrast = dark ? interpolate(1.05155f, 0.95258f, darkSize) : interpolate(1.015f, 1.113f, bodySize),
-        .luminosity = 0.0f,
-        .tintColor = interfaceStyle == UIUserInterfaceStyle::dark ? UIColor::white : UIColor::systemBackground,
-        .tintOpacity = dark ? interpolate(0.1261f, 0.12395f, darkSize) : interpolate(0.5201f, 0.53806f, bodySize),
-        .edgeStrength = 1.0f,
-        .specularStrength = 0.52f,
-        .darkBackdropSpecularStrength = 0.52f,
-        .brightBackdropSpecularStrength = 0.52f,
-        .lightAngle = interfaceStyle == UIUserInterfaceStyle::dark ? 90.0f : -90.0f,
-        .specularDirectionalPower = 3.0f,
-        .specularWidth = 0.8f,
-        .reflectionSampleDistance = 12.0f,
-        .reflectionSpread = 3.0f,
-        .brightBackdropShade = interpolate(0.008f, 0.004f, bodySize),
-    };
-}
 
 void validateFinite(
     const std::optional<NXFloat>& value,
@@ -258,137 +165,85 @@ BackdropEffect UIGlassEffect::_backdropEffect(
     NXSize size,
     const std::shared_ptr<UITraitCollection>& traits
 ) const {
-    const auto interfaceStyle = traits
-        ? traits->userInterfaceStyle()
-        : UIUserInterfaceStyle::unspecified;
-    const bool hasNativeTint = _tintColor && !_tintOpacity;
-    auto parameters = styleDefaults(_style, size, interfaceStyle, hasNativeTint);
-    const auto glassTintAmount = traits ? traits->glassTintAmount() : UITraitCollection::defaultGlassTintAmount;
-    // iOS 27 framebuffer controls: the slider changes regular material density,
-    // not view alpha. Clear style retains its body and explicit colors survive
-    // at every position. Keep caller-specified optical overrides below intact.
-    const bool dark = interfaceStyle == UIUserInterfaceStyle::dark;
-    const auto increasedTint = std::max<NXFloat>(0, (glassTintAmount - 0.5f) * 2);
-    // Measured 4-point stripe transmission uses a small, continuous kernel
-    // for clear/colored glass. Neutral regular retains its wider context blur
-    // plus detail lane; the preference progressively suppresses that lane.
-    if (_style == Style::clear || hasNativeTint) {
-        const auto firstHalf = std::min<NXFloat>(1, glassTintAmount * 2);
-        parameters.frostRadius = interpolate(0.4f, 1.0f, firstHalf);
-        if (glassTintAmount > 0.5f)
-            parameters.frostRadius = interpolate(1.0f, 1.65f, increasedTint);
-    } else if (glassTintAmount < 0.5f) {
-        parameters.frostRadius = glassTintAmount <= 0.25f
-            ? interpolate(0.7f, 1.1f, glassTintAmount * 4)
-            : interpolate(1.1f, parameters.frostRadius, (glassTintAmount - 0.25f) * 4);
+    const auto style = traits ? traits->userInterfaceStyle() : UIUserInterfaceStyle::unspecified;
+    const auto amount = traits ? traits->glassTintAmount() : UITraitCollection::defaultGlassTintAmount;
+    auto resolvedSize = size;
+    if (size.width == 0 && size.height == 0) {
+        const auto reference = Internal::nativeGlassProfile(_style, style, amount);
+        resolvedSize = {reference.context.width, reference.context.height};
     }
-    if (_style == Style::regular && !hasNativeTint) {
-        if (dark && increasedTint > 0) {
-            const auto first = std::min<NXFloat>(1, increasedTint * 2);
-            const auto second = std::max<NXFloat>(0, increasedTint * 2 - 1);
-            parameters.contrast *= interpolate(1, 0.735f, first) * interpolate(1, 0.721f, second);
-            parameters.saturation *= interpolate(1, 1.025f, first) * interpolate(1, 0.961f, second);
-            parameters.tintOpacity = interpolate(parameters.tintOpacity, 0.113f, first);
-            parameters.tintOpacity = interpolate(parameters.tintOpacity, 0.129f, second);
-        } else if (!dark) {
-            parameters.tintOpacity += (glassTintAmount - 0.5f) * (glassTintAmount < 0.5f ? 0.24f : 0.36f);
-        }
+    auto profile = Internal::nativeGlassProfile(_style, style, amount, resolvedSize,
+        _tintColor.has_value() && !_tintOpacity.has_value());
+    const auto traitScale = traits ? traits->displayScale() : 1.f;
+    Internal::resolveNativeGlassDisplayScale(profile,
+        std::isfinite(traitScale) && traitScale > 0 ? traitScale : 1.f);
+    if (_frostRadius) {
+        profile.blurRadius = *_frostRadius;
+        profile.blurFillRadius = profile.bleedBlurRadius = profile.shadowBlurRadius = 0;
+        profile.blurOpacity0 = profile.blurOpacity1 = profile.blurOpacity2 = profile.blurOpacity3 = 1;
+        profile.blurFillNormalOpacity = profile.blurFillLightenOpacity = profile.blurFillDarkenOpacity = 0;
     }
-
-    parameters.maximumSampleRadius = _maximumSampleRadius.value_or(
-        parameters.maximumSampleRadius
-    );
-    parameters.frostRadius = _frostRadius.value_or(parameters.frostRadius);
-    parameters.refraction = _refraction.value_or(parameters.refraction);
-    parameters.refractionDepth = _refractionDepth.value_or(parameters.refractionDepth);
-    parameters.dispersion = _dispersion.value_or(parameters.dispersion);
-    parameters.saturation = _saturation.value_or(parameters.saturation);
-    parameters.contrast = _contrast.value_or(parameters.contrast);
-    parameters.luminosity = _luminosity.value_or(parameters.luminosity);
-    parameters.tintOpacity = _tintOpacity.value_or(_tintColor ? 1.0f : parameters.tintOpacity);
-    parameters.edgeStrength = _edgeStrength.value_or(parameters.edgeStrength);
-    parameters.specularStrength = _specularStrength.value_or(parameters.specularStrength);
-    parameters.darkBackdropSpecularStrength = _darkBackdropSpecularStrength.value_or(
-        parameters.darkBackdropSpecularStrength
-    );
-    parameters.brightBackdropSpecularStrength = _brightBackdropSpecularStrength.value_or(
-        parameters.brightBackdropSpecularStrength
-    );
-    parameters.lightAngle = _lightAngle.value_or(parameters.lightAngle);
-    parameters.specularDirectionalPower = _specularDirectionalPower.value_or(
-        parameters.specularDirectionalPower
-    );
-    parameters.specularWidth = _specularWidth.value_or(parameters.specularWidth);
-    parameters.reflectionSampleDistance = _reflectionSampleDistance.value_or(
-        parameters.reflectionSampleDistance
-    );
-    parameters.reflectionSpread = _reflectionSpread.value_or(parameters.reflectionSpread);
-    parameters.brightBackdropShade = _brightBackdropShade.value_or(
-        parameters.brightBackdropShade
-    );
-
-    const auto tint = _tintColor.value_or(parameters.tintColor);
-    const auto tintRaw = tint.resolvedColorWithTraitCollection(traits).raw();
-    const auto tintAlpha = static_cast<NXFloat>((tintRaw >> 24) & 0xff) / 255.0f;
-    const auto resolvedTint = UIColor(
-        static_cast<unsigned char>((tintRaw >> 16) & 0xff),
-        static_cast<unsigned char>((tintRaw >> 8) & 0xff),
-        static_cast<unsigned char>(tintRaw & 0xff),
-        static_cast<unsigned char>(
-            std::round(255.0f * parameters.tintOpacity * tintAlpha)
-        )
-    );
-
-    auto effect = Internal::makeGlassShaderEffect(
-        parameters.maximumSampleRadius,
-        parameters.frostRadius
-    );
-    // The original shader calls the curved-edge depth `refraction` and the
-    // displacement strength `curve`. Keep those private uniform spellings
-    // while exposing the Figma/optics terminology through UIGlassEffect.
-    effect.setUniform("refraction", parameters.refractionDepth);
-    effect.setUniform("curve", parameters.refraction);
-    effect.setUniform("dispersion", parameters.dispersion);
-    effect.setUniform("saturation", parameters.saturation);
-    effect.setUniform("contrast", parameters.contrast);
-    effect.setUniform("luminosity", parameters.luminosity);
-    effect.setUniform("tint", resolvedTint);
-    effect.setUniform("tintMode", _tintColor && !_tintOpacity ? (_style == Style::clear ? 1.0f : 2.0f) : 0.0f);
-    effect.setUniform("edge", parameters.edgeStrength);
-    effect.setUniform("specStrength", parameters.specularStrength);
-    effect.setUniform(
-        "specFallbackStrength",
-        parameters.darkBackdropSpecularStrength
-    );
-    effect.setUniform(
-        "specBrightFallbackStrength",
-        parameters.brightBackdropSpecularStrength
-    );
-
-    const auto angle = parameters.lightAngle
-        * std::numbers::pi_v<NXFloat>
-        / 180.0f;
-    effect.setUniform("specLightDirection", NXPoint(std::cos(angle), std::sin(angle)));
-    effect.setUniform("specDirectionalPower", parameters.specularDirectionalPower);
-    effect.setUniform("specWidthPx", parameters.specularWidth);
-    effect.setUniform("reflectionSamplePx", parameters.reflectionSampleDistance);
-    effect.setUniform("reflectionSpreadPx", parameters.reflectionSpread);
-    effect.setUniform("brightBackdropShade", parameters.brightBackdropShade);
-    effect.setUniform("referenceAppearance", 1.0f);
-    effect.setUniform("bodyMode", _style == Style::clear ? 1.0f : 0.0f);
-    effect.setUniform("backdropLuma", interfaceStyle == UIUserInterfaceStyle::dark ? 0.15f : 0.85f);
-    effect.setUniform("edgeAbsorption", _edgeAbsorption.value_or(0.035f));
-    const auto bodySize = std::clamp((std::min(size.width, size.height) - 52.0f) / 68.0f, 0.0f, 1.0f);
-    effect.setUniform("adaptiveTint", 0.0f);
-    auto bodyCompression = _style == Style::regular && !_tintColor && !_tintOpacity
-        ? interpolate(0.30563f, 0.55112f, bodySize) : 0.153f;
-    if (_style == Style::regular && dark && !_tintColor && !_tintOpacity) {
-        bodyCompression = interpolate(bodyCompression, 0.477f, std::min<NXFloat>(1, increasedTint * 2));
-        bodyCompression = interpolate(bodyCompression, 0.835f, std::max<NXFloat>(0, increasedTint * 2 - 1));
+    if (_refraction) {
+        const auto gain = *_refraction / .55f;
+        profile.innerRefractionAmount *= gain; profile.outerRefractionAmount *= gain;
     }
-    effect.setUniform("bodyCompression", bodyCompression);
-    effect.setUniform("neutralDetail", _style == Style::regular && !_tintColor
-        ? 0.5f * std::pow(1 - increasedTint, 1.5f) : 0.0f);
-    effect.setUniform("glassTintAmount", glassTintAmount);
+    if (_refractionDepth) {
+        const auto height = *_refractionDepth * 20;
+        profile.innerRefractionHeight = profile.outerRefractionHeight = height;
+    }
+    if (_saturation) profile.faceSaturation = *_saturation;
+    if (_contrast) {
+        profile.faceBlack = 0; profile.faceWhite = *_contrast;
+        profile.faceColorMatrixMaxLuma = profile.faceColorMatrixMaxLumaSDR = 1;
+        profile.faceColorMatrixFillColor = {0,0,0,0};
+    }
+    if (_luminosity) { profile.faceBlack += *_luminosity; profile.faceWhite += *_luminosity; }
+    if (_specularStrength) {
+        const auto strength = *_specularStrength / .52f;
+        profile.highlight.keyAmount *= strength; profile.highlight.fillAmount *= strength;
+        profile.keyFillHighlightAmount *= strength;
+    }
+    if (_edgeStrength) {
+        profile.highlight.keyAmount *= *_edgeStrength; profile.highlight.fillAmount *= *_edgeStrength;
+        profile.keyFillHighlightAmount *= *_edgeStrength;
+        profile.bleedOpacity *= *_edgeStrength; profile.ringShadowOpacity *= *_edgeStrength;
+    }
+    if (_specularWidth) {
+        const auto width = *_specularWidth / .8f;
+        profile.highlight.keyHeight *= width; profile.highlight.fillHeight *= width;
+        profile.keyFillHighlightHeight *= width;
+    }
+    if (_lightAngle) {
+        const auto angle = *_lightAngle * std::numbers::pi_v<NXFloat> / 180;
+        profile.highlight.keyAngle = angle + std::numbers::pi_v<NXFloat> / 2;
+        profile.highlight.fillAngle = profile.highlight.keyAngle + std::numbers::pi_v<NXFloat>;
+        profile.keyFillHighlightAngle = angle;
+    }
+    if (_specularDirectionalPower) {
+        const auto spread = std::numbers::pi_v<NXFloat> / std::sqrt(std::max(*_specularDirectionalPower,1.f));
+        profile.highlight.keySpread = profile.highlight.fillSpread = spread;
+    }
+    const auto tint = _tintColor.value_or(UIColor::white).resolvedColorWithTraitCollection(traits);
+    auto effect = Internal::makeNativeGlassEffect(profile, _style, tint,
+        _tintColor.has_value() && !_tintOpacity.has_value(), _maximumSampleRadius.value_or(
+            std::max({std::abs(profile.innerRefractionAmount),std::abs(profile.outerRefractionAmount),
+                (profile.bleedOpacity>0 && profile.bleedHeight>0)?std::abs(profile.bleedAmount):0,
+                (profile.shadowOpacity>0 || profile.sdrShadowOpacity>0)?std::abs(profile.shadowAmount):0, _reflectionSampleDistance.value_or(0)+_reflectionSpread.value_or(0)})));
+    if (_frostRadius) {
+        // The public override is Skia sigma in view points, independent of the
+        // private CAFilter radius conversion and native backdrop downsampling.
+        effect.setBackdropBlurRadius(*_frostRadius);
+        effect.setBackdropScale(1);
+    }
+    effect.setUniform("nativeDispersion", _dispersion.value_or(0));
+    effect.setUniform("nativeEdgeAbsorption", _edgeAbsorption.value_or(0));
+    effect.setUniform("nativeTintOpacity", _tintOpacity.value_or(-1));
+    effect.setUniform("nativeBrightBackdropShade", _brightBackdropShade.value_or(0));
+    // Portable reflection controls retain separate roles without replacing the
+    // native pass data. Their defaults are identity adjustments.
+    effect.setUniform("nativeDarkSpecularGain", _darkBackdropSpecularStrength.value_or(.52f) / .52f);
+    effect.setUniform("nativeBrightSpecularGain", _brightBackdropSpecularStrength.value_or(.52f) / .52f);
+    effect.setUniform("nativeReflectionDistance", _reflectionSampleDistance.value_or(0));
+    effect.setUniform("nativeReflectionSpread", _reflectionSpread.value_or(0));
     return effect;
 }

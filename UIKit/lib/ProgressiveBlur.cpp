@@ -6,6 +6,7 @@
 #include "include/core/SkShader.h"
 #include "include/core/SkM44.h"
 #include <cmath>
+#include <cstdlib>
 #include <stdexcept>
 using namespace NXKit;
 UIBlurEffect UIBlurEffect::effectWithVariableBlurRadius(NXFloat radius,const std::shared_ptr<UIImage>& mask) {
@@ -117,6 +118,13 @@ half4 main(float2 p) {
 }
 sk_sp<SkImageFilter> Internal::progressiveEdgeBlurFilter(NXFloat radius,sk_sp<SkShader> mask,NXSize viewport,NXFloat scale,bool verticalGradient) {
     if(radius<=0)return nullptr;
+    // Sampling bounds are allocation hints, not a change to the convolution. Each pass
+    // samples along just one axis; avoid rendering an unused halo on the other axis.
+    const bool isotropic = std::getenv("NXKIT_ISOTROPIC_BLUR_BOUNDS") != nullptr;
+    const auto support = [&](NXFloat reach, bool vertical) {
+        return isotropic ? SkSize::Make(reach, reach)
+                         : SkSize::Make(vertical ? 0 : reach, vertical ? reach : 0);
+    };
     const auto kernel=[&](sk_sp<SkShader> field,NXFloat density,NXFloat subtractVariance,NXFloat maximumSigma,sk_sp<SkImageFilter> input,bool secondPass=true) {
         SkRuntimeShaderBuilder along(edgeKernelShader()),across(edgeKernelShader());
         for(auto* builder:{&along,&across}){
@@ -128,9 +136,9 @@ sk_sp<SkImageFilter> Internal::progressiveEdgeBlurFilter(NXFloat radius,sk_sp<Sk
         // The field is constant along the second sampling axis, so every
         // input there uses the same local sigma as the output pixel.
         const auto reach=(maximumSigma>0?maximumSigma:radius*density)*3;
-        auto first=SkImageFilters::RuntimeShader(along,reach,"content",std::move(input));
+        auto first=SkImageFilters::RuntimeShader(along,support(reach,verticalGradient),"content",std::move(input));
         if(!secondPass)return first;
-        return SkImageFilters::RuntimeShader(across,reach,"content",std::move(first));
+        return SkImageFilters::RuntimeShader(across,support(reach,!verticalGradient),"content",std::move(first));
     };
     // Edge sampling extends the scroll viewport's actual boundary pixels,
     // rather than treating the area outside it as transparent black.
@@ -156,7 +164,7 @@ sk_sp<SkImageFilter> Internal::progressiveEdgeBlurFilter(NXFloat radius,sk_sp<Sk
     resolve.uniform("subtractVariance")=removedVariance*scale*scale;
     resolve.uniform("axis")=verticalGradient?SkV2{1,0}:SkV2{0,1};
     std::string_view names[]={"small","large"};sk_sp<SkImageFilter> inputs[]={small,large};
-    return SkImageFilters::RuntimeShader(resolve,radius*scale*3,names,inputs,2);
+    return SkImageFilters::RuntimeShader(resolve,support(radius*scale*3,!verticalGradient),names,inputs,2);
 }
 sk_sp<SkImageFilter> Internal::progressiveBlurFilter(NXFloat radius,sk_sp<SkShader> mask,NXFloat scale) {
     if(radius<=0)return nullptr;

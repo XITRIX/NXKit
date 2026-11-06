@@ -22,7 +22,7 @@
 #include <filesystem>
 using namespace NXKit;
 namespace NXKit {
-bool applicationRunLoop();
+void renderApplicationFrame();
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplication*,std::map<std::string,std::any>){return true;}
 class UIGestureRecognizerTestHarness {
 public:
@@ -96,7 +96,8 @@ public:bool veto=false;
     bool navigationBarShouldPopItem(const std::shared_ptr<UINavigationBar>&,const std::shared_ptr<UINavigationItem>&)override{log("bar.shouldPop");return !veto;}
     void navigationBarDidPopItem(const std::shared_ptr<UINavigationBar>&,const std::shared_ptr<UINavigationItem>&)override{log("bar.didPop");}
 };
-void frame(){for(int i=0;i<5;++i){applicationRunLoop();DispatchQueueTestHarness::pump();}}
+// These are synchronous layout/trait controls, not wall-clock pacing tests.
+void frame(){for(int i=0;i<5;++i){DispatchQueueTestHarness::pump();renderApplicationFrame();DispatchQueueTestHarness::pump();}}
 void settle(){for(int i=0;i<12;++i){UIView::completePendingAnimations();DispatchQueueTestHarness::pump();}}
 void rect(std::ostream& out,NXRect r){out<<'['<<r.minX()<<','<<r.minY()<<','<<r.width()<<','<<r.height()<<']';}
 void snapshot(const std::shared_ptr<UIWindow>& window,const std::string& path,int scale) {

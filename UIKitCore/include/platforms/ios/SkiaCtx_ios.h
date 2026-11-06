@@ -4,6 +4,8 @@
 #include <platforms/SkiaCtx_sdlBase.h>
 #include <include/ports/SkCFObject.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <array>
+#include <cstdint>
 
 #include "include/core/SkFont.h"
 
@@ -45,6 +47,8 @@ private:
     sk_cfp<CFTypeRef> device;
     sk_cfp<CFTypeRef> queue;
     sk_cfp<CFTypeRef> drawable;
+    std::array<std::uint64_t,3> _diagnosticMemory {};
+    double _diagnosticMemoryTime = 0;
 
     skgpu::graphite::Context* graphiteContext() override { return context.get(); }
     skgpu::graphite::Recorder* graphiteRecorder() override { return recorder.get(); }

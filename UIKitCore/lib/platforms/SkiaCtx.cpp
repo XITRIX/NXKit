@@ -8,6 +8,8 @@
 #include "include/gpu/graphite/Recorder.h"
 #include "include/gpu/graphite/Recording.h"
 #include <cstdint>
+#include <cstdlib>
+#include <string_view>
 #include <list>
 #include <unordered_map>
 
@@ -98,6 +100,32 @@ void SkiaCtx::submitBackdropReads() {
 
 void SkiaCtx::pollBackdropReads() {
     if (auto* context = graphiteContext()) context->checkAsyncWorkCompletion();
+}
+
+void SkiaCtx::cleanupGpuCacheIfIdle() {
+    static const bool disabled = [] {
+        const auto value = std::getenv("NXKIT_DISABLE_IDLE_GPU_CLEANUP");
+        return value && std::string_view(value) == "1";
+    }();
+    if (disabled) return;
+    const auto now = FrameClock::now();
+    if (!_hasGpuSubmission || _didIdleCacheCleanup || now < _nextCacheCleanup) return;
+    auto* context = graphiteContext();
+    auto* recorder = graphiteRecorder();
+    if (!context || !recorder) return;
+    _nextCacheCleanup = now + std::chrono::seconds(1);
+    // Keep the recent working set warm for the next gesture. The cutoff is
+    // anchored ten seconds before the last submitted frame, so additional
+    // idle time does not age that working set out of the cache.
+    const auto age = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lastGpuSubmission)
+        + std::chrono::seconds(10);
+    const auto before = context->currentBudgetedBytes() + recorder->currentBudgetedBytes();
+    context->performDeferredCleanup(age, std::chrono::microseconds(500));
+    recorder->performDeferredCleanup(age, std::chrono::microseconds(500));
+    const auto after = context->currentBudgetedBytes() + recorder->currentBudgetedBytes();
+    // A time-limited pass may leave more eligible resources. Continue at most
+    // once per second until a pass makes no progress; never poll while drawing.
+    _didIdleCacheCleanup = after >= before;
 }
 
 std::unique_ptr<skgpu::graphite::Recorder> SkiaCtx::createGraphiteRecorder(
@@ -191,5 +219,9 @@ bool SkiaCtx::flushAndSubmitFrame(sk_sp<SkSurface> surface,
         SkDebugf("Graphite failed to submit the frame.\n");
         return false;
     }
+    _lastGpuSubmission = FrameClock::now();
+    _hasGpuSubmission = true;
+    _didIdleCacheCleanup = false;
+    _nextCacheCleanup = _lastGpuSubmission + std::chrono::seconds(2);
     return true;
 }

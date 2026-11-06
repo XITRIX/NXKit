@@ -20,6 +20,7 @@ void renderApplicationFrame() {
     if (!keyWindow) return;
     rendering = true;
     struct Restore { bool& value; ~Restore() { value = false; } } restore{rendering};
+    Internal::RenderFrameMeasurement measurement;
     SkiaCtx::_main->prepareFrame();
     // Move to UIRenderer
     NXSize size = SkiaCtx::_main->getSize();
@@ -53,9 +54,16 @@ void renderApplicationFrame() {
         };
         return enabled("NXKIT_CONTINUOUS_RENDERING") || enabled("NXKIT_UNCAPPED");
     }();
-    if (!continuous && !CALayer::layerTreeIsDirty) return;
+    if (!continuous && !CALayer::layerTreeIsDirty) {
+        SkiaCtx::_main->cleanupGpuCacheIfIdle();
+        return;
+    }
 
-    const auto surface = SkiaCtx::_main->getBackbufferSurface();
+    sk_sp<SkSurface> surface;
+    {
+        Internal::RenderPerformanceScope timer(Internal::RenderPerformance::current ? &Internal::RenderPerformance::current->acquireMs : nullptr);
+        surface = SkiaCtx::_main->getBackbufferSurface();
+    }
     if (!surface) {
         CALayer::layerTreeIsDirty = true;
         return;
@@ -80,6 +88,7 @@ void renderApplicationFrame() {
         Internal::RenderPerformanceScope timer(Internal::RenderPerformance::current ? &Internal::RenderPerformance::current->submitMs : nullptr);
         SkiaCtx::_main->flushAndSubmit(surface);
         SkiaCtx::_main->swapBuffers();
+        if (Internal::RenderPerformance::current) Internal::RenderPerformance::current->presented = true;
     }
 }
 
@@ -95,7 +104,11 @@ bool applicationRunLoop() {
     if (UIApplication::shared->isQuitRequested()) return false;
     SkiaCtx::_main->pollBackdropReads();
     DispatchQueue::main()->performAll();
-    renderApplicationFrame();
+    // Drain input/dispatch work on an early event wake, but keep the original
+    // frame deadline. Touch bursts must not turn a paced loop into uncapped
+    // submissions and an ever older queue of scroll positions.
+    SkiaCtx::_main->setTargetFrameRate(UIView::maximumAnimationFrameRate());
+    if (SkiaCtx::_main->beginScheduledFrame()) renderApplicationFrame();
     SkiaCtx::_main->sleepForNextFrame();
     return true;
 }

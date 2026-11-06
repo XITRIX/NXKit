@@ -6,6 +6,7 @@
 #include "include/core/SkExecutor.h"
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
+#import <TargetConditionals.h>
 #import <CommonCrypto/CommonDigest.h>
 #include <atomic>
 #include <chrono>
@@ -40,11 +41,27 @@ NSString* environmentPath(const char* name) {
 }
 NSURL* child(NSURL* base,NSString* name) { return [base URLByAppendingPathComponent:name]; }
 id<MTLBinaryArchive> loadArchive(id<MTLDevice> device,NSURL* url) {
+#if TARGET_OS_SIMULATOR
+    // Simulator Metal has no device architecture for binary archives. Source
+    // libraries and pre-created pipeline objects remain usable there.
+    return nil;
+#else
     if(!url||![NSFileManager.defaultManager fileExistsAtPath:url.path])return nil;
     MTLBinaryArchiveDescriptor* descriptor=[MTLBinaryArchiveDescriptor new];descriptor.url=url;
     NSError* error=nil;id<MTLBinaryArchive> result=[device newBinaryArchiveWithDescriptor:descriptor error:&error];
     if(!result)SkDebugf("Metal ignored unavailable/incompatible archive: %s\n",error.localizedDescription.UTF8String);
     return result;
+#endif
+}
+id<MTLLibrary> loadBundledLibrary(id<MTLDevice> device,NSURL* url) {
+    // Loading hundreds of libraries by URL can retain a descriptor per file
+    // in Simulator Metal. Owned dispatch data keeps the finite IR bytes alive
+    // without keeping those files open for the lifetime of the cache.
+    NSData* bytes=[NSData dataWithContentsOfURL:url options:0 error:nil];
+    if(!bytes.length)return nil;
+    dispatch_data_t payload=dispatch_data_create(bytes.bytes,bytes.length,nullptr,
+                                                DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+    return [device newLibraryWithData:payload error:nil];
 }
 id<MTLFunction> archiveFunction(id<MTLLibrary> library,NSString* name,NSArray* archives) {
     MTLFunctionDescriptor* descriptor=[MTLFunctionDescriptor new];descriptor.name=name;descriptor.binaryArchives=archives;
@@ -73,15 +90,16 @@ struct MetalPipelineCache::State {
     NSMutableSet<NSString*>* sourceIDs=[NSMutableSet new];
     bool exportFailed=false;
     void write() {
-        if(!dirty||!writeArchive)return;
         NSURL* base=harvest?:directory;if(!base)return;
-        NSURL* temporary=child(base,@"pipeline.binary.metallib.tmp");NSError* error=nil;
-        if([writeArchive serializeToURL:temporary error:&error]) {
-            // POSIX rename atomically replaces an existing cache without a gap.
-            NSURL* destination=child(base,@"pipeline.binary.metallib");
-            if(std::rename(temporary.fileSystemRepresentation,destination.fileSystemRepresentation)==0)dirty=false;
+        if(dirty&&writeArchive) {
+            NSURL* temporary=child(base,@"pipeline.binary.metallib.tmp");NSError* error=nil;
+            if([writeArchive serializeToURL:temporary error:&error]) {
+                // POSIX rename atomically replaces an existing cache without a gap.
+                NSURL* destination=child(base,@"pipeline.binary.metallib");
+                if(std::rename(temporary.fileSystemRepresentation,destination.fileSystemRepresentation)==0)dirty=false;
+            }
+            if(dirty&&diagnostics)SkDebugf("Metal archive persistence failed: %s\n",error.localizedDescription.UTF8String?:"rename failed");
         }
-        if(dirty&&diagnostics)SkDebugf("Metal archive persistence failed: %s\n",error.localizedDescription.UTF8String?:"rename failed");
         if(harvest) {
             NSMutableArray* libraries=[NSMutableArray new];
             for(NSString* source in [sourceIDs.allObjects sortedArrayUsingSelector:@selector(compare:)])
@@ -129,7 +147,9 @@ MetalPipelineCache::MetalPipelineCache(CFTypeRef native):state(std::make_shared<
     // an archive that a rendering/compilation thread is currently reading.
     s->writeArchive=loadArchive(s->device,persisted);
     if(!s->writeArchive&&s->harvest)s->writeArchive=loadArchive(s->device,child(s->harvest,@"pipeline.binary.metallib"));
+#if !TARGET_OS_SIMULATOR
     if(!s->writeArchive)s->writeArchive=[s->device newBinaryArchiveWithDescriptor:[MTLBinaryArchiveDescriptor new] error:nil];
+#endif
     // Prepare the native objects before the event loop starts. The catalog is
     // generic Metal state; Core never needs to instantiate a UIKit component.
     if(s->bundled) {
@@ -141,12 +161,13 @@ MetalPipelineCache::MetalPipelineCache(CFTypeRef native):state(std::make_shared<
             for(NSUInteger i=0;i<hash.length;++i)if(!std::isxdigit([hash characterAtIndex:i]))return nil;
             const auto key=std::string(hash.UTF8String);id<MTLLibrary> library=nil;
             if(auto existing=s->libraries.find(key);existing!=s->libraries.end())library=(__bridge id<MTLLibrary>)existing->second.get();
-            else {library=[s->device newLibraryWithURL:child(child(s->bundled,@"libraries"),[hash stringByAppendingPathExtension:@"metallib"]) error:nil];if(library){library.label=hash;s->libraries.emplace(key,sk_ret_cfp((__bridge CFTypeRef)library));}}
+            else {library=loadBundledLibrary(s->device,child(child(s->bundled,@"libraries"),[hash stringByAppendingPathExtension:@"metallib"]));if(library){library.label=hash;s->libraries.emplace(key,sk_ret_cfp((__bridge CFTypeRef)library));}}
             auto result=archiveFunction(library,parts[1],s->readArchives);result.label=hash;return result;
         };
         NSArray* descriptions=catalog[@"pipelines"][@"render_pipelines"];
         if(descriptions.count<=4096)for(NSDictionary* source in descriptions)try {
             auto descriptor=metalPipelineFromDescription(source,function(source[@"vertex_function"]),function(source[@"fragment_function"]));
+            if(enabled("NXKIT_GPU_PASS_METRICS"))descriptor.label=descriptor.fragmentFunction.label?:descriptor.vertexFunction.label;
             descriptor.binaryArchives=s->readArchives;
             id<MTLRenderPipelineState> pipeline=nil;
             // Metal can ignore FailOnBinaryArchiveMiss when no archive is
@@ -193,7 +214,7 @@ sk_cfp<CFTypeRef> MetalPipelineCache::loadLibrary(std::string_view msl) {
     if(s->bundled) {
         NSURL* path=child(child(s->bundled,@"libraries"),[key stringByAppendingPathExtension:@"metallib"]);
         if([NSFileManager.defaultManager fileExistsAtPath:path.path]) {
-            auto library=[s->device newLibraryWithURL:path error:nil];
+            auto library=loadBundledLibrary(s->device,path);
             if(library){library.label=key;++s->libraryHits;auto result=sk_ret_cfp((__bridge CFTypeRef)library);s->libraries.emplace(hash,result);return result;}
         }
     }
@@ -212,6 +233,7 @@ void MetalPipelineCache::didCompileLibrary(std::string_view msl,CFTypeRef librar
 sk_cfp<CFTypeRef> MetalPipelineCache::makeRenderPipeline(CFTypeRef native,CFTypeRef value,sk_cfp<CFTypeRef>* failure) {
     auto s=state;id<MTLDevice> device=(__bridge id<MTLDevice>)native;
     MTLRenderPipelineDescriptor* descriptor=(__bridge MTLRenderPipelineDescriptor*)value;
+    if(enabled("NXKIT_GPU_PASS_METRICS"))descriptor.label=descriptor.fragmentFunction.label?:descriptor.vertexFunction.label;
     descriptor.binaryArchives=s->readArchives;
     if(s->readArchives.count) {
         std::lock_guard lock(s->librariesMutex);

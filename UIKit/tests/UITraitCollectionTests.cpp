@@ -223,7 +223,8 @@ void testGlassPreference(const std::shared_ptr<Context>& ctx) {
     expect(controller->traitCollection()->glassTintAmount()==.1f && controller->leaf->traitCollection()->glassTintAmount()==.1f
         && mask->traitCollection()->glassTintAmount()==.1f && glass->traitCollection()->glassTintAmount()==.1f,
            "the application override propagates through controllers, ordinary views, masks and glass");
-    expect(std::static_pointer_cast<CABackdropEffectLayer>(glass->layer())->effect().uniform("glassTintAmount")->front()==.1f,
+    const auto materialFill=std::static_pointer_cast<CABackdropEffectLayer>(glass->layer())->effect().uniform("nativeFillOpacity");
+    expect(materialFill && !materialFill->empty() && std::abs(materialFill->front()-.1f)<.00001f,
            "an existing glass view invalidates its resolved material when only the preference changes");
     expect(before->glassTintAmount()==.75f && controller->previous->glassTintAmount()==.75f,
            "previous trait snapshots remain immutable after changing the preference");

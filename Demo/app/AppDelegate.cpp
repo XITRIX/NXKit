@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include "SwitchShaderBake.hpp"
 #include "GlassAppearanceSettings.hpp"
+#include "DemoPerformanceReplay.hpp"
 
 namespace NXKit {
 
@@ -45,6 +46,14 @@ bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplicati
     }.registerOn(window);
 
     // Direct launch for Instruments/Metal captures without navigating the Demo.
+    const auto demoReplay = std::getenv("NXKIT_IOS_DEMO_REPLAY");
+    if (demoReplay && std::string_view(demoReplay) == "1") {
+        auto screen=new_shared<GlassScreenViewController>();
+        window->setRootViewController(screen);
+        window->makeKeyAndVisible();
+        DemoPerformance::start(screen);
+        return true;
+    }
     const auto stress = std::getenv("NXKIT_GLASS_STRESS");
     const auto stressReplay = std::getenv("NXKIT_GLASS_STRESS_REPLAY");
     if ((stress && std::string(stress) == "1") || (stressReplay && std::string(stressReplay) == "1")) {

@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL_video.h>
 #include <functional>
+#include <chrono>
 #include <array>
 #include <memory>
 #include <optional>
@@ -86,6 +87,11 @@ protected:
     virtual skgpu::graphite::Recorder* graphiteRecorder() = 0;
 
     int millisecondsUntilNextFrame();
+    // Input wakes may end an SDL wait early. They must not reset the render
+    // deadline or submit another frame before the requested interval expires.
+    using FrameClock = std::chrono::steady_clock;
+    bool beginScheduledFrame(FrameClock::time_point now = FrameClock::now());
+    double remainingFrameMilliseconds(FrameClock::time_point now = FrameClock::now());
     void renderImmediatelyForResize() { if (_immediateResizeFrame) _immediateResizeFrame(); }
 
     NXSize _size;
@@ -96,6 +102,11 @@ protected:
     Timer currentRunLoopStartTimer;
 
 private:
+    FrameClock::time_point _lastScheduledFrame;
+    bool _hasScheduledFrame = false;
+    FrameClock::time_point _lastGpuSubmission, _nextCacheCleanup;
+    bool _hasGpuSubmission = false, _didIdleCacheCleanup = false;
+    void cleanupGpuCacheIfIdle();
     // Platform frame preparation freezes geometry for layout, traits and the
     // drawable acquired in the same frame. No public resize-animation API.
     virtual void prepareFrame() {}

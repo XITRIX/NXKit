@@ -12,6 +12,11 @@ public:
     // Analytic masks avoid recording/rasterizing a full-viewport mask picture.
     // Custom drawing masks can retain the draw() fallback.
     virtual sk_sp<SkShader> contentShader(const CALayer&) const { return nullptr; }
+    // Optional conservative support of (1 - mask alpha), in viewport coordinates.
+    // Outside these rectangles the analytic mask must be exactly one. This lets
+    // the renderer preserve just the affected backdrop instead of isolating the
+    // entire viewport. Unknown support retains the general saveLayer path.
+    virtual std::optional<std::vector<SkRect>> affectedRegions(const CALayer&) const { return std::nullopt; }
     // Optional kit-owned compositing backdrop, in viewport coordinates. Core
     // supplies no color or material policy; ordinary masks leave it untouched.
     virtual void drawBackdrop(SkCanvas*,const CALayer&) const {}

@@ -20,7 +20,7 @@
 
 using namespace NXKit;
 namespace NXKit {
-bool applicationRunLoop();
+void renderApplicationFrame();
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplication*,std::map<std::string,std::any>) { return true; }
 class DispatchQueueTestHarness { public: static void pump() { DispatchQueue::main()->performAll(); } };
 class UIGestureRecognizerTestHarness {
@@ -85,7 +85,8 @@ class BarDelegate final:public UITabBarDelegate {
 public:int did=0;
     void tabBarDidSelect(const std::shared_ptr<UITabBar>&,const std::shared_ptr<UITabBarItem>&) override{++did;}
 };
-void frame() {for(int i=0;i<4;++i){applicationRunLoop();DispatchQueueTestHarness::pump();}}
+// Explicit frames keep geometry checks independent of the render deadline.
+void frame() {for(int i=0;i<4;++i){DispatchQueueTestHarness::pump();renderApplicationFrame();DispatchQueueTestHarness::pump();}}
 void settle() {UIView::completePendingAnimations();DispatchQueueTestHarness::pump();}
 auto windowFor(const std::shared_ptr<UIViewController>& controller) {
     auto window=new_shared<UIWindow>();UIApplication::shared->delegate->window=window;

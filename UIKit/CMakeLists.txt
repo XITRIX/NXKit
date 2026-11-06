@@ -26,6 +26,12 @@ add_library(XITRIXUIKit
         lib/CAGlassContainerLayer.cpp
         lib/GlassContainerView.cpp
         lib/GlassShader.cpp
+        lib/NativeGlassBlur.cpp
+        lib/NativeGlassBlur.hpp
+        lib/NativeGlassShader.cpp
+        lib/NativeGlassShader.hpp
+        lib/NativeGlassLighting.cpp
+        lib/NativeGlassLighting.hpp
         lib/LensMaterial.cpp
         lib/LensView.cpp
         include/UITabBarController.h
@@ -37,6 +43,12 @@ add_library(XITRIXUIKit
         lib/TabSelectionMaterial.hpp
         lib/UIButton.cpp
         lib/UIGlassEffect.cpp
+        lib/GlassMaterialProfile.cpp
+        lib/GlassMaterialProfile.hpp
+        lib/NativeGlassProfile.cpp
+        lib/NativeGlassProfile.hpp
+        lib/NativeGlassProfileData.hpp
+        lib/NativeGlassSizeProfileData.hpp
         lib/UIKitRegistration.cpp
 )
 add_library(Xitrix::UIKit ALIAS XITRIXUIKit)
@@ -85,6 +97,23 @@ if (UIKIT_BUILD_TESTS)
     target_compile_options(NXKitLayerRenderingTests PRIVATE -fno-rtti)
     target_link_libraries(NXKitLayerRenderingTests PRIVATE Xitrix::UIKit)
     add_test(NAME NXKitLayerRenderingTests COMMAND NXKitLayerRenderingTests)
+
+    add_executable(NativeGlassProfileTests tests/NativeGlassProfileTests.cpp)
+    target_link_libraries(NativeGlassProfileTests PRIVATE Xitrix::UIKit)
+    add_test(NAME NativeGlassProfileTests COMMAND NativeGlassProfileTests)
+    add_executable(NativeGlassAccentTests tests/NativeGlassAccentTests.cpp)
+    target_link_libraries(NativeGlassAccentTests PRIVATE Xitrix::UIKit)
+    add_test(NAME NativeGlassAccentTests COMMAND NativeGlassAccentTests)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(NAME NativeGlassAccentData COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../Demo/GlassComparison/NativePassProbe/generate-accent.py --check)
+    add_executable(NativeGlassBlurTests tests/NativeGlassBlurTests.cpp)
+    target_link_libraries(NativeGlassBlurTests PRIVATE Xitrix::UIKit)
+    add_test(NAME NativeGlassBlurTests COMMAND NativeGlassBlurTests)
+
+    add_executable(NativeGlassLightingTests tests/NativeGlassLightingTests.cpp)
+    target_link_libraries(NativeGlassLightingTests PRIVATE Xitrix::UIKit)
+    add_test(NAME NativeGlassLightingTests COMMAND NativeGlassLightingTests)
 
     add_executable(NXKitGlassMaterialTests tests/GlassMaterialTests.cpp)
     target_link_libraries(NXKitGlassMaterialTests PRIVATE Xitrix::UIKit)

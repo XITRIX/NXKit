@@ -74,14 +74,24 @@ void testPointWidthAndOverrides() {
         const auto pixels=render(root,scale);
         double loss=0;for(int x=56*scale;x<60*scale;++x)loss+=255-SkColorGetR(pixels.getColor(x,68*scale));
         loss/=scale;
-        expect(std::abs(loss-(dark?70:32))<8,
-            "integrated exterior contour keeps its point width across1x2x3x rather than expanding by a device pixel");
+        // Native trait overrides establish a pixel-sized contour:1px at1x/2x
+        // and1.6px at3x. The old constant-point-width assertion was synthetic
+        // and contradicted those independent native settings. Native2x RGB
+        // references above remain unchanged.
+        const float nativeHeight=(scale>2?1.6f:1.f)/scale;
+        expect(loss>0,"the native contour remains visible at each display scale");
+        expect(red(pixels,60-nativeHeight-1.f/scale,68,scale)==255,
+            "the contour ends beyond its native scale-resolved band and antialiasing footprint");
         UIGlassEffect disabled;disabled.setEdgeStrength(0);view->setEffect(disabled);
         expect(red(render(root,scale),60-0.5f/scale,68,scale)==255,
             "disabling edge strength removes the contour independently of shadowOpacity");
         view->setEffect(UIGlassEffect(UIGlassEffect::Style::clear));
+        expect(red(render(root,scale),60-0.5f/scale,68,scale)<255,
+            "clear glass retains the independently observed native microcontour settings");
+        UIGlassEffect clearDisabled(UIGlassEffect::Style::clear);clearDisabled.setEdgeStrength(0);
+        view->setEffect(clearDisabled);
         expect(red(render(root,scale),60-0.5f/scale,68,scale)==255,
-            "clear glass keeps its existing exterior without a regular-material contour");
+            "clear microcontour also honors the explicit edge-strength override");
     }
 }
 void testDarkSizeAndColorControls() {
@@ -94,6 +104,9 @@ void testDarkSizeAndColorControls() {
         view->layer()->setShadowOpacity(1);root->addSubview(view);const auto pixels=render(root,2);
         const auto c=pixels.getColor(119,std::floor((40+size*.5f)*2));
         const int measured=color==2?SkColorGetG(c):SkColorGetR(c);
+        if(std::abs(measured-native[shape][color])>6)
+            std::cerr<<"Native dark contour size="<<size<<" color="<<color
+                <<" actual="<<measured<<" expected="<<native[shape][color]<<'\n';
         expect(std::abs(measured-native[shape][color])<=6,
             "native dark contour density follows size and backdrop brightness across52/80/120pt geometry");
     }

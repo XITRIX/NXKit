@@ -15,7 +15,7 @@ public:
   void draw(SkCanvas *canvas) override;
   void setLiftState(bool selection, NXFloat progress, NXFloat magnification, bool vibrant, bool dark);
   void setSource(const std::shared_ptr<UIView>& source, const std::shared_ptr<UIView>& owner);
-  void drawSource(SkCanvas* canvas);
+  void drawSource(SkCanvas* canvas,bool isolateForeground=true,bool cropSource=true);
 
 private:
   std::weak_ptr<UIView> _source, _owner;

@@ -161,4 +161,5 @@ void SkiaCtx_sdlBase::sleepForNextFrame() {
     // Preserve the event for UIApplication, and wake promptly on window/input
     // changes instead of sleeping through an idle-frame interval.
     if (milliseconds > 0) SDL_WaitEventTimeout(nullptr, milliseconds);
+    else SkiaCtx::sleepForNextFrame(); // Retain the fractional part of a display interval.
 }

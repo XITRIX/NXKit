@@ -28,11 +28,17 @@ public:
     void setEffect(const BackdropEffect& effect);
     void setEffect(const UIBlurEffect& effect);
     [[nodiscard]] BackdropEffect effect() const { return *_effect; }
+    [[nodiscard]] bool samplesOnlyLocalBackdrop() const {
+        return !_variableBlur&&!_glassMaterial&&_effect&&_effect->maximumSampleRadius()==0
+            &&_effect->backdropBlurRadius()==0&&_effect->backdropScale()==1
+            &&!_effect->backdropPyramid()&&_effect->backdropInputs().empty()&&_effect->outputOutset()==0;
+    }
 
     void setGlassInteraction(const Internal::GlassInteraction& interaction);
 
 protected:
     NXAffineTransform renderingTransform() const override;
+    NXFloat renderingOutset() const override { return _effect ? _effect->outputOutset() : 0; }
     void renderSublayers(SkCanvas* canvas) override;
 
 private:
@@ -45,7 +51,7 @@ private:
     void observeBackdrop(SkCanvas* context);
     static sk_sp<SkRuntimeEffect> compile(const BackdropEffect& effect);
     static void validateUniforms(const BackdropEffect& effect, const SkRuntimeEffect& runtimeEffect);
-    sk_sp<SkImageFilter> imageFilterForCurrentState();
+    sk_sp<SkImageFilter> imageFilterForCurrentState(SkCanvas* canvas=nullptr);
     std::shared_ptr<const BackdropEffect> resolvedEffect(NXSize size);
     void invalidateImageFilterCache();
     struct ResolvedMaterial {
@@ -66,6 +72,8 @@ private:
     CALayerCornerCurve _cachedFilterCornerCurve = CALayerCornerCurve::continuous;
     NXFloat _cachedFilterContentsScale = 0;
     bool _hasCachedFilterState = false;
+    NXFloat _cachedGlassShadowOpacity = 1;
+    bool _cachedGlassHasExplicitShadow = false;
     NXFloat _cachedInteractionGlow = 0;
     NXPoint _cachedInteractionLocation;
     // Shared by model and presentation copies, so concurrent app animations

@@ -99,7 +99,7 @@ void testOptInGlassAppearance() {
                && ink->traitCollection()->userInterfaceStyle() == Style::dark,
            "opt-in small glass changes content appearance without changing its host traits");
     expect(view->effect().uniform("backdropLuma")->front() < 0.5f
-               && std::abs(view->effect().uniform("curve")->front() - 0.23f) < 0.001f,
+               && std::abs(view->effect().uniform("nativeRefraction")->front() - (-32.f * .23f / .55f)) < 0.001f,
            "sampled appearance reaches the material and preserves optical overrides");
     draw(SK_ColorBLACK);
     SkBitmap pixels;

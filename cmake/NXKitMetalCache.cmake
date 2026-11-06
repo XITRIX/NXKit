@@ -4,14 +4,24 @@ function(nxkit_configure_metal_cache target root)
         "${root}/UIKit/lib/*.cpp" "${root}/UIKit/lib/*.hpp"
         "${root}/UIKitCore/lib/*Shader*" "${root}/UIKitCore/lib/*Corner*")
     list(APPEND inputs
+        "${root}/UIKitCore/lib/BackdropEffect.cpp"
+        "${root}/UIKitCore/include/BackdropEffect.h"
         "${root}/UIKitCore/lib/CALayer.cpp"
         "${root}/UIKitCore/include/CALayer.h"
         "${root}/UIKitCore/lib/LayerContentMask.hpp"
+        "${root}/UIKitCore/lib/LayerUniformPrefix.hpp"
+        "${root}/Submodules/skia/src/gpu/graphite/Device.h"
+        "${root}/Submodules/skia/src/gpu/graphite/draw/DrawContext.h"
+        "${root}/Submodules/skia/src/gpu/graphite/draw/DrawListBase.h"
         "${root}/Submodules/skia/src/gpu/graphite/mtl/MtlGraphiteUtils.mm"
         "${root}/Submodules/skia/src/gpu/graphite/mtl/MtlGraphicsPipeline.mm"
+        "${root}/Submodules/skia/src/gpu/graphite/mtl/MtlCaps.mm"
+        "${root}/Submodules/skia/src/gpu/graphite/mtl/MtlCommandBuffer.mm"
+        "${root}/Submodules/skia/src/gpu/graphite/mtl/MtlCommandBuffer.h"
         "${root}/Submodules/skia/src/core/SkImageFilterTypes.cpp"
         "${root}/Submodules/skia/src/core/SkImageFilterTypes.h"
         "${root}/Submodules/skia/src/effects/imagefilters/SkRuntimeImageFilter.cpp"
+        "${root}/Submodules/skia/include/effects/SkImageFilters.h"
         "${root}/Submodules/skia/include/gpu/graphite/mtl/MtlBackendContext.h")
     # CONFIGURE_DEPENDS on a glob detects additions/removals, not content edits.
     # Recompute the catalog ABI when an existing shader-generating input changes.
@@ -47,7 +57,7 @@ function(nxkit_target_metal_shaders target catalog)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     set(NXKIT_METAL_GPU_FAMILY "apple7" CACHE STRING "Metal GPU family for offline pipeline compilation (Apple7 and later)")
     if(PLATFORM_IOS)
-        if(CMAKE_OSX_SYSROOT MATCHES "simulator")
+        if(CMAKE_OSX_SYSROOT MATCHES "[Ss]imulator")
             set(sdk iphonesimulator)
             set(platform ios)
         else()

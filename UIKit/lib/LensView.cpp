@@ -1,6 +1,9 @@
 #include "GlassInteraction.hpp"
 #include "LensInteraction.hpp"
 #include "LensMaterial.hpp"
+#include "LensForegroundComposition.hpp"
+#include "CABackdropEffectLayer.hpp"
+#include <typeinfo>
 #include <BackdropEffectView.h>
 #include <CADisplayLink.h>
 #include <CATransaction.h>
@@ -24,9 +27,16 @@ class LensMotionLayer final : public CALayer {
 public:
   LensMotionLayer() = default;
   explicit LensMotionLayer(LensMotionLayer* source)
-      : CALayer(source), _elastic(source->_elastic) {}
+      : CALayer(source), _elastic(source->_elastic), canBoundResting(source->canBoundResting) {}
   std::shared_ptr<CALayer> copy() override {
     return new_shared<LensMotionLayer>(this);
+  }
+  std::function<bool()> canBoundResting;
+  void renderSublayers(SkCanvas* canvas) override {
+    Internal::LensForegroundComposition composition(canvas,bounds().size,
+        Internal::boundedLensForegroundEnabled()&&canBoundResting&&canBoundResting());
+    if(composition.isActive())if(auto* metrics=Internal::RenderPerformance::current)++metrics->boundedLensGroups;
+    CALayer::renderSublayers(canvas);
   }
   NXAffineTransform renderingTransform() const override { return _elastic; }
   void setElasticTransform(NXAffineTransform value) {
@@ -143,6 +153,39 @@ LensView::LensView(Style style)
       _animation(std::make_unique<Animation>()) {
   if (style != Style::regular && style != Style::selection)
     throw std::invalid_argument("Invalid lens style");
+  std::static_pointer_cast<LensMotionLayer>(layer())->canBoundResting=[weak=weak_from_base<LensView>()] {
+    const auto self=weak.lock();if(!self||self->_progress!=0)return false;
+    const auto root=self->layer()->presentationOrSelf();
+    const std::vector<std::shared_ptr<CALayer>> expected={self->_restingHost->layer(),self->_optics->layer(),self->_content->layer(),self->_contact->layer()};
+    if(root->_mask||root->_sublayers!=expected||!self->_optics->layer()->presentationOrSelf()->isHidden())return false;
+    for(auto ancestor=root;ancestor;ancestor=ancestor->_superlayer.lock())if(!ancestor->_contentMasks.empty())return false;
+    const auto host=self->_restingHost->layer()->presentationOrSelf(),contact=self->_contact->layer()->presentationOrSelf();
+    if(!host->masksToBounds()||host->getFrame()!=root->bounds()||contact->getFrame()!=root->bounds()
+       ||host->transform()!=NXTransform3DIdentity||contact->transform()!=NXTransform3DIdentity
+       ||contact->_mask||!contact->_contentMasks.empty()||!contact->_sublayers.empty()||contact->_contents
+       ||(contact->_shadowColor&&contact->_shadowColor->a()>0&&contact->_shadowOpacity>0))return false;
+    const auto plain=[](auto&& recurse,const std::shared_ptr<CALayer>& model)->bool {
+      const auto node=model->presentationOrSelf();const CALayer& concrete=*node;
+      const auto pointEffect=std::dynamic_pointer_cast<CABackdropEffectLayer>(node);
+      if((typeid(concrete)!=typeid(CALayer)&&(!pointEffect||!pointEffect->samplesOnlyLocalBackdrop()))
+         ||node->_mask||!node->_contentMasks.empty()||node->transform()!=NXTransform3DIdentity)return false;
+      for(const auto& child:node->_sublayers)if(!recurse(recurse,child))return false;
+      return true;
+    };
+    if(!plain(plain,host))return false;
+    // The source picture must also keep its sampling axes. Stop at the shared
+    // ancestor; glass outside the source/owner paths does not affect that map.
+    auto source=self->_liftedContent.lock();if(!source)source=self->_content;
+    std::vector<std::shared_ptr<UIView>> owners;
+    for(auto view=std::static_pointer_cast<UIView>(self);view;view=view->superview().lock())owners.push_back(view);
+    for(auto view=source;view&&std::find(owners.begin(),owners.end(),view)==owners.end();view=view->superview().lock()) {
+      const auto sourceLayer=view->layer()->presentationOrSelf();const CALayer& concrete=*sourceLayer;
+      if(typeid(concrete)!=typeid(CALayer))return false;
+      const auto t=sourceLayer->transform();
+      if(t.m12!=0||t.m21!=0||t.m13!=0||t.m14!=0||t.m23!=0||t.m24!=0||t.m31!=0||t.m32!=0||t.m33!=1||t.m34!=0||t.m43!=0||t.m44!=1||t.m11<=0||t.m11!=t.m22)return false;
+    }
+    return true;
+  };
   _restingHost->addSubview(_resting);
   addSubview(_restingHost);
   addSubview(_optics);

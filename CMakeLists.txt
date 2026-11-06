@@ -1,9 +1,5 @@
 project(UIKit)
 
-add_definitions(
-        -DSK_TRIVIAL_ABI=[[clang::trivial_abi]]
-)
-
 option(UIKIT_BUILD_UIKIT "Build Apple-styled UIKit components" ON)
 option(UIKIT_BUILD_NXKIT "Build Nintendo-styled NXKit components" ON)
 option(NXKIT_BUILD_TESTS "Build NXKit regression tests" OFF)
@@ -25,7 +21,9 @@ endif ()
 # inline ref-counting code changes with SK_DEBUG/SK_RELEASE, so every consumer
 # of those headers must use the same mode or an app-defined SkRefCnt subclass
 # can cross the static-library boundary with incompatible disposal semantics.
-target_compile_definitions(UIKitCore PUBLIC SK_RELEASE)
+# trivial_abi also changes sk_sp's by-value calling convention. Export both
+# definitions to applications and test targets outside this directory.
+target_compile_definitions(UIKitCore PUBLIC SK_RELEASE "SK_TRIVIAL_ABI=[[clang::trivial_abi]]")
 
 list(APPEND platform_libs yogacore tinyxml2)
 target_include_directories(UIKitCore PUBLIC ${EXTERN_PATH}/yoga)
@@ -51,7 +49,12 @@ if (APPLE)
         )
     # IOS
     elseif (PLATFORM_IOS)
-        set(SKIA_IOS_OUT_DIR ${EXTERN_PATH}/skia/out/ios-arm64)
+        if (PLATFORM MATCHES "^SIMULATOR" OR CMAKE_OSX_SYSROOT MATCHES "[Ss]imulator")
+            set(skia_ios_default ${EXTERN_PATH}/skia/out/ios-simulator-arm64)
+        else ()
+            set(skia_ios_default ${EXTERN_PATH}/skia/out/ios-arm64)
+        endif ()
+        set(SKIA_IOS_OUT_DIR "${skia_ios_default}" CACHE PATH "Matching iOS device or simulator Skia archives")
         if (NOT EXISTS "${SKIA_IOS_OUT_DIR}/libskia.a")
             message(FATAL_ERROR "Graphite/Metal Skia archive is missing: ${SKIA_IOS_OUT_DIR}/libskia.a")
         endif ()

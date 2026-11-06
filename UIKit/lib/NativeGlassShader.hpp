@@ -1,0 +1,10 @@
+#pragma once
+#include <BackdropEffect.h>
+#include "NativeGlassProfile.hpp"
+
+namespace NXKit::Internal {
+// Independent translation of the native pass equations. Distances use local
+// points; the portable renderer supplies the source pyramid and geometry field.
+BackdropEffect makeNativeGlassEffect(const NativeGlassProfile&, UIGlassEffect::Style,
+    UIColor tint, bool hasAccent, NXFloat maximumSampleRadius = 128);
+}

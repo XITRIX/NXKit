@@ -413,6 +413,64 @@ void testPressedMaterialScale() {
         }
     }
 }
+void testIndependentMaterialLanes() {
+    // Cross both the single-pass and sampler-batched paths. Each member must
+    // keep its own material when insertion order and shared geometry change.
+    for (int count : {2,3,4,6}) for (int scale : {1,3}) {
+        auto root=new_shared<TraitRoot>(false);root->setBackgroundColor(UIColor(90,100,110));
+        auto group=new_shared<GlassContainerView>();group->setFrame({0,0,420,120});root->addSubview(group);
+        std::vector<std::shared_ptr<BackdropEffectView>> members;
+        std::vector<SkColor> expected;
+        const std::array colors={UIColor::systemRed,UIColor::systemBlue,UIColor::systemGreen,
+            UIColor::systemOrange,UIColor::systemPurple,UIColor::systemTeal};
+        for (int i=0;i<count;++i) {
+            UIGlassEffect effect(i%2?UIGlassEffect::Style::clear:UIGlassEffect::Style::regular);
+            effect.setTintColor(colors[i]);effect.setFrostRadius(0);effect.setRefraction(0);
+            auto member=item({20.f+i*60,35,44,44},effect);
+            group->contentView()->addSubview(member);
+            expected.push_back(render(root,scale,420,120).getColor((42+i*60)*scale,57*scale));
+            member->setHidden(true);members.push_back(member);
+        }
+        for (const auto& member:members)member->setHidden(false);
+        for (bool reversed : {false,true}) {
+            if(reversed)for(auto it=members.rbegin();it!=members.rend();++it) {
+                (*it)->removeFromSuperview();group->contentView()->addSubview(*it);
+            }
+            const auto pixels=render(root,scale,420,120);
+            for(int i=0;i<count;++i) {
+                const auto actual=pixels.getColor((42+i*60)*scale,57*scale);
+                for(int shift:{0,8,16,24})expect(std::abs(int((actual>>shift)&255)-int((expected[i]>>shift)&255))<=2,
+                    "mixed material lanes retain standalone color after grouping/reordering across optical batches");
+            }
+        }
+    }
+}
+void testLargeGroupSamplingBatches() {
+    // More than three materials use multiple optical passes to fit the GPU's
+    // sampler budget. Distant members must not change existing pixels, alpha,
+    // or the original backdrop outside the material's finite output coverage.
+    for(int scale:{1,2,3}) for(float opacity:{1.f,.5f}) {
+        auto root=new_shared<TraitRoot>(false);root->setBackgroundColor(UIColor(64,96,128));
+        UIGlassContainerEffect grouping;grouping.setSpacing(20);
+        auto group=new_shared<GlassContainerView>(grouping);group->setFrame({0,0,720,180});root->addSubview(group);
+        auto first=item({40,60,52,52},opaque(UIColor::red));
+        auto second=item({96,60,52,52},opaque(UIColor::blue));
+        first->layer()->setOpacity(opacity);second->layer()->setOpacity(opacity);
+        group->contentView()->addSubview(first);group->contentView()->addSubview(second);
+        const auto single=render(root,scale);
+        group->contentView()->addSubview(item({440,60,52,52}));
+        group->contentView()->addSubview(item({496,60,52,52}));
+        const auto batched=render(root,scale);
+        int maximum=0;
+        for(int y=0;y<single.height();++y) for(int x=0;x<single.width();++x) {
+            const auto a=single.getColor(x,y),b=batched.getColor(x,y);
+            for(int channel:{0,8,16,24}) maximum=std::max(maximum,
+                std::abs(int((a>>channel)&255)-int((b>>channel)&255)));
+        }
+        expect(maximum<=2,"sampler-limited optical batches preserve shared geometry, opacity and untouched backdrop");
+    }
+}
+
 void testSharedNeutralMaterialSizing() {
     for (bool dark : {false,true}) for (auto backdrop : {UIColor::white, UIColor(128,128,128)}) {
         auto root = new_shared<TraitRoot>(dark); root->setBackgroundColor(backdrop);
@@ -474,7 +532,7 @@ void reference(const std::string& output, float offset, float factor, bool dark)
 }
 int main(int argc,char** argv) {
     testDisconnectedFilterRegions();
-    if (argc < 3) { testBackingScale(); testBehavior(); testExactMaterialHandoff(); testJoinLightingCoverage(); testSharedJoinLighting(); testPressMaterialResponse(); testSingleItemEquivalence(); testNeckDistanceCoverage(); testPressedMaterialScale(); testSharedNeutralMaterialSizing(); }
+    if (argc < 3) { testBackingScale(); testBehavior(); testExactMaterialHandoff(); testJoinLightingCoverage(); testSharedJoinLighting(); testPressMaterialResponse(); testSingleItemEquivalence(); testNeckDistanceCoverage(); testPressedMaterialScale(); testSharedNeutralMaterialSizing(); testLargeGroupSamplingBatches(); testIndependentMaterialLanes(); }
     if (argc>1) reference(argv[1],argc>2?std::stof(argv[2]):0,argc>3?std::stof(argv[3]):1,argc>4?std::stoi(argv[4])!=0:false);
     if (failures) return 1;
     std::cout << "Glass container tests passed\n";

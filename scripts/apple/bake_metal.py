@@ -66,7 +66,11 @@ def bake(harvest, output, sdk, target, family, abi=None, library_target=None):
     manifest, sources, script = inputs(harvest)
     if abi and manifest['abi'] != abi:
         raise ValueError('Metal shader catalog ABI differs from this build; regenerate the catalog with MetalNavigationBenchmark')
-    tools = {name: tool(name, sdk) for name in ('metal', 'metallib', 'metal-tt')}
+    # Simulator Metal supports portable libraries, but has no architecture for
+    # MTLBinaryArchive. Prepare its pipeline objects at launch instead.
+    binary_archive = sdk != 'iphonesimulator'
+    tools = {name: tool(name, sdk) for name in
+             (('metal', 'metallib', 'metal-tt') if binary_archive else ('metal', 'metallib'))}
     output.mkdir(parents=True, exist_ok=True)
     libraries = output / 'libraries'
     libraries.mkdir(exist_ok=True)
@@ -83,11 +87,14 @@ def bake(harvest, output, sdk, target, family, abi=None, library_target=None):
             library['path'] = str((libraries / (library['label'] + '.metallib')).resolve())
         configuration = work / 'pipelines.mtlp-json'
         configuration.write_text(json.dumps(script, indent=2) + '\n')
-        archive = work / 'pipeline.binary.metallib'
-        run(tools['metal-tt'], '-target', target, '-gpu-family', family, configuration, '-o', archive)
-        os.replace(archive, output / archive.name)
+        if binary_archive:
+            archive = work / 'pipeline.binary.metallib'
+            run(tools['metal-tt'], '-target', target, '-gpu-family', family, configuration, '-o', archive)
+            os.replace(archive, output / archive.name)
+        else:
+            (output / 'pipeline.binary.metallib').unlink(missing_ok=True)
     manifest |= {'sdk': sdk, 'target': target, 'gpuFamily': family, 'libraries': len(sources),
-                 'libraryTarget':library_target or target,
+                 'libraryTarget':library_target or target, 'binaryArchiveAvailable':binary_archive,
                  'pipelineDescriptionSHA256': hashlib.sha256((harvest / 'pipelines.mtlp-json').read_bytes()).hexdigest()}
     # Runtime preparation uses aliases only; no build-machine paths enter the bundle.
     for library in script['libraries']['paths']:

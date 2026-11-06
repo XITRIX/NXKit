@@ -62,6 +62,15 @@ if(PLATFORM_SWITCH)
 endif()
 
 if(APPLE)
+    if(CMAKE_GENERATOR STREQUAL "Xcode")
+        set_target_properties(${PROJECT_NAME} PROPERTIES XCODE_GENERATE_SCHEME TRUE)
+        find_package(Python3 REQUIRED COMPONENTS Interpreter)
+        add_custom_target(${PROJECT_NAME}.performance-scheme
+            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/performance_scheme.py"
+                "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.xcodeproj" "${PROJECT_NAME}"
+            VERBATIM COMMENT "Generating optimized Xcode performance scheme")
+        add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}.performance-scheme)
+    endif()
     option(NXKIT_BUILD_METAL_SHADERS "Build and embed standard UI Metal pipelines offline" ON)
     set(NXKIT_METAL_SHADER_HARVEST "${UIKIT_PATH}/shaders/apple/catalog" CACHE PATH
         "Source catalog exported by the Metal shader harness")

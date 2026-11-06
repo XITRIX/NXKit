@@ -81,7 +81,9 @@ elseif (PLATFORM_IOS)
     set(USE_GLES ON)
 
     set(BUILD_SHARED_LIBS OFF)
-    set(PLATFORM OS64)
+    if (NOT DEFINED PLATFORM)
+        set(PLATFORM OS64)
+    endif ()
     set(CMAKE_TOOLCHAIN_FILE ${EXTERN_PATH}/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE PATH "vcpkg toolchain file")
     set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE ${EXTERN_PATH}/cmake/ios.toolchain.cmake CACHE PATH "ios toolchain file")
     set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2") # iphone, ipad
@@ -166,6 +168,11 @@ function(setup_project)
     endif ()
 
     if (PLATFORM_IOS)
+        if (PLATFORM MATCHES "^SIMULATOR")
+            set(ios_sdk iphonesimulator)
+        else ()
+            set(ios_sdk iphoneos)
+        endif ()
         ios_bundle("${CMAKE_CURRENT_SOURCE_DIR}/app/platforms/ios/iphoneos/Splash.storyboard"
                 "${CMAKE_CURRENT_SOURCE_DIR}/app/platforms/ios/Images.xcassets"
                 "${CMAKE_CURRENT_SOURCE_DIR}/app/platforms/ios/iOSBundleInfo.plist.in")
@@ -180,8 +187,8 @@ function(setup_project)
                 XCODE_ATTRIBUTE_INFOPLIST_KEY_GCRequiresControllerUserInteraction YES
                 XCODE_ATTRIBUTE_INFOPLIST_KEY_LSApplicationCategoryType "public.app-category.games"
                 XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks"
-                XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphoneos"
-                XCODE_ATTRIBUTE_SDKROOT "iphoneos"
+                XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "${ios_sdk}"
+                XCODE_ATTRIBUTE_SDKROOT "${ios_sdk}"
                 XCODE_ATTRIBUTE_INSTALL_PATH $(LOCAL_APPS_DIR))
     elseif (PLATFORM_SWITCH)
         add_custom_target(${PROJECT_NAME}.nro DEPENDS ${PROJECT_NAME}

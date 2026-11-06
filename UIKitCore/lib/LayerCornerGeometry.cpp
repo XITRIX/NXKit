@@ -246,9 +246,14 @@ float3 continuousCornerSample(float2 p,float2 halfDim) {
     result.yz*=direction;return result;
 }
 float boxRoundedSDF(float2 p,float2 halfDim,float r) {
+    if(halfDim.x==halfDim.y && r==halfDim.x && dot(p,p)>.000001)return length(p)-r;
     return cornerCurve<0.5||r<=0.0 ? circularBoxSDF(p,halfDim,r) : continuousCornerSample(p,halfDim).x;
 }
 float2 lensNormalDirection(float2 p,float2 halfDim,float r) {
+    if(halfDim.x==halfDim.y && r==halfDim.x && dot(p,p)>.000001) {
+        float len=length(p);
+        return len==0 && (cornerCurve<0.5 || r<=0) ? float2(0,1) : p/max(len,0.000001);
+    }
     if(cornerCurve>0.5&&r>0.0)return continuousCornerSample(p,halfDim).yz;
     float2 q=abs(p)-halfDim+r;
     float2 direction=float2(p.x>=0.0?1.0:-1.0,p.y>=0.0?1.0:-1.0);
@@ -260,6 +265,11 @@ float2 lensNormalDirection(float2 p,float2 halfDim,float r) {
 // Continuous geometry computes both distance and its normal through the same
 // powers and roots. Reuse that result when a material needs both quantities.
 float3 roundedBoxSample(float2 p,float2 halfDim,float r) {
+    if(halfDim.x==halfDim.y && r==halfDim.x && dot(p,p)>.000001) {
+        float len=length(p);
+        float2 normal=len==0 && (cornerCurve<0.5 || r<=0) ? float2(0,1) : p/max(len,0.000001);
+        return float3(len-r,normal);
+    }
     if(cornerCurve>0.5&&r>0.0)return continuousCornerSample(p,halfDim);
     return float3(circularBoxSDF(p,halfDim,r),lensNormalDirection(p,halfDim,r));
 }

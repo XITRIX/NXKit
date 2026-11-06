@@ -4,6 +4,7 @@
 #include <SkiaCtx.h>
 #include <UINib.h>
 #include <iostream>
+#include <cmath>
 #include <string>
 
 using namespace NXKit;
@@ -64,6 +65,16 @@ NXFloat glassScalar(
         return 0;
     }
     return value->front();
+}
+
+std::vector<NXFloat> glassFace(const std::shared_ptr<BackdropEffectView>& view) {
+    auto transfer=view->effect().uniform("nativeFaceTransfer");
+    auto luma=view->effect().uniform("nativeFaceLuma");
+    if(!transfer || transfer->size()!=3 || !luma || luma->size()!=2) {
+        expect(false,"glass resolves a complete native face transfer");return {};
+    }
+    auto result=*transfer;result.insert(result.end(),luma->begin(),luma->end());
+    result.push_back(glassScalar(view,"nativeFaceBlack"));return result;
 }
 
 }
@@ -163,17 +174,14 @@ int main() {
     focusNavigationController->present(presentedController, false);
 
     const auto initialLightTint = glassTint(presentedGlass);
-    const auto initialLightLuminosity = glassScalar(
-        presentedGlass,
-        "luminosity"
-    );
+    const auto initialLightFace = glassFace(presentedGlass);
     expect(
         initialLightTint[0] > 0.99f
             && initialLightTint[1] > 0.99f
             && initialLightTint[2] > 0.99f
-            && initialLightTint[3] > 0.50f && initialLightTint[3] < 0.60f
-            && initialLightLuminosity == 0,
-        "presented regular glass starts with the translucent light material"
+            && initialLightTint[3] == 1
+            && initialLightFace.size()==6,
+        "presented regular glass resolves its light native material"
     );
 
     skiaContext->themeMode = UIUserInterfaceStyle::dark;
@@ -186,13 +194,13 @@ int main() {
         "window-owned presentation chrome receives the dark trait update"
     );
     const auto darkTint = glassTint(presentedGlass);
-    const auto darkLuminosity = glassScalar(presentedGlass, "luminosity");
+    const auto darkFace = glassFace(presentedGlass);
     expect(
         darkTint[0] > 0.99f
             && darkTint[1] > 0.99f
             && darkTint[2] > 0.99f
-            && darkTint[3] < initialLightTint[3]
-            && darkLuminosity < 0.001f,
+            && darkTint[3] == initialLightTint[3]
+            && darkFace != initialLightFace,
         "an active presented glass view reinstalls its dark material"
     );
 
@@ -201,8 +209,8 @@ int main() {
     const auto restoredLightTint = glassTint(presentedGlass);
     expect(
         restoredLightTint == initialLightTint
-            && glassScalar(presentedGlass, "luminosity")
-                == initialLightLuminosity,
+            && glassFace(presentedGlass)
+                == initialLightFace,
         "an active presented glass view restores its light material"
     );
     presentedController->dismiss(false);

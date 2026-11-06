@@ -5,6 +5,7 @@
 #include "include/core/SkSurface.h"
 #include <iostream>
 #include <stdexcept>
+#include <limits>
 
 using namespace NXKit;
 namespace {
@@ -145,6 +146,51 @@ void genericBackdrop() {
     catch (const std::invalid_argument&) { rejected = true; }
     expect(rejected && layer->effect().uniform("gain")->front() == .5f,
            "invalid shader preserves the previously installed effect");
+    effect.setBackdropBlurKernel({2,5,.4f});
+    effect.setBackdropInput("aux",BackdropBlurKernel{1,4,.25f});
+    const auto original=effect;
+    effect.setBackdropBlurRadius(3);
+    effect.setBackdropInput("aux",0);
+    expect(original.backdropBlurKernel()==BackdropBlurKernel{2,5,.4f}
+        && original.backdropInputKernels().at("aux")==BackdropBlurKernel{1,4,.25f}
+        && effect.backdropBlurKernel()==BackdropBlurKernel{3,3,0},
+        "Core blur mixtures copy independently and legacy setters restore a single kernel");
+    for(const auto kernel: {BackdropBlurKernel{-1,2,.5f},BackdropBlurKernel{1,-2,.5f},
+        BackdropBlurKernel{1,2,-.1f},BackdropBlurKernel{1,2,1.1f},
+        BackdropBlurKernel{1,2,std::numeric_limits<float>::quiet_NaN()},
+        BackdropBlurKernel{std::numeric_limits<float>::infinity(),2,.5f}}) {
+        bool primaryRejected=false,namedRejected=false;
+        try {effect.setBackdropBlurKernel(kernel);}catch(const std::invalid_argument&){primaryRejected=true;}
+        try {effect.setBackdropInput("aux",kernel);}catch(const std::invalid_argument&){namedRejected=true;}
+        expect(primaryRejected&&namedRejected
+            &&effect.backdropBlurKernel()==BackdropBlurKernel{3,3,0}
+            &&effect.backdropInputKernels().at("aux")==BackdropBlurKernel{},
+            "invalid primary and named mixtures preserve prior Core state");
+    }
+    effect.setBackdropPyramid(8,{{0,0,2},{1,0,2}});
+    const auto pyramidCopy=effect;
+    expect(effect.backdropPyramid()->taps[0][2]==.5f,"Core pyramid normalizes generic tap weights");
+    for(const auto taps: {std::vector<std::array<float,3>>{},{{0,0,-1}},{{0,0,0}},{{NAN,0,1}}}) {
+        bool failed=false;try{effect.setBackdropPyramid(1,taps);}catch(const std::invalid_argument&){failed=true;}
+        expect(failed&&effect.backdropPyramid()->maximumRadius==8,"invalid Core pyramid preserves prior descriptor");
+    }
+    effect.setBackdropBlurRadius(0);
+    expect(!effect.backdropPyramid()&&pyramidCopy.backdropPyramid()->taps.size()==2,
+        "legacy Gaussian override clears pyramid independently of copied material");
+    effect.setBackdropPyramid(8,{{0,0,1}},2,{{0,0,3},{2,0,3}});
+    const auto stagedCopy=effect;
+    expect(stagedCopy.backdropPyramid()->minimumRadius==2
+        &&stagedCopy.backdropPyramid()->initialTaps[1][2]==.5f,
+        "Core retains and normalizes an independent initial reduction stencil");
+    for(float minimum:{-1.f,9.f,NAN}) {
+        bool rejected=false;try{effect.setBackdropPyramid(8,{{0,0,1}},minimum);}catch(const std::invalid_argument&){rejected=true;}
+        expect(rejected&&effect.backdropPyramid()->minimumRadius==2,
+            "invalid pyramid ranges preserve the prior reduction plan");
+    }
+    effect.setBackdropBlurKernel({2,9,0});
+    expect(effect.backdropBlurRadius()==2,"unused mixture branches do not inflate sampling support");
+    effect.setBackdropBlurKernel({2,9,1});
+    expect(effect.backdropBlurKernel()==BackdropBlurKernel{9,9,0},"full weight canonicalizes to the second kernel");
 }
 }
 int main() {

@@ -1,6 +1,11 @@
 #include "LensMaterial.hpp"
 #include "GlassVibrancy.hpp"
 #include "GlassForeground.hpp"
+#include "LensForegroundComposition.hpp"
+#include "src/shaders/SkPictureShader.h"
+#include "include/gpu/graphite/Recorder.h"
+#include "src/gpu/graphite/Surface_Graphite.h"
+#include <typeinfo>
 #include "include/effects/SkImageFilters.h"
 #include "include/core/SkShader.h"
 #include "include/core/SkSurface.h"
@@ -9,6 +14,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdlib>
 #include <stdexcept>
 
 #include "include/core/SkPictureRecorder.h"
@@ -24,7 +30,7 @@ void LensLayer::setSource(const std::shared_ptr<UIView>& source, const std::shar
   }
   setNeedsDisplay();
 }
-void LensLayer::drawSource(SkCanvas* canvas) {
+void LensLayer::drawSource(SkCanvas* canvas,bool isolateForeground,bool cropSource) {
   const auto sourceView = _source.lock(), ownerView = _owner.lock();
   if (!sourceView || !ownerView) return;
   // Source callbacks and nested lenses may reenter capture; cross-linked
@@ -97,9 +103,61 @@ void LensLayer::drawSource(SkCanvas* canvas) {
     // No optical displacement at rest: blend the picture directly instead of
     // allocating a source surface and filtering the painted platter each frame.
     SkPaint paint;
-    paint.setShader(picture->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkFilterMode::kLinear,&pictureToOwner,nullptr));
+    auto sourceShader=picture->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkFilterMode::kLinear,&pictureToOwner,nullptr);
+    // Keep full source recording/callback semantics, but rasterize only pixels
+    // the settled lens can sample. Unknown drawing and destination filters keep
+    // the original full-picture path. Preserve Skia's original tile lattice,
+    // including its size cap, rather than rescaling the cropped rectangle.
+    static const bool fullSource=[] {const auto flag=std::getenv("NXKIT_FULL_LENS_SOURCE");return flag&&flag[0]=='1';}();
+    const auto plain=[](auto&& recurse,const std::shared_ptr<CALayer>& layer)->bool {
+      const auto node=layer->presentationOrSelf();const CALayer& concrete=*node;
+      if(typeid(concrete)!=typeid(CALayer)||node->_mask||!node->_contentMasks.empty()||node->_cornerRadius>0||node->_configuredCornerRadii||node->transform()!=NXTransform3DIdentity
+         ||(node->_borderColor&&node->_borderWidth>0)||(node->_shadowColor&&node->_shadowColor->a()>0&&node->_shadowOpacity>0))return false;
+      for(const auto& child:node->_sublayers)if(!recurse(recurse,child))return false;
+      return true;
+    };
+    auto* device=SkCanvasPriv::TopDevice(canvas);const auto matrix=canvas->getTotalMatrix();
+    const auto total=SkMatrix::Concat(matrix,pictureToOwner);SkMatrix ownerToPicture;
+    if(cropSource&&!fullSource&&device&&!device->isNoPixelsDevice()&&!canvas->recordingContext()
+       &&matrix.isScaleTranslate()&&matrix.getScaleX()>0&&matrix.getScaleX()==matrix.getScaleY()
+       &&total.isScaleTranslate()&&total.getScaleX()>0&&total.getScaleX()==total.getScaleY()
+       &&pictureToOwner.invert(&ownerToPicture)&&plain(plain,source)) {
+      const auto recorder=canvas->recorder();
+      const auto props=recorder?SkSurfaceProps():device->surfaceProps();
+      const auto info=SkPictureShader::CachedImageInfo::Make(picture->cullRect(),total,
+          device->imageInfo().colorType(),device->imageInfo().colorSpace(),recorder?recorder->maxTextureSize():0,props);
+      if(info.success) {
+        auto needed=SkRect::MakeWH(bounds().width(),bounds().height());
+        needed.outset(2/matrix.getScaleX(),2/matrix.getScaleY());
+        auto sampleBounds=info.matrixForDraw.mapRect(ownerToPicture.mapRect(needed));
+        sampleBounds.outset(1,1); // bilinear footprint on the original raster lattice
+        auto pixels=sampleBounds.roundOut();
+        if(pixels.intersect(SkIRect::MakeSize(info.imageInfo.dimensions()))
+           &&pixels.width()*int64_t(pixels.height())<info.imageInfo.width()*int64_t(info.imageInfo.height())) {
+          auto cropped=info;cropped.imageInfo=info.imageInfo.makeDimensions(pixels.size());
+          cropped.matrixForDraw.postTranslate(-pixels.left(),-pixels.top());
+          sk_sp<SkSurface> surface;
+          if(recorder)surface=skgpu::graphite::Surface::Make(recorder,cropped.imageInfo,"LensSourceROI",
+              skgpu::Budgeted::kYes,skgpu::Mipmapped::kNo,SkBackingFit::kExact,&cropped.props);
+          else surface=SkSurfaces::Raster(cropped.imageInfo,&cropped.props);
+          if(surface)if(auto image=cropped.makeImage(std::move(surface),picture.get())) {
+            SkMatrix rasterToPicture;
+            if(info.matrixForDraw.invert(&rasterToPicture)) {
+              auto imageToOwner=SkMatrix::Concat(pictureToOwner,rasterToPicture);
+              imageToOwner.preTranslate(pixels.left(),pixels.top());
+              sourceShader=image->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkSamplingOptions(SkFilterMode::kLinear),imageToOwner);
+              if(auto* metrics=RenderPerformance::current){++metrics->croppedLensSources;metrics->lensSourcePixels+=uint64_t(pixels.width())*pixels.height();}
+            }
+          }
+        }
+      }
+    }
+    paint.setShader(std::move(sourceShader));
     paint.setBlender(glassForegroundBlender(_dark));
     paint.setAlphaf(std::clamp(ancestorAlpha,0.0f,1.0f));
+    // A bounded initialized target avoids restarting fullscreen MSAA while
+    // retaining destination-dependent vibrancy and the original path coverage.
+    LensForegroundComposition composition(canvas,bounds().size,isolateForeground);
     canvas->save();
     canvas->clipPath(layerCornerPath(bounds().size,std::min(bounds().width(),bounds().height())*.5f,CALayerCornerCurve::continuous),true);
     canvas->drawRect(SkRect::MakeWH(bounds().width(),bounds().height()),paint);

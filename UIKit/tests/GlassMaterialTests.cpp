@@ -4,7 +4,12 @@
 #include <UITraitCollection.h>
 #include "GlassInteraction.hpp"
 #include "GlassAppearance.hpp"
+#include "NativeGlassProfile.hpp"
+#include "NativeGlassShader.hpp"
+#include "NativeGlassBlur.hpp"
+#include "BackdropShader.hpp"
 #include "CABackdropEffectLayer.hpp"
+#include "GlassPressCoverageFixture.hpp"
 
 #include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
@@ -29,8 +34,9 @@ public:
     static BackdropEffect resolve(UIGlassEffect::Style style, NXSize size) {
         return resolve(UIGlassEffect(style),size,false);
     }
-    static BackdropEffect resolve(const UIGlassEffect& effect, NXSize size, bool dark, NXFloat amount=.5f) {
+    static BackdropEffect resolve(const UIGlassEffect& effect, NXSize size, bool dark, NXFloat amount=.5f, int scale=1) {
         auto traits=UITraitCollection::traitCollectionWithGlassTintAmount(amount);
+        traits->_displayScale=scale;
         traits->_userInterfaceStyle=dark ? UIUserInterfaceStyle::dark : UIUserInterfaceStyle::light;
         return effect._backdropEffect(size,traits);
     }
@@ -137,109 +143,82 @@ sk_sp<SkRuntimeEffect> runtime;
 
 void bindMaterial(SkRuntimeEffectBuilder& builder, const BackdropEffect& glass,
                   NXSize size, NXFloat radius, NXFloat scale) {
-    for (const auto* name : {
-        "refraction", "curve", "dispersion", "saturation", "contrast", "luminosity",
-        "tint", "tintMode", "edge", "specStrength", "specFallbackStrength", "specBrightFallbackStrength",
-        "specLightDirection", "specDirectionalPower", "specWidthPx", "reflectionSamplePx",
-        "reflectionSpreadPx", "brightBackdropShade", "referenceAppearance", "bodyMode",
-        "backdropLuma", "edgeAbsorption", "adaptiveTint", "bodyCompression", "neutralDetail", "materialFrost", "glassTintAmount"
-    }) {
+    // Enumerate the compiled contract so new native passes cannot silently
+    // inherit zero uniforms in the test renderer. Automatic host geometry is
+    // supplied below, exactly as it is by BackdropShader::makeFilter.
+    for (const auto& uniform : runtime->uniforms()) {
+        const std::string name(uniform.name);
         const auto components = glass.uniform(name);
-        if (components) builder.uniform(name).set(components->data(), components->size());
+        if (components) builder.uniform(name.c_str()).set(components->data(),components->size());
     }
-    builder.uniform("resolution") = SkV2{size.width, size.height};
-    builder.uniform("lensSize") = SkV2{size.width, size.height};
-    builder.uniform("lensCenter") = SkV2{size.width * 0.5f, size.height * 0.5f};
-    builder.uniform("cornerRadius") = radius;
+    const auto scalar = [&](const char* name, NXFloat value) {
+        if (runtime->findUniform(name)) builder.uniform(name)=value;
+    };
+    const auto vector = [&](const char* name, SkV2 value) {
+        if (runtime->findUniform(name)) builder.uniform(name)=value;
+    };
+    vector("resolution",{size.width,size.height});
+    vector("lensSize",{size.width,size.height});
+    vector("lensCenter",{size.width*.5f,size.height*.5f});
+    scalar("cornerRadius",radius);scalar("cornerCurve",1);
     Internal::bindLayerCornerGeometry(builder,*runtime,size,radius);
-    builder.uniform("contentScale") = scale;
-    builder.uniform("filterScale") = 1.0f;
-    builder.uniform("maximumSampleRadius") = glass.maximumSampleRadius();
+    scalar("contentScale",scale);scalar("filterScale",1);
+    scalar("maximumSampleRadius",glass.maximumSampleRadius());
+    scalar("externalShapeCoverage",0);scalar("interactionIntensity",0);
+    vector("interactionLocation",{0,0});
 }
 
-SkBitmap renderFilterFixture(int scale, bool lineOnly, bool regular = false) {
-    constexpr int padding = 32, width = 120, height = 60;
-    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(
-        (width + padding * 2) * scale, (height + padding * 2) * scale
-    ));
-    auto* canvas = surface->getCanvas();
-    canvas->scale(scale, scale);
-    canvas->clear(lineOnly ? SK_ColorBLACK : SK_ColorBLUE);
-    if (!lineOnly) {
-        SkPaint red;
-        red.setColor(SK_ColorRED);
-        // This red band lies inside the lens, far from the inspected top edge.
-        // The native-calibrated fold reaches this band near the top perimeter.
-        canvas->drawRect(SkRect::MakeXYWH(0, padding + 34, width + padding * 2, 6), red);
+void bindFlatChildren(SkRuntimeEffectBuilder& builder,SkColor background) {
+    builder.uniform("backdropPyramidRect")=SkV4{0,0,1,1};
+    builder.uniform("backdropPyramidInfo")=SkV4{1,1,1,0};
+    // All lanes see the same constant scene for color-transfer controls.
+    // Image/filter tests below exercise their different kernels separately.
+    for (const auto& child : runtime->children()) {
+        const std::string name(child.name);
+        builder.child(name.c_str())=SkShaders::Color(background);
     }
-    auto glass = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
-    glass.setUniform("bodyMode", regular ? 0.0f : 1.0f);
-    glass.setUniform("tint", UIColor::clear);
-    glass.setUniform("saturation", 1.0f);
-    glass.setUniform("contrast", 1.0f);
-    glass.setUniform("luminosity", 0.0f);
-    glass.setUniform("specStrength", 0.0f);
-    glass.setUniform("edgeAbsorption", 0.0f);
-    glass.setUniform("brightBackdropShade", 0.0f);
-    if (lineOnly) {
-        glass.setUniform("curve", 0.0f);
-        glass.setUniform("dispersion", 0.0f);
-    }
-    SkRuntimeEffectBuilder builder(runtime);
-    bindMaterial(builder, glass, {width, height}, height * 0.5f, scale);
-    builder.uniform("filterScale") = static_cast<float>(scale);
-    builder.uniform("interactionIntensity") = 0.0f;
-    builder.uniform("interactionLocation") = SkV2{0, 0};
-    std::string_view names[] = {"content", "sharpContent"};
-    const sk_sp<SkImageFilter> inputs[] = {
-        SkImageFilters::Blur((regular ? 24 : 2) * scale, (regular ? 24 : 2) * scale, SkTileMode::kClamp, nullptr), nullptr
-    };
-    auto filter = SkImageFilters::RuntimeShader(builder, glass.maximumSampleRadius() * scale, names, inputs, 2);
-    expect(filter != nullptr, "sharp lens and frosted body bind as independent filter inputs");
-    canvas->save();
-    canvas->translate(padding, padding);
-    canvas->scale(1.0f / scale, 1.0f / scale);
-    const auto rect = SkRect::MakeWH(width * scale, height * scale);
-    canvas->clipRRect(SkRRect::MakeRectXY(rect, height * scale * 0.5f, height * scale * 0.5f), true);
-    SkPaint paint;
-    paint.setImageFilter(filter);
-    canvas->saveLayer(SkCanvas::SaveLayerRec(&rect, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag));
-    canvas->restore();
-    canvas->restore();
-    SkBitmap pixels;
-    pixels.allocN32Pixels(surface->width(), surface->height());
-    expect(surface->readPixels(pixels, 0, 0), "the actual image-filter graph produces readable pixels");
+}
+
+SkBitmap renderFilterFixture(const UIGlassEffect& material,int scale) {
+    constexpr int padding=48,width=120,height=60;
+    auto surface=SkSurfaces::Raster(SkImageInfo::MakeN32Premul(
+        (width+padding*2)*scale,(height+padding*2)*scale));
+    auto* canvas=surface->getCanvas();
+    canvas->scale(scale,scale);canvas->clear(SK_ColorBLUE);
+    SkPaint stripe;stripe.setColor(SK_ColorRED);
+    for (int x=0;x<width+padding*2;x+=8)
+        canvas->drawRect(SkRect::MakeXYWH(x,0,4,height+padding*2),stripe);
+    const auto glass=GlassMaterialTestHarness::resolve(material,{width,height},false);
+    auto filter=Internal::BackdropShader::makeFilter(glass,runtime,{width,height},height*.5f,
+        CALayerCornerCurve::continuous,scale);
+    expect(filter!=nullptr,"the production six-input image-filter graph is usable on raster");
+    canvas->save();canvas->translate(padding,padding);canvas->scale(1.f/scale,1.f/scale);
+    const auto rect=SkRect::MakeWH(width*scale,height*scale);
+    canvas->clipRRect(SkRRect::MakeRectXY(rect,height*scale*.5f,height*scale*.5f),true);
+    SkPaint paint;paint.setImageFilter(filter);
+    canvas->saveLayer(SkCanvas::SaveLayerRec(&rect,&paint,SkCanvas::kInitWithPrevious_SaveLayerFlag));
+    canvas->restore();canvas->restore();
+    SkBitmap pixels;pixels.allocN32Pixels(surface->width(),surface->height());
+    expect(surface->readPixels(pixels,0,0),"the actual image-filter graph produces readable pixels");
     return pixels;
 }
 
-SkColor render(bool clear, bool dark, NXFloat glow, NXPoint touch, NXPoint sample,
-               const UIColor& tint, NXFloat radius = 28, NXFloat scale = 1,
-               SkColor background = SkColorSetRGB(70, 100, 125)) {
-    auto glass = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
-    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(132, 56));
+SkColor render(bool clear,bool dark,NXFloat glow,NXPoint touch,NXPoint sample,
+               const UIColor& tint,NXFloat radius=28,NXFloat scale=1,
+               SkColor background=SkColorSetRGB(70,100,125)) {
+    UIGlassEffect material(clear?UIGlassEffect::Style::clear:UIGlassEffect::Style::regular);
+    if (tint.a()>0) material.setTintColor(tint);
+    const auto glass=GlassMaterialTestHarness::resolve(material,{132,56},dark);
+    auto surface=SkSurfaces::Raster(SkImageInfo::MakeN32Premul(132,56));
     SkRuntimeEffectBuilder builder(runtime);
-    // Start from the same clear material used by UIGlassEffect; override only
-    // the settings needed to isolate each optical assertion.
-    bindMaterial(builder, glass, {132, 56}, radius, scale);
-    builder.uniform("referenceAppearance") = 1.0f;
-    builder.uniform("bodyMode") = clear ? 1.0f : 0.0f;
-    builder.uniform("backdropLuma") = dark ? 0.15f : 0.85f;
-    builder.uniform("specDirectionalPower") = 16.0f;
-    builder.uniform("specWidthPx") = 0.5f;
-    builder.uniform("saturation") = 1.0f;
-    builder.uniform("contrast") = 1.0f;
-    builder.uniform("tint") = SkV4{tint.r() / 255.0f, tint.g() / 255.0f, tint.b() / 255.0f, tint.a() / 255.0f};
-    builder.uniform("interactionIntensity") = glow;
-    builder.uniform("interactionLocation") = SkV2{touch.x, touch.y};
-    builder.child("content") = SkShaders::Color(background);
-    builder.child("sharpContent") = SkShaders::Color(background);
-    SkPaint paint;
-    paint.setShader(builder.makeShader());
-    surface->getCanvas()->drawPaint(paint);
-    SkBitmap pixels;
-    pixels.allocN32Pixels(132, 56);
-    expect(surface->readPixels(pixels, 0, 0), "shader output can be read on the raster backend");
-    return pixels.getColor(sample.x, sample.y);
+    bindMaterial(builder,glass,{132,56},radius,scale);
+    builder.uniform("interactionIntensity")=glow;
+    builder.uniform("interactionLocation")=SkV2{touch.x,touch.y};
+    bindFlatChildren(builder,background);
+    SkPaint paint;paint.setShader(builder.makeShader());surface->getCanvas()->drawPaint(paint);
+    SkBitmap pixels;pixels.allocN32Pixels(132,56);
+    expect(surface->readPixels(pixels,0,0),"shader output can be read on the raster backend");
+    return pixels.getColor(sample.x,sample.y);
 }
 
 int luma(SkColor color) {
@@ -251,8 +230,7 @@ SkColor renderResolvedBody(const BackdropEffect& effect, NXSize size, SkColor ba
     bindMaterial(builder, effect, size, std::min(size.width, size.height) * 0.5f, 1);
     builder.uniform("interactionIntensity") = 0.0f;
     builder.uniform("interactionLocation") = SkV2{0, 0};
-    builder.child("content") = SkShaders::Color(background);
-    builder.child("sharpContent") = SkShaders::Color(background);
+    bindFlatChildren(builder,background);
     auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(size.width, size.height));
     SkPaint paint;
     paint.setShader(builder.makeShader());
@@ -283,7 +261,64 @@ void testNativeTint() {
         expect(SkColorGetB(alpha)<SkColorGetB(black) && SkColorGetA(alpha)==255,"tint alpha interpolates with material without punching out its backdrop");
         glass.setTintOpacity(0);
         const auto override=GlassMaterialTestHarness::resolve(glass,{160,70},dark);
-        expect(override.uniform("tintMode")->front()==0 && override.uniform("tint")->back()==0,"explicit opacity overrides retain the low-level tint path");
+        expect(override.uniform("nativeAccentEnabled")->front()==0 && override.uniform("nativeTintOpacity")->front()==0,"explicit opacity overrides retain the low-level tint path");
+    }
+}
+
+void testNativeProfiles() {
+    using namespace Internal;
+    using Style = UIGlassEffect::Style;
+    using Appearance = UIUserInterfaceStyle;
+    for (auto appearance : {Appearance::light, Appearance::dark}) {
+        const auto zero = nativeGlassProfile(Style::regular, appearance, 0);
+        const auto middle = nativeGlassProfile(Style::regular, appearance, .5f);
+        const auto full = nativeGlassProfile(Style::regular, appearance, 1);
+        expect(zero.blurRadius == 5 && middle.blurRadius == 5 && full.blurRadius == 5,
+               "captured regular main blur survives every system tint setting");
+        expect(zero.blurFillRadius == 8 && zero.blurFillNormalOpacity == 0
+               && middle.blurFillNormalOpacity == .5f && full.blurFillNormalOpacity == 1,
+               "native main blur and normal fill are independent inputs");
+        for (const auto style : {Style::regular,Style::clear}) {
+            for (int i=0;i<=100;++i) {
+                const auto profile=nativeGlassProfile(style,appearance,i/100.f,{112,64});
+                const auto material=makeNativeGlassEffect(profile,style,UIColor::white,false);
+                const auto radii=*material.uniform("nativeBlurRadii");
+                expect(material.backdropPyramid().has_value() && material.backdropInputs().empty()
+                    &&material.backdropScale()==profile.context.backdropScale
+                    &&radii[0]==profile.blurRadius
+                    &&radii[1]==((profile.blurFillNormalOpacity>0 || profile.blurFillLightenOpacity>0 || profile.blurFillDarkenOpacity>0)?profile.blurFillRadius:0)
+                    &&radii[2]==(profile.bleedOpacity>0?profile.bleedBlurRadius*.5f:0)
+                    &&radii[3]==((profile.shadowOpacity>0 && profile.shadowVibrancyContribution>0)?profile.shadowBlurRadius*.5f:0),
+                       "main, fill, bleed and shadow retain independent native radii in one pyramid");
+            }
+        }
+        const auto baseline=makeNativeGlassEffect(middle,Style::regular,UIColor::white,false);
+        auto changed=middle;changed.blurRadius*=2;
+        expect(makeNativeGlassEffect(changed,Style::regular,UIColor::white,false).uniform("nativeBlurRadii")->at(0)
+                   >baseline.uniform("nativeBlurRadii")->at(0),"native main blur directly controls its own kernel");
+        changed=middle;changed.blurFillRadius*=2;
+        const auto fill=makeNativeGlassEffect(changed,Style::regular,UIColor::white,false);
+        expect(fill.uniform("nativeBlurRadii")->at(1)>baseline.uniform("nativeBlurRadii")->at(1)
+                   &&fill.uniform("nativeBlurRadii")->at(0)==baseline.uniform("nativeBlurRadii")->at(0),
+               "fill blur changes independently without being collapsed into the main kernel");
+        changed=middle;changed.innerRefractionAmount*=.5f;changed.innerRefractionHeight*=.5f;
+        const auto lens=makeNativeGlassEffect(changed,Style::regular,UIColor::white,false);
+        expect(lens.uniform("nativeRefraction")->at(0)==changed.innerRefractionAmount
+                   &&lens.uniform("nativeRefraction")->at(1)==changed.innerRefractionHeight,
+               "native displacement and bevel height retain independent point units");
+        expect(nativeGlassProfile(Style::clear, appearance, 0).blurRadius == 0,
+               "native clear style has no main blur at zero preference");
+        for (const auto amount : {.25f,.75f}) {
+            const auto profile = nativeGlassProfile(Style::regular, appearance, amount);
+            expect(profile.blurFillNormalOpacity == amount,
+                   "the documented portable interpolation policy preserves anchor intervals");
+        }
+    }
+    for (auto amount : {-1.f, 2.f, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::quiet_NaN()}) {
+        bool rejected = false;
+        try { (void)nativeGlassProfile(Style::regular, Appearance::dark, amount); }
+        catch (const std::invalid_argument&) { rejected = true; }
+        expect(rejected, "native-profile resolution rejects invalid preference values");
     }
 }
 
@@ -295,7 +330,10 @@ void testGlassTintPreference() {
             int previousTransmission=1000;
             for(const auto amount : {0.f,.25f,.5f,.75f,1.f}) {
                 const auto effect=GlassMaterialTestHarness::resolve(glass,{160,64},dark,amount);
-                expect(effect.uniform("glassTintAmount")->front()==amount,"the inherited preference reaches the material uniform");
+                const auto profile=Internal::nativeGlassProfile(style,dark?UIUserInterfaceStyle::dark:UIUserInterfaceStyle::light,
+                    amount,{160,64},tinted);
+                expect(effect.uniform("nativeFillOpacity")->front()==profile.blurFillNormalOpacity,
+                       "the inherited preference resolves the captured native normal-fill lane");
                 const auto black=renderResolvedBody(effect,{160,64},SK_ColorBLACK);
                 const auto white=renderResolvedBody(effect,{160,64},SK_ColorWHITE);
                 const int transmission=std::abs(int(SkColorGetR(white))-int(SkColorGetR(black)))
@@ -460,10 +498,12 @@ void testNativeOpticalControls() {
         expect(error <= c.tolerance, "regular body and tint match native solid-color controls");
     }
     UIGlassEffect glass;
+    glass.setLightAngle(-90);
     auto resolved = GlassMaterialTestHarness::resolve(glass,{52,52},false);
     const auto background = SkColorSetRGB(128,128,128);
     const auto top = renderResolvedBody(resolved,{52,52},background,{26,0});
     const auto side = renderResolvedBody(resolved,{52,52},background,{0,26});
+    std::cout << "Rim control top=" << luma(top) << " side=" << luma(side) << '\n';
     expect(luma(top) > luma(side) + 12, "regular rim is directed light rather than a white border");
     glass.setLightAngle(0);
     resolved = GlassMaterialTestHarness::resolve(glass,{52,52},false);
@@ -481,6 +521,180 @@ void testNativeOpticalControls() {
         "explicit material overrides bypass the fitted default tone");
 }
 
+void testBackdropInputs() {
+    // A source impulse makes each Gaussian lane independently observable;
+    // sharpContent must retain the original pixels at reduced capture scale.
+    BackdropEffect effect(R"sksl(
+uniform shader content;
+uniform shader narrowContent;
+uniform shader wideContent;
+uniform shader sharpContent;
+uniform float filterScale;
+uniform float4 lane;
+half4 main(float2 xy) {
+    return content.eval(xy)*half(lane.x)+narrowContent.eval(xy)*half(lane.y)
+        +wideContent.eval(xy)*half(lane.z)+sharpContent.eval(xy)*half(lane.w);
+})sksl","content",32,0);
+    effect.setBackdropInput("narrowContent",3);
+    effect.setBackdropInput("wideContent",7);
+    effect.setBackdropScale(.5f);
+    effect.setUniform("lane",std::array<NXFloat,4>{0,0,0,1});
+    const auto program=Internal::BackdropShader::compile(effect);
+    Internal::BackdropShader::validate(effect,*program);
+    const auto image = [&](const BackdropEffect& description,int scale) {
+        auto surface=SkSurfaces::Raster(SkImageInfo::MakeN32Premul(64*scale,32*scale));
+        surface->getCanvas()->clear(SK_ColorBLACK);
+        SkPaint stripe;stripe.setColor(SK_ColorWHITE);
+        surface->getCanvas()->drawRect(SkRect::MakeXYWH(30*scale,0,3*scale,32*scale),stripe);
+        auto filter=Internal::BackdropShader::makeFilter(description,program,{64,32},0,
+            CALayerCornerCurve::circular,scale);
+        expect(filter!=nullptr,"multiple named backdrop lanes produce an image filter");
+        const auto rect=SkRect::MakeWH(64*scale,32*scale);
+        SkPaint paint;paint.setImageFilter(filter);
+        surface->getCanvas()->saveLayer(SkCanvas::SaveLayerRec(&rect,&paint,SkCanvas::kInitWithPrevious_SaveLayerFlag));
+        surface->getCanvas()->restore();
+        SkBitmap pixels;pixels.allocN32Pixels(64*scale,32*scale);
+        expect(surface->readPixels(pixels,0,0),"named backdrop lane pixels are readable");
+        return pixels;
+    };
+    for (int scale:{1,2,3}) {
+        const auto sharp=image(effect,scale);
+        for (int x=25*scale;x<38*scale;++x)
+            expect(SkColorGetR(sharp.getColor(x,16*scale))==(x>=30*scale&&x<33*scale?255:0),
+                   "sharpContent bypasses capture resampling at every backing scale");
+        auto selected=effect;
+        selected.setUniform("lane",std::array<NXFloat,4>{1,0,0,0});
+        const auto captured=image(selected,scale);
+        int resamplingDifference=0;
+        for(int x=25*scale;x<38*scale;++x)
+            resamplingDifference+=std::abs(int(SkColorGetR(captured.getColor(x,16*scale)))
+                -int(SkColorGetR(sharp.getColor(x,16*scale))));
+        expect(resamplingDifference>30,
+               "zero-sigma captured input really resamples; reciprocal scale matrices must not cancel");
+        selected.setUniform("lane",std::array<NXFloat,4>{0,1,0,0});
+        const auto narrow=image(selected,scale).getColor(31*scale,16*scale);
+        selected.setUniform("lane",std::array<NXFloat,4>{0,0,1,0});
+        const auto wide=image(selected,scale).getColor(31*scale,16*scale);
+        expect(SkColorGetR(narrow)>SkColorGetR(wide)+20&&SkColorGetR(narrow)<180,
+               "independent Gaussian sigmas remain in logical points through reduced-resolution capture");
+        selected.setBackdropInput("wideContent",3);
+        const auto equal=image(selected,scale).getColor(31*scale,16*scale);
+        expect(std::abs(int(SkColorGetR(equal))-int(SkColorGetR(narrow)))<=1,
+               "equal named kernels sample the same original scene without compositing feedback");
+        expect(effect.backdropInputs().at("wideContent")==7,
+               "editing a copied named-input graph does not change the original description");
+    }
+    const auto rejected = [&](const auto& mutation,const char* message) {
+        bool caught=false;
+        try { auto invalid=effect;mutation(invalid); }
+        catch (const std::invalid_argument&) { caught=true; }
+        expect(caught,message);
+    };
+    for (const auto* name:{"","bad name","9input","content","sharpContent"})
+        rejected([&](auto& value){value.setBackdropInput(name,1);},
+                 "named backdrop inputs reject invalid identifiers and reserved primary/sharp lanes");
+    for (NXFloat sigma:{-1.f,std::numeric_limits<float>::quiet_NaN(),std::numeric_limits<float>::infinity()})
+        rejected([&](auto& value){value.setBackdropInput("narrowContent",sigma);},
+                 "named Gaussian kernels reject negative and nonfinite radii");
+    for (NXFloat scale:{0.f,-1.f,1.1f,std::numeric_limits<float>::quiet_NaN()})
+        rejected([&](auto& value){value.setBackdropScale(scale);},
+                 "capture resampling rejects nonfinite and out-of-range scales");
+    rejected([&](auto& value){value.setBackdropInput("undeclared",1);Internal::BackdropShader::validate(value,*program);},
+             "validation rejects named lanes absent from the compiled shader contract");
+    BackdropEffect missing(effect.shaderSource());missing.setBackdropInput("narrowContent",3);
+    bool caught=false;
+    try { Internal::BackdropShader::validate(missing,*program); }
+    catch (const std::invalid_argument&) { caught=true; }
+    expect(caught,"validation rejects shader children that have no declared input lane");
+}
+
+void testNativeFaceHoldouts() {
+    struct Control {float size,saturation,black,white;int r,g,b,nr,ng,nb;};
+    const Control controls[]={
+#include "fixtures/NativeGlassFaceHoldouts.inc"
+    };
+    for(const auto& c:controls) {
+        auto profile=Internal::nativeGlassProfile(UIGlassEffect::Style::regular,UIUserInterfaceStyle::dark,.5f,{c.size,c.size},false);
+        profile.faceSaturation=c.saturation;profile.faceBlack=c.black;profile.faceWhite=c.white;
+        profile.bleedOpacity=profile.ringShadowOpacity=profile.shadowOpacity=profile.sdrShadowOpacity=profile.shadowAmount=profile.keyFillHighlightAmount=0;
+        const auto effect=Internal::makeNativeGlassEffect(profile,UIGlassEffect::Style::regular,UIColor::white,false);
+        const auto actual=renderResolvedBody(effect,{c.size,c.size},SkColorSetRGB(c.r,c.g,c.b));
+        const auto error=std::max({std::abs(int(SkColorGetR(actual))-c.nr),std::abs(int(SkColorGetG(actual))-c.ng),std::abs(int(SkColorGetB(actual))-c.nb)});
+        if(error>2)std::cerr<<"Native face size="<<c.size<<" saturation="<<c.saturation<<" error="<<error<<'\n';
+        expect(error<=2,"native face transfer matches independent endpoint and saturation perturbations");
+    }
+}
+
+void testNativeHoldingComposition() {
+    // Native holding-tone captures isolate a multiplicative white pass. This
+    // exercises its placement in the complete material, beyond helper tests.
+    for(float size:{64.f,120.f}) for(bool enabled:{false,true})
+        for(SkColor background:{SkColorSetRGB(80,80,80),SkColorSetRGB(120,70,80),SK_ColorWHITE}) {
+            auto p=Internal::nativeGlassProfile(UIGlassEffect::Style::regular,
+                UIUserInterfaceStyle::dark,.5f,{size,size},false);
+            p.faceBlack=0;p.faceWhite=p.faceSaturation=1;
+            p.faceColorMatrixMaxLuma=p.faceColorMatrixMaxLumaSDR=1;
+            p.faceColorMatrixFillColor={0,0,0,0};p.faceOpacity=1;
+            p.blurRadius=p.blurFillRadius=p.bleedBlurRadius=p.shadowBlurRadius=0;
+            p.blurFillNormalOpacity=p.blurFillLightenOpacity=p.blurFillDarkenOpacity=0;
+            p.innerRefractionAmount=p.outerRefractionAmount=p.refractionOpacity=0;
+            p.bleedOpacity=p.shadowOpacity=p.sdrShadowOpacity=p.ringShadowOpacity=0;
+            p.keyFillHighlightAmount=p.highlight.keyAmount=p.highlight.fillAmount=0;
+            p.sdrHoldingToneEnabled=enabled;p.sdrHoldingToneWhite=.5f;
+            p.sdrGradientDistance0=100;p.sdrGradientDistance1=101;
+            const auto effect=Internal::makeNativeGlassEffect(p,UIGlassEffect::Style::regular,UIColor::clear,false);
+            const auto actual=renderResolvedBody(effect,{size,size},background);
+            const float gain=enabled?.5f:1.f;
+            const std::array<float,3> actualRGB={float(SkColorGetR(actual)),float(SkColorGetG(actual)),float(SkColorGetB(actual))};
+            const std::array<float,3> backgroundRGB={float(SkColorGetR(background)),float(SkColorGetG(background)),float(SkColorGetB(background))};
+            for(size_t i=0;i<3;++i)
+                expect(std::abs(actualRGB[i]-gain*backgroundRGB[i])<=1,
+                    "holding tone multiplies the complete neutral material before decoration");
+        }
+}
+
+void testNativeTransparentMaterial() {
+    for(float outerOpacity:{0.f,.5f,1.f}) {
+        auto p=Internal::nativeGlassProfile(UIGlassEffect::Style::regular,
+            UIUserInterfaceStyle::dark,.5f,{64,64},false);
+        p.faceBlack=.2f;p.faceWhite=p.faceSaturation=1;
+        p.faceColorMatrixMaxLuma=p.faceColorMatrixMaxLumaSDR=1;
+        p.faceColorMatrixFillColor={0,0,0,0};p.faceOpacity=1;
+        p.blurRadius=p.blurFillRadius=p.bleedBlurRadius=p.shadowBlurRadius=0;
+        p.blurFillNormalOpacity=p.blurFillLightenOpacity=p.blurFillDarkenOpacity=0;
+        p.innerRefractionAmount=p.outerRefractionAmount=0;
+        p.refractionOpacity=outerOpacity;p.refractionDistance0=-100;p.refractionDistance1=-99;
+        p.bleedOpacity=p.shadowOpacity=p.sdrShadowOpacity=p.ringShadowOpacity=0;
+        p.keyFillHighlightAmount=p.highlight.keyAmount=p.highlight.fillAmount=0;
+        p.sdrHoldingToneEnabled=false;
+        const auto effect=Internal::makeNativeGlassEffect(p,UIGlassEffect::Style::regular,UIColor::clear,false);
+        const auto actual=renderResolvedBody(effect,{64,64},SK_ColorTRANSPARENT);
+        const float alpha=1-outerOpacity;
+        expect(std::abs(float(SkColorGetA(actual))-255*alpha)<=1,
+            "native material coverage is independent of inner backdrop alpha");
+        const float red=alpha>0?255*.2f/alpha:0;
+        expect(std::abs(float(SkColorGetR(actual))-red)<=2,
+            "face preserves literal outer RGBA until final premultiplied clamp");
+    }
+}
+
+void testNativeBlurRangePacking() {
+    auto p=Internal::nativeGlassProfile(UIGlassEffect::Style::regular,UIUserInterfaceStyle::dark,.5f);
+    p.blurRadius=0;p.blurOpacity0=p.blurOpacity1=p.blurOpacity2=p.blurOpacity3=1;
+    p.blurFillNormalOpacity=p.blurFillLightenOpacity=p.blurFillDarkenOpacity=0;
+    p.bleedOpacity=1;p.bleedBlurRadius=20;p.shadowOpacity=1;p.shadowBlurRadius=12;
+    p.shadowVibrancyContribution=0;
+    auto effect=Internal::makeNativeGlassEffect(p,UIGlassEffect::Style::regular,UIColor::clear,false);
+    expect(effect.uniform("nativeMinimumBlurRadius")->front()==0
+        &&effect.uniform("nativeBlurRadii")->at(2)==10
+        &&effect.uniform("nativeBlurRadii")->at(3)==0,
+        "native range keeps zero main radius and halves active bleed while excluding nonvibrant shadow");
+    p.shadowVibrancyContribution=1;
+    effect=Internal::makeNativeGlassEffect(p,UIGlassEffect::Style::regular,UIColor::clear,false);
+    expect(effect.uniform("nativeBlurRadii")->at(3)==6,
+        "native shadow samples use half radius only with active vibrancy");
+}
+
 void testMaterial() {
     auto result = SkRuntimeEffect::MakeForShader(SkString(UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect().shaderSource()));
     expect(result.effect != nullptr, "complete liquid glass shader compiles with Skia");
@@ -489,14 +703,22 @@ void testMaterial() {
         return;
     }
     runtime = result.effect;
+    testNativeFaceHoldouts();
+    testNativeHoldingComposition();
+    testNativeTransparentMaterial();
+    testNativeBlurRangePacking();
     testNativeTint();
     testNativeOpticalControls();
+    testNativeProfiles();
     testGlassTintPreference();
     testNativeGlassTintControls();
     const auto clearBody = renderDefaultBody(UIGlassEffect::Style::clear, {132, 56});
     const auto smallBody = renderDefaultBody(UIGlassEffect::Style::regular, {132, 56});
     const auto largeBody = renderDefaultBody(UIGlassEffect::Style::regular, {320, 240});
-    expect(luma(clearBody) >= 23 && luma(clearBody) <= 28
+    // The independent iOS27.1 preference fixture consistently measures32
+    // for neutral clear glass over black. The old26 smoke value predated that
+    // fixture and disagreed with all of its preferences/themes/sizes.
+    expect(std::abs(luma(clearBody)-32)<=3
                && luma(smallBody) >= 130 && luma(smallBody) <= 137,
            "clear and small regular glass match the theme-fixed native black-backdrop samples");
     expect(luma(largeBody) >= 133 && luma(largeBody) <= 139,
@@ -506,89 +728,97 @@ void testMaterial() {
            "small regular glass adapts to the native mid-gray sample rather than staying transparent");
     expect(std::abs(luma(renderDefaultBody(UIGlassEffect::Style::regular, {300, 160}, gray)) - 201) <= 6,
            "large regular glass preserves the native neutral tone over gray");
-    const auto rest = render(true, false, 0, {20, 28}, {20, 28}, UIColor::clear);
-    const auto press = render(true, false, 1, {20, 28}, {20, 28}, UIColor::clear);
-    const auto far = render(true, false, 1, {20, 28}, {110, 28}, UIColor::clear);
-    expect(luma(press) > luma(rest) + 20, "touch adds visible ambient light and a local sheen");
-    expect(luma(press) > luma(far), "touch highlight follows the finger");
-    expect(SkColorGetA(press) == 255, "pressed material remains opaque over its sampled backdrop");
-    const auto untinted = render(false, false, 0, {}, {66, 28}, UIColor::clear);
-    const auto tinted = render(false, false, 0, {}, {66, 28}, UIColor(30, 60, 180, 100));
-    expect(std::abs(luma(tinted) - luma(untinted)) < 6,
-           "regular chromatic tint preserves transmitted luminance");
-    expect(SkColorGetB(tinted) > SkColorGetB(untinted), "regular tint changes hue");
-    const auto clearTint = render(true, false, 0, {}, {66, 28}, UIColor(10, 20, 40, 100));
-    expect(luma(clearTint) < luma(rest), "clear tint uses direct alpha compositing");
-    const auto lightRim = render(true, false, 0, {}, {66, 0}, UIColor::clear);
-    const auto darkRim = render(true, true, 0, {}, {66, 0}, UIColor::clear);
-    expect(luma(darkRim) > luma(rest) && luma(lightRim) > luma(rest),
-           "the native-style reflection lights the rim in both appearances");
-    for (const float scale : {1.0f, 2.0f, 3.0f}) {
-        expect(render(true, false, 0, {}, {66, 28}, UIColor::clear, 28, scale) == rest,
+    const auto rest=render(true,false,0,{20,28},{20,28},UIColor::clear);
+    const auto press=render(true,false,1,{20,28},{20,28},UIColor::clear);
+    const auto far=render(true,false,1,{20,28},{110,28},UIColor::clear);
+    expect(luma(press)>luma(rest)+20,"touch adds visible ambient light and a local sheen");
+    expect(luma(press)>luma(far),"touch highlight follows the finger");
+    expect(SkColorGetA(press)==255,"pressed material remains opaque over its sampled backdrop");
+    for (const float scale:{1.f,2.f,3.f}) {
+        expect(render(true,false,0,{20,28},{20,28},UIColor::clear,28,scale)==rest,
                "content scale changes antialiasing without changing the flat interior");
     }
-    const auto corner = render(true, false, 1, {}, {0, 0}, UIColor::clear);
-    expect(corner == SkColorSetRGB(70, 100, 125), "rounded-corner pixels preserve the backdrop");
-    expect(SkColorGetA(render(false, false, 1, {}, {66, 28}, UIColor::clear, 0)) == 255,
+    expect(SkColorGetA(render(false,false,1,{}, {66,28},UIColor::clear,0))==255,
            "zero-radius geometry remains finite and drawable");
-    expect(luma(render(true, false, 0, {}, {66, 28}, UIColor::clear, 28, 1, SK_ColorWHITE)) > 245,
-           "clear glass keeps a white backdrop clear");
-    expect(luma(render(true, true, 1, {66, 28}, {66, 28}, UIColor::clear, 28, 1, SK_ColorBLACK)) > 10,
+    expect(SkColorGetA(render(false,false,1,{}, {66,28},UIColor::clear,28,1,SK_ColorTRANSPARENT))==255,
+           "native interior material provides coverage over a transparent backdrop");
+    expect(luma(render(true,true,1,{66,28},{66,28},UIColor::clear,28,1,SK_ColorBLACK))>10,
            "press feedback remains visible over black");
-
-    for (int scale : {1, 2, 3}) {
-        const auto lens = renderFilterFixture(scale, false);
-        const auto folded = lens.getColor((32 + 60) * scale, 32 * scale + scale);
-        const auto interior = lens.getColor((32 + 60) * scale, (32 + 30) * scale);
-        expect(SkColorGetR(folded) > SkColorGetB(folded) + 60,
-               "clear lens folds the interior stripe with native-calibrated gentle frost");
-        expect(SkColorGetB(interior) > SkColorGetR(interior) + 60,
-               "flat lens interior remains undisplaced");
-
-        const auto regular = renderFilterFixture(scale, false, true);
-        const auto frostedEdge = regular.getColor((32 + 60) * scale, 32 * scale + scale);
-        expect(SkColorGetR(frostedEdge) < SkColorGetR(folded) - 100
-                   && SkColorGetB(frostedEdge) > SkColorGetR(frostedEdge) + 60,
-               "regular glass keeps frost through the bevel instead of exposing a clear edge band");
-
-        const auto hairline = renderFilterFixture(scale, true);
-        double coverage = 0;
-        for (int x = 0; x < 4 * scale; ++x) {
-            const auto color = hairline.getColor(32 * scale + x, (32 + 30) * scale);
-            coverage += SkColorGetR(color) / (255.0 * 0.52);
+    UIGlassEffect identity;
+    identity.setFrostRadius(0);identity.setRefraction(0);identity.setSpecularStrength(0);
+    identity.setSaturation(1);identity.setContrast(1);identity.setTintOpacity(0);identity.setEdgeStrength(0);
+    const auto resolved=GlassMaterialTestHarness::resolve(identity,{120,60},false);
+    expect(resolved.backdropBlurRadius()==0,"public zero frost disables the main Gaussian");
+    for (const auto& [name,radius]:resolved.backdropInputs())
+        expect(radius==0,"public zero frost disables every auxiliary Gaussian");
+    const auto refraction=resolved.uniform("nativeRefraction");
+    expect(refraction->at(0)==0&&refraction->at(2)==0,"public zero refraction disables both optical displacement lanes");
+    expect(resolved.uniform("nativeKeyHighlight")->at(2)==0
+               &&resolved.uniform("nativeFillHighlight")->at(2)==0
+               &&resolved.uniform("nativeFilterHighlight")->at(0)==0,
+           "public zero specular strength disables key/fill and filter highlights");
+    expect(renderResolvedBody(resolved,{120,60},SK_ColorRED)==SK_ColorRED,
+           "explicit material identity preserves a solid-color source");
+    for (int scale:{1,2,3}) {
+        const auto sharp=renderFilterFixture(identity,scale);
+        auto frosted=identity;frosted.setFrostRadius(7);
+        const auto blurred=renderFilterFixture(frosted,scale);
+        const auto centerY=(48+30)*scale;
+        const auto sharpRed=sharp.getColor((48+50)*scale,centerY);
+        const auto sharpBlue=sharp.getColor((48+54)*scale,centerY);
+        const auto blurredRed=blurred.getColor((48+50)*scale,centerY);
+        expect(SkColorGetR(sharpRed)>240&&SkColorGetB(sharpRed)<15
+                   &&SkColorGetB(sharpBlue)>240&&SkColorGetR(sharpBlue)<15,
+               "zero frost and zero refraction preserve independently drawn stripe geometry");
+        expect(SkColorGetR(blurredRed)>50&&SkColorGetB(blurredRed)>50,
+               "nonzero public frost mixes source stripes through the production filter graph");
+        auto refracted=identity;refracted.setRefraction(.55f);
+        const auto lens=renderFilterFixture(refracted,scale);
+        long difference=0;
+        for(int y=4;y<16;++y)for(int x=30;x<90;++x) {
+            const auto a=sharp.getColor((48+x)*scale,(48+y)*scale);
+            const auto b=lens.getColor((48+x)*scale,(48+y)*scale);
+            difference+=std::abs(int(SkColorGetR(a))-int(SkColorGetR(b)));
         }
-        const double width = coverage / scale;
-        if (width <= 0.70 || width >= 0.90) {
-            std::cerr << "Rim width at " << scale << "x: " << width << " points; samples:";
-            for (int x = 0; x < 4 * scale; ++x) {
-                std::cerr << ' ' << SkColorGetR(hairline.getColor(32 * scale + x, (32 + 30) * scale));
-            }
-            std::cerr << '\n';
-        }
-        expect(width > 0.70 && width < 0.90,
-               "rim coverage stays sub-point at 1x, 2x and 3x rather than widening with AA");
+        expect(difference>100,"nonzero public refraction changes textured bevel samples independently of frost");
     }
 }
 }
 
-int main() {
+int main() try {
     {
         auto description = UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect();
         auto layer = new_shared<CABackdropEffectLayer>(description);
         const auto snapshot = std::static_pointer_cast<CABackdropEffectLayer>(layer->copy());
-        const auto original = snapshot->effect().uniform("luminosity");
-        description.setUniform("luminosity", .75f);
+        const auto original = snapshot->effect().uniform("nativeFaceBlack");
+        description.setUniform("nativeFaceBlack", .75f);
         layer->setEffect(description);
-        expect(snapshot->effect().uniform("luminosity") == original,
+        expect(snapshot->effect().uniform("nativeFaceBlack") == original,
                "a presentation snapshot retains its original immutable material when the model changes");
         auto returned = layer->effect();
-        returned.setUniform("luminosity", .25f);
-        expect(layer->effect().uniform("luminosity")->front() == .75f,
+        returned.setUniform("nativeFaceBlack", .25f);
+        expect(layer->effect().uniform("nativeFaceBlack")->front() == .75f,
                "editing a returned material description cannot mutate a shared render snapshot");
     }
+    struct RasterBackend {
+        sk_sp<SkSurface> surface(int w,int h){return SkSurfaces::Raster(SkImageInfo::MakeN32Premul(w,h));}
+        std::vector<uint8_t> read(const sk_sp<SkSurface>& surface) {
+            const auto info=SkImageInfo::Make(surface->width(),surface->height(),kRGBA_8888_SkColorType,kPremul_SkAlphaType);
+            std::vector<uint8_t> bytes(info.computeMinByteSize());
+            if(!surface->readPixels(info,bytes.data(),info.minRowBytes(),0,0))throw std::runtime_error("Press fixture readback failed");
+            return bytes;
+        }
+    } backend;
+    glassPressCoverageFixture(backend,[](const auto& effect,NXSize size,bool dark,int scale,float amount){
+        return GlassMaterialTestHarness::resolve(effect,size,dark,amount,scale);
+    });
     testMotion();
     testAppearancePolicy();
+    testBackdropInputs();
     testMaterial();
     if (failures) return 1;
     std::cout << "Glass material and motion tests passed\n";
+}
+ catch(const std::exception& error) {
+    std::cerr<<error.what()<<'\n';return 1;
 }
