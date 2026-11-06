@@ -9,6 +9,20 @@
 
 namespace NXKit {
 
+bool UIResponder::canPerformAction(const std::string& action, const std::shared_ptr<UIResponder>&) {
+    const auto registered = registeredAction(action);
+    return registered && registered->isEnabled && (!registered->canPerform || registered->canPerform());
+}
+
+bool UIResponder::performAction(const std::string& action, const std::shared_ptr<UIResponder>& sender,
+                                const std::shared_ptr<UIEvent>&) {
+    if (!canPerformAction(action, sender)) return false;
+    const auto registered = registeredAction(action);
+    if (!registered) return false;
+    registered->action.perform();
+    return true;
+}
+
 void UIResponder::touchesBegan(std::set<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) {
     auto next = this->next();
     if (next) next->touchesBegan(std::move(touches), std::move(event));

@@ -1,4 +1,6 @@
 #pragma once
+#include <Timer.h>
+#include <set>
 
 #include "UIView.h"
 #include <UIFocusSystem.h>
@@ -59,6 +61,14 @@ private:
 
     std::shared_ptr<UIFocusSystem> _focusSystem;
     UIWindowInputType _inputType = UIWindowInputType::focus;
+    // SDL finger events have no native tap count. This portable fallback is
+    // independent of component styling; see docs/controls/README.md.
+    std::weak_ptr<UIView> _lastTapView;
+    Timer _lastTapTime;
+    NXPoint _lastTapPoint;
+    unsigned int _lastTapCount = 0;
+    bool _tapContactIsolated = true;
+    std::set<unsigned long> _activeTouchIds;
 };
 
 }

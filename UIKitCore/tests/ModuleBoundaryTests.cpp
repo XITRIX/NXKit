@@ -192,6 +192,27 @@ void genericBackdrop() {
     effect.setBackdropBlurKernel({2,9,1});
     expect(effect.backdropBlurKernel()==BackdropBlurKernel{9,9,0},"full weight canonicalizes to the second kernel");
 }
+void genericPostShaderBlur() {
+    BackdropEffect effect(R"(
+        uniform shader content;
+        half4 main(float2 xy) {
+            half edge=xy.x<16?1:0;
+            return half4(half3(edge),content.eval(xy).a);
+        }
+    )");
+    effect.setOutputBlurRadius(2);
+    auto layer=new_shared<CABackdropLayer>(effect);layer->setFrame({0,0,32,32});
+    auto surface=SkSurfaces::Raster(SkImageInfo::MakeN32Premul(32,32));surface->getCanvas()->clear(SK_ColorBLACK);
+    layer->skiaRender(surface->getCanvas());
+    SkBitmap pixels;pixels.allocN32Pixels(32,32);surface->readPixels(pixels,0,0);
+    const auto left=SkColorGetR(pixels.getColor(15,16)),right=SkColorGetR(pixels.getColor(16,16));
+    expect(left>right&&left<235&&right>20,
+        "Core output blur filters a shader-generated edge; input blur alone cannot soften it");
+    for(float radius:{-1.f,NAN,std::numeric_limits<float>::infinity()}) {
+        bool rejected=false;try{effect.setOutputBlurRadius(radius);}catch(const std::invalid_argument&){rejected=true;}
+        expect(rejected&&effect.outputBlurRadius()==2,"invalid output blur preserves the installed sigma");
+    }
+}
 }
 int main() {
     discovery();
@@ -199,6 +220,7 @@ int main() {
     tabMetadata();
     navigationMetadata();
     genericBackdrop();
+    genericPostShaderBlur();
     if (!failures) std::cout << "Core module boundary tests passed\n";
     return failures ? 1 : 0;
 }

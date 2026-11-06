@@ -6,6 +6,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include "NativeTabShadowData.hpp"
 
 using namespace NXKit;
 namespace NXKit {
@@ -32,14 +33,15 @@ public:
   static auto optics(const std::shared_ptr<LensView> &lens) {
     return lens->_optics;
   }
+  static auto backdrop(const std::shared_ptr<LensView> &lens) {return lens->_warpBackdrop;}
 };
 } // namespace NXKit
 namespace {
 class Root : public UIView {
 public:
-  Root() {
+  Root(UIUserInterfaceStyle style=UIUserInterfaceStyle::light,NXFloat scale=2) {
     _traitCollection =
-        GlassMaterialTestHarness::traits(UIUserInterfaceStyle::light, 2);
+        GlassMaterialTestHarness::traits(style, scale);
   }
   void changeTraits(NXFloat scale = 3) {
     const auto previous = _traitCollection;
@@ -77,6 +79,69 @@ SkColor pixel(const std::shared_ptr<UIView> &view, int x, int y) {
   image.allocN32Pixels(240, 180);
   surface->readPixels(image, 0, 0);
   return image.getColor(x, y);
+}
+void testNativeTabRetirement() {
+ float maximum=0;
+ for(bool dark:{false,true})for(int scale:{1,2,3}) {
+  auto root=new_shared<Root>(dark?UIUserInterfaceStyle::dark:UIUserInterfaceStyle::light,scale);
+  auto lens=new_shared<LensView>(LensView::Style::large);lens->setFrame({40,40,120.5f,70});root->addSubview(lens);
+  lens->setLifted(true);lens->setLifted(false,true);lens->setFrame({48,48,104.5f,54});
+  double elapsed=0;
+  for(const auto& native:nativeTabShadowSamples)if(native.dark==dark) {
+   LensViewTestHarness::advance(lens,native.time-elapsed);elapsed=native.time;
+   const auto& material=LensViewTestHarness::optics(lens)->effect();
+   const auto get=[&](const char* key,int index=0){return material.uniform(key)->at(index);};
+   const auto error=std::max({std::abs(get("nativeFaceOpacity")-native.face),std::abs(get("nativeRefraction")-native.refraction),std::abs(get("nativeRefraction",1)-native.height),std::abs(get("nativeShadowResponse")-native.shadow),std::abs(get("nativeShadowShape")-native.radius),std::abs(get("nativeRingShadow",3)-native.ring)});
+   maximum=std::max(maximum,error);
+   expect(error<.006f,"automatic large lens retires native shadow/refraction/face inputs from lifted reference size while shrinking");
+   expect(get("nativeShadowShape",3)==0,"secondary shader shadow switches off on release for every lens caller");
+  }
+  LensViewTestHarness::advance(lens,.480001-elapsed);
+  expect(LensViewTestHarness::progress(lens)==0&&LensViewTestHarness::optics(lens)->isHidden(),"retired automatic lens removes its optical passes exactly");
+ }
+ std::cout<<"Native tab material retirement maximum parameter error="<<maximum<<'\n';
+}
+void testRestingConfiguration() {
+ auto background=new_shared<UIView>();background->setBackgroundColor(UIColor::white);
+ auto lens=new_shared<LensView>(background,LensView::Style::small);lens->setFrame({40,40,60,40});
+ expect(lens->hasCustomRestingBackground()&&lens->restingBackgroundView()==background&&background->superview().lock()!=lens,"custom resting background is owned by the shared fading host");
+ lens->setRestingBackgroundColor(UIColor::blue);expect(lens->restingBackgroundColor()==UIColor::blue&&background->backgroundColor()==UIColor::white,"native color override does not rewrite a custom resting view");
+ auto shadow=std::make_shared<UIShadowProperties>();
+ expect(shadow->opacity()==0&&shadow->radius()==0&&shadow->offset()==NXSize(0,0)&&shadow->color()==UIColor::black,"native shadow value defaults");
+ shadow->setRadius(5);shadow->setOffset({1,2});shadow->setOpacity(.2f);lens->setRestingShadowProperties(shadow);
+ const auto host=background->superview().lock();
+ expect(host->layer()->shadowRadius()==5&&host->layer()->shadowOffset()==NXPoint(1,2)&&host->layer()->shadowOpacity()==.2f&&!host->clipsToBounds(),"resting shadow uses unclipped host behind the fill");
+ const auto copy=UIShadowProperties::propertiesFromView(host);copy->scaleBy(2);
+ expect(copy->radius()==10&&copy->offset()==NXSize(2,4)&&shadow->radius()==5,"shadow scaling preserves original value object");
+ expect(copy->updatedShadowWithIntensity(.5)->opacity()==.1f&&copy->updatedShadowWithIntensity(2)->opacity()==.2f&&copy->updatedShadowWithIntensity(-1)->opacity()==0,"native shadow intensity clamps its multiplier");
+ lens->setRestingBorderColor(UIColor::red);expect(lens->layer()->borderWidth()==3,"resting border uses native three-point width");
+ lens->setLifted(true);expect(lens->layer()->borderWidth()==0&&host->alpha()==0,"lifting retires resting border and its shadow host");
+ lens->setLifted(false,true);LensViewTestHarness::advance(lens,.1);
+ expect(host->alpha()>0&&host->alpha()<1,"shared resting shadow returns with its fill during lowering");
+ lens->setRestingShadowProperties(nullptr);expect(host->layer()->shadowOpacity()==0&&host->layer()->shadowRadius()==0&&host->layer()->shadowOffset()==NXPoint::zero,"nil shadow properties clear prior configuration");
+ lens->setRestingBorderColor(std::nullopt);expect(lens->layer()->borderWidth()==0,"clearing border removes native decoration");
+}
+void testPublicLensLifecycleAndModes() {
+ auto root=new_shared<Root>();root->setFrame({0,0,240,180});
+ auto source=new_shared<UIView>(NXRect(20,20,180,100));source->setBackgroundColor(UIColor::blue);root->addSubview(source);
+ auto lens=new_shared<LensView>();lens->setFrame({40,40,120,64});root->addSubview(lens);
+ expect(!lens->warpsContentBelow()&&lens->liftedContentMode()==LensView::LiftedContentMode::preserveSource,"fresh public lens matches native source and backdrop policy defaults");
+ lens->setLiftedContentView(source);
+ expect(SkColorGetB(pixel(root,30,30))==255,"preserveSource leaves the external source's ordinary output visible");
+ lens->setLiftedContentMode(LensView::LiftedContentMode::hideSource);
+ expect(pixel(root,30,30)==SkColorSetRGB(128,128,128)&&!source->isHidden()&&source->alpha()==1,"hideSource owns ordinary rendering without altering caller visibility");
+ lens->setLiftedContentMode(LensView::LiftedContentMode::preserveSource);
+ expect(SkColorGetB(pixel(root,30,30))==255,"changing content mode releases ordinary source ownership immediately");
+ int alongside=0,completed=0;
+ const auto completion=[&](bool a,bool b){expect(a&&!b,"successful lens group uses the observed native completion pair");++completed;};
+ lens->setLifted(true,false,[&]{++alongside;},completion);
+ expect(alongside==1&&completed==1&&lens->isLifted(),"nonanimated public lift runs alongside and completion synchronously");
+ lens->setLifted(true,true,[&]{++alongside;},completion);
+ expect(alongside==2&&completed==1,"same-state native lift runs alongside without completion");
+ lens->setLifted(false,true,[&]{++alongside;},completion);LensViewTestHarness::advance(lens,.08);
+ lens->setLifted(true,true,[&]{++alongside;},completion);LensViewTestHarness::advance(lens,2);
+ expect(alongside==4&&completed==3&&lens->isLifted(),"interrupted lift completions collect until the current group settles");
+ expect(lens->applyXMLAttribute("style","large")&&lens->applyXMLAttribute("liftedContentMode","hideSource")&&lens->applyXMLAttribute("restingShadowRadius","5")&&lens->applyXMLAttribute("restingShadowOpacity",".14")&&!lens->applyXMLAttribute("restingShadowRadius","-1")&&!lens->applyXMLAttribute("liftedContentMode","invalid"),"XML exposes usable lens configuration and rejects invalid input");
 }
 void testStateAndRendering() {
   auto lens = new_shared<LensView>(LensView::Style::selection);
@@ -146,6 +211,21 @@ void testSelectedContentKeepsInteriorGeometryAndColor() {
     expect(pixel(lens, 92, 65) == source,
            "release preserves the selected-content portal ink");
   }
+}
+void testBelowGlassBlurPolicy() {
+  auto lens=new_shared<LensView>();lens->setFrame({0,0,57.35f,37.2f});
+  lens->setLifted(true);lens->setLifted(false,true);
+  LensViewTestHarness::advance(lens,.1);
+  auto backdrop=LensViewTestHarness::backdrop(lens);
+  expect(!backdrop->isHidden()&&backdrop->effect().outputBlurRadius()>0,
+         "small lens has a Gaussian backdrop lane while lowering toward its opaque resting surface");
+  auto parent=new_shared<Root>();parent->addSubview(lens);pixel(lens,20,20);
+  lens->setWarpsContentBelow(false);
+  expect(!backdrop->isHidden()&&backdrop->effect().outputBlurRadius()>0&&
+         backdrop->effect().uniform("displacement")->front()==0&&!LensViewTestHarness::optics(lens)->isHidden(),
+         "slider backdrop policy disables sustained displacement while preserving Gaussian blur and ClearGlass optics");
+  lens->setWarpsContentBelow(true);
+  expect(!backdrop->isHidden(),"restoring backdrop policy invalidates active lens material immediately");
 }
 void testVibrantForeground() {
   struct Case { bool dark;UIColor source,background,expected; };
@@ -245,6 +325,7 @@ void testAnimationAndLayout() {
   }
   expect(rejected && a->style() == LensView::Style::regular,
          "invalid variants leave the current style intact");
+  a->setLifted(true);
   auto root = new_shared<Root>();
   root->addSubview(a);
   auto optics = LensViewTestHarness::optics(a);
@@ -315,7 +396,7 @@ void testAnimationAndLayout() {
   expect(
       !presented->isHidden() &&
           std::abs(
-              a->subviews().front()->layer()->presentationOrSelf()->opacity() -
+              a->subviews()[1]->layer()->presentationOrSelf()->opacity() -
               (1 - LensViewTestHarness::progress(a))) < .0001f,
       "active size animation receives lifted visibility and resting opacity "
       "changes");
@@ -328,6 +409,7 @@ void testExternalSourceLifetimeAndCompositing() {
   source->setBackgroundColor(UIColor(16,96,232,128)); host->addSubview(source);
   auto lens = new_shared<LensView>(LensView::Style::selection);
   lens->setFrame({40,40,120,64}); root->addSubview(lens);
+  lens->setLiftedContentMode(LensView::LiftedContentMode::hideSource);
   lens->setLiftedContentView(source);
   const auto actual = pixel(root,100,72);
   expect(std::abs(int(SkColorGetR(actual))-72)<=1 && std::abs(int(SkColorGetG(actual))-112)<=1 && std::abs(int(SkColorGetB(actual))-180)<=1,
@@ -379,7 +461,8 @@ void testElasticRootPreservesStationarySource() {
     auto source=new_shared<UIView>(NXRect(20,20,180,100)); root->addSubview(source);
     auto mark=new_shared<UIView>(NXRect(74,48,12,12)); mark->setBackgroundColor(UIColor::red); source->addSubview(mark);
     auto lens=new_shared<LensView>(style); lens->setFrame({40,40,120,64}); root->addSubview(lens);
-    lens->setLiftedContentView(source); lens->setLifted(true);
+    lens->setLiftedContentMode(LensView::LiftedContentMode::hideSource);
+  lens->setLiftedContentView(source); lens->setLifted(true);
     expect(pixel(root,95,78)==UIColor::red.raw(),"stationary source marker initially occupies its parent coordinates");
     const NXAffineTransform elastic(1.2f,0,.1f,.9f,-11.2f,1.2f);
     LensViewTestHarness::elastic(lens,elastic);
@@ -437,8 +520,12 @@ void testInteractiveSourcesAndTermination() {
 }
 } // namespace
 int main() {
+  testNativeTabRetirement();
+  testRestingConfiguration();
+  testPublicLensLifecycleAndModes();
   testStateAndRendering();
   testSelectedContentKeepsInteriorGeometryAndColor();
+  testBelowGlassBlurPolicy();
   testVibrantForeground();
   testOptionalMagnification();
   testAnimationAndLayout();

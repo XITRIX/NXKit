@@ -1,6 +1,8 @@
 #pragma once
 
 #include <UIView.h>
+#include <UIShadowProperties.h>
+#include <functional>
 #include <optional>
 #include <utility>
 
@@ -19,16 +21,28 @@ enum class UITouchPhase;
     measured portable approximation; it does not claim exact UIKit physics. */
 class LensView : public UIView {
 public:
-  enum class Style { regular = 0, selection = 1 };
+  enum class Style { small = 0, large = 1, regular = small, selection = large };
+  /** Native integer values; enumerator names describe their observed behavior. */
+  enum class LiftedContentMode { preserveSource = 0, hideSource = 1 };
   enum class InteractionSource { contact, viewMotion };
   static std::shared_ptr<UIView> init() { return new_shared<LensView>(); }
   explicit LensView(Style style = Style::regular);
+  explicit LensView(NXRect frame, Style style = Style::small);
+  /** Counterpart of initWithRestingBackground:. The lens owns the supplied
+      view inside its shared resting host; nullptr creates a plain view. */
+  explicit LensView(std::shared_ptr<UIView> restingBackground, Style style = Style::small);
   ~LensView() override;
 
   [[nodiscard]] Style style() const { return _style; }
   void setStyle(Style style);
   [[nodiscard]] bool isLifted() const { return _lifted; }
   void setLifted(bool lifted, bool animated = false);
+  using LiftCompletion=std::function<void(bool,bool)>;
+  /** Native four-argument lift entry. Alongside model changes run synchronously
+      in the geometry animation; completions collect until the lift group settles.
+      Normal completion reports (true,false). Native flag names are unverified.
+      NXKit retargets immediately; native delayed-unlift timer quirks are omitted. */
+  void setLifted(bool lifted, bool animated, const std::function<void()>& alongsideAnimations, LiftCompletion completion);
 
   /** Color-dependent foreground blending for a semantic selected source.
       Defaults false, preserving caller RGB ink. The containing control may
@@ -74,9 +88,11 @@ public:
       must not contain it. Its complete presented bounds are sampled before
       the finished lens is clipped. Source ancestor visibility and opacity
       remain effective; their output masks do not preclip the optical input.
-      A live lens suppresses the source's ordinary rendering so translucent
-      and antialiased ink is composited once. */
+      hideSource mode suppresses its ordinary output so translucent and
+      antialiased ink is composited once. Default preserveSource keeps it visible. */
   void setLiftedContentView(const std::shared_ptr<UIView> &source);
+  [[nodiscard]] LiftedContentMode liftedContentMode() const { return _liftedContentMode; }
+  void setLiftedContentMode(LiftedContentMode mode);
   [[nodiscard]] std::shared_ptr<UIView> liftedContentView() const {
     return _liftedContent.lock();
   }
@@ -85,8 +101,19 @@ public:
   [[nodiscard]] std::shared_ptr<UIView> restingBackgroundView() const {
     return _resting;
   }
+  [[nodiscard]] bool hasCustomRestingBackground() const { return _hasCustomRestingBackground; }
   [[nodiscard]] std::optional<UIColor> restingBackgroundColor() const;
   void setRestingBackgroundColor(std::optional<UIColor> color);
+  [[nodiscard]] std::optional<UIColor> restingBorderColor() const { return _restingBorderColor; }
+  void setRestingBorderColor(std::optional<UIColor> color);
+  /** Mirrors the native resting-shadow configuration. The shadow belongs to
+      the unclipped resting host and fades with its fill, beneath the optics. */
+  [[nodiscard]] std::shared_ptr<UIShadowProperties> restingShadowProperties() const { return _restingShadow; }
+  void setRestingShadowProperties(std::shared_ptr<UIShadowProperties> properties);
+  /** Portable counterpart of the native lens's private backdrop policy.
+      Controls may disable sustained warping independently of transition blur. */
+  [[nodiscard]] bool warpsContentBelow() const { return _warpsContentBelow; }
+  void setWarpsContentBelow(bool value);
 
   void setFrame(NXRect frame) override;
   void setBounds(NXRect bounds) override;
@@ -97,7 +124,11 @@ public:
                          const std::string &value) override;
 
 private:
+  friend class UISlider;
   friend class LensViewTestHarness;
+  // A containing control can synchronize optics and its resting fill with
+  // its geometry clock without starting the lens's independent lift spring.
+  void setControlLift(bool lifted, NXFloat progress, NXFloat restingOpacity, NXFloat opticalProgress, NXSize materialReferenceSize);
   struct Animation;
   void updateLayout();
   void updateMaterial();
@@ -113,13 +144,20 @@ private:
   Style _style;
   bool _lifted = false;
   bool _contentVibrancy = false;
+  bool _warpsContentBelow = false;
+  LiftedContentMode _liftedContentMode=LiftedContentMode::preserveSource;
   NXFloat _progress = 0;
   NXFloat _liftedContentMagnification = 1;
   NXFloat _resolvedDisplayScale = 0;
   NXSize _materialSize;
   std::shared_ptr<UIView> _restingHost;
   std::shared_ptr<UIView> _resting;
+  std::shared_ptr<UIShadowProperties> _restingShadow;
+  std::optional<UIColor> _restingBorderColor;
+  std::optional<UIColor> _restingBackgroundColor;
+  bool _hasCustomRestingBackground=false;
   std::shared_ptr<UIView> _content;
+  std::shared_ptr<BackdropEffectView> _warpBackdrop;
   std::shared_ptr<BackdropEffectView> _optics;
   std::shared_ptr<UIView> _contact;
   std::weak_ptr<UIView> _liftedContent;

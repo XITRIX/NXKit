@@ -6,7 +6,10 @@
 namespace NXKit::Internal {
 // Recovered native lens settings and independently translated pass equations.
 BackdropEffect lensMaterial(bool selection, NXFloat liftProgress,
-                            bool dark = false, NXSize size = {});
+                            bool dark = false, NXSize size = {}, bool warpsContentBelow = true,
+                            std::optional<NXSize> controlReferenceSize = std::nullopt, bool controlLifted = true);
+BackdropEffect lensBackdropMaterial(bool selection, NXFloat liftProgress, NXSize size,
+    std::optional<NXFloat> displacement = std::nullopt);
 class LensLayer final : public CALayer {
 public:
   LensLayer() = default;

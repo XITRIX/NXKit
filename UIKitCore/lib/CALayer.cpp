@@ -439,7 +439,9 @@ void CALayer::skiaRender(SkCanvas* canvas) {
         const SkScalar sigma = _shadowRadius;
         SkPaint shadowPaint;
         shadowPaint.setAntiAlias(true);
-        shadowPaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, sigma, 0));
+        // CALayer geometry and shadowRadius are in points. Respect the canvas
+        // transform so a 2x/3x target does not shrink the blur to device pixels.
+        shadowPaint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, sigma, true));
         shadowPaint.setColor(_shadowColor.value().withAlphaComponent((NXFloat(_shadowColor.value().a()) / 255.0f) * _shadowOpacity).raw());
 
         canvas->save();

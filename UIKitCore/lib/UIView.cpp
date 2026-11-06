@@ -144,8 +144,28 @@ void UIView::setBounds(NXRect bounds) {
 }
 
 void UIView::setHidden(bool hidden) {
+    if (isHidden()==hidden) return;
     _layer->setHidden(hidden);
     _yoga->setIncludedInLayout(!hidden);
+    if (hidden) interactionDidBecomeUnavailable();
+}
+
+void UIView::setAlpha(NXFloat value) {
+    const auto previous=alpha();
+    _layer->setOpacity(value);
+    if (previous>=.01f && value<.01f) interactionDidBecomeUnavailable();
+}
+
+void UIView::setUserInteractionEnabled(bool enabled) {
+    if (_isUserInteractionEnabled==enabled) return;
+    _isUserInteractionEnabled=enabled;
+    if (!enabled) interactionDidBecomeUnavailable();
+}
+
+void UIView::interactionDidBecomeUnavailable() {
+    const auto children=_subviews;
+    for (const auto& child:children)
+        if (child->_superview.lock().get()==this) child->interactionDidBecomeUnavailable();
 }
 
 void UIView::setCenter(NXPoint position) {
@@ -311,6 +331,7 @@ std::shared_ptr<UIWindow> UIView::window() {
 void UIView::setSuperview(const std::shared_ptr<UIView>& superview) {
     const auto previousTraitCollection = _traitCollection;
     _superview = superview;
+    if (!superview) interactionDidBecomeUnavailable();
     updateCornerConfigurationTree();
 
     if (superview) {

@@ -8,6 +8,7 @@
 #include <UIWindow.h>
 #include <BackdropEffectView.h>
 #include "CABackdropEffectLayer.hpp"
+#include "RasterTestContext.hpp"
 
 #include <iostream>
 #include <memory>
@@ -102,6 +103,7 @@ void sendTouch(
 } // namespace
 
 int main() {
+    SkiaCtx::_main=std::make_shared<Internal::RasterTestContext>();
     {
         auto glassWindow = new_shared<UIWindow>();
         glassWindow->setFrame({0, 0, 320, 480});

@@ -30,7 +30,7 @@ public:
 };
 class LensViewTestHarness {
 public:
-    static void progress(const std::shared_ptr<LensView>& lens,float p) { lens->_progress=p;lens->updateMaterial(); }
+    static void progress(const std::shared_ptr<LensView>& lens,float p) { lens->setControlLift(p>0,p,1-p,p,lens->bounds().size); }
 };
 class RefractionTestRoot final : public UIView {
 public:
@@ -97,6 +97,8 @@ struct Scene {
         // that a sharp selected overlay cannot satisfy the edge-copy checks.
         source->removeFromSuperview();source->setFrame({-60,-40,280,200});lens->contentView()->addSubview(source);
 #else
+        lens->setWarpsContentBelow(true);
+        lens->setLiftedContentMode(LensView::LiftedContentMode::hideSource);
         lens->setLiftedContentView(source);
 #endif
         lens->setLifted(true);
@@ -392,7 +394,7 @@ void testBackgroundRefractionHasObservedNearEdgePlacement() {
     for(bool dark:{false,true}) {
         auto root=new_shared<RefractionTestRoot>(dark);
         auto backdrop=new_shared<UIView>(root->bounds());root->addSubview(backdrop);
-        auto lens=new_shared<LensView>(LensView::Style::selection);lens->setFrame({60.25f,40,116,56});root->addSubview(lens);lens->setLifted(true);
+        auto lens=new_shared<LensView>(LensView::Style::selection);lens->setFrame({60.25f,40,116,56});root->addSubview(lens);lens->setWarpsContentBelow(true);lens->setLifted(true);
         const auto control=render(root);
         auto dot=mark({116.25f,41,4,4},UIColor::black);dot->layer()->setCornerRadius(2);dot->layer()->setCornerCurve(CALayerCornerCurve::circular);backdrop->addSubview(dot);
         const auto near=channelCentroids(render(root),control,{108,40.5f,20,14});
@@ -413,7 +415,7 @@ void testBackgroundHasIndependentChromaticTransport() {
     for(bool dark:{false,true})for(auto style:{LensView::Style::regular,LensView::Style::selection}) {
         auto root=new_shared<RefractionTestRoot>(dark);
         auto background=new_shared<UIView>(root->bounds());root->addSubview(background);
-        auto lens=new_shared<LensView>(style);lens->setFrame({60,40,116,56});root->addSubview(lens);lens->setLifted(true);
+        auto lens=new_shared<LensView>(style);lens->setFrame({60,40,116,56});root->addSubview(lens);lens->setWarpsContentBelow(true);lens->setLifted(true);
         const auto control=render(root);
         auto vertical=mark({117.5f,30,1,76},UIColor::black);background->addSubview(vertical);
         const auto image=render(root);

@@ -369,6 +369,13 @@ sk_sp<SkImageFilter> BackdropShader::makeFilter(
     const auto filterScale = findUniform(*runtimeEffect, "filterScale")
         && std::isfinite(scale)
         ? std::max<NXFloat>(1, scale) : 1.0f;
+    const auto finish=[&](sk_sp<SkImageFilter> filter) {
+        if(filter && effect.outputBlurRadius()>0) {
+            const auto sigma=effect.outputBlurRadius()*filterScale;
+            return SkImageFilters::Blur(sigma,sigma,SkTileMode::kClamp,std::move(filter));
+        }
+        return filter;
+    };
 
     if (findUniform(*runtimeEffect, "resolution")) {
         builder.uniform("resolution") = size;
@@ -426,7 +433,7 @@ sk_sp<SkImageFilter> BackdropShader::makeFilter(
         for(const auto& [name,kernel]:effect.backdropInputKernels()) {
             names.push_back(name);images.push_back(filteredInput(kernel,filterScale,filterScale,effect.backdropScale(),captured));
         }
-        return SkImageFilters::RuntimeShader(builder,std::max(pyramid.sampleReach,effect.maximumSampleRadius()*filterScale),names.data(),images.data(),static_cast<int>(names.size()));
+        return finish(SkImageFilters::RuntimeShader(builder,std::max(pyramid.sampleReach,effect.maximumSampleRadius()*filterScale),names.data(),images.data(),static_cast<int>(names.size())));
 
     }
     if(findUniform(*runtimeEffect,"backdropPyramidRect"))builder.uniform("backdropPyramidRect")=SkV4{0,0,0,0};
@@ -453,8 +460,8 @@ sk_sp<SkImageFilter> BackdropShader::makeFilter(
         if (runtimeEffect->findChild("sharpContent") && effect._backdropShaderName != "sharpContent") {
             names.push_back("sharpContent"); inputs.push_back(nullptr);
         }
-        return SkImageFilters::RuntimeShader(builder, effect._maximumSampleRadius * filterScale,
-            names.data(), inputs.data(), static_cast<int>(inputs.size()));
+        return finish(SkImageFilters::RuntimeShader(builder, effect._maximumSampleRadius * filterScale,
+            names.data(), inputs.data(), static_cast<int>(inputs.size())));
     }
 
     sk_sp<SkImageFilter> imageFilter;
@@ -471,5 +478,5 @@ sk_sp<SkImageFilter> BackdropShader::makeFilter(
             builder, effect._maximumSampleRadius * filterScale, effect._backdropShaderName, std::move(input)
         );
     }
-    return imageFilter;
+    return finish(std::move(imageFilter));
 }

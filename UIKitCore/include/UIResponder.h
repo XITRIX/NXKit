@@ -53,6 +53,12 @@ public:
     virtual void pressesEnded(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event);
     virtual void pressesCancelled(std::set<std::shared_ptr<UIPress>> pressees, std::shared_ptr<UIPressesEvent> event);
 
+    // Portable selector dispatch: selector names are strings; subclasses may
+    // resolve them here. The default bridges named registerAction commands.
+    virtual bool canPerformAction(const std::string& action, const std::shared_ptr<UIResponder>& sender);
+    virtual bool performAction(const std::string& action, const std::shared_ptr<UIResponder>& sender,
+                               const std::shared_ptr<UIEvent>& event);
+
     void registerAction(UIResponderAction action);
     void unregisterAction(const std::string& identifier);
     [[nodiscard]] std::optional<UIResponderAction> registeredAction(

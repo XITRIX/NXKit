@@ -111,6 +111,15 @@ void UIWindow::sendTouchEvent(std::shared_ptr<UIEvent> event) {
 
         switch (touch->phase()) {
             case UITouchPhase::began: {
+                const auto elapsed=touch->timestamp()-_lastTapTime;
+                if (touch->_tapCount==1 && _activeTouchIds.empty() && _lastTapCount &&
+                    _lastTapView.lock()==hitView && elapsed>=0 && elapsed<=300 &&
+                    (touch->absoluteLocation()-_lastTapPoint).magnitude()<=22)
+                    touch->_tapCount=std::min(32u,_lastTapCount+1);
+                _lastTapCount=0;
+                if (_activeTouchIds.empty()) _tapContactIsolated=true;
+                else _tapContactIsolated=false;
+                _activeTouchIds.insert(touch->touchId());
                 touch->_view = hitView;
                 touch->_gestureRecognizers = getRecognizerHierachyFromView(hitView);
 
@@ -138,6 +147,13 @@ void UIWindow::sendTouchEvent(std::shared_ptr<UIEvent> event) {
                 break;
             }
             case UITouchPhase::ended: {
+                const bool isolated=_tapContactIsolated && _activeTouchIds.size()==1;
+                _activeTouchIds.erase(touch->touchId());
+                if (isolated && !touch->hasBeenCancelledByAGestureRecognizer() &&
+                    (touch->absoluteLocation()-touch->_initialLocation).magnitude()<=22) {
+                    _lastTapView=hitView;_lastTapPoint=touch->absoluteLocation();
+                    _lastTapTime=touch->timestamp();_lastTapCount=touch->tapCount();
+                }
                 const bool wasCancelledByRecognizer =
                     touch->hasBeenCancelledByAGestureRecognizer();
 
@@ -154,6 +170,7 @@ void UIWindow::sendTouchEvent(std::shared_ptr<UIEvent> event) {
                 break;
             }
             case UITouchPhase::cancelled: {
+                _activeTouchIds.erase(touch->touchId());_lastTapCount=0;
                 const bool wasCancelledByRecognizer =
                     touch->hasBeenCancelledByAGestureRecognizer();
                 touch->runTouchActionOnRecognizerHierachy(

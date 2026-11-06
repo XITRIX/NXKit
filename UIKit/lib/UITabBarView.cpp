@@ -99,12 +99,14 @@ UITabBarView::UITabBarView(NXRect frame) : UIView(frame),
     // to fake a portal (those properties must retain their normal meaning).
     _state->_glass->addSubview(_state->_selectedHost);
     _state->_selectedContent=new_shared<UIView>(); _state->_selectedContent->setUserInteractionEnabled(false); _state->_selectedHost->addSubview(_state->_selectedContent);
-    _state->_lens=new_shared<LensView>(LensView::Style::selection); _state->_lens->setUserInteractionEnabled(false);
+    _state->_selectionFill=new_shared<TabSelectionBackground>();
+    _state->_lens=new_shared<LensView>(_state->_selectionFill,LensView::Style::large); _state->_lens->setUserInteractionEnabled(false);
+    _state->_lens->setWarpsContentBelow(true);
+    _state->_lens->setLiftedContentMode(LensView::LiftedContentMode::hideSource);
     _state->_lens->setInteractive(true);
     _state->_lens->setContentVibrancyEnabled(true);
     _state->_lens->setInteractionSource(LensView::InteractionSource::viewMotion);
-    _state->_selectionFill=new_shared<TabSelectionBackground>();
-    _state->_lens->restingBackgroundView()->addSubview(_state->_selectionFill);_state->_glass->addSubview(_state->_lens);
+    _state->_glass->addSubview(_state->_lens);
     const auto weak = weak_from_base<UITabBarView>();
     auto pan=new_shared<UIPanGestureRecognizer>();
     _state->pan=pan;
@@ -267,9 +269,9 @@ void UITabBarView::setSelectionPosition(float position) {
 }
 void UITabBarView::setLifted(bool lifted, bool animated) {
     if(!lifted && _state->_liftLink) { _state->_liftLink->invalidate(); _state->_liftLink.reset(); _state->_minimumLiftRemaining=0; }
-    _state->_lifted=lifted; _state->_lens->setLifted(lifted,animated);
-    if (animated) UIView::animate(.28,0,static_cast<UIViewAnimationOptions>(UIViewAnimationOptions::allowUserInteraction|UIViewAnimationOptions::beginFromCurrentState),[this] { arrange(); });
-    else arrange();
+    _state->_lifted=lifted;
+    if(animated)_state->_lens->setLifted(lifted,true,[this]{arrange();},{});
+    else {_state->_lens->setLifted(lifted,false);arrange();}
 }
 void UITabBarView::setComparisonContent(std::shared_ptr<UIImage> normal, std::shared_ptr<UIImage> selected) {
     if (!normal || !selected) throw std::invalid_argument("Both lens comparison content images are required");

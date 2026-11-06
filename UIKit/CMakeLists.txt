@@ -9,11 +9,17 @@ add_library(XITRIXUIKit
         include/UIKit.h
         include/UIKitRegistration.h
         include/UIButton.h
+        include/UISlider.h
+        include/UISliderTrackConfiguration.h
+        lib/UISlider.cpp
+        lib/UISliderTrackConfiguration.cpp
         include/UIGlassEffect.h
         include/UIGlassContainerEffect.h
         include/BackdropEffectView.h
         include/GlassContainerView.h
         include/LensView.h
+        include/UIShadowProperties.h
+        lib/UIShadowProperties.cpp
         lib/BackdropEffectView.cpp
         include/private/UIBlurEffect.h
         lib/ProgressiveBlur.hpp
@@ -62,6 +68,9 @@ target_link_libraries(XITRIXUIKit PUBLIC UIKitCore)
 
 option(UIKIT_BUILD_TESTS "Build UIKit regression tests" OFF)
 if (UIKIT_BUILD_TESTS)
+    add_executable(NXKitSliderTests tests/UISliderTests.cpp)
+    target_link_libraries(NXKitSliderTests PRIVATE Xitrix::UIKit)
+    add_test(NAME NXKitSliderTests COMMAND NXKitSliderTests)
     enable_testing()
     if(APPLE)
         add_executable(UIKitScrollEdgeEffectsTests tests/ScrollEdgeEffectsTests.cpp)

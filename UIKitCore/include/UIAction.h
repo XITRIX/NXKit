@@ -7,8 +7,11 @@
 #include <string>
 #include <functional>
 #include <utility>
+#include <memory>
 
 namespace NXKit {
+class UIResponder;
+using UIActionIdentifier = std::string;
 
 // UIKit exposes this policy through UIMenuLeaf::repeatBehavior. NXKit's
 // current UIAction subset does not yet include the menu-element hierarchy, so
@@ -22,6 +25,11 @@ enum class UIMenuElementRepeatBehavior {
 class UIAction {
 public:
     explicit UIAction(std::string title = "", std::function<void()> handler = []() {});
+    UIAction(std::string title, UIActionIdentifier identifier,
+             std::function<void(const UIAction&)> handler);
+
+    [[nodiscard]] const UIActionIdentifier& identifier() const { return _identifier; }
+    [[nodiscard]] std::shared_ptr<UIResponder> sender() const { return _sender.lock(); }
 
     [[nodiscard]] const std::string& title() const { return _title; }
     void setTitle(std::string title) { _title = std::move(title); }
@@ -34,11 +42,13 @@ public:
     }
 
 //    uint identifier() { return _id; }
-    void perform() const { _handler(); }
+    void perform() const { if (_handler) _handler(*this); }
 private:
     friend class UIControl;
 
-    std::function<void()> _handler;
+    std::function<void(const UIAction&)> _handler;
+    UIActionIdentifier _identifier;
+    std::weak_ptr<UIResponder> _sender;
     std::string _title;
     UIMenuElementRepeatBehavior _repeatBehavior =
         UIMenuElementRepeatBehavior::automatic;

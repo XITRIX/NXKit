@@ -138,7 +138,7 @@ Confirm these areas before building on them:
 - `CALayer::mask` is stored but not applied by `skiaRender`.
 - Some visual setters do not dirty the layer tree, so updates may be deferred until another mutation.
 - `UIScrollView::contentSize()` is inferred from only the first subview; indicators and parts of delegate delivery are incomplete.
-- `UIControlEvent` lacks a real target/action registry, and control states do not model UIKit option-set semantics.
+- `UIControl` now has an event registry and UIKit option-set states; platform menus, tooltip integration, RTL alignment and accessibility bridging remain incomplete. See `docs/controls/README.md`.
 - `NXNavigationController` and `NXTabBarController` are console/demo components, not UIKit-compatible container implementations.
 - Public headers leak Skia implementation details.
 - Debug `printf` calls remain in frame and text paths.

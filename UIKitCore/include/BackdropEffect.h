@@ -72,6 +72,10 @@ public:
     /** Maximum Gaussian sigma used by the primary lane. */
     [[nodiscard]] NXFloat backdropBlurRadius() const { return _backdropBlurRadius; }
     void setBackdropBlurRadius(NXFloat radius);
+    /** Gaussian sigma in local points applied after the runtime shader.
+        Unlike backdropBlurRadius, this filters the shader's warped output. */
+    [[nodiscard]] NXFloat outputBlurRadius() const { return _outputBlurRadius; }
+    void setOutputBlurRadius(NXFloat radius);
     void setBackdropBlurKernel(BackdropBlurKernel kernel);
     /** Rendering extension: packed mip pyramid in the primary child. Shaders
         must declare float4 backdropPyramidRect={sourceX,sourceY,width,height}
@@ -122,6 +126,7 @@ private:
     std::string _backdropShaderName;
     NXFloat _maximumSampleRadius;
     NXFloat _backdropBlurRadius;
+    NXFloat _outputBlurRadius = 0;
     BackdropBlurKernel _backdropBlurKernel;
     std::optional<BackdropPyramid> _backdropPyramid;
     NXFloat _outputOutset = 0;

@@ -81,6 +81,11 @@ BackdropEffect::BackdropEffect(
 void BackdropEffect::setBackdropInput(std::string name, NXFloat radius) {
     setBackdropInput(std::move(name),BackdropBlurKernel{radius,radius,0});
 }
+void BackdropEffect::setOutputBlurRadius(NXFloat radius) {
+    if(!std::isfinite(radius)||radius<0)
+        throw std::invalid_argument("Backdrop output blur requires a finite nonnegative sigma");
+    _outputBlurRadius=radius;
+}
 
 void BackdropEffect::setBackdropInput(std::string name, BackdropBlurKernel kernel) {
     kernel = validatedKernel(kernel);

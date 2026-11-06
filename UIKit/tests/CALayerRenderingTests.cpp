@@ -84,6 +84,22 @@ void testMaskLayersUseLocalBounds() {
     }
 }
 
+void testShadowRadiusUsesPointGeometry() {
+    std::vector<int> samples;
+    for(int scale:{1,2,3}) {
+        auto surface=SkSurfaces::Raster(SkImageInfo::MakeN32Premul(80*scale,80*scale));
+        auto canvas=surface->getCanvas();canvas->clear(SK_ColorWHITE);canvas->scale(scale,scale);
+        auto layer=new_shared<CALayer>();layer->setBounds({0,0,40,20});layer->setPosition({40,40});
+        layer->setBackgroundColor(UIColor::white);layer->setShadowColor(UIColor::black);
+        layer->setShadowOpacity(1);layer->setShadowRadius(4);layer->skiaRender(canvas);
+        SkBitmap bitmap;bitmap.allocN32Pixels(80*scale,80*scale);surface->readPixels(bitmap,0,0);
+        // Same point-space location, four points outside the left edge.
+        samples.push_back(SkColorGetR(bitmap.getColor(16*scale+scale/2,40*scale+scale/2)));
+    }
+    expect(samples[0]<250,"point-space shadow sample has visible coverage");
+    for(auto value:samples)expect(std::abs(value-samples.front())<12,"shadow radius remains stable at1x/2x/3x");
+}
+
 void testOpacityLayersRetainBackdropForEffects() {
     auto layer = new_shared<CABackdropEffectLayer>(UIGlassEffect(UIGlassEffect::Style::clear).backdropEffect());
     layer->setBounds(NXRect(0, 0, 240, 120));
@@ -746,7 +762,11 @@ void testLargeGlassRefractionStopsBeforeDiagonalMedialAxis() {
 
 } // namespace
 
-int main() {
+int main(int argc,char** argv) {
+    testShadowRadiusUsesPointGeometry();
+    if(argc==2&&std::string(argv[1])=="--shadow-only") {
+        if(!failures)std::cout<<"CALayer point-space shadow tests passed\n";return failures?1:0;
+    }
     testMaskLayersUseLocalBounds();
     testOpacityLayersRetainBackdropForEffects();
     testBackdropFilterCacheTracksGeometry();

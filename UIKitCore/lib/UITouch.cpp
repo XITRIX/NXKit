@@ -1,11 +1,14 @@
 #include <UITouch.h>
 #include <UIWindow.h>
 #include <utility>
+#include <algorithm>
 
 namespace NXKit {
 
-UITouch::UITouch(unsigned long touchId, NXPoint atPoint, Timer timestamp):
+UITouch::UITouch(unsigned long touchId, NXPoint atPoint, Timer timestamp, unsigned int tapCount):
 _touchId(touchId),
+_tapCount(std::max(1u,tapCount)),
+_initialLocation(atPoint),
 _timestamp(timestamp),
 _absoluteLocation(atPoint),
 _previousAbsoluteLocation(atPoint)

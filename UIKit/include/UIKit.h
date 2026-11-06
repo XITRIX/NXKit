@@ -5,7 +5,10 @@
 #include <BackdropEffectView.h>
 #include <GlassContainerView.h>
 #include <LensView.h>
+#include <UIShadowProperties.h>
 #include <UIButton.h>
+#include <UISlider.h>
+#include <UISliderTrackConfiguration.h>
 #include <UIGlassEffect.h>
 #include <UIGlassContainerEffect.h>
 #include <UIKitRegistration.h>

@@ -62,7 +62,7 @@ public:
     void setCenter(NXPoint position);
     [[nodiscard]] NXPoint center() const;
 
-    void setAlpha(NXFloat alpha) { _layer->setOpacity(alpha); }
+    void setAlpha(NXFloat alpha);
     [[nodiscard]] NXFloat alpha() const { return _layer->opacity(); }
 
     void setHidden(bool hidden);
@@ -90,7 +90,7 @@ public:
     UIColor tintColor() const;
     virtual void tintColorDidChange();
 
-    void setUserInteractionEnabled(bool isUserInteractionEnabled) { _isUserInteractionEnabled = isUserInteractionEnabled; }
+    void setUserInteractionEnabled(bool isUserInteractionEnabled);
     [[nodiscard]] bool isUserInteractionEnabled() const { return _isUserInteractionEnabled; }
 
     void setContentMode(UIViewContentMode mode);
@@ -205,6 +205,9 @@ public:
 
     virtual bool applyXMLAttribute(const std::string& name, const std::string& value);
 protected:
+    // Internal lifecycle hook for tracking cancellation, including when an
+    // ancestor becomes unavailable. Implementations must call the base.
+    virtual void interactionDidBecomeUnavailable();
     // Material hosts may give their content a different color appearance
     // while retaining the host's inherited traits.
     virtual std::shared_ptr<UITraitCollection> traitsForSubviews() const { return traitCollection(); }

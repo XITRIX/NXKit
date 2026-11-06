@@ -1,6 +1,7 @@
 #include "GlassInteraction.hpp"
 #include "LensInteraction.hpp"
 #include "LensMaterial.hpp"
+#include "NativeLensProfile.hpp"
 #include "LensForegroundComposition.hpp"
 #include "CABackdropEffectLayer.hpp"
 #include <typeinfo>
@@ -122,6 +123,13 @@ void validateGeometry(NXRect value) {
 
 struct LensView::Animation {
   Internal::GlassSpring progress;
+  double materialElapsed=0;
+  std::optional<NXFloat> controlledRestingOpacity;
+  std::optional<NXFloat> controlledOpticalProgress;
+  std::optional<NXFloat> controlledMaterialProgress;
+  NXSize materialReferenceSize;
+  bool controlledBackdropCreated=false, firstControlLift=false;
+  std::vector<LiftCompletion> completions;
   bool interactive = false;
   InteractionSource source = InteractionSource::contact;
   Internal::LensInteraction motion;
@@ -147,6 +155,7 @@ struct LensView::Animation {
 LensView::LensView(Style style)
     : UIView(NXRect(), new_shared<LensMotionLayer>()), _style(style), _restingHost(new_shared<UIView>()),
       _resting(new_shared<UIView>()), _content(new_shared<UIView>()),
+      _warpBackdrop(new_shared<BackdropEffectView>(Internal::lensBackdropMaterial(style==Style::selection,0,{}))),
       _optics(new_shared<BackdropEffectView>(
           Internal::lensMaterial(style == Style::selection, 0))),
       _contact(new_shared<UIView>(NXRect(), new_shared<Internal::LensLayer>())),
@@ -156,11 +165,15 @@ LensView::LensView(Style style)
   std::static_pointer_cast<LensMotionLayer>(layer())->canBoundResting=[weak=weak_from_base<LensView>()] {
     const auto self=weak.lock();if(!self||self->_progress!=0)return false;
     const auto root=self->layer()->presentationOrSelf();
-    const std::vector<std::shared_ptr<CALayer>> expected={self->_restingHost->layer(),self->_optics->layer(),self->_content->layer(),self->_contact->layer()};
+    const std::vector<std::shared_ptr<CALayer>> expected={self->_warpBackdrop->layer(),self->_restingHost->layer(),self->_optics->layer(),self->_content->layer(),self->_contact->layer()};
     if(root->_mask||root->_sublayers!=expected||!self->_optics->layer()->presentationOrSelf()->isHidden())return false;
+    if(!self->_warpBackdrop->isHidden())return false;
     for(auto ancestor=root;ancestor;ancestor=ancestor->_superlayer.lock())if(!ancestor->_contentMasks.empty())return false;
     const auto host=self->_restingHost->layer()->presentationOrSelf(),contact=self->_contact->layer()->presentationOrSelf();
-    if(!host->masksToBounds()||host->getFrame()!=root->bounds()||contact->getFrame()!=root->bounds()
+    if(!self->_resting->layer()->presentationOrSelf()->masksToBounds()
+       ||host->_sublayers!=std::vector<std::shared_ptr<CALayer>>{self->_resting->layer()}
+       ||(host->_shadowColor&&host->_shadowColor->a()>0&&host->_shadowOpacity>0)
+       ||host->getFrame()!=root->bounds()||contact->getFrame()!=root->bounds()
        ||host->transform()!=NXTransform3DIdentity||contact->transform()!=NXTransform3DIdentity
        ||contact->_mask||!contact->_contentMasks.empty()||!contact->_sublayers.empty()||contact->_contents
        ||(contact->_shadowColor&&contact->_shadowColor->a()>0&&contact->_shadowOpacity>0))return false;
@@ -187,6 +200,9 @@ LensView::LensView(Style style)
     return true;
   };
   _restingHost->addSubview(_resting);
+  // Native order: below-glass blur/displacement, caller's resting surface,
+  // ClearGlass optics, then the selected-content portal and highlight.
+  addSubview(_warpBackdrop);
   addSubview(_restingHost);
   addSubview(_optics);
   // The selected input has separate ownership from the ordinary backdrop.
@@ -198,14 +214,23 @@ LensView::LensView(Style style)
   setSourceOwnership(_content->layer(),true);
   std::static_pointer_cast<Internal::LensLayer>(_contact->layer())->setSource(_content, shared_from_this());
   _restingHost->setUserInteractionEnabled(false);
+  _warpBackdrop->setUserInteractionEnabled(false);
   _optics->setUserInteractionEnabled(false);
   _contact->setUserInteractionEnabled(false);
-  _restingHost->setClipsToBounds(true);
+  _resting->setClipsToBounds(true);
   _content->setClipsToBounds(true);
   _optics->setClipsToBounds(false);
   updateDisplayScale();
   updateLayout();
   updateMaterial();
+}
+LensView::LensView(NXRect frame,Style style):LensView(style) {setFrame(frame);}
+LensView::LensView(std::shared_ptr<UIView> restingBackground,Style style):LensView(style) {
+  if(restingBackground) {
+    _hasCustomRestingBackground=true;
+    _resting->removeFromSuperview();_resting=std::move(restingBackground);
+    _resting->setClipsToBounds(true);_restingHost->addSubview(_resting);updateLayout();
+  }
 }
 NXAffineTransform LensView::interactionTransform() const {
   return std::static_pointer_cast<LensMotionLayer>(layer()->presentationOrSelf())
@@ -375,25 +400,66 @@ void LensView::setLiftedContentView(const std::shared_ptr<UIView> &source) {
   _registeredSource.reset();
   if (source && source != _content) {
     _registeredSource = source->layer();
-    setSourceOwnership(source->layer(),true);
+    setSourceOwnership(source->layer(),_liftedContentMode==LiftedContentMode::hideSource);
   }
   _liftedContent = source;
   std::static_pointer_cast<Internal::LensLayer>(_contact->layer())->setSource(source ? source : _content, shared_from_this());
   layer()->setNeedsDisplay();
 }
+void LensView::setLiftedContentMode(LiftedContentMode mode) {
+  if(mode!=LiftedContentMode::preserveSource&&mode!=LiftedContentMode::hideSource)
+    throw std::invalid_argument("Invalid lifted content mode");
+  if(_liftedContentMode==mode)return;
+  _liftedContentMode=mode;
+  setSourceOwnership(_registeredSource.lock(),mode==LiftedContentMode::hideSource);
+  layer()->setNeedsDisplay();
+}
 std::optional<UIColor> LensView::restingBackgroundColor() const {
-  return _resting->backgroundColor();
+  return _restingBackgroundColor;
 }
 void LensView::setRestingBackgroundColor(std::optional<UIColor> color) {
+  _restingBackgroundColor=color;
+  if(_hasCustomRestingBackground)return;
   CATransaction::begin();
   CATransaction::setDisableActions(true);
   _resting->setBackgroundColor(color);
   _resting->layer()->presentationOrSelf()->setBackgroundColor(color);
   CATransaction::commit();
 }
+void LensView::setRestingShadowProperties(std::shared_ptr<UIShadowProperties> properties) {
+  _restingShadow=std::move(properties);
+  (_restingShadow?_restingShadow:std::make_shared<UIShadowProperties>())->applyToView(_restingHost);
+  layer()->setNeedsDisplay();
+}
+void LensView::setRestingBorderColor(std::optional<UIColor> color) {
+  _restingBorderColor=std::move(color);updateMaterial();
+}
+void LensView::setWarpsContentBelow(bool value) {
+  if(_warpsContentBelow==value)return;
+  _warpsContentBelow=value;updateMaterial();
+}
 void LensView::setLifted(bool lifted, bool animated) {
+  _animation->controlledRestingOpacity.reset();
+  _animation->controlledOpticalProgress.reset();
+  _animation->controlledMaterialProgress.reset();
   const bool changed = _lifted != lifted;
   _lifted = lifted;
+  if(lifted&&!_animation->controlledBackdropCreated) {
+    _animation->controlledBackdropCreated=true;_animation->firstControlLift=true;
+  }
+  if(!lifted)_animation->firstControlLift=false;
+  if(changed) {
+    _animation->materialElapsed=0;
+    if(!lifted)_animation->progress.velocity=0;
+    else if(_style==Style::small) {
+      const auto omega=2*std::numbers::pi/.27;
+      _animation->progress.velocity+=(1-_animation->progress.value)*omega*omega*.032;
+    }
+  }
+  // Native material distances retire from their lifted reference geometry,
+  // even while the caller's presentation bounds shrink underneath them.
+  if(lifted || _animation->materialReferenceSize.width<=0 || _animation->materialReferenceSize.height<=0)
+    _animation->materialReferenceSize=bounds().size;
   if(isInteractive()&&interactionSource()==InteractionSource::viewMotion) prepareViewMotion();
   if (!animated) {
     _animation->progress = {lifted ? 1.0 : 0.0, 0};
@@ -402,10 +468,49 @@ void LensView::setLifted(bool lifted, bool animated) {
     if(isInteractive()&&interactionSource()==InteractionSource::viewMotion) prepareViewMotion();
     if(_animation->contact||!_animation->motion.atRest()||(isInteractive()&&interactionSource()==InteractionSource::viewMotion&&lifted)) wakeAnimation();
     else if(_animation->link) { _animation->link->invalidate(); _animation->link.reset(); }
+    auto completions=std::move(_animation->completions);_animation->completions.clear();
+    for(const auto& completion:completions)completion(true,false);
     return;
   }
   if (!changed) return;
   wakeAnimation();
+}
+void LensView::setLifted(bool lifted,bool animated,const std::function<void()>& alongsideAnimations,LiftCompletion completion) {
+  if(_lifted==lifted) {if(alongsideAnimations)alongsideAnimations();return;}
+  setLifted(lifted,animated);
+  if(alongsideAnimations) {
+    if(animated)UIView::animate(_style==Style::large?.25:(_lifted?.25:.46),0,
+        UIViewAnimationOptions(UIViewAnimationOptions::allowUserInteraction|UIViewAnimationOptions::beginFromCurrentState),alongsideAnimations);
+    else UIView::performWithoutAnimation(alongsideAnimations);
+  }
+  if(completion) {
+    if(animated)_animation->completions.push_back(std::move(completion));
+    else completion(true,false);
+  }
+}
+void LensView::setControlLift(bool lifted, NXFloat progress, NXFloat restingOpacity, NXFloat opticalProgress, NXSize materialReferenceSize) {
+  const auto materialProgress=progress;
+  progress=std::clamp(progress,0.f,1.f);
+  restingOpacity=std::clamp(restingOpacity,0.f,1.f);
+  const bool changed=_lifted!=lifted || _progress!=progress
+      || _animation->controlledRestingOpacity!=restingOpacity || _animation->controlledOpticalProgress!=opticalProgress
+      || _animation->controlledMaterialProgress!=materialProgress || _animation->materialReferenceSize!=materialReferenceSize;
+  if(lifted&&!_animation->controlledBackdropCreated) {
+    _animation->controlledBackdropCreated=true;_animation->firstControlLift=true;
+  }
+  if(!lifted)_animation->firstControlLift=false;
+  _lifted=lifted;
+  _progress=progress;
+  _animation->progress={progress,0};
+  _animation->controlledRestingOpacity=restingOpacity;
+  _animation->controlledOpticalProgress=opticalProgress;
+  _animation->controlledMaterialProgress=materialProgress;
+  _animation->materialReferenceSize=materialReferenceSize;
+  if(changed)updateMaterial();
+  if(isInteractive()&&interactionSource()==InteractionSource::viewMotion) {
+    prepareViewMotion();
+    if(lifted || !_animation->motion.atRest())wakeAnimation();
+  }
 }
 void LensView::wakeAnimation() {
   if(_animation->link) return;
@@ -454,11 +559,22 @@ void LensView::advance(double seconds) {
     applyInteractionTransform(state.motion.transform(size));
   }
   const auto previousProgress=_progress;
-  _animation->progress.advance(_lifted ? 1 : 0, seconds, .32, 0);
-  _progress =
-      std::clamp(NXFloat(_animation->progress.value), NXFloat(0), NXFloat(1));
-  if(_progress!=previousProgress) updateMaterial();
-  if (!_animation->contact && _animation->motion.atRest() && _animation->progress.atRest(_lifted ? 1 : 0)
+  const auto previousMaterialProgress=state.progress.value;
+  if(!state.controlledRestingOpacity) {
+    state.materialElapsed+=seconds;
+    const bool large=_style==Style::selection;
+    _animation->progress.advance(_lifted ? 1 : 0, seconds, _lifted?(large?.25:.27):.4, _lifted&&!large?.375:0);
+    // Both captured native controls terminate this material return at .48s;
+    // do not keep submitting imperceptible analytic-tail frames after that.
+    if(!_lifted && state.materialElapsed>=.48)state.progress={0,0};
+    _progress = std::clamp(NXFloat(_animation->progress.value), NXFloat(0), NXFloat(1));
+  }
+  if(_progress!=previousProgress || state.progress.value!=previousMaterialProgress) updateMaterial();
+  if(!state.controlledRestingOpacity && state.progress.atRest(_lifted?1:0) && !state.completions.empty()) {
+    auto completions=std::move(state.completions);state.completions.clear();
+    for(const auto& completion:completions)completion(true,false);
+  }
+  if (!_animation->contact && _animation->motion.atRest() && (state.controlledRestingOpacity || _animation->progress.atRest(_lifted ? 1 : 0))
       && !(isInteractive()&&interactionSource()==InteractionSource::viewMotion&&_lifted&&_animation->hasLifetime)) {
     if (_animation->link)
       _animation->link->invalidate();
@@ -470,15 +586,33 @@ void LensView::updateMaterial() {
   _materialSize = bounds().size;
   CATransaction::begin();
   CATransaction::setDisableActions(true);
-  _restingHost->setAlpha(1 - _progress);
-  _restingHost->layer()->presentationOrSelf()->setOpacity(1 - _progress);
+  const auto restingOpacity=_animation->controlledRestingOpacity.value_or(1 - _progress);
+  _restingHost->setAlpha(restingOpacity);
+  _restingHost->layer()->presentationOrSelf()->setOpacity(restingOpacity);
+  for(const auto& target:{layer(),_optics->layer()}) {
+    const auto width=_restingBorderColor&&!_lifted?3.f:0.f;
+    target->setBorderColor(_restingBorderColor);target->setBorderWidth(width);
+    target->presentationOrSelf()->setBorderColor(_restingBorderColor);target->presentationOrSelf()->setBorderWidth(width);
+  }
   _optics->setHidden(_progress == 0);
   _optics->layer()->presentationOrSelf()->setHidden(_progress == 0);
+  _warpBackdrop->setHidden(_progress==0);
+  _warpBackdrop->layer()->presentationOrSelf()->setHidden(_warpBackdrop->isHidden());
+  if(!_warpBackdrop->isHidden()) {
+    const auto optical=_animation->controlledOpticalProgress.value_or(_progress);
+    std::optional<NXFloat> displacement;
+    if(!_warpsContentBelow) {
+      const auto initial=Internal::nativeLensProfile(_style==Style::selection,false,bounds().size).spec.unliftedDisplacement;
+      displacement=_animation->firstControlLift?initial*(1-optical):0.f;
+    }
+    _warpBackdrop->setEffect(Internal::lensBackdropMaterial(_style==Style::selection,optical,bounds().size,displacement));
+  }
   const auto traits = traitCollection();
   const bool dark =
       traits && traits->userInterfaceStyle() == UIUserInterfaceStyle::dark;
   _optics->setEffect(
-      Internal::lensMaterial(_style == Style::selection, _progress, dark, bounds().size));
+      Internal::lensMaterial(_style == Style::selection, _animation->controlledMaterialProgress.value_or(NXFloat(_animation->progress.value)), dark, bounds().size, false,
+          _animation->materialReferenceSize.width>0&&_animation->materialReferenceSize.height>0 ? std::optional<NXSize>(_animation->materialReferenceSize) : std::nullopt, _lifted));
   std::static_pointer_cast<Internal::LensLayer>(_contact->layer())
       ->setLiftState(_style == Style::selection, _progress, _liftedContentMagnification, _contentVibrancy, dark);
   CATransaction::commit();
@@ -486,17 +620,19 @@ void LensView::updateMaterial() {
 }
 void LensView::updateLayout() {
   const auto size = bounds().size;
+  if(_lifted && !_animation->controlledMaterialProgress)_animation->materialReferenceSize=size;
   const auto radius =
       std::max(NXFloat(0), std::min(size.width, size.height) * .5f);
   const NXRect local(0, 0, size.width, size.height);
   layer()->setCornerRadius(radius);
   for (const auto &view :
-       {_restingHost, _content, std::static_pointer_cast<UIView>(_optics),
+       {_restingHost, _content, std::static_pointer_cast<UIView>(_warpBackdrop), std::static_pointer_cast<UIView>(_optics),
         _contact}) {
     view->setFrame(bounds());
     view->layer()->setCornerRadius(radius);
   }
   _resting->setFrame(local);
+  _resting->layer()->setCornerRadius(radius);
   if (_materialSize != size) updateMaterial();
 }
 void LensView::setFrame(NXRect frame) {
@@ -540,13 +676,23 @@ void LensView::updateDisplayScale() {
 }
 bool LensView::applyXMLAttribute(const std::string &name,
                                  const std::string &value) {
+  if(name=="warpsContentBelow") {
+    const auto parsed=valueToBool(value);if(!parsed)return false;
+    setWarpsContentBelow(*parsed);return true;
+  }
   if (name == "style") {
-    if (value == "regular")
+    if (value == "regular" || value == "small")
       setStyle(Style::regular);
-    else if (value == "selection")
+    else if (value == "selection" || value == "large")
       setStyle(Style::selection);
     else
       return false;
+    return true;
+  }
+  if(name=="liftedContentMode") {
+    if(value=="preserveSource")setLiftedContentMode(LiftedContentMode::preserveSource);
+    else if(value=="hideSource")setLiftedContentMode(LiftedContentMode::hideSource);
+    else return false;
     return true;
   }
   if(name=="interactionSource") {
@@ -582,6 +728,22 @@ bool LensView::applyXMLAttribute(const std::string &name,
       return false;
     setRestingBackgroundColor(*parsed);
     return true;
+  }
+  if(name=="restingBorderColor") {
+    const auto parsed=valueToColor(value);if(!parsed)return false;
+    setRestingBorderColor(*parsed);return true;
+  }
+  if(name=="restingShadowColor" || name=="restingShadowRadius" || name=="restingShadowOpacity" || name=="restingShadowOffsetX" || name=="restingShadowOffsetY") {
+    auto properties=_restingShadow?_restingShadow->copy():std::make_shared<UIShadowProperties>();
+    if(name=="restingShadowColor") {
+      const auto color=valueToColor(value);if(!color)return false;properties->setColor(*color);
+    } else {
+      const auto number=valueToFloat(value);if(!number || !std::isfinite(*number))return false;
+      if(name=="restingShadowRadius"){if(*number<0)return false;properties->setRadius(*number);}
+      else if(name=="restingShadowOpacity")properties->setOpacity(*number);
+      else {auto offset=properties->offset();if(name=="restingShadowOffsetX")offset.width=*number;else offset.height=*number;properties->setOffset(offset);}
+    }
+    setRestingShadowProperties(properties);return true;
   }
   return UIView::applyXMLAttribute(name, value);
 }

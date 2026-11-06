@@ -17,7 +17,8 @@ class UIWindow;
 class UITouch {
 public:
     UITouch(): UITouch(0, NXPoint(), Timer()) {}
-    UITouch(unsigned long touchId, NXPoint point, Timer timestamp);
+    UITouch(unsigned long touchId, NXPoint point, Timer timestamp, unsigned int tapCount = 1);
+    [[nodiscard]] unsigned int tapCount() const { return _tapCount; }
 
     [[nodiscard]] constexpr unsigned long touchId() const { return _touchId; }
 
@@ -43,6 +44,8 @@ public:
 
 private:
     unsigned long _touchId;
+    unsigned int _tapCount = 1;
+    NXPoint _initialLocation;
 
     std::weak_ptr<UIView> _view;
     std::weak_ptr<UIWindow> _window;

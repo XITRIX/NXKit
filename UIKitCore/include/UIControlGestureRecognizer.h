@@ -9,13 +9,13 @@
 
 #include <UIControl.h>
 #include <UIGestureRecognizer.h>
-#include <UIControlGestureRecognizer.h>
 
 namespace NXKit {
 
 class UIControlGestureRecognizer: public UIGestureRecognizer {
 public:
     explicit UIControlGestureRecognizer(const std::weak_ptr<UIControl>& control);
+    bool canBePreventedBy(const std::shared_ptr<UIGestureRecognizer>& other) const override;
 
     void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
     void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;

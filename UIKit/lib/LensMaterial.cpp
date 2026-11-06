@@ -19,6 +19,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
+#include <numbers>
 
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkPicture.h"
@@ -445,12 +446,35 @@ void LensLayer::draw(SkCanvas *canvas) {
     return;
   // The recovered glass-background pass owns its exterior ring/shadow.
 }
-BackdropEffect lensMaterial(bool selection, NXFloat progress, bool dark, NXSize size) {
+BackdropEffect lensBackdropMaterial(bool selection, NXFloat progress, NXSize size, std::optional<NXFloat> displacement) {
+  static const auto source=std::string("uniform shader content;uniform shader sharpContent;uniform float2 resolution;uniform float filterScale;uniform float cornerCurve;uniform float contentScale;uniform float2 displacement;\n")
+      +layerCornerShaderUniforms+layerCornerShaderSource()+std::string(nativeLensShaderFunctions())+R"sksl(
+half4 main(float2 xy) {
+    float scale=max(filterScale,1);
+    float2 p=xy/scale;
+    float2 sample=lensDisplaced(p,resolution,displacement.x,displacement.y,1,.5);
+    return content.eval(sample*scale);
+})sksl";
+  const auto profile=nativeLensProfile(selection,false,size);
+  const auto amount=displacement.value_or(profile.spec.unliftedDisplacement+(profile.spec.liftedDisplacement-profile.spec.unliftedDisplacement)*progress);
+  const auto blur=std::max(0.f,profile.spec.unliftedBlurRadius*(1-progress));
+  BackdropEffect effect(source,"content",std::abs(amount)+profile.backdrop.height+3*blur);
+  effect.setOutputBlurRadius(blur);
+  effect.setUniform("displacement",NXPoint(amount,profile.backdrop.height));
+  return effect;
+}
+BackdropEffect lensMaterial(bool selection, NXFloat progress, bool dark, NXSize size, bool warpsContentBelow, std::optional<NXSize> controlReferenceSize, bool controlLifted) {
   static const std::string source=[] {
     std::string material(nativeGlassMaterialShaderSource());
     auto entry=material.find("half4 main(float2 filterXY)");
     if(entry==std::string::npos)throw std::runtime_error("Native glass material entry is unavailable");
     material.erase(entry);
+    // CASDFOutputEffect min/max allocate SDF support; they are not a radial
+    // alpha cutoff. Applying that cutoff to the capsule chops its shadow tail.
+    const auto coverageStart=material.find("float nativeGlassOutputCoverage(float sdf) {");
+    if(coverageStart==std::string::npos)throw std::runtime_error("Native glass output support entry is unavailable");
+    const auto coverageEnd=material.find("\n}",coverageStart);
+    material.replace(coverageStart,coverageEnd+2-coverageStart,"float nativeGlassOutputCoverage(float sdf) { return 1; }");
     // The backdrop warp precedes the native clear-glass passes. Preserve the
     // original sampler for the resting interpolation and exterior pixels.
     auto at=material.find("float2 nativeSampleXY(");
@@ -460,8 +484,10 @@ uniform float4 lensForegroundAberration;
 uniform float4 lensForegroundEdge;
 uniform float lensForegroundCaptureMargin;
 uniform float2 lensInnerRefractionFraction;
+uniform float3 lensControlRefraction;
 uniform float lensProgress;
 float4 lensRefraction() {
+    if(lensControlRefraction.z>.5)return float4(lensControlRefraction.xy,0,0);
     float shortSide=min(resolution.x,resolution.y);
     return float4(lensInnerRefractionFraction.x*shortSide,min(20,lensInnerRefractionFraction.y*shortSide),0,0);
 }
@@ -534,16 +560,43 @@ half4 main(float2 filterXY) {
         rgb*=float3(.5,1.0/3,.5);alpha*=edge;
         base=half4(half3(rgb*alpha),half(alpha))+base*(1-half(alpha));
     }
-    base.rgb=nativeGlassHighlight(field.x,field.yz,field.yz,half3(nativeUnpremul(base)))*base.a;
+    // The native ClearGlass material stays active. Only its final highlight
+    // follows the complementary resting-fill opacity, not the whole surface.
+    half3 lit=nativeGlassHighlight(field.x,field.yz,field.yz,half3(nativeUnpremul(base)))*base.a;
+    base.rgb=mix(base.rgb,lit,half(lensProgress));
     float coverage=externalShapeCoverage>.5?1:clamp(.5-field.x*max(contentScale,1),0,1);
     // Exterior shadow/rim remain native, without clipping to the body.
-    half4 resultPixel=mix(original,base,half(lensProgress));
-    return field.x>0?resultPixel:mix(original,resultPixel,half(coverage));
+    return field.x>0?base:mix(original,base,half(coverage));
 }
 )sksl";
     return material;
   }();
-  const auto profile=nativeLensProfile(selection,dark,size);
+  auto profile=nativeLensProfile(selection,dark,controlReferenceSize.value_or(size));
+  {
+    // Actual small and large lens CAFilter traces retire the material inputs
+    // themselves. This is shared lens behavior, independent of which control
+    // supplies geometry or its animation clock. Keep raw spring overshoot.
+    const auto q=std::max(0.f,progress), bounded=std::clamp(q,0.f,1.f);
+    auto& p=profile.glass;
+    p.bleedDistance0*=q;p.blurDistance0*=q;p.faceBlack*=q;p.faceOpacity*=q;
+    p.innerRefractionAmount*=q;p.innerRefractionHeight*=q;p.refractionDistance0*=q;
+    p.keyFillHighlightAmount=.4f+(p.keyFillHighlightAmount-.4f)*q;
+    p.keyFillHighlightEffectOffset*=q;p.keyFillHighlightHeight*=q;
+    constexpr float restingSpread=5*std::numbers::pi_v<float>/12;
+    p.keyFillHighlightSpread=restingSpread+(p.keyFillHighlightSpread-restingSpread)*q;
+    p.keyFillHighlightSpreadSDR=restingSpread+(p.keyFillHighlightSpreadSDR-restingSpread)*q;
+    p.maxHeadroom=1.2f+(p.maxHeadroom-1.2f)*q;
+    p.ringShadowBlurRadius=std::min(3.f,1+2*q);p.ringShadowMask=1-q;
+    p.ringShadowOffset*=q;p.ringShadowOpacity*=q;p.ringShadowStrokeWidth*=q;
+    p.shadowAmount*=q;p.shadowRadius*=q;p.shadowColorMatrixFillColor.a*=bounded;
+    p.shadowOffset.y=8-bounded;
+    if(!controlLifted)p.shadowOpacity=0;
+  }
+  // Preserve the finite Gaussian/ring support instead of clipping at an SDF
+  // iso-distance. These are kernel bounds, independent of device layout.
+  profile.glass.output.maximum=std::max({profile.glass.output.maximum,
+      std::abs(profile.glass.ringShadowOffset)+profile.glass.ringShadowStrokeWidth+3*profile.glass.ringShadowBlurRadius,
+      std::abs(profile.glass.shadowOffset.y)+3*profile.glass.shadowRadius});
   auto effect=makeNativeGlassEffect(profile.glass,UIGlassEffect::Style::clear,UIColor::clear,false,
       std::abs(profile.backdrop.amount)+std::abs(profile.source.amount)+profile.glass.innerRefractionHeight+32,source);
   if(profile.glass.blurRadius==0 && profile.glass.blurFillRadius==0 &&
@@ -551,7 +604,8 @@ half4 main(float2 filterXY) {
     effect.setBackdropBlurRadius(0); // No redundant LOD0 atlas for a sharp lens.
   effect.setBackdropScale(1);
   effect.setUniform("lensProgress",std::clamp(progress,NXFloat(0),NXFloat(1)));
-  effect.setUniform("lensBackdropDisplacement",NXPoint(profile.backdrop.amount,profile.backdrop.height));
+  effect.setUniform("lensControlRefraction",std::array<NXFloat,3>{profile.glass.innerRefractionAmount,profile.glass.innerRefractionHeight,controlReferenceSize?1.f:0.f});
+  effect.setUniform("lensBackdropDisplacement",NXPoint(warpsContentBelow?profile.backdrop.amount:0,profile.backdrop.height));
   const auto unitProfile=nativeLensProfile(selection,dark,{1,1});
   effect.setUniform("lensInnerRefractionFraction",NXPoint(unitProfile.glass.innerRefractionAmount,unitProfile.glass.innerRefractionHeight));
   const auto& foreground=unitProfile.foreground;

@@ -4,6 +4,7 @@
 #include "GlassScreenViewController.hpp"
 #include "GlassStressView.hpp"
 #include "GlassAppearanceSettings.hpp"
+#include <UISlider.h>
 #include <algorithm>
 #include <cmath>
 
@@ -53,10 +54,26 @@ public:
         detail->setText("Applies to all Demo screens and is saved for this app. Follow system uses Apple's glass preference on 27+, or the original NXKit material elsewhere.");
         _content->addSubview(detail);
         const auto weak=weak_from_base<GlassAppearanceSettingsController>();
-        const auto apply=[weak](std::optional<NXFloat> amount){DemoGlassSettings::set(amount);if(auto self=weak.lock())self->updateStatus();};
+        const auto apply=[weak](std::optional<NXFloat> amount){
+            if(auto self=weak.lock();self && self->_slider)self->_slider->cancelTracking();
+            DemoGlassSettings::set(amount);if(auto self=weak.lock())self->updateStatus();
+        };
         _content->addSubview(button("Follow system",[apply]{apply(std::nullopt);}));
-        for(const auto amount : {0.f,.25f,.5f,.75f,1.f})
-            _content->addSubview(button(std::to_string(int(amount*100))+"% tinted",[apply,amount]{apply(amount);}));
+        _slider=new_shared<UISlider>();
+        _slider->configureLayout([](const auto& layout) {
+            layout->setWidth(100_percent);layout->setHeight(44_pt);layout->setFlexShrink(0);
+        });
+        _slider->addAction(UIAction("Glass tint",[weak] {
+            if(auto self=weak.lock()) {
+                if(self->_slider->isTracking())UIApplication::shared->setOverrideGlassTintAmount(self->_slider->value());
+                else DemoGlassSettings::set(self->_slider->value());
+                self->updateStatus();
+            }
+        }),UIControlEvent::valueChanged);
+        _slider->addAction(UIAction("Save glass tint",[weak] {
+            if(auto self=weak.lock())DemoGlassSettings::set(self->_slider->value());
+        }),UIControlEvent::touchUpInside|UIControlEvent::touchUpOutside|UIControlEvent::touchCancel);
+        _content->addSubview(_slider);
         _scroll->addSubview(_content);setView(_scroll);updateStatus();
     }
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previous) override {
@@ -72,12 +89,14 @@ private:
     void updateStatus() {
         if(!_status) return;
         const auto app=UIApplication::shared;
+        if(_slider)_slider->setValue(app->glassTintAmount());
         _status->setText(std::string(app->overrideGlassTintAmount()?"App override: ":"System: ")
             +std::to_string(int(std::lround(app->glassTintAmount()*100)))+"% tinted");
     }
     std::shared_ptr<UIScrollView> _scroll;
     std::shared_ptr<UIView> _content;
     std::shared_ptr<UILabel> _status;
+    std::shared_ptr<UISlider> _slider;
 };
 class LensDemoViewController final : public UIViewController {
 public:
