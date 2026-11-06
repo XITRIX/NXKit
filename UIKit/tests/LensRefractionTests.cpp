@@ -316,9 +316,11 @@ void testTintedInkHasVisibleChromaticTransport() {
             const auto centers=channelCentroids(render(scene.root),control,{p.x-18,std::max(40.5f,p.y-18),36,std::min(95.5f,p.y+18)-std::max(40.5f,p.y-18)},color);
             expect(centers[1].mass>1&&centers[2].mass>1,"selected blue/cyan ink contributes both channels independently of the ordinary backdrop");
             const float separation=(i<2?centers[1].x-centers[2].x:centers[1].y-centers[2].y)*(i==1||i==3?-1:1);
+            if(!(separation>(i<2?1.45f:.9f)&&separation<(i<2?1.9f:1.4f)))std::cerr<<"Tinted separation="<<separation<<" edge="<<i<<" dark="<<dark<<" G="<<centers[1].x<<','<<centers[1].y<<" B="<<centers[2].x<<','<<centers[2].y<<'\n';
             expect(separation>(i<2?1.45f:.9f)&&separation<(i<2?1.9f:1.4f),"tinted selected ink retains the native-sized G/B fringe at straight and curved edges");
             if(i>=2) {
                 const auto radial=(centers[2].x-centers[1].x)*(i==2?1:-1);
+                if(!(radial>.15f&&radial<.55f))std::cerr<<"Tinted radial="<<radial<<" edge="<<i<<" dark="<<dark<<'\n';
                 expect(radial>.15f&&radial<.55f,"selected blue/cyan markers reproduce UIKit's additional side-normal channel separation");
             }
             dot->removeFromSuperview();
@@ -394,9 +396,11 @@ void testBackgroundRefractionHasObservedNearEdgePlacement() {
         const auto control=render(root);
         auto dot=mark({116.25f,41,4,4},UIColor::black);dot->layer()->setCornerRadius(2);dot->layer()->setCornerCurve(CALayerCornerCurve::circular);backdrop->addSubview(dot);
         const auto near=channelCentroids(render(root),control,{108,40.5f,20,14});
+        if(!(near[1].mass>1 && near[1].y>46.2f && near[1].y<47.6f))std::cerr<<"Backdrop near G="<<near[1].y<<" mass="<<near[1].mass<<'\n';
         expect(near[1].mass>1 && near[1].y>46.2f && near[1].y<47.6f,"near-rim ordinary backdrop marker reaches the observed native green-channel depth");
         dot->removeFromSuperview();backdrop->addSubview(mark({106,52,24,1},UIColor::black));
         const auto deeper=channelCentroids(render(root),control,{110,50,16,10});
+        if(!(deeper[1].mass>1 && deeper[1].y>53.5f && deeper[1].y<55.25f))std::cerr<<"Backdrop deeper G="<<deeper[1].y<<" mass="<<deeper[1].mass<<'\n';
         expect(deeper[1].mass>1 && deeper[1].y>53.5f && deeper[1].y<55.25f,"deeper backdrop line retains the native displacement falloff");
     }
 }
@@ -443,6 +447,7 @@ void testBackgroundHasIndependentChromaticTransport() {
 
 }
 int main(int argc,char** argv) {
+    if(argc>1 && std::string(argv[1])=="--background-only") {testBackgroundRefractionHasObservedNearEdgePlacement();return failures?1:0;}
     if(argc>1 && std::string(argv[1])=="--sampling-only") {testCenterInkKeepsRetinaPixelEdges();return failures?1:0;}
     if(argc>1 && std::string(argv[1])=="--zoom-only") { testUniformLiftedMagnification(); return failures?1:0; }
     if(argc>1 && std::string(argv[1])=="--ink-only") {

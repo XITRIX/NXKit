@@ -28,6 +28,10 @@ add_library(XITRIXUIKit
         lib/GlassShader.cpp
         lib/NativeGlassBlur.cpp
         lib/NativeGlassBlur.hpp
+        lib/NativeLensProfile.cpp
+        lib/NativeLensProfile.hpp
+        lib/NativeLensProfileData.hpp
+        lib/NativeLensShader.hpp
         lib/NativeGlassShader.cpp
         lib/NativeGlassShader.hpp
         lib/NativeGlassLighting.cpp
@@ -146,6 +150,11 @@ if (UIKIT_BUILD_TESTS)
     add_executable(NXKitLensRefractionTests tests/LensRefractionTests.cpp)
     target_link_libraries(NXKitLensRefractionTests PRIVATE Xitrix::UIKit)
     add_test(NAME NXKitLensRefractionTests COMMAND NXKitLensRefractionTests)
+
+    add_executable(NXKitNativeLensProfileTests tests/NativeLensProfileTests.cpp)
+    target_include_directories(NXKitNativeLensProfileTests PRIVATE lib)
+    target_link_libraries(NXKitNativeLensProfileTests PRIVATE Xitrix::UIKit)
+    add_test(NAME NXKitNativeLensProfileTests COMMAND NXKitNativeLensProfileTests)
 
     add_executable(NXKitGlassContainerTests tests/GlassContainerTests.cpp tests/FilterRegionProbe.cpp)
     set_source_files_properties(tests/FilterRegionProbe.cpp PROPERTIES COMPILE_OPTIONS -fno-rtti)

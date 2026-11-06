@@ -256,9 +256,14 @@ void testAnimationAndLayout() {
                  UIUserInterfaceStyle::dark,
          "resizing display scale and appearance reach optics and selected "
          "content");
-  expect(
-      optics->effect().uniform("rimShadeScale")->front() > 2,
-      "regular lens adapts its measured perimeter shading to dark appearance");
+  const auto darkFace = optics->effect().uniform("nativeFaceBlack");
+  expect(darkFace && darkFace->front() > 0,
+         "regular lens uses the captured dark-appearance face transfer");
+  a->setBounds({0,0,160,80});
+  const auto refraction=optics->effect().uniform("nativeRefraction");
+  expect(refraction && std::abs(refraction->at(0)+24)<.001f &&
+         std::abs(refraction->at(1)-14.4f)<.001f,
+         "resizing a lifted lens refreshes size-dependent native material distances");
   root->changeTraits(1);
   expect(optics->layer()->contentsScale() == 1 &&
              a->subviews().back()->layer()->contentsScale() == 1,
@@ -304,7 +309,7 @@ void testAnimationAndLayout() {
   const auto presented = std::static_pointer_cast<CABackdropEffectLayer>(
       optics->layer()->presentationOrSelf());
   expect(
-      std::abs(presented->effect().uniform("liftProgress")->front() -
+      std::abs(presented->effect().uniform("lensProgress")->front() -
                LensViewTestHarness::progress(a)) < .0001f,
       "interrupted lifted state reaches active material presentation copies");
   expect(

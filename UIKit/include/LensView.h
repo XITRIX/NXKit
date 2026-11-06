@@ -116,6 +116,7 @@ private:
   NXFloat _progress = 0;
   NXFloat _liftedContentMagnification = 1;
   NXFloat _resolvedDisplayScale = 0;
+  NXSize _materialSize;
   std::shared_ptr<UIView> _restingHost;
   std::shared_ptr<UIView> _resting;
   std::shared_ptr<UIView> _content;

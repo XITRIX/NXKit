@@ -202,7 +202,7 @@ LensView::LensView(Style style)
   _contact->setUserInteractionEnabled(false);
   _restingHost->setClipsToBounds(true);
   _content->setClipsToBounds(true);
-  _optics->setClipsToBounds(true);
+  _optics->setClipsToBounds(false);
   updateDisplayScale();
   updateLayout();
   updateMaterial();
@@ -467,6 +467,7 @@ void LensView::advance(double seconds) {
     CALayer::requestFramerate(120);
 }
 void LensView::updateMaterial() {
+  _materialSize = bounds().size;
   CATransaction::begin();
   CATransaction::setDisableActions(true);
   _restingHost->setAlpha(1 - _progress);
@@ -477,7 +478,7 @@ void LensView::updateMaterial() {
   const bool dark =
       traits && traits->userInterfaceStyle() == UIUserInterfaceStyle::dark;
   _optics->setEffect(
-      Internal::lensMaterial(_style == Style::selection, _progress, dark));
+      Internal::lensMaterial(_style == Style::selection, _progress, dark, bounds().size));
   std::static_pointer_cast<Internal::LensLayer>(_contact->layer())
       ->setLiftState(_style == Style::selection, _progress, _liftedContentMagnification, _contentVibrancy, dark);
   CATransaction::commit();
@@ -496,6 +497,7 @@ void LensView::updateLayout() {
     view->layer()->setCornerRadius(radius);
   }
   _resting->setFrame(local);
+  if (_materialSize != size) updateMaterial();
 }
 void LensView::setFrame(NXRect frame) {
   validateGeometry(frame);

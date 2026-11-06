@@ -4,9 +4,9 @@
 #include <UIView.h>
 
 namespace NXKit::Internal {
-// Independent approximation calibrated against the native lens fixture.
+// Recovered native lens settings and independently translated pass equations.
 BackdropEffect lensMaterial(bool selection, NXFloat liftProgress,
-                            bool dark = false);
+                            bool dark = false, NXSize size = {});
 class LensLayer final : public CALayer {
 public:
   LensLayer() = default;

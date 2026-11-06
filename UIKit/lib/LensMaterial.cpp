@@ -1,4 +1,7 @@
 #include "LensMaterial.hpp"
+#include "NativeLensProfile.hpp"
+#include "NativeLensShader.hpp"
+#include "NativeGlassShader.hpp"
 #include "GlassVibrancy.hpp"
 #include "GlassForeground.hpp"
 #include "LensForegroundComposition.hpp"
@@ -198,8 +201,10 @@ void LensLayer::drawSource(SkCanvas* canvas,bool isolateForeground,bool cropSour
   static const auto sourceEffects = [] {
     std::array<sk_sp<SkRuntimeEffect>,2> effects;
     for(int variant=0;variant<2;++variant) {
-    auto compiled = SkRuntimeEffect::MakeForShader(SkString(std::string(variant?"const bool vibrantSource=true;\n":"const bool vibrantSource=false;\n") + "uniform float cornerCurve;\n" + layerCornerShaderUniforms + layerCornerShaderSource() + glassVibrancySource + R"sksl(
+    auto compiled = SkRuntimeEffect::MakeForShader(SkString(std::string(variant?"const bool vibrantSource=true;\n":"const bool vibrantSource=false;\n") + "uniform float cornerCurve;\n" + layerCornerShaderUniforms + layerCornerShaderSource() + "uniform float contentScale;\n" + std::string(nativeLensShaderFunctions()) + glassVibrancySource + R"sksl(
 uniform shader selected;
+uniform shader opticalSelected;
+uniform float bufferedOptics;
 uniform shader scene;
 uniform float3x3 samplingToOwner;
 uniform float sourceScale;
@@ -219,29 +224,38 @@ float capsule(float2 p) {
 float2 opticalNormal(float2 p) {
   return lensNormalDirection(p-size*.5,size*.5,min(size.x,size.y)*.5);
 }
-// Effective radial fit to the native 1pt line sweep, in logical points.
-// These reconstruction parameters are not Apple's private shader equation.
+uniform float2 wrapperDisplacement;
+uniform float2 sourceDisplacement;
+uniform float4 foregroundRefraction;
+uniform float4 foregroundAberration;
+uniform float4 foregroundEdge;
+uniform float foregroundCaptureMargin;
 float2 sourcePosition(float2 p) {
-  float depth=max(-capsule(p),0.0);
-  float projected=sqrt(7.94*7.94+(depth-3.42)*(depth-3.42));
-  float shoulder=smoothstep(4.34,13.70,depth);
-  float target=projected;
-  if(selection<.5) target+=5.3*exp(-depth/1.5)*(1.0-smoothstep(3.0,5.0,depth));
-  // Bound the perimeter fold before blending back to identity. The continuous
-  // shape's first-order distance can exceed half-height in its interior;
-  // clamping the final mixed target used to reintroduce a center displacement.
-  target=mix(min(target,min(size.x,size.y)*.5),depth,shoulder);
-  return magnifiedPosition(p-opticalNormal(p)*(target-depth));
+  return magnifiedPosition(lensDisplaced(p,size,wrapperDisplacement.x,wrapperDisplacement.y,1,.5));
 }
-half4 sourceAt(float2 p,float2 normal,float sigma) {
-  sigma/=sourceMagnification;
-  half4 value=selected.eval(p*sourceScale);
-  if(sigma>.05) {
-    value*=.375;
-    value+=(selected.eval((p-normal*sigma)*sourceScale)+selected.eval((p+normal*sigma)*sourceScale))*.25;
-    value+=(selected.eval((p-normal*sigma*2.0)*sourceScale)+selected.eval((p+normal*sigma*2.0)*sourceScale))*.0625;
+half4 sourceAt(float2 p) {
+  float mask=clamp(.5-lensShape(p,size).x*max(contentScale,1),0,1);
+  return selected.eval(sourcePosition(p)*sourceScale)*half(mask);
+}
+half4 displacedSourceAt(float2 p) {
+  if(bufferedOptics>.5)return opticalSelected.eval(p*sourceScale);
+  float mask=clamp(.5-lensShape(p,size).x*max(contentScale,1),0,1);
+  return sourceAt(lensDisplaced(p,size,sourceDisplacement.x,sourceDisplacement.y,1,0))*half(mask);
+}
+void spectralSource(float2 p,out half3 ink,out half3 coverage) {
+  float3 field=lensShape(p,size);
+  float2 center=p+field.yz*foregroundRefraction.x*lensShoulder(-field.x,foregroundRefraction.y,foregroundRefraction.z);
+  float2 spread=lensAberration(field.yz,foregroundAberration.w,lensForegroundExtent(size,foregroundCaptureMargin))*foregroundAberration.x
+      *lensShoulder(-field.x,foregroundAberration.y,foregroundAberration.z);
+  float3 rgb=float3(0),alpha=float3(0);
+  for(int i=0;i<7;++i) {
+    float position=1-float(i)/3;
+    half4 sample=displacedSourceAt(center+spread*position);
+    float r=max(position,0),b=max(-position,0),g=1-abs(position);
+    float3 weight=float3(r,g,b)*float3(.5,1.0/3,.5);
+    rgb+=float3(sample.rgb)*weight;alpha+=float(sample.a)*weight;
   }
-  return value;
+  ink=half3(rgb);coverage=half3(alpha);
 }
 half4 vibrantSample(half4 source,half4 background) {
   if(source.a<=0)return half4(0);
@@ -257,38 +271,21 @@ half4 main(float2 coordinate) {
   half3 ink=original.rgb;
   half3 coverage=original.aaa;
   if(progress>0.0) {
-    float depth=max(-capsule(p),0.0);
-    float2 normal=opticalNormal(p);
-    float2 uv=sourcePosition(p);
-    float sigma=.6*exp(-depth/1.2);
-    half4 green=sourceAt(uv,normal,sigma);
-    if(vibrantSource)green=vibrantSample(green,background);
-    half3 color=green.rgb;
-    half3 alpha=green.aaa;
-    if(selection>.5) {
-      float edge=1.0-smoothstep(6.0,12.0,depth);
-      float v=(3.5-depth)/sqrt((3.5-depth)*(3.5-depth)+2.25);
-      // Native selected-ink G/B centroids separate about 1.6pt at the top
-      // and 1.05pt at the curved side. The old smaller field left saturated
-      // tinted glyphs with narrow fringes despite a strongly dispersed backdrop.
-      // Keep the independently measured diagonal fold while increasing the
-      // dispersion in the measured top/side sectors. A uniform gain changes
-      // the corner's outer/inner branch ownership and loses native ink.
-      float side=abs(normal.x);
-      float2 spread=float2(1.45+.27*(1.0-smoothstep(.05,.25,side)),
-                           .80+.36*smoothstep(.65,.95,side));
-      // UIKit's side markers also separate radially (blue inward,
-      // red outward). Tangential transport alone leaves long blue glyph
-      // strokes with identical channel boundaries along the curved sides.
-      float2 shift=(float2(normal.y,normal.x)*spread-normal*(.06*v))*edge;
-      float sideRay=smoothstep(.85,.98,side)*edge;
-      // Perturb before folding. At curved corners the radial fold can
-      // reverse channel order; adding a shift after the fold cannot do so.
-      half4 red=sourceAt(sourcePosition(p+shift-normal*(.70*sideRay)),normal,sigma);
-      half4 blue=sourceAt(sourcePosition(p-shift+normal*(2.25*sideRay)),normal,sigma);
-      if(vibrantSource) { red=vibrantSample(red,background);blue=vibrantSample(blue,background); }
-      color=half3(red.r,green.g,blue.b);
-      alpha=half3(red.a,green.a,blue.a);
+    half4 base=displacedSourceAt(p);
+    half3 spectralInk=base.rgb,spectralCoverage=base.aaa;
+    half edge=0;
+    if(foregroundAberration.x!=0 || foregroundRefraction.x!=0) {
+      spectralSource(p,spectralInk,spectralCoverage);
+      edge=half(lensEdgeOpacity(lensShape(p,size).x,foregroundEdge));
+    }
+    // UIKit filters the already composed opaque surface. Our selected ink is
+    // retained separately: carry each spectral channel's coverage so its
+    // background contribution is not replaced with transparent black.
+    half3 color=mix(base.rgb,spectralInk,edge);
+    half3 alpha=mix(base.aaa,spectralCoverage,edge);
+    if(vibrantSource) {
+      half3 straight=color/max(alpha,half3(.0001));
+      color=mix(color,half3(glassVibrantColor(float3(straight),float3(background.rgb/max(background.a,.0001)),dark))*alpha,background.a);
     }
     ink=mix(original.rgb,color,half(progress));
     coverage=mix(original.aaa,alpha,half(progress));
@@ -323,6 +320,74 @@ half4 main(float2 coordinate) {
   SkRuntimeShaderBuilder sourceBuilder(sourceEffect);
   sourceBuilder.child("selected")=shader;
   if(useVibrancy) {sourceBuilder.child("scene")=SkShaders::Color(SK_ColorTRANSPARENT);sourceBuilder.uniform("samplingToOwner")=samplingToOwner;}
+  const auto profile=nativeLensProfile(_selection,_dark,bounds().size);
+  // UIKit rasterizes the wrapper and source-displacement layers before the
+  // foreground samples them. Inlining both nonlinear maps into each spectral
+  // read skips those sampling boundaries and changes thin glyph coverage.
+  sk_sp<SkShader> opticalShader;
+  if(_progress>0) {
+    static const auto opticalEffect=[] {
+      auto compiled=SkRuntimeEffect::MakeForShader(SkString(std::string("uniform float cornerCurve;\n")+
+          layerCornerShaderUniforms+layerCornerShaderSource()+"uniform float contentScale;\n"+
+          std::string(nativeLensShaderFunctions())+R"sksl(
+uniform shader source;
+uniform float2 size;
+uniform float2 displacement;
+uniform float ovalization;
+uniform float sourceScale;
+uniform float magnification;
+half4 main(float2 p) {
+  float mask=clamp(.5-lensShape(p,size).x*max(contentScale,1),0,1);
+  if(mask<=0)return half4(0);
+  float2 sample=lensDisplaced(p,size,displacement.x,displacement.y,1,ovalization);
+  sample=size*.5+(sample-size*.5)/magnification;
+  return source.eval(sample*sourceScale)*half(mask);
+}
+)sksl"));
+      if(!compiled.effect)throw std::runtime_error(compiled.errorText.c_str());
+      return compiled.effect;
+    }();
+    const auto ownerToDevice=canvas->getTotalMatrix();SkMatrix deviceToOwner;
+    auto pixels=ownerToDevice.mapRect(SkRect::MakeWH(bounds().width(),bounds().height())).roundOut();pixels.outset(2,2);
+    // A resource bound, not layout geometry. Unsupported/recording surfaces
+    // retain the analytic path rather than allocating an unbounded image.
+    if(ownerToDevice.invert(&deviceToOwner) && pixels.width()>0 && pixels.height()>0 &&
+       int64_t(pixels.width())*pixels.height()<=16*1024*1024) {
+      auto input=shader;
+      for(int stage=0;stage<2 && input;++stage) {
+        auto surface=canvas->makeSurface(SkImageInfo::MakeN32Premul(pixels.width(),pixels.height(),canvas->imageInfo().refColorSpace()));
+        if(!surface){input.reset();break;}
+        SkRuntimeShaderBuilder builder(opticalEffect);builder.child("source")=input;
+        builder.uniform("size")=SkV2{bounds().width(),bounds().height()};
+        builder.uniform("cornerCurve")=1.f;
+        bindLayerCornerGeometry(builder,*opticalEffect,bounds().size,std::min(bounds().width(),bounds().height())*.5f);
+        builder.uniform("contentScale")=std::max<NXFloat>(1,contentsScale());
+        const auto& warp=stage==0?profile.contentWrapper:profile.source;
+        builder.uniform("displacement")=SkV2{warp.amount,warp.height};
+        builder.uniform("ovalization")=warp.gradientOvalization;
+        builder.uniform("sourceScale")=sourceScale;
+        builder.uniform("magnification")=stage==0?1+(_magnification-1)*_progress:1.f;
+        auto target=surface->getCanvas();target->clear(SK_ColorTRANSPARENT);
+        target->translate(-pixels.left(),-pixels.top());target->concat(ownerToDevice);
+        SkPaint paint;paint.setShader(builder.makeShader());
+        target->drawPaint(paint); // SDF coverage owns the fractional silhouette.
+        auto image=surface->makeImageSnapshot();if(!image){input.reset();break;}
+        auto imageToOwner=deviceToOwner;imageToOwner.preTranslate(pixels.left(),pixels.top());imageToOwner.postScale(sourceScale,sourceScale);
+        input=image->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkSamplingOptions(SkFilterMode::kLinear),&imageToOwner);
+      }
+      opticalShader=std::move(input);
+    }
+  }
+  sourceBuilder.child("opticalSelected")=opticalShader?opticalShader:shader;
+  sourceBuilder.uniform("bufferedOptics")=opticalShader?1.f:0.f;
+  sourceBuilder.uniform("wrapperDisplacement")=SkV2{profile.contentWrapper.amount,profile.contentWrapper.height};
+  sourceBuilder.uniform("sourceDisplacement")=SkV2{profile.source.amount,profile.source.height};
+  const auto& foreground=profile.foreground;
+  sourceBuilder.uniform("foregroundRefraction")=SkV4{foreground.refractionAmount,foreground.refractionHeight,foreground.refractionOffset,0};
+  sourceBuilder.uniform("foregroundAberration")=SkV4{foreground.aberrationAmount,foreground.aberrationHeight,foreground.aberrationOffset,foreground.aberrationAngle};
+  sourceBuilder.uniform("foregroundEdge")=SkV4{foreground.edgeStart,foreground.edgeEnd,foreground.edgeOpacityStart,foreground.edgeOpacityEnd};
+  sourceBuilder.uniform("foregroundCaptureMargin")=foreground.captureMargin;
+  sourceBuilder.uniform("contentScale")=std::max<NXFloat>(1,contentsScale());
   sourceBuilder.uniform("sourceScale")=sourceScale;
   if(useVibrancy)sourceBuilder.uniform("dark")=_dark?1.f:0.f;
   sourceBuilder.uniform("size")=SkV2{bounds().width(),bounds().height()};
@@ -378,161 +443,121 @@ void LensLayer::draw(SkCanvas *canvas) {
   drawSource(canvas);
   if (_progress <= 0 || bounds().size.width <= 0 || bounds().size.height <= 0)
     return;
-  // Native gray controls show a sub-point dark contact contour plus a soft
-  // lower lobe. Restrict both to the exterior so the lens body stays clear.
-  static const auto effect = [] {
-    auto result = SkRuntimeEffect::MakeForShader(SkString(std::string("uniform float cornerCurve;\n") + layerCornerShaderUniforms + layerCornerShaderSource() + R"sksl(
-uniform float2 size;
-uniform float scale;
-uniform float progress;
-uniform float selection;
-float sdf(float2 p) {
-    return boxRoundedSDF(p-size*.5,size*.5,min(size.x,size.y)*.5);
+  // The recovered glass-background pass owns its exterior ring/shadow.
 }
-half4 main(float2 p) {
-    float d=sdf(p);
-    if (d<=0.0) return half4(0);
-    float2 n=lensNormalDirection(p-size*.5,size*.5,min(size.x,size.y)*.5);
-    float aa=.5/max(scale,1.0);
-    float contour=(.4+.22*n.x*n.x)*(1.0-smoothstep(1.0-aa,1.0+aa,d));
-    float lower=pow(max(n.y,0.0),2.0)*mix(.075,.05,selection)*exp(-pow((d-5.5)/5.0,2.0));
-    float ambient=.015*exp(-d/3.0);
-    return half4(0,0,0,half(clamp((contour+lower+ambient)*progress,0.0,1.0)));
+BackdropEffect lensMaterial(bool selection, NXFloat progress, bool dark, NXSize size) {
+  static const std::string source=[] {
+    std::string material(nativeGlassMaterialShaderSource());
+    auto entry=material.find("half4 main(float2 filterXY)");
+    if(entry==std::string::npos)throw std::runtime_error("Native glass material entry is unavailable");
+    material.erase(entry);
+    // The backdrop warp precedes the native clear-glass passes. Preserve the
+    // original sampler for the resting interpolation and exterior pixels.
+    auto at=material.find("float2 nativeSampleXY(");
+    material.insert(at,std::string(nativeLensShaderFunctions())+R"sksl(
+uniform float2 lensBackdropDisplacement;
+uniform float4 lensForegroundAberration;
+uniform float4 lensForegroundEdge;
+uniform float lensForegroundCaptureMargin;
+uniform float2 lensInnerRefractionFraction;
+uniform float lensProgress;
+float4 lensRefraction() {
+    float shortSide=min(resolution.x,resolution.y);
+    return float4(lensInnerRefractionFraction.x*shortSide,min(20,lensInnerRefractionFraction.y*shortSide),0,0);
 }
-)sksl"));
-    if (!result.effect)
-      throw std::runtime_error(result.errorText.c_str());
-    return result.effect;
-  }();
-  SkRuntimeShaderBuilder builder(effect);
-  builder.uniform("size") = SkV2{bounds().size.width, bounds().size.height};
-  builder.uniform("cornerCurve")=1.f;
-  bindLayerCornerGeometry(builder,*effect,bounds().size,std::min(bounds().width(),bounds().height())*.5f);
-  builder.uniform("scale") = contentsScale();
-  builder.uniform("progress") = _progress;
-  builder.uniform("selection") = _selection ? 1.f : 0.f;
-  SkPaint paint;
-  paint.setShader(builder.makeShader());
-  canvas->drawRect(SkRect::MakeXYWH(-20, -20, bounds().size.width + 40,
-                                    bounds().size.height + 40),
-                   paint);
+half4 lensBackdropAt(float2 coordinate) {
+    float2 p=coordinate/max(filterScale,1);
+    float mask=clamp(.5-lensShape(p,resolution).x*max(contentScale,1),0,1);
+    if(mask<=0)return sharpContent.eval(coordinate);
+    p=lensDisplaced(p,resolution,lensBackdropDisplacement.x,lensBackdropDisplacement.y,1,.5);
+    return mix(sharpContent.eval(coordinate),sharpContent.eval(p*max(filterScale,1)),half(mask));
 }
-BackdropEffect lensMaterial(bool selection, NXFloat progress, bool dark) {
-  // Native lifted lenses retain sharp interior detail. Their curved perimeter
-  // bends lines and separates colors; there is no regular-glass body veil.
-  // This is an independent optical model, not Apple's private shader.
-  static const std::string source = std::string("uniform float cornerCurve;\n") + layerCornerShaderUniforms + layerCornerShaderSource() + R"sksl(
-uniform shader content;
-uniform float2 resolution;
-uniform float filterScale;
-uniform float contentScale;
-uniform float externalShapeCoverage;
-uniform float liftProgress;
-uniform float refractionStrength;
-uniform float chromaticSpread;
-uniform float bevelWidth;
-uniform float riseWidth;
-uniform float ambientLift;
-uniform float selectionStyle;
-uniform float reflectionStrength;
-uniform float reflectionDistance;
-uniform float rimShadeScale;
-
-float distanceToCapsule(float2 p) {
-    return boxRoundedSDF(p-resolution*.5,resolution*.5,min(resolution.x,resolution.y)*.5);
-}
-half4 sampleAt(float2 p) { return content.eval(p * filterScale); }
-// Native monochrome backdrop probes show tangential RGB separation with a
-// finite footprint. This is texture transport, separate from spectral rim
-// lighting and from the selected-source fold above.
-half4 transported(float2 bent,float2 reflected,float reflection,float2 offset) {
-    half4 value=sampleAt(bent+offset);
-    if(reflection>0.0) value=mix(value,sampleAt(reflected+offset),half(reflection));
-    return value;
-}
-half4 footprint(float2 bent,float2 reflected,float reflection,float2 offset,float2 tangent,float sigma) {
-    half4 value=transported(bent,reflected,reflection,offset)*.375;
-    value+=(transported(bent,reflected,reflection,offset+tangent*sigma)+transported(bent,reflected,reflection,offset-tangent*sigma))*.25;
-    value+=(transported(bent,reflected,reflection,offset+tangent*sigma*2.0)+transported(bent,reflected,reflection,offset-tangent*sigma*2.0))*.0625;
-    return value;
-}
-half4 main(float2 coordinate) {
-    float2 p = coordinate / filterScale;
-    half4 original = sampleAt(p);
-    float d = distanceToCapsule(p);
-    float2 normal = lensNormalDirection(p-resolution*.5,resolution*.5,min(resolution.x,resolution.y)*.5);
-    float depth = max(-d, 0.0);
-    float bevel = min(bevelWidth, min(resolution.x, resolution.y) * .5);
-    float t = clamp(depth / max(bevel,.01),0.0,1.0);
-    float displacement = (1.0-exp(-depth/max(riseWidth,.001)))
-        * (1.0-t)*(1.0-t) * (1.0+2.0*t) * refractionStrength;
-    float2 bent = p + normal * displacement;
-    float reflection=reflectionStrength*pow(clamp(1.0-depth/max(reflectionDistance,.001),0.0,1.0),2.0);
-    float2 reflected=p-normal*(reflectionDistance-2.0*depth);
-    half4 refracted=transported(bent,reflected,reflection,float2(0));
-    if(chromaticSpread>0.0 && depth<10.0) {
-        // Opposite edges reverse RGB ordering. A radial-only offset cannot
-        // reproduce the lateral fringes in the native black/white grid.
-        float edge=clamp(1.0-depth/10.0,0.0,1.0);
-        float2 shift=float2(normal.y,normal.x*(1.8/3.1))*chromaticSpread*edge;
-        float2 tangent=float2(-normal.y,normal.x);
-        float sigma=1.2*(1.0-smoothstep(3.0,10.0,depth));
-        refracted.r=footprint(bent,reflected,reflection,shift,tangent,sigma).r;
-        refracted.g=footprint(bent,reflected,reflection,float2(0),tangent,sigma).g;
-        refracted.b=footprint(bent,reflected,reflection,-shift,tangent,sigma).b;
+)sksl");
+    // Only the material helper source reads through the warped sampler.
+    const auto begin=material.find("float2 nativeSampleXY(");
+    const std::string from="sharpContent.eval(",to="lensBackdropAt(";
+    size_t cursor=begin;
+    while((cursor=material.find(from,cursor))!=std::string::npos) {
+        material.replace(cursor,from.size(),to);cursor+=to.size();
     }
-    // Native small-variant uniform controls add the same achromatic lift to
-    // all channels: .1 * (1 - luma), including colored backdrops.
-    float luma = dot(float3(refracted.rgb),float3(.2126,.7152,.0722));
-    refracted.rgb = min(refracted.rgb + half(ambientLift*(1.0-luma)),refracted.aaa);
-    float3 shaded;
-    if (selectionStyle > .5) {
-        // Directional spectral edge observed even over a uniform neutral
-        // backdrop. It is independent of RGB texture-coordinate separation.
-        float horizontal = normal.x * normal.x;
-        float top = max(-normal.y,0.0);
-        float bottom = max(normal.y,0.0);
-        float sideShade = .05 * horizontal * exp(-pow(max(depth-4.0,0.0)/4.0,2.0));
-        float upperShade = .055 * top * exp(-pow((depth-10.0)/6.0,2.0));
-        float lowerLight = .03 * bottom * exp(-pow((depth-2.5)/2.0,2.0));
-        float upperLight = .015 * top * exp(-pow((depth-2.0)/1.5,2.0));
-        float spectral = 1.0-smoothstep(.2,1.75,depth);
-        float3 spectralAbsorption = float3(0.0,.045,.42) * horizontal * spectral;
-        float3 spectralLight = float3(-.045+.04*normal.y,.18,.25+.05*normal.y)
-            * normal.y * normal.y * exp(-depth/.7);
-        shaded = float3(refracted.rgb) * (1.0-sideShade-upperShade) * (1.0-spectralAbsorption)
-            + lowerLight + upperLight + spectralLight;
-    } else {
-        float horizontal = normal.x * normal.x;
-        float top = max(-normal.y,0.0);
-        float bottom = max(normal.y,0.0);
-        float sideShade = .09 * horizontal * exp(-pow(max(depth-2.0,0.0)/5.0,2.0));
-        float upperShade = top * (.093 * exp(-pow((depth-10.0)/6.0,2.0))
-            + .022 * exp(-pow((depth-2.5)/2.0,2.0)));
-        float upperLight = .08 * top * exp(-pow((depth-.35)/.35,2.0));
-        float lowerLight = bottom * (.24*exp(-depth/.7)
-            + .012 * exp(-pow((depth-2.5)/3.0,2.0)));
-        shaded = float3(refracted.rgb) * (1.0-rimShadeScale*(sideShade+upperShade)) + lowerLight + upperLight;
+    // A zero-radius native lens samples the warped backdrop directly. The
+    // shared glass helper otherwise reads LOD0 of its unwarped pyramid, even
+    // at radius0, bypassing the preceding displacement pass entirely.
+    const std::string radiusEntry="half4 nativeAtRadius(float2 origin,float2 target,float radius) {";
+    const auto radiusAt=material.find(radiusEntry);
+    if(radiusAt==std::string::npos)throw std::runtime_error("Native glass sampling entry is unavailable");
+    material.insert(radiusAt+radiusEntry.size(),"\n    if(radius<=0)return lensBackdropAt(nativeSampleXY(origin,target));\n");
+    // Effect uniforms are retained across a bounds animation, whereas the
+    // renderer's resolution follows presentation geometry on every frame.
+    // Resolve size-dependent native inputs from that live geometry.
+    const std::string refraction="nativeRefraction.";
+    cursor=begin;
+    while((cursor=material.find(refraction,cursor))!=std::string::npos) {
+        material.replace(cursor,refraction.size(),"lensRefraction().");cursor+=17;
     }
-    refracted.rgb = half3(min(clamp(shaded,0.0,1.0),float3(refracted.aaa)));
-    float coverage = externalShapeCoverage > .5 ? 1.0 : clamp(.5-d*contentScale,0.0,1.0);
-    return mix(original,refracted,half(liftProgress)) * half(coverage);
+    // UIKit's SDF highlight is a final sibling, after the displacement and
+    // foreground backdrop passes. Do not refract or disperse its light.
+    const std::string lighting="rgb=float3(nativeGlassHighlight(sdf,normal,worldNormal,half3(rgb)));";
+    const auto lightingAt=material.find(lighting);
+    if(lightingAt==std::string::npos)throw std::runtime_error("Native glass highlight entry is unavailable");
+    material.replace(lightingAt,lighting.size(),"rgb=unlit;");
+    material+=R"sksl(
+half4 lensMaterialAt(float2 p) {
+    float3 field=lensShape(p,resolution);float radius=min(resolution.x,resolution.y)*.5;
+    float shadow=boxRoundedSDF(p-nativeShadowOffset-resolution*.5,resolution*.5,radius);
+    float ring=boxRoundedSDF(p-float2(0,nativeRingShadowOffset)-resolution*.5,resolution*.5,radius);
+    half4 background=lensBackdropAt(p*max(filterScale,1));
+    float coverage=clamp(.5-field.x*max(contentScale,1),0,1);
+    return nativeGlassSurface(p,field.x,field.yz,field.yz,radius,shadow,ring,background,coverage,max(contentScale,1));
+}
+half4 main(float2 filterXY) {
+    float2 p=filterXY/max(filterScale,1);
+    float3 field=lensShape(p,resolution);
+    half4 original=sharpContent.eval(filterXY);
+    if(nativeGlassOutputCoverage(field.x)<=0)return original;
+    half4 base=lensMaterialAt(p);
+    float shortSide=min(resolution.x,resolution.y);
+    float bodyCoverage=clamp(.5-field.x*max(contentScale,1),0,1);
+    float4 edgeInputs=lensForegroundEdge;edgeInputs.x*=shortSide;
+    float edge=lensEdgeOpacity(field.x,edgeInputs)*bodyCoverage;
+    if(lensForegroundAberration.x>0 && edge>0) {
+        float2 spread=lensAberration(field.yz,lensForegroundAberration.w,lensForegroundExtent(resolution,lensForegroundCaptureMargin))*lensForegroundAberration.x*shortSide
+            *lensShoulder(-field.x,lensForegroundAberration.y,lensForegroundAberration.z*shortSide);
+        float3 rgb=float3(0);float alpha=0;
+        for(int i=0;i<7;++i) {
+            float position=1-float(i)/3;
+            half4 sample=lensMaterialAt(p+spread*position);
+            float3 color=float3(sample.rgb)/max(float(sample.a),.000001);
+            rgb+=color*float3(max(position,0),1-abs(position),max(-position,0));
+            alpha+=float(sample.a)/7;
+        }
+        rgb*=float3(.5,1.0/3,.5);alpha*=edge;
+        base=half4(half3(rgb*alpha),half(alpha))+base*(1-half(alpha));
+    }
+    base.rgb=nativeGlassHighlight(field.x,field.yz,field.yz,half3(nativeUnpremul(base)))*base.a;
+    float coverage=externalShapeCoverage>.5?1:clamp(.5-field.x*max(contentScale,1),0,1);
+    // Exterior shadow/rim remain native, without clipping to the body.
+    half4 resultPixel=mix(original,base,half(lensProgress));
+    return field.x>0?resultPixel:mix(original,resultPixel,half(coverage));
 }
 )sksl";
-  BackdropEffect effect(source, "content", 18, 0);
-  effect.setUniform("liftProgress",
-                    std::clamp(progress, NXFloat(0), NXFloat(1)));
-  effect.setUniform("refractionStrength", selection ? NXFloat(4.5) : NXFloat(4));
-  effect.setUniform("chromaticSpread", selection ? NXFloat(3.1) : NXFloat(0));
-  effect.setUniform("bevelWidth", NXFloat(28));
-  effect.setUniform("riseWidth", selection ? NXFloat(.001) : NXFloat(1));
-  effect.setUniform("ambientLift", selection ? NXFloat(0) : NXFloat(.1));
-  effect.setUniform("selectionStyle", selection ? NXFloat(1) : NXFloat(0));
-  effect.setUniform("reflectionStrength",
-                    selection ? NXFloat(.25) : NXFloat(1));
-  effect.setUniform("reflectionDistance", selection ? NXFloat(8) : NXFloat(12));
-  effect.setUniform("rimShadeScale",
-                    !selection && dark ? NXFloat(2.2) : NXFloat(1));
+    return material;
+  }();
+  const auto profile=nativeLensProfile(selection,dark,size);
+  auto effect=makeNativeGlassEffect(profile.glass,UIGlassEffect::Style::clear,UIColor::clear,false,
+      std::abs(profile.backdrop.amount)+std::abs(profile.source.amount)+profile.glass.innerRefractionHeight+32,source);
+  if(profile.glass.blurRadius==0 && profile.glass.blurFillRadius==0 &&
+     profile.glass.bleedBlurRadius==0 && profile.glass.shadowBlurRadius==0)
+    effect.setBackdropBlurRadius(0); // No redundant LOD0 atlas for a sharp lens.
+  effect.setBackdropScale(1);
+  effect.setUniform("lensProgress",std::clamp(progress,NXFloat(0),NXFloat(1)));
+  effect.setUniform("lensBackdropDisplacement",NXPoint(profile.backdrop.amount,profile.backdrop.height));
+  const auto unitProfile=nativeLensProfile(selection,dark,{1,1});
+  effect.setUniform("lensInnerRefractionFraction",NXPoint(unitProfile.glass.innerRefractionAmount,unitProfile.glass.innerRefractionHeight));
+  const auto& foreground=unitProfile.foreground;
+  effect.setUniform("lensForegroundAberration",std::array<NXFloat,4>{foreground.aberrationAmount,foreground.aberrationHeight,foreground.aberrationOffset,foreground.aberrationAngle});
+  effect.setUniform("lensForegroundEdge",std::array<NXFloat,4>{foreground.edgeStart,foreground.edgeEnd,foreground.edgeOpacityStart,foreground.edgeOpacityEnd});
+  effect.setUniform("lensForegroundCaptureMargin",foreground.captureMargin);
   return effect;
 }
 } // namespace NXKit::Internal

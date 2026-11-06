@@ -317,9 +317,10 @@ void vec(BackdropEffect& effect,const char* name,float a,float b,float c,float d
 }
 void col(BackdropEffect& effect,const char* name,const NativeGlassColor& c) {vec(effect,name,c.r,c.g,c.b,c.a);}
 }
+std::string_view nativeGlassMaterialShaderSource() { return source; }
 BackdropEffect makeNativeGlassEffect(const NativeGlassProfile& p,UIGlassEffect::Style style,
-    UIColor tint,bool accent,NXFloat radius) {
-    auto effect=BackdropEffect(source,"content",radius,0);
+    UIColor tint,bool accent,NXFloat radius,std::string_view shaderSourceOverride) {
+    auto effect=BackdropEffect(shaderSourceOverride.empty()?source:std::string(shaderSourceOverride),"content",radius,0);
     const auto mainRadius=(p.blurOpacity0>0 || p.blurOpacity1>0 || p.blurOpacity2>0 || p.blurOpacity3>0)?p.blurRadius:0;
     const auto fillRadius=(p.blurFillNormalOpacity>0 || p.blurFillLightenOpacity>0 || p.blurFillDarkenOpacity>0)?p.blurFillRadius:0;
     const auto bleedRadius=p.bleedOpacity>0?p.bleedBlurRadius*.5f:0;
