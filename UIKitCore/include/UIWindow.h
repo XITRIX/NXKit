@@ -57,6 +57,20 @@ private:
     void removePresentedViewController(const std::shared_ptr<UIViewController>& controller);
 
     void sendTouchEvent(std::shared_ptr<UIEvent> event);
+    struct ResponderTouchDelivery;
+    std::vector<std::shared_ptr<ResponderTouchDelivery>> _responderTouchDeliveries;
+    unsigned _touchDispatchDepth = 0;
+    bool _flushingResponderTouches = false;
+    bool _responderTouchFlushRequested = false;
+    void queueResponderTouch(const std::shared_ptr<UITouch>& touch,
+                             const std::shared_ptr<UIEvent>& event,
+                             const std::shared_ptr<UIView>& target);
+    void flushResponderTouches();
+    void invalidateResponderTouchesForView(const UIView* view);
+    bool hasDeliveredResponderTouch(const std::shared_ptr<UITouch>& touch) const;
+    friend class UIGestureRecognizer;
+    friend class UIView;
+    friend class UIScrollView;
     void sendPressEvent(const std::shared_ptr<UIPressesEvent>& event);
 
     std::shared_ptr<UIFocusSystem> _focusSystem;

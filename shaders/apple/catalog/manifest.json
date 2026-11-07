@@ -1,5 +1,5 @@
 {
-  "abi": "3112bbe96394db43659182453aeb39df3a20daa4bbd11c4512702ad0359fee16",
+  "abi": "1fbe335a9f6301e16a772b44d17ae5655746614d33b42d71a1cbbc29d415bbca",
   "device": "Apple iOS simulator GPU",
   "languageVersion": "metal2.3",
   "os": "Version 27.0 (Build 24A434)",
@@ -81,23 +81,26 @@
       "manifestSHA256": "d37b1cd5e1d43a67185652463e4809d0cb47b6c5bd810c9a6d9729c2cfdd446f",
       "pipelineDescriptionSHA256": "451b1b585cc778ce37fb69c7cbff0ae3730a249bae204d69ab4eb22d96349d47",
       "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "3112bbe96394db43659182453aeb39df3a20daa4bbd11c4512702ad0359fee16",
+      "manifestSHA256": "18ffbb44ea4e9a08848502dd51ab7a3f9e8c4dcd0be477505a7310608ea21850",
+      "pipelineDescriptionSHA256": "e189d29e62bb6f8f520699a57d0a346fcb242fff5e7424461c6cc6eb298d78f0",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "ea56e591cfc9e4e681ea7d5cb6d021cd5ecf202676e7847bfe0914121fb95d47",
+      "manifestSHA256": "e8a51dfd13dc6b2ffcf0df00b3f6b48290a36271b9ce420616538d77d33dda70",
+      "pipelineDescriptionSHA256": "e189d29e62bb6f8f520699a57d0a346fcb242fff5e7424461c6cc6eb298d78f0",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
     }
   ],
   "coverage": {
-    "change": "Elastic retirement starts on lowering; lifted elasticity does not expire",
-    "lensMotion": {
-      "fixture": "MetalNavigationBenchmark --lens-motion --quick --passes 2",
-      "items": [
-        2,
-        3,
-        4,
-        5
-      ]
-    },
-    "controlGallery": {
-      "fixture": "MetalNavigationBenchmark --controls-gallery --passes 1"
-    },
-    "priorStates": "Prior content-addressed raw MSL and complete descriptors retained as an additive superset; no old GPU binary reused",
+    "fixture": "Demo/NavigationComparison/MetalNavigationBenchmark.mm",
+    "lensMotion": "fresh final ABI --lens-motion --quick --passes 2; 2/3/4/5 tabs, lift/drag/settling",
+    "controlGallery": "fresh final ABI --controls-gallery --passes 1; actual System UI navigation and live settings",
+    "priorCoverage": "Prior content-addressed raw MSL and full pipeline descriptors retained additively; other previous scenarios were not recaptured in this run",
+    "behavioralEvidence": "docs/controls/list-selection-switch-tap/README.md",
     "freshLibraries": 61,
     "freshPipelines": 44
   }

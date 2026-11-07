@@ -71,12 +71,15 @@ public:
 protected:
     void controlStateDidChange() override;
     bool requiresExclusiveTouchTracking() const override { return true; }
+    bool capturesUndelayedDrag(const std::shared_ptr<UITouch>& touch) const override;
+    void contactFeedbackBegan(const std::shared_ptr<UITouch>& touch, const std::shared_ptr<UIEvent>& event) override;
+    void contactFeedbackCancelled() override;
     bool deferEndTracking(const std::shared_ptr<UITouch>& touch, const std::shared_ptr<UIEvent>& event) override;
     void trackingDidEnd() override;
 private:
     friend class UISliderTestHarness;
     NXFloat _value=0, _minimumValue=0, _maximumValue=1;
-    bool _continuous=true, _pressed=false;
+    bool _continuous=true, _pressed=false, _contactFeedback=false;
     UISliderStyle _style=UISliderStyle::defaultStyle;
     std::optional<UIColor> _minimumTrackTint, _maximumTrackTint, _thumbTint;
     std::shared_ptr<UISliderTrackConfiguration> _configuration;

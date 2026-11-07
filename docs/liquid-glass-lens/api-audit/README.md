@@ -48,6 +48,10 @@ The fresh case establishes:
 
 The boolean semantic names are **unresolved**: these normal/retarget samples never vary the pair, and static bridge code establishes types, not names. Do not call the second bit `interrupted` or claim generic UIView completion semantics without more evidence. A portable callback with a simpler documented contract is an intentional C++ extension; exposing anonymous native bits would not make a useful API. The observed delayed-unlift behavior need not be preserved if NXKit deliberately provides safer cancellation, but that divergence must be explicit.
 
+## Implemented follow-up (2026-11-07)
+
+The shared portable lens now preserves the native minimum animated lift lifetime, including deferred alongside callbacks and same-state pending-unlift behavior. Eight fresh direct native probes verify the 0.22 second policy independently of switch touch routing; short-tap Switch geometry now follows that shared callback. The two-argument nonanimated convenience retains an explicit force/snap extension for cancellation. See [the follow-up](../../switch/tap-hang/README.md). This supersedes the earlier immediate-retarget implementation divergence; the original runtime observations above remain evidence.
+
 ## Keep internal
 
 The readonly `spec` getter returns `_UILiquidLensViewVariantSpec` subclasses. Existing captures establish variant defaults and material/spring settings, not a `setSpec:` method. Do not add a public spec setter from serialized archive keys. `liftProgress` is a `_UIDebouncingAnimatableFloat` implementation object, not evidence for a public external-progress API. Keep `liftPortal`, `glass`, `belowGlassWarpBackdrop`, `contentWrapper`, `_removeAllAnimations:`, timers, group completion and progress-driven render hooks internal. Separate caller motion geometry from shared lens material lifecycle without exposing diagnostics as application configuration.

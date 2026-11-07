@@ -44,7 +44,7 @@ public:
     static void updateTouch(
         const std::shared_ptr<UITouch>& touch,
         UITouchPhase phase,
-        NXPoint location,
+        NXKit::NXPoint location,
         Timer timestamp = Timer()
     ) {
         touch->updateAbsoluteLocation(location);
@@ -88,7 +88,7 @@ void sendTouch(
     const std::shared_ptr<UIEvent>& event,
     const std::shared_ptr<UITouch>& touch,
     UITouchPhase phase,
-    NXPoint location,
+    NXKit::NXPoint location,
     Timer timestamp = Timer()
 ) {
     UIGestureRecognizerTestHarness::updateTouch(
@@ -120,7 +120,7 @@ int main() {
         button->primaryAction = UIAction("", [&] { ++actions; });
 
         const auto tap = [&](unsigned long identifier, UITouchPhase endPhase) {
-            auto touch = new_shared<UITouch>(identifier, NXPoint(70, 48), Timer());
+            auto touch = new_shared<UITouch>(identifier, NXKit::NXPoint(70, 48), Timer());
             auto event = UIGestureRecognizerTestHarness::eventWithTouch(touch, glassWindow);
             sendTouch(glassWindow, event, touch, UITouchPhase::began, {70, 48});
             GlassInteractionTestHarness::advance(glass, 0.15);
@@ -141,7 +141,7 @@ int main() {
 
         auto pan = new_shared<UIPanGestureRecognizer>();
         glass->addGestureRecognizer(pan);
-        auto touch = new_shared<UITouch>(702, NXPoint(70, 48), Timer());
+        auto touch = new_shared<UITouch>(702, NXKit::NXPoint(70, 48), Timer());
         auto event = UIGestureRecognizerTestHarness::eventWithTouch(touch, glassWindow);
         sendTouch(glassWindow, event, touch, UITouchPhase::began, {70, 48});
         sendTouch(glassWindow, event, touch, UITouchPhase::moved, {110, 48});
@@ -158,7 +158,7 @@ int main() {
         // Public transforms and bounds remain app-owned through feedback.
         const auto appTransform = NXAffineTransform::scale(0.8f);
         glass->setTransform(appTransform);
-        touch = new_shared<UITouch>(703, NXPoint(70, 48), Timer());
+        touch = new_shared<UITouch>(703, NXKit::NXPoint(70, 48), Timer());
         event = UIGestureRecognizerTestHarness::eventWithTouch(touch, glassWindow);
         sendTouch(glassWindow, event, touch, UITouchPhase::began, {70, 48});
         GlassInteractionTestHarness::advance(glass, 0.15);
@@ -173,7 +173,7 @@ int main() {
         GlassInteractionTestHarness::advance(glass, 0.01);
         expect(GlassInteractionTestHarness::motion(glass).atRest(),
                "reenabling during the same touch safely finishes the old sequence");
-        touch = new_shared<UITouch>(704, NXPoint(70, 48), Timer());
+        touch = new_shared<UITouch>(704, NXKit::NXPoint(70, 48), Timer());
         event = UIGestureRecognizerTestHarness::eventWithTouch(touch, glassWindow);
         sendTouch(glassWindow, event, touch, UITouchPhase::began, {70, 48});
         GlassInteractionTestHarness::advance(glass, 0.15);
@@ -216,18 +216,18 @@ int main() {
     auto contentView = new_shared<UIView>(NXRect(0, 0, 320, 800));
     scrollView->addSubview(contentView);
     expect(
-        scrollView->contentSize() == NXSize(320, 800),
+        scrollView->contentSize() == NXKit::NXSize(320, 800),
         "a scroll view preserves legacy inferred content size when unset"
     );
-    scrollView->setContentSize(NXSize(320, 900));
+    scrollView->setContentSize(NXKit::NXSize(320, 900));
     expect(
-        scrollView->contentSize() == NXSize(320, 900),
+        scrollView->contentSize() == NXKit::NXSize(320, 900),
         "an explicit scroll-view content size overrides subview inference"
     );
 
     bool rejectedInvalidContentSize = false;
     try {
-        scrollView->setContentSize(NXSize(-1, 900));
+        scrollView->setContentSize(NXKit::NXSize(-1, 900));
     } catch (const std::invalid_argument&) {
         rejectedInvalidContentSize = true;
     }
@@ -241,10 +241,10 @@ int main() {
     auto nonBouncingScrollView = new_shared<UIScrollView>(
         nonBouncingWindow->bounds()
     );
-    nonBouncingScrollView->setContentSize(NXSize(320, 900));
+    nonBouncingScrollView->setContentSize(NXKit::NXSize(320, 900));
     nonBouncingWindow->addSubview(nonBouncingScrollView);
 
-    auto momentumTouch = new_shared<UITouch>(6, NXPoint(20, 300), Timer());
+    auto momentumTouch = new_shared<UITouch>(6, NXKit::NXPoint(20, 300), Timer());
     auto momentumEvent = UIGestureRecognizerTestHarness::eventWithTouch(
         momentumTouch,
         nonBouncingWindow
@@ -254,7 +254,7 @@ int main() {
         momentumEvent,
         momentumTouch,
         UITouchPhase::began,
-        NXPoint(20, 300),
+        NXKit::NXPoint(20, 300),
         Timer(0)
     );
     sendTouch(
@@ -262,7 +262,7 @@ int main() {
         momentumEvent,
         momentumTouch,
         UITouchPhase::moved,
-        NXPoint(20, 270),
+        NXKit::NXPoint(20, 270),
         Timer(16)
     );
     sendTouch(
@@ -270,7 +270,7 @@ int main() {
         momentumEvent,
         momentumTouch,
         UITouchPhase::moved,
-        NXPoint(20, 180),
+        NXKit::NXPoint(20, 180),
         Timer(32)
     );
     sendTouch(
@@ -278,7 +278,7 @@ int main() {
         momentumEvent,
         momentumTouch,
         UITouchPhase::ended,
-        NXPoint(20, 180),
+        NXKit::NXPoint(20, 180),
         Timer(48)
     );
     expect(
@@ -297,19 +297,19 @@ int main() {
         ++primaryActionCount;
     });
 
-    auto touch = new_shared<UITouch>(1, NXPoint(20, 20), Timer());
+    auto touch = new_shared<UITouch>(1, NXKit::NXPoint(20, 20), Timer());
     auto event = UIGestureRecognizerTestHarness::eventWithTouch(touch, window);
 
-    sendTouch(window, event, touch, UITouchPhase::began, NXPoint(20, 20));
-    expect(control->isHighlighted(), "touch-down highlights the control");
+    sendTouch(window, event, touch, UITouchPhase::began, NXKit::NXPoint(20, 20));
+    expect(!control->isTracking() && !control->isHighlighted(), "competing scroll delays control tracking and highlight");
 
-    sendTouch(window, event, touch, UITouchPhase::moved, NXPoint(20, 50));
+    sendTouch(window, event, touch, UITouchPhase::moved, NXKit::NXPoint(20, 50));
     expect(
         !control->isHighlighted(),
-        "a recognized ancestor pan cancels the control highlight"
+        "a recognized ancestor pan suppresses pending control feedback"
     );
 
-    sendTouch(window, event, touch, UITouchPhase::ended, NXPoint(20, 50));
+    sendTouch(window, event, touch, UITouchPhase::ended, NXKit::NXPoint(20, 50));
     expect(
         primaryActionCount == 0,
         "lifting after a recognized scroll does not perform the control action"
@@ -318,7 +318,8 @@ int main() {
     // A touch which catches active inertia belongs to the pan. This assertion
     // checks a fresh idle control touch, so explicitly finish the previous drag.
     scrollView->setContentOffset({}, false);
-    auto cancelledTouch = new_shared<UITouch>(2, NXPoint(20, 20), Timer());
+    scrollView->setDelaysContentTouches(false); // Exercise cancellation after actual admission.
+    auto cancelledTouch = new_shared<UITouch>(2, NXKit::NXPoint(20, 20), Timer());
     auto cancelledEvent = UIGestureRecognizerTestHarness::eventWithTouch(
         cancelledTouch,
         window
@@ -328,7 +329,7 @@ int main() {
         cancelledEvent,
         cancelledTouch,
         UITouchPhase::began,
-        NXPoint(20, 20)
+        NXKit::NXPoint(20, 20)
     );
     expect(control->isHighlighted(), "a new touch can track after the scroll ends");
     sendTouch(
@@ -336,7 +337,7 @@ int main() {
         cancelledEvent,
         cancelledTouch,
         UITouchPhase::cancelled,
-        NXPoint(20, 20)
+        NXKit::NXPoint(20, 20)
     );
     expect(!control->isHighlighted(), "a cancelled touch clears control tracking");
     expect(primaryActionCount == 0, "a cancelled touch performs no control action");
@@ -370,14 +371,14 @@ int main() {
         !disabledScrollView->isScrollEnabled(),
         "a scroll view reports disabled user scrolling"
     );
-    disabledScrollView->setContentOffset(NXPoint(0, 100), false);
+    disabledScrollView->setContentOffset(NXKit::NXPoint(0, 100), false);
     expect(
-        disabledScrollView->contentOffset() == NXPoint(0, 100),
+        disabledScrollView->contentOffset() == NXKit::NXPoint(0, 100),
         "disabling user scrolling preserves programmatic content offsets"
     );
-    disabledScrollView->setContentOffset(NXPoint(), false);
+    disabledScrollView->setContentOffset(NXKit::NXPoint(), false);
 
-    auto disabledScrollTouch = new_shared<UITouch>(5, NXPoint(20, 20), Timer());
+    auto disabledScrollTouch = new_shared<UITouch>(5, NXKit::NXPoint(20, 20), Timer());
     auto disabledScrollEvent = UIGestureRecognizerTestHarness::eventWithTouch(
         disabledScrollTouch,
         disabledScrollWindow
@@ -387,17 +388,17 @@ int main() {
         disabledScrollEvent,
         disabledScrollTouch,
         UITouchPhase::began,
-        NXPoint(20, 20)
+        NXKit::NXPoint(20, 20)
     );
     sendTouch(
         disabledScrollWindow,
         disabledScrollEvent,
         disabledScrollTouch,
         UITouchPhase::moved,
-        NXPoint(20, 50)
+        NXKit::NXPoint(20, 50)
     );
     expect(
-        disabledScrollView->contentOffset() == NXPoint(),
+        disabledScrollView->contentOffset() == NXKit::NXPoint(),
         "a drag does not move a scroll view when user scrolling is disabled"
     );
     expect(
@@ -409,7 +410,7 @@ int main() {
         disabledScrollEvent,
         disabledScrollTouch,
         UITouchPhase::ended,
-        NXPoint(20, 50)
+        NXKit::NXPoint(20, 50)
     );
     expect(
         disabledScrollActionCount == 1,
@@ -465,7 +466,7 @@ int main() {
         }
     );
 
-    auto selfRemovingTouch = new_shared<UITouch>(3, NXPoint(20, 20), Timer());
+    auto selfRemovingTouch = new_shared<UITouch>(3, NXKit::NXPoint(20, 20), Timer());
     auto selfRemovingEvent = UIGestureRecognizerTestHarness::eventWithTouch(
         selfRemovingTouch,
         hierarchyMutationWindow
@@ -475,14 +476,14 @@ int main() {
         selfRemovingEvent,
         selfRemovingTouch,
         UITouchPhase::began,
-        NXPoint(20, 20)
+        NXKit::NXPoint(20, 20)
     );
     sendTouch(
         hierarchyMutationWindow,
         selfRemovingEvent,
         selfRemovingTouch,
         UITouchPhase::ended,
-        NXPoint(20, 20)
+        NXKit::NXPoint(20, 20)
     );
     expect(
         selfRemovingActionCount == 1 && selfRemovingControl->superview().expired(),
@@ -528,7 +529,7 @@ int main() {
         }
     );
 
-    auto focusedTouch = new_shared<UITouch>(4, NXPoint(20, 20), Timer());
+    auto focusedTouch = new_shared<UITouch>(4, NXKit::NXPoint(20, 20), Timer());
     auto focusedTouchEvent = UIGestureRecognizerTestHarness::eventWithTouch(
         focusedTouch,
         focusWindow
@@ -538,7 +539,7 @@ int main() {
         focusedTouchEvent,
         focusedTouch,
         UITouchPhase::began,
-        NXPoint(20, 20)
+        NXKit::NXPoint(20, 20)
     );
     expect(
         initiallyFocusedControl->isHighlighted(),
@@ -554,7 +555,7 @@ int main() {
         focusedTouchEvent,
         focusedTouch,
         UITouchPhase::ended,
-        NXPoint(20, 20)
+        NXKit::NXPoint(20, 20)
     );
     expect(
         focusedTouchActionCount == 1,

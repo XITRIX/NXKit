@@ -71,6 +71,7 @@ private:
     friend class UIResponder;
     friend class UIControl;
     friend class UIWindow;
+    friend class UIGestureRecognizerTestHarness;
 };
 
 }

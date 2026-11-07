@@ -1,0 +1,10 @@
+{
+  "scope": "Native primary replay transport and local output artifacts, not a conformance comparison",
+  "nativeXCTestResult": "TEST SUCCEEDED",
+  "capturedCases": 10,
+  "transportHasCompletePhysicalTouchSequences": true,
+  "reaCaptureStatus": "cleanup_incomplete",
+  "reaEvidenceID": null,
+  "reaReturnedResources": [],
+  "limitation": "REA wrapper did execute native tests, but returned no completed evidence receipt. Use local output/source hashes and do not label this a successful REA runtime capture. One switch tap differs from full-v2 under compressed main-thread touch delivery."
+}

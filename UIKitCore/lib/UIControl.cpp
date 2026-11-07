@@ -20,6 +20,31 @@ UIControl::UIControl(NXRect frame, std::optional<UIAction> action) : UIView(fram
     _controlGesture = gesture;
     addGestureRecognizer(gesture);
 }
+std::optional<NXPoint> UIControl::completedContactTravel(const std::shared_ptr<UITouch>& touch) const {
+    if(const auto gesture=_controlGesture.lock();gesture && gesture->_completedTouch.lock()==touch)return gesture->_completedTravel;
+    return std::nullopt;
+}
+bool UIControl::beginTrackingContact(const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>& event) {
+    return beginTouch(touch,event);
+}
+void UIControl::moveTrackingContact(const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>& event) { moveTouch(touch,event); }
+void UIControl::endTrackingContact(const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>& event) { endTouch(touch,event); }
+void UIControl::touchesBegan(std::set<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent> event) {
+    for(const auto& touch:touches) {
+        if(hasTrackingContact())continue;
+        if(beginTrackingContact(touch,event)) {
+            if(hasTrackingContact() && isEnabled() && isActionDispatchAllowed() && requiresExclusiveTouchTracking())
+                if(const auto gesture=_controlGesture.lock())gesture->claimContact();
+        } else if(const auto gesture=_controlGesture.lock())gesture->rejectContact(touch);
+    }
+}
+void UIControl::touchesMoved(std::set<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent> event) {
+    for(const auto& touch:touches)moveTrackingContact(touch,event);
+}
+void UIControl::touchesEnded(std::set<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent> event) {
+    for(const auto& touch:touches)endTrackingContact(touch,event);
+}
+void UIControl::touchesCancelled(std::set<std::shared_ptr<UITouch>>,std::shared_ptr<UIEvent> event) { cancelTracking(event); }
 bool UIControl::canBecomeFocused() { return isEnabled() && isActionDispatchAllowed(); }
 bool UIControl::allowsActionDispatch() const { return isEnabled() && UIView::allowsActionDispatch(); }
 bool UIControl::isEnabled() const { return !contains(_state, UIControlState::disabled); }

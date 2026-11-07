@@ -163,9 +163,20 @@ void UIView::setUserInteractionEnabled(bool enabled) {
 }
 
 void UIView::interactionDidBecomeUnavailable() {
-    const auto children=_subviews;
-    for (const auto& child:children)
-        if (child->_superview.lock().get()==this) child->interactionDidBecomeUnavailable();
+    if (const auto owner = window()) owner->invalidateResponderTouchesForView(this);
+    UIGestureRecognizer::beginEventDispatch();
+    try {
+        const auto recognizers = _gestureRecognizers;
+        for (const auto& recognizer : recognizers)
+            if (recognizer && recognizer->_view.lock().get() == this) recognizer->cancelForUnavailableView();
+        const auto children=_subviews;
+        for (const auto& child:children)
+            if (child->_superview.lock().get()==this) child->interactionDidBecomeUnavailable();
+    } catch (...) {
+        UIGestureRecognizer::endEventDispatch();
+        throw;
+    }
+    UIGestureRecognizer::endEventDispatch();
 }
 
 void UIView::setCenter(NXPoint position) {
@@ -308,8 +319,23 @@ void UIView::updateLayoutMargin() {
 }
 
 void UIView::addGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& gestureRecognizer) {
+    if (!gestureRecognizer) throw std::invalid_argument("Gesture recognizer cannot be null");
+    if (gestureRecognizer->_view.lock().get() == this) return;
+    if (const auto previous = gestureRecognizer->_view.lock()) {
+        previous->removeGestureRecognizer(gestureRecognizer);
+        // Cancellation can call application code. Its later attachment wins
+        // over the outer request, including reattachment to this same view.
+        if (!gestureRecognizer->_view.expired()) return;
+    }
     gestureRecognizer->_view = weak_from_this();
     _gestureRecognizers.push_back(gestureRecognizer);
+}
+
+void UIView::removeGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& gestureRecognizer) {
+    if (!gestureRecognizer || gestureRecognizer->_view.lock().get() != this) return;
+    std::erase(_gestureRecognizers, gestureRecognizer);
+    gestureRecognizer->_view.reset();
+    gestureRecognizer->cancelForUnavailableView();
 }
 
 void UIView::addSubview(const std::shared_ptr<UIView>& view) {
@@ -330,6 +356,8 @@ std::shared_ptr<UIWindow> UIView::window() {
 
 void UIView::setSuperview(const std::shared_ptr<UIView>& superview) {
     const auto previousTraitCollection = _traitCollection;
+    if (!superview && !_superview.expired())
+        if (const auto owner = window()) owner->invalidateResponderTouchesForView(this);
     _superview = superview;
     if (!superview) interactionDidBecomeUnavailable();
     updateCornerConfigurationTree();

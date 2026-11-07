@@ -1,0 +1,5 @@
+-fx -s8 -c1 0x222e8ca30
+0x222e8ca30: 0x000000022e8701d0
+(lldb) image lookup -a 0x22e8701d0
+      Address: UIKitCore[0x000000022e8701d0] (UIKitCore.__DATA.__objc_data + 388000)
+      Summary: (void *)0x000000022e8701f8: UIScrollViewDelayedTouchesBeganGestureRecognizer

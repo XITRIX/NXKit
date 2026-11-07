@@ -61,6 +61,9 @@ add_test(NAME ViewInteractionTests COMMAND ViewInteractionTests)
 add_executable(PressLifecycleTests ${NXKIT_ROOT}/UIKitCore/tests/UIApplicationPressLifecycleTests.cpp)
 target_link_libraries(PressLifecycleTests PRIVATE UIKitCore)
 add_test(NAME PressLifecycleTests COMMAND PressLifecycleTests)
+add_executable(TouchDeliveryTests ${NXKIT_ROOT}/UIKitCore/tests/TouchDeliveryTests.cpp)
+target_link_libraries(TouchDeliveryTests PRIVATE UIKitCore)
+add_test(NAME TouchDeliveryTests COMMAND TouchDeliveryTests)
 add_executable(CornerConfigurationTests ${NXKIT_ROOT}/UIKitCore/tests/CornerConfigurationTests.cpp)
 target_link_libraries(CornerConfigurationTests PRIVATE UIKitCore)
 add_test(NAME CornerConfigurationTests COMMAND CornerConfigurationTests)
@@ -194,6 +197,12 @@ if (NXKIT_RASTER_CONTROLLER_TESTS)
             ${NXKIT_ROOT}/UIKitCore/lib/UIApplicationMain.cpp)
         target_link_libraries(GlassScreenTests PRIVATE NXKit Xitrix::UIKit)
         add_test(NAME GlassScreenTests COMMAND GlassScreenTests)
+        add_executable(DemoListScrollTests ${NXKIT_ROOT}/Demo/tests/ListScrollArbitrationTests.cpp
+            ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassScreenView.cpp
+            ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassScreenViewController.cpp
+            ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/SystemControlsDemoViewController.cpp)
+        target_link_libraries(DemoListScrollTests PRIVATE Xitrix::UIKit NXKit)
+        add_test(NAME DemoListScrollTests COMMAND DemoListScrollTests)
         add_executable(GlassPerformance ../GlassPerformance.cpp
             ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassScreenView.cpp
             ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassDemoScene.cpp
@@ -213,6 +222,10 @@ add_test(NAME LensTabTests COMMAND LensTabTests)
 add_executable(LensTests ${NXKIT_ROOT}/UIKit/tests/LensViewTests.cpp)
 target_link_libraries(LensTests PRIVATE XITRIXUIKit)
 add_test(NAME LensTests COMMAND LensTests)
+
+add_executable(SwitchTests ${NXKIT_ROOT}/UIKit/tests/UISwitchTests.cpp)
+target_link_libraries(SwitchTests PRIVATE Xitrix::UIKit)
+add_test(NAME SwitchTests COMMAND SwitchTests)
 
 add_executable(LensRefractionTests ${NXKIT_ROOT}/UIKit/tests/LensRefractionTests.cpp)
 target_link_libraries(LensRefractionTests PRIVATE XITRIXUIKit)
@@ -273,6 +286,15 @@ target_include_directories(ScrollPhysicsTests PRIVATE ${NXKIT_ROOT}/UIKitCore/li
 target_link_libraries(ScrollPhysicsTests PRIVATE XITRIXUIKit)
 add_test(NAME ScrollPhysicsTests COMMAND ScrollPhysicsTests)
 add_executable(GestureTests GestureMain.cpp)
+add_executable(ControlScrollArbitrationTests ${NXKIT_ROOT}/UIKit/tests/ControlScrollArbitrationTests.cpp)
+target_link_libraries(ControlScrollArbitrationTests PRIVATE Xitrix::UIKit)
+add_test(NAME ControlScrollArbitrationTests COMMAND ControlScrollArbitrationTests)
+add_executable(GestureFailureTests ${NXKIT_ROOT}/UIKitCore/tests/GestureFailureTests.cpp)
+target_link_libraries(GestureFailureTests PRIVATE Xitrix::UIKitCore)
+add_test(NAME GestureFailureTests COMMAND GestureFailureTests)
+add_executable(ScrollContentTouchTests ${NXKIT_ROOT}/UIKitCore/tests/ScrollContentTouchTests.cpp)
+target_link_libraries(ScrollContentTouchTests PRIVATE Xitrix::UIKitCore)
+add_test(NAME ScrollContentTouchTests COMMAND ScrollContentTouchTests)
 if(APPLE)
     add_executable(MetalGlassStressPerformance ../MetalGlassStressPerformance.mm
         ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassStressView.cpp

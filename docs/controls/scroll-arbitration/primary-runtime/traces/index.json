@@ -1,0 +1,62 @@
+[
+  {
+    "case": "slider-hold-long",
+    "file": "slider-hold-long.json.gz",
+    "rawSHA256": "0a47fcb77c207b28468f668d471f02b8e64eb6c347bbe7f19478416d7d3df0f6",
+    "gzipSHA256": "e6f534aebd55d48dc0c3fac67fa4c160ade4cef912ebc2ee5ad64f847cbf9af4"
+  },
+  {
+    "case": "slider-horizontal-fast",
+    "file": "slider-horizontal-fast.json.gz",
+    "rawSHA256": "7d4f4ebcbfc3ebf5b03da59f2f27885daff139242abad73d8b6dcabf16ee33a4",
+    "gzipSHA256": "3871084f2a75c5bbd1144aab579ae58b752e9b4eee18ed4326dd5b547c3dff6f"
+  },
+  {
+    "case": "slider-tap",
+    "file": "slider-tap.json.gz",
+    "rawSHA256": "690d61132f7cd7548f826efddcc508967464a1a94badda4db87972107115847b",
+    "gzipSHA256": "9102d1879594ffc9fa056db1afd3bc34ceb5c93968e18675e9f444fa3ad74193"
+  },
+  {
+    "case": "slider-track-vertical-fast",
+    "file": "slider-track-vertical-fast.json.gz",
+    "rawSHA256": "6328e1c2a22af7b367d58a7dfc3b39ffa254f28fc082694eebdfb5977c96fefc",
+    "gzipSHA256": "40a1edd988a3483ec2018be0850fcc67da187caa9e11d6e9f4a8fef63d975b1e"
+  },
+  {
+    "case": "slider-vertical-fast",
+    "file": "slider-vertical-fast.json.gz",
+    "rawSHA256": "4f026884efc77d12375b0e3fe4b882df139acc2b3b490447ca7a190d2a7d5396",
+    "gzipSHA256": "12b02074605b176511ab4cca6a1404fd8a8373952875d4d23382d5d3ccddda84"
+  },
+  {
+    "case": "switch-held-vertical",
+    "file": "switch-held-vertical.json.gz",
+    "rawSHA256": "a721d1582ca0519f8cb0fe59f10d10ec4b905ddf6cded647b9844626b0e2dbc5",
+    "gzipSHA256": "9d2c402b89082c2f2b8baac82ee415c50e2eb106bfee9383fcc21905fa89fc72"
+  },
+  {
+    "case": "switch-hold-long",
+    "file": "switch-hold-long.json.gz",
+    "rawSHA256": "3af71a58385d52d0a6d135c37f57a260b6f15a29734513f751e2d8f0c8d66543",
+    "gzipSHA256": "86033051c7c5373a3b73e482ba63860ca667b441a808b42c173686512ca889bf"
+  },
+  {
+    "case": "switch-horizontal-fast",
+    "file": "switch-horizontal-fast.json.gz",
+    "rawSHA256": "95f0f558da4cc992e726713f3314f7f3af17c509a7f34fae44ac3d26830d0c45",
+    "gzipSHA256": "fbfdb566cc5f77f70b7300e6aa53908fe1d0affbd9274476c2be3057d3ab113b"
+  },
+  {
+    "case": "switch-tap",
+    "file": "switch-tap.json.gz",
+    "rawSHA256": "f8b5a2cab9bf3490055ebb68c1fc2bd093ebb4a05bcdeb9af17193c6e0090465",
+    "gzipSHA256": "073591446ad5ae13865882a769aeea145d1fd68792c2800b9effa22a50c812d1"
+  },
+  {
+    "case": "switch-vertical-fast",
+    "file": "switch-vertical-fast.json.gz",
+    "rawSHA256": "4882da8de754f25978e4a4fb2454a5fb1a320d72d8965921f87c0be542d73715",
+    "gzipSHA256": "8ecd876f4c2cf06ebee2d0c97874da3f48a57c5243063c9e2a555bb0c2f0a77c"
+  }
+]

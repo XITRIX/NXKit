@@ -1,4 +1,5 @@
 #include "SystemControlsDemoViewController.hpp"
+#include "GlassDemoListView.hpp"
 #include "GlassScreenTypography.hpp"
 #include <UIKit.h>
 #include <algorithm>
@@ -52,7 +53,7 @@ private:
     std::shared_ptr<UIControl> _control;
     std::shared_ptr<UILabel> _value;
 };
-class ControlsView final:public UIScrollView {
+class ControlsView final:public GlassDemoListView {
 public:
     ControlsView(Page page,std::function<void(Page)> push):_page(page),_push(std::move(push)) {
         setBackgroundColor(UIColor::systemGroupedBackground);setBounceVertically(true);
@@ -111,6 +112,7 @@ private:
     }
     std::shared_ptr<SettingRow> row(const std::string& id,const std::string& title,std::function<void()> callback) {
         auto control=new_shared<SettingRow>(title);control->primaryAction=UIAction(title,std::move(callback));
+        registerSelectableRow(control);
         _currentRows->push_back(control);_currentCard->addSubview(control);_blocks[_currentBlock].height=NXFloat(_currentRows->size())*52;
         _actions[id]=control;_rows[id]=control;return control;
     }

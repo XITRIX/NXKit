@@ -33,6 +33,7 @@ add_executable(${PROJECT_NAME}
         app/Screens/GlassDemoViewController/LensTabBarView.cpp
         app/Screens/GlassDemoViewController/GlassStressView.cpp
         app/Screens/GlassDemoViewController/GlassScreenView.cpp
+        app/Screens/GlassDemoViewController/GlassDemoListView.hpp
         app/Screens/GlassDemoViewController/GlassScreenViewController.cpp
         app/Screens/GlassDemoViewController/SystemControlsDemoViewController.cpp
         app/Screens/GlassDemoViewController/LensDemoStage.cpp
@@ -50,6 +51,16 @@ target_link_libraries(${PROJECT_NAME}
         Xitrix::UIKit
         NXKit
 )
+
+if(UIKIT_BUILD_TESTS)
+    enable_testing()
+    add_executable(DemoListScrollTests tests/ListScrollArbitrationTests.cpp
+        app/Screens/GlassDemoViewController/GlassScreenView.cpp
+        app/Screens/GlassDemoViewController/GlassScreenViewController.cpp
+        app/Screens/GlassDemoViewController/SystemControlsDemoViewController.cpp)
+    target_link_libraries(DemoListScrollTests PRIVATE Xitrix::UIKit NXKit)
+    add_test(NAME DemoListScrollTests COMMAND DemoListScrollTests)
+endif()
 
 option(NXKIT_BUILD_SIMULATOR_BENCHMARKS "Build Metal regression executables for simctl spawn" OFF)
 if(NXKIT_BUILD_SIMULATOR_BENCHMARKS)

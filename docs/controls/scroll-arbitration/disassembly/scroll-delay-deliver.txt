@@ -1,0 +1,21 @@
+UIKitCore`-[UIScrollViewDelayedTouchesBeganGestureRecognizer sendDelayedTouches]:
+UIKitCore[0x1c4e476b8] <+0>:  sub    sp, sp, #0x30
+UIKitCore[0x1c4e476bc] <+4>:  stp    x20, x19, [sp, #0x10]
+UIKitCore[0x1c4e476c0] <+8>:  stp    x29, x30, [sp, #0x20]
+UIKitCore[0x1c4e476c4] <+12>: add    x29, sp, #0x20
+UIKitCore[0x1c4e476c8] <+16>: mov    x19, x0
+UIKitCore[0x1c4e476cc] <+20>: cbz    x0, 0x1c4e47700           ; <+72>
+UIKitCore[0x1c4e476d0] <+24>: ldr    x0, [x19, #0x20]
+UIKitCore[0x1c4e476d4] <+28>: bl     0x1c5a6b280               ; objc_msgSend$copy
+UIKitCore[0x1c4e476d8] <+32>: mov    x1, x0
+UIKitCore[0x1c4e476dc] <+36>: mov    x0, x19
+UIKitCore[0x1c4e476e0] <+40>: str    x1, [sp, #0x8]
+UIKitCore[0x1c4e476e4] <+44>: mov    x2, x1
+UIKitCore[0x1c4e476e8] <+48>: bl     0x1c5afa5a0               ; objc_msgSend$sendTouchesShouldBeginForDelayedTouches:
+UIKitCore[0x1c4e476ec] <+52>: ldr    x0, [sp, #0x8]
+UIKitCore[0x1c4e476f0] <+56>: ldp    x29, x30, [sp, #0x20]
+UIKitCore[0x1c4e476f4] <+60>: ldp    x20, x19, [sp, #0x10]
+UIKitCore[0x1c4e476f8] <+64>: add    sp, sp, #0x30
+UIKitCore[0x1c4e476fc] <+68>: b      0x1c5b8629c               ; symbol stub for: objc_release
+UIKitCore[0x1c4e47700] <+72>: mov    x1, #0x0                  ; =0
+UIKitCore[0x1c4e47704] <+76>: b      0x1c4e476dc               ; <+36>

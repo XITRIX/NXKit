@@ -33,6 +33,12 @@ protected:
 private:
     std::weak_ptr<UIControl> control;
     std::shared_ptr<UITouch> _touchToTrack;
+    NXPoint _contactOrigin, _peakTravel, _completedTravel;
+    std::weak_ptr<UITouch> _completedTouch;
+    bool _capturesDrag = false, _inputEnded = false;
+    std::uint64_t _contactGeneration = 0;
+    void claimContact();
+    void rejectContact(const std::shared_ptr<UITouch>& touch);
 
     friend class UIControl;
 };

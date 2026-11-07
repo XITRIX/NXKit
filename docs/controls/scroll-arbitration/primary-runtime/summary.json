@@ -1,0 +1,250 @@
+[
+  {
+    "id": "slider-hold-long",
+    "touchCount": 2,
+    "durationMS": 2522.09,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 38.72,
+    "scrollShouldBeginMS": 167.06,
+    "controlTouchesBeganMS": 167.31,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 23.07,
+    "valueChangedMS": 642.41,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230834.7124551667,
+        "dtMS": 167.06
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-horizontal-fast",
+    "touchCount": 7,
+    "durationMS": 2110.61,
+    "initialValue": 0.5,
+    "finalValue": 0.8644089102745056,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 21.32,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": 36.88,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 38.6,
+    "controlLongPressActionBeganMS": 20.83,
+    "valueChangedMS": 45.26,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-tap",
+    "touchCount": 2,
+    "durationMS": 2127.83,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 44.44,
+    "scrollShouldBeginMS": 61.17,
+    "controlTouchesBeganMS": 62.04,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 23.06,
+    "valueChangedMS": 61.83,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230823.05084941673,
+        "dtMS": 61.17
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-track-vertical-fast",
+    "touchCount": 5,
+    "durationMS": 3164.21,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      529
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": 146.33,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-vertical-fast",
+    "touchCount": 6,
+    "durationMS": 2142.41,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 41.35,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": 33.17,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 35.51,
+    "controlLongPressActionBeganMS": 27.59,
+    "valueChangedMS": 175.6,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-held-vertical",
+    "touchCount": 59,
+    "durationMS": 3630.53,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 172.99,
+    "scrollShouldBeginMS": 151.89,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 630.1,
+    "controlLongPressActionBeganMS": 172.47,
+    "valueChangedMS": 1669.49,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230895.0394812084,
+        "dtMS": 151.89
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-hold-long",
+    "touchCount": 2,
+    "durationMS": 2468.2,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 174.46,
+    "scrollShouldBeginMS": 152.07,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 173.94,
+    "valueChangedMS": 610.24,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230885.15176212505,
+        "dtMS": 152.07
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-horizontal-fast",
+    "touchCount": 5,
+    "durationMS": 936.05,
+    "initialValue": 0,
+    "finalValue": 0,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": 119.39,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 119.96,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230917.36758862506,
+        "dtMS": 119.39
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-tap",
+    "touchCount": 2,
+    "durationMS": 804.88,
+    "initialValue": 0,
+    "finalValue": 0,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": 6.84,
+    "controlTouchesBeganMS": 7.38,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230876.12025308338,
+        "dtMS": 6.84
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-vertical-fast",
+    "touchCount": 8,
+    "durationMS": 3125.69,
+    "initialValue": 0,
+    "finalValue": 0,
+    "finalOffset": [
+      0,
+      596
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": 25.52,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  }
+]

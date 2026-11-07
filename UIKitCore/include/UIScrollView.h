@@ -96,6 +96,13 @@ public:
 
     [[nodiscard]] bool isScrollEnabled() const { return _isScrollEnabled; }
     void setScrollEnabled(bool scrollEnabled);
+    [[nodiscard]] bool delaysContentTouches() const { return _delaysContentTouches; }
+    void setDelaysContentTouches(bool delaysContentTouches);
+    [[nodiscard]] bool canCancelContentTouches() const { return _canCancelContentTouches; }
+    void setCanCancelContentTouches(bool canCancelContentTouches);
+    virtual bool touchesShouldBegin(std::set<std::shared_ptr<UITouch>> touches,
+                                   std::shared_ptr<UIEvent> event, std::shared_ptr<UIView> contentView);
+    virtual bool touchesShouldCancelInContentView(std::shared_ptr<UIView> contentView);
 
     UIEdgeInsets contentInset() { return _contentInset; }
     void setContentInset(UIEdgeInsets contentInset);
@@ -183,6 +190,9 @@ private:
     void notifyContainers();
     void synchronizeContainerInsets();
     std::shared_ptr<UIPanGestureRecognizer> _panGestureRecognizer;
+    std::shared_ptr<UIGestureRecognizer> _contentTouchDelayRecognizer;
+    bool _delaysContentTouches = true;
+    bool _canCancelContentTouches = true;
 #ifdef __SWITCH__
     bool _dragSmoothingEnabled = true;
 #else

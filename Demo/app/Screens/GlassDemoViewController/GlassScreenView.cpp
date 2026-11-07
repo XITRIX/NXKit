@@ -1,4 +1,5 @@
 #include "GlassScreenView.hpp"
+#include "GlassDemoListView.hpp"
 #include "GlassScreenTypography.hpp"
 #include "DemoSystemSymbol.hpp"
 #include <algorithm>
@@ -18,7 +19,7 @@ class Row final : public UIControl {
 };
 }
 GlassScreenView::GlassScreenView() {
-    _scroll=new_shared<UIScrollView>();
+    _scroll=new_shared<GlassDemoListView>();
     _scroll->setBounceVertically(true);
     _scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes);
     addSubview(_scroll);
@@ -62,6 +63,7 @@ void GlassScreenView::rebuild() {
         for(const auto& [id,title,value,callback]:rows) {
             const bool detail=_details&&id.starts_with("item-"); const NXFloat height=detail?70:52;
             auto control=new_shared<Row>(); control->setFrame({0,rowY,column,height}); card->addSubview(control); _actions[id]=control;
+            std::static_pointer_cast<GlassDemoListView>(_scroll)->registerSelectableRow(control);
             control->primaryAction=UIAction(title,callback);
             auto text=label(title,body); text->setFrame({16,0,std::max(0.0f,column-140),52}); control->addSubview(text);
             if(id=="add-row"||id=="reset") text->setTextColor(accentColor());

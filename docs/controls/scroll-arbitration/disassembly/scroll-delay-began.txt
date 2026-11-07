@@ -1,0 +1,78 @@
+UIKitCore`-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesBegan:withEvent:]:
+UIKitCore[0x1c4e47790] <+0>:   sub    sp, sp, #0x40
+UIKitCore[0x1c4e47794] <+4>:   stp    x22, x21, [sp, #0x10]
+UIKitCore[0x1c4e47798] <+8>:   stp    x20, x19, [sp, #0x20]
+UIKitCore[0x1c4e4779c] <+12>:  stp    x29, x30, [sp, #0x30]
+UIKitCore[0x1c4e477a0] <+16>:  add    x29, sp, #0x30
+UIKitCore[0x1c4e477a4] <+20>:  mov    x20, x2
+UIKitCore[0x1c4e477a8] <+24>:  mov    x19, x0
+UIKitCore[0x1c4e477ac] <+28>:  bl     0x1c5b86464               ; symbol stub for: objc_retain_x3
+UIKitCore[0x1c4e477b0] <+32>:  str    x0, [sp, #0x8]
+UIKitCore[0x1c4e477b4] <+36>:  bl     0x1c5b863f8               ; symbol stub for: objc_retain_x20
+UIKitCore[0x1c4e477b8] <+40>:  mov    x20, x0
+UIKitCore[0x1c4e477bc] <+44>:  mov    x0, x19
+UIKitCore[0x1c4e477c0] <+48>:  bl     0x1c5a603e0               ; objc_msgSend$clearTimer
+UIKitCore[0x1c4e477c4] <+52>:  mov    x0, x19
+UIKitCore[0x1c4e477c8] <+56>:  bl     0x1c59a7e80               ; objc_msgSend$_clientView
+UIKitCore[0x1c4e477cc] <+60>:  bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c4e477d0] <+64>:  mov    x21, x0
+UIKitCore[0x1c4e477d4] <+68>:  bl     0x1c5a74e20               ; objc_msgSend$delaysContentTouches
+UIKitCore[0x1c4e477d8] <+72>:  mov    x22, x0
+UIKitCore[0x1c4e477dc] <+76>:  bl     0x1c5b862e4               ; symbol stub for: objc_release_x21
+UIKitCore[0x1c4e477e0] <+80>:  cbz    w22, 0x1c4e47898          ; <+264>
+UIKitCore[0x1c4e477e4] <+84>:  mov    x0, x19
+UIKitCore[0x1c4e477e8] <+88>:  mov    x2, x20
+UIKitCore[0x1c4e477ec] <+92>:  bl     0x1c5a19900               ; objc_msgSend$_shouldMakeTimerForDelayedContentTouches:
+UIKitCore[0x1c4e477f0] <+96>:  mov    x21, x0
+UIKitCore[0x1c4e477f4] <+100>: bl     0x1c5b862d8               ; symbol stub for: objc_release_x20
+UIKitCore[0x1c4e477f8] <+104>: cbz    w21, 0x1c4e47860          ; <+208>
+UIKitCore[0x1c4e477fc] <+108>: adrp   x8, 385092
+UIKitCore[0x1c4e47800] <+112>: ldr    x0, [x8, #0x998]
+UIKitCore[0x1c4e47804] <+116>: bl     0x1c5b860ec               ; symbol stub for: objc_alloc
+UIKitCore[0x1c4e47808] <+120>: mov    x20, x0
+UIKitCore[0x1c4e4780c] <+124>: adrp   x8, 473932
+UIKitCore[0x1c4e47810] <+128>: add    x21, x8, #0x75f
+UIKitCore[0x1c4e47814] <+132>: mov    x0, x19
+UIKitCore[0x1c4e47818] <+136>: bl     0x1c59a7e80               ; objc_msgSend$_clientView
+UIKitCore[0x1c4e4781c] <+140>: bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c4e47820] <+144>: mov    x22, x0
+UIKitCore[0x1c4e47824] <+148>: bl     0x1c5a26d60               ; objc_msgSend$_touchDelayForScrollDetection
+UIKitCore[0x1c4e47828] <+152>: adrp   x8, 382008
+UIKitCore[0x1c4e4782c] <+156>: ldr    x8, [x8, #0x5e8]
+UIKitCore[0x1c4e47830] <+160>: ldr    x5, [x8]
+UIKitCore[0x1c4e47834] <+164>: mov    x0, x20
+UIKitCore[0x1c4e47838] <+168>: mov    x2, x19
+UIKitCore[0x1c4e4783c] <+172>: mov    x3, x21
+UIKitCore[0x1c4e47840] <+176>: mov    x4, #0x0                  ; =0
+UIKitCore[0x1c4e47844] <+180>: bl     0x1c5aa9780               ; objc_msgSend$initWithTarget:action:userInfo:delay:mode:
+UIKitCore[0x1c4e47848] <+184>: adrp   x8, 432585
+UIKitCore[0x1c4e4784c] <+188>: ldrsw  x8, [x8, #0xc70]
+UIKitCore[0x1c4e47850] <+192>: ldr    x9, [x19, x8]
+UIKitCore[0x1c4e47854] <+196>: str    x0, [x19, x8]
+UIKitCore[0x1c4e47858] <+200>: bl     0x1c5b86368               ; symbol stub for: objc_release_x9
+UIKitCore[0x1c4e4785c] <+204>: bl     0x1c5b862f0               ; symbol stub for: objc_release_x22
+UIKitCore[0x1c4e47860] <+208>: adrp   x8, 432585
+UIKitCore[0x1c4e47864] <+212>: ldrsw  x8, [x8, #0xc74]
+UIKitCore[0x1c4e47868] <+216>: add    x21, x19, x8
+UIKitCore[0x1c4e4786c] <+220>: mov    x0, x19
+UIKitCore[0x1c4e47870] <+224>: ldr    x2, [sp, #0x8]
+UIKitCore[0x1c4e47874] <+228>: bl     0x1c5995240               ; objc_msgSend$_activeTouchesForEvent:
+UIKitCore[0x1c4e47878] <+232>: bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c4e4787c] <+236>: mov    x20, x0
+UIKitCore[0x1c4e47880] <+240>: mov    x0, x19
+UIKitCore[0x1c4e47884] <+244>: mov    x2, x20
+UIKitCore[0x1c4e47888] <+248>: mov    w3, #0x0                  ; =0
+UIKitCore[0x1c4e4788c] <+252>: bl     0x1c59a58e0               ; objc_msgSend$_centroidOfTouches:excludingEnded:
+UIKitCore[0x1c4e47890] <+256>: stp    d0, d1, [x21]
+UIKitCore[0x1c4e47894] <+260>: b      0x1c4e478a8               ; <+280>
+UIKitCore[0x1c4e47898] <+264>: mov    x0, x19
+UIKitCore[0x1c4e4789c] <+268>: mov    x2, x20
+UIKitCore[0x1c4e478a0] <+272>: ldr    x3, [sp, #0x8]
+UIKitCore[0x1c4e478a4] <+276>: bl     0x1c5afa5c0               ; objc_msgSend$sendTouchesShouldBeginForTouches:withEvent:
+UIKitCore[0x1c4e478a8] <+280>: bl     0x1c5b862d8               ; symbol stub for: objc_release_x20
+UIKitCore[0x1c4e478ac] <+284>: ldr    x0, [sp, #0x8]
+UIKitCore[0x1c4e478b0] <+288>: ldp    x29, x30, [sp, #0x30]
+UIKitCore[0x1c4e478b4] <+292>: ldp    x20, x19, [sp, #0x20]
+UIKitCore[0x1c4e478b8] <+296>: ldp    x22, x21, [sp, #0x10]
+UIKitCore[0x1c4e478bc] <+300>: add    sp, sp, #0x40
+UIKitCore[0x1c4e478c0] <+304>: b      0x1c5b8629c               ; symbol stub for: objc_release

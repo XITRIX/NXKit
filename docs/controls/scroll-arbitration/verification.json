@@ -1,0 +1,86 @@
+{
+  "date": "2026-11-07",
+  "revision": "working tree after b895e97",
+  "controlFixtures": 34,
+  "simulator": "iOS27.0, built with SDK27.1, arm64 RelWithDebInfo",
+  "result": "Focused control, gesture, buffer, scroll hook, slider/switch, scrolling physics and interactive navigation suites pass",
+  "otherBuilds": [
+    "macOS XITRIXUIKit",
+    "iOS Simulator ThorVGApp with offline Metal shader archive"
+  ],
+  "logs": {
+    "simulator": {
+      "artifact": "simulator.log.gz",
+      "sha256": "c723fddd27d1c8a2f84557af0660116a3444c08a4e3cc6f46ddc5571b2b14316"
+    },
+    "rasterControls": {
+      "artifact": "rasterControls.log.gz",
+      "sha256": "6f300025130c2909fe4230916b0a14173a4189333a4ec982136ffd9cd27c5c9f"
+    },
+    "rasterGesture": {
+      "artifact": "rasterGesture.log.gz",
+      "sha256": "5240db3931312cd16105e8b725a6a1eccb57281208f60ec4f7225264be986f62"
+    },
+    "simulatorBuild": {
+      "artifact": "simulatorBuild.log.gz",
+      "sha256": "48f3929d309efd4527e0230b6db1d3d13325be0b679b8b001c654c21f4aa3e5f"
+    },
+    "demoBuild": {
+      "artifact": "demoBuild.log.gz",
+      "sha256": "b3428494cef42e7ff241df8b588921d8e37bf73cdaa7e086a586694a68f7dc34"
+    },
+    "macOSBuild": {
+      "artifact": "macOSBuild.log.gz",
+      "sha256": "2d19444a4e4213a4e56c35068c45951ec4d0b42184584251281b695bc862a931"
+    }
+  },
+  "shaderColdChecks": {
+    "motion": {
+      "frames": 1921,
+      "renderLibraryCompiles": 0,
+      "renderPipelineCompiles": 0,
+      "startupPrewarmPipelines": 220
+    },
+    "gallery": {
+      "frames": 20,
+      "renderLibraryCompiles": 0,
+      "renderPipelineCompiles": 0,
+      "startupPrewarmPipelines": 220
+    }
+  },
+  "shaderABI": "ea56e591cfc9e4e681ea7d5cb6d021cd5ecf202676e7847bfe0914121fb95d47",
+  "sourceSHA256": {
+    "UIKit/include/UISlider.h": "55c48619c769bbec40f469a6f4cfee8ac543b6f8659a072657eaaff01938b677",
+    "UIKit/include/UISwitch.h": "e9c8e3a24b2bcbf3f08612fa41b79096cc2c3e644932a0ed9899e3c3533d5abd",
+    "UIKit/lib/UISlider.cpp": "3edee0ebb0d13a0db57003a092692ea327325d631bb42f5ccf06d7f000c6c0da",
+    "UIKit/lib/UISwitch.cpp": "ddb3ab1b634282cc01d06b066c07fdfd535500499fc112884be803ef75870c61",
+    "UIKit/tests/UIGestureRecognizerTests.cpp": "f323374b2f92d405932a8d940c4e248823895f24e94904ca44932f1137c34767",
+    "UIKit/tests/UISliderTests.cpp": "29e7a9d15783fc15817f185e908688d0aac8e0f342c1a16c6232255b42ede408",
+    "UIKit/tests/UISwitchTests.cpp": "d0f2fd32cac789a609681eea7f59a457ced3ed7548b6996ec491bc13789bd9ca",
+    "UIKitCore/include/UIControl.h": "9ecbdd6308eac53bb25de27b5bf05ba7e72c1ae5a9b752eb2fdb8b5aa2ae9f2c",
+    "UIKitCore/include/UIControlGestureRecognizer.h": "8f6552826e6af0fcd92aeefba84c5180023df31ca9c7402d5409cea65dcd692d",
+    "UIKitCore/include/UIEvent.h": "637d7d8023c557790c9618ad858416d1c4b7a9b20e54962736a73a5ec832c1f3",
+    "UIKitCore/include/UIGestureRecognizer.h": "09f8e79cdc066e5a69814b6a3efe7f894f357871a215002eef341371a0c2b98e",
+    "UIKitCore/include/UIPress.h": "80e1e53245916ddeccdb58889c7a77ba7306074e0ba9c34d82bacb17a176a6ba",
+    "UIKitCore/include/UIPressesEvent.h": "b33400e6d3eaf078c6d58a17f62f03fbb24583f29603dd1168d423de45f73e49",
+    "UIKitCore/include/UIScrollView.h": "517744c3fc6a0ae8e92f920f7ad80c7dd45f8bb2f8157d4935de19fd2fc37d5a",
+    "UIKitCore/include/UIView.h": "1e3d2f3b7c8c7abc27c2b96b25647e5c2e9fa3bbaaee6022fd0768c810dd1fcf",
+    "UIKitCore/include/UIWindow.h": "d01fe6cdc10428051da10c13b8212dea991fb5ab9262a55634fd0fb2e9a5ae02",
+    "UIKitCore/lib/UIControl.cpp": "573cddc5d670a391cd0e9e03ff03c3c607c38ee1eddd6f47268e3aeb8d5c6bd0",
+    "UIKitCore/lib/UIControlGestureRecognizer.cpp": "11aba46c46d647cd9025e0bfa746e4c0e99777d469df752970b30572696f42b1",
+    "UIKitCore/lib/UIGestureRecognizer.cpp": "3c7d57aed9ca13e1267939498abf242077ba049cc5287a38faae84ee92139f3d",
+    "UIKitCore/lib/UIScrollView.cpp": "91a46cfdaaa5e61cccf887cd378383672560ca32b773015659b4388fb06f5c3d",
+    "UIKitCore/lib/UIView.cpp": "87fc0503647752461cba4403076e7f67167c1add0feba4fac5f56b0f58c37623",
+    "UIKitCore/lib/UIWindow.cpp": "1b9c56d3a559ed6582ad7b22c74efc843c7ac544be5a25c54f95a62200b25e1e",
+    "UIKit/tests/ControlScrollArbitrationTests.cpp": "2ba79671f832347218c1685f21f53a5c0614a4592f2aa01642b43104b6731b48",
+    "UIKitCore/tests/GestureFailureTests.cpp": "49381955d6c6b36f655cadeaa871d0e831c0a0d7bb732487ddfc9a3875fa226a",
+    "UIKitCore/tests/TouchDeliveryTests.cpp": "6aca35e05a3e3dfc54c058c15b7ea3320d4d476dae3bb7e3be86917165ccdb90",
+    "UIKitCore/tests/ScrollContentTouchTests.cpp": "914cb2e35810378b44ffabddc3ee4a8ec01bafc90835a58b7c83807ec460813a"
+  },
+  "limitations": [
+    "Native reference is one Simulator OS build and single-finger scenarios, not physical-device parity",
+    "Generic recognizer delay flags do not yet buffer hardware/controller press responders",
+    "Exact intrinsic switch10ms press timing and complete private recognizer graph remain approximate",
+    "Raster ScrollPhysicsTests has an existing missing applicationRunLoop link dependency; the Simulator target passes"
+  ]
+}

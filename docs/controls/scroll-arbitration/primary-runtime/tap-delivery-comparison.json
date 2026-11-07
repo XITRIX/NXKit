@@ -1,0 +1,62 @@
+[
+  {
+    "capture": "full-v2",
+    "config": {
+      "id": "switch-tap",
+      "dy": 0,
+      "control": "switch",
+      "dx": 0,
+      "hold": 0.05
+    },
+    "touchPoint": [
+      98,
+      264
+    ],
+    "hitView": "_UILiquidLensView",
+    "touchDownTimestamp": 230592.06584370835,
+    "touchUpTimestamp": 230592.132510375,
+    "windowDownDelivery": 230592.0920644167,
+    "windowUpDelivery": 230592.15075125004,
+    "physicalHoldMS": 66.666667,
+    "deliveredHoldMS": 58.686833,
+    "downDispatchLagMS": 26.220708,
+    "frameGapsOverlappingWindowDown": [
+      {
+        "durationMS": 32.117167,
+        "startFromWindowDownMS": -23.575708,
+        "endFromWindowDownMS": 8.541458
+      }
+    ],
+    "finalValue": 1
+  },
+  {
+    "capture": "primary",
+    "config": {
+      "id": "switch-tap",
+      "dy": 0,
+      "control": "switch",
+      "dx": 0,
+      "hold": 0.05
+    },
+    "touchPoint": [
+      98,
+      264
+    ],
+    "hitView": "_UILiquidLensView",
+    "touchDownTimestamp": 230876.01369525,
+    "touchUpTimestamp": 230876.08036191665,
+    "windowDownDelivery": 230876.1134162084,
+    "windowUpDelivery": 230876.12019562506,
+    "physicalHoldMS": 66.666667,
+    "deliveredHoldMS": 6.779417,
+    "downDispatchLagMS": 99.720958,
+    "frameGapsOverlappingWindowDown": [
+      {
+        "durationMS": 105.324042,
+        "startFromWindowDownMS": -96.084042,
+        "endFromWindowDownMS": 9.24
+      }
+    ],
+    "finalValue": 0
+  }
+]

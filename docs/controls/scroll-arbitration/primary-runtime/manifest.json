@@ -1,0 +1,16 @@
+{
+  "startedUnix": 1794044383.752615,
+  "subset": "primary-ten",
+  "device": "3F494163-D29F-446D-9379-20EBA1E70C53",
+  "exitCode": 0,
+  "sourceSHA256": {
+    "build.py": "fbac496b66edae279603c6231a87bdd64313b3488a1452f69d7a2bdb8dc3673a",
+    "collect.py": "6337130047ad7d7d7cbf6cb358f7fac7384a6cbbd7280595fc3f5c87095dc81b",
+    "Reference.m": "d520564d8e1ade4898b7cb9dd4fb2ce9f24dba474d188e531fe9b6d160b5c794",
+    "summarize.py": "a92682fc6ac5cbf05b43ec5ab05f29b850c27e18fc8c0a5ae0d3fe4d314dc3e0",
+    "UITests.m": "ad68d72a949f89e6aedabff3eda45721dda3e2be419b0118d54ddbbe01edc849",
+    "analyze.py": "b29e9d618dadf8409906e69cf56cd4b1ecf21d1d33dc744abae499992d166a81"
+  },
+  "scope": "Native UISlider/UISwitch with actual XCTest OS touches, vertical/horizontal UIScrollView and outside baseline. No synthetic UITouch or recognizer policy changes.",
+  "capturedCases": 10
+}

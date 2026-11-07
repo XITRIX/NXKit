@@ -1,0 +1,3215 @@
+{
+  "result": {
+    "manifest": {
+      "rea_version": "4.0.1",
+      "provider_version": "3",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "pty_backend": "node-pty",
+      "started_at": "2026-11-07T12:14:35.852Z",
+      "completed_at": "2026-11-07T12:15:05.072Z",
+      "scenario": {
+        "executable": "/usr/bin/python3",
+        "arguments": [
+          "/Users/daniilvinogradov/Documents/Dev/NXKit/Demo/SwitchComparison/capture-minimum-lift.py",
+          "3F494163-D29F-446D-9379-20EBA1E70C53",
+          "/private/tmp/nxkit-switch-minimum-lift-rea"
+        ],
+        "working_directory": "/Users/daniilvinogradov/Documents/Dev/NXKit",
+        "environment": {},
+        "filesystem_observation_paths": [],
+        "terminal": {
+          "columns": 80,
+          "rows": 24,
+          "scrollback": 1000
+        },
+        "events": [],
+        "timeout_ms": 90000,
+        "idle_timeout_ms": 60000,
+        "settle_ms": 100,
+        "limits": {
+          "output_bytes": 16000,
+          "files": 20,
+          "file_bytes": 120000,
+          "processes": 20,
+          "filesystem_depth": 1
+        },
+        "normalization": {
+          "paths": false,
+          "pids": true,
+          "ports": true,
+          "time_bucket_ms": 10,
+          "patterns": []
+        },
+        "executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"
+      },
+      "comparison_contract": {
+        "working_directory": "/Users/daniilvinogradov/Documents/Dev/NXKit",
+        "environment": {},
+        "ambient_environment": "unknown",
+        "filesystem_observation_paths": [],
+        "terminal": {
+          "columns": 80,
+          "rows": 24,
+          "scrollback": 1000
+        },
+        "events": [],
+        "timeout_ms": 90000,
+        "idle_timeout_ms": 60000,
+        "settle_ms": 100,
+        "limits": {
+          "output_bytes": 16000,
+          "files": 20,
+          "file_bytes": 120000,
+          "processes": 20,
+          "filesystem_depth": 1
+        },
+        "normalization": {
+          "paths": false,
+          "pids": true,
+          "ports": true,
+          "time_bucket_ms": 10,
+          "patterns": []
+        }
+      },
+      "full_scenario_sha256": "b727098695627237912c6087182ec0e459221bbccfc28c4d5b58a7c4039e8ccb",
+      "comparison_contract_sha256": "6dec366f2669631fc851cfb06db0862d4c4c0c66ce90927b99e72e7701138d8d",
+      "executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2",
+      "normalization_sha256": "5c58aa1aa890197f15f9c59ef755d01120e6e07f356fa1ef2f20787e63b6fa87"
+    },
+    "normalization": {
+      "paths": false,
+      "pids": true,
+      "ports": true,
+      "time_bucket_ms": 10,
+      "patterns": []
+    },
+    "frames": [
+      {
+        "sequence": 0,
+        "at_ms": 8000,
+        "data": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[0m\u001b[0;1;35mwarning: "
+      },
+      {
+        "sequence": 1,
+        "at_ms": 8000,
+        "data": "\u001b[0m\u001b[1m\r\n      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\u001b[0m\r\n   20 |   ...event:@\"alo"
+      },
+      {
+        "sequence": 2,
+        "at_ms": 8000,
+        "data": "ngsi"
+      },
+      {
+        "sequence": 3,
+        "at_ms": 8000,
+        "data": "d"
+      },
+      {
+        "sequence": 4,
+        "at_ms": 8000,
+        "data": "e\""
+      },
+      {
+        "sequence": 5,
+        "at_ms": 8000,
+        "data": " "
+      },
+      {
+        "sequence": 6,
+        "at_ms": 8000,
+        "data": "te"
+      },
+      {
+        "sequence": 7,
+        "at_ms": 8000,
+        "data": "st"
+      },
+      {
+        "sequence": 8,
+        "at_ms": 8000,
+        "data": ":t"
+      },
+      {
+        "sequence": 9,
+        "at_ms": 8000,
+        "data": "es"
+      },
+      {
+        "sequence": 10,
+        "at_ms": 8000,
+        "data": "t"
+      },
+      {
+        "sequence": 11,
+        "at_ms": 8000,
+        "data": " f"
+      },
+      {
+        "sequence": 12,
+        "at_ms": 8000,
+        "data": "ie"
+      },
+      {
+        "sequence": 13,
+        "at_ms": 8000,
+        "data": "ld"
+      },
+      {
+        "sequence": 14,
+        "at_ms": 8000,
+        "data": "s:"
+      },
+      {
+        "sequence": 15,
+        "at_ms": 8000,
+        "data": "@{@"
+      },
+      {
+        "sequence": 16,
+        "at_ms": 8000,
+        "data": "\""
+      },
+      {
+        "sequence": 17,
+        "at_ms": 8000,
+        "data": "li"
+      },
+      {
+        "sequence": 18,
+        "at_ms": 8000,
+        "data": "ft"
+      },
+      {
+        "sequence": 19,
+        "at_ms": 8000,
+        "data": "e"
+      },
+      {
+        "sequence": 20,
+        "at_ms": 8000,
+        "data": "d\""
+      },
+      {
+        "sequence": 21,
+        "at_ms": 8000,
+        "data": ":@(lif"
+      },
+      {
+        "sequence": 22,
+        "at_ms": 8000,
+        "data": "ted"
+      },
+      {
+        "sequence": 23,
+        "at_ms": 8000,
+        "data": ")}"
+      },
+      {
+        "sequence": 24,
+        "at_ms": 8000,
+        "data": "];"
+      },
+      {
+        "sequence": 25,
+        "at_ms": 8000,
+        "data": "le"
+      },
+      {
+        "sequence": 26,
+        "at_ms": 8000,
+        "data": "ns"
+      },
+      {
+        "sequence": 27,
+        "at_ms": 8000,
+        "data": ".b"
+      },
+      {
+        "sequence": 28,
+        "at_ms": 8000,
+        "data": "o"
+      },
+      {
+        "sequence": 29,
+        "at_ms": 8000,
+        "data": "un"
+      },
+      {
+        "sequence": 30,
+        "at_ms": 8000,
+        "data": "ds"
+      },
+      {
+        "sequence": 31,
+        "at_ms": 8000,
+        "data": "="
+      },
+      {
+        "sequence": 32,
+        "at_ms": 8000,
+        "data": "\u001b[0;32m."
+      },
+      {
+        "sequence": 33,
+        "at_ms": 8000,
+        "data": ".."
+      },
+      {
+        "sequence": 34,
+        "at_ms": 8000,
+        "data": "\u001b[0m"
+      },
+      {
+        "sequence": 35,
+        "at_ms": 8000,
+        "data": "\r\n      "
+      },
+      {
+        "sequence": 36,
+        "at_ms": 8000,
+        "data": "| "
+      },
+      {
+        "sequence": 37,
+        "at_ms": 8000,
+        "data": "\u001b[0;1;32m"
+      },
+      {
+        "sequence": 38,
+        "at_ms": 8000,
+        "data": "                                                                 ^~~~"
+      },
+      {
+        "sequence": 39,
+        "at_ms": 8000,
+        "data": "\r\n"
+      },
+      {
+        "sequence": 40,
+        "at_ms": 8000,
+        "data": "\u001b[0m"
+      },
+      {
+        "sequence": 41,
+        "at_ms": 8000,
+        "data": "\u001b[1m"
+      },
+      {
+        "sequence": 42,
+        "at_ms": 8000,
+        "data": "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>"
+      },
+      {
+        "sequence": 43,
+        "at_ms": 8000,
+        "data": ":"
+      },
+      {
+        "sequence": 44,
+        "at_ms": 8000,
+        "data": "3:"
+      },
+      {
+        "sequence": 45,
+        "at_ms": 8000,
+        "data": " \u001b[0m"
+      },
+      {
+        "sequence": 46,
+        "at_ms": 8000,
+        "data": "\u001b[0;1;36m"
+      },
+      {
+        "sequence": 47,
+        "at_ms": 8000,
+        "data": "note: \u001b[0m"
+      },
+      {
+        "sequence": 48,
+        "at_ms": 8000,
+        "data": "\r\n"
+      },
+      {
+        "sequence": 49,
+        "at_ms": 8000,
+        "data": "      block"
+      },
+      {
+        "sequence": 50,
+        "at_ms": 8000,
+        "data": " will"
+      },
+      {
+        "sequence": 51,
+        "at_ms": 8000,
+        "data": " "
+      },
+      {
+        "sequence": 52,
+        "at_ms": 8000,
+        "data": "be"
+      },
+      {
+        "sequence": 53,
+        "at_ms": 8000,
+        "data": " "
+      },
+      {
+        "sequence": 54,
+        "at_ms": 8000,
+        "data": "retained "
+      },
+      {
+        "sequence": 55,
+        "at_ms": 8000,
+        "data": "by "
+      },
+      {
+        "sequence": 56,
+        "at_ms": 8000,
+        "data": "the captured object\u001b[0m\r\n"
+      },
+      {
+        "sequence": 57,
+        "at_ms": 8000,
+        "data": "   20 | "
+      },
+      {
+        "sequence": 58,
+        "at_ms": 8000,
+        "data": " [le"
+      },
+      {
+        "sequence": 59,
+        "at_ms": 8000,
+        "data": "ns"
+      },
+      {
+        "sequence": 60,
+        "at_ms": 8000,
+        "data": " s"
+      },
+      {
+        "sequence": 61,
+        "at_ms": 8000,
+        "data": "etL"
+      },
+      {
+        "sequence": 62,
+        "at_ms": 8000,
+        "data": "ifted:l"
+      },
+      {
+        "sequence": 63,
+        "at_ms": 8000,
+        "data": "if"
+      },
+      {
+        "sequence": 64,
+        "at_ms": 8000,
+        "data": "te"
+      },
+      {
+        "sequence": 65,
+        "at_ms": 8000,
+        "data": "d "
+      },
+      {
+        "sequence": 66,
+        "at_ms": 8000,
+        "data": "a"
+      },
+      {
+        "sequence": 67,
+        "at_ms": 8000,
+        "data": "ni"
+      },
+      {
+        "sequence": 68,
+        "at_ms": 8000,
+        "data": "ma"
+      },
+      {
+        "sequence": 69,
+        "at_ms": 8000,
+        "data": "te"
+      },
+      {
+        "sequence": 70,
+        "at_ms": 8000,
+        "data": "d:an"
+      },
+      {
+        "sequence": 71,
+        "at_ms": 8000,
+        "data": "im"
+      },
+      {
+        "sequence": 72,
+        "at_ms": 8000,
+        "data": "a"
+      },
+      {
+        "sequence": 73,
+        "at_ms": 8000,
+        "data": "te"
+      },
+      {
+        "sequence": 74,
+        "at_ms": 8000,
+        "data": "d "
+      },
+      {
+        "sequence": 75,
+        "at_ms": 8000,
+        "data": "al"
+      },
+      {
+        "sequence": 76,
+        "at_ms": 8000,
+        "data": "o"
+      },
+      {
+        "sequence": 77,
+        "at_ms": 8000,
+        "data": "ng"
+      },
+      {
+        "sequence": 78,
+        "at_ms": 8000,
+        "data": "s"
+      },
+      {
+        "sequence": 79,
+        "at_ms": 8000,
+        "data": "i"
+      },
+      {
+        "sequence": 80,
+        "at_ms": 8000,
+        "data": "deAn"
+      },
+      {
+        "sequence": 81,
+        "at_ms": 8000,
+        "data": "im"
+      },
+      {
+        "sequence": 82,
+        "at_ms": 8000,
+        "data": "ations"
+      },
+      {
+        "sequence": 83,
+        "at_ms": 8000,
+        "data": ":^{"
+      },
+      {
+        "sequence": 84,
+        "at_ms": 8000,
+        "data": "[s"
+      },
+      {
+        "sequence": 85,
+        "at_ms": 8000,
+        "data": "el"
+      },
+      {
+        "sequence": 86,
+        "at_ms": 8000,
+        "data": "f ev...\u001b[0m\r\n      | \u001b[0;1;32m  ^~~~\r\n\u001b[0m"
+      },
+      {
+        "sequence": 87,
+        "at_ms": 8020,
+        "data": "1 warning generated"
+      },
+      {
+        "sequence": 88,
+        "at_ms": 8020,
+        "data": ".\r\n"
+      },
+      {
+        "sequence": 89,
+        "at_ms": 8530,
+        "data": "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.app: replacing existing signature\r\n"
+      },
+      {
+        "sequence": 90,
+        "at_ms": 20950,
+        "data": "org.nxkit.MinimumLiftReference: 868\r\n"
+      },
+      {
+        "sequence": 91,
+        "at_ms": 29030,
+        "data": "{\"device\": \"3F494163-D29F-446D-9379-20EBA1E70C53\", \"sourceSHA256\": \"d8fdc00bcf972783ff83cf0524f5cbaac98364af08cfe8c93d99d9a9b97fbe7e\", \"traceSHA256\": \"017f27cc1023d2549e5ac36d0ea82c3c439c30f8de948d65686c3c64e8899043\", \"os\": \"Version 27.0 (Build 24A434)\", \"scale\": 3, \"scope\": \"Authored native private setLifted:animated:alongsideAnimations:completion: calls at0/30/100/300ms forsmall/largestyle; no control, no touches, no mutation of native timing/spec. Write once after collection.\", \"summary\": [{\"id\": \"style0-down0\", \"style\": 0, \"downRequestMS\": 35.16279166797176, \"downAlongsideMS\": 220.95304165850393, \"deferredMS\": 185.79024999053217}, {\"id\": \"style0-down0.03\", \"style\": 0, \"downRequestMS\": 51.33729166118428, \"downAlongsideMS\": 220.22758331149817, \"deferredMS\": 168.89029165031388}, {\"id\": \"style0-down0.1\", \"style\": 0, \"downRequestMS\": 107.4664166662842, \"downAlongsideMS\": 220.33029166050255, \"deferredMS\": 112.86387499421835}, {\"id\": \"style0-down0.3\", \"style\": 0, \"downRequestMS\": 319.05333331087604, \"downAlongsi"
+      },
+      {
+        "sequence": 92,
+        "at_ms": 29030,
+        "data": "deMS\": 319.15966665837914, \"deferredMS\": 0.10633334750309587}, {\"id\": \"style1-down0\", \"style\": 1, \"downRequestMS\": 4.204916651360691, \"downAlongsideMS\": 220.60433332808316, \"deferredMS\": 216.39941667672247}, {\"id\": \"style1-down0.03\", \"style\": 1, \"downRequestMS\": 35.22112499922514, \"downAlongsideMS\": 220.24870832683519, \"deferredMS\": 185.02758332761005}, {\"id\": \"style1-down0.1\", \"style\": 1, \"downRequestMS\": 107.58070833981037, \"downAlongsideMS\": 220.28841666178778, \"deferredMS\": 112.7077083219774}, {\"id\": \"style1-down0.3\", \"style\": 1, \"downRequestMS\": 322.14895833749324, \"downAlongsideMS\": 322.24174999282695, \"deferredMS\": 0.0927916553337127}]}\r\n"
+      }
+    ],
+    "rendered_frames": [
+      {
+        "sequence": 0,
+        "at_ms": 8000,
+        "columns": 80,
+        "rows": 24,
+        "cursor_x": 3,
+        "cursor_y": 1,
+        "active_buffer": "normal",
+        "lines": [
+          "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+          "g:                                                                              ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                "
+        ],
+        "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: "
+      },
+      {
+        "sequence": 1,
+        "at_ms": 8000,
+        "columns": 80,
+        "rows": 24,
+        "cursor_x": 24,
+        "cursor_y": 4,
+        "active_buffer": "normal",
+        "lines": [
+          "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+          "g:                                                                              ",
+          "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+          "      cycle [-Warc-retain-cycles]                                               ",
+          "   20 |   ...event:@\"alo                                                        ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                "
+        ],
+        "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alo"
+      },
+      {
+        "sequence": 2,
+        "at_ms": 8000,
+        "columns": 80,
+        "rows": 24,
+        "cursor_x": 28,
+        "cursor_y": 4,
+        "active_buffer": "normal",
+        "lines": [
+          "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+          "g:                                                                              ",
+          "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+          "      cycle [-Warc-retain-cycles]                                               ",
+          "   20 |   ...event:@\"alongsi                                                    ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                "
+        ],
+        "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alongsi"
+      },
+      {
+        "sequence": 3,
+        "at_ms": 8000,
+        "columns": 80,
+        "rows": 24,
+        "cursor_x": 29,
+        "cursor_y": 4,
+        "active_buffer": "normal",
+        "lines": [
+          "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+          "g:                                                                              ",
+          "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+          "      cycle [-Warc-retain-cycles]                                               ",
+          "   20 |   ...event:@\"alongsid                                                   ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                "
+        ],
+        "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alongsid"
+      },
+      {
+        "sequence": 4,
+        "at_ms": 8000,
+        "columns": 80,
+        "rows": 24,
+        "cursor_x": 31,
+        "cursor_y": 4,
+        "active_buffer": "normal",
+        "lines": [
+          "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+          "g:                                                                              ",
+          "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+          "      cycle [-Warc-retain-cycles]                                               ",
+          "   20 |   ...event:@\"alongside\"                                                 ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                "
+        ],
+        "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alongside\""
+      },
+      {
+        "sequence": 5,
+        "at_ms": 8000,
+        "columns": 80,
+        "rows": 24,
+        "cursor_x": 32,
+        "cursor_y": 4,
+        "active_buffer": "normal",
+        "lines": [
+          "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+          "g:                                                                              ",
+          "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+          "      cycle [-Warc-retain-cycles]                                               ",
+          "   20 |   ...event:@\"alongside\"                                                 ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                "
+        ],
+        "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alongside\" "
+      },
+      {
+        "sequence": 6,
+        "at_ms": 8000,
+        "columns": 80,
+        "rows": 24,
+        "cursor_x": 34,
+        "cursor_y": 4,
+        "active_buffer": "normal",
+        "lines": [
+          "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+          "g:                                                                              ",
+          "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+          "      cycle [-Warc-retain-cycles]                                               ",
+          "   20 |   ...event:@\"alongside\" te                                              ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                "
+        ],
+        "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alongside\" te"
+      }
+    ],
+    "interaction_events": [],
+    "exit": {
+      "code": 0,
+      "signal": 0,
+      "reason": "exited"
+    },
+    "settlement": {
+      "state": "alive_at_deadline",
+      "elapsed_ms": 154,
+      "cleanup_outcome": "cleaned"
+    },
+    "process_samples": [
+      {
+        "at_ms": 1160,
+        "pid": 1,
+        "parent_pid": 2,
+        "command": "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python /Users/daniilvinogradov/Documents/Dev/NXKit/Demo/SwitchComparison/capture-minimum-lift.py 3F494163-D29F-446D-9379-20EBA1E70C53 /private/tmp/nxkit-switch-minimum-lift-rea",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 1750,
+        "pid": 3,
+        "parent_pid": 1,
+        "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -target arm64-apple-ios26.0-simulator -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -fobjc-arc -framework UIKit -framework QuartzCore -framework Foundation /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m -o /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.app/MinimumLiftReference",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 1900,
+        "pid": 4,
+        "parent_pid": 3,
+        "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -cc1 -triple arm64-apple-ios26.0.0-simulator -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -dumpdir /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.app/MinimumLiftReference- -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name MinimumLiftReference.m -mrelocation-model pic -pic-level 2 -mframe-pointer=non-leaf -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=1 -fobjc-msgsend-selector-stubs -fno-sized-deallocation -target-sdk-version=<port>.1 -fdepfile-entry=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/SDKSettings.json -fvisibility-inlines-hidden-static-local-var -fno-modulemap-allow-subdirectory-search -fdefine-target-os-macros -fno-assume-unique-vtables -fno-modulemap-allow-subdirectory-search -enable-tlsdesc -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -target-abi darwinpcs -debugger-tuning=lldb -fdebug-compilation-dir=/Users/daniilvinogradov/Documents/Dev/NXKit -target-linker-version 1166.2 -fcoverage-compilation-dir=/Users/daniilvinogradov/Documents/Dev/NXKit -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -I/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/Frameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/SubFrameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/Library/Frameworks -Wno-elaborated-enum-base -ferror-limit 19 -fmessage-length=<port> -stack-protector 1 -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fobjc-runtime=ios-26.0.0 -fobjc-arc -fobjc-exceptions -fexceptions -fmax-type-align=<port> -fcommon -fcolor-diagnostics -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -clang-vendor-feature=+disableAtImportPrivateFrameworkInImplementationError -Wno-error=allocator-wrappers -fdwarf2-cfi-asm -o /var/folders/r1/skwv4t4111v9z2q9lgk81mpj076blc/T/MinimumLiftReference-b5419d.o -x objective-c /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 8040,
+        "pid": 5,
+        "parent_pid": 3,
+        "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -no_deduplicate -dynamic -arch arm64 -platform_version ios-simulator 26.0.0 27.1 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -mllvm -enable-linkonceodr-outlining -o /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.app/MinimumLiftReference -L/usr/local/lib -framework UIKit -framework QuartzCore -framework Foundation /var/folders/r1/skwv4t4111v9z2q9lgk81mpj076blc/T/MinimumLiftReference-b5419d.o -framework Foundation -lobjc -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/lib/darwin/libclang_rt.iossim.a",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 8490,
+        "pid": 6,
+        "parent_pid": 1,
+        "command": "(codesign)",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 8640,
+        "pid": 7,
+        "parent_pid": 1,
+        "command": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/Resources/bin/simctl install 3F494163-D29F-446D-9379-20EBA1E70C53 /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.app",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 13860,
+        "pid": 7,
+        "parent_pid": 1,
+        "command": "(simctl)",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 14010,
+        "pid": 8,
+        "parent_pid": 1,
+        "command": "/bin/bash /Applications/Xcode.app/Contents/Developer/usr/bin/simctl get_app_container 3F494163-D29F-446D-9379-20EBA1E70C53 org.nxkit.MinimumLiftReference data",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 14010,
+        "pid": 9,
+        "parent_pid": 8,
+        "command": "(bash)",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 14010,
+        "pid": 10,
+        "parent_pid": 9,
+        "command": "(PlistBuddy)",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 14160,
+        "pid": 8,
+        "parent_pid": 1,
+        "command": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/Resources/bin/simctl get_app_container 3F494163-D29F-446D-9379-20EBA1E70C53 org.nxkit.MinimumLiftReference data",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 15980,
+        "pid": 11,
+        "parent_pid": 1,
+        "command": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/Resources/bin/simctl launch --terminate-running-process 3F494163-D29F-446D-9379-20EBA1E70C53 org.nxkit.MinimumLiftReference",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 24960,
+        "pid": 12,
+        "parent_pid": 1,
+        "command": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/Resources/bin/simctl terminate 3F494163-D29F-446D-9379-20EBA1E70C53 org.nxkit.MinimumLiftReference",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 24960,
+        "pid": 13,
+        "parent_pid": 12,
+        "command": "(bash)",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 24960,
+        "pid": 14,
+        "parent_pid": 13,
+        "command": "(PlistBuddy)",
+        "process_group_id": 1,
+        "session_id": null
+      }
+    ],
+    "filesystem_checkpoints": [
+      {
+        "name": "before",
+        "at_ms": 0,
+        "files": [],
+        "effects": [],
+        "truncated": false
+      },
+      {
+        "name": "after_settlement",
+        "at_ms": 29220,
+        "files": [],
+        "effects": [],
+        "truncated": false
+      }
+    ],
+    "event_journal": [
+      {
+        "capture_order": 0,
+        "collection": "filesystem_checkpoints",
+        "index": 0
+      },
+      {
+        "capture_order": 1,
+        "collection": "process_samples",
+        "index": 0
+      },
+      {
+        "capture_order": 2,
+        "collection": "process_samples",
+        "index": 1
+      },
+      {
+        "capture_order": 3,
+        "collection": "process_samples",
+        "index": 2
+      },
+      {
+        "capture_order": 4,
+        "collection": "frames",
+        "index": 0
+      },
+      {
+        "capture_order": 5,
+        "collection": "frames",
+        "index": 1
+      },
+      {
+        "capture_order": 6,
+        "collection": "frames",
+        "index": 2
+      },
+      {
+        "capture_order": 7,
+        "collection": "frames",
+        "index": 3
+      },
+      {
+        "capture_order": 8,
+        "collection": "frames",
+        "index": 4
+      },
+      {
+        "capture_order": 9,
+        "collection": "frames",
+        "index": 5
+      },
+      {
+        "capture_order": 10,
+        "collection": "frames",
+        "index": 6
+      },
+      {
+        "capture_order": 11,
+        "collection": "frames",
+        "index": 7
+      },
+      {
+        "capture_order": 12,
+        "collection": "frames",
+        "index": 8
+      },
+      {
+        "capture_order": 13,
+        "collection": "frames",
+        "index": 9
+      },
+      {
+        "capture_order": 14,
+        "collection": "frames",
+        "index": 10
+      },
+      {
+        "capture_order": 15,
+        "collection": "frames",
+        "index": 11
+      },
+      {
+        "capture_order": 16,
+        "collection": "frames",
+        "index": 12
+      },
+      {
+        "capture_order": 17,
+        "collection": "frames",
+        "index": 13
+      },
+      {
+        "capture_order": 18,
+        "collection": "frames",
+        "index": 14
+      },
+      {
+        "capture_order": 19,
+        "collection": "frames",
+        "index": 15
+      },
+      {
+        "capture_order": 20,
+        "collection": "frames",
+        "index": 16
+      },
+      {
+        "capture_order": 21,
+        "collection": "frames",
+        "index": 17
+      },
+      {
+        "capture_order": 22,
+        "collection": "frames",
+        "index": 18
+      },
+      {
+        "capture_order": 23,
+        "collection": "frames",
+        "index": 19
+      },
+      {
+        "capture_order": 24,
+        "collection": "frames",
+        "index": 20
+      },
+      {
+        "capture_order": 25,
+        "collection": "frames",
+        "index": 21
+      },
+      {
+        "capture_order": 26,
+        "collection": "frames",
+        "index": 22
+      },
+      {
+        "capture_order": 27,
+        "collection": "frames",
+        "index": 23
+      },
+      {
+        "capture_order": 28,
+        "collection": "frames",
+        "index": 24
+      },
+      {
+        "capture_order": 29,
+        "collection": "frames",
+        "index": 25
+      },
+      {
+        "capture_order": 30,
+        "collection": "frames",
+        "index": 26
+      },
+      {
+        "capture_order": 31,
+        "collection": "frames",
+        "index": 27
+      },
+      {
+        "capture_order": 32,
+        "collection": "frames",
+        "index": 28
+      },
+      {
+        "capture_order": 33,
+        "collection": "frames",
+        "index": 29
+      },
+      {
+        "capture_order": 34,
+        "collection": "frames",
+        "index": 30
+      },
+      {
+        "capture_order": 35,
+        "collection": "frames",
+        "index": 31
+      },
+      {
+        "capture_order": 36,
+        "collection": "frames",
+        "index": 32
+      },
+      {
+        "capture_order": 37,
+        "collection": "frames",
+        "index": 33
+      },
+      {
+        "capture_order": 38,
+        "collection": "frames",
+        "index": 34
+      },
+      {
+        "capture_order": 39,
+        "collection": "frames",
+        "index": 35
+      },
+      {
+        "capture_order": 40,
+        "collection": "frames",
+        "index": 36
+      },
+      {
+        "capture_order": 41,
+        "collection": "frames",
+        "index": 37
+      },
+      {
+        "capture_order": 42,
+        "collection": "frames",
+        "index": 38
+      },
+      {
+        "capture_order": 43,
+        "collection": "frames",
+        "index": 39
+      },
+      {
+        "capture_order": 44,
+        "collection": "frames",
+        "index": 40
+      },
+      {
+        "capture_order": 45,
+        "collection": "frames",
+        "index": 41
+      },
+      {
+        "capture_order": 46,
+        "collection": "frames",
+        "index": 42
+      },
+      {
+        "capture_order": 47,
+        "collection": "frames",
+        "index": 43
+      },
+      {
+        "capture_order": 48,
+        "collection": "frames",
+        "index": 44
+      },
+      {
+        "capture_order": 49,
+        "collection": "frames",
+        "index": 45
+      },
+      {
+        "capture_order": 50,
+        "collection": "frames",
+        "index": 46
+      },
+      {
+        "capture_order": 51,
+        "collection": "frames",
+        "index": 47
+      },
+      {
+        "capture_order": 52,
+        "collection": "frames",
+        "index": 48
+      },
+      {
+        "capture_order": 53,
+        "collection": "frames",
+        "index": 49
+      },
+      {
+        "capture_order": 54,
+        "collection": "frames",
+        "index": 50
+      },
+      {
+        "capture_order": 55,
+        "collection": "frames",
+        "index": 51
+      },
+      {
+        "capture_order": 56,
+        "collection": "frames",
+        "index": 52
+      },
+      {
+        "capture_order": 57,
+        "collection": "frames",
+        "index": 53
+      },
+      {
+        "capture_order": 58,
+        "collection": "frames",
+        "index": 54
+      },
+      {
+        "capture_order": 59,
+        "collection": "frames",
+        "index": 55
+      },
+      {
+        "capture_order": 60,
+        "collection": "frames",
+        "index": 56
+      },
+      {
+        "capture_order": 61,
+        "collection": "frames",
+        "index": 57
+      },
+      {
+        "capture_order": 62,
+        "collection": "frames",
+        "index": 58
+      },
+      {
+        "capture_order": 63,
+        "collection": "frames",
+        "index": 59
+      },
+      {
+        "capture_order": 64,
+        "collection": "frames",
+        "index": 60
+      },
+      {
+        "capture_order": 65,
+        "collection": "frames",
+        "index": 61
+      },
+      {
+        "capture_order": 66,
+        "collection": "frames",
+        "index": 62
+      },
+      {
+        "capture_order": 67,
+        "collection": "frames",
+        "index": 63
+      },
+      {
+        "capture_order": 68,
+        "collection": "frames",
+        "index": 64
+      },
+      {
+        "capture_order": 69,
+        "collection": "frames",
+        "index": 65
+      },
+      {
+        "capture_order": 70,
+        "collection": "frames",
+        "index": 66
+      },
+      {
+        "capture_order": 71,
+        "collection": "frames",
+        "index": 67
+      },
+      {
+        "capture_order": 72,
+        "collection": "frames",
+        "index": 68
+      },
+      {
+        "capture_order": 73,
+        "collection": "frames",
+        "index": 69
+      },
+      {
+        "capture_order": 74,
+        "collection": "frames",
+        "index": 70
+      },
+      {
+        "capture_order": 75,
+        "collection": "frames",
+        "index": 71
+      },
+      {
+        "capture_order": 76,
+        "collection": "frames",
+        "index": 72
+      },
+      {
+        "capture_order": 77,
+        "collection": "frames",
+        "index": 73
+      },
+      {
+        "capture_order": 78,
+        "collection": "frames",
+        "index": 74
+      },
+      {
+        "capture_order": 79,
+        "collection": "frames",
+        "index": 75
+      },
+      {
+        "capture_order": 80,
+        "collection": "frames",
+        "index": 76
+      },
+      {
+        "capture_order": 81,
+        "collection": "frames",
+        "index": 77
+      },
+      {
+        "capture_order": 82,
+        "collection": "frames",
+        "index": 78
+      },
+      {
+        "capture_order": 83,
+        "collection": "frames",
+        "index": 79
+      },
+      {
+        "capture_order": 84,
+        "collection": "frames",
+        "index": 80
+      },
+      {
+        "capture_order": 85,
+        "collection": "frames",
+        "index": 81
+      },
+      {
+        "capture_order": 86,
+        "collection": "frames",
+        "index": 82
+      },
+      {
+        "capture_order": 87,
+        "collection": "frames",
+        "index": 83
+      },
+      {
+        "capture_order": 88,
+        "collection": "frames",
+        "index": 84
+      },
+      {
+        "capture_order": 89,
+        "collection": "frames",
+        "index": 85
+      },
+      {
+        "capture_order": 90,
+        "collection": "rendered_frames",
+        "index": 0
+      },
+      {
+        "capture_order": 91,
+        "collection": "frames",
+        "index": 86
+      },
+      {
+        "capture_order": 92,
+        "collection": "rendered_frames",
+        "index": 1
+      },
+      {
+        "capture_order": 93,
+        "collection": "rendered_frames",
+        "index": 2
+      },
+      {
+        "capture_order": 94,
+        "collection": "rendered_frames",
+        "index": 3
+      },
+      {
+        "capture_order": 95,
+        "collection": "rendered_frames",
+        "index": 4
+      },
+      {
+        "capture_order": 96,
+        "collection": "rendered_frames",
+        "index": 5
+      },
+      {
+        "capture_order": 97,
+        "collection": "rendered_frames",
+        "index": 6
+      },
+      {
+        "capture_order": 98,
+        "collection": "frames",
+        "index": 87
+      },
+      {
+        "capture_order": 99,
+        "collection": "frames",
+        "index": 88
+      },
+      {
+        "capture_order": 100,
+        "collection": "process_samples",
+        "index": 3
+      },
+      {
+        "capture_order": 101,
+        "collection": "frames",
+        "index": 89
+      },
+      {
+        "capture_order": 102,
+        "collection": "process_samples",
+        "index": 4
+      },
+      {
+        "capture_order": 103,
+        "collection": "process_samples",
+        "index": 5
+      },
+      {
+        "capture_order": 104,
+        "collection": "process_samples",
+        "index": 6
+      },
+      {
+        "capture_order": 105,
+        "collection": "process_samples",
+        "index": 7
+      },
+      {
+        "capture_order": 106,
+        "collection": "process_samples",
+        "index": 8
+      },
+      {
+        "capture_order": 107,
+        "collection": "process_samples",
+        "index": 9
+      },
+      {
+        "capture_order": 108,
+        "collection": "process_samples",
+        "index": 10
+      },
+      {
+        "capture_order": 109,
+        "collection": "process_samples",
+        "index": 11
+      },
+      {
+        "capture_order": 110,
+        "collection": "frames",
+        "index": 90
+      },
+      {
+        "capture_order": 111,
+        "collection": "process_samples",
+        "index": 12
+      },
+      {
+        "capture_order": 112,
+        "collection": "process_samples",
+        "index": 13
+      },
+      {
+        "capture_order": 113,
+        "collection": "process_samples",
+        "index": 14
+      },
+      {
+        "capture_order": 114,
+        "collection": "frames",
+        "index": 91
+      },
+      {
+        "capture_order": 115,
+        "collection": "frames",
+        "index": 92
+      },
+      {
+        "capture_order": 116,
+        "collection": "lifecycle",
+        "index": 0
+      },
+      {
+        "capture_order": 117,
+        "collection": "lifecycle",
+        "index": 1
+      },
+      {
+        "capture_order": 118,
+        "collection": "filesystem_checkpoints",
+        "index": 1
+      }
+    ],
+    "files_before": [],
+    "files_after": [],
+    "filesystem_effects": [],
+    "truncated": true,
+    "limitations": [
+      "Process trees are sampled and may omit short-lived descendants.",
+      "Filesystem observations are before/after snapshots, not syscall traces.",
+      "Inherited host environment variables are not recorded and may affect results.",
+      "No filesystem observation paths were selected; filesystem effects remain unknown."
+    ],
+    "residual_unknowns": [
+      {
+        "scope": "process",
+        "reason": "Process trees are sampled and may omit short-lived descendants."
+      },
+      {
+        "scope": "environment",
+        "reason": "Inherited host environment variables are not recorded."
+      },
+      {
+        "scope": "network",
+        "reason": "Network activity is not observed by this capture."
+      },
+      {
+        "scope": "filesystem",
+        "reason": "No filesystem observation paths were selected; filesystem effects remain unknown."
+      }
+    ],
+    "cleanup": {
+      "owned_process_group": "verified",
+      "temporary_root": "removed"
+    }
+  },
+  "evidence_id": "ev_ffdaff76e537dc4e121beafdb8756001a3a80d48803c4e783b9aad95f3a5c58a",
+  "evidence": {
+    "evidence_id": "ev_ffdaff76e537dc4e121beafdb8756001a3a80d48803c4e783b9aad95f3a5c58a",
+    "subject": null,
+    "provider": {
+      "id": "rea-process",
+      "name": "REA process capture",
+      "version": "3"
+    },
+    "predicate_type": "rea.process-capture",
+    "operation": "capture_process_scenario",
+    "parameters": {
+      "executable_name": "python3",
+      "argument_count": 3,
+      "event_count": 0,
+      "filesystem_observation_path_count": 0,
+      "normalization": {
+        "paths": false,
+        "pids": true,
+        "ports": true,
+        "time_bucket_ms": 10,
+        "patterns": []
+      }
+    },
+    "raw_result": null,
+    "normalized_result": {
+      "manifest": {
+        "rea_version": "4.0.1",
+        "provider_version": "3",
+        "platform": "darwin",
+        "architecture": "arm64",
+        "pty_backend": "node-pty",
+        "started_at": "2026-11-07T12:14:35.852Z",
+        "completed_at": "2026-11-07T12:15:05.072Z",
+        "scenario": {
+          "executable": "/usr/bin/python3",
+          "arguments": [
+            "/Users/daniilvinogradov/Documents/Dev/NXKit/Demo/SwitchComparison/capture-minimum-lift.py",
+            "3F494163-D29F-446D-9379-20EBA1E70C53",
+            "/private/tmp/nxkit-switch-minimum-lift-rea"
+          ],
+          "working_directory": "/Users/daniilvinogradov/Documents/Dev/NXKit",
+          "environment": {},
+          "filesystem_observation_paths": [],
+          "terminal": {
+            "columns": 80,
+            "rows": 24,
+            "scrollback": 1000
+          },
+          "events": [],
+          "timeout_ms": 90000,
+          "idle_timeout_ms": 60000,
+          "settle_ms": 100,
+          "limits": {
+            "output_bytes": 16000,
+            "files": 20,
+            "file_bytes": 120000,
+            "processes": 20,
+            "filesystem_depth": 1
+          },
+          "normalization": {
+            "paths": false,
+            "pids": true,
+            "ports": true,
+            "time_bucket_ms": 10,
+            "patterns": []
+          },
+          "executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"
+        },
+        "comparison_contract": {
+          "working_directory": "/Users/daniilvinogradov/Documents/Dev/NXKit",
+          "environment": {},
+          "ambient_environment": "unknown",
+          "filesystem_observation_paths": [],
+          "terminal": {
+            "columns": 80,
+            "rows": 24,
+            "scrollback": 1000
+          },
+          "events": [],
+          "timeout_ms": 90000,
+          "idle_timeout_ms": 60000,
+          "settle_ms": 100,
+          "limits": {
+            "output_bytes": 16000,
+            "files": 20,
+            "file_bytes": 120000,
+            "processes": 20,
+            "filesystem_depth": 1
+          },
+          "normalization": {
+            "paths": false,
+            "pids": true,
+            "ports": true,
+            "time_bucket_ms": 10,
+            "patterns": []
+          }
+        },
+        "full_scenario_sha256": "b727098695627237912c6087182ec0e459221bbccfc28c4d5b58a7c4039e8ccb",
+        "comparison_contract_sha256": "6dec366f2669631fc851cfb06db0862d4c4c0c66ce90927b99e72e7701138d8d",
+        "executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2",
+        "normalization_sha256": "5c58aa1aa890197f15f9c59ef755d01120e6e07f356fa1ef2f20787e63b6fa87"
+      },
+      "normalization": {
+        "paths": false,
+        "pids": true,
+        "ports": true,
+        "time_bucket_ms": 10,
+        "patterns": []
+      },
+      "frames": [
+        {
+          "sequence": 0,
+          "at_ms": 8000,
+          "data": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[0m\u001b[0;1;35mwarning: "
+        },
+        {
+          "sequence": 1,
+          "at_ms": 8000,
+          "data": "\u001b[0m\u001b[1m\r\n      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\u001b[0m\r\n   20 |   ...event:@\"alo"
+        },
+        {
+          "sequence": 2,
+          "at_ms": 8000,
+          "data": "ngsi"
+        },
+        {
+          "sequence": 3,
+          "at_ms": 8000,
+          "data": "d"
+        },
+        {
+          "sequence": 4,
+          "at_ms": 8000,
+          "data": "e\""
+        },
+        {
+          "sequence": 5,
+          "at_ms": 8000,
+          "data": " "
+        },
+        {
+          "sequence": 6,
+          "at_ms": 8000,
+          "data": "te"
+        },
+        {
+          "sequence": 7,
+          "at_ms": 8000,
+          "data": "st"
+        },
+        {
+          "sequence": 8,
+          "at_ms": 8000,
+          "data": ":t"
+        },
+        {
+          "sequence": 9,
+          "at_ms": 8000,
+          "data": "es"
+        },
+        {
+          "sequence": 10,
+          "at_ms": 8000,
+          "data": "t"
+        },
+        {
+          "sequence": 11,
+          "at_ms": 8000,
+          "data": " f"
+        },
+        {
+          "sequence": 12,
+          "at_ms": 8000,
+          "data": "ie"
+        },
+        {
+          "sequence": 13,
+          "at_ms": 8000,
+          "data": "ld"
+        },
+        {
+          "sequence": 14,
+          "at_ms": 8000,
+          "data": "s:"
+        },
+        {
+          "sequence": 15,
+          "at_ms": 8000,
+          "data": "@{@"
+        },
+        {
+          "sequence": 16,
+          "at_ms": 8000,
+          "data": "\""
+        },
+        {
+          "sequence": 17,
+          "at_ms": 8000,
+          "data": "li"
+        },
+        {
+          "sequence": 18,
+          "at_ms": 8000,
+          "data": "ft"
+        },
+        {
+          "sequence": 19,
+          "at_ms": 8000,
+          "data": "e"
+        },
+        {
+          "sequence": 20,
+          "at_ms": 8000,
+          "data": "d\""
+        },
+        {
+          "sequence": 21,
+          "at_ms": 8000,
+          "data": ":@(lif"
+        },
+        {
+          "sequence": 22,
+          "at_ms": 8000,
+          "data": "ted"
+        },
+        {
+          "sequence": 23,
+          "at_ms": 8000,
+          "data": ")}"
+        },
+        {
+          "sequence": 24,
+          "at_ms": 8000,
+          "data": "];"
+        },
+        {
+          "sequence": 25,
+          "at_ms": 8000,
+          "data": "le"
+        },
+        {
+          "sequence": 26,
+          "at_ms": 8000,
+          "data": "ns"
+        },
+        {
+          "sequence": 27,
+          "at_ms": 8000,
+          "data": ".b"
+        },
+        {
+          "sequence": 28,
+          "at_ms": 8000,
+          "data": "o"
+        },
+        {
+          "sequence": 29,
+          "at_ms": 8000,
+          "data": "un"
+        },
+        {
+          "sequence": 30,
+          "at_ms": 8000,
+          "data": "ds"
+        },
+        {
+          "sequence": 31,
+          "at_ms": 8000,
+          "data": "="
+        },
+        {
+          "sequence": 32,
+          "at_ms": 8000,
+          "data": "\u001b[0;32m."
+        },
+        {
+          "sequence": 33,
+          "at_ms": 8000,
+          "data": ".."
+        },
+        {
+          "sequence": 34,
+          "at_ms": 8000,
+          "data": "\u001b[0m"
+        },
+        {
+          "sequence": 35,
+          "at_ms": 8000,
+          "data": "\r\n      "
+        },
+        {
+          "sequence": 36,
+          "at_ms": 8000,
+          "data": "| "
+        },
+        {
+          "sequence": 37,
+          "at_ms": 8000,
+          "data": "\u001b[0;1;32m"
+        },
+        {
+          "sequence": 38,
+          "at_ms": 8000,
+          "data": "                                                                 ^~~~"
+        },
+        {
+          "sequence": 39,
+          "at_ms": 8000,
+          "data": "\r\n"
+        },
+        {
+          "sequence": 40,
+          "at_ms": 8000,
+          "data": "\u001b[0m"
+        },
+        {
+          "sequence": 41,
+          "at_ms": 8000,
+          "data": "\u001b[1m"
+        },
+        {
+          "sequence": 42,
+          "at_ms": 8000,
+          "data": "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>"
+        },
+        {
+          "sequence": 43,
+          "at_ms": 8000,
+          "data": ":"
+        },
+        {
+          "sequence": 44,
+          "at_ms": 8000,
+          "data": "3:"
+        },
+        {
+          "sequence": 45,
+          "at_ms": 8000,
+          "data": " \u001b[0m"
+        },
+        {
+          "sequence": 46,
+          "at_ms": 8000,
+          "data": "\u001b[0;1;36m"
+        },
+        {
+          "sequence": 47,
+          "at_ms": 8000,
+          "data": "note: \u001b[0m"
+        },
+        {
+          "sequence": 48,
+          "at_ms": 8000,
+          "data": "\r\n"
+        },
+        {
+          "sequence": 49,
+          "at_ms": 8000,
+          "data": "      block"
+        },
+        {
+          "sequence": 50,
+          "at_ms": 8000,
+          "data": " will"
+        },
+        {
+          "sequence": 51,
+          "at_ms": 8000,
+          "data": " "
+        },
+        {
+          "sequence": 52,
+          "at_ms": 8000,
+          "data": "be"
+        },
+        {
+          "sequence": 53,
+          "at_ms": 8000,
+          "data": " "
+        },
+        {
+          "sequence": 54,
+          "at_ms": 8000,
+          "data": "retained "
+        },
+        {
+          "sequence": 55,
+          "at_ms": 8000,
+          "data": "by "
+        },
+        {
+          "sequence": 56,
+          "at_ms": 8000,
+          "data": "the captured object\u001b[0m\r\n"
+        },
+        {
+          "sequence": 57,
+          "at_ms": 8000,
+          "data": "   20 | "
+        },
+        {
+          "sequence": 58,
+          "at_ms": 8000,
+          "data": " [le"
+        },
+        {
+          "sequence": 59,
+          "at_ms": 8000,
+          "data": "ns"
+        },
+        {
+          "sequence": 60,
+          "at_ms": 8000,
+          "data": " s"
+        },
+        {
+          "sequence": 61,
+          "at_ms": 8000,
+          "data": "etL"
+        },
+        {
+          "sequence": 62,
+          "at_ms": 8000,
+          "data": "ifted:l"
+        },
+        {
+          "sequence": 63,
+          "at_ms": 8000,
+          "data": "if"
+        },
+        {
+          "sequence": 64,
+          "at_ms": 8000,
+          "data": "te"
+        },
+        {
+          "sequence": 65,
+          "at_ms": 8000,
+          "data": "d "
+        },
+        {
+          "sequence": 66,
+          "at_ms": 8000,
+          "data": "a"
+        },
+        {
+          "sequence": 67,
+          "at_ms": 8000,
+          "data": "ni"
+        },
+        {
+          "sequence": 68,
+          "at_ms": 8000,
+          "data": "ma"
+        },
+        {
+          "sequence": 69,
+          "at_ms": 8000,
+          "data": "te"
+        },
+        {
+          "sequence": 70,
+          "at_ms": 8000,
+          "data": "d:an"
+        },
+        {
+          "sequence": 71,
+          "at_ms": 8000,
+          "data": "im"
+        },
+        {
+          "sequence": 72,
+          "at_ms": 8000,
+          "data": "a"
+        },
+        {
+          "sequence": 73,
+          "at_ms": 8000,
+          "data": "te"
+        },
+        {
+          "sequence": 74,
+          "at_ms": 8000,
+          "data": "d "
+        },
+        {
+          "sequence": 75,
+          "at_ms": 8000,
+          "data": "al"
+        },
+        {
+          "sequence": 76,
+          "at_ms": 8000,
+          "data": "o"
+        },
+        {
+          "sequence": 77,
+          "at_ms": 8000,
+          "data": "ng"
+        },
+        {
+          "sequence": 78,
+          "at_ms": 8000,
+          "data": "s"
+        },
+        {
+          "sequence": 79,
+          "at_ms": 8000,
+          "data": "i"
+        },
+        {
+          "sequence": 80,
+          "at_ms": 8000,
+          "data": "deAn"
+        },
+        {
+          "sequence": 81,
+          "at_ms": 8000,
+          "data": "im"
+        },
+        {
+          "sequence": 82,
+          "at_ms": 8000,
+          "data": "ations"
+        },
+        {
+          "sequence": 83,
+          "at_ms": 8000,
+          "data": ":^{"
+        },
+        {
+          "sequence": 84,
+          "at_ms": 8000,
+          "data": "[s"
+        },
+        {
+          "sequence": 85,
+          "at_ms": 8000,
+          "data": "el"
+        },
+        {
+          "sequence": 86,
+          "at_ms": 8000,
+          "data": "f ev...\u001b[0m\r\n      | \u001b[0;1;32m  ^~~~\r\n\u001b[0m"
+        },
+        {
+          "sequence": 87,
+          "at_ms": 8020,
+          "data": "1 warning generated"
+        },
+        {
+          "sequence": 88,
+          "at_ms": 8020,
+          "data": ".\r\n"
+        },
+        {
+          "sequence": 89,
+          "at_ms": 8530,
+          "data": "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.app: replacing existing signature\r\n"
+        },
+        {
+          "sequence": 90,
+          "at_ms": 20950,
+          "data": "org.nxkit.MinimumLiftReference: 868\r\n"
+        },
+        {
+          "sequence": 91,
+          "at_ms": 29030,
+          "data": "{\"device\": \"3F494163-D29F-446D-9379-20EBA1E70C53\", \"sourceSHA256\": \"d8fdc00bcf972783ff83cf0524f5cbaac98364af08cfe8c93d99d9a9b97fbe7e\", \"traceSHA256\": \"017f27cc1023d2549e5ac36d0ea82c3c439c30f8de948d65686c3c64e8899043\", \"os\": \"Version 27.0 (Build 24A434)\", \"scale\": 3, \"scope\": \"Authored native private setLifted:animated:alongsideAnimations:completion: calls at0/30/100/300ms forsmall/largestyle; no control, no touches, no mutation of native timing/spec. Write once after collection.\", \"summary\": [{\"id\": \"style0-down0\", \"style\": 0, \"downRequestMS\": 35.16279166797176, \"downAlongsideMS\": 220.95304165850393, \"deferredMS\": 185.79024999053217}, {\"id\": \"style0-down0.03\", \"style\": 0, \"downRequestMS\": 51.33729166118428, \"downAlongsideMS\": 220.22758331149817, \"deferredMS\": 168.89029165031388}, {\"id\": \"style0-down0.1\", \"style\": 0, \"downRequestMS\": 107.4664166662842, \"downAlongsideMS\": 220.33029166050255, \"deferredMS\": 112.86387499421835}, {\"id\": \"style0-down0.3\", \"style\": 0, \"downRequestMS\": 319.05333331087604, \"downAlongsi"
+        },
+        {
+          "sequence": 92,
+          "at_ms": 29030,
+          "data": "deMS\": 319.15966665837914, \"deferredMS\": 0.10633334750309587}, {\"id\": \"style1-down0\", \"style\": 1, \"downRequestMS\": 4.204916651360691, \"downAlongsideMS\": 220.60433332808316, \"deferredMS\": 216.39941667672247}, {\"id\": \"style1-down0.03\", \"style\": 1, \"downRequestMS\": 35.22112499922514, \"downAlongsideMS\": 220.24870832683519, \"deferredMS\": 185.02758332761005}, {\"id\": \"style1-down0.1\", \"style\": 1, \"downRequestMS\": 107.58070833981037, \"downAlongsideMS\": 220.28841666178778, \"deferredMS\": 112.7077083219774}, {\"id\": \"style1-down0.3\", \"style\": 1, \"downRequestMS\": 322.14895833749324, \"downAlongsideMS\": 322.24174999282695, \"deferredMS\": 0.0927916553337127}]}\r\n"
+        }
+      ],
+      "rendered_frames": [
+        {
+          "sequence": 0,
+          "at_ms": 8000,
+          "columns": 80,
+          "rows": 24,
+          "cursor_x": 3,
+          "cursor_y": 1,
+          "active_buffer": "normal",
+          "lines": [
+            "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+            "g:                                                                              ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                "
+          ],
+          "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: "
+        },
+        {
+          "sequence": 1,
+          "at_ms": 8000,
+          "columns": 80,
+          "rows": 24,
+          "cursor_x": 24,
+          "cursor_y": 4,
+          "active_buffer": "normal",
+          "lines": [
+            "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+            "g:                                                                              ",
+            "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+            "      cycle [-Warc-retain-cycles]                                               ",
+            "   20 |   ...event:@\"alo                                                        ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                "
+          ],
+          "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alo"
+        },
+        {
+          "sequence": 2,
+          "at_ms": 8000,
+          "columns": 80,
+          "rows": 24,
+          "cursor_x": 28,
+          "cursor_y": 4,
+          "active_buffer": "normal",
+          "lines": [
+            "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+            "g:                                                                              ",
+            "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+            "      cycle [-Warc-retain-cycles]                                               ",
+            "   20 |   ...event:@\"alongsi                                                    ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                "
+          ],
+          "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alongsi"
+        },
+        {
+          "sequence": 3,
+          "at_ms": 8000,
+          "columns": 80,
+          "rows": 24,
+          "cursor_x": 29,
+          "cursor_y": 4,
+          "active_buffer": "normal",
+          "lines": [
+            "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+            "g:                                                                              ",
+            "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+            "      cycle [-Warc-retain-cycles]                                               ",
+            "   20 |   ...event:@\"alongsid                                                   ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                "
+          ],
+          "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alongsid"
+        },
+        {
+          "sequence": 4,
+          "at_ms": 8000,
+          "columns": 80,
+          "rows": 24,
+          "cursor_x": 31,
+          "cursor_y": 4,
+          "active_buffer": "normal",
+          "lines": [
+            "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+            "g:                                                                              ",
+            "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+            "      cycle [-Warc-retain-cycles]                                               ",
+            "   20 |   ...event:@\"alongside\"                                                 ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                "
+          ],
+          "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alongside\""
+        },
+        {
+          "sequence": 5,
+          "at_ms": 8000,
+          "columns": 80,
+          "rows": 24,
+          "cursor_x": 32,
+          "cursor_y": 4,
+          "active_buffer": "normal",
+          "lines": [
+            "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+            "g:                                                                              ",
+            "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+            "      cycle [-Warc-retain-cycles]                                               ",
+            "   20 |   ...event:@\"alongside\"                                                 ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                "
+          ],
+          "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alongside\" "
+        },
+        {
+          "sequence": 6,
+          "at_ms": 8000,
+          "columns": 80,
+          "rows": 24,
+          "cursor_x": 34,
+          "cursor_y": 4,
+          "active_buffer": "normal",
+          "lines": [
+            "/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: warnin",
+            "g:                                                                              ",
+            "      capturing 'lens' strongly in this block is likely to lead to a retain     ",
+            "      cycle [-Warc-retain-cycles]                                               ",
+            "   20 |   ...event:@\"alongside\" te                                              ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                "
+          ],
+          "serialized_state": "\u001b[1m/private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m:<port>:<port>: \u001b[35mwarning: \r\n\u001b[39m      capturing 'lens' strongly in this block is likely to lead to a retain\r\n      cycle [-Warc-retain-cycles]\r\n\u001b[0m   20 |   ...event:@\"alongside\" te"
+        }
+      ],
+      "interaction_events": [],
+      "exit": {
+        "code": 0,
+        "signal": 0,
+        "reason": "exited"
+      },
+      "settlement": {
+        "state": "alive_at_deadline",
+        "elapsed_ms": 154,
+        "cleanup_outcome": "cleaned"
+      },
+      "process_samples": [
+        {
+          "at_ms": 1160,
+          "pid": 1,
+          "parent_pid": 2,
+          "command": "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python /Users/daniilvinogradov/Documents/Dev/NXKit/Demo/SwitchComparison/capture-minimum-lift.py 3F494163-D29F-446D-9379-20EBA1E70C53 /private/tmp/nxkit-switch-minimum-lift-rea",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 1750,
+          "pid": 3,
+          "parent_pid": 1,
+          "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -target arm64-apple-ios26.0-simulator -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -fobjc-arc -framework UIKit -framework QuartzCore -framework Foundation /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m -o /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.app/MinimumLiftReference",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 1900,
+          "pid": 4,
+          "parent_pid": 3,
+          "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -cc1 -triple arm64-apple-ios26.0.0-simulator -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -dumpdir /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.app/MinimumLiftReference- -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name MinimumLiftReference.m -mrelocation-model pic -pic-level 2 -mframe-pointer=non-leaf -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=1 -fobjc-msgsend-selector-stubs -fno-sized-deallocation -target-sdk-version=<port>.1 -fdepfile-entry=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/SDKSettings.json -fvisibility-inlines-hidden-static-local-var -fno-modulemap-allow-subdirectory-search -fdefine-target-os-macros -fno-assume-unique-vtables -fno-modulemap-allow-subdirectory-search -enable-tlsdesc -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -target-abi darwinpcs -debugger-tuning=lldb -fdebug-compilation-dir=/Users/daniilvinogradov/Documents/Dev/NXKit -target-linker-version 1166.2 -fcoverage-compilation-dir=/Users/daniilvinogradov/Documents/Dev/NXKit -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -I/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/Frameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/System/Library/SubFrameworks -internal-iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk/Library/Frameworks -Wno-elaborated-enum-base -ferror-limit 19 -fmessage-length=<port> -stack-protector 1 -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fobjc-runtime=ios-26.0.0 -fobjc-arc -fobjc-exceptions -fexceptions -fmax-type-align=<port> -fcommon -fcolor-diagnostics -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -clang-vendor-feature=+disableAtImportPrivateFrameworkInImplementationError -Wno-error=allocator-wrappers -fdwarf2-cfi-asm -o /var/folders/r1/skwv4t4111v9z2q9lgk81mpj076blc/T/MinimumLiftReference-b5419d.o -x objective-c /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.m",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 8040,
+          "pid": 5,
+          "parent_pid": 3,
+          "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -no_deduplicate -dynamic -arch arm64 -platform_version ios-simulator 26.0.0 27.1 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator27.1.sdk -mllvm -enable-linkonceodr-outlining -o /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.app/MinimumLiftReference -L/usr/local/lib -framework UIKit -framework QuartzCore -framework Foundation /var/folders/r1/skwv4t4111v9z2q9lgk81mpj076blc/T/MinimumLiftReference-b5419d.o -framework Foundation -lobjc -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21/lib/darwin/libclang_rt.iossim.a",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 8490,
+          "pid": 6,
+          "parent_pid": 1,
+          "command": "(codesign)",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 8640,
+          "pid": 7,
+          "parent_pid": 1,
+          "command": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/Resources/bin/simctl install 3F494163-D29F-446D-9379-20EBA1E70C53 /private/tmp/nxkit-switch-minimum-lift-rea/MinimumLiftReference.app",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 13860,
+          "pid": 7,
+          "parent_pid": 1,
+          "command": "(simctl)",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 14010,
+          "pid": 8,
+          "parent_pid": 1,
+          "command": "/bin/bash /Applications/Xcode.app/Contents/Developer/usr/bin/simctl get_app_container 3F494163-D29F-446D-9379-20EBA1E70C53 org.nxkit.MinimumLiftReference data",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 14010,
+          "pid": 9,
+          "parent_pid": 8,
+          "command": "(bash)",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 14010,
+          "pid": 10,
+          "parent_pid": 9,
+          "command": "(PlistBuddy)",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 14160,
+          "pid": 8,
+          "parent_pid": 1,
+          "command": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/Resources/bin/simctl get_app_container 3F494163-D29F-446D-9379-20EBA1E70C53 org.nxkit.MinimumLiftReference data",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 15980,
+          "pid": 11,
+          "parent_pid": 1,
+          "command": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/Resources/bin/simctl launch --terminate-running-process 3F494163-D29F-446D-9379-20EBA1E70C53 org.nxkit.MinimumLiftReference",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 24960,
+          "pid": 12,
+          "parent_pid": 1,
+          "command": "/Library/Developer/PrivateFrameworks/CoreSimulator.framework/Versions/A/Resources/bin/simctl terminate 3F494163-D29F-446D-9379-20EBA1E70C53 org.nxkit.MinimumLiftReference",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 24960,
+          "pid": 13,
+          "parent_pid": 12,
+          "command": "(bash)",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 24960,
+          "pid": 14,
+          "parent_pid": 13,
+          "command": "(PlistBuddy)",
+          "process_group_id": 1,
+          "session_id": null
+        }
+      ],
+      "filesystem_checkpoints": [
+        {
+          "name": "before",
+          "at_ms": 0,
+          "files": [],
+          "effects": [],
+          "truncated": false
+        },
+        {
+          "name": "after_settlement",
+          "at_ms": 29220,
+          "files": [],
+          "effects": [],
+          "truncated": false
+        }
+      ],
+      "event_journal": [
+        {
+          "capture_order": 0,
+          "collection": "filesystem_checkpoints",
+          "index": 0
+        },
+        {
+          "capture_order": 1,
+          "collection": "process_samples",
+          "index": 0
+        },
+        {
+          "capture_order": 2,
+          "collection": "process_samples",
+          "index": 1
+        },
+        {
+          "capture_order": 3,
+          "collection": "process_samples",
+          "index": 2
+        },
+        {
+          "capture_order": 4,
+          "collection": "frames",
+          "index": 0
+        },
+        {
+          "capture_order": 5,
+          "collection": "frames",
+          "index": 1
+        },
+        {
+          "capture_order": 6,
+          "collection": "frames",
+          "index": 2
+        },
+        {
+          "capture_order": 7,
+          "collection": "frames",
+          "index": 3
+        },
+        {
+          "capture_order": 8,
+          "collection": "frames",
+          "index": 4
+        },
+        {
+          "capture_order": 9,
+          "collection": "frames",
+          "index": 5
+        },
+        {
+          "capture_order": 10,
+          "collection": "frames",
+          "index": 6
+        },
+        {
+          "capture_order": 11,
+          "collection": "frames",
+          "index": 7
+        },
+        {
+          "capture_order": 12,
+          "collection": "frames",
+          "index": 8
+        },
+        {
+          "capture_order": 13,
+          "collection": "frames",
+          "index": 9
+        },
+        {
+          "capture_order": 14,
+          "collection": "frames",
+          "index": 10
+        },
+        {
+          "capture_order": 15,
+          "collection": "frames",
+          "index": 11
+        },
+        {
+          "capture_order": 16,
+          "collection": "frames",
+          "index": 12
+        },
+        {
+          "capture_order": 17,
+          "collection": "frames",
+          "index": 13
+        },
+        {
+          "capture_order": 18,
+          "collection": "frames",
+          "index": 14
+        },
+        {
+          "capture_order": 19,
+          "collection": "frames",
+          "index": 15
+        },
+        {
+          "capture_order": 20,
+          "collection": "frames",
+          "index": 16
+        },
+        {
+          "capture_order": 21,
+          "collection": "frames",
+          "index": 17
+        },
+        {
+          "capture_order": 22,
+          "collection": "frames",
+          "index": 18
+        },
+        {
+          "capture_order": 23,
+          "collection": "frames",
+          "index": 19
+        },
+        {
+          "capture_order": 24,
+          "collection": "frames",
+          "index": 20
+        },
+        {
+          "capture_order": 25,
+          "collection": "frames",
+          "index": 21
+        },
+        {
+          "capture_order": 26,
+          "collection": "frames",
+          "index": 22
+        },
+        {
+          "capture_order": 27,
+          "collection": "frames",
+          "index": 23
+        },
+        {
+          "capture_order": 28,
+          "collection": "frames",
+          "index": 24
+        },
+        {
+          "capture_order": 29,
+          "collection": "frames",
+          "index": 25
+        },
+        {
+          "capture_order": 30,
+          "collection": "frames",
+          "index": 26
+        },
+        {
+          "capture_order": 31,
+          "collection": "frames",
+          "index": 27
+        },
+        {
+          "capture_order": 32,
+          "collection": "frames",
+          "index": 28
+        },
+        {
+          "capture_order": 33,
+          "collection": "frames",
+          "index": 29
+        },
+        {
+          "capture_order": 34,
+          "collection": "frames",
+          "index": 30
+        },
+        {
+          "capture_order": 35,
+          "collection": "frames",
+          "index": 31
+        },
+        {
+          "capture_order": 36,
+          "collection": "frames",
+          "index": 32
+        },
+        {
+          "capture_order": 37,
+          "collection": "frames",
+          "index": 33
+        },
+        {
+          "capture_order": 38,
+          "collection": "frames",
+          "index": 34
+        },
+        {
+          "capture_order": 39,
+          "collection": "frames",
+          "index": 35
+        },
+        {
+          "capture_order": 40,
+          "collection": "frames",
+          "index": 36
+        },
+        {
+          "capture_order": 41,
+          "collection": "frames",
+          "index": 37
+        },
+        {
+          "capture_order": 42,
+          "collection": "frames",
+          "index": 38
+        },
+        {
+          "capture_order": 43,
+          "collection": "frames",
+          "index": 39
+        },
+        {
+          "capture_order": 44,
+          "collection": "frames",
+          "index": 40
+        },
+        {
+          "capture_order": 45,
+          "collection": "frames",
+          "index": 41
+        },
+        {
+          "capture_order": 46,
+          "collection": "frames",
+          "index": 42
+        },
+        {
+          "capture_order": 47,
+          "collection": "frames",
+          "index": 43
+        },
+        {
+          "capture_order": 48,
+          "collection": "frames",
+          "index": 44
+        },
+        {
+          "capture_order": 49,
+          "collection": "frames",
+          "index": 45
+        },
+        {
+          "capture_order": 50,
+          "collection": "frames",
+          "index": 46
+        },
+        {
+          "capture_order": 51,
+          "collection": "frames",
+          "index": 47
+        },
+        {
+          "capture_order": 52,
+          "collection": "frames",
+          "index": 48
+        },
+        {
+          "capture_order": 53,
+          "collection": "frames",
+          "index": 49
+        },
+        {
+          "capture_order": 54,
+          "collection": "frames",
+          "index": 50
+        },
+        {
+          "capture_order": 55,
+          "collection": "frames",
+          "index": 51
+        },
+        {
+          "capture_order": 56,
+          "collection": "frames",
+          "index": 52
+        },
+        {
+          "capture_order": 57,
+          "collection": "frames",
+          "index": 53
+        },
+        {
+          "capture_order": 58,
+          "collection": "frames",
+          "index": 54
+        },
+        {
+          "capture_order": 59,
+          "collection": "frames",
+          "index": 55
+        },
+        {
+          "capture_order": 60,
+          "collection": "frames",
+          "index": 56
+        },
+        {
+          "capture_order": 61,
+          "collection": "frames",
+          "index": 57
+        },
+        {
+          "capture_order": 62,
+          "collection": "frames",
+          "index": 58
+        },
+        {
+          "capture_order": 63,
+          "collection": "frames",
+          "index": 59
+        },
+        {
+          "capture_order": 64,
+          "collection": "frames",
+          "index": 60
+        },
+        {
+          "capture_order": 65,
+          "collection": "frames",
+          "index": 61
+        },
+        {
+          "capture_order": 66,
+          "collection": "frames",
+          "index": 62
+        },
+        {
+          "capture_order": 67,
+          "collection": "frames",
+          "index": 63
+        },
+        {
+          "capture_order": 68,
+          "collection": "frames",
+          "index": 64
+        },
+        {
+          "capture_order": 69,
+          "collection": "frames",
+          "index": 65
+        },
+        {
+          "capture_order": 70,
+          "collection": "frames",
+          "index": 66
+        },
+        {
+          "capture_order": 71,
+          "collection": "frames",
+          "index": 67
+        },
+        {
+          "capture_order": 72,
+          "collection": "frames",
+          "index": 68
+        },
+        {
+          "capture_order": 73,
+          "collection": "frames",
+          "index": 69
+        },
+        {
+          "capture_order": 74,
+          "collection": "frames",
+          "index": 70
+        },
+        {
+          "capture_order": 75,
+          "collection": "frames",
+          "index": 71
+        },
+        {
+          "capture_order": 76,
+          "collection": "frames",
+          "index": 72
+        },
+        {
+          "capture_order": 77,
+          "collection": "frames",
+          "index": 73
+        },
+        {
+          "capture_order": 78,
+          "collection": "frames",
+          "index": 74
+        },
+        {
+          "capture_order": 79,
+          "collection": "frames",
+          "index": 75
+        },
+        {
+          "capture_order": 80,
+          "collection": "frames",
+          "index": 76
+        },
+        {
+          "capture_order": 81,
+          "collection": "frames",
+          "index": 77
+        },
+        {
+          "capture_order": 82,
+          "collection": "frames",
+          "index": 78
+        },
+        {
+          "capture_order": 83,
+          "collection": "frames",
+          "index": 79
+        },
+        {
+          "capture_order": 84,
+          "collection": "frames",
+          "index": 80
+        },
+        {
+          "capture_order": 85,
+          "collection": "frames",
+          "index": 81
+        },
+        {
+          "capture_order": 86,
+          "collection": "frames",
+          "index": 82
+        },
+        {
+          "capture_order": 87,
+          "collection": "frames",
+          "index": 83
+        },
+        {
+          "capture_order": 88,
+          "collection": "frames",
+          "index": 84
+        },
+        {
+          "capture_order": 89,
+          "collection": "frames",
+          "index": 85
+        },
+        {
+          "capture_order": 90,
+          "collection": "rendered_frames",
+          "index": 0
+        },
+        {
+          "capture_order": 91,
+          "collection": "frames",
+          "index": 86
+        },
+        {
+          "capture_order": 92,
+          "collection": "rendered_frames",
+          "index": 1
+        },
+        {
+          "capture_order": 93,
+          "collection": "rendered_frames",
+          "index": 2
+        },
+        {
+          "capture_order": 94,
+          "collection": "rendered_frames",
+          "index": 3
+        },
+        {
+          "capture_order": 95,
+          "collection": "rendered_frames",
+          "index": 4
+        },
+        {
+          "capture_order": 96,
+          "collection": "rendered_frames",
+          "index": 5
+        },
+        {
+          "capture_order": 97,
+          "collection": "rendered_frames",
+          "index": 6
+        },
+        {
+          "capture_order": 98,
+          "collection": "frames",
+          "index": 87
+        },
+        {
+          "capture_order": 99,
+          "collection": "frames",
+          "index": 88
+        },
+        {
+          "capture_order": 100,
+          "collection": "process_samples",
+          "index": 3
+        },
+        {
+          "capture_order": 101,
+          "collection": "frames",
+          "index": 89
+        },
+        {
+          "capture_order": 102,
+          "collection": "process_samples",
+          "index": 4
+        },
+        {
+          "capture_order": 103,
+          "collection": "process_samples",
+          "index": 5
+        },
+        {
+          "capture_order": 104,
+          "collection": "process_samples",
+          "index": 6
+        },
+        {
+          "capture_order": 105,
+          "collection": "process_samples",
+          "index": 7
+        },
+        {
+          "capture_order": 106,
+          "collection": "process_samples",
+          "index": 8
+        },
+        {
+          "capture_order": 107,
+          "collection": "process_samples",
+          "index": 9
+        },
+        {
+          "capture_order": 108,
+          "collection": "process_samples",
+          "index": 10
+        },
+        {
+          "capture_order": 109,
+          "collection": "process_samples",
+          "index": 11
+        },
+        {
+          "capture_order": 110,
+          "collection": "frames",
+          "index": 90
+        },
+        {
+          "capture_order": 111,
+          "collection": "process_samples",
+          "index": 12
+        },
+        {
+          "capture_order": 112,
+          "collection": "process_samples",
+          "index": 13
+        },
+        {
+          "capture_order": 113,
+          "collection": "process_samples",
+          "index": 14
+        },
+        {
+          "capture_order": 114,
+          "collection": "frames",
+          "index": 91
+        },
+        {
+          "capture_order": 115,
+          "collection": "frames",
+          "index": 92
+        },
+        {
+          "capture_order": 116,
+          "collection": "lifecycle",
+          "index": 0
+        },
+        {
+          "capture_order": 117,
+          "collection": "lifecycle",
+          "index": 1
+        },
+        {
+          "capture_order": 118,
+          "collection": "filesystem_checkpoints",
+          "index": 1
+        }
+      ],
+      "files_before": [],
+      "files_after": [],
+      "filesystem_effects": [],
+      "truncated": true,
+      "limitations": [
+        "Process trees are sampled and may omit short-lived descendants.",
+        "Filesystem observations are before/after snapshots, not syscall traces.",
+        "Inherited host environment variables are not recorded and may affect results.",
+        "No filesystem observation paths were selected; filesystem effects remain unknown."
+      ],
+      "residual_unknowns": [
+        {
+          "scope": "process",
+          "reason": "Process trees are sampled and may omit short-lived descendants."
+        },
+        {
+          "scope": "environment",
+          "reason": "Inherited host environment variables are not recorded."
+        },
+        {
+          "scope": "network",
+          "reason": "Network activity is not observed by this capture."
+        },
+        {
+          "scope": "filesystem",
+          "reason": "No filesystem observation paths were selected; filesystem effects remain unknown."
+        }
+      ],
+      "cleanup": {
+        "owned_process_group": "verified",
+        "temporary_root": "removed"
+      }
+    },
+    "confidence": "observed",
+    "authority": "controlled-replay",
+    "environment": {
+      "id": "darwin-arm64",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "isolation": "process"
+    },
+    "limitations": [
+      "Artifact identity is unavailable for this observation.",
+      "Process trees are sampled and may omit short-lived descendants.",
+      "Filesystem observations are before/after snapshots, not syscall traces.",
+      "Inherited host environment variables are not recorded and may affect results.",
+      "No filesystem observation paths were selected; filesystem effects remain unknown."
+    ],
+    "locations": [],
+    "evidence_links": []
+  }
+}

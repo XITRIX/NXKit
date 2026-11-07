@@ -593,6 +593,54 @@ void testViewMotionActivation() {
   }
   std::cout<<"Lens view-motion activation cases="<<cases<<'\n';
 }
+void testMinimumAnimatedLiftLifetime() {
+  unsigned cases=0;
+  for(auto style:{LensView::Style::small,LensView::Style::large})for(int hz:{60,120})
+  for(double release:{0.,.03,.10,.219,.22,.40}) {
+    auto lens=new_shared<LensView>(style);lens->setFrame({0,0,58,38});
+    int alongside=0,completed=0;
+    const auto completion=[&](bool first,bool second){expect(first&&!second,"native lens completion bits remain true,false");++completed;};
+    lens->setLifted(true,true,{},completion);
+    if(release>0)LensViewTestHarness::advance(lens,release);
+    lens->setLifted(false,true,[&]{++alongside;},completion);
+    expect(lens->isLifted()==(release<.22),"early animated unlift preserves actual lifted state through native hang interval");
+    expect(alongside==(release<.22?0:1),"geometry callback waits with the actual lower transition");
+    double time=release;
+    for(int frame=0;frame<hz;++frame) {
+      LensViewTestHarness::advance(lens,1./hz);time+=1./hz;
+      if(time<.22-1e-7)expect(lens->isLifted()&&alongside==0,"short release cannot truncate full lift before native deadline");
+      if(time>=.22+1e-7)expect(!lens->isLifted()&&alongside==1,"lower transition starts at deadline without another input event");
+    }
+    LensViewTestHarness::advance(lens,2);
+    expect(completed==2&&LensViewTestHarness::progress(lens)==0,"deferred up/down group completes exactly once per requested transition and becomes fully resting");
+    ++cases;
+  }
+  for(auto style:{LensView::Style::small,LensView::Style::large}) {
+    auto lens=new_shared<LensView>(style);lens->setFrame({0,0,58,38});
+    int stale=0,newest=0;
+    lens->setLifted(true,true);LensViewTestHarness::advance(lens,.03);
+    lens->setLifted(false,true,[&]{++stale;},{});
+    LensViewTestHarness::advance(lens,.07);
+    lens->setLifted(false,true,[&]{++newest;},{});
+    lens->setLifted(true,true,[&]{++newest;},{});
+    LensViewTestHarness::advance(lens,.119);
+    expect(lens->isLifted()&&stale==0&&newest==1,"same-state relift runs alongside without cancelling or extending the pending native unlift");
+    LensViewTestHarness::advance(lens,.002);
+    expect(!lens->isLifted()&&stale==0&&newest==2,"replacement lower request preserves original minimum-lift deadline");
+    lens->setLifted(true,true);lens->setLifted(false,true,[&]{++stale;},{});
+    lens->setLifted(false,false);LensViewTestHarness::advance(lens,1);
+    expect(!lens->isLifted()&&LensViewTestHarness::progress(lens)==0&&stale==0,"explicit immediate snap cancels pending geometry callbacks without a later ghost unlift");
+    lens->setLifted(true,true);lens->setLifted(false,true,[&]{++stale;},{});
+    LensViewTestHarness::controlLift(lens,false,0);LensViewTestHarness::advance(lens,1);
+    expect(!lens->isLifted()&&stale==0,"externally clocked control lift replaces the automatic pending hang phase");
+    lens->setLifted(true,true);
+    lens->setLifted(false,true,[&]{lens->setLifted(true,true);},{});
+    LensViewTestHarness::advance(lens,.23);
+    expect(lens->isLifted(),"deferred geometry callback may reenter lift without stale timer overriding its newer state");
+    ++cases;
+  }
+  std::cout<<"Native minimum animated lift cases="<<cases<<'\n';
+}
 void testFiniteElasticResponse() {
   int cases=0;
   for(auto style:{LensView::Style::small,LensView::Style::large})
@@ -692,5 +740,6 @@ int main() {
   testInteractiveSourcesAndTermination();
   testViewMotionActivation();
   testFiniteElasticResponse();
+  testMinimumAnimatedLiftLifetime();
   return failures ? 1 : 0;
 }

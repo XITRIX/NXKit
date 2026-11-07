@@ -1,0 +1,4 @@
+# Retained evidence metadata and test traces. Original user videos stay in Downloads.
+!*.json
+!*.gz
+!*.csv

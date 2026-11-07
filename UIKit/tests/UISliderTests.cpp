@@ -151,7 +151,7 @@ void tracking() {
  auto center=[&]{auto r=s->thumbRectForBounds(s->bounds(),s->trackRectForBounds(s->bounds()),s->value());return NXKit::NXPoint(r.midX()+40,r.midY()+200);};
  const auto p=center();send(UITouchPhase::began,p);
  auto lens=UISliderTestHarness::lens(s);
- expect(s->isTracking()&&lens->isLifted()&&near(lens->bounds().width(),37),"accepted thumb contact starts from its visible resting size");
+ expect(!s->isTracking()&&lens->isLifted()&&near(lens->bounds().width(),37),"scroll delay defers tracking while native thumb feedback starts immediately");
  UISliderTestHarness::advance(s,.25);
  expect(near(lens->bounds().width(),57.35f)&&near(lens->bounds().height(),37.2f),"contact spring reaches native lifted geometry");
  send(UITouchPhase::moved,p+NXKit::NXPoint{60,0});expect(s->value()>.25f&&values==1&&scroll->contentOffset()==NXKit::NXPoint::zero,"slider drag owns input without scrolling its parent");
@@ -166,6 +166,7 @@ void tracking() {
  send(UITouchPhase::began,q+NXKit::NXPoint{5,0});send(UITouchPhase::moved,q+NXKit::NXPoint{45,0});expect(values==count,"noncontinuous tracking defers valueChanged");send(UITouchPhase::ended,q+NXKit::NXPoint{45,0});UISliderTestHarness::release(s);expect(values==count+1,"noncontinuous release sends one changed value");
  t=new_shared<UITouch>(4,NXKit::NXPoint(),Timer());q=center();send(UITouchPhase::began,q);send(UITouchPhase::moved,q-NXKit::NXPoint{40,0});s->setEnabled(false);expect(!s->isTracking()&&!lens->isLifted()&&cancels==1,"disabling a held slider cancels lens and touch once");
  send(UITouchPhase::ended,q);expect(values==count+1,"cancelled noncontinuous gesture emits no deferred valueChanged");
+ scroll->setDelaysContentTouches(false); // Remaining cases exercise the no-delay provider path.
  s->setEnabled(true);s->setSliderStyle(UISliderStyle::thumbless);s->setContinuous(true);
  t=new_shared<UITouch>(5,NXKit::NXPoint(),Timer());send(UITouchPhase::began,{200,222});expect(s->isTracking()&&!lens->isLifted(),"thumbless tracking has no glass knob");send(UITouchPhase::ended,{220,222});UISliderTestHarness::release(s);
  s->setSliderStyle(UISliderStyle::defaultStyle);s->setValue(.5);s->setTrackConfiguration(UISliderTrackConfiguration::configurationWithNumberOfTicks(5));

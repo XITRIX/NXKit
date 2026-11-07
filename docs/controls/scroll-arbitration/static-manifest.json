@@ -1,0 +1,47 @@
+{
+  "scope": "Static read-only shipped UIKitCore disassembly; methods are not executed",
+  "binarySHA256": "5cefe8cfb213b0dfcb378feb86ddd9062fda37fb4f331b3ceb782070a20292a4",
+  "methods": {
+    "switch-failure-policy": "-[UISwitchModernVisualElement gestureRecognizer:shouldRequireFailureOfGestureRecognizer:]",
+    "switch-event-admission": "-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]",
+    "switch-simultaneous-policy": "-[UISwitchModernVisualElement gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:]",
+    "switch-long-press": "-[UISwitchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureState:]",
+    "scroll-delay-began": "-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesBegan:withEvent:]",
+    "scroll-delay-moved": "-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesMoved:withEvent:]",
+    "scroll-delay-ended": "-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]",
+    "scroll-delay-deliver": "-[UIScrollViewDelayedTouchesBeganGestureRecognizer sendDelayedTouches]",
+    "slider-should-begin": "-[UISlider gestureRecognizerShouldBegin:]"
+  },
+  "disassemblySHA256": {
+    "switch-failure-policy": "06421ed700e68f4c796ff3919027960c4da51213bb304cb420b84a7037d86b69",
+    "switch-event-admission": "53a5bec57ce665d9685f58cc94ab397f2f88da8898af026b03eafebca4a4671a",
+    "switch-simultaneous-policy": "3135b3119e48a73f457b2b6fa230d92c24be0c6198720ecbe2a6cf6bfdd69ddb",
+    "switch-long-press": "812fb3a25623d8d961cc05ee8c95dbc81b2d6f6c47b038a031a1ea6a6484d685",
+    "scroll-delay-began": "fca2a3cba60b718781b8c7184dd9afb9217f0b08a3e1c94bbb2eac24913eea24",
+    "scroll-delay-moved": "43dc9313339e608e839955fe9854927f63239d00178ed111cfd49b0f0fea891a",
+    "scroll-delay-ended": "3a9e319556b01c746354ddca4873581e58e404d4927acf33616d050e35dd639d",
+    "scroll-delay-deliver": "3bd01451ced0b29370ff885ac7899d5f59100c055b615ded1a60a6f133358122",
+    "slider-should-begin": "7d7b8930cbb3ea5e70b391051f72228e83fe6a2b7678f3014aa431399f694e1c"
+  },
+  "normalizedPreviewSHA256": {
+    "switch-failure-policy": "3c8cc02620ff3e5930c9696b366c23a01ea59c66b20e0fdf9fac9d4a85f8bbab",
+    "switch-event-admission": "c37dfc4a7a868c23ab163719612d52f5ce50753a45b69f6bff445ee9a7d8f5ee",
+    "switch-simultaneous-policy": "3333bf0d5000957115d677a313806063cba2a25fc509a7f81dd1b01433c0fb71",
+    "switch-long-press": "7ee64ee309f6108bca934b01f61937c6caf60de20a622c9671d0e0f7cd5e12cc",
+    "scroll-delay-began": "4efcd935d08e7bdf205f3e7d4a0a54e52a9092e82b3a335943fd9ca145d475cb",
+    "scroll-delay-moved": "4c2e7e62a6f5e857d2c3838dd92009c7dd1a2ffd5707c577af6a5de9464e3f41",
+    "scroll-delay-ended": "017a4a6cd6f32829249532f47093f29453c8cbb43fe96d37c9ece9e00e4e61b3",
+    "scroll-delay-deliver": "b4e16308529cb7b560df162f11839117e67aff5af4f48eb894f8ed6d269edc14",
+    "slider-should-begin": "7d7b8930cbb3ea5e70b391051f72228e83fe6a2b7678f3014aa431399f694e1c"
+  },
+  "disassemblyEncoding": "Original LLDB bytes are retained in .txt.gz; .txt previews normalize trailing whitespace",
+  "observedPolicy": "Switch longPress and pan require failure of recognizers whose class is UIScrollViewDelayedTouchesBeganGestureRecognizer; other own recognizers return false in this method",
+  "requiredClassReference": {
+    "slot": "0x222e8ca30",
+    "value": "0x22e8701d0",
+    "name": "UIScrollViewDelayedTouchesBeganGestureRecognizer"
+  },
+  "unknowns": [
+    "No assertion about other UIKit builds or complete dependency graph; runtime outcome remains defined by real touch traces"
+  ]
+}

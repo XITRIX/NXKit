@@ -1,4 +1,5 @@
 #include "GlassScreenViewController.hpp"
+#include "GlassDemoListView.hpp"
 #include "GlassScreenTypography.hpp"
 #include "SystemControlsDemoViewController.hpp"
 #include <NXNavigationController.h>
@@ -18,7 +19,7 @@ constexpr std::array explanations={
     "A leading favorite action supplements the automatic Back button. The trailing image pair still shares its glass.",
     "Add opts out of sharing its background. More remains a regular glass action, without a separator item.",
     "Add hides its glass background. More keeps its capsule; Back restores the previous arrangement."};
-class LargeTitleDemoView final:public UIScrollView {
+class LargeTitleDemoView final:public GlassDemoListView {
 public:
     explicit LargeTitleDemoView(std::function<void(UINavigationItemLargeTitleDisplayMode)> push) {
         setBounceVertically(true);setBackgroundColor(UIColor::systemGroupedBackground);setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::scrollableAxes);
@@ -26,6 +27,7 @@ public:
         const std::array names={"Push Automatic (inherits this screen)","Push Always","Push Never (inline title)"};
         for(size_t i=0;i<3;++i) {
             auto row=new_shared<UIButton>();row->setText(names[i]);row->primaryAction=UIAction(names[i],[push,mode=modes[i]]{push(mode);});addSubview(row);
+            registerSelectableRow(row);
         }
         for(size_t i=0;i<24;++i){auto label=new_shared<UILabel>();label->setText(i==0?"Scroll slowly and release halfway to test settling.":"Content row "+std::to_string(i));label->setTextColor(UIColor::secondaryLabel);addSubview(label);}
     }
@@ -51,7 +53,7 @@ public:
     NavigationMorphView(size_t arrangement,std::function<void(size_t)> choose,std::function<void()> collection)
         :_arrangement(arrangement),_choose(std::move(choose)),_collection(std::move(collection)) {
         setBackgroundColor(UIColor::systemGroupedBackground);
-        _scroll=new_shared<UIScrollView>();_scroll->setBounceVertically(true);_scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::never);addSubview(_scroll);
+        _scroll=new_shared<GlassDemoListView>();_scroll->setBounceVertically(true);_scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::never);addSubview(_scroll);
         _content=new_shared<UIView>();_scroll->addSubview(_content);
         _status=new_shared<UILabel>();_status->setText("Tap a navigation item to test its glass.");GlassScreenTypography::apply(_status,GlassScreenTypography::footnote);_status->setTextColor(UIColor::secondaryLabel);
         rebuild();
@@ -78,6 +80,7 @@ private:
         auto row=[&](const std::string& id,const std::string& title,std::function<void()> action) {
             if(cardY>0){auto separator=new_shared<UIView>(NXRect{16,cardY-.5f,std::max(0.f,column-16),.5f});separator->setBackgroundColor(UIColor::separator);card->addSubview(separator);}
             auto control=new_shared<NavigationDemoRow>();control->setFrame({0,cardY,column,52});control->primaryAction=UIAction(title,std::move(action));card->addSubview(control);_actions[id]=control;
+            std::static_pointer_cast<GlassDemoListView>(_scroll)->registerSelectableRow(control);
             auto label=new_shared<UILabel>();label->setText(title);GlassScreenTypography::apply(label,GlassScreenTypography::body);label->setTextColor(UIColor::tint);label->setUserInteractionEnabled(false);label->setFrame({16,0,std::max(0.f,column-54),52});control->addSubview(label);
             auto chevron=new_shared<UILabel>();chevron->setText("›");chevron->setTextColor(UIColor::secondaryLabel);chevron->setUserInteractionEnabled(false);chevron->setFrame({std::max(0.f,column-32),0,16,52});control->addSubview(chevron);cardY+=52;
         };

@@ -1,0 +1,704 @@
+[
+  {
+    "id": "slider-held-vertical",
+    "touchCount": 56,
+    "durationMS": 3598.59,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 21.83,
+    "scrollShouldBeginMS": 155.81,
+    "controlTouchesBeganMS": 156.0,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 772.18,
+    "controlLongPressActionBeganMS": 21.41,
+    "valueChangedMS": 1714.17,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230491.92631737504,
+        "dtMS": 155.81
+      },
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldCancel",
+        "t": 230492.54165787506,
+        "dtMS": 771.15
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-hold-long",
+    "touchCount": 2,
+    "durationMS": 2473.26,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 37.35,
+    "scrollShouldBeginMS": 151.11,
+    "controlTouchesBeganMS": 151.31,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 36.75,
+    "valueChangedMS": 589.73,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230482.29639225005,
+        "dtMS": 151.11
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-hold-short",
+    "touchCount": 2,
+    "durationMS": 2055.66,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 38.87,
+    "scrollShouldBeginMS": 122.34,
+    "controlTouchesBeganMS": 123.28,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 29.41,
+    "valueChangedMS": 123.1,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230471.53423383337,
+        "dtMS": 122.34
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-horizontal",
+    "touchCount": 40,
+    "durationMS": 2702.67,
+    "initialValue": 0.5,
+    "finalValue": 0.699999988079071,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 45.6,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": 120.64,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 120.54,
+    "controlLongPressActionBeganMS": 25.34,
+    "valueChangedMS": 137.01,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-horizontal-fast",
+    "touchCount": 7,
+    "durationMS": 2130.59,
+    "initialValue": 0.5,
+    "finalValue": 0.8644089102745056,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 47.58,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": 27.29,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 30.01,
+    "controlLongPressActionBeganMS": 21.95,
+    "valueChangedMS": 48.28,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-horizontal-scroll",
+    "touchCount": 32,
+    "durationMS": 2711.33,
+    "initialValue": 0.5,
+    "finalValue": 0.30000001192092896,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 29.13,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": 143.19,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 143.02,
+    "controlLongPressActionBeganMS": 28.66,
+    "valueChangedMS": 145.72,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-no-cancel-vertical",
+    "touchCount": 47,
+    "durationMS": 3604.84,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 83.58,
+    "scrollShouldBeginMS": 155.75,
+    "controlTouchesBeganMS": 155.91,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 742.68,
+    "controlLongPressActionBeganMS": 25.25,
+    "valueChangedMS": 1654.24,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230532.86951545838,
+        "dtMS": 155.75
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-no-delay-vertical",
+    "touchCount": 41,
+    "durationMS": 2928.32,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 28.71,
+    "scrollShouldBeginMS": 0.83,
+    "controlTouchesBeganMS": 22.34,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 153.11,
+    "controlLongPressActionBeganMS": 22.22,
+    "valueChangedMS": 1062.35,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230522.39003337506,
+        "dtMS": 0.83
+      },
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldCancel",
+        "t": 230522.51757470838,
+        "dtMS": 128.37
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-outside-hold",
+    "touchCount": 2,
+    "durationMS": 2542.17,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 60.8,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": 30.24,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 30.08,
+    "valueChangedMS": 626.33,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-tap",
+    "touchCount": 2,
+    "durationMS": 2068.27,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 35.2,
+    "scrollShouldBeginMS": 51.88,
+    "controlTouchesBeganMS": 52.69,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 34.64,
+    "valueChangedMS": 52.53,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230440.86759104172,
+        "dtMS": 51.88
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-track-tap",
+    "touchCount": 2,
+    "durationMS": 840.31,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": 56.84,
+    "controlTouchesBeganMS": 57.09,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "ProbeSlider",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230573.60084375006,
+        "dtMS": 56.84
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-track-vertical-fast",
+    "touchCount": 6,
+    "durationMS": 3177.56,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      612.3333333333334
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": 12.83,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-vertical",
+    "touchCount": 55,
+    "durationMS": 3014.69,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 46.85,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": 161.19,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 161.05,
+    "controlLongPressActionBeganMS": 24.22,
+    "valueChangedMS": 1063.82,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "slider-vertical-fast",
+    "touchCount": 8,
+    "durationMS": 2050.12,
+    "initialValue": 0.5,
+    "finalValue": 0.5,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 50.42,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": 29.56,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 41.53,
+    "controlLongPressActionBeganMS": 23.49,
+    "valueChangedMS": 184.15,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-held-vertical",
+    "touchCount": 54,
+    "durationMS": 3561.24,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 213.58,
+    "scrollShouldBeginMS": 161.57,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 661.44,
+    "controlLongPressActionBeganMS": 190.08,
+    "valueChangedMS": 1701.01,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230640.68451758337,
+        "dtMS": 161.57
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-hold-long",
+    "touchCount": 2,
+    "durationMS": 2575.79,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 173.22,
+    "scrollShouldBeginMS": 151.47,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 172.76,
+    "valueChangedMS": 658.27,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230631.2096771667,
+        "dtMS": 151.47
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-hold-short",
+    "touchCount": 2,
+    "durationMS": 2264.16,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 151.09,
+    "scrollShouldBeginMS": 129.89,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 149.3,
+    "valueChangedMS": 161.44,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230621.55089920838,
+        "dtMS": 129.89
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-horizontal",
+    "touchCount": 34,
+    "durationMS": 2668.64,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 176.05,
+    "scrollShouldBeginMS": 155.71,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 175.27,
+    "controlLongPressActionBeganMS": 175.12,
+    "valueChangedMS": 777.59,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230602.20576158338,
+        "dtMS": 155.71
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-horizontal-fast",
+    "touchCount": 6,
+    "durationMS": 854.16,
+    "initialValue": 0,
+    "finalValue": 0,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": 86.57,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 87.16,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230692.55078358337,
+        "dtMS": 86.57
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-horizontal-scroll",
+    "touchCount": 40,
+    "durationMS": 1502.97,
+    "initialValue": 0,
+    "finalValue": 0,
+    "finalOffset": [
+      60,
+      0
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": 109.6,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-no-cancel-vertical",
+    "touchCount": 56,
+    "durationMS": 3529.54,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 176.86,
+    "scrollShouldBeginMS": 156.52,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 662.86,
+    "controlLongPressActionBeganMS": 176.33,
+    "valueChangedMS": 1705.66,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230671.5280070834,
+        "dtMS": 156.52
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-no-delay-vertical",
+    "touchCount": 57,
+    "durationMS": 2870.7,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 53.97,
+    "scrollShouldBeginMS": 0.23,
+    "controlTouchesBeganMS": 7.56,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": 72.43,
+    "controlLongPressActionBeganMS": 31.2,
+    "valueChangedMS": 1047.94,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230661.0306995417,
+        "dtMS": 0.23
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-outside-hold",
+    "touchCount": 2,
+    "durationMS": 2573.68,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 34.32,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": 4.34,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 33.94,
+    "valueChangedMS": 632.03,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-tap",
+    "touchCount": 2,
+    "durationMS": 2158.6,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 81.79,
+    "scrollShouldBeginMS": 58.78,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 79.64,
+    "valueChangedMS": 90.54,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "_UILiquidLensView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230592.15084508338,
+        "dtMS": 58.78
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-track-tap",
+    "touchCount": 2,
+    "durationMS": 2163.32,
+    "initialValue": 0,
+    "finalValue": 1,
+    "finalOffset": [
+      0,
+      0
+    ],
+    "firstLiftMS": 88.89,
+    "scrollShouldBeginMS": 63.0,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": null,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": 86.71,
+    "valueChangedMS": 98.0,
+    "publicScrollCallbacks": [
+      {
+        "answer": true,
+        "view": "UIView",
+        "kind": "scroll-touchesShouldBegin",
+        "t": 230711.1508284584,
+        "dtMS": 63.0
+      }
+    ],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-track-vertical-fast",
+    "touchCount": 7,
+    "durationMS": 3120.93,
+    "initialValue": 0,
+    "finalValue": 0,
+    "finalOffset": [
+      0,
+      632
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": 7.17,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-vertical",
+    "touchCount": 61,
+    "durationMS": 1779.26,
+    "initialValue": 0,
+    "finalValue": 0,
+    "finalOffset": [
+      0,
+      90
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": 114.53,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  },
+  {
+    "id": "switch-vertical-fast",
+    "touchCount": 8,
+    "durationMS": 3088.24,
+    "initialValue": 0,
+    "finalValue": 0,
+    "finalOffset": [
+      0,
+      616
+    ],
+    "firstLiftMS": null,
+    "scrollShouldBeginMS": null,
+    "controlTouchesBeganMS": null,
+    "scrollDragMS": 25.57,
+    "controlPanActionBeganMS": null,
+    "controlLongPressActionBeganMS": null,
+    "valueChangedMS": null,
+    "publicScrollCallbacks": [],
+    "completePhysicalTouch": true
+  }
+]

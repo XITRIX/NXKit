@@ -1,0 +1,86 @@
+[
+  {
+    "label": "list-ours",
+    "path": "/Users/daniilvinogradov/Downloads/ScreenRecording_11-07-2026 12-55-35_1.MP4",
+    "sha256": "fa6e855d0961ad4b1a9a3279de06e1f9547a239f9c63f8286b0b0bd772850e4d",
+    "metadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "width": 1290,
+          "height": 2796,
+          "r_frame_rate": "120/1",
+          "avg_frame_rate": "49500/1297",
+          "nb_frames": "495"
+        }
+      ],
+      "format": {
+        "duration": "12.953333"
+      }
+    }
+  },
+  {
+    "label": "list-uikit",
+    "path": "/Users/daniilvinogradov/Downloads/ScreenRecording_11-07-2026 12-55-57_1.MP4",
+    "sha256": "4c8028502ec007149656dc3ffe617e8a08137e6207d18f4fcbf9e1290226d19f",
+    "metadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "width": 1290,
+          "height": 2796,
+          "r_frame_rate": "60/1",
+          "avg_frame_rate": "365400/6091",
+          "nb_frames": "609"
+        }
+      ],
+      "format": {
+        "duration": "10.135000"
+      }
+    }
+  },
+  {
+    "label": "switch-ours",
+    "path": "/Users/daniilvinogradov/Downloads/ScreenRecording_11-07-2026 13-02-01_1.MP4",
+    "sha256": "48d9de56bf13136d776277286a2d01a68734832208cdb2171a4e2dc81db2f60e",
+    "metadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "width": 1290,
+          "height": 2796,
+          "r_frame_rate": "120/1",
+          "avg_frame_rate": "9600/163",
+          "nb_frames": "592"
+        }
+      ],
+      "format": {
+        "duration": "10.035556"
+      }
+    }
+  },
+  {
+    "label": "switch-uikit",
+    "path": "/Users/daniilvinogradov/Downloads/ScreenRecording_11-07-2026 13-02-19_1.MP4",
+    "sha256": "cbda902e1ed4f02d0e3799fe36c95eaaf8a0a57c9df2d78064ae75c9e3e2f3dd",
+    "metadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "width": 1290,
+          "height": 2796,
+          "r_frame_rate": "60/1",
+          "avg_frame_rate": "226800/3791",
+          "nb_frames": "378"
+        }
+      ],
+      "format": {
+        "duration": "6.301667"
+      }
+    }
+  }
+]

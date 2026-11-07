@@ -51,19 +51,23 @@ public:
 protected:
     void controlStateDidChange() override;
     bool requiresExclusiveTouchTracking() const override { return true; }
+    bool beginTrackingContact(const std::shared_ptr<UITouch>& touch, const std::shared_ptr<UIEvent>& event) override;
+    void moveTrackingContact(const std::shared_ptr<UITouch>& touch, const std::shared_ptr<UIEvent>& event) override;
+    void endTrackingContact(const std::shared_ptr<UITouch>& touch, const std::shared_ptr<UIEvent>& event) override;
+    bool hasTrackingContact() const override { return _acceptedContact; }
 private:
     friend class UISwitchTestHarness;
-    friend class UISwitchGestureRecognizer;
     bool _on = false;
     UISwitchStyle _preferredStyle = UISwitchStyle::automatic;
     std::optional<UIColor> _onTintColor, _thumbTintColor;
     std::shared_ptr<UIImage> _onImage, _offImage;
     std::shared_ptr<UIView> _visuals, _track;
     std::shared_ptr<LensView> _lens;
-    std::weak_ptr<UIGestureRecognizer> _switchGesture;
+    std::shared_ptr<UITouch> _contactTouch;
+    std::uint64_t _contactGeneration=0;
     NXPoint _dragOrigin;
     NXFloat _trackingStartPosition = 0, _position = 0;
-    bool _dragged = false, _acceptedContact = false;
+    bool _dragged = false, _panRecognized = false, _acceptedContact = false;
     void updateAppearance();
     void updateGeometry();
     void setPressed(bool pressed, bool animated);

@@ -1,0 +1,5 @@
+UIKitCore`-[UISlider gestureRecognizerShouldBegin:]:
+UIKitCore[0x1c4144e2c] <+0>:  adrp   x8, 435911
+UIKitCore[0x1c4144e30] <+4>:  ldrsw  x8, [x8, #0x270]
+UIKitCore[0x1c4144e34] <+8>:  ldr    x0, [x0, x8]
+UIKitCore[0x1c4144e38] <+12>: b      0x1c5a91060               ; objc_msgSend$gestureRecognizerShouldBegin:

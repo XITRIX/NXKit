@@ -1,0 +1,154 @@
+UIKitCore`-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesMoved:withEvent:]:
+UIKitCore[0x1c4e478c4] <+0>:   sub    sp, sp, #0x150
+UIKitCore[0x1c4e478c8] <+4>:   stp    d11, d10, [sp, #0xd0]
+UIKitCore[0x1c4e478cc] <+8>:   stp    d9, d8, [sp, #0xe0]
+UIKitCore[0x1c4e478d0] <+12>:  stp    x28, x27, [sp, #0xf0]
+UIKitCore[0x1c4e478d4] <+16>:  stp    x26, x25, [sp, #0x100]
+UIKitCore[0x1c4e478d8] <+20>:  stp    x24, x23, [sp, #0x110]
+UIKitCore[0x1c4e478dc] <+24>:  stp    x22, x21, [sp, #0x120]
+UIKitCore[0x1c4e478e0] <+28>:  stp    x20, x19, [sp, #0x130]
+UIKitCore[0x1c4e478e4] <+32>:  stp    x29, x30, [sp, #0x140]
+UIKitCore[0x1c4e478e8] <+36>:  add    x29, sp, #0x140
+UIKitCore[0x1c4e478ec] <+40>:  mov    x19, x3
+UIKitCore[0x1c4e478f0] <+44>:  mov    x21, x0
+UIKitCore[0x1c4e478f4] <+48>:  adrp   x8, 382416
+UIKitCore[0x1c4e478f8] <+52>:  ldr    x8, [x8, #0xee8]
+UIKitCore[0x1c4e478fc] <+56>:  ldr    x8, [x8]
+UIKitCore[0x1c4e47900] <+60>:  stur   x8, [x29, #-0x78]
+UIKitCore[0x1c4e47904] <+64>:  bl     0x1c5b863ec               ; symbol stub for: objc_retain_x2
+UIKitCore[0x1c4e47908] <+68>:  mov    x20, x0
+UIKitCore[0x1c4e4790c] <+72>:  bl     0x1c5b863e0               ; symbol stub for: objc_retain_x19
+UIKitCore[0x1c4e47910] <+76>:  mov    x19, x0
+UIKitCore[0x1c4e47914] <+80>:  movi.2d v0, #0000000000000000
+UIKitCore[0x1c4e47918] <+84>:  stp    q0, q0, [sp]
+UIKitCore[0x1c4e4791c] <+88>:  stp    q0, q0, [sp, #0x20]
+UIKitCore[0x1c4e47920] <+92>:  bl     0x1c5b863f8               ; symbol stub for: objc_retain_x20
+UIKitCore[0x1c4e47924] <+96>:  mov    x20, x0
+UIKitCore[0x1c4e47928] <+100>: mov    x2, sp
+UIKitCore[0x1c4e4792c] <+104>: add    x3, sp, #0x48
+UIKitCore[0x1c4e47930] <+108>: mov    w4, #0x10                 ; =16
+UIKitCore[0x1c4e47934] <+112>: bl     0x1c5a6bd20               ; objc_msgSend$countByEnumeratingWithState:objects:count:
+UIKitCore[0x1c4e47938] <+116>: cbz    x0, 0x1c4e479c4           ; <+256>
+UIKitCore[0x1c4e4793c] <+120>: mov    x22, x0
+UIKitCore[0x1c4e47940] <+124>: ldr    x8, [sp, #0x10]
+UIKitCore[0x1c4e47944] <+128>: ldr    x25, [x8]
+UIKitCore[0x1c4e47948] <+132>: adrp   x26, 385092
+UIKitCore[0x1c4e4794c] <+136>: mov    x27, #0x0                 ; =0
+UIKitCore[0x1c4e47950] <+140>: ldr    x8, [sp, #0x10]
+UIKitCore[0x1c4e47954] <+144>: ldr    x8, [x8]
+UIKitCore[0x1c4e47958] <+148>: cmp    x8, x25
+UIKitCore[0x1c4e4795c] <+152>: b.eq   0x1c4e47968               ; <+164>
+UIKitCore[0x1c4e47960] <+156>: mov    x0, x20
+UIKitCore[0x1c4e47964] <+160>: bl     0x1c5b86194               ; symbol stub for: objc_enumerationMutation
+UIKitCore[0x1c4e47968] <+164>: ldr    x8, [sp, #0x8]
+UIKitCore[0x1c4e4796c] <+168>: ldr    x0, [x8, x27, lsl #3]
+UIKitCore[0x1c4e47970] <+172>: bl     0x1c5b74580               ; objc_msgSend$view
+UIKitCore[0x1c4e47974] <+176>: bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c4e47978] <+180>: mov    x23, x0
+UIKitCore[0x1c4e4797c] <+184>: ldr    x0, [x26, #0x938]
+UIKitCore[0x1c4e47980] <+188>: bl     0x1c5b86254               ; symbol stub for: objc_opt_class
+UIKitCore[0x1c4e47984] <+192>: mov    x1, x0
+UIKitCore[0x1c4e47988] <+196>: mov    x0, x23
+UIKitCore[0x1c4e4798c] <+200>: bl     0x1c5b86260               ; symbol stub for: objc_opt_isKindOfClass
+UIKitCore[0x1c4e47990] <+204>: mov    x24, x0
+UIKitCore[0x1c4e47994] <+208>: bl     0x1c5b862fc               ; symbol stub for: objc_release_x23
+UIKitCore[0x1c4e47998] <+212>: tbnz   w24, #0x0, 0x1c4e479cc    ; <+264>
+UIKitCore[0x1c4e4799c] <+216>: add    x27, x27, #0x1
+UIKitCore[0x1c4e479a0] <+220>: cmp    x22, x27
+UIKitCore[0x1c4e479a4] <+224>: b.ne   0x1c4e47950               ; <+140>
+UIKitCore[0x1c4e479a8] <+228>: mov    x2, sp
+UIKitCore[0x1c4e479ac] <+232>: add    x3, sp, #0x48
+UIKitCore[0x1c4e479b0] <+236>: mov    x0, x20
+UIKitCore[0x1c4e479b4] <+240>: mov    w4, #0x10                 ; =16
+UIKitCore[0x1c4e479b8] <+244>: bl     0x1c5a6bd20               ; objc_msgSend$countByEnumeratingWithState:objects:count:
+UIKitCore[0x1c4e479bc] <+248>: mov    x22, x0
+UIKitCore[0x1c4e479c0] <+252>: cbnz   x0, 0x1c4e4794c           ; <+136>
+UIKitCore[0x1c4e479c4] <+256>: mov    x22, x20
+UIKitCore[0x1c4e479c8] <+260>: b      0x1c4e47ad8               ; <+532>
+UIKitCore[0x1c4e479cc] <+264>: bl     0x1c5b862d8               ; symbol stub for: objc_release_x20
+UIKitCore[0x1c4e479d0] <+268>: mov    x0, x21
+UIKitCore[0x1c4e479d4] <+272>: bl     0x1c59a7e80               ; objc_msgSend$_clientView
+UIKitCore[0x1c4e479d8] <+276>: bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c4e479dc] <+280>: mov    x22, x0
+UIKitCore[0x1c4e479e0] <+284>: bl     0x1c59ff9c0               ; objc_msgSend$_scrollHysteresis
+UIKitCore[0x1c4e479e4] <+288>: mov.16b v8, v0
+UIKitCore[0x1c4e479e8] <+292>: mov    x0, x22
+UIKitCore[0x1c4e479ec] <+296>: bl     0x1c59a3cc0               ; objc_msgSend$_canScrollX
+UIKitCore[0x1c4e479f0] <+300>: mov    x24, x0
+UIKitCore[0x1c4e479f4] <+304>: mov    x0, x22
+UIKitCore[0x1c4e479f8] <+308>: bl     0x1c59a3ce0               ; objc_msgSend$_canScrollY
+UIKitCore[0x1c4e479fc] <+312>: mov    x23, x0
+UIKitCore[0x1c4e47a00] <+316>: mov    x0, x21
+UIKitCore[0x1c4e47a04] <+320>: mov    x2, x19
+UIKitCore[0x1c4e47a08] <+324>: bl     0x1c5995240               ; objc_msgSend$_activeTouchesForEvent:
+UIKitCore[0x1c4e47a0c] <+328>: bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c4e47a10] <+332>: mov    x25, x0
+UIKitCore[0x1c4e47a14] <+336>: mov    x0, x21
+UIKitCore[0x1c4e47a18] <+340>: mov    x2, x25
+UIKitCore[0x1c4e47a1c] <+344>: mov    w3, #0x0                  ; =0
+UIKitCore[0x1c4e47a20] <+348>: bl     0x1c59a58e0               ; objc_msgSend$_centroidOfTouches:excludingEnded:
+UIKitCore[0x1c4e47a24] <+352>: mov.16b v9, v0
+UIKitCore[0x1c4e47a28] <+356>: mov.16b v11, v1
+UIKitCore[0x1c4e47a2c] <+360>: bl     0x1c5b86314               ; symbol stub for: objc_release_x25
+UIKitCore[0x1c4e47a30] <+364>: adrp   x8, 432585
+UIKitCore[0x1c4e47a34] <+368>: ldrsw  x8, [x8, #0xc74]
+UIKitCore[0x1c4e47a38] <+372>: add    x8, x21, x8
+UIKitCore[0x1c4e47a3c] <+376>: ldp    d0, d1, [x8]
+UIKitCore[0x1c4e47a40] <+380>: fsub   d10, d9, d0
+UIKitCore[0x1c4e47a44] <+384>: fsub   d9, d11, d1
+UIKitCore[0x1c4e47a48] <+388>: mov    x0, x21
+UIKitCore[0x1c4e47a4c] <+392>: bl     0x1c5b74580               ; objc_msgSend$view
+UIKitCore[0x1c4e47a50] <+396>: bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c4e47a54] <+400>: mov    x25, x0
+UIKitCore[0x1c4e47a58] <+404>: bl     0x1c5b797a0               ; objc_msgSend$window
+UIKitCore[0x1c4e47a5c] <+408>: bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c4e47a60] <+412>: mov    x26, x0
+UIKitCore[0x1c4e47a64] <+416>: cbz    x0, 0x1c4e47a9c           ; <+472>
+UIKitCore[0x1c4e47a68] <+420>: mov    x0, x25
+UIKitCore[0x1c4e47a6c] <+424>: bl     0x1c5b797a0               ; objc_msgSend$window
+UIKitCore[0x1c4e47a70] <+428>: bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c4e47a74] <+432>: mov    x27, x0
+UIKitCore[0x1c4e47a78] <+436>: mov.16b v0, v10
+UIKitCore[0x1c4e47a7c] <+440>: mov.16b v1, v9
+UIKitCore[0x1c4e47a80] <+444>: bl     0x1c59aeb20               ; objc_msgSend$_convertOffsetFromSceneReferenceSpace:
+UIKitCore[0x1c4e47a84] <+448>: mov    x0, x25
+UIKitCore[0x1c4e47a88] <+452>: mov    x1, #0x0                  ; =0
+UIKitCore[0x1c4e47a8c] <+456>: bl     0x1c4e9d548               ; -[UIView _convertOffset:fromView:]
+UIKitCore[0x1c4e47a90] <+460>: mov.16b v10, v0
+UIKitCore[0x1c4e47a94] <+464>: mov.16b v9, v1
+UIKitCore[0x1c4e47a98] <+468>: bl     0x1c5b8632c               ; symbol stub for: objc_release_x27
+UIKitCore[0x1c4e47a9c] <+472>: fcvt   s0, d8
+UIKitCore[0x1c4e47aa0] <+476>: tbnz   w24, #0x0, 0x1c4e47ab4    ; <+496>
+UIKitCore[0x1c4e47aa4] <+480>: fabs   d1, d10
+UIKitCore[0x1c4e47aa8] <+484>: fcvt   d2, s0
+UIKitCore[0x1c4e47aac] <+488>: fcmp   d1, d2
+UIKitCore[0x1c4e47ab0] <+492>: b.gt   0x1c4e47ac8               ; <+516>
+UIKitCore[0x1c4e47ab4] <+496>: tbnz   w23, #0x0, 0x1c4e47ad0    ; <+524>
+UIKitCore[0x1c4e47ab8] <+500>: fabs   d1, d9
+UIKitCore[0x1c4e47abc] <+504>: fcvt   d0, s0
+UIKitCore[0x1c4e47ac0] <+508>: fcmp   d1, d0
+UIKitCore[0x1c4e47ac4] <+512>: b.le   0x1c4e47ad0               ; <+524>
+UIKitCore[0x1c4e47ac8] <+516>: mov    x0, x21
+UIKitCore[0x1c4e47acc] <+520>: bl     0x1c5afa140               ; objc_msgSend$sendDelayedTouches
+UIKitCore[0x1c4e47ad0] <+524>: bl     0x1c5b86320               ; symbol stub for: objc_release_x26
+UIKitCore[0x1c4e47ad4] <+528>: bl     0x1c5b86314               ; symbol stub for: objc_release_x25
+UIKitCore[0x1c4e47ad8] <+532>: bl     0x1c5b862f0               ; symbol stub for: objc_release_x22
+UIKitCore[0x1c4e47adc] <+536>: bl     0x1c5b862c0               ; symbol stub for: objc_release_x19
+UIKitCore[0x1c4e47ae0] <+540>: bl     0x1c5b862d8               ; symbol stub for: objc_release_x20
+UIKitCore[0x1c4e47ae4] <+544>: ldur   x8, [x29, #-0x78]
+UIKitCore[0x1c4e47ae8] <+548>: adrp   x9, 382416
+UIKitCore[0x1c4e47aec] <+552>: ldr    x9, [x9, #0xee8]
+UIKitCore[0x1c4e47af0] <+556>: ldr    x9, [x9]
+UIKitCore[0x1c4e47af4] <+560>: cmp    x9, x8
+UIKitCore[0x1c4e47af8] <+564>: b.ne   0x1c4e47b24               ; <+608>
+UIKitCore[0x1c4e47afc] <+568>: ldp    x29, x30, [sp, #0x140]
+UIKitCore[0x1c4e47b00] <+572>: ldp    x20, x19, [sp, #0x130]
+UIKitCore[0x1c4e47b04] <+576>: ldp    x22, x21, [sp, #0x120]
+UIKitCore[0x1c4e47b08] <+580>: ldp    x24, x23, [sp, #0x110]
+UIKitCore[0x1c4e47b0c] <+584>: ldp    x26, x25, [sp, #0x100]
+UIKitCore[0x1c4e47b10] <+588>: ldp    x28, x27, [sp, #0xf0]
+UIKitCore[0x1c4e47b14] <+592>: ldp    d9, d8, [sp, #0xe0]
+UIKitCore[0x1c4e47b18] <+596>: ldp    d11, d10, [sp, #0xd0]
+UIKitCore[0x1c4e47b1c] <+600>: add    sp, sp, #0x150
+UIKitCore[0x1c4e47b20] <+604>: ret
+UIKitCore[0x1c4e47b24] <+608>: bl     0x1c5b85738               ; symbol stub for: __stack_chk_fail

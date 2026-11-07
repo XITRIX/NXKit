@@ -1,6 +1,6 @@
 # Shared application-facing lens configuration
 
-2026-11-06, working tree after `bd143cc`. `LensView` is an NXKit extension in
+2026-11-07, working tree after `b895e97`. `LensView` is an NXKit extension in
 UIKit. Its configuration follows the useful app-callable portion of private
 `_UILiquidLensView`; it is not an Apple public UIKit class or a binary-compatible
 replacement. [The complete audit](api-audit/README.md) retains runtime metadata,
@@ -25,7 +25,7 @@ This is a portable policy in addition to the captured native settings.
 | liftedContentView | weak selected-content source |
 | liftedContentMode | preserveSource=0 / hideSource=1; names are portable, values/behavior native |
 | warpsContentBelow | default false; independent of transition blur |
-| setLifted:animated:alongsideAnimations:completion: | four-argument setLifted with synchronous alongside model changes and grouped two-boolean completion |
+| setLifted:animated:alongsideAnimations:completion: | four-argument setLifted with shared minimum-lift lifetime, alongside model changes and grouped two-boolean completion |
 
 The two-argument convenience remains. Native normal completion is observed as
 `(true,false)`; names for those native flags are not established. NXKit reports
@@ -33,9 +33,15 @@ that pair when its group settles, including collected callbacks across retargets
 Same-state four-argument calls run alongside without completion. Nonanimated
 changed calls run alongside/completion synchronously. Alongside geometry uses the
 portable UIView animation facility; exact interrupted native spring velocity is
-not claimed. NXKit retargets immediately, avoiding the native pending-unlift timer
-quirk observed in the audit. Controls retain their established minimum-lift/input
-policies. Generic resting color remains clear unless provided by the caller,
+not claimed. Animated lowering respects the captured spec.lensHangTime (0.22s):
+it keeps the actual lifted state and defers alongside changes until the minimum
+lifetime ends. Same-state four-argument relifts do not cancel an already queued
+unlift, matching the native setter. The nonanimated two-argument convenience is
+an explicit portable snap/cancellation path. Externally clocked Slider motion
+keeps its own synchronized lift phase and bypasses this automatic clock.
+Switch and TabBar geometry follow the shared alongside callback. See the
+[short-tap investigation](../switch/tap-hang/README.md) for eight direct native
+probes and four real-touch switch captures. Generic resting color remains clear unless provided by the caller,
 rather than reproducing private `_controlForegroundColor` resolution.
 
 Native `liftProgress` is a debouncing animation object, and `spec` is readonly.

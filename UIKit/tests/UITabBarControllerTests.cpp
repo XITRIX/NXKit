@@ -23,6 +23,7 @@ namespace NXKit {
 void renderApplicationFrame();
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplication*,std::map<std::string,std::any>) { return true; }
 class DispatchQueueTestHarness { public: static void pump() { DispatchQueue::main()->performAll(); } };
+class LensViewTestHarness { public: static void advance(const std::shared_ptr<LensView>& lens,double seconds) {lens->advance(seconds);} };
 class UIGestureRecognizerTestHarness {
 public:
     static auto event(const std::shared_ptr<UIWindow>& window,const std::shared_ptr<UITouch>& touch) {
@@ -88,6 +89,17 @@ public:int did=0;
 // Explicit frames keep geometry checks independent of the render deadline.
 void frame() {for(int i=0;i<4;++i){DispatchQueueTestHarness::pump();renderApplicationFrame();DispatchQueueTestHarness::pump();}}
 void settle() {UIView::completePendingAnimations();DispatchQueueTestHarness::pump();}
+void settleTabLift(const std::shared_ptr<UITabBarView>& bar) {
+    // Transit, the containing control's hold and the shared lens lifetime have
+    // independent clocks. Advance both live clocks before asserting rest.
+    UIView::completePendingAnimations();
+    const auto lens=Internal::TabBarViewAccess::state(*bar)._lens;
+    for(int i=0;i<240;++i) {
+        Internal::TabBarViewAccess::advance(*bar,1./120);
+        LensViewTestHarness::advance(lens,1./120);
+    }
+    settle();frame();
+}
 auto windowFor(const std::shared_ptr<UIViewController>& controller) {
     auto window=new_shared<UIWindow>();UIApplication::shared->delegate->window=window;
     window->setRootViewController(controller);window->makeKeyAndVisible();frame();return window;
@@ -304,7 +316,7 @@ void variantCases(const std::shared_ptr<Context>& ctx,const std::string& reportP
         auto touch=new_shared<UITouch>(10000+count,last,Timer());auto event=UIGestureRecognizerTestHarness::event(window,touch);
         UIGestureRecognizerTestHarness::send(window,event,touch,UITouchPhase::began,last,0);
         UIGestureRecognizerTestHarness::send(window,event,touch,UITouchPhase::ended,last,32);
-        Internal::TabBarViewAccess::advance(*bar,2);settle();frame();
+        settleTabLift(bar);
         expect(tabs->selectedIndex()==count-1&&std::abs(state._lens->frame().maxX()-(platterWidth-4))<.01f,
                "routed last-tab taps preserve selection and the trailing lens inset for every count");
         const auto firstControl=state._controls.front();
@@ -314,7 +326,7 @@ void variantCases(const std::shared_ptr<Context>& ctx,const std::string& reportP
         UIGestureRecognizerTestHarness::send(window,dragEvent,drag,UITouchPhase::moved,(last+first)*.5f,16);
         UIGestureRecognizerTestHarness::send(window,dragEvent,drag,UITouchPhase::moved,first,32);
         UIGestureRecognizerTestHarness::send(window,dragEvent,drag,UITouchPhase::ended,first,48);
-        Internal::TabBarViewAccess::advance(*bar,2);settle();frame();
+        settleTabLift(bar);
         expect(tabs->selectedIndex()==0&&std::abs(state._lens->frame().minX()-4)<.01f,
                "routed drags return to the first tab and restore its leading lens inset");
         window->setRootViewController(nullptr);UIApplication::shared->delegate->window.reset();

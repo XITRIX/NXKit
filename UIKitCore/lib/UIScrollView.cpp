@@ -13,6 +13,8 @@
 #include <CATransaction.h>
 #include <DispatchQueue.h>
 #include <UIWindow.h>
+#include <UIControl.h>
+#include <UITouch.h>
 #include <tools/IBTools.h>
 #include <UIScrollViewExtensions/SpringTimingParameters.h>
 #include <UIScrollViewExtensions/RubberBand.h>
@@ -34,6 +36,67 @@ constexpr NXFloat kScrollIndicatorMinimumLength = 36.0f;
 constexpr NXFloat kScrollIndicatorZPosition = 1000000.0f;
 constexpr double kScrollIndicatorFlashDuration = 0.5;
 constexpr double kScrollIndicatorFadeDuration = 0.25;
+
+std::pair<bool, bool> scrollableTouchAxes(UIScrollView& scroll) {
+    if (!scroll.isScrollEnabled() || !scroll.panGestureRecognizer()->isEnabled()) return {false, false};
+    const auto size = scroll.contentSize();
+    const auto viewport = scroll.bounds().size;
+    const auto inset = scroll.adjustedContentInset();
+    return {scroll.bounceHorizontally() || size.width + inset.left + inset.right > viewport.width,
+            scroll.bounceVertically() || size.height + inset.top + inset.bottom > viewport.height};
+}
+
+// UIKit uses a separate delayed-began recognizer rather than making its pan
+// recognizer delay content. This gate never recognizes or prevents another
+// gesture; failure releases responder delivery after the finite ambiguity
+// interval, or immediately when an independent gesture wins or the tap ends.
+class ScrollContentTouchDelayRecognizer final : public UIGestureRecognizer {
+public:
+    explicit ScrollContentTouchDelayRecognizer(std::weak_ptr<UIScrollView> owner) : _owner(std::move(owner)) {
+        setCancelsTouchesInView(false);
+        setDelaysTouchesBegan(true);
+        setDelaysTouchesEnded(false);
+    }
+    bool canPrevent(const std::shared_ptr<UIGestureRecognizer>&) const override { return false; }
+    void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent>) override {
+        const auto owner = _owner.lock();
+        const auto target = touches.empty() ? nullptr : touches.front()->view().lock();
+        if (!owner || !owner->isScrollEnabled() || !owner->delaysContentTouches()
+            || !target || target == owner || !target->isDescendantOf(owner)) {
+            setState(UIGestureRecognizerState::failed);
+            return;
+        }
+        const auto [horizontal, vertical] = scrollableTouchAxes(*owner);
+        // A delay is useful only when an ancestor pan could actually compete.
+        // Bounds, content, insets, bounce and recognizer availability are live.
+        if ((!horizontal && !vertical) || owner->panGestureRecognizer()->numberOfTouches()==0) {
+            // The pan is dispatched first; a delegate-rejected contact cannot
+            // compete either, even when the scroll view has movable content.
+            setState(UIGestureRecognizerState::failed);return;
+        }
+        if (_scheduled) return;
+        _scheduled = true;
+        const auto generation = ++_generation;
+        const auto weak = weak_from_base<ScrollContentTouchDelayRecognizer>();
+        DispatchQueue::main()->asyncAfter(0.150, [weak, generation] {
+            if (const auto recognizer = weak.lock(); recognizer && recognizer->_generation == generation
+                && recognizer->isEnabled() && recognizer->state() == UIGestureRecognizerState::possible)
+                recognizer->setState(UIGestureRecognizerState::failed);
+        });
+    }
+    void touchesEnded(std::vector<std::shared_ptr<UITouch>>, std::shared_ptr<UIEvent>) override {
+        setState(UIGestureRecognizerState::failed);
+    }
+    void touchesCancelled(std::vector<std::shared_ptr<UITouch>>, std::shared_ptr<UIEvent>) override {
+        setState(UIGestureRecognizerState::failed);
+    }
+protected:
+    void reset() override { ++_generation; _scheduled = false; }
+private:
+    std::weak_ptr<UIScrollView> _owner;
+    std::uint64_t _generation = 0;
+    bool _scheduled = false;
+};
 
 struct ScrollIndicatorAxisGeometry {
     NXFloat origin = 0;
@@ -131,18 +194,35 @@ UIScrollView::UIScrollView(const NXRect frame): UIView(frame) {
     const auto invalidate=[weak=weak_from_base<UIScrollView>()]{if(const auto scroll=weak.lock())scroll->layer()->setNeedsDisplay();};
     for(auto& edge:_edgeEffects)edge=std::shared_ptr<UIScrollEdgeEffect>(new UIScrollEdgeEffect(invalidate));
     _panGestureRecognizer = new_shared<UIPanGestureRecognizer>();
+    // The scroll detector has its own content gate; its pan does not delay
+    // responder endings (native UIScrollViewPanGestureRecognizer defaults).
+    _panGestureRecognizer->setDelaysTouchesEnded(false);
     _panGestureRecognizer->_shouldBegin = [weak = weak_from_base<UIScrollView>()](NXPoint travel) {
         const auto self = weak.lock();
         if (!self || !self->isScrollEnabled()) return false;
-        const auto size = self->contentSize();
-        const auto viewport = self->bounds().size;
-        const auto inset = self->effectiveContentInsets();
-        const bool horizontal = self->bounceHorizontally() || size.width + inset.left + inset.right > viewport.width;
-        const bool vertical = self->bounceVertically() || size.height + inset.top + inset.bottom > viewport.height;
-        return std::abs(travel.x) > std::abs(travel.y) ? horizontal : vertical;
+        const auto [horizontal, vertical] = scrollableTouchAxes(*self);
+        if (!(std::abs(travel.x) > std::abs(travel.y) ? horizontal : vertical)) return false;
+        const auto containingWindow = self->window();
+        for (const auto& touch : self->_panGestureRecognizer->_touches) {
+            const auto contentView = touch->view().lock();
+            if (!containingWindow || !contentView || contentView.get() == self.get()
+                || !containingWindow->hasDeliveredResponderTouch(touch)) continue;
+            // Receiving responder touches does not imply a UIControl accepted
+            // tracking (for example a slider hit outside its thumb). There is
+            // no active control interaction for the pan to cancel in that case.
+            if (const auto control = std::dynamic_pointer_cast<UIControl>(contentView);
+                control && !control->hasTrackingContact()) continue;
+            if (!self->_canCancelContentTouches || !self->touchesShouldCancelInContentView(contentView)) return false;
+            // The override may disable scrolling or remove/reparent content.
+            if (!self->isScrollEnabled() || self->window() != containingWindow
+                || !contentView->isDescendantOf(self)) return false;
+        }
+        return true;
     };
     _panGestureRecognizer->onStateChanged = [this](auto){ onPanGestureStateChanged(); };
     addGestureRecognizer(_panGestureRecognizer);
+    _contentTouchDelayRecognizer = new_shared<ScrollContentTouchDelayRecognizer>(weak_from_base<UIScrollView>());
+    addGestureRecognizer(_contentTouchDelayRecognizer);
     setClipsToBounds(true);
 
     _horizontalScrollIndicatorLayer = new_shared<CALayer>();
@@ -760,6 +840,7 @@ void UIScrollView::setScrollEnabled(bool scrollEnabled) {
     _isScrollEnabled = scrollEnabled;
     if (!scrollEnabled) stopDragSmoothing();
     _panGestureRecognizer->setEnabled(scrollEnabled);
+    _contentTouchDelayRecognizer->setEnabled(scrollEnabled);
     if (scrollEnabled) return;
 
     if (_timerAnimation) {
@@ -770,6 +851,24 @@ void UIScrollView::setScrollEnabled(bool scrollEnabled) {
     _isDecelerating = false;
     weightedAverageVelocity = NXPoint();
     hideScrollIndicators();
+}
+
+void UIScrollView::setDelaysContentTouches(bool delays) {
+    if (_delaysContentTouches == delays) return;
+    _delaysContentTouches = delays;
+    _contentTouchDelayRecognizer->setDelaysTouchesBegan(delays);
+}
+
+void UIScrollView::setCanCancelContentTouches(bool canCancel) {
+    _canCancelContentTouches = canCancel;
+}
+
+bool UIScrollView::touchesShouldBegin(std::set<std::shared_ptr<UITouch>>, std::shared_ptr<UIEvent>, std::shared_ptr<UIView>) {
+    return true;
+}
+
+bool UIScrollView::touchesShouldCancelInContentView(std::shared_ptr<UIView> contentView) {
+    return !std::dynamic_pointer_cast<UIControl>(contentView);
 }
 
 void UIScrollView::setContentInset(UIEdgeInsets contentInset) {
@@ -1473,6 +1572,8 @@ bool UIScrollView::applyXMLAttribute(const std::string& name, const std::string&
     }
 
     REGISTER_XIB_ATTRIBUTE(scrollEnabled, valueToBool, setScrollEnabled)
+    REGISTER_XIB_ATTRIBUTE(delaysContentTouches, valueToBool, setDelaysContentTouches)
+    REGISTER_XIB_ATTRIBUTE(canCancelContentTouches, valueToBool, setCanCancelContentTouches)
     REGISTER_XIB_ATTRIBUTE(dragSmoothingEnabled, valueToBool, setDragSmoothingEnabled)
     REGISTER_XIB_ATTRIBUTE(bounceVertically, valueToBool, setBounceVertically)
     REGISTER_XIB_ATTRIBUTE(bounceHorizontally, valueToBool, setBounceHorizontally)

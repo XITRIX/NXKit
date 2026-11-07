@@ -100,6 +100,7 @@ public:
     [[nodiscard]] std::shared_ptr<UIView> mask() const { return _mask; }
 
     void addGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& gestureRecognizer);
+    void removeGestureRecognizer(const std::shared_ptr<UIGestureRecognizer>& gestureRecognizer);
     [[nodiscard]] std::vector<std::shared_ptr<UIGestureRecognizer>>* gestureRecognizers()  { return &_gestureRecognizers; }
 
     /** The view owns its interactions; the returned array is a snapshot. An

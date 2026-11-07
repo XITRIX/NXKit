@@ -1,0 +1,53 @@
+UIKitCore`-[UISwitchModernVisualElement gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:]:
+UIKitCore[0x1c414c5f0] <+0>:   stp    x24, x23, [sp, #-0x40]!
+UIKitCore[0x1c414c5f4] <+4>:   stp    x22, x21, [sp, #0x10]
+UIKitCore[0x1c414c5f8] <+8>:   stp    x20, x19, [sp, #0x20]
+UIKitCore[0x1c414c5fc] <+12>:  stp    x29, x30, [sp, #0x30]
+UIKitCore[0x1c414c600] <+16>:  add    x29, sp, #0x30
+UIKitCore[0x1c414c604] <+20>:  mov    x20, x3
+UIKitCore[0x1c414c608] <+24>:  mov    x23, x0
+UIKitCore[0x1c414c60c] <+28>:  bl     0x1c5b863ec               ; symbol stub for: objc_retain_x2
+UIKitCore[0x1c414c610] <+32>:  mov    x19, x0
+UIKitCore[0x1c414c614] <+36>:  bl     0x1c5b863f8               ; symbol stub for: objc_retain_x20
+UIKitCore[0x1c414c618] <+40>:  mov    x20, x0
+UIKitCore[0x1c414c61c] <+44>:  mov    x0, x23
+UIKitCore[0x1c414c620] <+48>:  bl     0x1c5ac4ea0               ; objc_msgSend$longPress
+UIKitCore[0x1c414c624] <+52>:  bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c414c628] <+56>:  mov    x21, x0
+UIKitCore[0x1c414c62c] <+60>:  cmp    x19, x0
+UIKitCore[0x1c414c630] <+64>:  b.ne   0x1c414c64c               ; <+92>
+UIKitCore[0x1c414c634] <+68>:  mov    x0, x23
+UIKitCore[0x1c414c638] <+72>:  bl     0x1c5ad4f60               ; objc_msgSend$pan
+UIKitCore[0x1c414c63c] <+76>:  bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c414c640] <+80>:  mov    x22, x0
+UIKitCore[0x1c414c644] <+84>:  cmp    x20, x0
+UIKitCore[0x1c414c648] <+88>:  b.eq   0x1c414c694               ; <+164>
+UIKitCore[0x1c414c64c] <+92>:  mov    x0, x23
+UIKitCore[0x1c414c650] <+96>:  bl     0x1c5ad4f60               ; objc_msgSend$pan
+UIKitCore[0x1c414c654] <+100>: bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c414c658] <+104>: mov    x24, x0
+UIKitCore[0x1c414c65c] <+108>: cmp    x19, x0
+UIKitCore[0x1c414c660] <+112>: b.eq   0x1c414c66c               ; <+124>
+UIKitCore[0x1c414c664] <+116>: mov    w23, #0x0                 ; =0
+UIKitCore[0x1c414c668] <+120>: b      0x1c414c684               ; <+148>
+UIKitCore[0x1c414c66c] <+124>: mov    x0, x23
+UIKitCore[0x1c414c670] <+128>: bl     0x1c5ac4ea0               ; objc_msgSend$longPress
+UIKitCore[0x1c414c674] <+132>: bl     0x1c5b86158               ; symbol stub for: objc_claimAutoreleasedReturnValue
+UIKitCore[0x1c414c678] <+136>: cmp    x20, x0
+UIKitCore[0x1c414c67c] <+140>: cset   w23, eq
+UIKitCore[0x1c414c680] <+144>: bl     0x1c5b8629c               ; symbol stub for: objc_release
+UIKitCore[0x1c414c684] <+148>: bl     0x1c5b86308               ; symbol stub for: objc_release_x24
+UIKitCore[0x1c414c688] <+152>: cmp    x19, x21
+UIKitCore[0x1c414c68c] <+156>: b.eq   0x1c414c698               ; <+168>
+UIKitCore[0x1c414c690] <+160>: b      0x1c414c69c               ; <+172>
+UIKitCore[0x1c414c694] <+164>: mov    w23, #0x1                 ; =1
+UIKitCore[0x1c414c698] <+168>: bl     0x1c5b862f0               ; symbol stub for: objc_release_x22
+UIKitCore[0x1c414c69c] <+172>: bl     0x1c5b862e4               ; symbol stub for: objc_release_x21
+UIKitCore[0x1c414c6a0] <+176>: bl     0x1c5b862d8               ; symbol stub for: objc_release_x20
+UIKitCore[0x1c414c6a4] <+180>: bl     0x1c5b862c0               ; symbol stub for: objc_release_x19
+UIKitCore[0x1c414c6a8] <+184>: mov    x0, x23
+UIKitCore[0x1c414c6ac] <+188>: ldp    x29, x30, [sp, #0x30]
+UIKitCore[0x1c414c6b0] <+192>: ldp    x20, x19, [sp, #0x20]
+UIKitCore[0x1c414c6b4] <+196>: ldp    x22, x21, [sp, #0x10]
+UIKitCore[0x1c414c6b8] <+200>: ldp    x24, x23, [sp], #0x40
+UIKitCore[0x1c414c6bc] <+204>: ret

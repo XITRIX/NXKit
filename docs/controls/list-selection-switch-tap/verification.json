@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-07",
+  "revision": "working tree after b895e97",
+  "sources": {
+    "UIKit/include/LensView.h": "99fc7ccee405534aa4c7c9319fab724fd24a0499b6d0a0dea6d084e6211d565d",
+    "UIKit/lib/LensView.cpp": "098a80d7a78504b6bfc37f426b78570c8bf0f40023d86386e25fe6cb7a345af3",
+    "UIKit/lib/UISwitch.cpp": "4975c24441b8220d1984ee234709b6f3661c272e889c72d56c02425a85848482",
+    "UIKit/lib/UITabBarView.cpp": "bf6a76bcec8e25a84b8520d527e131a8a304fc910bfc33d2e7f33ced08ac2f40",
+    "Demo/app/Screens/GlassDemoViewController/GlassDemoListView.hpp": "3e49d92f23160a2efccf15710e6a5ce9996285c6f2225e0ab53f97999c00c4ff",
+    "Demo/tests/ListScrollArbitrationTests.cpp": "a0422c8b9ccd0a9df23d81136a7414b8af50c3407da6517b63dcbb47b544c4a7",
+    "UIKit/tests/LensViewTests.cpp": "9d679b315bd90f735cc368bdd4d7089f08fdeab21b7b731bb83f10c319ada85a",
+    "UIKit/tests/UISwitchTests.cpp": "7c9d16349f81b2ec72e3537f88b15ca76fa399d07a68e14e968e849ecdda0fc3",
+    "UIKit/tests/UITabBarControllerTests.cpp": "3abdd9938c10e3d473ebb080e2c676dce78876b0b437274fc09964e73955cabe"
+  },
+  "simulator": {
+    "device": "iPad Simulator F0FF4E71-DF79-41DD-8862-DC161CB409E0",
+    "sdk": "iOS Simulator 27.1",
+    "runtime": "iOS 27.0 (24A434)",
+    "DemoListScrollTests": {
+      "cases": 34,
+      "failures": 0
+    },
+    "NXKitControlScrollArbitrationTests": {
+      "cases": 34,
+      "failures": 0
+    },
+    "NXKitLensViewTests": {
+      "minimumLiftCases": 26,
+      "failures": 0
+    },
+    "NXKitSwitchTests": {
+      "newTimingLifecycleCases": 38,
+      "traitCases": 96,
+      "failures": 0
+    },
+    "NXKitSliderTests": "passed: 35 geometry, 608 endpoint and six native touch traces plus moving-release coverage",
+    "UIKitTabBarControllerTests": "passed with both shared lens and tab motion clocks advanced",
+    "ThorVGApp": "built with final offline shader package"
+  },
+  "raster": {
+    "DemoListScrollTests": "34 cases passed",
+    "ControlScrollArbitrationTests": "34 cases passed",
+    "SwitchTests": "38 new timing/lifecycle and 96 trait cases passed",
+    "GestureFailureTests": "passed",
+    "ScrollContentTouchTests": "passed",
+    "TouchDeliveryTests": "passed",
+    "GlassScreenTests": "passed with NXKIT_UNCAPPED=1; default frame pacing conflicts with this legacy rapid-frame harness"
+  },
+  "macOS": {
+    "NXKitSwitchTests": "38 timing/lifecycle and 96 trait cases passed"
+  },
+  "native": {
+    "directLensCases": 8,
+    "osTouchSwitchCases": 4,
+    "evidence": "ev_ffdaff76e537dc4e121beafdb8756001a3a80d48803c4e783b9aad95f3a5c58a"
+  },
+  "metal": {
+    "abi": "1fbe335a9f6301e16a772b44d17ae5655746614d33b42d71a1cbbc29d415bbca",
+    "freshMotionFrames": 1921,
+    "freshGalleryFrames": 20,
+    "catalogLibraries": 260,
+    "catalogPipelines": 220,
+    "bundledOnlyValidation": {
+      "motion": {
+        "frames": 1921,
+        "libraryCompiles": 0,
+        "pipelineCompiles": "220 at startup, unchanged across rendered frames",
+        "trace": "cold-motion.csv.gz",
+        "result": "passed"
+      },
+      "gallery": {
+        "frames": 20,
+        "libraryCompiles": 0,
+        "pipelineCompiles": "220 at startup, unchanged across rendered frames",
+        "trace": "cold-gallery.csv.gz",
+        "result": "passed"
+      }
+    }
+  },
+  "limitations": [
+    "The final build is installed and launched on iPhone; post-fix physical timing/thermal measurements remain unverified.",
+    "Finite native/portable cases do not establish complete optical, repeated-contact, multitouch, accessibility or RTL parity."
+  ],
+  "phoneInstallation": {
+    "timestampUTC": "2026-11-07T12:34:49.674738+00:00",
+    "device": "iPhone Pro XITRIX",
+    "os": "iOS 27.2",
+    "configuration": "RelWithDebInfo",
+    "bundleIdentifier": "ru.xitrix.skiatest",
+    "install": "success",
+    "launch": "success",
+    "signatureVerification": "codesign --verify --deep --strict passed",
+    "shaderABI": "1fbe335a9f6301e16a772b44d17ae5655746614d33b42d71a1cbbc29d415bbca",
+    "executableSHA256": "9cca39ab2b302ebf830cc67184b0c053a9a65dbe5e9059982c00ef24e1b807fb"
+  }
+}

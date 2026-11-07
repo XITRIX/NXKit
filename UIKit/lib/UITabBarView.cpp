@@ -269,9 +269,12 @@ void UITabBarView::setSelectionPosition(float position) {
 }
 void UITabBarView::setLifted(bool lifted, bool animated) {
     if(!lifted && _state->_liftLink) { _state->_liftLink->invalidate(); _state->_liftLink.reset(); _state->_minimumLiftRemaining=0; }
-    _state->_lifted=lifted;
-    if(animated)_state->_lens->setLifted(lifted,true,[this]{arrange();},{});
-    else {_state->_lens->setLifted(lifted,false);arrange();}
+    if(animated) {
+        const auto weak=weak_from_base<UITabBarView>();
+        _state->_lens->setLifted(lifted,true,[weak]{if(const auto self=weak.lock()) {
+            self->_state->_lifted=self->_state->_lens->isLifted();self->arrange();
+        }},{});
+    } else {_state->_lens->setLifted(lifted,false);_state->_lifted=lifted;arrange();}
 }
 void UITabBarView::setComparisonContent(std::shared_ptr<UIImage> normal, std::shared_ptr<UIImage> selected) {
     if (!normal || !selected) throw std::invalid_argument("Both lens comparison content images are required");

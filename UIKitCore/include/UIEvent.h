@@ -26,6 +26,7 @@ private:
     friend class UIApplication;
     friend class UIView;
     friend class UIGestureRecognizerTestHarness;
+    friend class UIWindow;
 };
 
 }

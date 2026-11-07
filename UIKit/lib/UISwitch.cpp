@@ -25,49 +25,9 @@ void validateGeometry(NXRect rect) {
        rect.width()<0 || rect.height()<0)throw std::invalid_argument("Invalid switch geometry");
 }
 }
-// UIKit's modern switch uses private tap/pan recognizers rather than the
-// UIControl tracking path: isTracking/isHighlighted remain false, taps send
-// valueChanged then touchUpInside, and pans send only valueChanged.
-class UISwitchGestureRecognizer final:public UIGestureRecognizer {
-public:
-    explicit UISwitchGestureRecognizer(std::weak_ptr<UISwitch> owner):_owner(std::move(owner)){setCancelsTouchesInView(false);}
-    bool canBePreventedBy(const std::shared_ptr<UIGestureRecognizer>&)const override {
-        const auto owner=_owner.lock();return !owner || !owner->_acceptedContact;
-    }
-    void touchesBegan(std::vector<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent> event)override {
-        if(_touch || touches.empty())return;
-        const auto owner=_owner.lock();
-        if(!owner || !owner->isEnabled() || !owner->isActionDispatchAllowed() || !owner->beginTracking(touches.front(),event)){
-            setState(UIGestureRecognizerState::failed);return;
-        }
-        _touch=touches.front();setState(UIGestureRecognizerState::began);
-    }
-    void touchesMoved(std::vector<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent> event)override {
-        if(!_touch || std::find(touches.begin(),touches.end(),_touch)==touches.end())return;
-        if(const auto owner=_owner.lock();owner && owner->_acceptedContact && owner->isEnabled()){
-            owner->continueTracking(_touch,event);setState(UIGestureRecognizerState::changed);
-        }
-    }
-    void touchesEnded(std::vector<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent> event)override {
-        if(!_touch || std::find(touches.begin(),touches.end(),_touch)==touches.end())return;
-        auto touch=std::move(_touch);_touch.reset();
-        if(const auto owner=_owner.lock();owner && owner->isEnabled())owner->endTracking(touch,event);
-        setState(UIGestureRecognizerState::ended);
-    }
-    void touchesCancelled(std::vector<std::shared_ptr<UITouch>> touches,std::shared_ptr<UIEvent> event)override {
-        if(!_touch || std::find(touches.begin(),touches.end(),_touch)==touches.end())return;
-        _touch.reset();if(const auto owner=_owner.lock())owner->cancelTracking(event);
-        setState(UIGestureRecognizerState::cancelled);
-    }
-protected:
-    void reset()override{const bool active=bool(_touch);_touch.reset();if(active)if(const auto owner=_owner.lock())owner->cancelTracking();}
-private:
-    std::weak_ptr<UISwitch> _owner;
-    std::shared_ptr<UITouch> _touch;
-};
 struct UISwitch::Motion {
     Internal::GlassSpring position, elevation;
-    bool pressed=false;
+    bool pressed=false; // Actual lens elevation target; contact may already have ended.
     double elapsed=0,positionElapsed=0;
     std::shared_ptr<CADisplayLink> link;
     std::chrono::steady_clock::time_point lastFrame;
@@ -76,11 +36,6 @@ struct UISwitch::Motion {
 UISwitch::UISwitch(NXRect frame,std::optional<UIAction> action)
     :UIControl({frame.origin,switchSize}),_motion(std::make_unique<Motion>()) {
     validateGeometry(frame);
-    // At construction the only installed recognizer is UIControl's private
-    // tracker; replace it before any input can observe the view.
-    gestureRecognizers()->clear();
-    auto gesture=new_shared<UISwitchGestureRecognizer>(weak_from_base<UISwitch>());
-    _switchGesture=gesture;addGestureRecognizer(gesture);
     if(action)addAction(*action,UIControlEvent::valueChanged);
     _visuals=new_shared<UIView>();_visuals->setAutolayoutEnabled(false);addSubview(_visuals);
     _track=new_shared<UIView>();_track->setAutolayoutEnabled(false);_track->setUserInteractionEnabled(false);_visuals->addSubview(_track);
@@ -105,13 +60,13 @@ void UISwitch::setOn(bool on,bool animated) {
     if(!changed && animated)return;
     if(!animated) {
         _position=on?1:0;_motion->position={_position,0};
-        if(!_motion->pressed){
-            _motion->elevation={0,0};_lens->setLifted(false,false);
+        if(!_acceptedContact){
+            _motion->pressed=false;_motion->elevation={0,0};_lens->setLifted(false,false);
             if(_motion->link)_motion->link->invalidate();_motion->link.reset();
         }
         updateGeometry();return;
     }
-    _motion->elapsed=0;_motion->positionElapsed=0;
+    _motion->positionElapsed=0;
     wakeAnimation();
 }
 void UISwitch::setOnTintColor(std::optional<UIColor> color){_onTintColor=std::move(color);updateAppearance();}
@@ -159,15 +114,25 @@ void UISwitch::layoutSubviews() {
     _visuals->setFrame(bounds());_visuals->setBounds(bounds());updateGeometry();
 }
 void UISwitch::setPressed(bool pressed,bool animated) {
-    if(_motion->pressed==pressed)return;
-    _motion->pressed=pressed;_motion->elapsed=0;
-    _lens->setLifted(pressed,animated);
-    if(!animated){_motion->elevation={pressed?1.:0.,0};updateGeometry();}
-    else {
-        const auto omega=2*std::numbers::pi/(pressed?.27:.5);
-        _motion->elevation.velocity+=(double(pressed)-_motion->elevation.value)*omega*omega*(pressed?.032:.016);
-        wakeAnimation();
-    }
+    if(_motion->pressed==pressed && _lens->isLifted()==pressed)return;
+    const auto weak=weak_from_base<UISwitch>();
+    // LensView owns native minimum lift duration. Its alongside callback runs
+    // when the requested lift actually starts, including a deferred lowering.
+    // Contact ownership and value/action delivery remain independent of this
+    // visual target, so a tap may finish while its knob is still expanding.
+    _lens->setLifted(pressed,animated,[weak,animated]{
+        const auto self=weak.lock();if(!self)return;
+        auto& motion=*self->_motion;
+        const bool lifted=self->_lens->isLifted();
+        if(motion.pressed==lifted)return;
+        motion.pressed=lifted;motion.elapsed=0;motion.lastFrame=std::chrono::steady_clock::now();
+        if(!animated){motion.elevation={lifted?1.:0.,0};self->updateGeometry();}
+        else {
+            const auto omega=2*std::numbers::pi/(lifted?.27:.5);
+            motion.elevation.velocity+=(double(lifted)-motion.elevation.value)*omega*omega*(lifted?.032:.016);
+            self->wakeAnimation();
+        }
+    },nullptr);
 }
 void UISwitch::wakeAnimation() {
     if(_motion->link)return;
@@ -195,15 +160,38 @@ void UISwitch::advance(double seconds) {
         if(m.positionElapsed>=1./3)m.position={_on?1.:0.,0};
         _position=std::clamp(NXFloat(m.position.value),0.f,1.f);
     }
-    if(m.elapsed>=.6){m.elevation={elevation,0};if(!_acceptedContact){m.position={_on?1.:0.,0};_position=_on?1:0;}}
     CATransaction::begin();CATransaction::setDisableActions(true);updateGeometry();CATransaction::commit();
     if(m.elevation.atRest(elevation) && (_acceptedContact || m.position.atRest(_on?1:0))){
         if(m.link)m.link->invalidate();m.link.reset();
     }else CALayer::requestFramerate(120);
 }
+// The modern provider keeps UIKit's UIControl tracking/highlight flags false,
+// while sharing responder admission with every other control in a scroll view.
+bool UISwitch::beginTrackingContact(const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>& event) {
+    if(_acceptedContact || !isEnabled() || !isActionDispatchAllowed())return false;
+    // A pan that finished while scroll admission was pending never starts the
+    // switch's press/lift path. Native deferred pan actions flush at touch-up
+    // without committing a value in this case.
+    if(const auto travel=completedContactTravel(touch);travel && std::max(std::abs(travel->x),std::abs(travel->y))>=10)return false;
+    const auto generation=++_contactGeneration;
+    _contactTouch=touch;
+    const auto expectedSuperview=superview().lock();
+    const bool accepted=beginTracking(touch,event);
+    if(generation!=_contactGeneration || _contactTouch!=touch)return false;
+    if(!accepted || !_acceptedContact || !isEnabled() || !isActionDispatchAllowed() || superview().lock()!=expectedSuperview) {
+        cancelTracking(event);return false;
+    }
+    return true;
+}
+void UISwitch::moveTrackingContact(const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>& event) {
+    if(_acceptedContact && _contactTouch==touch)continueTracking(touch,event);
+}
+void UISwitch::endTrackingContact(const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>& event) {
+    if(_acceptedContact && _contactTouch==touch){_contactTouch.reset();endTracking(touch,event);}
+}
 bool UISwitch::beginTracking(const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>&) {
     if(!touch || !isEnabled())return false;
-    _dragOrigin=touch->locationIn(shared_from_this());_dragged=false;_acceptedContact=true;
+    _dragOrigin=touch->locationIn(shared_from_this());_dragged=false;_panRecognized=false;_acceptedContact=true;
     const auto presented=_lens->layer()->presentationOrSelf()->getFrame();
     const auto travel=switchSize.width-restingThumbSize.width-4;
     const auto base=_visuals->bounds().midX()-switchSize.width*.5f+2+restingThumbSize.width*.5f;
@@ -215,6 +203,7 @@ bool UISwitch::continueTracking(const std::shared_ptr<UITouch>& touch,const std:
     if(!touch)return false;
     const auto p=touch->locationIn(shared_from_this());
     const auto delta=p.x-_dragOrigin.x;
+    _panRecognized|=std::max(std::abs(delta),std::abs(p.y-_dragOrigin.y))>=10;
     if(std::abs(delta)>3)_dragged=true;
     if(_dragged) {
         const auto travel=switchSize.width-restingThumbSize.width-4;
@@ -226,8 +215,8 @@ bool UISwitch::continueTracking(const std::shared_ptr<UITouch>& touch,const std:
 void UISwitch::endTracking(const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>&) {
     if(!_acceptedContact)return;
     const bool inside=touch && point(touch->locationIn(shared_from_this()),nullptr);
-    const bool wasTap=!_dragged && inside;
-    const bool target=_dragged?_position>=.5f:(inside?!_on:_on);
+    const bool wasTap=!_panRecognized && !_dragged && inside;
+    const bool target=_dragged?_position>=.5f:((_panRecognized || inside)?!_on:_on);
     _acceptedContact=false;_lens->endInteraction();setPressed(false,true);
     const bool changed=target!=_on;_on=target;_motion->position={_position,0};_motion->positionElapsed=0;wakeAnimation();
     if(changed)sendActions(UIControlEvent::valueChanged);
@@ -235,15 +224,13 @@ void UISwitch::endTracking(const std::shared_ptr<UITouch>& touch,const std::shar
 }
 void UISwitch::cancelTracking(const std::shared_ptr<UIEvent>& event) {
     const bool accepted=_acceptedContact;
-    if(_lens && accepted) {
-        _acceptedContact=false;_lens->endInteraction({},true);setPressed(false,true);
+    ++_contactGeneration;_contactTouch.reset();
+    if(_lens && (accepted || _lens->isLifted() || _motion->pressed)) {
+        _acceptedContact=false;_lens->endInteraction({},true);setPressed(false,false);
         _motion->position={_position,0};_motion->positionElapsed=0;wakeAnimation();
     }
     UIControl::cancelTracking(event);
     if(accepted) {
-        if(const auto gesture=_switchGesture.lock()) {
-            const bool enabled=gesture->isEnabled();gesture->setEnabled(false);gesture->setEnabled(enabled);
-        }
         sendActions(UIControlEvent::touchCancel);
     }
 }

@@ -38,10 +38,12 @@ public:
   [[nodiscard]] bool isLifted() const { return _lifted; }
   void setLifted(bool lifted, bool animated = false);
   using LiftCompletion=std::function<void(bool,bool)>;
-  /** Native four-argument lift entry. Alongside model changes run synchronously
-      in the geometry animation; completions collect until the lift group settles.
-      Normal completion reports (true,false). Native flag names are unverified.
-      NXKit retargets immediately; native delayed-unlift timer quirks are omitted. */
+  /** Native four-argument lift entry. Animated lowering waits for the captured
+      spec's minimum lifted lifetime. Its alongside block runs when lowering
+      starts; completions collect until the lift group settles. Same-state calls
+      run alongside immediately, without completion or cancelling a pending
+      unlift. The two-argument nonanimated setter forces an immediate snap.
+      Normal completion reports (true,false); native flag names are unverified. */
   void setLifted(bool lifted, bool animated, const std::function<void()>& alongsideAnimations, LiftCompletion completion);
 
   /** Color-dependent foreground blending for a semantic selected source.
@@ -141,6 +143,9 @@ private:
   void updateMaterial();
   void updateDisplayScale();
   void advance(double seconds);
+  void advanceState(double seconds);
+  void applyLifted(bool lifted, bool animated);
+  void performLiftTransition(bool lifted, bool animated, const std::function<void()>& alongsideAnimations, LiftCompletion completion);
   void wakeAnimation();
   bool viewMotionIsActive() const;
   void restartElasticResponse();

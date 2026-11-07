@@ -18,6 +18,7 @@ private:
 
     friend class UIApplication;
     friend class UIApplicationPressRepeatTestHarness;
+    friend class UIGestureRecognizerTestHarness;
 };
 
 }

@@ -294,6 +294,19 @@ void UISlider::advanceThumb(double seconds) {
         motion.thumbLink.reset();
     } else CALayer::requestFramerate(120);
 }
+bool UISlider::capturesUndelayedDrag(const std::shared_ptr<UITouch>& touch) const {
+    if(!touch || !isEnabled() || _maximumValue<=_minimumValue || _style!=UISliderStyle::defaultStyle)return false;
+    auto self=const_cast<UISlider*>(this)->shared_from_this();
+    const auto visible=(currentThumbImage()?_thumbImage->layer():_lens->layer())->presentationOrSelf()->getFrame();
+    return visible.insetBy({10,10,10,10}).contains(touch->locationIn(self));
+}
+void UISlider::contactFeedbackBegan(const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>&) {
+    if(!capturesUndelayedDrag(touch))return;
+    _contactFeedback=true;_lens->beginInteraction(touch->locationIn(shared_from_this()));setPressed(true,true);
+}
+void UISlider::contactFeedbackCancelled() {
+    if(_contactFeedback && !isTracking())cancelTracking();
+}
 bool UISlider::beginTracking(const std::shared_ptr<UITouch>& touch,const std::shared_ptr<UIEvent>&) {
     if(!touch || !isEnabled() || _maximumValue<=_minimumValue)return false;
     _lastTouch=touch->locationIn(shared_from_this());
@@ -310,7 +323,8 @@ bool UISlider::beginTracking(const std::shared_ptr<UITouch>& touch,const std::sh
     _dragOrigin=_lastTouch;_dragging=false;
     _interaction->previousPoint=_lastTouch;_interaction->previousTime=touch->timestamp();
     _interaction->hasVelocity=false;_interaction->velocity=_interaction->previousVelocity=0;
-    _lens->beginInteraction(_lastTouch);setPressed(true,true);
+    if(!_contactFeedback)_lens->beginInteraction(_lastTouch);
+    _contactFeedback=true;setPressed(true,true);
     if(_style==UISliderStyle::thumbless)updateFromTouch(touch);
     return true;
 }
@@ -387,6 +401,7 @@ void UISlider::advanceRelease(double seconds) {
     else CALayer::requestFramerate(120);
 }
 void UISlider::endTracking(const std::shared_ptr<UITouch>&,const std::shared_ptr<UIEvent>&) {
+    _contactFeedback=false;
     if(_interaction->link){_interaction->link->invalidate();_interaction->link.reset();}
     _lens->endInteraction();setPressed(false,true);
 }
@@ -396,6 +411,7 @@ void UISlider::trackingDidEnd() {
     sendActions(UIControlEvent::valueChanged);
 }
 void UISlider::cancelTracking(const std::shared_ptr<UIEvent>& event) {
+    _contactFeedback=false;
     if(_interaction && _interaction->link){_interaction->link->invalidate();_interaction->link.reset();}
     if(_lens){
         _lens->endInteraction({},true);

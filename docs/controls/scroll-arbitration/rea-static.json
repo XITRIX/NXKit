@@ -1,0 +1,735 @@
+{
+  "result": {
+    "manifest": {
+      "rea_version": "4.0.1",
+      "provider_version": "3",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "pty_backend": "node-pty",
+      "started_at": "2026-11-07T10:27:07.056Z",
+      "completed_at": "2026-11-07T10:27:09.252Z",
+      "scenario": {
+        "executable": "/usr/bin/python3",
+        "arguments": [
+          "Demo/ControlScrollComparison/audit.py"
+        ],
+        "working_directory": "/Users/daniilvinogradov/Documents/Dev/NXKit",
+        "environment": {},
+        "filesystem_observation_paths": [],
+        "terminal": {
+          "columns": 80,
+          "rows": 24,
+          "scrollback": 1000
+        },
+        "events": [],
+        "timeout_ms": 45000,
+        "idle_timeout_ms": 30000,
+        "settle_ms": 100,
+        "limits": {
+          "output_bytes": 8000,
+          "files": 15,
+          "file_bytes": 300000,
+          "processes": 15,
+          "filesystem_depth": 1
+        },
+        "normalization": {
+          "paths": false,
+          "pids": true,
+          "ports": true,
+          "time_bucket_ms": 10,
+          "patterns": []
+        },
+        "executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"
+      },
+      "comparison_contract": {
+        "working_directory": "/Users/daniilvinogradov/Documents/Dev/NXKit",
+        "environment": {},
+        "ambient_environment": "unknown",
+        "filesystem_observation_paths": [],
+        "terminal": {
+          "columns": 80,
+          "rows": 24,
+          "scrollback": 1000
+        },
+        "events": [],
+        "timeout_ms": 45000,
+        "idle_timeout_ms": 30000,
+        "settle_ms": 100,
+        "limits": {
+          "output_bytes": 8000,
+          "files": 15,
+          "file_bytes": 300000,
+          "processes": 15,
+          "filesystem_depth": 1
+        },
+        "normalization": {
+          "paths": false,
+          "pids": true,
+          "ports": true,
+          "time_bucket_ms": 10,
+          "patterns": []
+        }
+      },
+      "full_scenario_sha256": "d2e88a701055e4e3a1cf1ab9d52b55edea9842afb5565f291a7f9c400d79ccf9",
+      "comparison_contract_sha256": "751a5276ada9d45eefec414787ab565d8b5b5df95ff65021ad45a15c61967f02",
+      "executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2",
+      "normalization_sha256": "5c58aa1aa890197f15f9c59ef755d01120e6e07f356fa1ef2f20787e63b6fa87"
+    },
+    "normalization": {
+      "paths": false,
+      "pids": true,
+      "ports": true,
+      "time_bucket_ms": 10,
+      "patterns": []
+    },
+    "frames": [
+      {
+        "sequence": 0,
+        "at_ms": 2050,
+        "data": "{\"scope\": \"Static read-only shipped UIKitCore disassembly; methods are not executed\", \"binarySHA256\": \"5cefe8cfb213b0dfcb378feb86ddd9062fda37fb4f331b3ceb782070a20292a4\", \"methods\": {\"switch-failure-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRequireFailureOfGestureRecognizer:]\", \"switch-event-admission\": \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\", \"switch-simultaneous-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:]\", \"switch-long-press\": \"-[UISwitchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureState:]\", \"scroll-delay-began\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesBegan:withEvent:]\", \"scroll-delay-moved\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesMoved:withEvent:]\", \"scroll-delay-ended\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\", \"scroll-delay-deliver\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer"
+      },
+      {
+        "sequence": 1,
+        "at_ms": 2050,
+        "data": " sendDelayedTouches]\", \"slider-should-begin\": \"-[UISlider gestureRecognizerShouldBegin:]\"}, \"disassemblySHA256\": {\"switch-failure-policy\": \"06421ed700e68f4c796ff3919027960c4da51213bb304cb420b84a7037d86b69\", \"switch-event-admission\": \"53a5bec57ce665d9685f58cc94ab397f2f88da8898af026b03eafebca4a4671a\", \"switch-simultaneous-policy\": \"3135b3119e48a73f457b2b6fa230d92c24be0c6198720ecbe2a6cf6bfdd69ddb\", \"switch-long-press\": \"812fb3a25623d8d961cc05ee8c95dbc81b2d6f6c47b038a031a1ea6a6484d685\", \"scroll-delay-began\": \"fca2a3cba60b718781b8c7184dd9afb9217f0b08a3e1c94bbb2eac24913eea24\", \"scroll-delay-moved\": \"43dc9313339e608e839955fe9854927f63239d00178ed111cfd49b0f0fea891a\", \"scroll-delay-ended\": \"3a9e319556b01c746354ddca4873581e58e404d4927acf33616d050e35dd639d\", \"scroll-delay-deliver\": \"3bd01451ced0b29370ff885ac7899d5f59100c055b615ded1a60a6f133358122\", \"slider-should-begin\": \"7d7b8930cbb3ea5e70b391051f72228e83fe6a2b7678f3014aa431399f694e1c\"}, \"normalizedPreviewSHA256\": {\"switch-failure-policy\": \"3c8cc02620ff3e5930c9696b366c"
+      },
+      {
+        "sequence": 2,
+        "at_ms": 2050,
+        "data": "23a01ea59c66b20e0fdf9fac9d4a85f8bbab\", \"switch-event-admission\": \"c37dfc4a7a868c23ab163719612d52f5ce50753a45b69f6bff445ee9a7d8f5ee\", \"switch-simultaneous-policy\": \"3333bf0d5000957115d677a313806063cba2a25fc509a7f81dd1b01433c0fb71\", \"switch-long-press\": \"7ee64ee309f6108bca934b01f61937c6caf60de20a622c9671d0e0f7cd5e12cc\", \"scroll-delay-began\": \"4efcd935d08e7bdf205f3e7d4a0a54e52a9092e82b3a335943fd9ca145d475cb\", \"scroll-delay-moved\": \"4c2e7e62a6f5e857d2c3838dd92009c7dd1a2ffd5707c577af6a5de9464e3f41\", \"scroll-delay-ended\": \"017a4a6cd6f32829249532f47093f29453c8cbb43fe96d37c9ece9e00e4e61b3\", \"scroll-delay-deliver\": \"b4e16308529cb7b560df162f11839117e67aff5af4f48eb894f8ed6d269edc14\", \"slider-should-begin\": \"7d7b8930cbb3ea5e70b391051f72228e83fe6a2b7678f3014aa431399f694e1c\"}, \"disassemblyEncoding\": \"Original LLDB bytes are retained in .txt.gz; .txt previews normalize trailing whitespace\", \"observedPolicy\": \"Switch longPress and pan require failure of recognizers whose class is UIScrollViewDelayedTouchesBeganGestureRecogni"
+      },
+      {
+        "sequence": 3,
+        "at_ms": 2050,
+        "data": "zer; other own recognizers return false in this method\", \"requiredClassReference\": {\"slot\": \"0x222e8ca30\", \"value\": \"0x22e8701d0\", \"name\": \"UIScrollViewDelayedTouchesBeganGestureRecognizer\"}, \"unknowns\": [\"No assertion about other UIKit builds or complete dependency graph; runtime outcome remains defined by real touch traces\"]}\r\n"
+      }
+    ],
+    "rendered_frames": [
+      {
+        "sequence": 0,
+        "at_ms": 2050,
+        "columns": 80,
+        "rows": 24,
+        "cursor_x": 64,
+        "cursor_y": 12,
+        "active_buffer": "normal",
+        "lines": [
+          "{\"scope\": \"Static read-only shipped UIKitCore disassembly; methods are not execu",
+          "ted\", \"binarySHA256\": \"5cefe8cfb213b0dfcb378feb86ddd9062fda37fb4f331b3ceb782070a",
+          "20292a4\", \"methods\": {\"switch-failure-policy\": \"-[UISwitchModernVisualElement ge",
+          "stureRecognizer:shouldRequireFailureOfGestureRecognizer:]\", \"switch-event-admiss",
+          "ion\": \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\", \"",
+          "switch-simultaneous-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:sh",
+          "ouldRecognizeSimultaneouslyWithGestureRecognizer:]\", \"switch-long-press\": \"-[UIS",
+          "witchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureStat",
+          "e:]\", \"scroll-delay-began\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer ",
+          "touchesBegan:withEvent:]\", \"scroll-delay-moved\": \"-[UIScrollViewDelayedTouchesBe",
+          "ganGestureRecognizer touchesMoved:withEvent:]\", \"scroll-delay-ended\": \"-[UIScrol",
+          "lViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\", \"scroll-del",
+          "ay-deliver\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                ",
+          "                                                                                "
+        ],
+        "serialized_state": "{\"scope\": \"Static read-only shipped UIKitCore disassembly; methods are not executed\", \"binarySHA256\": \"5cefe8cfb213b0dfcb378feb86ddd9062fda37fb4f331b3ceb782070a20292a4\", \"methods\": {\"switch-failure-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRequireFailureOfGestureRecognizer:]\", \"switch-event-admission\": \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\", \"switch-simultaneous-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:]\", \"switch-long-press\": \"-[UISwitchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureState:]\", \"scroll-delay-began\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesBegan:withEvent:]\", \"scroll-delay-moved\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesMoved:withEvent:]\", \"scroll-delay-ended\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\", \"scroll-delay-deliver\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer"
+      },
+      {
+        "sequence": 1,
+        "at_ms": 2050,
+        "columns": 80,
+        "rows": 24,
+        "cursor_x": 48,
+        "cursor_y": 23,
+        "active_buffer": "normal",
+        "lines": [
+          "20292a4\", \"methods\": {\"switch-failure-policy\": \"-[UISwitchModernVisualElement ge",
+          "stureRecognizer:shouldRequireFailureOfGestureRecognizer:]\", \"switch-event-admiss",
+          "ion\": \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\", \"",
+          "switch-simultaneous-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:sh",
+          "ouldRecognizeSimultaneouslyWithGestureRecognizer:]\", \"switch-long-press\": \"-[UIS",
+          "witchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureStat",
+          "e:]\", \"scroll-delay-began\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer ",
+          "touchesBegan:withEvent:]\", \"scroll-delay-moved\": \"-[UIScrollViewDelayedTouchesBe",
+          "ganGestureRecognizer touchesMoved:withEvent:]\", \"scroll-delay-ended\": \"-[UIScrol",
+          "lViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\", \"scroll-del",
+          "ay-deliver\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer sendDelayedTouc",
+          "hes]\", \"slider-should-begin\": \"-[UISlider gestureRecognizerShouldBegin:]\"}, \"dis",
+          "assemblySHA256\": {\"switch-failure-policy\": \"06421ed700e68f4c796ff3919027960c4da5",
+          "1213bb304cb420b84a7037d86b69\", \"switch-event-admission\": \"53a5bec57ce665d9685f58",
+          "cc94ab397f2f88da8898af026b03eafebca4a4671a\", \"switch-simultaneous-policy\": \"3135",
+          "b3119e48a73f457b2b6fa230d92c24be0c6198720ecbe2a6cf6bfdd69ddb\", \"switch-long-pres",
+          "s\": \"812fb3a25623d8d961cc05ee8c95dbc81b2d6f6c47b038a031a1ea6a6484d685\", \"scroll-",
+          "delay-began\": \"fca2a3cba60b718781b8c7184dd9afb9217f0b08a3e1c94bbb2eac24913eea24\"",
+          ", \"scroll-delay-moved\": \"43dc9313339e608e839955fe9854927f63239d00178ed111cfd49b0",
+          "f0fea891a\", \"scroll-delay-ended\": \"3a9e319556b01c746354ddca4873581e58e404d4927ac",
+          "f33616d050e35dd639d\", \"scroll-delay-deliver\": \"3bd01451ced0b29370ff885ac7899d5f5",
+          "9100c055b615ded1a60a6f133358122\", \"slider-should-begin\": \"7d7b8930cbb3ea5e70b391",
+          "051f72228e83fe6a2b7678f3014aa431399f694e1c\"}, \"normalizedPreviewSHA256\": {\"switc",
+          "h-failure-policy\": \"3c8cc02620ff3e5930c9696b366c                                "
+        ],
+        "serialized_state": "{\"scope\": \"Static read-only shipped UIKitCore disassembly; methods are not executed\", \"binarySHA256\": \"5cefe8cfb213b0dfcb378feb86ddd9062fda37fb4f331b3ceb782070a20292a4\", \"methods\": {\"switch-failure-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRequireFailureOfGestureRecognizer:]\", \"switch-event-admission\": \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\", \"switch-simultaneous-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:]\", \"switch-long-press\": \"-[UISwitchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureState:]\", \"scroll-delay-began\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesBegan:withEvent:]\", \"scroll-delay-moved\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesMoved:withEvent:]\", \"scroll-delay-ended\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\", \"scroll-delay-deliver\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer sendDelayedTouches]\", \"slider-should-begin\": \"-[UISlider gestureRecognizerShouldBegin:]\"}, \"disassemblySHA256\": {\"switch-failure-policy\": \"06421ed700e68f4c796ff3919027960c4da51213bb304cb420b84a7037d86b69\", \"switch-event-admission\": \"53a5bec57ce665d9685f58cc94ab397f2f88da8898af026b03eafebca4a4671a\", \"switch-simultaneous-policy\": \"3135b3119e48a73f457b2b6fa230d92c24be0c6198720ecbe2a6cf6bfdd69ddb\", \"switch-long-press\": \"812fb3a25623d8d961cc05ee8c95dbc81b2d6f6c47b038a031a1ea6a6484d685\", \"scroll-delay-began\": \"fca2a3cba60b718781b8c7184dd9afb9217f0b08a3e1c94bbb2eac24913eea24\", \"scroll-delay-moved\": \"43dc9313339e608e839955fe9854927f63239d00178ed111cfd49b0f0fea891a\", \"scroll-delay-ended\": \"3a9e319556b01c746354ddca4873581e58e404d4927acf33616d050e35dd639d\", \"scroll-delay-deliver\": \"3bd01451ced0b29370ff885ac7899d5f59100c055b615ded1a60a6f133358122\", \"slider-should-begin\": \"7d7b8930cbb3ea5e70b391051f72228e83fe6a2b7678f3014aa431399f694e1c\"}, \"normalizedPreviewSHA256\": {\"switch-failure-policy\": \"3c8cc02620ff3e5930c9696b366c"
+      }
+    ],
+    "interaction_events": [],
+    "exit": {
+      "code": 0,
+      "signal": 0,
+      "reason": "exited"
+    },
+    "settlement": {
+      "state": "alive_at_deadline",
+      "elapsed_ms": 111,
+      "cleanup_outcome": "cleaned"
+    },
+    "process_samples": [
+      {
+        "at_ms": 250,
+        "pid": 1,
+        "parent_pid": 2,
+        "command": "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python Demo/ControlScrollComparison/audit.py",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 370,
+        "pid": 3,
+        "parent_pid": 1,
+        "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/lldb -b -o target create /private/tmp/nxkit-glass-settings/binaries/UIKitCore -o disassemble -n \"-[UISwitchModernVisualElement gestureRecognizer:shouldRequireFailureOfGestureRecognizer:]\" -o disassemble -n \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\" -o disassemble -n \"-[UISwitchModernVisualElement gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:]\" -o disassemble -n \"-[UISwitchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureState:]\" -o disassemble -n \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesBegan:withEvent:]\" -o disassemble -n \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesMoved:withEvent:]\" -o disassemble -n \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\" -o disassemble -n \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer sendDelayedTouches]\" -o disassemble -n \"-[UISlider gestureRecognizerShouldBegin:]\" -o memory read -fx -s8 -c1 0x222e8ca30 -o image lookup -a 0x22e8701d0 -o quit",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 1530,
+        "pid": 3,
+        "parent_pid": 1,
+        "command": "(lldb)",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 1880,
+        "pid": 1,
+        "parent_pid": 2,
+        "command": "(Python)",
+        "process_group_id": 1,
+        "session_id": null
+      }
+    ],
+    "filesystem_checkpoints": [
+      {
+        "name": "before",
+        "at_ms": 0,
+        "files": [],
+        "effects": [],
+        "truncated": false
+      },
+      {
+        "name": "after_settlement",
+        "at_ms": 2196,
+        "files": [],
+        "effects": [],
+        "truncated": false
+      }
+    ],
+    "event_journal": [
+      {
+        "capture_order": 0,
+        "collection": "filesystem_checkpoints",
+        "index": 0
+      },
+      {
+        "capture_order": 1,
+        "collection": "process_samples",
+        "index": 0
+      },
+      {
+        "capture_order": 2,
+        "collection": "process_samples",
+        "index": 1
+      },
+      {
+        "capture_order": 3,
+        "collection": "process_samples",
+        "index": 2
+      },
+      {
+        "capture_order": 4,
+        "collection": "frames",
+        "index": 0
+      },
+      {
+        "capture_order": 5,
+        "collection": "frames",
+        "index": 1
+      },
+      {
+        "capture_order": 6,
+        "collection": "frames",
+        "index": 2
+      },
+      {
+        "capture_order": 7,
+        "collection": "frames",
+        "index": 3
+      },
+      {
+        "capture_order": 8,
+        "collection": "rendered_frames",
+        "index": 0
+      },
+      {
+        "capture_order": 9,
+        "collection": "rendered_frames",
+        "index": 1
+      },
+      {
+        "capture_order": 10,
+        "collection": "lifecycle",
+        "index": 0
+      },
+      {
+        "capture_order": 11,
+        "collection": "process_samples",
+        "index": 3
+      },
+      {
+        "capture_order": 12,
+        "collection": "lifecycle",
+        "index": 1
+      },
+      {
+        "capture_order": 13,
+        "collection": "filesystem_checkpoints",
+        "index": 1
+      }
+    ],
+    "files_before": [],
+    "files_after": [],
+    "filesystem_effects": [],
+    "truncated": true,
+    "limitations": [
+      "Process trees are sampled and may omit short-lived descendants.",
+      "Filesystem observations are before/after snapshots, not syscall traces.",
+      "Inherited host environment variables are not recorded and may affect results.",
+      "No filesystem observation paths were selected; filesystem effects remain unknown."
+    ],
+    "residual_unknowns": [
+      {
+        "scope": "process",
+        "reason": "Process trees are sampled and may omit short-lived descendants."
+      },
+      {
+        "scope": "environment",
+        "reason": "Inherited host environment variables are not recorded."
+      },
+      {
+        "scope": "network",
+        "reason": "Network activity is not observed by this capture."
+      },
+      {
+        "scope": "filesystem",
+        "reason": "No filesystem observation paths were selected; filesystem effects remain unknown."
+      }
+    ],
+    "cleanup": {
+      "owned_process_group": "verified",
+      "temporary_root": "removed"
+    }
+  },
+  "evidence_id": "ev_b28bfa8f1111483ee53bd134326affbb49f1f9230bcd03154e27e011053a1c18",
+  "evidence": {
+    "evidence_id": "ev_b28bfa8f1111483ee53bd134326affbb49f1f9230bcd03154e27e011053a1c18",
+    "subject": null,
+    "provider": {
+      "id": "rea-process",
+      "name": "REA process capture",
+      "version": "3"
+    },
+    "predicate_type": "rea.process-capture",
+    "operation": "capture_process_scenario",
+    "parameters": {
+      "executable_name": "python3",
+      "argument_count": 1,
+      "event_count": 0,
+      "filesystem_observation_path_count": 0,
+      "normalization": {
+        "paths": false,
+        "pids": true,
+        "ports": true,
+        "time_bucket_ms": 10,
+        "patterns": []
+      }
+    },
+    "raw_result": null,
+    "normalized_result": {
+      "manifest": {
+        "rea_version": "4.0.1",
+        "provider_version": "3",
+        "platform": "darwin",
+        "architecture": "arm64",
+        "pty_backend": "node-pty",
+        "started_at": "2026-11-07T10:27:07.056Z",
+        "completed_at": "2026-11-07T10:27:09.252Z",
+        "scenario": {
+          "executable": "/usr/bin/python3",
+          "arguments": [
+            "Demo/ControlScrollComparison/audit.py"
+          ],
+          "working_directory": "/Users/daniilvinogradov/Documents/Dev/NXKit",
+          "environment": {},
+          "filesystem_observation_paths": [],
+          "terminal": {
+            "columns": 80,
+            "rows": 24,
+            "scrollback": 1000
+          },
+          "events": [],
+          "timeout_ms": 45000,
+          "idle_timeout_ms": 30000,
+          "settle_ms": 100,
+          "limits": {
+            "output_bytes": 8000,
+            "files": 15,
+            "file_bytes": 300000,
+            "processes": 15,
+            "filesystem_depth": 1
+          },
+          "normalization": {
+            "paths": false,
+            "pids": true,
+            "ports": true,
+            "time_bucket_ms": 10,
+            "patterns": []
+          },
+          "executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"
+        },
+        "comparison_contract": {
+          "working_directory": "/Users/daniilvinogradov/Documents/Dev/NXKit",
+          "environment": {},
+          "ambient_environment": "unknown",
+          "filesystem_observation_paths": [],
+          "terminal": {
+            "columns": 80,
+            "rows": 24,
+            "scrollback": 1000
+          },
+          "events": [],
+          "timeout_ms": 45000,
+          "idle_timeout_ms": 30000,
+          "settle_ms": 100,
+          "limits": {
+            "output_bytes": 8000,
+            "files": 15,
+            "file_bytes": 300000,
+            "processes": 15,
+            "filesystem_depth": 1
+          },
+          "normalization": {
+            "paths": false,
+            "pids": true,
+            "ports": true,
+            "time_bucket_ms": 10,
+            "patterns": []
+          }
+        },
+        "full_scenario_sha256": "d2e88a701055e4e3a1cf1ab9d52b55edea9842afb5565f291a7f9c400d79ccf9",
+        "comparison_contract_sha256": "751a5276ada9d45eefec414787ab565d8b5b5df95ff65021ad45a15c61967f02",
+        "executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2",
+        "normalization_sha256": "5c58aa1aa890197f15f9c59ef755d01120e6e07f356fa1ef2f20787e63b6fa87"
+      },
+      "normalization": {
+        "paths": false,
+        "pids": true,
+        "ports": true,
+        "time_bucket_ms": 10,
+        "patterns": []
+      },
+      "frames": [
+        {
+          "sequence": 0,
+          "at_ms": 2050,
+          "data": "{\"scope\": \"Static read-only shipped UIKitCore disassembly; methods are not executed\", \"binarySHA256\": \"5cefe8cfb213b0dfcb378feb86ddd9062fda37fb4f331b3ceb782070a20292a4\", \"methods\": {\"switch-failure-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRequireFailureOfGestureRecognizer:]\", \"switch-event-admission\": \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\", \"switch-simultaneous-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:]\", \"switch-long-press\": \"-[UISwitchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureState:]\", \"scroll-delay-began\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesBegan:withEvent:]\", \"scroll-delay-moved\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesMoved:withEvent:]\", \"scroll-delay-ended\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\", \"scroll-delay-deliver\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer"
+        },
+        {
+          "sequence": 1,
+          "at_ms": 2050,
+          "data": " sendDelayedTouches]\", \"slider-should-begin\": \"-[UISlider gestureRecognizerShouldBegin:]\"}, \"disassemblySHA256\": {\"switch-failure-policy\": \"06421ed700e68f4c796ff3919027960c4da51213bb304cb420b84a7037d86b69\", \"switch-event-admission\": \"53a5bec57ce665d9685f58cc94ab397f2f88da8898af026b03eafebca4a4671a\", \"switch-simultaneous-policy\": \"3135b3119e48a73f457b2b6fa230d92c24be0c6198720ecbe2a6cf6bfdd69ddb\", \"switch-long-press\": \"812fb3a25623d8d961cc05ee8c95dbc81b2d6f6c47b038a031a1ea6a6484d685\", \"scroll-delay-began\": \"fca2a3cba60b718781b8c7184dd9afb9217f0b08a3e1c94bbb2eac24913eea24\", \"scroll-delay-moved\": \"43dc9313339e608e839955fe9854927f63239d00178ed111cfd49b0f0fea891a\", \"scroll-delay-ended\": \"3a9e319556b01c746354ddca4873581e58e404d4927acf33616d050e35dd639d\", \"scroll-delay-deliver\": \"3bd01451ced0b29370ff885ac7899d5f59100c055b615ded1a60a6f133358122\", \"slider-should-begin\": \"7d7b8930cbb3ea5e70b391051f72228e83fe6a2b7678f3014aa431399f694e1c\"}, \"normalizedPreviewSHA256\": {\"switch-failure-policy\": \"3c8cc02620ff3e5930c9696b366c"
+        },
+        {
+          "sequence": 2,
+          "at_ms": 2050,
+          "data": "23a01ea59c66b20e0fdf9fac9d4a85f8bbab\", \"switch-event-admission\": \"c37dfc4a7a868c23ab163719612d52f5ce50753a45b69f6bff445ee9a7d8f5ee\", \"switch-simultaneous-policy\": \"3333bf0d5000957115d677a313806063cba2a25fc509a7f81dd1b01433c0fb71\", \"switch-long-press\": \"7ee64ee309f6108bca934b01f61937c6caf60de20a622c9671d0e0f7cd5e12cc\", \"scroll-delay-began\": \"4efcd935d08e7bdf205f3e7d4a0a54e52a9092e82b3a335943fd9ca145d475cb\", \"scroll-delay-moved\": \"4c2e7e62a6f5e857d2c3838dd92009c7dd1a2ffd5707c577af6a5de9464e3f41\", \"scroll-delay-ended\": \"017a4a6cd6f32829249532f47093f29453c8cbb43fe96d37c9ece9e00e4e61b3\", \"scroll-delay-deliver\": \"b4e16308529cb7b560df162f11839117e67aff5af4f48eb894f8ed6d269edc14\", \"slider-should-begin\": \"7d7b8930cbb3ea5e70b391051f72228e83fe6a2b7678f3014aa431399f694e1c\"}, \"disassemblyEncoding\": \"Original LLDB bytes are retained in .txt.gz; .txt previews normalize trailing whitespace\", \"observedPolicy\": \"Switch longPress and pan require failure of recognizers whose class is UIScrollViewDelayedTouchesBeganGestureRecogni"
+        },
+        {
+          "sequence": 3,
+          "at_ms": 2050,
+          "data": "zer; other own recognizers return false in this method\", \"requiredClassReference\": {\"slot\": \"0x222e8ca30\", \"value\": \"0x22e8701d0\", \"name\": \"UIScrollViewDelayedTouchesBeganGestureRecognizer\"}, \"unknowns\": [\"No assertion about other UIKit builds or complete dependency graph; runtime outcome remains defined by real touch traces\"]}\r\n"
+        }
+      ],
+      "rendered_frames": [
+        {
+          "sequence": 0,
+          "at_ms": 2050,
+          "columns": 80,
+          "rows": 24,
+          "cursor_x": 64,
+          "cursor_y": 12,
+          "active_buffer": "normal",
+          "lines": [
+            "{\"scope\": \"Static read-only shipped UIKitCore disassembly; methods are not execu",
+            "ted\", \"binarySHA256\": \"5cefe8cfb213b0dfcb378feb86ddd9062fda37fb4f331b3ceb782070a",
+            "20292a4\", \"methods\": {\"switch-failure-policy\": \"-[UISwitchModernVisualElement ge",
+            "stureRecognizer:shouldRequireFailureOfGestureRecognizer:]\", \"switch-event-admiss",
+            "ion\": \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\", \"",
+            "switch-simultaneous-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:sh",
+            "ouldRecognizeSimultaneouslyWithGestureRecognizer:]\", \"switch-long-press\": \"-[UIS",
+            "witchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureStat",
+            "e:]\", \"scroll-delay-began\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer ",
+            "touchesBegan:withEvent:]\", \"scroll-delay-moved\": \"-[UIScrollViewDelayedTouchesBe",
+            "ganGestureRecognizer touchesMoved:withEvent:]\", \"scroll-delay-ended\": \"-[UIScrol",
+            "lViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\", \"scroll-del",
+            "ay-deliver\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                "
+          ],
+          "serialized_state": "{\"scope\": \"Static read-only shipped UIKitCore disassembly; methods are not executed\", \"binarySHA256\": \"5cefe8cfb213b0dfcb378feb86ddd9062fda37fb4f331b3ceb782070a20292a4\", \"methods\": {\"switch-failure-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRequireFailureOfGestureRecognizer:]\", \"switch-event-admission\": \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\", \"switch-simultaneous-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:]\", \"switch-long-press\": \"-[UISwitchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureState:]\", \"scroll-delay-began\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesBegan:withEvent:]\", \"scroll-delay-moved\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesMoved:withEvent:]\", \"scroll-delay-ended\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\", \"scroll-delay-deliver\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer"
+        },
+        {
+          "sequence": 1,
+          "at_ms": 2050,
+          "columns": 80,
+          "rows": 24,
+          "cursor_x": 48,
+          "cursor_y": 23,
+          "active_buffer": "normal",
+          "lines": [
+            "20292a4\", \"methods\": {\"switch-failure-policy\": \"-[UISwitchModernVisualElement ge",
+            "stureRecognizer:shouldRequireFailureOfGestureRecognizer:]\", \"switch-event-admiss",
+            "ion\": \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\", \"",
+            "switch-simultaneous-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:sh",
+            "ouldRecognizeSimultaneouslyWithGestureRecognizer:]\", \"switch-long-press\": \"-[UIS",
+            "witchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureStat",
+            "e:]\", \"scroll-delay-began\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer ",
+            "touchesBegan:withEvent:]\", \"scroll-delay-moved\": \"-[UIScrollViewDelayedTouchesBe",
+            "ganGestureRecognizer touchesMoved:withEvent:]\", \"scroll-delay-ended\": \"-[UIScrol",
+            "lViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\", \"scroll-del",
+            "ay-deliver\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer sendDelayedTouc",
+            "hes]\", \"slider-should-begin\": \"-[UISlider gestureRecognizerShouldBegin:]\"}, \"dis",
+            "assemblySHA256\": {\"switch-failure-policy\": \"06421ed700e68f4c796ff3919027960c4da5",
+            "1213bb304cb420b84a7037d86b69\", \"switch-event-admission\": \"53a5bec57ce665d9685f58",
+            "cc94ab397f2f88da8898af026b03eafebca4a4671a\", \"switch-simultaneous-policy\": \"3135",
+            "b3119e48a73f457b2b6fa230d92c24be0c6198720ecbe2a6cf6bfdd69ddb\", \"switch-long-pres",
+            "s\": \"812fb3a25623d8d961cc05ee8c95dbc81b2d6f6c47b038a031a1ea6a6484d685\", \"scroll-",
+            "delay-began\": \"fca2a3cba60b718781b8c7184dd9afb9217f0b08a3e1c94bbb2eac24913eea24\"",
+            ", \"scroll-delay-moved\": \"43dc9313339e608e839955fe9854927f63239d00178ed111cfd49b0",
+            "f0fea891a\", \"scroll-delay-ended\": \"3a9e319556b01c746354ddca4873581e58e404d4927ac",
+            "f33616d050e35dd639d\", \"scroll-delay-deliver\": \"3bd01451ced0b29370ff885ac7899d5f5",
+            "9100c055b615ded1a60a6f133358122\", \"slider-should-begin\": \"7d7b8930cbb3ea5e70b391",
+            "051f72228e83fe6a2b7678f3014aa431399f694e1c\"}, \"normalizedPreviewSHA256\": {\"switc",
+            "h-failure-policy\": \"3c8cc02620ff3e5930c9696b366c                                "
+          ],
+          "serialized_state": "{\"scope\": \"Static read-only shipped UIKitCore disassembly; methods are not executed\", \"binarySHA256\": \"5cefe8cfb213b0dfcb378feb86ddd9062fda37fb4f331b3ceb782070a20292a4\", \"methods\": {\"switch-failure-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRequireFailureOfGestureRecognizer:]\", \"switch-event-admission\": \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\", \"switch-simultaneous-policy\": \"-[UISwitchModernVisualElement gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:]\", \"switch-long-press\": \"-[UISwitchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureState:]\", \"scroll-delay-began\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesBegan:withEvent:]\", \"scroll-delay-moved\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesMoved:withEvent:]\", \"scroll-delay-ended\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\", \"scroll-delay-deliver\": \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer sendDelayedTouches]\", \"slider-should-begin\": \"-[UISlider gestureRecognizerShouldBegin:]\"}, \"disassemblySHA256\": {\"switch-failure-policy\": \"06421ed700e68f4c796ff3919027960c4da51213bb304cb420b84a7037d86b69\", \"switch-event-admission\": \"53a5bec57ce665d9685f58cc94ab397f2f88da8898af026b03eafebca4a4671a\", \"switch-simultaneous-policy\": \"3135b3119e48a73f457b2b6fa230d92c24be0c6198720ecbe2a6cf6bfdd69ddb\", \"switch-long-press\": \"812fb3a25623d8d961cc05ee8c95dbc81b2d6f6c47b038a031a1ea6a6484d685\", \"scroll-delay-began\": \"fca2a3cba60b718781b8c7184dd9afb9217f0b08a3e1c94bbb2eac24913eea24\", \"scroll-delay-moved\": \"43dc9313339e608e839955fe9854927f63239d00178ed111cfd49b0f0fea891a\", \"scroll-delay-ended\": \"3a9e319556b01c746354ddca4873581e58e404d4927acf33616d050e35dd639d\", \"scroll-delay-deliver\": \"3bd01451ced0b29370ff885ac7899d5f59100c055b615ded1a60a6f133358122\", \"slider-should-begin\": \"7d7b8930cbb3ea5e70b391051f72228e83fe6a2b7678f3014aa431399f694e1c\"}, \"normalizedPreviewSHA256\": {\"switch-failure-policy\": \"3c8cc02620ff3e5930c9696b366c"
+        }
+      ],
+      "interaction_events": [],
+      "exit": {
+        "code": 0,
+        "signal": 0,
+        "reason": "exited"
+      },
+      "settlement": {
+        "state": "alive_at_deadline",
+        "elapsed_ms": 111,
+        "cleanup_outcome": "cleaned"
+      },
+      "process_samples": [
+        {
+          "at_ms": 250,
+          "pid": 1,
+          "parent_pid": 2,
+          "command": "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python Demo/ControlScrollComparison/audit.py",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 370,
+          "pid": 3,
+          "parent_pid": 1,
+          "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/lldb -b -o target create /private/tmp/nxkit-glass-settings/binaries/UIKitCore -o disassemble -n \"-[UISwitchModernVisualElement gestureRecognizer:shouldRequireFailureOfGestureRecognizer:]\" -o disassemble -n \"-[UISwitchModernVisualElement _gestureRecognizer:shouldReceiveEvent:]\" -o disassemble -n \"-[UISwitchModernVisualElement gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:]\" -o disassemble -n \"-[UISwitchModernVisualElement _handleLongPressWithGestureLocationInBounds:gestureState:]\" -o disassemble -n \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesBegan:withEvent:]\" -o disassemble -n \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesMoved:withEvent:]\" -o disassemble -n \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]\" -o disassemble -n \"-[UIScrollViewDelayedTouchesBeganGestureRecognizer sendDelayedTouches]\" -o disassemble -n \"-[UISlider gestureRecognizerShouldBegin:]\" -o memory read -fx -s8 -c1 0x222e8ca30 -o image lookup -a 0x22e8701d0 -o quit",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 1530,
+          "pid": 3,
+          "parent_pid": 1,
+          "command": "(lldb)",
+          "process_group_id": 1,
+          "session_id": null
+        },
+        {
+          "at_ms": 1880,
+          "pid": 1,
+          "parent_pid": 2,
+          "command": "(Python)",
+          "process_group_id": 1,
+          "session_id": null
+        }
+      ],
+      "filesystem_checkpoints": [
+        {
+          "name": "before",
+          "at_ms": 0,
+          "files": [],
+          "effects": [],
+          "truncated": false
+        },
+        {
+          "name": "after_settlement",
+          "at_ms": 2196,
+          "files": [],
+          "effects": [],
+          "truncated": false
+        }
+      ],
+      "event_journal": [
+        {
+          "capture_order": 0,
+          "collection": "filesystem_checkpoints",
+          "index": 0
+        },
+        {
+          "capture_order": 1,
+          "collection": "process_samples",
+          "index": 0
+        },
+        {
+          "capture_order": 2,
+          "collection": "process_samples",
+          "index": 1
+        },
+        {
+          "capture_order": 3,
+          "collection": "process_samples",
+          "index": 2
+        },
+        {
+          "capture_order": 4,
+          "collection": "frames",
+          "index": 0
+        },
+        {
+          "capture_order": 5,
+          "collection": "frames",
+          "index": 1
+        },
+        {
+          "capture_order": 6,
+          "collection": "frames",
+          "index": 2
+        },
+        {
+          "capture_order": 7,
+          "collection": "frames",
+          "index": 3
+        },
+        {
+          "capture_order": 8,
+          "collection": "rendered_frames",
+          "index": 0
+        },
+        {
+          "capture_order": 9,
+          "collection": "rendered_frames",
+          "index": 1
+        },
+        {
+          "capture_order": 10,
+          "collection": "lifecycle",
+          "index": 0
+        },
+        {
+          "capture_order": 11,
+          "collection": "process_samples",
+          "index": 3
+        },
+        {
+          "capture_order": 12,
+          "collection": "lifecycle",
+          "index": 1
+        },
+        {
+          "capture_order": 13,
+          "collection": "filesystem_checkpoints",
+          "index": 1
+        }
+      ],
+      "files_before": [],
+      "files_after": [],
+      "filesystem_effects": [],
+      "truncated": true,
+      "limitations": [
+        "Process trees are sampled and may omit short-lived descendants.",
+        "Filesystem observations are before/after snapshots, not syscall traces.",
+        "Inherited host environment variables are not recorded and may affect results.",
+        "No filesystem observation paths were selected; filesystem effects remain unknown."
+      ],
+      "residual_unknowns": [
+        {
+          "scope": "process",
+          "reason": "Process trees are sampled and may omit short-lived descendants."
+        },
+        {
+          "scope": "environment",
+          "reason": "Inherited host environment variables are not recorded."
+        },
+        {
+          "scope": "network",
+          "reason": "Network activity is not observed by this capture."
+        },
+        {
+          "scope": "filesystem",
+          "reason": "No filesystem observation paths were selected; filesystem effects remain unknown."
+        }
+      ],
+      "cleanup": {
+        "owned_process_group": "verified",
+        "temporary_root": "removed"
+      }
+    },
+    "confidence": "observed",
+    "authority": "controlled-replay",
+    "environment": {
+      "id": "darwin-arm64",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "isolation": "process"
+    },
+    "limitations": [
+      "Artifact identity is unavailable for this observation.",
+      "Process trees are sampled and may omit short-lived descendants.",
+      "Filesystem observations are before/after snapshots, not syscall traces.",
+      "Inherited host environment variables are not recorded and may affect results.",
+      "No filesystem observation paths were selected; filesystem effects remain unknown."
+    ],
+    "locations": [],
+    "evidence_links": []
+  }
+}

@@ -134,6 +134,15 @@ void validateGeometry(NXRect value) {
 
 struct LensView::Animation {
   Internal::GlassSpring progress;
+  struct PendingUnlift {
+    double remaining;
+    std::function<void()> alongside;
+    LiftCompletion completion;
+  };
+  std::optional<PendingUnlift> pendingUnlift;
+  double liftAge=std::numeric_limits<double>::infinity();
+  std::chrono::steady_clock::time_point liftStart;
+  std::uint64_t liftGeneration=0;
   double materialElapsed=0;
   std::optional<NXFloat> controlledRestingOpacity;
   std::optional<NXFloat> controlledOpticalProgress;
@@ -480,6 +489,13 @@ void LensView::setWarpsContentBelow(bool value) {
   _warpsContentBelow=value;updateMaterial();
 }
 void LensView::setLifted(bool lifted, bool animated) {
+  if(animated) {setLifted(lifted,true,{},{});return;}
+  // The portable immediate setter is also the explicit interruption/snap path.
+  _animation->pendingUnlift.reset();++_animation->liftGeneration;
+  _animation->liftAge=std::numeric_limits<double>::infinity();
+  applyLifted(lifted,false);
+}
+void LensView::applyLifted(bool lifted, bool animated) {
   _animation->controlledRestingOpacity.reset();
   _animation->controlledOpticalProgress.reset();
   _animation->controlledMaterialProgress.reset();
@@ -519,19 +535,43 @@ void LensView::setLifted(bool lifted, bool animated) {
   wakeAnimation();
 }
 void LensView::setLifted(bool lifted,bool animated,const std::function<void()>& alongsideAnimations,LiftCompletion completion) {
+  // Native same-state requests run alongside synchronously, without completion
+  // or cancelling a previously requested delayed unlift.
   if(_lifted==lifted) {if(alongsideAnimations)alongsideAnimations();return;}
-  setLifted(lifted,animated);
+  auto& state=*_animation;
+  state.pendingUnlift.reset();++state.liftGeneration;
+  if(animated && !lifted && std::isfinite(state.liftAge)) {
+    const auto elapsed=std::max(state.liftAge,std::chrono::duration<double>(std::chrono::steady_clock::now()-state.liftStart).count());
+    const auto traits=traitCollection();
+    const auto hang=Internal::nativeLensProfile(_style==Style::selection,
+        traits && traits->userInterfaceStyle()==UIUserInterfaceStyle::dark,bounds().size).spec.lensHangTime;
+    if(const auto remaining=double(hang)-elapsed;remaining>1e-8) {
+      state.pendingUnlift=Animation::PendingUnlift{remaining,alongsideAnimations,std::move(completion)};
+      wakeAnimation();return;
+    }
+  }
+  performLiftTransition(lifted,animated,alongsideAnimations,std::move(completion));
+}
+void LensView::performLiftTransition(bool lifted,bool animated,const std::function<void()>& alongsideAnimations,LiftCompletion completion) {
+  auto& state=*_animation;
+  state.pendingUnlift.reset();++state.liftGeneration;
+  state.liftAge=lifted&&animated?0:std::numeric_limits<double>::infinity();
+  if(lifted&&animated)state.liftStart=std::chrono::steady_clock::now();
+  applyLifted(lifted,animated);
   if(alongsideAnimations) {
     if(animated)UIView::animate(_style==Style::large?.25:(_lifted?.25:.46),0,
         UIViewAnimationOptions(UIViewAnimationOptions::allowUserInteraction|UIViewAnimationOptions::beginFromCurrentState),alongsideAnimations);
     else UIView::performWithoutAnimation(alongsideAnimations);
   }
   if(completion) {
-    if(animated)_animation->completions.push_back(std::move(completion));
+    if(animated)state.completions.push_back(std::move(completion));
     else completion(true,false);
   }
 }
 void LensView::setControlLift(bool lifted, NXFloat progress, NXFloat restingOpacity, NXFloat opticalProgress, NXSize materialReferenceSize) {
+  // A control supplying an external presentation clock owns its own hold phase.
+  _animation->pendingUnlift.reset();++_animation->liftGeneration;
+  _animation->liftAge=std::numeric_limits<double>::infinity();
   if(lifted&&!_lifted)restartElasticResponse();
   if(!lifted&&_lifted)retireElasticResponse();
   const auto materialProgress=progress;
@@ -574,8 +614,25 @@ void LensView::wakeAnimation() {
   CALayer::requestFramerate(120);
 }
 void LensView::advance(double seconds) {
-  if (!std::isfinite(seconds) || seconds <= 0)
+  if(!std::isfinite(seconds)||seconds<=0)return;
+  auto& state=*_animation;
+  if(state.pendingUnlift) {
+    const auto generation=state.liftGeneration;
+    const auto held=std::min(seconds,state.pendingUnlift->remaining);
+    state.pendingUnlift->remaining-=held;
+    if(std::isfinite(state.liftAge))state.liftAge+=held;
+    if(held>0)advanceState(held);
+    if(state.liftGeneration==generation && state.pendingUnlift && state.pendingUnlift->remaining<=1e-8) {
+      auto pending=std::move(*state.pendingUnlift);state.pendingUnlift.reset();
+      performLiftTransition(false,true,pending.alongside,std::move(pending.completion));
+    }
+    if(seconds>held)advance(seconds-held);
     return;
+  }
+  if(std::isfinite(state.liftAge))state.liftAge+=seconds;
+  advanceState(seconds);
+}
+void LensView::advanceState(double seconds) {
   auto& state=*_animation;
   state.elasticAge=std::min(elasticLifetime,state.elasticAge+seconds);
   // UIKit's motion-driven flex is inactive at rest (resolved mode 1), and
@@ -630,7 +687,7 @@ void LensView::advance(double seconds) {
     for(const auto& completion:completions)completion(true,false);
   }
   if(state.source==InteractionSource::viewMotion&&!viewMotionIsActive())resetInteraction();
-  if (!_animation->contact && _animation->motion.atRest() && (state.controlledRestingOpacity || _animation->progress.atRest(_lifted ? 1 : 0))
+  if (!state.pendingUnlift && !_animation->contact && _animation->motion.atRest() && (state.controlledRestingOpacity || _animation->progress.atRest(_lifted ? 1 : 0))
       && !(viewMotionIsActive()&&_lifted&&_animation->hasLifetime)) {
     if (_animation->link)
       _animation->link->invalidate();

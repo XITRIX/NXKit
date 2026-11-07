@@ -46,6 +46,10 @@ public:
     bool canBecomeFocused() override;
     bool allowsActionDispatch() const override;
     void didUpdateFocusIn(UIFocusUpdateContext context, UIFocusAnimationCoordinator* coordinator) override;
+    void touchesBegan(std::set<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
+    void touchesMoved(std::set<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
+    void touchesEnded(std::set<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
+    void touchesCancelled(std::set<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent> event) override;
     void pressesBegan(std::set<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) override;
     void pressesEnded(std::set<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) override;
     void pressesCancelled(std::set<std::shared_ptr<UIPress>> presses, std::shared_ptr<UIPressesEvent> event) override;
@@ -110,6 +114,20 @@ public:
 protected:
     virtual void controlStateDidChange() {}
     virtual bool requiresExclusiveTouchTracking() const { return false; }
+    // Portable control-provider hooks. Actual tracking is delivered through the
+    // responder path, including gesture-recognizer touch delays. A provider may
+    // separately show early contact feedback and capture a drag from its thumb.
+    virtual bool capturesUndelayedDrag(const std::shared_ptr<UITouch>&) const { return false; }
+    virtual void contactFeedbackBegan(const std::shared_ptr<UITouch>&, const std::shared_ptr<UIEvent>&) {}
+    virtual void contactFeedbackCancelled() {}
+    virtual bool beginTrackingContact(const std::shared_ptr<UITouch>& touch, const std::shared_ptr<UIEvent>& event);
+    virtual void moveTrackingContact(const std::shared_ptr<UITouch>& touch, const std::shared_ptr<UIEvent>& event);
+    virtual void endTrackingContact(const std::shared_ptr<UITouch>& touch, const std::shared_ptr<UIEvent>& event);
+    virtual bool hasTrackingContact() const { return isTracking(); }
+    // Provider admission can distinguish a replayed, already completed drag
+    // from a live contact without inferring intent from the replayed phase.
+    // Components are the maximum absolute travel on each axis, including reversals.
+    [[nodiscard]] std::optional<NXPoint> completedContactTravel(const std::shared_ptr<UITouch>& touch) const;
     // A control may keep its final tracking phase alive while its owned
     // presentation settles. These are internal portable subclass hooks.
     virtual bool deferEndTracking(const std::shared_ptr<UITouch>&, const std::shared_ptr<UIEvent>&) { return false; }
@@ -118,6 +136,7 @@ protected:
     void interactionDidBecomeUnavailable() override;
 private:
     friend class UIControlGestureRecognizer;
+    friend class UIScrollView;
     struct Handler {
         std::optional<UIAction> action;
         std::weak_ptr<UIResponder> target;

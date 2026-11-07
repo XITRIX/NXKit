@@ -1,0 +1,4 @@
+# Retained input traces and read-only shipped-code evidence for this regression.
+!*.json
+!*.gz
+!*.txt

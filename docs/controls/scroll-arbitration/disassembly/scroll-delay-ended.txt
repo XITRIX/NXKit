@@ -1,0 +1,37 @@
+UIKitCore`-[UIScrollViewDelayedTouchesBeganGestureRecognizer touchesEnded:withEvent:]:
+UIKitCore[0x1c4e47b28] <+0>:   sub    sp, sp, #0x30
+UIKitCore[0x1c4e47b2c] <+4>:   stp    x20, x19, [sp, #0x10]
+UIKitCore[0x1c4e47b30] <+8>:   stp    x29, x30, [sp, #0x20]
+UIKitCore[0x1c4e47b34] <+12>:  add    x29, sp, #0x20
+UIKitCore[0x1c4e47b38] <+16>:  mov    x19, x0
+UIKitCore[0x1c4e47b3c] <+20>:  bl     0x1c5b51500               ; objc_msgSend$state
+UIKitCore[0x1c4e47b40] <+24>:  cmp    x0, #0x1
+UIKitCore[0x1c4e47b44] <+28>:  b.ne   0x1c4e47b60               ; <+56>
+UIKitCore[0x1c4e47b48] <+32>:  mov    x0, x19
+UIKitCore[0x1c4e47b4c] <+36>:  mov    w2, #0x3                  ; =3
+UIKitCore[0x1c4e47b50] <+40>:  ldp    x29, x30, [sp, #0x20]
+UIKitCore[0x1c4e47b54] <+44>:  ldp    x20, x19, [sp, #0x10]
+UIKitCore[0x1c4e47b58] <+48>:  add    sp, sp, #0x30
+UIKitCore[0x1c4e47b5c] <+52>:  b      0x1c5b36ec0               ; objc_msgSend$setState:
+UIKitCore[0x1c4e47b60] <+56>:  adrp   x8, 432585
+UIKitCore[0x1c4e47b64] <+60>:  ldrsw  x8, [x8, #0xc70]
+UIKitCore[0x1c4e47b68] <+64>:  ldr    x8, [x19, x8]
+UIKitCore[0x1c4e47b6c] <+68>:  cbz    x8, 0x1c4e47b9c           ; <+116>
+UIKitCore[0x1c4e47b70] <+72>:  ldr    x0, [x19, #0x20]
+UIKitCore[0x1c4e47b74] <+76>:  bl     0x1c5a6b280               ; objc_msgSend$copy
+UIKitCore[0x1c4e47b78] <+80>:  mov    x2, x0
+UIKitCore[0x1c4e47b7c] <+84>:  str    x0, [sp, #0x8]
+UIKitCore[0x1c4e47b80] <+88>:  mov    x0, x19
+UIKitCore[0x1c4e47b84] <+92>:  bl     0x1c5afa5a0               ; objc_msgSend$sendTouchesShouldBeginForDelayedTouches:
+UIKitCore[0x1c4e47b88] <+96>:  ldr    x0, [sp, #0x8]
+UIKitCore[0x1c4e47b8c] <+100>: ldp    x29, x30, [sp, #0x20]
+UIKitCore[0x1c4e47b90] <+104>: ldp    x20, x19, [sp, #0x10]
+UIKitCore[0x1c4e47b94] <+108>: add    sp, sp, #0x30
+UIKitCore[0x1c4e47b98] <+112>: b      0x1c5b8629c               ; symbol stub for: objc_release
+UIKitCore[0x1c4e47b9c] <+116>: adrp   x2, 384166
+UIKitCore[0x1c4e47ba0] <+120>: add    x2, x2, #0x578            ; @"touchesEnded"
+UIKitCore[0x1c4e47ba4] <+124>: mov    x0, x19
+UIKitCore[0x1c4e47ba8] <+128>: ldp    x29, x30, [sp, #0x20]
+UIKitCore[0x1c4e47bac] <+132>: ldp    x20, x19, [sp, #0x10]
+UIKitCore[0x1c4e47bb0] <+136>: add    sp, sp, #0x30
+UIKitCore[0x1c4e47bb4] <+140>: b      0x1c59c22a0               ; objc_msgSend$_failWithReason:
