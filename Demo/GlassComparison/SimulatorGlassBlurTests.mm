@@ -31,6 +31,7 @@
 #include "include/effects/SkImageFilters.h"
 #include "include/effects/SkRuntimeEffect.h"
 #import <Metal/Metal.h>
+#include <UISwitch.h>
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -55,6 +56,13 @@ class LensViewTestHarness {
 public:
     static void progress(const std::shared_ptr<LensView>& lens,NXFloat value) {
         lens->setControlLift(value>0,value,1-value,value,lens->bounds().size);
+    }
+};
+class UISwitchTestHarness {
+public:
+    static void pose(const std::shared_ptr<UISwitch>& control,float progress) {
+        control->setPressed(progress>0,false);control->layoutSubviews();
+        LensViewTestHarness::progress(control->_lens,progress);
     }
 };
 class UISliderTestHarness {
@@ -462,6 +470,69 @@ void sliderMotionMetalEquivalence(GPU& gpu) {
     }
     std::cout<<"Slider motion Metal "<<frames<<" frames / "<<cases<<" raster comparisons max="<<maximum<<" MAE="<<total/values<<std::endl;
 }
+void switchMetalEquivalence(GPU& gpu) {
+    Raster raster;int cases=0,maximum=0;double total=0;size_t values=0;
+    for(int scale:{1,2,3})for(bool dark:{false,true})for(bool on:{false,true})for(bool tinted:{false,true})for(bool enabled:{false,true})for(float progress:{0.f,.5f,1.f}) {
+        const auto draw=[&](auto& renderer) {
+            auto root=new_shared<LensMetalRoot>(scale,dark);root->setBackgroundColor(dark?UIColor::black:UIColor::white);
+            auto control=new_shared<UISwitch>(NXRect{58.5f,62.25f,63,28});root->addSubview(control);
+            control->setOn(on,false);control->setEnabled(enabled);
+            if(tinted){control->setOnTintColor(UIColor::systemPurple);control->setThumbTintColor(UIColor::systemOrange);}
+            UISwitchTestHarness::pose(control,progress);
+            auto output=renderer.surface(180*scale,160*scale);auto canvas=output->getCanvas();
+            canvas->clear(SK_ColorTRANSPARENT);canvas->scale(scale,scale);root->layer()->skiaRender(canvas);return renderer.read(output);
+        };
+        const auto a=draw(raster),b=draw(gpu);double error=0;int worst=0;
+        for(size_t i=0;i<a.size();++i){const auto delta=std::abs(int(a[i])-int(b[i]));error+=delta;worst=std::max(worst,delta);}
+        if(error/a.size()>.3||worst>120) {
+            std::cerr<<"Switch mismatch scale="<<scale<<" dark="<<dark<<" on="<<on<<" tinted="<<tinted<<" enabled="<<enabled<<" progress="<<progress<<" max="<<worst<<" MAE="<<error/a.size()<<std::endl;
+            throw std::runtime_error("Switch raster/Metal disagreement");
+        }
+        total+=error;values+=a.size();maximum=std::max(maximum,worst);++cases;
+    }
+    std::cout<<"Switch Metal/raster "<<cases<<" cases max="<<maximum<<" MAE="<<total/values<<std::endl;
+}
+template<class Renderer>
+void emptyLensForegroundPreservesBackdrop(Renderer& renderer,const char* backend) {
+    auto root=new_shared<UIView>(NXRect{0,0,180,160});
+    auto source=new_shared<UIView>(root->bounds());root->addSubview(source);
+    auto layer=new_shared<LensLayer>();auto owner=new_shared<UIView>(NXRect{30.25f,35.5f,100,44},layer);root->addSubview(owner);
+    layer->setSource(source,owner);layer->setLiftState(true,1,1,true,false);layer->setContentsScale(1);
+    auto target=renderer.surface(180,160);target->getCanvas()->clear(0x80402060);
+    const auto before=renderer.read(target);root->layer()->skiaRender(target->getCanvas());const auto after=renderer.read(target);
+    int worst=0;for(size_t i=0;i<before.size();++i)worst=std::max(worst,std::abs(int(before[i])-int(after[i])));
+    if(worst>1)throw std::runtime_error("Empty lens foreground added the translucent backdrop twice");
+    std::cout<<backend<<" empty lens preserves translucent backdrop max="<<worst<<std::endl;
+}
+// Cross-process control: run with and without NXKIT_UNBOUNDED_LENS=1.
+// Capture the whole target, including the soft exterior and untouched prefix.
+void movingLensOutput(GPU& gpu,const char* path) {
+    std::ofstream output(path,std::ios::binary);if(!output)throw std::runtime_error("Cannot write lens equivalence output");
+    int cases=0;uint64_t groups=0,direct=0,immutable=0;
+    for(int scale:{1,3})for(bool dark:{false,true})for(bool selection:{false,true})for(bool vibrant:{false,true})for(float progress:{.35f,1.f})for(int pose=0;pose<4;++pose) {
+        auto root=new_shared<LensMetalRoot>(scale,dark);root->setFrame({0,0,500,400});
+        if(pose>=2)root->setBackgroundColor(UIColor(32,76,128,140));
+        auto source=new_shared<UIView>(root->bounds());root->addSubview(source);
+        for(int i=0;i<8;++i) {
+            auto mark=new_shared<UIView>(NXRect{float(60+i*47),40,6,300});
+            mark->setBackgroundColor(i%2?UIColor(255,230,90,155):UIColor(17,94,231));source->addSubview(mark);
+        }
+        auto lens=new_shared<LensView>(selection?LensView::Style::large:LensView::Style::small);
+        lens->setFrame({200.25f,180.5f,100,44});root->addSubview(lens);
+        lens->setWarpsContentBelow(true);lens->setLiftedContentMode(LensView::LiftedContentMode::hideSource);
+        lens->setLiftedContentView(source);lens->setContentVibrancyEnabled(vibrant);
+        lens->setLifted(true);LensViewTestHarness::progress(lens,progress);
+        if(pose==1)lens->setTransform({1.12f,0,0,.88f,3,-2});
+        if(pose==2)lens->setTransform({.98f,.2f,-.2f,.98f,3,-2});
+        auto surface=gpu.surface(500*scale,400*scale);auto canvas=surface->getCanvas();
+        canvas->clear(0x80402060);canvas->scale(scale,scale);
+        if(pose==3)canvas->clipRRect(SkRRect::MakeRectXY(SkRect::MakeXYWH(210,174,90,60),12,12),true);
+        RenderPerformance metrics;RenderPerformance::current=&metrics;root->layer()->skiaRender(canvas);RenderPerformance::current=nullptr;
+        groups+=metrics.boundedLensGroups;direct+=metrics.directLensForegrounds;immutable+=metrics.immutableLensInputs;
+        const auto pixels=gpu.read(surface);output.write(reinterpret_cast<const char*>(pixels.data()),pixels.size());++cases;
+    }
+    std::cout<<"Moving lens output cases="<<cases<<" boundedGroups="<<groups<<" directForegrounds="<<direct<<" immutableInputs="<<immutable<<std::endl;
+}
 template<class Renderer>
 void boundedLensEquivalence(Renderer& renderer,const char* backend) {
     int maximum=0,cases=0;double error=0;size_t values=0;
@@ -683,6 +754,13 @@ float3 legacySample(float2 p,float2 halfDim,float r) {
 int main(int argc,char** argv) {@autoreleasepool{try {
     GPU gpu;
     const auto prepared=gpu.cache->statistics();
+    if(argc==2&&std::string_view(argv[1])=="--switch-only") {
+        switchMetalEquivalence(gpu);
+        const auto rendered=gpu.cache->statistics();
+        if(std::getenv("NXKIT_METAL_BUNDLED_ONLY")&&(rendered.libraryCompiles!=prepared.libraryCompiles||rendered.pipelineCompiles!=prepared.pipelineCompiles))throw std::runtime_error("Bundled switch replay compiled shaders");
+        return 0;
+    }
+    if(argc==3&&std::string_view(argv[1])=="--lens-state-output"){movingLensOutput(gpu,argv[2]);return 0;}
     if(argc==2&&std::string_view(argv[1])=="--slider-only") {
         sliderMetalEquivalence(gpu);
         sliderMotionMetalEquivalence(gpu);
@@ -714,7 +792,7 @@ int main(int argc,char** argv) {@autoreleasepool{try {
         if(!output)throw std::runtime_error("Clear fixture output failed");return 0;
     }
     if(!(argc==2&&std::string_view(argv[1])=="--lens-only"))maskPrefixSemantics(gpu);
-    Raster raster;boundedLensEquivalence(raster,"Raster");
+    Raster raster;emptyLensForegroundPreservesBackdrop(raster,"Raster");emptyLensForegroundPreservesBackdrop(gpu,"Metal");boundedLensEquivalence(raster,"Raster");
     boundedLensEquivalence(gpu,"Metal");
     liftedLensMetalEquivalence(gpu);
     if(std::getenv("NXKIT_METAL_BUNDLED_ONLY")) {

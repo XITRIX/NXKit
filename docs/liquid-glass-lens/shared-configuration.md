@@ -6,6 +6,12 @@ UIKit. Its configuration follows the useful app-callable portion of private
 replacement. [The complete audit](api-audit/README.md) retains runtime metadata,
 shipped-code inspection and fresh app-space calls, with Evidence IDs and limits.
 
+The 2026-11-07 [finite response follow-up](finite-response/README.md) applies a
+shared two-second elastic fade after lowering to all clients, at the user's
+request. Elasticity remains active throughout the lifted state, including
+deceleration after contact ends. Lifted geometry, optics and control motion remain independent.
+This is a portable policy in addition to the captured native settings.
+
 ## Public surface
 
 | Native input | Portable API |

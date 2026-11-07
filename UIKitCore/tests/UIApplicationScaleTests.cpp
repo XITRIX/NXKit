@@ -4,6 +4,7 @@
 #include <UIEvent.h>
 #include <UITouch.h>
 #include <CADisplayLink.h>
+#include <DispatchQueue.h>
 #include <SDL3/SDL.h>
 #include "include/core/SkBitmap.h"
 #include <cmath>
@@ -32,7 +33,7 @@ public:
     bool exposeDuringAcquire=false;
     void expose() { renderImmediatelyForResize(); }
     void prepareFrame() override { ++preparations; }
-    void setTargetFrameRate(int rate) override {requestedRate=rate;}
+    void setTargetFrameRate(int rate) override {requestedRate=rate;SkiaCtx::setTargetFrameRate(rate);}
     sk_sp<SkSurface> surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(
         std::lround(nativeSize.width * nativeScale), std::lround(nativeSize.height * nativeScale)));
     NXSize getSize() override { return nativeSize * _extraScaleFactor; }
@@ -48,7 +49,7 @@ public:
     }
     void flushAndSubmit(sk_sp<SkSurface>) override {}
     void swapBuffers() override {++presents;}
-    void sleepForNextFrame() override {++waits;}
+    void sleepForNextFrame() override {++waits;SkiaCtx::sleepForNextFrame();}
     bool platformRunLoop(std::function<bool()> loop) override;
 protected:
     skgpu::graphite::Context* graphiteContext() override { return nullptr; }
@@ -57,6 +58,9 @@ protected:
 
 class TouchView final : public UIView {
 public:
+    int draws=0, layouts=0;
+    void draw() override { ++draws; }
+    void layoutSubviews() override { ++layouts; UIView::layoutSubviews(); }
     NXPoint lastTouch{-1, -1};
     void touchesBegan(std::set<std::shared_ptr<UITouch>> touches, std::shared_ptr<UIEvent>) override {
         lastTouch = (*touches.begin())->locationIn(shared_from_this());
@@ -81,19 +85,37 @@ bool Context::platformRunLoop(std::function<bool()> loop) {
         fast.invalidate();
     }
     expect(loop()&&requestedRate==30,"idle pacing returns to 30 Hz after interaction stops");
+    // A rate reduction can leave this first iteration before the new deadline.
+    const auto uncappedValue=std::getenv("NXKIT_UNCAPPED");
+    if (!(uncappedValue&&std::string_view(uncappedValue)=="1"))
+        expect(loop(),"the next paced idle deadline runs");
     const auto enabled=[](const char* name){const auto value=std::getenv(name);return value&&std::string_view(value)=="1";};
     const auto continuous=enabled("NXKIT_CONTINUOUS_RENDERING")||enabled("NXKIT_UNCAPPED");
     expect(presents==painted+(continuous?2:0),"clean frames skip GPU presentation unless profiling requests continuous rendering");
     expect(observed==3&&observedPresents==presents,"diagnostics distinguish idle iterations from submitted frames");
     Internal::RenderPerformance::observer=nullptr;
     const auto idlePresents=presents,idleAcquires=acquisitions;
+    static int idleViews=0;
+    idleViews=0;
+    Internal::RenderPerformance::observer=[](const Internal::RenderPerformance& frame) { idleViews+=frame.views; };
     for(int i=0;i<120;++i)expect(loop(),"idle event/dispatch loop keeps running");
+    Internal::RenderPerformance::observer=nullptr;
+    expect(continuous || idleViews==0,"clean idle iterations do not walk the view display tree");
     expect(presents==idlePresents+(continuous?120:0)&&acquisitions==idleAcquires+(continuous?120:0),
            "120 clean iterations acquire and submit zero framebuffers in normal mode");
     const auto window = UIApplication::shared->keyWindow.lock();
     expect(window->bounds().size == nativeSize, "startup preserves native window points");
     expect(window->traitCollection()->displayScale() == nativeScale, "window retains native display scale");
     expect(window->safeAreaInsets() == nativeSafe, "safe areas share the window point space");
+    const auto tracked=std::static_pointer_cast<TouchView>(window->rootViewController()->view());
+    const auto draws=tracked->draws, layouts=tracked->layouts;
+    tracked->setNeedsDisplay();
+    expect(loop()&&tracked->draws==draws+1,"view-only display invalidation wakes a clean tree");
+    tracked->setNeedsLayout();
+    expect(loop()&&tracked->layouts==layouts+1,"view-only layout invalidation wakes a clean tree");
+    bool dispatched=false;
+    DispatchQueue::main()->async([&]{dispatched=true;tracked->setNeedsDisplay();});
+    expect(loop()&&dispatched&&tracked->draws==draws+2,"main-queue work and its invalidation run after idle");
 
     // Check actual run-loop output: a 44-point view must occupy 132 pixels at
     // 3x and 88 pixels at 2x, without changing its point-sized hit geometry.
@@ -123,6 +145,7 @@ bool Context::platformRunLoop(std::function<bool()> loop) {
     root->layer()->removeAllAnimations();
     root->setAlpha(1);
     loop();
+    loop(); // Allow the 60-to-30 Hz deadline change to complete.
     const auto settled=presents;
     expect(loop()&&presents==settled+(continuous?1:0),"rendering skips resume after an animation is removed");
 

@@ -1,5 +1,5 @@
 {
-  "abi": "cb64e4205e5561624c44c98d05f3364671aa722e75caf9923a7f66caaa948b3d",
+  "abi": "3112bbe96394db43659182453aeb39df3a20daa4bbd11c4512702ad0359fee16",
   "device": "Apple iOS simulator GPU",
   "languageVersion": "metal2.3",
   "os": "Version 27.0 (Build 24A434)",
@@ -51,19 +51,54 @@
       "manifestSHA256": "a45b352a8d4b941bcbbcce325bbc87952f01247e2c4d478a59256900e02801d5",
       "pipelineDescriptionSHA256": "117a54135576d56341ab823f8ac4f9900e84e222036512a1f3fe253aa98d8bc2",
       "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "cb64e4205e5561624c44c98d05f3364671aa722e75caf9923a7f66caaa948b3d",
+      "manifestSHA256": "b9fdb25a345e4254aa1549eba1580ff4f4f49ee3e7b7ee3f0a9d7e7acc38645b",
+      "pipelineDescriptionSHA256": "117a54135576d56341ab823f8ac4f9900e84e222036512a1f3fe253aa98d8bc2",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "0cb95436b7c436a838a69299ea7620d3b256a1370d11b432a6212fd699292910",
+      "manifestSHA256": "8d2f4c7d7d884d2e10d8b6b4b82284a7d637a11a5041251fa24c182860b2d6a3",
+      "pipelineDescriptionSHA256": "451b1b585cc778ce37fb69c7cbff0ae3730a249bae204d69ab4eb22d96349d47",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "9ab0cb6107f6171249787fb7bec84fd98c37decb32c41cb2c6850e8c84babb92",
+      "manifestSHA256": "67d7d09f93d84018390a14720d1c6e9f820a63479b64837eca9c4b8a4bf87600",
+      "pipelineDescriptionSHA256": "451b1b585cc778ce37fb69c7cbff0ae3730a249bae204d69ab4eb22d96349d47",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "4d43f8ae5bf6cce79f9f99d16f4466ed8d908cea85d3c8927663af2033e3b4db",
+      "manifestSHA256": "f377ba84463b0692e676bab9f606297e92cb3469620e91b607f9063e96b45f13",
+      "pipelineDescriptionSHA256": "451b1b585cc778ce37fb69c7cbff0ae3730a249bae204d69ab4eb22d96349d47",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
+    },
+    {
+      "abi": "2ee3d064b1bdd537e184cd0fffc4b77ca9417a3438fe0218fa1e9c917db9f203",
+      "manifestSHA256": "d37b1cd5e1d43a67185652463e4809d0cb47b6c5bd810c9a6d9729c2cfdd446f",
+      "pipelineDescriptionSHA256": "451b1b585cc778ce37fb69c7cbff0ae3730a249bae204d69ab4eb22d96349d47",
+      "reason": "Retain exact content-addressed raw MSL and complete pipeline descriptors as an additive superset; no old GPU binary is reused or relabelled."
     }
   ],
   "coverage": {
-    "fixture": "Demo/GlassComparison/SimulatorGlassBlurTests.mm --slider-only",
-    "cases": 360,
-    "lens": {
-      "fixture": "SimulatorGlassBlurTests --lens-only",
-      "semanticCases": 48,
-      "boundedCases": 480,
-      "liftedCases": 48
+    "change": "Elastic retirement starts on lowering; lifted elasticity does not expire",
+    "lensMotion": {
+      "fixture": "MetalNavigationBenchmark --lens-motion --quick --passes 2",
+      "items": [
+        2,
+        3,
+        4,
+        5
+      ]
     },
-    "navigation": "MetalNavigationBenchmark --quick --passes 2 --catalog --interactive",
-    "freshLibraries": 51,
-    "freshPipelines": 37
+    "controlGallery": {
+      "fixture": "MetalNavigationBenchmark --controls-gallery --passes 1"
+    },
+    "priorStates": "Prior content-addressed raw MSL and complete descriptors retained as an additive superset; no old GPU binary reused",
+    "freshLibraries": 61,
+    "freshPipelines": 44
   }
 }

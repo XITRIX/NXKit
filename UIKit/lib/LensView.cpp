@@ -84,6 +84,17 @@ void validateInput(NXPoint value) {
   if(!std::isfinite(value.x)||!std::isfinite(value.y))
     throw std::invalid_argument("Lens interaction input must be finite");
 }
+// Elasticity stays active while lifted. Lowering starts a finite C2 fade,
+// even when the driving view keeps moving, without a final transform snap.
+constexpr double elasticLifetime=2;
+double smoothProgress(double value) {
+  value=std::clamp(value,0.,1.);
+  return value*value*value*(value*(value*6-15)+10);
+}
+double elasticWeight(double age,double entryWeight,bool retiring) {
+  return retiring ? entryWeight*(1-smoothProgress(age/elasticLifetime))
+      : entryWeight+(1-entryWeight)*smoothProgress(age/.08);
+}
 struct MotionPose { NXPoint center; NXAffineTransform inverse; bool valid = true; };
 MotionPose modelMotionPose(const std::shared_ptr<UIView>& view,const std::function<NXAffineTransform(const std::shared_ptr<CALayer>&)>& ancestorExtra) {
   MotionPose result;
@@ -133,6 +144,8 @@ struct LensView::Animation {
   bool interactive = false;
   InteractionSource source = InteractionSource::contact;
   Internal::LensInteraction motion;
+  double elasticAge=elasticLifetime,elasticEntryWeight=1;
+  bool elasticRetiring=true;
   bool hasLifetime = false;
   double lastVelocityTime = 0;
   bool contact = false;
@@ -255,7 +268,8 @@ void LensView::setInteractive(bool interactive) {
     };
     addGestureRecognizer(_animation->observer);
   }
-  if(interactionSource()==InteractionSource::viewMotion&&_lifted) { prepareViewMotion(); wakeAnimation(); }
+  if(_lifted)restartElasticResponse();
+  if(viewMotionIsActive()) { prepareViewMotion(); wakeAnimation(); }
 }
 LensView::InteractionSource LensView::interactionSource() const { return _animation->source; }
 void LensView::setInteractionSource(InteractionSource source) {
@@ -263,16 +277,39 @@ void LensView::setInteractionSource(InteractionSource source) {
     throw std::invalid_argument("Invalid lens interaction source");
   if(_animation->source==source) return;
   resetInteraction(); _animation->source=source;
-  if(isInteractive()&&source==InteractionSource::viewMotion&&_lifted) { prepareViewMotion(); wakeAnimation(); }
+  if(isInteractive()&&_lifted)restartElasticResponse();
+  if(viewMotionIsActive()) { prepareViewMotion(); wakeAnimation(); }
 }
 std::optional<std::pair<NXPoint,NXAffineTransform>> LensView::motionPose() {
   const auto pose=modelMotionPose(shared_from_this(),[](const auto& layer) { return layer->renderingTransform(); });
   if(!pose.valid) return std::nullopt;
   return std::pair(pose.center,pose.inverse);
 }
-void LensView::prepareViewMotion() {
-  if(!isInteractive()||interactionSource()!=InteractionSource::viewMotion||superview().expired()) return;
+bool LensView::viewMotionIsActive() const {
+  return isInteractive()&&interactionSource()==InteractionSource::viewMotion
+      &&(!_animation->elasticRetiring||_animation->elasticAge<elasticLifetime)
+      &&(_lifted||!_animation->progress.atRest(0)||!_animation->motion.atRest());
+}
+void LensView::restartElasticResponse() {
   auto& state=*_animation;
+  state.elasticEntryWeight=state.motion.atRest()?1:elasticWeight(state.elasticAge,state.elasticEntryWeight,state.elasticRetiring);
+  state.elasticAge=0;
+  state.elasticRetiring=false;
+}
+void LensView::retireElasticResponse() {
+  auto& state=*_animation;
+  if(state.elasticRetiring)return;
+  state.elasticEntryWeight=elasticWeight(state.elasticAge,state.elasticEntryWeight,false);
+  state.elasticAge=0;
+  state.elasticRetiring=true;
+}
+void LensView::prepareViewMotion() {
+  auto& state=*_animation;
+  if(!viewMotionIsActive()) {
+    if(state.source==InteractionSource::viewMotion&&state.hasLifetime)resetInteraction();
+    return;
+  }
+  if(superview().expired())return;
   if(!state.hasLifetime) {
     state.parent=superview(); state.window=window(); state.hadWindow=!state.window.expired(); state.hasLifetime=true;
   }
@@ -285,12 +322,13 @@ void LensView::beginInteraction(NXPoint location) {
   validateInput(location);
   if(!isInteractive()||superview().expired()||bounds().width()<=0||bounds().height()<=0) return;
   auto& state=*_animation;
+  restartElasticResponse();
   state.contact=true; state.direct=false; state.touch.reset();
   state.origin=state.location=location; state.velocity={};
   state.lastInput=std::chrono::steady_clock::now();
   state.lastVelocityTime=state.motion.time; state.hasLifetime=true;
   state.parent=superview(); state.window=window(); state.hadWindow=!state.window.expired();
-  if(state.source==InteractionSource::viewMotion) {
+  if(viewMotionIsActive()) {
     const auto pose=motionPose(); if(pose) state.motion.rebase(pose->first);
   }
   wakeAnimation();
@@ -317,6 +355,7 @@ void LensView::endInteraction(NXPoint velocity,bool cancelled) {
   _animation->contact=false; _animation->direct=false; _animation->touch.reset();
   _animation->velocity=cancelled?NXPoint():velocity;
   _animation->lastVelocityTime=_animation->motion.time;
+  if(!_lifted)retireElasticResponse();
   wakeAnimation();
 }
 void LensView::applyInteractionTransform(NXAffineTransform transform) {
@@ -327,6 +366,8 @@ void LensView::resetInteraction() {
   state.contact=false; state.direct=false; state.touch.reset();
   state.parent.reset(); state.window.reset(); state.velocity={};
   state.hasLifetime=false; state.motion.reset();
+  state.elasticAge=elasticLifetime;
+  state.elasticRetiring=true;
   applyInteractionTransform(NXAffineTransform::identity);
   if(state.progress.atRest(_lifted ? 1 : 0) && state.link) {
     state.link->invalidate(); state.link.reset();
@@ -443,6 +484,8 @@ void LensView::setLifted(bool lifted, bool animated) {
   _animation->controlledOpticalProgress.reset();
   _animation->controlledMaterialProgress.reset();
   const bool changed = _lifted != lifted;
+  if(changed&&lifted)restartElasticResponse();
+  if(changed&&!lifted)retireElasticResponse();
   _lifted = lifted;
   if(lifted&&!_animation->controlledBackdropCreated) {
     _animation->controlledBackdropCreated=true;_animation->firstControlLift=true;
@@ -466,7 +509,7 @@ void LensView::setLifted(bool lifted, bool animated) {
     _progress = lifted ? 1 : 0;
     updateMaterial();
     if(isInteractive()&&interactionSource()==InteractionSource::viewMotion) prepareViewMotion();
-    if(_animation->contact||!_animation->motion.atRest()||(isInteractive()&&interactionSource()==InteractionSource::viewMotion&&lifted)) wakeAnimation();
+    if(_animation->contact||!_animation->motion.atRest()||viewMotionIsActive()) wakeAnimation();
     else if(_animation->link) { _animation->link->invalidate(); _animation->link.reset(); }
     auto completions=std::move(_animation->completions);_animation->completions.clear();
     for(const auto& completion:completions)completion(true,false);
@@ -489,6 +532,8 @@ void LensView::setLifted(bool lifted,bool animated,const std::function<void()>& 
   }
 }
 void LensView::setControlLift(bool lifted, NXFloat progress, NXFloat restingOpacity, NXFloat opticalProgress, NXSize materialReferenceSize) {
+  if(lifted&&!_lifted)restartElasticResponse();
+  if(!lifted&&_lifted)retireElasticResponse();
   const auto materialProgress=progress;
   progress=std::clamp(progress,0.f,1.f);
   restingOpacity=std::clamp(restingOpacity,0.f,1.f);
@@ -509,7 +554,7 @@ void LensView::setControlLift(bool lifted, NXFloat progress, NXFloat restingOpac
   if(changed)updateMaterial();
   if(isInteractive()&&interactionSource()==InteractionSource::viewMotion) {
     prepareViewMotion();
-    if(lifted || !_animation->motion.atRest())wakeAnimation();
+    if(viewMotionIsActive())wakeAnimation();
   }
 }
 void LensView::wakeAnimation() {
@@ -532,6 +577,12 @@ void LensView::advance(double seconds) {
   if (!std::isfinite(seconds) || seconds <= 0)
     return;
   auto& state=*_animation;
+  state.elasticAge=std::min(elasticLifetime,state.elasticAge+seconds);
+  // UIKit's motion-driven flex is inactive at rest (resolved mode 1), and
+  // active while lifted/settling (mode 3). Ancestor movement contributes in
+  // the active state, but must not wake an unlifted knob or retain a stale
+  // world-space baseline for its next lift.
+  if((state.elasticRetiring&&state.elasticAge>=elasticLifetime)||(state.source==InteractionSource::viewMotion&&!viewMotionIsActive()))resetInteraction();
   if(state.hasLifetime) {
     bool invalid=state.parent.lock()!=superview().lock()
         || (state.hadWindow && state.window.lock()!=window())
@@ -556,7 +607,11 @@ void LensView::advance(double seconds) {
       else velocity={};
       state.motion.advanceVelocity(velocity,seconds,size);
     }
-    applyInteractionTransform(state.motion.transform(size));
+    auto transform=state.motion.transform(size);
+    const auto weight=NXFloat(elasticWeight(state.elasticAge,state.elasticEntryWeight,state.elasticRetiring));
+    transform.m11=1+(transform.m11-1)*weight;transform.m22=1+(transform.m22-1)*weight;
+    transform.m12*=weight;transform.m21*=weight;transform.tX*=weight;transform.tY*=weight;
+    applyInteractionTransform(transform);
   }
   const auto previousProgress=_progress;
   const auto previousMaterialProgress=state.progress.value;
@@ -574,8 +629,9 @@ void LensView::advance(double seconds) {
     auto completions=std::move(state.completions);state.completions.clear();
     for(const auto& completion:completions)completion(true,false);
   }
+  if(state.source==InteractionSource::viewMotion&&!viewMotionIsActive())resetInteraction();
   if (!_animation->contact && _animation->motion.atRest() && (state.controlledRestingOpacity || _animation->progress.atRest(_lifted ? 1 : 0))
-      && !(isInteractive()&&interactionSource()==InteractionSource::viewMotion&&_lifted&&_animation->hasLifetime)) {
+      && !(viewMotionIsActive()&&_lifted&&_animation->hasLifetime)) {
     if (_animation->link)
       _animation->link->invalidate();
     _animation->link.reset();
@@ -638,16 +694,17 @@ void LensView::updateLayout() {
 void LensView::setFrame(NXRect frame) {
   validateGeometry(frame);
   prepareViewMotion();
+  const auto previousBounds=bounds();
   UIView::setFrame(frame);
-  updateLayout();
-  if(isInteractive()&&interactionSource()==InteractionSource::viewMotion) wakeAnimation();
+  if(bounds()!=previousBounds)updateLayout();
+  if(viewMotionIsActive()) wakeAnimation();
 }
 void LensView::setBounds(NXRect bounds) {
   validateGeometry(bounds);
   prepareViewMotion();
   UIView::setBounds(bounds);
   updateLayout();
-  if(isInteractive()&&interactionSource()==InteractionSource::viewMotion) wakeAnimation();
+  if(viewMotionIsActive()) wakeAnimation();
 }
 void LensView::layoutSubviews() {
   UIView::layoutSubviews();

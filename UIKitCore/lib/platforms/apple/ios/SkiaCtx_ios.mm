@@ -24,6 +24,7 @@
 #include <QuartzCore/CATransaction.h>
 #include <QuartzCore/CAMediaTiming.h>
 #include <SDL3/SDL_metal.h>
+#include <SDL3/SDL_system.h>
 #include <UIKit/UIKit.h>
 #include <algorithm>
 #include <cmath>
@@ -311,6 +312,30 @@ bool SkiaCtx_ios::platformRunLoop(std::function<bool()> loop) {
         currentRunLoopStartTimer = Timer();
         return loop();
     }
+}
+
+void SkiaCtx_ios::setTargetFrameRate(int frameRate) {
+    // The native transition is sampled in prepareFrame, after the outer loop
+    // resets per-frame requests. Preserve its refresh request across early wakes.
+    if (_frameGeometry && _frameGeometry->transitioning) frameRate = std::max(frameRate, screenFrameRate());
+    SkiaCtx::setTargetFrameRate(frameRate);
+    // SDL creates an otherwise empty high-refresh display link on ProMotion
+    // screens. Keep that refresh request during motion, but invalidate it at
+    // the idle target: even an empty display link drives native update cycles.
+    const auto interval = frameRate > 30 ? std::max(1, screenFrameRate() / frameRate) : 0;
+    if (interval == _nativeAnimationInterval) return;
+    if (SDL_SetiOSAnimationCallback(window, std::max(1, interval),
+            interval ? +[](void*) {} : nullptr, nullptr)) _nativeAnimationInterval = interval;
+}
+
+void SkiaCtx_ios::sleepForNextFrame() {
+    const auto milliseconds = remainingFrameMilliseconds();
+    if (milliseconds <= 0 || SDL_HasEvents(SDL_EVENT_FIRST, SDL_EVENT_LAST)) return;
+    // SDL's UIKit backend has no native WaitEventTimeout: its fallback pumps
+    // UIKit and sleeps for 1 ms repeatedly. Let the native run loop sleep until
+    // a source (including touch/lifecycle/main-queue work) wakes it or the
+    // existing frame deadline expires. An early wake never resets that deadline.
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, milliseconds / 1000.0, true);
 }
 
 std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx() {

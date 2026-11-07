@@ -3,6 +3,7 @@
 #include <UINavigationBar.h>
 #include <UIButton.h>
 #include <UISlider.h>
+#include <UISwitch.h>
 #include <UITabBarView.h>
 #include <BackdropEffectView.h>
 #include <GlassContainerView.h>
@@ -14,6 +15,7 @@ void NXKit::registerUIKitViews() {
     UINib::registerXIB("UITabBar", UITabBarView::init);
     UINib::registerXIB("UIButton", UIButton::init);
     UINib::registerXIB("UISlider", UISlider::init);
+    UINib::registerXIB("UISwitch", UISwitch::init);
     UINib::registerXIB("BackdropEffectView", BackdropEffectView::init);
     UINib::registerXIB("GlassContainerView", GlassContainerView::init);
     UINib::registerXIB("LensView", LensView::init);

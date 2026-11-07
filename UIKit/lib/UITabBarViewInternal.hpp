@@ -49,6 +49,8 @@ struct TabBarViewState {
     bool hasSelection = false;
     bool resetting = false;
     size_t generation = 0;
+    std::optional<NXRect> arrangedBounds;
+    bool arrangedLifted = false;
 };
 class TabBarViewAccess {
 public:

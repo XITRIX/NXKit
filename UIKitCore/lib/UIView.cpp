@@ -749,6 +749,7 @@ void UIView::animate(double duration, double delay, double damping, double initi
 }
 
 int UIView::_performWithoutAnimationTick = 0;
+bool UIView::_viewTreeNeedsUpdate = true;
 
 void UIView::performWithoutAnimation(const std::function<void()>& actionsWithoutAnimation) {
     _performWithoutAnimationTick++;
@@ -874,6 +875,7 @@ std::shared_ptr<UIView> UIView::layoutRoot() {
 }
 
 void UIView::setNeedsLayout() {
+    _viewTreeNeedsUpdate = true;
 //    setNeedsDisplay();
 
     // Needs to recalculate Yoga from root

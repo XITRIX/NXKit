@@ -6,6 +6,7 @@
 #include "GlassForeground.hpp"
 #include "LensForegroundComposition.hpp"
 #include "src/shaders/SkPictureShader.h"
+#include "src/core/SkSpecialImage.h"
 #include "include/gpu/graphite/Recorder.h"
 #include "src/gpu/graphite/Surface_Graphite.h"
 #include <typeinfo>
@@ -26,6 +27,32 @@
 #include "LayerCornerGeometry.hpp"
 
 namespace NXKit::Internal {
+namespace {
+// These are frame-local filter inputs, never client-owned render surfaces.
+// Child devices can be frozen without Graphite's client-surface snapshot copy.
+// Retain the surface path for recording backends and regression controls.
+template<class Draw>
+sk_sp<SkShader> lensInputShader(SkCanvas* canvas,SkIRect pixels,const SkMatrix& imageToOwner,Draw&& draw) {
+  static const bool clientSurface=[] {const auto value=std::getenv("NXKIT_LENS_SURFACE_INPUTS");return value&&value[0]=='1';}();
+  const auto info=SkImageInfo::MakeN32Premul(pixels.width(),pixels.height(),canvas->imageInfo().refColorSpace());
+  auto* device=SkCanvasPriv::TopDevice(canvas);
+  if(!clientSurface&&device&&!device->isNoPixelsDevice()) {
+    auto child=device->createDevice(SkDevice::CreateInfo(info,kUnknown_SkPixelGeometry,nullptr),nullptr);
+    if(child) {
+      {SkCanvas target(child);draw(&target);}
+      child->setImmutable();
+      if(const auto image=child->snapSpecial(SkIRect::MakeWH(pixels.width(),pixels.height()),false)) {
+        if(auto* metrics=RenderPerformance::current)++metrics->immutableLensInputs;
+        return image->asShader(SkTileMode::kDecal,SkSamplingOptions(SkFilterMode::kLinear),imageToOwner,true);
+      }
+    }
+  }
+  auto surface=canvas->makeSurface(info);if(!surface)return nullptr;
+  draw(surface->getCanvas());
+  const auto image=surface->makeImageSnapshot();
+  return image?image->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkSamplingOptions(SkFilterMode::kLinear),&imageToOwner):nullptr;
+}
+}
 void LensLayer::setSource(const std::shared_ptr<UIView>& source, const std::shared_ptr<UIView>& owner) {
   _source = source; _owner = owner;
   if (auto active = presentation()) {
@@ -178,16 +205,12 @@ void LensLayer::drawSource(SkCanvas* canvas,bool isolateForeground,bool cropSour
     if(!ownerToDevice.invert(&deviceToOwner))return;
     auto deviceRect=ownerToDevice.mapRect(SkRect::MakeWH(bounds().width(),bounds().height())).roundOut();deviceRect.outset(2,2);
     samplingToOwner=deviceToOwner;sourceDeviceRect=deviceRect;
-    auto surface=canvas->makeSurface(SkImageInfo::MakeN32Premul(deviceRect.width(),deviceRect.height(),canvas->imageInfo().refColorSpace()));
-    if(surface) {
-      auto input=surface->getCanvas();input->clear(SK_ColorTRANSPARENT);
+    auto imageToOwner=deviceToOwner;imageToOwner.preTranslate(deviceRect.left(),deviceRect.top());imageToOwner.postScale(sourceScale,sourceScale);
+    shader=lensInputShader(canvas,deviceRect,imageToOwner,[&](SkCanvas* input) {
+      input->clear(SK_ColorTRANSPARENT);
       input->translate(-deviceRect.left(),-deviceRect.top());input->concat(ownerToDevice);
       input->drawPicture(picture,&pictureToOwner,nullptr);
-      auto image=surface->makeImageSnapshot();if(image) {
-        auto imageToOwner=deviceToOwner;imageToOwner.preTranslate(deviceRect.left(),deviceRect.top());imageToOwner.postScale(sourceScale,sourceScale);
-        shader=image->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkSamplingOptions(SkFilterMode::kLinear),&imageToOwner);
-      }
-    }
+    });
   }
   if(!shader) {
     // Recording canvases have no compatible render target. Preserve their
@@ -356,8 +379,6 @@ half4 main(float2 p) {
        int64_t(pixels.width())*pixels.height()<=16*1024*1024) {
       auto input=shader;
       for(int stage=0;stage<2 && input;++stage) {
-        auto surface=canvas->makeSurface(SkImageInfo::MakeN32Premul(pixels.width(),pixels.height(),canvas->imageInfo().refColorSpace()));
-        if(!surface){input.reset();break;}
         SkRuntimeShaderBuilder builder(opticalEffect);builder.child("source")=input;
         builder.uniform("size")=SkV2{bounds().width(),bounds().height()};
         builder.uniform("cornerCurve")=1.f;
@@ -368,13 +389,14 @@ half4 main(float2 p) {
         builder.uniform("ovalization")=warp.gradientOvalization;
         builder.uniform("sourceScale")=sourceScale;
         builder.uniform("magnification")=stage==0?1+(_magnification-1)*_progress:1.f;
-        auto target=surface->getCanvas();target->clear(SK_ColorTRANSPARENT);
-        target->translate(-pixels.left(),-pixels.top());target->concat(ownerToDevice);
-        SkPaint paint;paint.setShader(builder.makeShader());
-        target->drawPaint(paint); // SDF coverage owns the fractional silhouette.
-        auto image=surface->makeImageSnapshot();if(!image){input.reset();break;}
         auto imageToOwner=deviceToOwner;imageToOwner.preTranslate(pixels.left(),pixels.top());imageToOwner.postScale(sourceScale,sourceScale);
-        input=image->makeShader(SkTileMode::kDecal,SkTileMode::kDecal,SkSamplingOptions(SkFilterMode::kLinear),&imageToOwner);
+        auto stageShader=builder.makeShader();
+        input=lensInputShader(canvas,pixels,imageToOwner,[&](SkCanvas* target) {
+          target->clear(SK_ColorTRANSPARENT);
+          target->translate(-pixels.left(),-pixels.top());target->concat(ownerToDevice);
+          SkPaint paint;paint.setShader(stageShader);
+          target->drawPaint(paint); // SDF coverage owns the fractional silhouette.
+        });
       }
       opticalShader=std::move(input);
     }
@@ -403,6 +425,32 @@ half4 main(float2 p) {
   canvas->clipPath(layerCornerPath(bounds().size,std::min(bounds().width(),bounds().height())*.5f,CALayerCornerCurve::continuous),true);
   if(useVibrancy) {
     sourceBuilder.uniform("pass")=2.f;
+    // This compositor reads the scene at the current pixel only. Snapshot
+    // that prefix directly instead of initializing another offscreen layer
+    // and evaluating a zero-radius runtime image filter at restore time.
+    // Keep the old filter path for recording/unsupported devices and as an
+    // independent opt-in regression control.
+    static const bool filterForeground=[] {const auto value=std::getenv("NXKIT_LENS_FILTER_FOREGROUND");return value&&value[0]=='1';}();
+    auto* device=SkCanvasPriv::TopDevice(canvas);
+    if(!filterForeground&&device&&device->imageInfo().alphaType()==kPremul_SkAlphaType) {
+      const auto toDevice=device->globalToDevice().asM33();
+      const auto toGlobal=device->deviceToGlobal().asM33();
+      auto pixels=toDevice.mapRect(SkRect::Make(sourceDeviceRect)).roundOut();
+      if(toDevice.isTranslate()&&toDevice.getTranslateX()==std::round(toDevice.getTranslateX())
+         &&toDevice.getTranslateY()==std::round(toDevice.getTranslateY())&&pixels.intersect(device->bounds())) {
+        if(const auto prefix=device->snapSpecial(pixels,true)) {
+          auto imageToGlobal=toGlobal;imageToGlobal.preTranslate(pixels.left(),pixels.top());
+          sourceBuilder.child("scene")=prefix->asShader(SkTileMode::kDecal,SkSamplingOptions(SkFilterMode::kLinear),imageToGlobal,true);
+          paint.setShader(sourceBuilder.makeShader());paint.setBlendMode(SkBlendMode::kSrc);
+          canvas->resetMatrix();canvas->drawRect(SkRect::Make(sourceDeviceRect),paint);canvas->restore();
+          if(auto* metrics=RenderPerformance::current)++metrics->directLensForegrounds;
+          return;
+        }
+      }
+    }
+    // pass2 already contains the sampled scene. Replace it rather than
+    // adding a translucent backdrop for a second time at layer restore.
+    paint.setBlendMode(SkBlendMode::kSrc);
     paint.setImageFilter(SkImageFilters::RuntimeShader(sourceBuilder,0,"scene",nullptr));
     // Keep the image filter itself on integer device pixels. Restoring an
     // owner-local fractional layer would bilinearly filter its ink again.

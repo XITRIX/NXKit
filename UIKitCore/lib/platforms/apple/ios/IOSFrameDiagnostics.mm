@@ -12,6 +12,7 @@
 #include <memory>
 #include <string_view>
 #include <algorithm>
+#include <cmath>
 #include <vector>
 
 namespace {
@@ -28,6 +29,11 @@ struct FrameLog {
     double memoryTime=0;
     double start = CACurrentMediaTime();
     const double exportAfter=[] {
+        if(const auto lens=std::getenv("NXKIT_IOS_DEMO_LENS_REPLAY");lens&&lens[0]=='1') {
+            const auto requested=std::getenv("NXKIT_IOS_DEMO_LENS_SECONDS");
+            const auto parsed=requested?std::atof(requested):60.;
+            return 12+(std::isfinite(parsed)?std::clamp(parsed,10.,600.):60.);
+        }
         const auto value=std::getenv("NXKIT_IOS_DEMO_SCROLL_SECONDS");
         const auto resume=std::getenv("NXKIT_IOS_DEMO_IDLE_RESUME");
         return 34+(value?std::clamp(std::atof(value),12.0,600.0):12.0)+(resume&&resume[0]=='1'?27:0);

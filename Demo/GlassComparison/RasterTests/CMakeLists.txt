@@ -189,6 +189,7 @@ if (NXKIT_RASTER_CONTROLLER_TESTS)
             ${NXKIT_ROOT}/Demo/tests/GlassScreenTests.cpp
             ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassScreenView.cpp
             ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassScreenViewController.cpp
+            ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/SystemControlsDemoViewController.cpp
             ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/LensTabBarView.cpp
             ${NXKIT_ROOT}/UIKitCore/lib/UIApplicationMain.cpp)
         target_link_libraries(GlassScreenTests PRIVATE NXKit Xitrix::UIKit)
@@ -296,6 +297,7 @@ if(APPLE)
         add_executable(NavigationCycleRenderer ../../NavigationComparison/CycleRenderer.cpp
             ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassScreenView.cpp
             ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassScreenViewController.cpp
+            ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/SystemControlsDemoViewController.cpp
             ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/LensTabBarView.cpp
             ${NXKIT_ROOT}/UIKitCore/lib/UIApplicationMain.cpp)
         target_include_directories(NavigationCycleRenderer PRIVATE ${NXKIT_ROOT}/UIKit/lib ${NXKIT_ROOT}/UIKitCore/lib)
@@ -303,12 +305,14 @@ if(APPLE)
         add_executable(InteractiveReplay ../../NavigationComparison/InteractiveReplay.cpp
             ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassScreenView.cpp
             ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/GlassScreenViewController.cpp
+            ${NXKIT_ROOT}/Demo/app/Screens/GlassDemoViewController/SystemControlsDemoViewController.cpp
             ${NXKIT_ROOT}/UIKitCore/lib/UIApplicationMain.cpp)
         target_link_libraries(InteractiveReplay PRIVATE Xitrix::UIKit NXKit)
         add_executable(MetalNavigationBenchmark ../../NavigationComparison/MetalNavigationBenchmark.mm
             ${NXKIT_ROOT}/UIKitCore/lib/platforms/SkiaCtx.cpp
             ../../app/Screens/GlassDemoViewController/GlassScreenView.cpp
             ../../app/Screens/GlassDemoViewController/GlassScreenViewController.cpp
+            ../../app/Screens/GlassDemoViewController/SystemControlsDemoViewController.cpp
             ${NXKIT_ROOT}/UIKitCore/lib/UIApplicationMain.cpp)
         target_link_libraries(MetalNavigationBenchmark PRIVATE Xitrix::UIKit NXKit)
     endif()

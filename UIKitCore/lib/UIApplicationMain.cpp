@@ -24,7 +24,8 @@ void renderApplicationFrame() {
     SkiaCtx::_main->prepareFrame();
     // Move to UIRenderer
     NXSize size = SkiaCtx::_main->getSize();
-    keyWindow->setFrame({ NXPoint::zero, size });
+    const NXRect windowFrame{NXPoint::zero, size};
+    if (keyWindow->frame() != windowFrame) keyWindow->setFrame(windowFrame);
 
     const auto scale = SkiaCtx::_main->getScaleFactor();
     // Poll even when geometry is unchanged: UIKit can change size classes at
@@ -33,7 +34,17 @@ void renderApplicationFrame() {
 
     const Timer frameTime;
     UIView::animateIfNeeded(frameTime);
-    {
+    static const bool continuous = [] {
+        const auto enabled = [](const char* name) {
+            const auto value = std::getenv(name);
+            return value && std::string_view(value) == "1";
+        };
+        return enabled("NXKIT_CONTINUOUS_RENDERING") || enabled("NXKIT_UNCAPPED");
+    }();
+    if (continuous || CALayer::layerTreeIsDirty || UIView::_viewTreeNeedsUpdate) {
+        // Clear before callbacks: a later/sibling invalidation during the walk
+        // must remain scheduled for the following frame, including hidden views.
+        UIView::_viewTreeNeedsUpdate = false;
         Internal::RenderPerformanceScope timer(Internal::RenderPerformance::current ? &Internal::RenderPerformance::current->layoutMs : nullptr);
         keyWindow->layoutTreeIfNeeded(false);
         // Layout can resize/reposition an animating layer after its first
@@ -43,17 +54,10 @@ void renderApplicationFrame() {
         keyWindow->displayTreeIfNeeded();
     }
 
-    // Polling, layout and animation delivery still run while idle. Avoid
+    // Environment polling and animation delivery still run while idle. Avoid
     // acquiring a drawable or submitting GPU work when the retained tree is
     // unchanged; the platform keeps displaying its last presented frame.
     SkiaCtx::_main->setTargetFrameRate(UIView::maximumAnimationFrameRate());
-    static const bool continuous = [] {
-        const auto enabled = [](const char* name) {
-            const auto value = std::getenv(name);
-            return value && std::string_view(value) == "1";
-        };
-        return enabled("NXKIT_CONTINUOUS_RENDERING") || enabled("NXKIT_UNCAPPED");
-    }();
     if (!continuous && !CALayer::layerTreeIsDirty) {
         SkiaCtx::_main->cleanupGpuCacheIfIdle();
         return;

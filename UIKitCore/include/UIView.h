@@ -139,7 +139,7 @@ public:
     bool preservesSuperviewLayoutMargins() const { return _preservesSuperviewLayoutMargins; }
     void setPreservesSuperviewLayoutMargins(bool preservesSuperviewLayoutMargins);
 
-    void setNeedsDisplay() { _needsDisplay = true; }
+    void setNeedsDisplay() { _needsDisplay = true; _viewTreeNeedsUpdate = true; }
     void setNeedsLayout();// { setNeedsDisplay(); _needsLayout = true; }
 
     bool isDescendantOf(const std::shared_ptr<UIView>& view);
@@ -148,7 +148,7 @@ public:
     virtual void layoutSubviews();
 
     virtual NXSize sizeThatFits(NXSize size);
-    void sizeToFit();
+    virtual void sizeToFit();
     virtual void invalidateIntrinsicContentSize();
 
     // FlexLayout
@@ -256,8 +256,12 @@ private:
     void updateSafeAreaInsets();
     void updateLayoutMarginIfNeeded();
     void updateLayoutMargin();
-    void setNeedsUpdateSafeAreaInsets() { _needsUpdateSafeAreaInsets = true; }
-    void setNeedsUpdateLayoutMargins() { _needsUpdateLayoutMargins = true; }
+    void setNeedsUpdateSafeAreaInsets() { _needsUpdateSafeAreaInsets = true; _viewTreeNeedsUpdate = true; }
+    void setNeedsUpdateLayoutMargins() { _needsUpdateLayoutMargins = true; _viewTreeNeedsUpdate = true; }
+
+    // Main-thread invalidations schedule a tree walk independently of whether
+    // an existing layer has changed yet (e.g. setNeedsDisplay/setNeedsLayout).
+    static bool _viewTreeNeedsUpdate;
 
     bool _needsLayout = true;
     bool _isLayingOut = false;

@@ -65,8 +65,13 @@ public:
   void setInteractive(bool interactive);
   [[nodiscard]] InteractionSource interactionSource() const;
   /** Exclusive force source: contact supports stationary knobs; viewMotion
-      samples caller-controlled global presentation geometry. Contact-driven
-      deformation is an NXKit extension; native calibration uses viewMotion. */
+      samples global presentation geometry while lifted and settling. Resting
+      placement and ancestor movement do not activate it. Elasticity stays active
+      while lifted, then fades to identity within two seconds of lowering,
+      even during motion;
+      lift geometry and optical state remain independent. The finite fade and
+      contact-driven deformation are NXKit extensions; native calibration uses
+      viewMotion. */
   void setInteractionSource(InteractionSource source);
   /** Contact location and velocity are in the current superview's coordinates
       (points and points/second). Keep that coordinate space stable for the
@@ -76,6 +81,8 @@ public:
       provide velocity explicitly for gesture recognizers and deterministic replay. */
   void updateInteraction(NXPoint location);
   void updateInteraction(NXPoint location, NXPoint velocity);
+  /** Ends contact without retiring elasticity while still lifted. Contact-only
+      use (without a lifted state) begins the retirement fade here. */
   void endInteraction(NXPoint velocity = {}, bool cancelled = false);
   /** Additional visual-only affine in lens-local coordinates. This is the
       same value used by the root presentation layer, before bounds origin,
@@ -135,6 +142,9 @@ private:
   void updateDisplayScale();
   void advance(double seconds);
   void wakeAnimation();
+  bool viewMotionIsActive() const;
+  void restartElasticResponse();
+  void retireElasticResponse();
   void prepareViewMotion();
   std::optional<std::pair<NXPoint,NXAffineTransform>> motionPose();
   void resetInteraction();

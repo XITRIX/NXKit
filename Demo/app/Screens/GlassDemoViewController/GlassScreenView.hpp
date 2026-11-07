@@ -26,7 +26,7 @@ public:
     std::shared_ptr<NXKit::UIControl> action(const std::string& id) const;
     std::shared_ptr<NXKit::UIScrollView> scrollView() const { return _scroll; }
     std::function<void(NXKit::UIColor)> onAccentChanged;
-    std::function<void()> onNavigationDemo,onLargeTitleDemo;
+    std::function<void()> onNavigationDemo,onLargeTitleDemo,onSystemControlsDemo;
     NXKit::UIColor accentColor() const;
     void layoutSubviews() override;
     void safeAreaInsetsDidChange() override;

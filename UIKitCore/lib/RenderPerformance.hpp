@@ -21,7 +21,7 @@ struct RenderPerformance {
     std::uint64_t metalLibraryCompiles = 0, metalPipelineCompiles = 0, metalArchiveHits = 0;
     double layoutMs = 0, renderMs = 0, glassMs = 0, sortMs = 0, submitMs = 0;
     double acquireMs = 0, totalMs = 0;
-    std::uint64_t uniformMaskPrefixes = 0;
+    std::uint64_t uniformMaskPrefixes = 0, directLensForegrounds = 0, immutableLensInputs = 0;
     std::uint64_t metalAllocatedBytes = 0, graphiteBudgetedBytes = 0, graphitePurgeableBytes = 0;
     double memorySampleTime = 0;
 };

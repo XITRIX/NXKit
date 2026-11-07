@@ -31,12 +31,13 @@ public:
     NXKit::UIUserInterfaceStyle getThemeMode() override;
     NXFloat getGlassTintAmount() override;
     std::pair<NXKit::UIUserInterfaceSizeClass, NXKit::UIUserInterfaceSizeClass> getSizeClasses() override;
-//    void setTargetFrameRate(int frameRate) override;
+    void setTargetFrameRate(int frameRate) override;
 
     bool platformRunLoop(std::function<bool ()> loop) override;
-//    void sleepForNextFrame() override {}
+    void sleepForNextFrame() override;
 
 private:
+    int _nativeAnimationInterval = -1;
     void prepareFrame() override;
     std::unique_ptr<Internal::IOSWindowGeometry> _windowGeometry;
     std::unique_ptr<Internal::IOSWindowFrame> _frameGeometry;

@@ -3,7 +3,8 @@ get_target_property(sim_abi_header UIKitCore NXKIT_METAL_SHADER_ABI_HEADER)
 get_filename_component(sim_abi_directory "${sim_abi_header}" DIRECTORY)
 add_executable(MetalNavigationBenchmark NavigationComparison/MetalNavigationBenchmark.mm
     app/Screens/GlassDemoViewController/GlassScreenView.cpp
-    app/Screens/GlassDemoViewController/GlassScreenViewController.cpp)
+    app/Screens/GlassDemoViewController/GlassScreenViewController.cpp
+    app/Screens/GlassDemoViewController/SystemControlsDemoViewController.cpp)
 target_link_libraries(MetalNavigationBenchmark PRIVATE Xitrix::UIKit NXKit)
 add_executable(MetalGlassStressPerformance GlassComparison/MetalGlassStressPerformance.mm
     app/Screens/GlassDemoViewController/GlassStressView.cpp)

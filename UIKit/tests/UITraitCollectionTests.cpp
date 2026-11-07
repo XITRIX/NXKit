@@ -49,7 +49,7 @@ public:
     Classes getSizeClasses() override { return nativeClasses.value_or(SkiaCtx::getSizeClasses()); }
     sk_sp<SkSurface> getBackbufferSurface() override { return nullptr; }
     void swapBuffers() override {}
-    void sleepForNextFrame() override {}
+    void sleepForNextFrame() override { SkiaCtx::sleepForNextFrame(); }
     bool platformRunLoop(std::function<bool()>) override { return false; }
 protected:
     skgpu::graphite::Context* graphiteContext() override { return nullptr; }

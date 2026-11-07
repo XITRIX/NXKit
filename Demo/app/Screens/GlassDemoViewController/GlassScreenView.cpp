@@ -81,7 +81,8 @@ void GlassScreenView::rebuild() {
         {"sort","Sort order",_reversed?"Descending":"Ascending",[weak]{if(auto self=weak.lock())self->toggleOrder();}},
         {"reset","Reset demo","",[weak]{if(auto self=weak.lock())self->reset();}}},"Use + to add an item. More shows additional details.");
     section("Navigation",{{"navigation-demo","Navigation morphing","Push ›",[weak]{if(auto self=weak.lock();self&&self->onNavigationDemo)self->onNavigationDemo();}},
-        {"large-title-demo","Large titles","Push ›",[weak]{if(auto self=weak.lock();self&&self->onLargeTitleDemo)self->onLargeTitleDemo();}}});
+        {"large-title-demo","Large titles","Push ›",[weak]{if(auto self=weak.lock();self&&self->onLargeTitleDemo)self->onLargeTitleDemo();}},
+        {"system-ui-demo","System UI elements","Push ›",[weak]{if(auto self=weak.lock();self&&self->onSystemControlsDemo)self->onSystemControlsDemo();}}});
     std::vector<std::tuple<std::string,std::string,std::string,std::function<void()>>> items;
     for(int i=1;i<=8+_added;++i) { const auto item=_reversed?9+_added-i:i; items.push_back({"item-"+std::to_string(item),"Item "+std::to_string(item),_completed.contains(item)?"Done":"Open",[weak,item] { if(auto self=weak.lock()) { if(self->_completed.contains(item))self->_completed.erase(item);else self->_completed.insert(item);self->rebuild(); } }}); }
     section(std::string(titles[selectedTab()])+" collection",items);

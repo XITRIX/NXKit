@@ -10,8 +10,10 @@
 #include "platforms/apple/MetalPipelineCache.hpp"
 #include "UINavigationBarInternal.hpp"
 #include "NavigationBarMotion.hpp"
+#include "UITabBarViewInternal.hpp"
 #include "../app/Screens/GlassDemoViewController/GlassScreenViewController.hpp"
 #include "../app/DemoPerformanceReplay.hpp"
+#include "../app/Screens/GlassDemoViewController/SystemControlsDemoViewController.hpp"
 #include "include/gpu/graphite/Context.h"
 #include "include/gpu/graphite/ContextOptions.h"
 #include "include/gpu/graphite/Recorder.h"
@@ -27,6 +29,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <thread>
 // Observe completed Metal work separately from synchronous benchmark latency.
 @interface NXBenchmarkQueue : NSProxy {
     id<MTLCommandQueue> _queue;
@@ -46,6 +49,7 @@ using namespace NXKit;
 namespace NXKit {
 std::unique_ptr<SkiaCtx> MakeSkiaCtx(){throw std::runtime_error("Metal benchmark supplies its own context");}
 bool UIApplicationDelegate::applicationDidFinishLaunchingWithOptions(UIApplication*,std::map<std::string,std::any>){return true;}
+class LensViewTestHarness {public:static void advance(const std::shared_ptr<LensView>& v,double dt){v->advance(dt);}};
 class DispatchQueueTestHarness {public:static void pump(){DispatchQueue::main()->performAll();}};
 class UIGestureRecognizerTestHarness {
 public:
@@ -92,8 +96,9 @@ void tick(const std::shared_ptr<CALayer>& layer,Timer time){const auto children=
 int main(int argc,char** argv){@autoreleasepool{try {
     const std::string path=argc>1?argv[1]:"/tmp/navigation-metal.csv";
     int frameStep=1,passes=3;std::string snapshots,isolation="none";bool scrolling=false,liveAppearance=false;
+    bool lensMotion=false,controlsGallery=false;
     bool all=false,full=false,light=false,interactive=false,large=false,inkBlur=false;float density=3;
-    for(int i=2;i<argc;++i){const std::string arg=argv[i];if(arg=="--quick")frameStep=4;else if(arg=="--live-appearance")liveAppearance=true;else if(arg=="--scroll"){scrolling=true;full=true;}else if(arg=="--isolation"&&i+1<argc)isolation=argv[++i];else if(arg=="--passes"&&i+1<argc)passes=std::stoi(argv[++i]);else if(arg=="--snapshots"&&i+1<argc)snapshots=argv[++i];else if(arg=="--ink-blur")inkBlur=true;else if(arg=="--large-titles")large=true;else if(arg=="--catalog")all=true;else if(arg=="--interactive")interactive=true;else if(arg=="--full")full=true;else if(arg=="--light")light=true;else if(arg=="--2x")density=2;else throw std::invalid_argument("Unknown benchmark option");}
+    for(int i=2;i<argc;++i){const std::string arg=argv[i];if(arg=="--controls-gallery"){controlsGallery=true;full=true;}else if(arg=="--lens-motion"){lensMotion=true;full=true;}else if(arg=="--quick")frameStep=4;else if(arg=="--live-appearance")liveAppearance=true;else if(arg=="--scroll"){scrolling=true;full=true;}else if(arg=="--isolation"&&i+1<argc)isolation=argv[++i];else if(arg=="--passes"&&i+1<argc)passes=std::stoi(argv[++i]);else if(arg=="--snapshots"&&i+1<argc)snapshots=argv[++i];else if(arg=="--ink-blur")inkBlur=true;else if(arg=="--large-titles")large=true;else if(arg=="--catalog")all=true;else if(arg=="--interactive")interactive=true;else if(arg=="--full")full=true;else if(arg=="--light")light=true;else if(arg=="--2x")density=2;else throw std::invalid_argument("Unknown benchmark option");}
     if(isolation!="none"&&isolation!="glass"&&isolation!="navigation"&&isolation!="tabs"&&isolation!="pockets"&&isolation!="effects")throw std::invalid_argument("Invalid isolation");
     if(passes<1||passes>10)throw std::invalid_argument("Invalid pass count");
     auto ctx=std::make_shared<Context>(full,density);ctx->dark=!light;SkiaCtx::_main=ctx;UIApplication::shared=new_shared<UIApplication>();UIApplication::shared->delegate=std::make_shared<UIApplicationDelegate>();
@@ -103,17 +108,17 @@ int main(int argc,char** argv){@autoreleasepool{try {
     if(isolation=="navigation")DemoPerformance::isolate(bar,true,false);
     else if(isolation=="tabs")DemoPerformance::isolate(demo->tabBar(),true,false);
     else DemoPerformance::isolate(demo->view(),isolation=="glass"||isolation=="effects",isolation=="pockets"||isolation=="effects");
-    std::ofstream out(path);out<<"pass,direction,arrangement,frame,cpu_ms,library_compiles,pipeline_compiles,archive_hits,total_ms,gpu_ms,command_buffers,bounded_lenses,bounded_lens_groups,cropped_lens_sources,lens_source_pixels,uniform_mask_prefixes,bounded_masks\n";
+    std::ofstream out(path);out<<"pass,direction,arrangement,frame,cpu_ms,library_compiles,pipeline_compiles,archive_hits,total_ms,gpu_ms,command_buffers,bounded_lenses,bounded_lens_groups,cropped_lens_sources,lens_source_pixels,uniform_mask_prefixes,bounded_masks,update_ms,layout_ms,render_ms,submit_ms,direct_lens_foregrounds,immutable_lens_inputs\n";
     SkBitmap alphaMask;alphaMask.allocPixels(SkImageInfo::MakeA8(128,64));alphaMask.eraseColor(SK_ColorTRANSPARENT);
     for(int y=12;y<52;++y)for(int x=12;x<116;++x)*alphaMask.getAddr8(x,y)=((x/12+y/12)%2)?255:64;
     auto maskImage=SkImages::RasterFromBitmap(alphaMask);float forcedBlur=0;
-    uint64_t warmMisses=0,lastMisses=0;
+    uint64_t warmMisses=0,lastMisses=0; double updateMS=0;
     auto draw=[&](int pass,const char* direction,int arrangement,int frame){
         [ctx->diagnosticQueue.buffers removeAllObjects];
         Internal::RenderPerformance sample;
         struct RestoreMetrics {Internal::RenderPerformance* previous;~RestoreMetrics(){Internal::RenderPerformance::current=previous;}} restoreMetrics{Internal::RenderPerformance::current};
-        if(frame==0||frame==120||frame==240)Internal::RenderPerformance::current=&sample;
-        auto start=std::chrono::steady_clock::now();window->drawAndLayoutTreeIfNeeded();auto canvas=ctx->surface->getCanvas();canvas->clear(ctx->dark?SK_ColorBLACK:SkColorSetRGB(242,242,247));canvas->save();canvas->scale(density,density);if(!full)canvas->translate(0,12-bar->frame().minY());UITraitCollection::setCurrent(window->traitCollection());(full?window->layer():bar->layer())->presentationOrSelf()->skiaRender(canvas);canvas->restore();
+        if(lensMotion||frame==0||frame==120||frame==240)Internal::RenderPerformance::current=&sample;
+        auto start=std::chrono::steady_clock::now();window->drawAndLayoutTreeIfNeeded();auto layoutEnd=std::chrono::steady_clock::now();auto canvas=ctx->surface->getCanvas();canvas->clear(ctx->dark?SK_ColorBLACK:SkColorSetRGB(242,242,247));canvas->save();canvas->scale(density,density);if(!full)canvas->translate(0,12-bar->frame().minY());UITraitCollection::setCurrent(window->traitCollection());(full?window->layer():bar->layer())->presentationOrSelf()->skiaRender(canvas);canvas->restore();
         if(inkBlur&&forcedBlur>0) {
             // Alpha-only intermediates are used by glyph/shape masks. Cover
             // their clamped and unclamped Gaussian paths as well as RGBA ink.
@@ -121,7 +126,7 @@ int main(int argc,char** argv){@autoreleasepool{try {
             canvas->save();canvas->scale(density,density);canvas->clipRect(SkRect::MakeXYWH(0,200,300,80));
             canvas->drawImage(maskImage,32,210,SkSamplingOptions(SkFilterMode::kLinear),&paint);canvas->restore();
         }
-        ctx->flushAndSubmit(ctx->surface);
+        auto renderEnd=std::chrono::steady_clock::now();ctx->flushAndSubmit(ctx->surface);
         auto ms=std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count();const auto stats=ctx->cache->statistics();
         if(stats.failures)throw std::runtime_error("Required Metal pipeline preparation failed");
         ctx->gpu->submit(skgpu::graphite::SyncToCpu::kYes);
@@ -129,7 +134,7 @@ int main(int argc,char** argv){@autoreleasepool{try {
         out<<pass<<','<<direction<<','<<arrangement<<','<<frame<<','<<ms<<','<<stats.libraryCompiles<<','<<stats.pipelineCompiles<<','<<stats.archiveHits<<','<<total;
         double gpuMS=0;for(id<MTLCommandBuffer> buffer in ctx->diagnosticQueue.buffers)
             if(buffer.GPUStartTime>0 && buffer.GPUEndTime>=buffer.GPUStartTime)gpuMS+=(buffer.GPUEndTime-buffer.GPUStartTime)*1000;
-        out<<','<<gpuMS<<','<<ctx->diagnosticQueue.buffers.count<<','<<sample.boundedLenses<<','<<sample.boundedLensGroups<<','<<sample.croppedLensSources<<','<<sample.lensSourcePixels<<','<<sample.uniformMaskPrefixes<<','<<sample.boundedMasks<<'\n';out.flush();
+        out<<','<<gpuMS<<','<<ctx->diagnosticQueue.buffers.count<<','<<sample.boundedLenses<<','<<sample.boundedLensGroups<<','<<sample.croppedLensSources<<','<<sample.lensSourcePixels<<','<<sample.uniformMaskPrefixes<<','<<sample.boundedMasks<<','<<updateMS<<','<<std::chrono::duration<double,std::milli>(layoutEnd-start).count()<<','<<std::chrono::duration<double,std::milli>(renderEnd-layoutEnd).count()<<','<<(ms-std::chrono::duration<double,std::milli>(renderEnd-start).count())<<','<<sample.directLensForegrounds<<','<<sample.immutableLensInputs<<'\n';out.flush();
         if(!snapshots.empty()&&pass==0&&arrangement>=0&&
             (std::string_view(direction)=="rest" || ((std::string_view(direction)=="push"||std::string_view(direction)=="pop")&&frame==60))) {
             std::unique_ptr<const SkImage::AsyncReadResult> pixels;
@@ -147,7 +152,66 @@ int main(int argc,char** argv){@autoreleasepool{try {
     draw(-1,"initial",-1,0);
     for(int pass=0;pass<passes;++pass) {
         const auto before=ctx->cache->statistics();
-        if(scrolling) {
+        if(controlsGallery) {
+            const auto settle=[&] {
+                const auto until=std::chrono::steady_clock::now()+std::chrono::milliseconds(1250);
+                do {
+                    DispatchQueueTestHarness::pump();const auto time=Timer();tick(window->layer(),time);
+                    window->drawAndLayoutTreeIfNeeded();tick(window->layer(),time);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(8));
+                }while(std::chrono::steady_clock::now()<until);
+            };
+            nav->popToRootViewController(false);window->drawAndLayoutTreeIfNeeded();
+            const auto entry=demo->selectedList()->action("system-ui-demo");
+            if(!entry)throw std::runtime_error("Missing system UI gallery entry");entry->performPrimaryAction();
+            UIView::completePendingAnimations();DispatchQueueTestHarness::pump();
+            settle();auto catalog=std::dynamic_pointer_cast<SystemControlsDemoViewController>(nav->topViewController());
+            if(!catalog)throw std::runtime_error("Gallery entry did not push catalog");
+            int page=0;
+            for(const char* kind:{"slider","switch"}) {
+                catalog->action(kind)->performPrimaryAction();UIView::completePendingAnimations();DispatchQueueTestHarness::pump();
+                settle();auto control=std::dynamic_pointer_cast<SystemControlsDemoViewController>(nav->topViewController());
+                if(!control||control==catalog)throw std::runtime_error("Gallery control did not push");
+                draw(pass,"rest",page,0);
+                const std::vector<const char*> actions=page==0?std::vector<const char*>{"value","range","continuous","enabled","style","minimum-tint","maximum-tint","thumb-tint","ticks","end-images","background"}:std::vector<const char*>{"on","enabled","style","on-tint","thumb-tint","background"};
+                for(const auto name:actions) {
+                    const auto action=control->action(name);if(!action)throw std::runtime_error(std::string("Missing gallery setting ")+name);
+                    action->performPrimaryAction();UIView::completePendingAnimations();DispatchQueueTestHarness::pump();draw(pass,"gallery-setting",page,0);
+                }
+                if(page==0&&(!control->slider()||control->slider()->isEnabled()||control->slider()->isContinuous()))throw std::runtime_error("Slider gallery setting did not apply");
+                if(page==1&&(!control->switchControl()||!control->switchControl()->isOn()||control->switchControl()->isEnabled()))throw std::runtime_error("Switch gallery setting did not apply");
+                nav->popViewController(false);window->drawAndLayoutTreeIfNeeded();
+                // Drain the restored catalog's deferred layout/scroll/title
+                // coordination before immediately pushing its other child.
+                settle();if(nav->topViewController()!=catalog)throw std::runtime_error("Gallery pop lost catalog");++page;
+            }
+            nav->popViewController(false);if(nav->topViewController()!=root)throw std::runtime_error("Gallery pop lost original content root");
+            std::cout<<"Gallery navigation and live settings passed"<<std::endl;
+        } else if(lensMotion) {
+            auto tabs=demo->tabBar();auto& state=Internal::TabBarViewAccess::state(*tabs);
+            const auto originals=tabs->items();
+            for(int count:{2,3,4,5}) {
+                std::vector<std::shared_ptr<UITabBarItem>> items;
+                for(int n=0;n<count;++n)items.push_back(new_shared<UITabBarItem>(n<4?originals[n%originals.size()]->title():"More",originals[n%originals.size()]->image(),n));
+                Internal::TabBarViewAccess::setItems(*tabs,std::move(items),false);
+                Internal::TabBarViewAccess::select(*tabs,tabs->items().front(),false);
+                window->drawAndLayoutTreeIfNeeded();
+                for(int phase=0;phase<4;++phase) {
+                    const char* name[]={"lens-rest","lens-lift","lens-drag","lens-lower"};
+                    if(phase==1||phase==3)Internal::TabBarViewAccess::lift(*tabs,phase==1,true);
+                    const auto origin=Timer();
+                    for(int i=0;i<240;i+=frameStep) {
+                        auto start=std::chrono::steady_clock::now();
+                        if(phase==2)Internal::TabBarViewAccess::position(*tabs,(count-1)*(.5f-.5f*std::cos(i*2*3.141592653589793f/120)));
+                        auto now=origin;const auto us=origin.startTime.tv_usec+i*1000000L/120;now.startTime.tv_sec+=us/1000000;now.startTime.tv_usec=us%1000000;
+                        tick(window->layer(),now);LensViewTestHarness::advance(state._lens,frameStep/120.);
+                        updateMS=std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count();
+                        draw(pass,name[phase],count,i);
+                    }
+                }
+                UIView::completePendingAnimations();
+            }
+        } else if(scrolling) {
             if(liveAppearance){UIView::completePendingAnimations();ctx->gpu->checkAsyncWorkCompletion();DispatchQueueTestHarness::pump();}
             const auto list=demo->selectedList();const auto scroll=list->scrollView();
             const auto inset=scroll->adjustedContentInset();
@@ -195,7 +259,7 @@ int main(int argc,char** argv){@autoreleasepool{try {
                 }
             }
         }
-        if(!scrolling&&interactive&&!large&&!inkBlur)for(int arrangement=0;arrangement<8;++arrangement)for(bool commit:{false,true}) {
+        if(!controlsGallery&&!lensMotion&&!scrolling&&interactive&&!large&&!inkBlur)for(int arrangement=0;arrangement<8;++arrangement)for(bool commit:{false,true}) {
             nav->setViewControllers({root,new_shared<GlassNavigationDemoViewController>(arrangement),new_shared<GlassNavigationDemoViewController>((arrangement+1)%8)},false);
             draw(pass,"interactive-rest",arrangement,0);
             UIGestureRecognizerTestHarness input(window);input.send(UITouchPhase::moved,{14,300},50);input.send(UITouchPhase::moved,{15,300},60);
@@ -207,7 +271,7 @@ int main(int argc,char** argv){@autoreleasepool{try {
             for(int i=0;i<=120;i+=frameStep){auto now=start;const auto us=start.startTime.tv_usec+i*1000000L/120;now.startTime.tv_sec+=us/1000000;now.startTime.tv_usec=us%1000000;tick(window->layer(),now);DispatchQueueTestHarness::pump();draw(pass,commit?"commit-settle":"cancel-settle",arrangement,i);}
             UIView::completePendingAnimations();DispatchQueueTestHarness::pump();pan->setEnabled(true);
         }
-        if(!scrolling&&!inkBlur&&!large&&(all||!interactive))for(int arrangement=all?0:5;arrangement<(all?8:6);++arrangement) {
+        if(!controlsGallery&&!lensMotion&&!scrolling&&!inkBlur&&!large&&(all||!interactive))for(int arrangement=all?0:5;arrangement<(all?8:6);++arrangement) {
             auto source=new_shared<GlassNavigationDemoViewController>(all?(arrangement+7)%8:4);
             nav->setViewControllers({root,source},false);draw(pass,"rest",arrangement,0);
             for(bool pop:{false,true}) {

@@ -8,6 +8,7 @@
 #include <UIShadowProperties.h>
 #include <UIButton.h>
 #include <UISlider.h>
+#include <UISwitch.h>
 #include <UISliderTrackConfiguration.h>
 #include <UIGlassEffect.h>
 #include <UIGlassContainerEffect.h>

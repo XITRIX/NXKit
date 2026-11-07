@@ -3,6 +3,7 @@
 #include "include/core/SkSurface.h"
 #include <BackdropEffectView.h>
 #include <LensView.h>
+#include <UIScrollView.h>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -29,6 +30,10 @@ public:
   }
   static void elastic(const std::shared_ptr<LensView>& lens,NXAffineTransform value) {
     lens->applyInteractionTransform(value);
+  }
+  static bool motionActive(const std::shared_ptr<LensView>& lens) {return lens->viewMotionIsActive();}
+  static void controlLift(const std::shared_ptr<LensView>& lens,bool lifted,float q) {
+    lens->setControlLift(lifted,q,1-q,q,lens->bounds().size);
   }
   static auto optics(const std::shared_ptr<LensView> &lens) {
     return lens->_optics;
@@ -488,6 +493,9 @@ void testInteractiveSourcesAndTermination() {
   LensViewTestHarness::advance(lens,10);
   for(int i=0;i<24;i++) LensViewTestHarness::advance(lens,1.0/120);
   expect(lens->interactionTransform().isIdentity(),"resuming a held contact after suspension does not revive expired velocity");
+  for(int i=0;i<24;i++) {lens->updateInteraction({90+i*2.f,50},{240,0});LensViewTestHarness::advance(lens,1./120);}
+  expect(!lens->interactionTransform().isIdentity(),"a held contact remains responsive to fresh input after a long hold or suspension");
+  lens->beginInteraction({90,50});
   for(int i=0;i<24;i++) { lens->updateInteraction({90+i*2.0f,50},{240,0}); LensViewTestHarness::advance(lens,1.0/120); }
   const auto beforeCancel=lens->interactionTransform();
   expect(!beforeCancel.isIdentity(),"fresh contact input still excites the lens after suspension");
@@ -496,6 +504,7 @@ void testInteractiveSourcesAndTermination() {
   for(int i=0;i<500;i++) LensViewTestHarness::advance(lens,1.0/120);
   expect(lens->interactionTransform().isIdentity(),"cancelled contact settles to the exact unmodified aperture");
   lens->setInteractionSource(LensView::InteractionSource::viewMotion);
+  lens->setLifted(true);
   lens->beginInteraction({90,50});
   for(int i=0;i<24;i++) { lens->updateInteraction({90+i*2.0f,50},{240,0}); LensViewTestHarness::advance(lens,1.0/120); }
   expect(lens->interactionTransform().isIdentity(),"view-motion mode does not double-count finger velocity when model geometry stays fixed");
@@ -518,6 +527,155 @@ void testInteractiveSourcesAndTermination() {
   try { lens->updateInteraction({std::numeric_limits<NXFloat>::quiet_NaN(),0},{}); } catch(const std::invalid_argument&) { rejected=true; }
   expect(rejected,"nonfinite public motion input is rejected before state mutation");
 }
+void testViewMotionActivation() {
+  int cases=0;
+  for(auto style:{LensView::Style::small,LensView::Style::large})for(bool dark:{false,true})for(int scale:{1,2,3})for(int movement=0;movement<8;movement++) {
+    auto root=new_shared<Root>(dark?UIUserInterfaceStyle::dark:UIUserInterfaceStyle::light,scale);
+    root->setFrame({0,0,700,400});
+    auto scroll=new_shared<UIScrollView>(NXRect(20,20,260,140));root->addSubview(scroll);
+    scroll->setContentInsetAdjustmentBehavior(UIScrollViewContentInsetAdjustmentBehavior::never);
+    auto parent=new_shared<UIView>(NXRect(0,0,500,180));scroll->addSubview(parent);scroll->setContentSize({500,180});
+    auto lens=new_shared<LensView>(style);lens->setFrame({40,25,100,44});parent->addSubview(lens);
+    lens->setInteractive(true);lens->setInteractionSource(LensView::InteractionSource::viewMotion);
+    auto target=movement==7?lens:parent;
+    const auto move=[&](int index) {
+      const auto x=NXFloat(index*2);
+      switch(movement) {
+        case 0:lens->setFrame({40+x,25,100,44});break;
+        case 1:parent->setFrame({x,0,500,180});break;
+        case 2:scroll->setFrame({20+x,20,260,140});break;
+        case 3:parent->setTransform(NXAffineTransform::translationBy(x,0));break;
+        case 4:scroll->setContentOffset({x,0},false);break;
+        case 5:parent->setBounds({x,0,500,180});break;
+        default:break;
+      }
+    };
+    const auto animate=[&] {
+      auto animation=new_shared<CABasicAnimation>("position");animation->duration=1;
+      const auto start=target->layer()->position();animation->fromValue=start;animation->toValue=start+NXPoint{180,0};
+      target->layer()->add(animation,"relative-motion-test");return animation;
+    };
+    const auto sample=[&](int index,const std::shared_ptr<CABasicAnimation>& animation) {
+      move(index);
+      if(animation) {
+        auto time=animation->creationTime;const auto us=time.startTime.tv_usec+index*1000000L/120;
+        time.startTime.tv_sec+=us/1000000;time.startTime.tv_usec=us%1000000;
+        target->layer()->animateAt(time);
+      }
+      LensViewTestHarness::advance(lens,1./120);
+    };
+    auto animation=movement>=6?animate():nullptr;
+    for(int i=0;i<24;i++) {
+      sample(i,animation);
+      expect(lens->interactionTransform().isIdentity(),"resting own/ancestor/scroll/presentation movement does not excite lens flex");
+      expect(!LensViewTestHarness::motionActive(lens),"resting layout does not activate a motion sampler");
+    }
+    lens->setLifted(true);LensViewTestHarness::advance(lens,1./120);
+    expect(lens->interactionTransform().isIdentity(),"lifting rebases at the live pose instead of replaying prior movement");
+    for(int i=24;i<48;i++)sample(i,animation);
+    expect(!lens->interactionTransform().isIdentity(),"lifted own/ancestor/scroll/presentation movement still excites native global flex");
+    target->layer()->removeAllAnimations();
+    lens->setLifted(false,true);
+    for(int i=0;i<500;i++)LensViewTestHarness::advance(lens,1./120);
+    expect(lens->interactionTransform().isIdentity()&&!LensViewTestHarness::motionActive(lens),"lowering and elastic settling deactivate view-motion sampling");
+    animation=movement>=6?animate():nullptr;
+    for(int i=48;i<72;i++) {
+      sample(i,animation);
+      expect(lens->interactionTransform().isIdentity(),"later movement cannot reactivate a previously lifted, now resting lens");
+    }
+    lens->setLifted(true);LensViewTestHarness::advance(lens,1./120);
+    expect(lens->interactionTransform().isIdentity(),"a second lift does not reuse a stale ancestor-space baseline");
+    lens->setLifted(false,false);
+    parent->setFrame({280,80,500,180});
+    lens->setLifted(true);LensViewTestHarness::advance(lens,1./120);
+    expect(lens->interactionTransform().isIdentity(),"immediate lowering clears history even without an intervening display tick");
+    target->layer()->removeAllAnimations();lens->setInteractive(false);++cases;
+  }
+  std::cout<<"Lens view-motion activation cases="<<cases<<'\n';
+}
+void testFiniteElasticResponse() {
+  int cases=0;
+  for(auto style:{LensView::Style::small,LensView::Style::large})
+  for(auto source:{LensView::InteractionSource::contact,LensView::InteractionSource::viewMotion})
+  for(int hz:{60,120})for(double holdSeconds:{.25,3.0})for(bool controlled:{false,true}) {
+    auto root=new_shared<Root>();root->setFrame({0,0,500,200});
+    auto lens=new_shared<LensView>(style);lens->setFrame({50,40,100,44});root->addSubview(lens);
+    lens->setInteractive(true);lens->setInteractionSource(source);
+    lens->beginInteraction({100,60});lens->setLifted(true);
+    const auto drive=[&](int i) {
+      const auto x=100.f+40.f*std::sin(float(i)*.8f);
+      if(source==LensView::InteractionSource::viewMotion)lens->setFrame({x,40,100,44});
+      else lens->updateInteraction({x,60},{float(i%2?900:-900),0});
+    };
+    for(int i=0;i<int(holdSeconds*hz);i++) {
+      drive(i);
+      if(controlled)LensViewTestHarness::controlLift(lens,true,1);
+      LensViewTestHarness::advance(lens,1./hz);
+      if(i>=2*hz)expect(!lens->interactionTransform().isIdentity(),"continuous movement stays elastic beyond two seconds while lifted");
+    }
+    lens->endInteraction({900,0});
+    // Touch release can precede lowering during control deceleration. Keep
+    // responding until the control actually changes its lifted state.
+    if(holdSeconds>2&&source==LensView::InteractionSource::viewMotion)for(int i=0;i<hz/2;i++) {
+      drive(i);
+      LensViewTestHarness::advance(lens,1./hz);
+      if(source==LensView::InteractionSource::viewMotion)
+        expect(!lens->interactionTransform().isIdentity(),"ending contact does not start retirement while the knob is still lifted and moving");
+    }
+    const auto beforeLowering=lens->interactionTransform();
+    if(controlled)LensViewTestHarness::controlLift(lens,false,0);
+    else lens->setLifted(false,true);
+    expect(lens->interactionTransform()==beforeLowering,"lowering starts the fade from the displayed pose without a transform jump");
+    double earlyPeak=0,latePeak=0;
+    for(int i=0;i<3*hz;i++) {
+      const auto elapsed=double(i+1)/hz;
+      drive(i);
+      if(controlled)LensViewTestHarness::controlLift(lens,false,0);
+      else lens->setLifted(false,true);
+      LensViewTestHarness::advance(lens,1./hz);
+      const auto a=lens->interactionTransform();
+      const double magnitude=std::max({std::abs(a.m11-1.f),std::abs(a.m22-1.f),std::abs(a.tX)/50,std::abs(a.tY)/22});
+      if(elapsed<1)earlyPeak=std::max(earlyPeak,magnitude);
+      if(elapsed>1.75&&elapsed<2)latePeak=std::max(latePeak,magnitude);
+      if(elapsed>=2+1./hz) {
+        expect(a.isIdentity(),"lowered lenses become exactly stiff within two seconds of lowering despite continuing motion");
+        expect(!LensViewTestHarness::motionActive(lens),"continuing motion/control lift updates do not renew the expired motion sampler");
+      }
+    }
+    expect(earlyPeak>0&&latePeak<earlyPeak*.1,"elasticity fades well before its deadline instead of waiting and snapping off");
+    expect(!lens->isLifted(),"retiring elasticity never changes the control's requested lifted state");
+    lens->beginInteraction({100,60});lens->setLifted(true);
+    for(int i=0;i<hz/4;i++) {
+      if(source==LensView::InteractionSource::viewMotion)lens->setFrame({100+i*3.f,40,100,44});
+      else lens->updateInteraction({100+i*3.f,60},{360,0});
+      LensViewTestHarness::advance(lens,1./hz);
+    }
+    expect(!lens->interactionTransform().isIdentity(),"a fresh lift/contact restores active elasticity after retirement");
+    if(controlled)LensViewTestHarness::controlLift(lens,false,0);
+    else lens->setLifted(false,true);
+    for(int i=0;i<hz/2;i++){drive(i);LensViewTestHarness::advance(lens,1./hz);}
+    const auto beforeRelift=lens->interactionTransform();
+    lens->beginInteraction({100,60});
+    if(controlled)LensViewTestHarness::controlLift(lens,true,1);
+    else lens->setLifted(true);
+    expect(lens->interactionTransform()==beforeRelift,"re-lifting during retirement preserves the displayed elastic pose");
+    for(int i=0;i<3*hz;i++) {
+      drive(i);
+      if(controlled)LensViewTestHarness::controlLift(lens,true,1);
+      LensViewTestHarness::advance(lens,1./hz);
+    }
+    expect(!lens->interactionTransform().isIdentity(),"re-lifting cancels retirement and stays elastic throughout a long new hold");
+    root->setHidden(true);LensViewTestHarness::advance(lens,1./hz);root->setHidden(false);
+    for(int i=0;i<hz/4;i++) {
+      if(source==LensView::InteractionSource::viewMotion)lens->setFrame({200+i*3.f,40,100,44});
+      else lens->updateInteraction({200+i*3.f,60},{360,0});
+      LensViewTestHarness::advance(lens,1./hz);
+    }
+    expect(lens->interactionTransform().isIdentity(),"cancellation closes the response window instead of resuming old jiggle when visible again");
+    lens->setInteractive(false);++cases;
+  }
+  std::cout<<"Finite elastic response cases="<<cases<<'\n';
+}
 } // namespace
 int main() {
   testNativeTabRetirement();
@@ -532,5 +690,7 @@ int main() {
   testExternalSourceLifetimeAndCompositing();
   testElasticRootPreservesStationarySource();
   testInteractiveSourcesAndTermination();
+  testViewMotionActivation();
+  testFiniteElasticResponse();
   return failures ? 1 : 0;
 }

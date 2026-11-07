@@ -1,5 +1,6 @@
 #include "GlassScreenViewController.hpp"
 #include "GlassScreenTypography.hpp"
+#include "SystemControlsDemoViewController.hpp"
 #include <NXNavigationController.h>
 #include <algorithm>
 #include <array>
@@ -150,6 +151,7 @@ void GlassListViewController::loadView() {
     screen->onAccentChanged=[weak=weak_from_base<GlassListViewController>()](UIColor){if(const auto self=weak.lock())self->updateAccent();};
     screen->onLargeTitleDemo=[weak=weak_from_base<GlassListViewController>()]{if(const auto self=weak.lock())if(const auto nav=self->navigationController())nav->pushViewController(new_shared<LargeTitleDemoController>(),true);};
     screen->onNavigationDemo=[weak=weak_from_base<GlassListViewController>()]{if(const auto self=weak.lock())if(const auto nav=self->navigationController())nav->pushViewController(new_shared<GlassNavigationDemoViewController>(),true);};
+    screen->onSystemControlsDemo=[weak=weak_from_base<GlassListViewController>()]{if(const auto self=weak.lock())if(const auto nav=self->navigationController())nav->pushViewController(new_shared<SystemControlsDemoViewController>(),true);};
     setView(screen);
 }
 std::shared_ptr<GlassScreenView> GlassListViewController::list(){loadViewIfNeeded();return std::static_pointer_cast<GlassScreenView>(view());}

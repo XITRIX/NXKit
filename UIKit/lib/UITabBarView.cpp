@@ -406,6 +406,7 @@ void UITabBarView::installItems(std::vector<std::shared_ptr<UITabBarItem>> value
     }
 }
 void UITabBarView::refreshItems() {
+    _state->arrangedBounds.reset();
     const auto color = tintColor();
     const auto unselected = _state->unselectedTint.value_or(UIColor::label);
     const UIColor semantic[] = {UIColor::systemBlue,UIColor::systemRed,UIColor::systemGreen,
@@ -517,32 +518,40 @@ void UITabBarView::arrange() {
     if (_state->customLayout) { _state->customLayout(); return; }
     auto& s = *_state;
     const auto w=std::max(0.0f,bounds().width()),h=std::max(0.0f,bounds().height());
-    s._glass->setFrame({bounds().origin.x,bounds().origin.y,w,h}); s._glass->layer()->setCornerRadius(h*.5f);
-    s._normal->setFrame({0,0,w,h});
-    if (s._normal->mask()) s._normal->mask()->setFrame({0,0,w,h});
-    s._selectedHost->setFrame({0,0,w,h}); s._selectedContent->setFrame({0,0,w,h});
-    if (!s._count) { s._lens->setHidden(true); return; }
-    const auto slot=w/s._count;
-    const auto inset=std::min(4.0f,w*.5f);
-    const auto available=std::max(0.0f,w-2*inset);
-    auto& widths=s._itemWidths;auto& left=s._itemLefts;
-    widths.resize(s._count);left.resize(s._count);
-    if(s._count>=4&&slot<70&&w>=28) {
-        // Narrow UIKit layouts compress content proportionally, retaining
-        // 20pt cell padding/overlap. Longer titles receive wider cells.
-        NXFloat total=0;for(const auto width:s._itemContentWidths)total+=width;
-        NXFloat x=inset;
-        for(size_t i=0;i<s._count;++i){widths[i]=std::min(available,20+(w-28)*s._itemContentWidths[i]/std::max(1.0f,total));left[i]=x;x+=widths[i]-20;}
-    } else {
-        const auto preferredWidth=s._count<4?94.0f:std::max(slot+5,s._minimumItemWidth);
-        const auto width=std::max(0.0f,std::min(preferredWidth,available));
-        const auto step=s._count>1?(available-width)/(s._count-1):0;
-        for(size_t i=0;i<s._count;++i){widths[i]=width;left[i]=s._count>1?inset+i*step:(w-width)*.5f;}
+    // Dragging changes the lens position, not the row's layout. Reapplying
+    // every icon/label frame walks safe areas and corner geometry repeatedly.
+    const bool layoutRow=s.arrangedBounds!=bounds() || s.arrangedLifted!=s._lifted;
+    if(layoutRow) {
+        s.arrangedBounds=bounds();s.arrangedLifted=s._lifted;
+        s._glass->setFrame({bounds().origin.x,bounds().origin.y,w,h}); s._glass->layer()->setCornerRadius(h*.5f);
+        s._normal->setFrame({0,0,w,h});
+        if (s._normal->mask()) s._normal->mask()->setFrame({0,0,w,h});
+        s._selectedHost->setFrame({0,0,w,h}); s._selectedContent->setFrame({0,0,w,h});
+        if (!s._count) { s._lens->setHidden(true); return; }
+        const auto slot=w/s._count;
+        const auto inset=std::min(4.0f,w*.5f);
+        const auto available=std::max(0.0f,w-2*inset);
+        auto& widths=s._itemWidths;auto& left=s._itemLefts;
+        widths.resize(s._count);left.resize(s._count);
+        if(s._count>=4&&slot<70&&w>=28) {
+            // Narrow UIKit layouts compress content proportionally, retaining
+            // 20pt cell padding/overlap. Longer titles receive wider cells.
+            NXFloat total=0;for(const auto width:s._itemContentWidths)total+=width;
+            NXFloat x=inset;
+            for(size_t i=0;i<s._count;++i){widths[i]=std::min(available,20+(w-28)*s._itemContentWidths[i]/std::max(1.0f,total));left[i]=x;x+=widths[i]-20;}
+        } else {
+            const auto preferredWidth=s._count<4?94.0f:std::max(slot+5,s._minimumItemWidth);
+            const auto width=std::max(0.0f,std::min(preferredWidth,available));
+            const auto step=s._count>1?(available-width)/(s._count-1):0;
+            for(size_t i=0;i<s._count;++i){widths[i]=width;left[i]=s._count>1?inset+i*step:(w-width)*.5f;}
+        }
+        s._selectionCenters.resize(s._count);
+        for (size_t i=0;i<s._count;++i)
+            s._selectionCenters[i]=left[i]+widths[i]*.5f;
+        s._selectionStep=s._count>1?s._selectionCenters[1]-s._selectionCenters[0]:0;
     }
-    s._selectionCenters.resize(s._count);
-    for (size_t i=0;i<s._count;++i)
-        s._selectionCenters[i]=left[i]+widths[i]*.5f;
-    s._selectionStep=s._count>1?s._selectionCenters[1]-s._selectionCenters[0]:0;
+    if(!s._count)return;
+    const auto& widths=s._itemWidths;
     const auto a=std::min(s._count-1,size_t(std::max(0.0f,s._position)));
     const auto b=std::min(s._count-1,a+1); const auto t=s._position-float(a);
     const auto center=s._selectionCenters[a]*(1-t)+s._selectionCenters[b]*t;
@@ -551,6 +560,8 @@ void UITabBarView::arrange() {
     const auto lensHeight=std::max(0.0f,std::min(56.0f,h-8)+growth);
     s._lens->setFrame({center-lensWidth*.5f,(h-lensHeight)*.5f,lensWidth,lensHeight});
     s._selectionFill->setFrame(s._lens->restingBackgroundView()->bounds());
+    if(!layoutRow)return;
+    const auto slot=w/s._count;
     for (size_t i=0;i<s._count;++i) {
         const auto itemWidth=widths[i];
         const auto centerX=s._selectionCenters[i];

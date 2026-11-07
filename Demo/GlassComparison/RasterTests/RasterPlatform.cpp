@@ -9,6 +9,7 @@ void SkiaCtx::readBackdrop(sk_sp<SkImage>, BackdropCompletion completion) { comp
 void SkiaCtx::flushAndSubmit(sk_sp<SkSurface>) {}
 
 void SkiaCtx::pollBackdropReads() {}
+void SkiaCtx::cleanupGpuCacheIfIdle() {} // No GPU cache in this raster context.
 std::unique_ptr<SkiaCtx> NXKit::MakeSkiaCtx() {
     throw std::runtime_error("Headless tests supply their own SkiaCtx");
 }

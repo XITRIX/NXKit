@@ -1,0 +1,30 @@
+[
+  {
+    "id": "off-tap-light",
+    "control": "switch",
+    "dark": false,
+    "tap": true,
+    "filters": true
+  },
+  {
+    "id": "on-hold-dark",
+    "control": "switch",
+    "on": true,
+    "dark": true,
+    "hold": 1,
+    "filters": true
+  },
+  {
+    "id": "off-drag-light",
+    "control": "switch",
+    "dark": false,
+    "switchDrag": true,
+    "filters": true
+  },
+  {
+    "id": "programmatic-light",
+    "control": "switch",
+    "programmatic": true,
+    "filters": true
+  }
+]

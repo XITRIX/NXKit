@@ -10,6 +10,8 @@ add_library(XITRIXUIKit
         include/UIKitRegistration.h
         include/UIButton.h
         include/UISlider.h
+        include/UISwitch.h
+        lib/UISwitch.cpp
         include/UISliderTrackConfiguration.h
         lib/UISlider.cpp
         lib/UISliderTrackConfiguration.cpp
@@ -68,6 +70,9 @@ target_link_libraries(XITRIXUIKit PUBLIC UIKitCore)
 
 option(UIKIT_BUILD_TESTS "Build UIKit regression tests" OFF)
 if (UIKIT_BUILD_TESTS)
+    add_executable(NXKitSwitchTests tests/UISwitchTests.cpp)
+    target_link_libraries(NXKitSwitchTests PRIVATE Xitrix::UIKit)
+    add_test(NAME NXKitSwitchTests COMMAND NXKitSwitchTests)
     add_executable(NXKitSliderTests tests/UISliderTests.cpp)
     target_link_libraries(NXKitSliderTests PRIVATE Xitrix::UIKit)
     add_test(NAME NXKitSliderTests COMMAND NXKitSliderTests)

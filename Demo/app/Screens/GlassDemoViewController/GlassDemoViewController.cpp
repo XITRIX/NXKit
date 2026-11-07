@@ -5,6 +5,7 @@
 #include "GlassStressView.hpp"
 #include "GlassAppearanceSettings.hpp"
 #include <UISlider.h>
+#include <UISwitch.h>
 #include <algorithm>
 #include <cmath>
 
@@ -74,6 +75,24 @@ public:
             if(auto self=weak.lock())DemoGlassSettings::set(self->_slider->value());
         }),UIControlEvent::touchUpInside|UIControlEvent::touchUpOutside|UIControlEvent::touchCancel);
         _content->addSubview(_slider);
+        auto switchRow=new_shared<UIView>();
+        switchRow->configureLayout([](const auto& layout){
+            layout->setWidth(100_percent);layout->setHeight(56_pt);
+            layout->setFlexDirection(YGFlexDirectionRow);layout->setAlignItems(YGAlignCenter);
+            layout->setJustifyContent(YGJustifySpaceBetween);
+        });
+        _switchStatus=new_shared<UILabel>();_switchStatus->setFontSize(17);
+        _switchStatus->setText("Liquid switch · Off");switchRow->addSubview(_switchStatus);
+        _switch=new_shared<UISwitch>();
+        _switch->configureLayout([](const auto& layout){layout->setFlexShrink(0);});
+        _switch->addAction(UIAction("Liquid switch",[weak]{if(auto self=weak.lock())
+            self->_switchStatus->setText(self->_switch->isOn()?"Liquid switch · On":"Liquid switch · Off");
+        }),UIControlEvent::valueChanged);
+        switchRow->addSubview(_switch);_content->addSubview(switchRow);
+        _content->addSubview(button("Toggle switch with animation",[weak]{if(auto self=weak.lock()) {
+            self->_switch->setOn(!self->_switch->isOn(),true);
+            self->_switchStatus->setText(self->_switch->isOn()?"Liquid switch · On":"Liquid switch · Off");
+        }}));
         _scroll->addSubview(_content);setView(_scroll);updateStatus();
     }
     void traitCollectionDidChange(std::shared_ptr<UITraitCollection> previous) override {
@@ -97,6 +116,8 @@ private:
     std::shared_ptr<UIView> _content;
     std::shared_ptr<UILabel> _status;
     std::shared_ptr<UISlider> _slider;
+    std::shared_ptr<UISwitch> _switch;
+    std::shared_ptr<UILabel> _switchStatus;
 };
 class LensDemoViewController final : public UIViewController {
 public:
